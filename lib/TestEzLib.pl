@@ -1,14 +1,5 @@
 #!/usr/bin/perl
 
-#   this subroutine takes only one parameter, the process id for
-#   which memory usage information is to be returned.  If
-#   undefined, the current process id is assumed.
-#
-#   Returns array of two values, raw process memory size and
-#   percentage memory utilisation, in this order.  Returns
-#   undefined if these values cannot be determined.
-
-
   use lib "/home/ezachte/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
