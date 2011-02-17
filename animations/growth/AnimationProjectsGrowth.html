@@ -1,0 +1,806 @@
+<html>
+<head>
+  <title>Wikipedia Growth</title>
+  <!--[if IE]><script type="text/javascript" src="../excanvas.js"></script><![endif]-->
+  <script type="text/javascript" src="AnimationProjectsGrowthInit.js"></script>
+  <script type="text/javascript">
+
+  var a = []; // array with all data per Wikipedia  
+  var b = []; // array with buttons
+  var button = 0 ;          
+  var button_prev = -1 ;
+  var yaxis_log = true ;
+  var yaxis_lin = false ;
+  var yaxis_mode = yaxis_log ;
+  var r_edits = true ;
+
+  var incomplete = false ;
+  var date = new Date() ;
+  var time = date.getTime();
+  var elapsed = "" ;
+  
+  var Coordinate_X_InImage = 0 ;
+  var Coordinate_Y_InImage = 0 ;
+
+  var canvas, ctx;
+  var mouse_x = 0 ;
+  var mouse_y = 0 ;
+  var ready = false ;
+  var transparency = 0.6 ;  
+  var CIRCLES    = true ;
+  var RADIUSMULT = 2.5 ;
+  var PI2        = Math.PI * 2 ;
+  var INTERVAL   = 15 ;
+
+  var LOG10   = Math.log(10) ;
+  var LOG1010 = Math.log(10)/LOG10 ;
+  var y_min = 1 ;     // 10      // 100
+  var y_min_log = 0 ; // LOG1010 // 2 * LOG1010 ;
+  
+  var CYCLES = 100 ;
+
+  var MARGIN_L = 30 ;
+  var MARGIN_B = 15 ;
+  var MARGIN_R = 10 ;
+  var MARGIN_T = 20 ;
+  var articles_max = 3000000 ;
+
+  var cycle   = 0 ;
+  var month   = FROM_MONTH ;
+  var year    = FROM_YEAR ;
+  var step    = 0 ;
+  var index   = 0 ;
+  var size    = 0 ;
+  var steps_max ; 
+  var alerts = 0 ;
+  var steps_per_month = 15 ;
+
+  var MONTHES = ["","JAN","FEB","MRT","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"] ;
+  var diagram_height   ;
+  var diagram_width ;
+
+  function setcolors (value, transparency)
+  {
+    value=Math.floor((value/100)*255) ;
+    line_color = "Black" ; // a[i].line_color ; 
+    fill_color = "rgba(" + value + "," + (255-value) + ",255," + transparency + ")" ; 
+    value= (value+128) % 256 ;
+    // text_color = "rgba(" + value + "," + (255-value) + ",0," + transparency + ")" ; 
+    text_color = "yellow" ;
+    return {f:fill_color, l:line_color, t:text_color} ;
+  }      
+
+  function drawButton(b) 
+  {                                   
+    ctx.mozTextStyle = b.pt + "pt Arial";
+    ctx.lineWidth = "2";
+    ctx.fillStyle = b.c ;
+    ctx.fillRect (b.x,b.y,b.w,b.h) ;
+    ctx.strokeStyle = "black";
+    ctx.strokeRect (b.x,b.y,b.w,b.h) ;
+    dxtext = ctx.mozMeasureText(b.t) / 2;
+    if (b.active)
+    { ctx.fillStyle = "rgb(128,255,128)" ; }
+    else
+    { ctx.fillStyle = "rgb(0,96,0)" ; }
+    
+    write (b.x+b.w/2-dxtext  , b.y+b.h/2+b.dy, b.t);
+    if (b.f > 1)
+    { write (b.x+b.w/2-dxtext-1, b.y+b.h/2+b.dy, b.t); }
+    if (b.f > 2)
+    {  write (b.x+b.w/2-dxtext+1, b.y+b.h/2+b.dy, b.t); }
+  }
+                     
+  function TrackCoordinatesInImage(evt)
+  {
+    Coordinate_X_InImage = Coordinate_Y_InImage = 0;
+    
+    //if (window.event && !window.opera && typeof event.offsetX == "number") 
+    //{ // IE 5+
+    //  Coordinate_X_InImage = event.offsetX;
+    //  Coordinate_Y_InImage = event.offsetY;
+    //} 
+    //else 
+    
+    // Mozilla-based browsers
+    if (document.addEventListener && evt && typeof evt.pageX == "number")
+    { 
+      var Element = evt.target;
+      var CalculatedTotalOffsetLeft, CalculatedTotalOffsetTop;
+      CalculatedTotalOffsetLeft = CalculatedTotalOffsetTop = 0;
+      while (Element.offsetParent) 
+      {
+        CalculatedTotalOffsetLeft += Element.offsetLeft ;
+        CalculatedTotalOffsetTop += Element.offsetTop ;
+        Element = Element.offsetParent ;
+      }
+      Coordinate_X_InImage = evt.pageX - CalculatedTotalOffsetLeft ;
+      Coordinate_Y_InImage = evt.pageY - CalculatedTotalOffsetTop ;
+    }
+    document.getElementById('cv').innerHTML = "X:"+Coordinate_X_InImage+" Y: "+Coordinate_Y_InImage;
+    return false ;
+  }  
+  
+  function Wikipedia()
+  {
+    this.x = 0 ;
+    this.y = 0 ;
+    this.r = 12 ; 
+    this.xprev = 0 ;                     
+    this.yprev = 0 ;
+    this.value = 0 ;
+    this.maxsize = 0 ;
+    this.show = false ;
+    this.rand = (Math.random() - 0.5) * steps_per_month * dxstep ;
+    this.transparency = transparency ;
+  }
+
+  Wikipedia.prototype.update = function(i)
+  {
+    this.label = this.langcode ;
+
+    this.size1 = 0 ;
+    this.size2 = this.articles [index] ;
+    if (index > 0)
+    { this.size1 = this.articles [index-1] ; }
+    if (this.size1 == undefined) { this.size1 = 0 ; }
+    if (this.size2 == undefined) { this.size2 = 0 ; }
+    
+    if (this.size2 > 0)
+    {                  
+      step0 = step % steps_per_month ;
+      this.size = (step0 / steps_per_month) * this.size2 + (1 - (step0 / steps_per_month)) * this.size1 ;
+    }                   
+    else
+    { 
+      if (this.size1 > 0)
+      { 
+        if (i < 25) // signal only when data missing for 25 largest wikis
+        { incomplete = true ; }
+        this.size = this.size1 ; 
+      }                   
+      else
+      {
+        if ((this.maxsize > 0) && (i < 25)) // signal only when data missing for 25 largest wikis
+        { incomplete = true ; }
+      }
+      
+    }
+
+    if (this.size > this.maxsize)
+    { this.maxsize = this.size ; }
+
+    if (this.maxsize >= y_min)
+    { this.show = true ; }
+    
+    if (this.maxsize == 0) { return ; }
+
+    this.x = (this.size2 == 0) ? this.xprev : MARGIN_L + cycle * dxstep - (this.start*steps_per_month*dxstep) + this.rand ;
+    if (yaxis_mode == yaxis_log)
+    { this.y = (this.size == 0) ? this.yprev : canvas.height - (MARGIN_T + ((Math.log(this.size)/LOG10)-y_min_log)  * diagram_height) ; }
+    else
+    { this.y = (this.size == 0) ? this.yprev : canvas.height - (MARGIN_B + this.size / articles_max * diagram_height) ; }
+    
+    this.xprev = this.x ;
+    this.yprev = this.y ;
+    
+    if (this.values [index] > 0)
+    { this.value = this.values [index] ; }
+
+    c = setcolors (this.value, this.transparency) ;
+    this.fill_color = c.f ;
+    this.line_color = c.l ;
+    this.text_color = c.t ;                             
+    if (this.size2 == 0)
+    { 
+      var date = new Date() ;
+      var msec = date.getMilliseconds() ;
+      var red = Math.floor ((1000 - msec) / 1000 * 255) ;
+      if (red < 200) { red = 200 ; }
+      this.text_color = "rgb("+red+",0,0)" ; 
+    }                             
+                            
+    if (r_edits)
+    {
+      this.editors1 = 0 ;
+      this.editors2 = this.editors5 [index] ;
+      if (index > 0)
+      { this.editors1 = this.editors5 [index-1] ; }
+      if (this.editors1 == undefined) { this.editors1 = 0 ; }
+      if (this.editors2 == undefined) { this.editors2 = 0 ; }
+
+      if (this.editors2 > 0)
+      {                  
+        step0 = step % steps_per_month ;
+        this.editors = (step0 / steps_per_month) * this.editors2 + (1 - (step0 / steps_per_month)) * this.editors1 ;
+      }                   
+      else
+      { 
+        if (this.editors1 > 0)
+        { this.editors = this.editors1 ; }                   
+      }
+
+      if (this.editors > 0)
+      { this.r =  0.5 + Math.log(this.editors)/LOG10 * 4 ;  }
+      else
+      { this.r = 0.5 ;}                
+      if (this.editors > 0)
+      { this.r =  1 + Math.log(this.editors)/LOG10 * 7 ;  }
+      else
+      { this.r = 1 ;}                
+    }
+    else
+    { this.r = 12 ; }  
+    
+    this.ts = Math.floor(this.r) + "pt Arial";
+  }
+
+//**** LOOP ****//
+
+  function loop()
+  {
+//  if (ready) { setTimeout (loop, INTERVAL); return ; }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    grid() ;
+
+    ctx.lineWidth = "1";
+    ctx.strokeStyle = "rgb(255, 255, 255)";
+    ctx.mozTextStyle = "10pt Arial";
+
+    mouse_index = -1 ;         
+         
+    var  i ;       
+    var date = new Date() ;
+    var timeloop = date.getTime();
+    incomplete = false ;
+    for (i = WIKIPEDIAS - 1 ; i >= 0 ; i--)
+    {
+      a[i].update(i);      
+      
+      if (a[i].show)
+      {
+        ctx.lineWidth = "1";
+        if ((mouse_x > 0) && (mouse_y > 0))
+        {     
+          x = a[i].x - mouse_x ;                     
+          y = a[i].y - mouse_y ;
+          r = a[i].r ;
+          if (x*x + y*y < r*r)
+          { mouse_index = i ; }
+        }
+
+        if (CIRCLES)
+        {
+          ctx.strokeStyle = a[i].line_color ;
+          ctx.fillStyle   = a[i].fill_color ;
+          circle (a[i].x, a[i].y, a[i].r) ;
+        }                                          
+      
+                           
+        ctx.mozTextStyle = a[i].ts ;
+        ctx.fillStyle = a[i].text_color ;
+        label = a[i].label ;                     
+        dxtext = ctx.mozMeasureText(label) / 2;
+        dytext = -a[i].r / 3 ; 
+        write (a[i].x-dxtext, a[i].y-dytext, label);
+      }  
+    }               
+
+    button = -1 ;
+    for (x = 0 ; x < b.length ; x++)
+    { 
+      if ((mouse_x >= b[x].x) && (mouse_x <= b[x].x+b[x].w-1) &&
+          (mouse_y >= b[x].y) && (mouse_y <= b[x].y+b[x].h-1))
+      { button = x ; }
+    }
+    if (button > -1)
+    {                
+      if (button < 4) // speed buttons
+      {
+        for (x = 0 ; x < 4 ; x++)
+        { b[x].active = (x == button) ; }
+      
+        if (button == 3)  
+        { ready = true ; }
+        else
+        {
+          if (button == 0) // restart slow
+          { steps_per_month = 15 ; }
+          if (button == 1) // restart normal
+          { steps_per_month = 8 ; }
+          if (button == 2) // restart fast
+          { steps_per_month = 4 ; }
+          
+          restart() ;
+        }  
+      }                     
+      else
+      {
+        if ((button == 4) && (button != button_prev)) // edits > 5
+        { 
+          b[4].active = ! b[4].active ; 
+          r_edits = ! r_edits ;
+        }
+        //if (button == 4) // lineair (disabled)
+        //{ 
+        //  b[4].active = true ;  b[5].active = false ; 
+        //  yaxis_mode = yaxis_lin ;
+        //  diagram_height = canvas.height - MARGIN_B - MARGIN_T ; 
+        //}
+        //if (button == 5) // logarithmic (disabled)
+        //{ 
+        //  b[4].active = false ; b[5].active = true ; 
+        //  yaxis_mode = yaxis_log ;
+        //  diagram_height = (canvas.height - MARGIN_B - MARGIN_T) / ((Math.log(articles_max)/LOG10)-y_min_log) ; 
+        //}
+      }  
+    } 
+    button_prev = button ;
+                      
+    if (mouse_index > -1)
+    {
+      ctx.lineWidth = "3";
+      ctx.strokeStyle = a[mouse_index].line_color ;
+      
+      color = a[mouse_index].fill_color ;
+      color = color.replace(/rgba/,"rgb");
+      color = color.replace(/,[^,\)]+\)$/,"\)");
+      
+      ctx.fillStyle = color ;
+      circle (a[mouse_index].x, a[mouse_index].y, a[mouse_index].r*1.5) ;
+
+      ctx.fillStyle = "black";            
+      ctx.mozTextStyle = "14pt Arial";
+      label = a[mouse_index].label ;                     
+      dxtext = ctx.mozMeasureText(label) / 2;
+      dytext = -6 ;
+      write (a[mouse_index].x-dxtext, a[mouse_index].y-dytext, label);
+
+
+      label   = a[mouse_index].language ;
+      dxtext  = ctx.mozMeasureText(label);
+      dxtext2 = dxtext ;
+      if (mouse_x < canvas.width - MARGIN_R - dxtext - 20)
+      { dxtext = 30 ; }
+      else
+      { dxtext = -30 - dxtext ; }
+      dytext = 6 ;   
+      ctx.fillStyle = "rgb(255,255,240)";
+      ctx.fillRect (a[mouse_index].x+dxtext-7,
+                    a[mouse_index].y+dytext-20, 
+                    dxtext2 + 14, 28) ;
+      ctx.strokeStyle = "black";
+      ctx.strokeRect (a[mouse_index].x+dxtext-7,
+                      a[mouse_index].y+dytext-20, 
+                      dxtext2 + 14, 28) ;
+      ctx.fillStyle = "rgb(0,128,0)" ; // a[mouse_index].text_color ;
+      write (a[mouse_index].x+dxtext, a[mouse_index].y+dytext, label);
+      ctx.mozTextStyle = "10pt Arial";
+
+      ctx.lineWidth = "1";
+    }
+                
+    grid2() ;    
+
+    //ctx.mozTextStyle = "10pt Arial";
+    //ctx.fillStyle = "DarkGrey" ;
+    //dxtext = ctx.mozMeasureText(cycle);
+    //dytext = -4 ;                     
+    //write (canvas.width-100, 15, cycle);
+
+    if ((! ready) && ((mouse_x == 0) && (mouse_y == 0)))
+    {
+      cycle += 1 ;
+      step += 1 ;
+      if (step >= steps_per_month)
+      {
+        step = 0 ;
+        month += 1 ;
+        index ++ ;
+        if (month > 12)
+        {
+          month = 1 ;
+          year += 1 ;
+        }
+      }
+    }
+
+    // title
+    ctx.mozTextStyle = "12pt Arial";
+    // text = "Number of articles, and average article size, per " + PROJECT ;
+    text = "Articles, total and and average size, per " + PROJECT ;
+    ctx.fillStyle = "white";
+    dxtext = ctx.mozMeasureText(text) / 2;                            // !!!!!!!!! for samller canvas sizes avoid overlaps
+    x1 = MARGIN_L + (canvas.width - MARGIN_L - MARGIN_R) / 2 - dxtext - 35 ;
+    write (x1, MARGIN_T-6, text);
+
+    // yyyy
+    ctx.mozTextStyle = "18pt Arial";
+    ctx.fillStyle = "Grey";
+    text = year ; 
+    dxtext = ctx.mozMeasureText(text) ;
+    x1 = MARGIN_L + (canvas.width - MARGIN_L - MARGIN_R) / 2 - dxtext - 5 ;
+    write (x1, MARGIN_T + 22, text) ;
+
+    // month           
+    text = MONTHES[month] ; // + " : " + size1 + " - " + a[0].size2 ;
+    dxtext = ctx.mozMeasureText(text) ;
+    x1 = MARGIN_L + (canvas.width - MARGIN_L - MARGIN_R) / 2 + 5 ;
+    write (x1, MARGIN_T + 22, text);
+
+    // footer
+    ctx.mozTextStyle = "8pt Arial";
+    ctx.fillStyle = "White";
+
+    text = "Articles" ;
+    dxtext = ctx.mozMeasureText(text);
+    write (3, MARGIN_T-7, text);
+
+    text = "Age" ;
+    dxtext = ctx.mozMeasureText(text);
+    x1 = canvas.width - MARGIN_R - dxtext - 3 ;
+    write_vert (canvas.width-4, canvas.height-MARGIN_B-(text.length-1)*10+10, text);
+
+    text = "Author: Erik Zachte" ;
+    text = "ERIK ZACHTE" ;
+    ctx.fillStyle = "rgb(100,100,100)";
+    dxtext = ctx.mozMeasureText(text);
+  //write (canvas.width-MARGIN_R-dxtext-3, MARGIN_T-7, text);
+  //write_vert (canvas.width-5, canvas.height-MARGIN_B-(text.length+1)*10, text);
+
+    // position at far right, 50% above 1K line, 50% below 
+    if (yaxis_mode == yaxis_log)
+    { write_vert (canvas.width-4, canvas.height - (MARGIN_T + ((Math.log(1000)/LOG10)-y_min_log)  * diagram_height) - (text.length-1)*10/2, text); }
+    else
+    { write_vert (canvas.width-4, MARGIN_B + diagram_height / 2 - text.length*10/2, text); }
+
+    // legend
+    ctx.mozTextStyle = "8pt Arial";
+    ctx.fillStyle = "rgba(200,200,0,0.7)";
+
+    yalias = MARGIN_T + 12 ;
+    var aliasses2 = aliasses.split(',') ;
+    for (var x = 0; x < aliasses2.length ; x++)
+    {
+      dxtext = ctx.mozMeasureText(aliasses2[x]) / 2;
+      x1 = MARGIN_L + (canvas.width - MARGIN_L - MARGIN_R) / 2 - dxtext ;
+      write (MARGIN_L+5, yalias,aliasses2[x]);
+      yalias += 12 ;
+    }  
+           
+    // write legend: meaning of colored circles
+    x1 = canvas.width - 237 ;
+    c = setcolors (0, transparency) ;
+    label = "Avg. size:" ;                     
+    ctx.fillStyle = "white";
+    write (x1, MARGIN_T-7, label);
+    ctx.fillStyle   = c.f ;
+    circle (x1+58, MARGIN_T-11, 6) ;
+    label = "0\% > 0.5 Kb" ;                     
+    ctx.fillStyle = "white";
+    write (x1+70, MARGIN_T-7, label);
+
+    c = setcolors (100, transparency) ;
+    ctx.fillStyle   = c.f ;
+    circle (x1+147, MARGIN_T-11, 6) ;
+    label = "100\% > 0.5 Kb" ;                     
+    ctx.fillStyle = "white";
+    write (x1+159, MARGIN_T-7, label);
+    
+    // write XX = Last month(s) missing
+    if (incomplete)
+    {
+      var date = new Date() ;
+      var msec = date.getMilliseconds() ;
+      var red = Math.floor ((1000 - msec) / 1000 * 255) ;
+      if (red < 128) { red = 128 ; }
+      ctx.fillStyle = "rgb("+red+",0,0)" ; 
+      label = "XX" ;                     
+      write (55, MARGIN_T-7, label);
+      ctx.fillStyle = "white";
+      label = "= Last month(s) missing" ;                     
+      write (73, MARGIN_T-7, label);
+    }  
+
+    // draw background for buttons
+    ctx.fillStyle = "rgb(56,56,56)";
+    if (b.length > 5)
+    { ctx.fillRect (canvas.width-MARGIN_R-63, canvas.height-MARGIN_B- 113, 62, 112) ; } 
+    else
+    if (b.length > 4)
+    { ctx.fillRect (canvas.width-MARGIN_R-63, canvas.height-MARGIN_B- 85, 62, 84) ; } 
+    else
+    { ctx.fillRect (canvas.width-MARGIN_R-63, canvas.height-MARGIN_B- 59, 62, 58) ; } 
+    ctx.strokeStyle = "black";
+
+    // draw buttons
+    for (x = 0 ; x < b.length ; x++)
+    { drawButton (b[x]) ; }
+
+    if ((year == TILL_YEAR) && (month == TILL_MONTH) && (step >= steps_per_month-1) && (! ready))
+    { 
+      ready = true ; 
+      var date = new Date() ;
+      elapsed = " - " + (date.getTime() - time) ;                                              
+      
+      button = 3 ;
+      for (x = 0 ; x < 4 ; x++)
+      { b[x].active = (x == button) ; }
+    }
+
+    setTimeout(loop, INTERVAL);
+  }
+
+//**** OUTPUT PRIMITIVES ****//
+  function line(x1,y1,x2,y2)
+  {
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  
+  function write(x,y,text)
+  {
+    ctx.translate(x,y);
+    ctx.mozDrawText(text+' ');
+    ctx.translate(-x,-y);
+  }
+
+  function write_vert(x,y,text)
+  {
+    ctx.save() ;
+    for (t=0 ; t < text.length; t++)
+    {
+      t2 = text.charAt(t) ;
+      dxtext = ctx.mozMeasureText(t2) / 2;
+      ctx.translate(x-dxtext,y);
+      ctx.mozDrawText(t2+' ');
+      ctx.translate(-x+dxtext,-y+10);
+    }  
+    ctx.restore() ;
+  }
+
+  function circle(x,y,r)
+  {                    
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, PI2, true) ;
+    ctx.closePath();
+    ctx.fill() ;
+    ctx.stroke() ;
+  }
+    
+//**** GRID ****//
+  function grid()
+  {
+    var dz ;
+
+    ctx.lineWidth = "1";
+    ctx.strokeStyle = "rgb(0,0,0)" ;
+
+    // draw vertical lines
+    ctx.mozTextStyle = "8pt Arial";
+    for (var x = 0; x <= years ; x++)
+    {
+      x1 = MARGIN_L + x * 12 * steps_per_month * dxstep ;
+      line (x1,canvas.height-MARGIN_B,x1,MARGIN_T) ;
+    }
+    line (canvas.width-MARGIN_R,canvas.height-MARGIN_B,canvas.width-MARGIN_R,MARGIN_T) ;
+
+    // draw horizontal lines
+    if (yaxis_mode == yaxis_log)
+    { y = y_min ; }
+    else
+    { y = 0 ; }
+    
+    z = -1 ;
+    (yaxis_mode == yaxis_log) ? dz = 3 : dz = 2 ;
+
+    log = "" ;
+    ctx.fillStyle = "White";
+    ctx.mozTextStyle = "8pt Arial";
+    while (y <= articles_max)
+    {
+      z++ ;
+
+      if (yaxis_mode == yaxis_log)
+      {  y1 = MARGIN_B + ((Math.log(y)/LOG10)-y_min_log) * diagram_height ; }
+      else
+      {  y1 = MARGIN_B + y / articles_max * diagram_height ; }
+      
+
+      ((z % dz == 0) || (y == articles_max)) ? ctx.strokeStyle = "rgb(0,0,0)"       : ctx.strokeStyle = "rgb(55,55,55)" ;     // lines
+      (z % dz == 0) ? ctx.fillStyle   = "rgb(255,255,255)" : ctx.fillStyle   = "rgb(110,110,110)" ;  // text
+
+      line (MARGIN_L,canvas.height-y1,canvas.width-MARGIN_R,canvas.height-y1);
+      
+      text = y ;
+      if (y > 999999)
+      { text = text / 1000000 + 'M' ;  }
+      else
+      {
+        if (y > 999)
+        { text = text / 1000 + 'k' ;  }
+      }  
+
+      dxtext = ctx.mozMeasureText(text) ;
+      dytext = -4 ;
+      write (MARGIN_L-dxtext-6, canvas.height-y1-dytext,text) ;
+
+      if (yaxis_mode == yaxis_log)
+      { if (z % dz != 1) { y *= 2 ; } else { y *= 2.5 ; } }
+      else
+      { y += articles_max / 10 ; }
+    }
+    if (yaxis_mode == yaxis_log)
+    { y1 = MARGIN_B + ((Math.log(articles_max)/LOG10)-y_min_log) * diagram_height ; }
+    ctx.strokeStyle = "rgb(0,0,0)" ;
+    line (MARGIN_L,canvas.height-y1,canvas.width-MARGIN_R,canvas.height-y1);
+  }
+
+  function grid2()
+  {
+    // number vertical lines
+    ctx.fillStyle = "White";
+    ctx.mozTextStyle = "8pt Arial";
+    for (var x = 0; x <= years ; x++)
+    {
+      x1 = MARGIN_L + x * 12 * steps_per_month * dxstep ;
+      dxtext = ctx.mozMeasureText(x)/2 ;
+      write (x1-dxtext, canvas.height-MARGIN_B+11, x);
+    }
+  }  
+
+//**** RESTART ****//
+  function restart()
+  {
+    ready = false ;
+    cycle = 0 ;
+    step  = 0 ;
+    index = 0 ;
+    month   = FROM_MONTH ;
+    year    = FROM_YEAR ;
+    for (i = WIKIPEDIAS - 1 ; i >= 0 ; i--)
+    {
+      a[i].x = 0 ;
+      a[i].y = 0 ;
+      a[i].r = 12 ; 
+      a[i].xprev = 0 ;                     
+      a[i].yprev = 0 ;
+      a[i].value = 0 ;
+      a[i].maxsize = 0 ;
+      a[i].show = false ;
+      a[i].rand = (Math.random() - 0.5) * steps_per_month * dxstep ;
+      a[i].transparency = transparency ;
+      a[i].size = 0 ;
+      a[i].editors1 = 0 ;
+      a[i].editors2 = 0 ;
+      a[i].editors  = 0 ;
+    }
+
+    steps_max = months * steps_per_month ;
+    dxstep = diagram_width / steps_max ;
+    // setTimeout(loop, 0);
+  }
+
+//**** LOAD ****//
+  function load(steps)
+  {
+    if (document.addEventListener) 
+    { document.getElementById("cv").addEventListener("mousemove",TrackCoordinatesInImage, false); } 
+    // else if(window.event && document.getElementById) 
+    // { document.getElementById("idImageToMonitor").onmousemove = TrackCoordinatesInImage; }
+
+    steps_per_month = steps ;
+    
+    var i, m ;
+    canvas = document.getElementById("cv");
+    ctx    = canvas.getContext("2d");
+
+    cycle  = 0 ;
+    month  = FROM_MONTH ;
+    year   = FROM_YEAR ;
+    step   = 0 ;
+    index  = 0 ;
+    ready  = false ;
+
+    months = (TILL_YEAR*12+TILL_MONTH) - (FROM_YEAR*12+FROM_MONTH) + 1 ;
+    years = Math.floor (months/12) ;
+                                                                               
+    if (yaxis_mode == yaxis_log)                                                                            
+    { diagram_height = (canvas.height - MARGIN_B - MARGIN_T) / ((Math.log(articles_max)/LOG10)-y_min_log) ; }
+    else
+    { diagram_height = canvas.height - MARGIN_B - MARGIN_T ; }
+    diagram_width  = canvas.width - MARGIN_L - MARGIN_R ;
+
+    steps_max = months * steps_per_month ;
+    dxstep = diagram_width / steps_max ;
+
+    init() ;
+
+    for (i = 0; i < WIKIPEDIAS; i++)
+    {
+      a[i].start = -1 ;
+      for (m = 0 ; m < a[i].articles.length ; m++)
+      {
+        if (a [i].articles[m] > 0)
+        { a[i].start = m ; break ; }
+      }
+      a[i].stop = a[i].articles.length - 1 ;
+      for (m = a[i].articles.length - 1 ; m > 0 ; m--)
+      {
+        if (a [i].articles[m] != 0)
+        { break ;  }
+        a[i].stop -- ;
+      }
+    }
+
+    b[0] = {x:canvas.width-MARGIN_R-58, y:canvas.height-MARGIN_B-  52, w:24, h:20, c:"rgb(48,48,48)", t:">",     pt:"12", dy:7, active:false,  f:3}  
+    b[1] = {x:canvas.width-MARGIN_R-58, y:canvas.height-MARGIN_B-  24, w:24, h:20, c:"rgb(48,48,48)", t:">>",    pt:"10", dy:6, active:false,  f:3}  
+    b[2] = {x:canvas.width-MARGIN_R-28, y:canvas.height-MARGIN_B-  52, w:24, h:20, c:"rgb(48,48,48)", t:">>>",   pt:"9",  dy:5, active:true,   f:3}  
+    b[3] = {x:canvas.width-MARGIN_R-28, y:canvas.height-MARGIN_B-  24, w:24, h:20, c:"rgb(48,48,48)", t:"||||",   pt:"10", dy:4, active:false, f:3}  
+    b[4] = {x:canvas.width-MARGIN_R-58, y:canvas.height-MARGIN_B-  80, w:54, h:20, c:"rgb(48,48,48)", t:"editors", pt:"10", dy:4, active:true,  f:2}  
+    // in current animation lineair y scale makes no sense, disable buttons
+    // b[4] = {x:canvas.width-MARGIN_R-58, y:canvas.height-MARGIN_B-  80, w:54, h:20, c:"rgb(48,48,48)", t:"lin", pt:"10", dy:4, active:true,  f:2}  
+    // b[5] = {x:canvas.width-MARGIN_R-58, y:canvas.height-MARGIN_B- 108, w:54, h:20, c:"rgb(48,48,48)", t:"log", pt:"10", dy:4, active:false, f:2}  
+  }
+         
+       
+  function storepoint(x,y)
+  {
+    mouse_x = x ;
+    mouse_y = y ;
+  }         
+
+  function freepoint()
+  {
+    mouse_x = 0 ;
+    mouse_y = 0 ;
+  }         
+  </script>
+
+  <style>
+    body   {background-color:#404040; margin:50px; text-align:center;}
+    canvas {border:2px solid #444;}
+  </style>
+</head>
+
+<body onload="load(4);loop();">
+<center> 
+
+
+  <script type="text/javascript">
+  if (document.body && document.body.clientWidth)
+  { W = document.body.clientWidth * 0.95 ; }
+  else
+  if (window.innerWidth)
+  { W = window.innerWidth * 0.95 ; }
+  else
+  if (screen.width)
+  { W = screen.width * 0.95 ; }
+
+  if (document.body && document.body.clientHeight)
+  { H = document.body.clientHeight * 0.9 ; }
+  else
+  if (window.innerHeight)
+  { H = window.innerHeight * 0.9 ; }
+  else
+  if (screen.height)
+  { H = screen.height * 0.9 ; }
+
+//  document.write ('<canvas id="cv" width=' + W + ' height=' + H + '>') ;
+  </script>
+
+  <!-- <canvas id="cv" width=800 height=600 onmousedown="storepoint(Coordinate_X_InImage,Coordinate_Y_InImage)" onmouseup="freepoint()"> -->
+  <canvas id="cv" width=1600 height=1200 onmousedown="storepoint(Coordinate_X_InImage,Coordinate_Y_InImage)" onmouseup="freepoint()"> 
+   <font color=#A00000>
+      Your browser does not (yet) support direct drawing to the web page (html tag <b>canvas</b>).<br>
+      Try a recent build of Firefox, Safari, or Opera
+    </font>
+  </canvas>
+</center>
+</body>
+
+</html>
