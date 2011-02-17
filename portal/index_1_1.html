@@ -1,0 +1,740 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+  <meta name="robots" content="index,follow">
+  <script language="javascript" type="text/javascript" src="../WikipediaStatistics11.js"></script>
+  <link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+  <link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+  <title>Wikistats: Wikimedia Statistics</title>
+
+  <script src="jquery-1.1.3.1.pack.js" type="text/javascript"></script>
+  <script src="jquery.history_remote.pack.js" type="text/javascript"></script>
+  <script src="jquery.tabs.pack.js" type="text/javascript"></script>
+  <script type="text/javascript">
+  $(function() 
+  { $('#container-1').tabs({ fxAutoHeight: true }); })  
+  </script>
+
+  <link rel="stylesheet" href="jquery.tabs.css" type="text/css" media="print, projection, screen">
+
+  <style type="text/css">
+    body    {font-family:arial,sans-serif; font-size:12px; background-color: #FFFFDD; }
+    h1      {margin:0px 0px 3px 0px; font-size:24px}
+    h2      {margin:0px 0px 3px 0px; font-size:18px}
+    h3      {margin:0px 0px 1px 0px; font-size:15px}
+    h4      {margin:0px 0px 9px 0px; font-size:14px}
+    hr,form {margin-top:1px;margin-bottom:2px}
+    hr.b    {margin-top:1px;margin-bottom:4px}
+    p       {background-color: #FFFFDD;}
+    dt      {font-weight:bold;}
+    a:link    {color:#0000D0;text-decoration:none}
+    a:visited {color:#0000D0;text-decoration:none}
+    a:active  {color:#0000D0;text-decoration:none}
+    a:hover   {color:#FF00FF;text-decoration:none}
+    a img     {border-color:black}
+    ul { padding-left: 12px; margin-left: 10;  }
+  </style>
+</head>
+
+<body>
+<noscript>
+<h2><font color="800000">Javascript is disabled on your browser.</font>
+</h2>
+<h3><font color="#008000">With javascript enabled this page is presented in segments.</font></h3>
+<p>
+<hr>
+<p>	
+</noscript>
+
+<table>
+<tr>	
+  <td valign=middle>&nbsp;<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/35px-Wikimedia-logo.svg.png' width='70%'></td>
+  <td valign=middle align=left><h1>Wikistats: Wikimedia Statistics</h1></td>
+</tr>
+</table>   
+
+<p>
+
+<div id="container-1">
+	
+<script>	
+document.write ("<ul>" + 
+  "<li><a href='#fragment-11'><h2 style='background-color:#FFFFDD;'>&nbsp;Introduction&nbsp;&nbsp;&nbsp;|</h2></a></li>" +
+  "<li><a href='#fragment-12'><h2 style='background-color:#FFFFDD;'>&nbsp;Regular Reports&nbsp;&nbsp;&nbsp;|</h2></a></li>" +
+  "<li><a href='#fragment-13'><h2 style='background-color:#FFFFDD;'>&nbsp;Special reports&nbsp;&nbsp;&nbsp;|</h2></a></li>" +
+  "<li><a href='#fragment-14'><h2 style='background-color:#FFFFDD;'>&nbsp;See Also ...&nbsp;</h2></a></li>" +
+  "</ul>") ;
+</script>
+  <div id="fragment-11" style="background-color:#FFFFDD;">
+    <a href='#intro'>Wikistats</a> - <a href='#process'>Process</a> - <a href='#data-scripts'>Data and Scripts</a> - <a href='#florence'>Florence N.</a>
+
+    <a id='intro' name='intro'></a>
+
+    <p>
+    <!-- <b>Introductory text</b>
+    To be added... -->
+
+		<p><b>Enough tables, bar charts and plots to keep you busy for a while, available in:</b> 
+    <p>
+    Asturianu</a> | 
+    &#1073;&#1098;&#1083;&#1075;&#1072;&#1088;&#1089;&#1082;&#1080;</a> | 
+    Brezhoneg</a> | 
+    Catal&agrave;</a> | 
+    &#269;e&#353;tina</a> | 
+    Dansk</a> | 
+    Deutsch</a> | 
+    English |
+    Esperanto</a> <br> 
+
+    Espa&ntilde;ol</a> | 
+    Fran&ccedil;ais</a> | 
+    &#1506;&#1489;&#1512;&#1497;&#1514;</a> | 
+    Magyar</a> |
+    Italiano</a> | 
+    &#26085;&#26412;&#35486;</a> 
+    Nederlands</a> |
+    Nynorsk</a> | 
+    Polski</a> <br> 
+
+    Portugu&ecirc;s</a> | 
+    Rom&#226;n&#259;</a> | 
+    &#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</a> | 
+    Sloven&#353;&#269;ina&#160;</a> | 
+    Svenska</a> | 
+    Walon</a> | 
+    &#20013;&#25991;</a>
+   
+    <p>
+    <a href='index.html#fragment-12'><img src="Stats2.jpg" border="1">&nbsp;<img src="Stats1.jpg" border="1"></a>  
+    
+    <hr>
+    <p>
+    <a id='process' name='process'></a>
+    <h3>Wikistats Process</h3>	
+    <p><b>Dumps</b>
+    <p>All Wikimedia wikis are <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl?#projects'>exported on a regular basis</a> to so called 'dumps'.
+    <br>The 'full archive' version of the dumps for over 700 wikis is processed by Wikistats scripts. 
+    <br>Resulting counts are used to create reports in many languages (and are available for download). 
+    <p><font color=#600000>Note: due to technical problems there has been no full archive dump for the English Wikipedia since<br>
+    September 2006. Until this has been fixed wikistats data for this wiki will be incomplete.</font> 
+    <p><b>Log files</b>
+    <p>All requests to Wikimedia servers are logged. 
+    <br>Mid 2009: 4,000 article requests per second, 70,000 file requests per second all in all. 
+    <br>From these logs page view counts are distilled. 
+
+    <hr>
+    <p>
+    <a id='data-scripts' name='data-scripts'></a>
+    <h3>Raw Data and Scripts</h3>	
+    <p>
+    <a href='http://stats.wikimedia.org/csv_wp.zip'><img src="csv-file.png" border="1"></a><p>
+    Raw data in <a href='http://en.wikipedia.org/wiki/Comma-separated_values'>csv format</a> (can be imported in spreadsheet):<br> 
+    <a href='http://stats.wikimedia.org/csv_wb.zip'>Wikibooks</a>, 
+    <a href='http://stats.wikimedia.org/csv_wn.zip'>Wikinews</a>, 
+    <a href='http://stats.wikimedia.org/csv_wp.zip'>Wikipedia</a>, 
+    <a href='http://stats.wikimedia.org/csv_wq.zip'>Wikiquote</a>, 
+    <a href='http://stats.wikimedia.org/csv_ws.zip'>Wikisource</a>, 
+    <a href='http://stats.wikimedia.org/csv_wv.zip'>Wikiversity</a>, 
+    <a href='http://stats.wikimedia.org/csv_wx.zip'>Wikispecial</a>, 
+    <a href='http://stats.wikimedia.org/csv_wk.zip'>Wiktionary</a>
+    
+    <p>
+    <a href='http://stats.wikimedia.org/scripts.zip'><img src="perl.png" border="1"></a><p>
+    <a href='http://stats.wikimedia.org/scripts.zip'>Perl scripts</a>
+    
+    <hr>
+    <p>
+    <a id='florence' name='florence'></a>
+    <h3>Florence Nightingale</h3>
+    <p>
+    <a href='http://en.wikipedia.org/wiki/Florence_Nightingale'><img src="nightingale-mortality.jpg" border="1"></a><p>
+    My first edit on the English Wikipedia (October 2002) was on statistics, namely the importance<br>
+    of <a href='http://en.wikipedia.org/wiki/Florence_Nightingale'>Florence Nightingale </a>
+    for the development of epidemiological statistics, and particularly her<br>
+    usage of the <a href='http://en.wikipedia.org/wiki/Polar_area_diagram'>polar diagram</a>.
+    <hr>
+    <table>
+      <tr>
+        <td valign=top><a href='http://infodisiac.com/blog'><img src='Blog3.jpg'></a></td>
+	      <td valign=top>
+	  	    <small>Author:Erik Zachte (<a href='http://infodisiac.com/'>Web site</a>)<br>
+	  	    Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
+          For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>. Scripts: <a href='http://stats.wikimedia.org/scripts.zip'>scripts.zip</a><br>
+          &lArr;&nbsp;See also  <a href='http://infodisiac.com/blog'>Blog on Wikimedia Statistics</a></small>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </div>  
+
+  <div id="fragment-12" style="background-color:#FFFFDD;">
+    
+    <a href='#maps'>Site Maps</a> - <a href='#regular'>Overview of Regular Reports</a> - <a href='#bars'>Navigation Bars</a> - <a href='#concepts'>Core Concepts</a>
+    <p>
+		<b><font color=green>First time users please see <a href='#concepts'>core concepts</a> below.</font></b>
+    <hr>
+		<p>
+    <h3>Report Card</h3>
+    <p>
+    The monthly Report Card offers a compact overview over recent trends.<br>
+    All charts cover exactly one year. The Report Card comes in three layouts:
+    <ol >
+    <li>A <b><a href='http://stats.wikimedia.org/reportcard/'>detailed report</a></b> with different views on the data behind tabs.<br>
+    Most charts come in three variations: 
+    <ul>
+    <li><i>Absolute numbers on a linear scale</i>
+    <li><i>Absolute numbers on a logarithmic scale</i><br>
+    This allows widely diverging values to appear in one chart, but makes growth curves less intuitive to interpret 
+    <li><i>An indexed version</i>, with allows comparison of relative growth trends: each line start at 100% for first month
+    </ul>  
+    <li>A <b>summary in one column</b> for online browsing
+    <li>A <b>summary in two columns</b> for printing on one large sheet (there is a link for print instructions)  
+    </ol>
+    <a href='http://stats.wikimedia.org/reportcard/'><img src='ReportCard.png'></a>
+		<p>
+    <hr>
+    <p>
+
+
+    <a id='maps' name='maps'></a>
+    <h3>Site Maps</h3>
+    For each Wikimedia project a site map lists all reports, tables and charts. 
+    <p>
+		<a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'><img src='sitemap.png' border='1'></a>
+		<p>
+    <h3>Choose site map for any these projects:</h3>
+    <br>
+		<table border=0 width=500>
+      <tr><td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/40px-Wikipedia-logo.png' width='40' height='40' border='0'  alt='Wikipedia'border=0 /></a></td><td valign=middle><a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'><b>Wikipedia</b></a></td>
+          <td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wikibooks/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/40px-Wikibooks-logo.svg.png' width='40' height='40' alt='Wikibooks' title='Wikibooks' border=0 /></a>&nbsp;<a href='http://www.wikibooks.org/' title='Wikibooks'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wikibooks/EN/Sitemap.htm'>Wikibooks</a></b></td>
+          <td valign=middle align=left width=40><br><a href='http://en.wikipedia.org/wikistats/wikinews/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='40' height='24' alt='Wikinews' title='Wikinews'  border=0 /></a>&nbsp;<a href='http://www.wikinews.org/' title='Wikinews'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wikinews/EN/Sitemap.htm'>Wikinews</a></b></td>
+          <td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wikiquote/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/40px-Wikiquote-logo.svg.png' width='40' height='41' alt='Wikiquote' title='Wikiquote' border=0 /></a>&nbsp;<a href='http://www.wikiquote.org/' title='Wikiquote'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wikiquote/EN/Sitemap.htm'>Wikiquote</a></b></td></tr>
+      <tr><td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wikisource/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='40' height='37' alt='Wikisource' title='Wikisource' border=0 /></a>&nbsp;<a href='http://www.wikisource.org/' title='Wikisource'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wikisource/EN/Sitemap.htm'>Wikisource</a></b></td>
+          <td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wikiversity/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikiversity-logo.svg/40px-Wikiversity-logo.svg.png' width='40' height='28' alt='Wikiversity' title='Wikiversity' border=0 /></a>&nbsp;<a href='http://www.wikiversity.org/' title='Wikiversity'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wikiversity/EN/Sitemap.htm'>Wikiversity</a></b></td>
+          <td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wiktionary/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/40px-Wiktionary-logo-en.png' width='40' height='38' alt='Wiktionary' title='Wiktionary' border=0 /></a>&nbsp;<a href='http://www.wiktionary.org/' title='Wiktionary'></a></td><td valign=middle><b><a href='http://en.wikipedia.org/wikistats/wiktionary/EN/Sitemap.htm'>Wiktionary</a></b></td>
+          <td valign=middle>
+          	<table>
+            <tr>
+            	<td valign=bottom align=left width=40><a href='http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/35px-Wikimedia-logo.svg.png' width='23' height='23' alt='Foundation Wiki' title='Foundation Wiki' border=0 /></a></td>
+         	    <td valign=middle align=left width=40><a href='http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Wikimedia_Community_Logo.svg/35px-Wikimedia_Community_Logo.svg.png' width='20' height='20' alt='Meta' title='Meta' border=0 /></a></td>
+            </tr>
+            <tr>
+          	  <td valign=bottom align=left width=40><a href='http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Wikispecies-logo.svg/40px-Wikispecies-logo.svg.png' width='24' height='24' alt='Wikispecies' title='Wikispecies, a free directory of life!' border=0 /></a></td>
+         	   <td valign=top align=left width=40><a href='http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/40px-Commons-logo.svg.png' width='20' height='24' alt='Commons' title='Free media repository' border=0 /></a></td>
+       	    </tr>
+            </table>
+          </td>  
+          <td valign=middle><a href='http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm'><b>Wikispecial</b></a></td>        
+        </tr>    
+    </table>	
+		<p>
+    <hr>
+    <p>
+
+    <a id='regular' name='regular'></a>
+    <h3>Overview of Regular Reports</h3>
+		<p>The links below are <b>examples only</b>, and lead you to the German Wikipedia.
+		<p>Tip 1: Choose site map above for full list of all languages 
+		<br>Tip 2: Switch between tables and charts, between languages or comparison reports with <a href='#bars'>navigation bar</a>, see below
+	
+		<p><b>Tables for each language project plus <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZZ.htm'>summary for all projects</a>:</b>
+		<p><blockquote>Language projects are sorted by popularity (views per hour)</blockquote>
+		<ul>
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm'>Monthly counts & Quarterly rankings</a> 
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#editdistribution'>Distribution of article edits</a> 
+		<li> Most prolific <a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#wikipedians'>active</a> and <a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#sleeping'>inactive</a> registered contributors, 
+		     <a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#anonymous'>anonymous</a> contributors and <a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#bots'>bots</a>
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#distribution'>Articles per size range</a>
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#namespaces'>Records per namespace + Binaries</a>
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#mostedited'>Most edited articles</a>
+		<li><a href='http://stats.wikimedia.org/EN/TablesWikipediaDE.htm#zeitgeist'>Zeitgeist</a> (per month top 25 articles with most editors)
+    </ul>
+		<p><b>Charts for each language project plus <a href='http://stats.wikimedia.org/EN/ChartsWikipediaZZZ.htm'>summary for all projects</a>:</b>
+		<ul>
+    <li><img src='yellowbar.gif' height=10 width=12>&nbsp;&nbsp;<a href='http://stats.wikimedia.org/EN/ChartsWikipediaDE.htm'><b>Wikimedians</b></a>
+    <br>Contributors - New Wikimedians - Active Wikimedians - Very Active Wikimedians
+    <li><img src='bluebar.gif' height=10 width=12>&nbsp;&nbsp;<a href='http://stats.wikimedia.org/EN/ChartsWikipediaDE.htm#2'><b>Articles</b></a>
+    <br>Count (official and alternate) - New articles per day - Edits per article - Bytes per article - Articles over 0.5 or 2 Kb
+    <li><img src='redbar.gif' height=10 width=12>&nbsp;&nbsp;<a href='http://stats.wikimedia.org/EN/ChartsWikipediaDE.htm#3'><b>Database</b></a>
+    <br>Edits per month - Database size - Word count
+    <li><img src='greenbar.gif' height=10 width=12>&nbsp;&nbsp;<a href='http://stats.wikimedia.org/EN/ChartsWikipediaDE.htm#4'><b>Links</b></a>
+    <br>Internal - Interwiki - Binaries - External - Redirects
+    </ul>
+		<p><b>Tables plus Charts for comparisons between language projects: </b>
+		<ul>
+		<li><b>Wikimedians / Editors</b><br>
+		<a href='http://stats.wikimedia.org/EN/TablesWikipediansContributors.htm'>Contributors</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesWikipediansNew.htm'>New Wikimedians</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesWikipediansEditsGt5.htm'>Active</a> and   
+		<a href='http://stats.wikimedia.org/EN/TablesWikipediansEditsGt100.htm'>Very Active</a> Wikimedians 
+		<li><b>Articles</b><br>
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Official Count</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesNewPerDay.htm'>New Articles Per Day</a> - 
+		Percentage Articles Over 
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesGt500Bytes.htm'>0.5 Kb</a> or
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesGt1500Bytes.htm'>2 Kb</a> Size
+		<li><b>Edits</b><br>
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesEditsPerArticle.htm'>Mean Edits Per Article</a> -   
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseEdits.htm'>Edits Per Period</a> (table:month, chart:day) 
+		<li><b>Basic Counts</b><br>
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseSize.htm'>Data Base Size</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseWords.htm'>Word Counts</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesArticlesBytesPerArticle.htm'>Mean Bytes Per Article</a> 
+		<li><b>Links</b><br>
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseLinks.htm'>Internal</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseExternalLinks.htm'>External</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseWikiLinks.htm'>Inter Project</a> - 
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseRedirects.htm'>Redirects</a>  (aliasses) and <br>
+		<a href='http://stats.wikimedia.org/EN/TablesDatabaseImageLinks.htm'>Referenced Binaries</a> (images, sounds, movies)
+		</ul>
+		<p><b>See section <a href='index.html#fragment-13'>Special Reports</a> for other tables and charts listed on site maps</b>
+ 
+		<hr>
+		<p>
+		<a id='bars' name='bars'></a>	
+		<h3>Navigation Bars</h3> 
+		<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src='legend.png'><br>
+		<ul>
+			<li><b>%</b> ... Hide/show percentages
+			<li><b>C</b> ... Hide/show colors
+			<li><b>Zoom</b> <b>-</b> <b>+</b> ... Shrink or enlarge the table<br>
+			<li><b>Home</b> ... Return to site map
+			<li><b>Charts</b> ... Switch to line chart (.png or .svg) and back 
+			<li><b>Table</b> ... Switch to table and back
+			<li><b>SVG</b> ... Switch to scalable vector grahics
+			<li><b>PNG</b> ... Switch to bitmap
+			<li><b>Active wikipedians</b> ... Choose another comparison from list
+			<li><b>German</b> ... Choose another language from list
+			<li><b>&lt;</b> <b>&gt;</b> ... Move to previous or next language or comparison
+  	</ul>		
+		<p>
+
+		<hr>
+		<p>
+		<a id='concepts' name='concepts'></a>	
+		<h3>Core Concepts</h3> 
+		<dl>
+			<dt>Contributors
+			<dd>Also called here <i>wikipedians</i>, <i>wikireporters</i>, <i>wiktionarians</i>, etc depending on the project)
+			<p>Defined as <b>registered</b> users who edited 10 or more times since they arrived, 
+			<br>and thus showed at least a modicum of involvement at one point in time.
+			<p>This number can only grow.	The number is very inclusive. Compare (very) active users below.
+			<dt>(Very) Active Users 
+			<dd>Contributors that edited at least 5 or 100 times in any given month
+			<br>Note: charts show weekly data. <i>Very active</i> is then 25 edits or more per week 	
+			
+			<dt>Bots
+			<dd>Mass edit tools, employed (semi-) automatically by registered users, for routine corrections and housekeeping. 
+			<br><a href='http://stats.wikimedia.org/EN/BotActivityMatrix.htm'>Their contribution</a> increased considerably over the years. Distinguishing between human editors and bots
+	    <br>has therefore become more and more urgent, and is now a work in progress. For example <a href='http://stats.wikimedia.org/EN/TablesWikipediaEN.htm#activitylevels'>edit activity</a> is now differentiated. 
+  	</dl>		
+		<p>
+
+    <hr>
+    <table>
+      <tr>
+        <td valign=top><a href='http://infodisiac.com/blog'><img src='Blog3.jpg'></a></td>
+	      <td valign=top>
+	  	    <small>Author:Erik Zachte (<a href='http://infodisiac.com/'>Web site</a>)<br>
+	  	    Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
+          For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>. Scripts: <a href='http://stats.wikimedia.org/scripts.zip'>scripts.zip</a><br>
+          &lArr;&nbsp;See also  <a href='http://infodisiac.com/blog'>Blog on Wikimedia Statistics</a></small>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="fragment-13" style="background-color:#FFFFDD;">
+    <a href='#growth'>Growth</a> - <a href='#views'>Page Views</a> - <a href='#requests'>Server Requests</a> - <a href='#surges'>Traffic Surges</a> - <a href='#bots'>Bot Activity</a> - <a href='#mails'>Mailing Lists</a>
+    <p> 
+    <a href='#creation'>Creation History</a> - <a href='#recent'>Recent Months</a> - <a href='#status'>Current Status</a> - 
+    <a href='#dumps'>Dumps</a> - <a href='#categories'>Categories</a> - <a href='#books'>Wikibooks</a> 
+    
+    <p>
+		<a id='growth' name='growth'></a>	
+		<h3><a href='WikimediaProjectsGrowth.png'>Growth per Major Project</a></h3>
+		<p>
+		<a href='WikimediaProjectsGrowth.png'><img src='Growth.jpg' width=500 border=1></a><br>
+	  <small>(click to zoom in)</small>
+    <hr>
+    <p>
+
+    <h3><a href="http://stats.wikimedia.org/wikimedia/animations/growth/index.html">Growth per Language Edition (animation)</a></h3>
+    <p>
+    <p>These animations are pure javascript (html 5, canvas object) and require a modern browser
+    <br>For other browsers there is a <a href='http://stats.wikimedia.org/wikimedia/animations/growth/Animation.html'><b>Flash recording</b></a>
+    <p> 	
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWb.html">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWn.html">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWp.html">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWq.html">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWs.html">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/Wikistats/AnimationProjectsGrowthWv.html">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWx.html">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWk.html.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/index.html"><img src="Animation2009A.jpg" border="1"></a><br>
+    <a href="http://stats.wikimedia.org/wikimedia/animations/growth/index.html"><img src="Animation2009B.jpg" border="1"></a>
+    <hr>
+    <p>
+
+		<a id='views' name='views'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm">Page Views per Project</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/TablesPageViewsMonthly.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/TablesPageViewsMonthly.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/TablesPageViewsMonthly.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/TablesPageViewsMonthly.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/TablesPageViewsMonthly.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/TablesPageViewsMonthly.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/TablesPageViewsMonthly.htm">Wiktionary</a>
+    <br>
+    Also <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm">Summary for all projects</a> 
+    
+    <p>
+    <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm"><img src="PageViewsNew.png" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+    <h3><a href="http://infodisiac.com/blog/2008/10/wikimedia-page-view-stats-i/">Page Views for Wikimedia Projects</a></h3>
+    <p>Read more at my blog post <a href='http://infodisiac.com/blog/2008/10/wikimedia-page-view-stats-i/'>Wikimedia Page Views</a>
+    <p>
+    <a href="http://infodisiac.com/blog/wp-content/uploads/2008/10/piechartscorrected.png"><img src="piechartscorrected.png" border="1" width=500></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='requests' name='requests'></a>	
+    <h3><a href="http://stats.wikimedia.org/wikimedia/squids/SquidReportRequests.htm">Server Requests</a></h3>
+    <p>
+    This analysis is based on a 1:1000 sampled server log (squids) &rArr; <font color=#008000><b>all counts x 1000</b></font>.<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportRequests.htm'>How many files are requested each day?</a> Breakdown by file type and target (sub)project<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportOrigins.htm'>Where do those requests originate?</a> Breakdown by file category and origin<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportMethods.htm'>Which HTTP requests are issued?<a/> Breakdown by type and results<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportScripts.htm'>Which scripts are invoked?</a> Breakdown by type (css, javascript, php), name and parameters<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportSkins.htm'>Which skin files are downloaded and how often?</a><br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>Which crawlers access our servers?</a> Breakdown by host, file types requested, agent string<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportOperatingSystems.htm'>Which operating systems do our clients use?</a> Breakdown by platform, mobile or not, release<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Which browsers are how popular?</a> Breakdown by brand, revision level, mobile or not<br>
+    <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportGoogle.htm'>Breakdown of all traffic that Google send us: directly (crawlers) and indirectly (search results)</a>
+    <p>
+    <a href="http://stats.wikimedia.org/wikimedia/squids/SquidReportRequests.htm"><img src="VisitorLogAnalysis.png" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='bots' name='bots'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/BotActivityMatrix.htm">Bot activity</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/BotActivityMatrix.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/BotActivityMatrix.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/BotActivityMatrix.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/BotActivityMatrix.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/BotActivityMatrix.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/BotActivityMatrix.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/BotActivityMatrix.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/BotActivityMatrix.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/EN/BotActivityMatrix.htm"><img src="bots2.png" border="1"></a>
+    <hr>
+    <p>
+
+		<a id='mails' name='mails'></a>	
+    <h3><a href="http://www.infodisiac.com/Wikipedia/ScanMail/Index.html">Mailing Lists</a></h3>
+    <p>Which <a href="http://www.infodisiac.com/Wikipedia/ScanMail/">Wikimedia mailing lists</a> are frequently updated?
+    <br>Which <a href="http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html">Wikimedia editors</a> are most active and where ?
+    <p>
+    <a href="http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html"><img src="PowerPosters.png" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='categories' name='categories'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/CategoryOverviewIndex.htm">Categories</a></h3>
+    <p>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/CategoryOverviewIndex.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/CategoryOverviewIndex.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/CategoryOverviewIndex.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/CategoryOverviewIndex.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/CategoryOverviewIndex.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/CategoryOverviewIndex.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/CategoryOverviewIndex.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/CategoryOverviewIndex.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/EN/CategoryOverviewIndex.htm"><img src="CategoriesZH.jpg" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='creation' name='creation'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/TablesWikipediaGrowthSummary.htm">Creation History</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/TablesWikipediaGrowthSummary.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/TablesWikipediaGrowthSummary.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/TablesWikipediaGrowthSummary.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/TablesWikipediaGrowthSummary.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/TablesWikipediaGrowthSummary.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/TablesWikipediaGrowthSummary.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaGrowthSummary.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/TablesWikipediaGrowthSummary.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/EN/TablesWikipediaGrowthSummary.htm"><img src="growth.png" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='dumps' name='dumps'></a>	
+    <h3><a href="http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl">Dumps</a></h3>
+    <p>
+   	<b>See also: <a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering progress</a></b><p>
+    <table>
+      <tr>
+       <td><small>Concise report</small><br><a href="http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl"><img src="WikiDumpReport.png" border="1"></a></td>
+       <td><small>Original report</small><br><a href="http://download.wikimedia.org/backup-index.html"><img src="Dump1b.jpg" border="1"></a></td>
+     </tr>
+    </table><p>
+    <hr>
+    <p>
+
+		<a id='books' name='books'></a>	
+    <h3><a href="http://stats.wikimedia.org/wikibooks/EN/WikiBookIndex.htm">Wikibooks</a></h3>
+    <p>
+   	Rankings (by size, edits, authors and chapter counts), Tables of Content, Chapter Sizes 
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/WikiBookIndex.htm"><img src="WikiBooks.png" border="1"></a>
+    <p>
+    <hr>
+    <p>
+
+		<a id='status' name='status'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/TablesCurrentStatusVerbose.htm">Current Status</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/TablesCurrentStatusVerbose.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/TablesCurrentStatusVerbose.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/TablesCurrentStatusVerbose.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/TablesCurrentStatusVerbose.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/TablesCurrentStatusVerbose.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/TablesCurrentStatusVerbose.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/TablesCurrentStatusVerbose.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/TablesCurrentStatusVerbose.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/EN/TablesCurrentStatusVerbose.htm"><img src="status.jpg" border="1"></a>
+    <p>
+    <hr>
+    <p>
+		
+		<a id='recent' name='recent'></a>	
+    <h3><a href="http://stats.wikimedia.org/EN/TablesRecentTrends.htm">Overview Recent Months</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/wikibooks/EN/TablesRecentTrends.htm">Wikibooks</a>, 
+    <a href="http://stats.wikimedia.org/wikinews/EN/TablesRecentTrends.htm">Wikinews</a>, 
+    <a href="http://stats.wikimedia.org/EN/TablesRecentTrends.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/wikiquote/EN/TablesRecentTrends.htm">Wikiquote</a>, 
+    <a href="http://stats.wikimedia.org/wikisource/EN/TablesRecentTrends.htm">Wikisource</a>, 
+    <a href="http://stats.wikimedia.org/wikiversity/EN/TablesRecentTrends.htm">Wikiversity</a>, 
+    <a href="http://stats.wikimedia.org/wikispecial/EN/TablesRecentTrends.htm">Wikispecial</a>, 
+    <a href="http://stats.wikimedia.org/wiktionary/EN/TablesRecentTrends.htm">Wiktionary</a>
+    <p>
+    <a href="http://stats.wikimedia.org/EN/TablesRecentTrends.htm"><img src="recentmonths.jpg" border="1"></a>
+    <p>  
+    <hr>
+    <p>
+
+		<a id='surges' name='surges'></a>	
+    <h3><a href="http://infodisiac.com/blog/2008/09/sarah-palin/">Traffic surge I</a></h3>
+    <p>
+   	More at my blog post <a href='http://infodisiac.com/blog/2008/09/sarah-palin/'>Sarah Palin</a><br>
+   	See also blog post <a href='http://infodisiac.com/blog/2008/11/us-presidential-election-2008/'>US presidential election 2008</a>
+    <p>
+    <a href="bothcandidates-pageviews-21aug-6sep.jpg"><img src="palin-small2.jpg" border="1"></a>
+
+    <h3><a href="http://infodisiac.com/blog/2009/05/h1n1-flu-or-new-flu-or/">Traffic surge II</a></h3>
+    <p>
+   	More at my blog post <a href='http://infodisiac.com/blog/2009/05/h1n1-flu-or-new-flu-or/'>H1N1 Flu or New Flu or …</a>
+    <p>
+    <a href="influenza.png"><img src="influenza-small2.jpg" border="1"></a>
+
+    <hr>
+    <table>
+      <tr>
+        <td valign=top><a href='http://infodisiac.com/blog'><img src='Blog3.jpg'></a></td>
+	      <td valign=top>
+	  	  <small>Author:Erik Zachte (<a href='http://infodisiac.com/'>Web site</a>)<br>
+	  	  Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
+        For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>. Scripts: <a href='http://stats.wikimedia.org/scripts.zip'>scripts.zip</a><br>
+        &lArr;&nbsp;See also  <a href='http://infodisiac.com/blog'>Blog on Wikimedia Statistics</a></small>
+        </td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </div>
+  
+  <div id="fragment-14" style="background-color:#FFFFDD;">
+
+    <p>
+    <h3><a href='http://infodisiac.com/Wikimedia/Visualizations/'>Visualizations, an overview</h3>
+    <p>
+    <a href="http://infodisiac.com/Wikimedia/Visualizations/"><img src="Visualizations.jpg" border="1"></a><br>
+    <p>
+    <p>Many authors 
+    <hr>
+
+    <h2><font color=#000000>See also popular statistics pages by other authors</font></h2>
+    <p>
+
+    <p>
+    <h3><a href="http://s23.org/wikistats/">S23 - Statistics about Mediawiki wikis</a></h3>
+    <p>
+    <a href="http://s23.org/wikistats/"><img src="S23.png" border="0"></a><br><small><font color=#999999>Screenshot edited for compact display</font></small><p>
+    <p><a href="http://s23.org/wikistats/">Basic set stats on lots of Mediawiki wikis, very up to date</a>
+    <p>Author <a href='http://s23.org/wiki/User:Mutante'>User:Mutante</a>  
+    <hr>
+
+    <p>
+    <h3><a href="http://www.trendingtopics.org/">Page Views - Trending Topics</a></h3>
+    <p>
+    <a href="http://www.trendingtopics.org/"><img src="trendingtopics.png" border="0"></a><p>
+    <a href="http://www.trendingtopics.org/"><img src="trendingtopics2.png" border="1"></a>
+    <p><a href="http://www.trendingtopics.org/">Article views per day, week, month or year</a>, based on <a href='http://dammit.lt/wikistats/'>dammit.lt files</a>
+    <p>Author <a href='http://www.datawrangling.com/about/'>Pete Skomoroch (Data Wrangling)</a>  
+    <hr>
+
+    <p>
+    <h3><a href="http://wikistics.falsikon.de/">Page Views - THE wikiStics</a></h3>
+    <p>
+    <a href="http://wikistics.falsikon.de/latest/"><img src="wikistics3.png" border="1"></a>
+    <p><a href="http://wikistics.falsikon.de/">Article views per month</a>, based on <a href='http://dammit.lt/wikistats/'>dammit.lt files</a> 
+    <p>Author <a href='http://meta.wikimedia.org/wiki/User:Melancholie'>Melancholie</a>  
+    <hr>
+
+    <h3><a href="http://stats.grok.se/">Page Views - stats.grok.se</a></h3>
+    <p>
+    <a href="http://stats.grok.se/"><img src="stats-grok-se.png" border="1"></a>
+    <p><a href="http://stats.grok.se/">Article views per month</a>, based on <a href='http://dammit.lt/wikistats/'>dammit.lt files</a>
+    <p>Author <a href='http://en.wikipedia.org/wiki/User:Henrik'>Henrik</a>  
+    <hr>
+
+    <p>
+    <h3><a href="http://wikirank.com/en/">Page Views - Wikirank</a></h3>
+    <p>
+    <a href="http://wikirank.com/en/Safari_(web_browser),Firefox,Internet_Explorer,Opera_(web_browser)#size=3"><img src="wikirank.jpg" border="1"></a>
+    <p><a href="http://wikirank.com/en">Comparing article views for the last 30, 60 or 90 days</a>, based on <a href='http://dammit.lt/wikistats/'>dammit.lt files</a>
+    <p>Author <a href='http://www.smallbatchinc.com/'>Small Batch Inc</a>  
+    <hr>
+
+    <p>
+    <h3><a href='http://www.wikirage.com/top-edits'>Most Edited Pages - Wikirage</h3>
+    <p>
+    <a href="http://www.wikirage.com/top-edits"><img src="wikirage.png" border="1"></a><br>
+    <p>Author <a href='http://www.craigsblog.com/'>Craig Wood</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://en.wikipedia.org/wiki/User:Dragons_flight/Log_analysis'>Log Analysis Oct 2007 - Dragons flight</h3>
+    <p>
+    <a href="http://en.wikipedia.org/wiki/User:Dragons_flight/Log_analysis"><img src="article_edits.jpg" border="1"></a>
+    <p><b>Many charts</b>: Edit rate - Edits per article - Revert rate - New articles,<br>new users, new administrators - Uploads and admin actions 
+    <p>Author <a href='http://en.wikipedia.org/wiki/User:Dragons_flight'>Dragons flight</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://en.wikipedia.org/wiki/Wikipedia:Editing_frequency'>Editing Frequency on English Wikipedia</h3>
+    <p>
+    <a href="http://en.wikipedia.org/wiki/Wikipedia:Editing_frequency"><img src="editors_all_time.png" border="1"></a><br>
+    <p>Author <a href='http://en.wikipedia.org/wiki/User:Dragons_flight'>Dragons flight</a>
+    <hr>
+
+    <p>
+    <h3><a href="http://www.wikichecker.com/editrate/">Edit Rates - WikiChecker</a></h3>
+    <p>
+    <a href="http://www.wikichecker.com/editrate/"><img src="wikichecker.jpg" border="1"></a><br>
+    <p>Author <a href='http://www.wikichecker.com'>WikiChecker.com</a> 
+    <hr>
+
+    <p>
+    <h3><a href="http://wikimediafoundation.org/wiki/Special:FundraiserStatistics">Donations at Fundraiser</a></h3>
+    <p>
+    <a href="http://wikimediafoundation.org/wiki/Special:FundraiserStatistics"><img src="fundraiser.png" border="1"></a><br>
+    <p>Author <a href='http://wikimediafoundation.org/wiki/Staff'>WMF staff member</a> (?)  
+    <hr>
+
+    <p>
+    <h3><a href='http://en.wikipedia.org/wiki/ComScore'>Unique Visitors - @comScore</a> Data <a href="http://meta.wikimedia.org/wiki/User:Stu/comScore_data_on_Wikimedia"> on Wikimedia</a> </h3>
+    <p>
+    <a href="http://meta.wikimedia.org/wiki/User:Stu/comScore_data_on_Wikimedia"><img src="comScore.png" border="1"></a><br>
+    <p>Author <a href='http://meta.wikimedia.org/wiki/User:Stu'>Stu</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://www.alexa.com/siteinfo/wikipedia.org'>Web Stats - Alexa</h3>
+    <p>
+    <a href="http://www.alexa.com/siteinfo/wikipedia.org"><img src="alexa.png" border="1"></a><br>
+    <p>Author <a href='http://www.alexa.com/'>Alexa</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://www.google.com/trends?q=wikipedia'>Web Stats - Google Trends</h3>
+    <p>
+    <a href="http://www.google.com/trends?q=wikipedia"><img src="google-trends.png" border="1"></a><br>
+    <p>Author <a href='http://www.google.com/'>Google</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://meta.wikimedia.org/wiki/List_of_Wikipedias'>Basic stats for all Wikipedias</h3>
+    <p>
+    <a href="http://meta.wikimedia.org/wiki/List_of_Wikipedias#All%20Wikipedias%20ordered by%20number%20of%20articles"><img src="list_of_wikipedias.png" border="1"></a><br>
+    <p>Author <a href='http://meta.wikimedia.org/w/index.php?title=List_of_Wikipedias&action=history'>Many wikipedians</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://meta.wikimedia.org/wiki/Wikimedia_News#Wikipedias'>Milestones</h3>
+    <p>
+    <a href="http://meta.wikimedia.org/wiki/Wikimedia_News#Wikipedias"><img src="milestones.png" border="1"></a><br>
+    <p>Author <a href='http://meta.wikimedia.org/w/index.php?title=Wikimedia_News&action=history'>Many wikipedians</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://www.flickr.com/photos/factoryjoe/2077575436/'>WikiDashboard</h3>
+    <p>
+    <a href="http://www.flickr.com/photos/factoryjoe/2077575436/"><img src="wikidashboard.jpg" border="1"></a><br>
+    <p>Authors <a href='http://www2.parc.com/istl/groups/uir/people/bongwon/bongwon.htm'>Bongwon Suh</a> and <a href='http://www-users.cs.umn.edu/~echi/'>Ed Chi</a>
+    <hr>
+
+    <p>
+    <h3><a href='http://www.nedworks.org/~mark/reqstats//reqstats-weekly.png'>Server Requests</h3>
+    <p>
+    <a href="http://www.nedworks.org/~mark/reqstats//reqstats-weekly.png"><img src="clusters.jpg" border="1"></a><br>
+    <p>
+    <table><tr><td>	
+    <b>Requests</b><br>	
+    <a href='http://toolserver.org/~leon/stats/reqstats/reqstats-hourly.png'> hourly</a> - 
+    <a href='http://toolserver.org/~leon/stats/reqstats/reqstats-daily.png'> daily</a> - 
+    <a href='http://toolserver.org/~leon/stats/reqstats/reqstats-weekly.png'> weekly</a> - 
+    <a href='http://toolserver.org/~leon/stats/reqstats/reqstats-monthly.png'> monthly</a> -
+    <a href='http://toolserver.org/~leon/stats/reqstats/reqstats-yearly.png'> yearly</a>
+    </td><td width=75>&nbsp;</td><td>
+    <b>Traffic</b><br>
+    <a href='http://toolserver.org/~leon/stats/trafstats/trafficstats-hourly.png'> hourly</a> - 
+    <a href='http://toolserver.org/~leon/stats/trafstats/trafficstats-daily.png'> daily</a> - 
+    <a href='http://toolserver.org/~leon/stats/trafstats/trafficstats-weekly.png'> weekly</a> - 
+    <a href='http://toolserver.org/~leon/stats/trafstats/trafficstats-monthly.png'> monthly</a> - 
+    <a href='http://toolserver.org/~leon/stats/trafstats/trafficstats-yearly.png'> yearly</a> 
+    </td></tr></table>
+    <p>Author <a href='http://en.wikipedia.org/wiki/User:Mark_Bergsma'>Mark Bergsma</a> &amp; <a href='http://de.wikipedia.org/wiki/Benutzer:Leon'>Leon Weber</a>
+    <hr>
+    <p>
+
+    <p>
+
+  </div>
+  
+</div>
+
+<!-- http://www.research.ibm.com/visual/projects/history_flow/ -->
+</body>
+</html>
