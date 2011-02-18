@@ -1,0 +1,47 @@
+PrepareInput
+FilterContent
+
+=== 1: Project mlwiki ===
+
+
+Unchanged project mlwiki: 20110128,mlwiki,mlwiki/20110128,progress -> 20110128,mlwiki,mlwiki/20110128,progress
+Status unchanged, last run 20110128,mlwiki,mlwiki/20110128,progress 
+
+UpdateProject 20110128,mlwiki,mlwiki/20110128,progress
+
+GetInfoLastSuccesfulDump mlwiki
+
+Folder http://download.wikimedia.org/mlwiki/20110128
+Fetch 'index.html' on http://download.wikimedia.org/mlwiki/20110128/index.html
+ -> OK
+Usable dump found: date 20110128, project mlwiki, href mlwiki/20110128, dumps usable 'stub|bz2'
+
+Fetch 'ml.wikipedia.org/' on http://ml.wikipedia.org/
+ -> OK
+
+=== 2: Project frwiki ===
+
+
+Unchanged project frwiki: 20110112,frwiki,frwiki/20110112, -> 20110112,frwiki,frwiki/20110112,
+Status unchanged, last run 20110112,frwiki,frwiki/20110112, 
+
+=== 3: Project dewiki ===
+
+
+Unchanged project dewiki: 20110111,dewiki,dewiki/20110111, -> 20110111,dewiki,dewiki/20110111,
+Status unchanged, last run 20110111,dewiki,dewiki/20110111, 
+
+=== 4: Project itwiki ===
+
+
+Unchanged project itwiki: 20101103,itwiki,itwiki/20101103, -> 20101103,itwiki,itwiki/20101103,
+Status unchanged, last run 20101103,itwiki,itwiki/20101103, 
+
+=== 5: Project jawiki ===
+
+
+Unchanged project jawiki: 20101102,jawiki,jawiki/20101102, -> 20101102,jawiki,jawiki/20101102,
+Status unchanged, last run 20101102,jawiki,jawiki/20101102, 
+CollectProjectStats
+WriteOutput
+DisplayOutput
