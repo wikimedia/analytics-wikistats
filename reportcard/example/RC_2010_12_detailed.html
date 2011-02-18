@@ -1,0 +1,1042 @@
+  
+<html lang="en">
+<head>
+
+<title>Wikimedia Report Card - December 2010</title>
+
+<meta http-equiv="content-type" content="text/html"; charset="iso-8859-1">
+<meta http-equiv="Window-target" content="_top">
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+<link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+
+<script src="assets/jquery-1.1.3.1.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.history_remote.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tabs.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tablesorter.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+$(function()
+{
+  $('#container-1').tabs();
+  $('#container-2').tabs();
+  $('#container-3').tabs();
+  $('#container-4').tabs();
+  $('#container-5').tabs();
+  $('#container-6').tabs();
+  $('#container-7').tabs();
+  $('#container-8').tabs();
+  $('#container-9').tabs();
+  $('#container-10').tabs();
+  $("#MoversShakers").tablesorter();
+})
+</script>
+
+<script type="text/javascript">
+$(document).ready(
+function()
+{ $("#MoversShakers").tablesorter(sortList: [[2,0]] ); }
+);
+</script>
+
+<link rel="stylesheet" href="assets/jquery.tabs.css" type="text/css" media="print, projection, screen">
+
+<!--[if lte IE 7]>
+<link rel="stylesheet" href="assets/jquery.tabs-ie.css" type="text/css" media="projection, screen">
+<![endif]-->
+
+
+
+<style type="text/css">
+body {font-family:arial,sans-serif;background-color:#B0B0B0}
+table,td,tr{background-color:#FFFFFF;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#000080;text-decoration:none}
+a:visited {color:#000080;text-decoration:none}
+a:active  {color:#000080;text-decoration:none}
+a:hover   {color:#0000FF;text-decoration:underline}
+a img     {border-color:black}
+hr        {color:#006000;width:95%;margin-top:10px}
+hr.fat    {color:#000000;background-color:#000000;width:100%;margin-top:5px;height:3px}
+hr.thin   {color:#C0E0C0;background-color:#C0E0C0;width:100%;margin-top:10px;height:1px}
+tr.h1     { color:#FFFFFF ; background-color:#000000}
+td.h2     { text-align:left ; padding:2px }
+.h1      {font-size:20px ; color:#FFFFFF ; background-color:#606060 ; font-weight: bold ; margin:5px ; padding:2px}
+.h2      {font-size:16px ; color:#000000 ;                            font-weight: bold ; margin:0px ; padding:0px}
+td.score {text-align:right ; white-space:nowrap;}
+th.detail       {font-size:10px ; color:#000000 ; text-align:center ;}
+th.detail-header {font-size:10px ; color:#FFFFFF ; background-color:#707070 ; text-align:center ; vertical-align:top}
+th.detail-left  {font-size:10px ; color:#000000 ; text-align:left}
+th.detail-left-red {font-size:10px ; color:#000000 ; background-color:#707070 ; text-align:left}
+th.detail-left-grey {font-size:10px ; color:#000000 ; background-color:#E0E0E0 ; text-align:left}
+td.detail       {font-size:10px ; color:#FF0000 ; text-align:center ;  }
+td.detail-tiny  {font-size:8px ; color:#000000 ; text-align:center ; margin:0px }
+td.detail-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0 ; text-align:center }
+td.detail-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF ; text-align:right }
+td.detail-left-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF; text-align:left }
+td.detail-left-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0; text-align:left }
+td.detail-left  {font-size:10px ; color:#000000 ; text-align:left ; font-weight: bold ;}
+td.detail-right {font-size:10px ; color:#000000 ; text-align:right ; }
+td.detail-right-blue  {font-size:10px ; background-color:#D8D8FF ; text-align:right ; }
+td.detail-right-green {font-size:10px ; background-color:#D0FFD0 ; text-align:right ; }
+td.date         {font-size:10px ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateA        {font-size:10px ; background-color: #E0FFE0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateE        {font-size:10px ; background-color: #FFD0D0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+.score   {font-size:16px ; background-color: #DDDDDD ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreA  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreB  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreC  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreD  {font-size:16px ; background-color: #C08080 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreE  {font-size:16px ; background-color: #FFD0D0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.comment {font-size:9px ; color:#707070 ; font-weight: normal;  padding:2px }
+.remark  {font-size:12px ; color:#000000 ; font-weight: normal;  padding:2px }
+.bgA     {background-color: #E0FFE0 ; font-weight:bold}
+.bgD     {background-color: #C08080 ; font-weight:bold}
+.bgE     {background-color: #FFD0D0 ; font-weight:bold}
+.bgAu    {background-color: #E0FFE0 ; text-decoration:underline ; font-weight:bold}
+.chart {font-size: 9px; text-align:center; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart-left {font-size: 9px; text-align:left; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart_scale {font-size: 8px; text-align:right; color: #000000; font-family: arial,sans-serif; padding: 0px;}
+.xsmall {font-size: 8px; color: #FF00FF; font-family: arial,sans-serif;}
+xsmall {font-size: 10px; color: #000000; font-family: arial,sans-serif;}
+
+table.score2
+{
+        border-width: medium medium medium medium;
+        border-spacing: 0px;
+        border-style: outset outset outset outset;
+        border-color: black black black black;
+        border-collapse: separate;
+        background-color: rgb(255, 255, 240);
+}
+table.score2 th
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+table.score2 td
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+
+/* tables */
+table.tablesorter
+{
+        font-family:arial;
+        background-color: #CDCDCD;
+        margin:10px 0pt 15px;
+        font-size: 7pt;
+        width: 80%;
+        text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th
+{
+        background-color: #99D;
+        border: 1px solid #FFF;
+        font-size: 8pt;
+        padding: 4px;
+}
+table.tablesorter thead tr .header
+{
+        background-image: url(bg.gif);
+        background-repeat: no-repeat;
+        background-position: center right;
+        cursor: pointer;
+}
+table.tablesorter tbody td
+{
+        color: #3D3D3D;
+        padding: 4px;
+        background-color: #CCF;
+        vertical-align: top;
+}
+table.tablesorter tbody tr.odd td
+{ background-color:#F0F0F6; }
+table.tablesorter thead tr .headerSortUp
+{ background-image: url(asc.gif); }
+table.tablesorter thead tr .headerSortDown
+{ background-image: url(desc.gif); }
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
+{ background-color: #44F; //#8dbdd8; }
+</style>
+</head>
+
+
+
+<body>
+
+
+
+
+<table width=800 cellpadding=18 align=center>
+<tr>
+  <td align='center'>
+
+    <table width=95%>
+
+    <tr>
+      <td width=100% colspan=99>
+        <table width=100%>
+        <tr>
+          <td align=left width=150 valign=top><img src='assets/WikimediaLogo.png' width=30></td>
+          <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>December 2010</font></h1>
+                          
+
+            
+          </td>
+          <td align=right width=150 valign=top><small><small>Published<br>February<br>2011</small></small></td>
+        </tr>
+        <tr>
+          <td align=left width=150 valign=top><small><a href='RC_2010_11_detailed.html'>&lArr;&nbsp;November</a></small></td>
+          <td align=center valign=top>
+            <small>&rArr; <a href='RC_2010_12_summary.html'>Summary, 1 column</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_columns.html'>Summary, 2 columns</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_synopsis.html'>Synopsis</a></small>
+          </td>
+          <td align=right width=150 valign=top><small><a href='RC_2011_01_detailed.html'>January&nbsp;&rArr;</a></small></td>
+        </tr>
+        </table>
+      </td>
+    </tr>
+
+
+<tr><td colspan=99 align=center>   
+  <hr><font color=#008000><b>New: multi-year trends for most metrics.</b><br><small> Depending on available history reporting period can vary per metric.</small></font>
+</td></tr>
+
+
+
+
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Reach</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+
+  <tr>
+    <td class=score><a id='unique_visitors' name='unique_visitors'></a><span class=bg>395 million</sup></span></td>
+    <td class=h2><span class=h2>Unique Visitors, All Projects</span><br></td>
+</tr>
+
+
+
+
+    <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+14.0%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-3.7%</td>
+        </tr>
+      </table>
+    </td>
+
+
+      <td align=left valign=middle>
+
+        <table>
+        <tr>
+          <td valign=middle>
+  <div id="container-1">
+  <ul>
+  <li><a href="#fragment-11"><span>Unique Visitors, log scale</span></a></li>
+  <li><a href="#fragment-12"><span>UV, indexed</span></a></li>
+  <li><a href="#fragment-13"><span>Reach Percentage, linear scale</span></a></li>
+  <li><a href="#fragment-14"><span>RP, indexed</span></a></li>
+  </ul>
+
+
+  <div id="fragment-11">
+  <img src='charts/2010-12/Unique-Visitors-Per-Region-Absolute-Linear.png'>
+  </div>
+
+
+  <div id="fragment-12">
+  <img src='charts/2010-12/Unique-Visitors-Per-Region-Indexed.png'>
+  </div>
+
+
+  <div id="fragment-13">
+  <img src='charts/2010-12/Reach-Per-Region-Absolute-Linear.png'>
+  </div>
+
+
+  <div id="fragment-14">
+  <img src='charts/2010-12/Reach-Per-Region-Indexed.png'>
+  </div>
+  </div>
+
+  <span class=comment>source: comScore ; UV = Unique Visitors in millions ; PR = Page Requests in billions</span
+
+          </td>
+
+          <td>&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+
+
+            
+        <hr class=thin>
+      </td>
+
+    </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='page_requests' name='page_requests'></a><span class=bg>14.0 billion</sup></span></td>
+    <td class=h2><span class=h2>Page Requests, All Projects</span><br></td>
+</tr>
+
+
+    <tr>
+
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+22.6%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+2.4%</td>
+        </tr>
+      </table>
+    </td>
+
+
+      
+      <td align=left valign=middle>
+  <div id="container-2">
+  <ul>
+  <li><a href="#fragment-21"><span>Page Requests, log</span></a></li>
+  <li><a href="#fragment-22"><span>PR, linear</span></a></li>
+  <li><a href="#fragment-23"><span>PR, ind. per wiki</span></a></li>
+  <li><a href="#fragment-24"><span>Mobile</span></a></li>
+  <li><a href="#fragment-25"><span>M&S</span></a></li>
+  </ul>
+
+
+  <div id="fragment-21">
+  <img src='charts/2010-12/Page-Views-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-22">
+  <img src='charts/2010-12/Page-Views-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-23">
+  <img src='charts/2010-12/Page-Views-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-24">
+  <img src='charts/2010-12/Page-Views-Breakdown-Mobile-Traffic.png'><br>
+  </div>
+
+
+  <div id="fragment-25">
+
+          
+            <center><small><b>Movers & Shakers in top 25 / November&nbsp;&rArr;&nbsp;December</b> <font color="808080">(click any table header to sort by that column)</font><br>
+                     <font color=#800000><b>Please keep in mind monthly changes are not normalized for length of month.<br>The effect of this shows particlarly in Jan &rArr; Feb and Feb &rArr; Mar.</font></b></small>
+
+
+              <table border=1 width=75% align=center id="MoversShakers" class=tablesorter>
+              <thead>
+              <tr>
+                <th class=detail-header align=center>Language +<br>Project</th>
+                <th class=detail-header align=center>Page Views<br>(millions)&nbsp;&nbsp;&nbsp;</th>
+                <th class=detail-header align=center>Monthly (%)<br>11/10 &rArr; 12/10&nbsp;&nbsp;&nbsp;</th>
+                <th class=detail-header align=center>Yearly (%)<br>12/9 &rArr; 12/10&nbsp;&nbsp;&nbsp;</th>
+              </tr>
+              </thead>
+
+<tbody>
+<tr>
+<td class=detail-left>Wp:Turkish</td>
+<td class=detail-blue>93</td>
+<td class=detail-blue>24.0%</td>
+<td class=detail-blue>18.7%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Korean</td>
+<td class=detail-blue>39</td>
+<td class=detail-blue>7.5%</td>
+<td class=detail-blue>35.1%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Russian</td>
+<td class=detail-blue>588</td>
+<td class=detail-blue>6.0%</td>
+<td class=detail-blue>66.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Hebrew</td>
+<td class=detail-blue>38</td>
+<td class=detail-blue>3.5%</td>
+<td class=detail-blue>14.7%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Arabic</td>
+<td class=detail-blue>57</td>
+<td class=detail-blue>3.4%</td>
+<td class=detail-blue>36.6%</td>
+</tr>
+<tr>
+<td class=detail-left>Wx:Commons</td>
+<td class=detail-blue>196</td>
+<td class=detail-blue>1.9%</td>
+<td class=detail-blue>-14.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wk:English</td>
+<td class=detail-blue>58</td>
+<td class=detail-blue>1.7%</td>
+<td class=detail-blue>14.6%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Ukrainian</td>
+<td class=detail-blue>30</td>
+<td class=detail-blue>0.5%</td>
+<td class=detail-blue>43.8%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Swedish</td>
+<td class=detail-blue>84</td>
+<td class=detail-blue>-0.6%</td>
+<td class=detail-blue>27.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Italian</td>
+<td class=detail-blue>419</td>
+<td class=detail-blue>-1.3%</td>
+<td class=detail-blue>38.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Chinese</td>
+<td class=detail-blue>50</td>
+<td class=detail-blue>-1.9%</td>
+<td class=detail-blue>-33.6%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Finnish</td>
+<td class=detail-blue>64</td>
+<td class=detail-blue>-2.2%</td>
+<td class=detail-blue>20.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:English</td>
+<td class=detail-blue>7028</td>
+<td class=detail-blue>-2.4%</td>
+<td class=detail-blue>29.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Dutch</td>
+<td class=detail-blue>156</td>
+<td class=detail-blue>-2.8%</td>
+<td class=detail-blue>18.3%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Hungarian</td>
+<td class=detail-blue>43</td>
+<td class=detail-blue>-2.9%</td>
+<td class=detail-blue>26.1%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Norwegian</td>
+<td class=detail-blue>39</td>
+<td class=detail-blue>-3.1%</td>
+<td class=detail-blue>32.2%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:French</td>
+<td class=detail-blue>618</td>
+<td class=detail-blue>-3.2%</td>
+<td class=detail-blue>30.9%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Polish</td>
+<td class=detail-blue>354</td>
+<td class=detail-blue>-3.4%</td>
+<td class=detail-blue>22.2%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Thai</td>
+<td class=detail-blue>34</td>
+<td class=detail-blue>-4.2%</td>
+<td class=detail-blue>22.5%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Czech</td>
+<td class=detail-blue>57</td>
+<td class=detail-blue>-4.6%</td>
+<td class=detail-blue>25.5%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Japanese</td>
+<td class=detail-blue>1094</td>
+<td class=detail-blue>-5.2%</td>
+<td class=detail-blue>11.7%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:German</td>
+<td class=detail-blue>973</td>
+<td class=detail-blue>-6.6%</td>
+<td class=detail-blue>24.0%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Indonesian</td>
+<td class=detail-blue>45</td>
+<td class=detail-blue>-15.5%</td>
+<td class=detail-blue>37.1%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Portuguese</td>
+<td class=detail-blue>294</td>
+<td class=detail-blue>-19.2%</td>
+<td class=detail-blue>47.0%</td>
+</tr>
+<tr>
+<td class=detail-left>Wp:Spanish</td>
+<td class=detail-blue>759</td>
+<td class=detail-blue>-25.3%</td>
+<td class=detail-blue>46.9%</td>
+</tr>
+</tbody>
+              <tr>
+                      <td colspan=99 class=chart>
+  <span class=comment>source: Squid logs ; figures in millions ; / see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a></span
+
+                      </td>
+             </tr>
+             </table>
+<br><small><small>Wb:Wikibooks, Wk:Wiktionary, Wn:Wikinews, Wp:Wikipedia, Wq:Wikiquote, Ws: Wikisource, Wv:Wikiversity, Wx:special wiki</small></small>
+           </center>
+          
+          <br>
+  <span class=comment><font color=#FF0000>Due to server problems page view counts from squid logs for December 2009 - March 2010 are too low, estimated underreporting 10%-25%</font></span
+
+  <span class=comment><br>source: Squid logs ; see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a></span
+
+  <span class=comment><br>view counts for all months have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc), this mainly shows in Jan&rArr;Feb and Feb&rArr;Mar</span
+
+          <hr class=thin>
+        </td>
+      </tr>
+
+  <tr>
+    <td class=score><a id='web_properties' name='web_properties'></a><span class=bg>5th in rank</sup></span></td>
+    <td class=h2><span class=h2>Web Properties - Unique Visitors</span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+0</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+0</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+
+  <div id="container-3">
+  <ul>
+  <li><a href="#fragment-31"><span>Unique Visitors, linear scale</span></a></li>
+  <li><a href="#fragment-32"><span>Percentage of Total Internet Pop.</span></a></li>
+  </ul>
+
+
+  <div id="fragment-31">
+  <img src='charts/2010-12/Unique-Visitors-Google-Absolute-Linear.png'>
+  </div>
+
+
+  <div id="fragment-32">
+  <img src='charts/2010-12/Unique-Visitors-Google-Percentage-Linear.png'>
+  </div>
+  </div>
+        
+
+  <span class=comment><br>source: comScore ; UV = Unique Visitors in millions</span
+
+
+         </td>
+       </tr>
+
+
+
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Content</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+  <tr>
+    <td class=score><a id='commons_files' name='commons_files'></a><span class=bg>8.0 million</sup></span></td>
+    <td class=h2><span class=h2>Binary Files </span><br></td>
+</tr>
+
+
+       <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+43.1%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+3.0%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-10">
+  <ul>
+  <li><a href="#fragment-101"><span>Binary Files, log scale</span></a></li>
+  <li><a href="#fragment-102"><span>BF, linear scale</span></a></li>
+  <li><a href="#fragment-103"><span>BF, indexed</span></a></li>
+  </ul>
+
+
+  <div id="fragment-101">
+  <img src='charts/2010-12/Binaries-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-102">
+  <img src='charts/2010-12/Binaries-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-103">
+  <img src='charts/2010-12/Binaries-Indexed.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaCOMMONS.htm#namespaces'>Wikistats</a></span
+
+            <hr class=thin>
+          </td>
+        </tr>              
+
+  <tr>
+    <td class=score><a id='article_count' name='article_count'></a><span class=bg>17.6 million</sup></span></td>
+    <td class=h2><span class=h2>Wikipedia Articles, Comparison with Other Projects </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+20.0%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+1.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-4">
+  <ul>
+  <li><a href="#fragment-41"><span>Article Count, log scale</span></a></li>
+  <li><a href="#fragment-42"><span>AC, linear scale</span></a></li>
+  <li><a href="#fragment-43"><span>AC, indexed per wiki</span></a></li>
+  <li><a href="#fragment-44"><span>AC, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-41">
+  <img src='charts/2010-12/Article-Count-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-42">
+  <img src='charts/2010-12/Article-Count-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-43">
+  <img src='charts/2010-12/Article-Count-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-44">
+  <img src='charts/2010-12/Article-Count-Indexed-Projects.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Wikistats</a></span
+
+  <span class=comment><br>Wikinews without Serbian (which is flooded by trivial bot updates)</span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='articles_per_day' name='articles_per_day'></a><span class=bg>8,555</sup></span></td>
+    <td class=h2><span class=h2>New Wikipedia Articles Per Day </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+16.5%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+5.1%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-5">
+  <ul>
+  <li><a href="#fragment-51"><span>New Articles, log scale</span></a></li>
+  <li><a href="#fragment-52"><span>NA, linear scale</span></a></li>
+  <li><a href="#fragment-53"><span>NA, indexed per wiki</span></a></li>
+  <li><a href="#fragment-54"><span>NA, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-51">
+  <img src='charts/2010-12/Articles-New-Per-Day-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-52">
+  <img src='charts/2010-12/Articles-New-Per-Day-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-53">
+  <img src='charts/2010-12/Articles-New-Per-Day-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-54">
+  <img src='charts/2010-12/Articles-New-Per-Day-Indexed-Projects.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesArticlesNewPerDay.htm'>Wikistats</a></span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+  <tr>
+    <td class=score><a id='edits_per_month' name='edits_per_month'></a><span class=bg>11.6 million</sup></span></td>
+    <td class=h2><span class=h2>Wikipedia Edits Per Month </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+3.6%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+3.8%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-9">
+  <ul>
+  <li><a href="#fragment-91"><span>Edits per Month, log scale</span></a></li>
+  <li><a href="#fragment-92"><span>EM, linear scale</span></a></li>
+  <li><a href="#fragment-93"><span>EM, indexed per wiki</span></a></li>
+  <li><a href="#fragment-94"><span>EM, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-91">
+  <img src='charts/2010-12/Edits-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-92">
+  <img src='charts/2010-12/Edits-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-93">
+  <img src='charts/2010-12/Edits-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-94">
+  <img src='charts/2010-12/Edits-Indexed-Projects.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesDatabaseEdits.htm'>Wikistats</a></span
+
+          </td>
+        </tr>
+
+
+
+
+
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Community</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+
+  <tr>
+    <td class=score><a id='new_editors_per_month' name='new_editors_per_month'></a><span class=bg>14,607</sup></span></td>
+    <td class=h2><span class=h2>New Wikipedia Editors Per Month </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateE><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateE>-16.6%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-2.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-6">
+  <ul>
+  <li><a href="#fragment-61"><span>New Editors, log scale</span></a></li>
+  <li><a href="#fragment-62"><span>NE, linear scale</span></a></li>
+  <li><a href="#fragment-63"><span>NE, indexed per wiki</span></a></li>
+  <li><a href="#fragment-64"><span>NE, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-61">
+  <img src='charts/2010-12/Editors-New-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-62">
+  <img src='charts/2010-12/Editors-New-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-63">
+  <img src='charts/2010-12/Editors-New-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-64">
+  <img src='charts/2010-12/Editors-New-Indexed-Projects.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm'>Wikistats</a> / Registered users with 10+ edits since their registration</span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='active_editors' name='active_editors'></a><span class=bg>79,324</sup></span></td>
+    <td class=h2><span class=h2>Active Wikipedia Editors (5+ edits per month) </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateE><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateE>-5.9%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-0.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-7">
+  <ul>
+  <li><a href="#fragment-71"><span>Active Editors, log scale</span></a></li>
+  <li><a href="#fragment-72"><span>AE, linear scale</span></a></li>
+  <li><a href="#fragment-73"><span>AE, indexed per wiki</span></a></li>
+  <li><a href="#fragment-74"><span>AE, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-71">
+  <img src='charts/2010-12/Editors-Active-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-72">
+  <img src='charts/2010-12/Editors-Active-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-73">
+  <img src='charts/2010-12/Editors-Active-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-74">
+  <img src='charts/2010-12/Editors-Active-Indexed-Projects.png'><br>
+  </div>
+  </div>
+
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded</span
+
+  <span class=comment><br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. </span
+
+  <span class=comment><br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).</span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='very_active_editors' name='very_active_editors'></a><span class=bg>10,254</sup></span></td>
+    <td class=h2><span class=h2>Very Active Wikipedia Editors (100+ edits per month) </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateE><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateE>-1.6%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+0.1%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+  <div id="container-8">
+  <ul>
+  <li><a href="#fragment-81"><span>Very Active Editors, log scale</span></a></li>
+  <li><a href="#fragment-82"><span>VAE, linear scale</span></a></li>
+  <li><a href="#fragment-83"><span>VAE, indexed per wiki</span></a></li>
+  <li><a href="#fragment-84"><span>VAE, indexed per project</span></a></li>
+  </ul>
+
+
+  <div id="fragment-81">
+  <img src='charts/2010-12/Editors-Very-Active-Absolute-Log.png'><br>
+  </div>
+
+
+  <div id="fragment-82">
+  <img src='charts/2010-12/Editors-Very-Active-Absolute-Linear.png'><br>
+  </div>
+
+
+  <div id="fragment-83">
+  <img src='charts/2010-12/Editors-Very-Active-Indexed-Wikis.png'><br>
+  </div>
+
+
+  <div id="fragment-84">
+  <img src='charts/2010-12/Editors-Very-Active-Indexed-Projects.png'><br>
+  </div>
+  </div>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded</span
+
+  <span class=comment><br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. </span
+
+  <span class=comment><br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).</span
+
+          </td>
+        </tr>
+        </table>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td colspan=99 align=center>
+      <hr class=thin>
+      <small><small><font color=808080>Author Erik Zachte - mail: ezachte@###.org (nospam: ###=wikimedia)</font></small></small>
+    </td>
+    </tr>
+    </table>  
+</body>
+</html>

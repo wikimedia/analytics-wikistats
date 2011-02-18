@@ -1,0 +1,12 @@
+body{font-family:arial,sans-serif;background-color:B0B0B0}
+table,td,tr{background-color:F0F0F8;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#006000;text-decoration:none}
+a:visited {color:#006000;text-decoration:none}
+a:active  {color:#006000;text-decoration:none}
+a:hover   {color:#0000A0;text-decoration:underline}
+a img     {border-color:black}
+hr        {color:#006000;width:90%}

@@ -1,0 +1,197 @@
+<html lang="en">
+<head>
+<title>Wikimedia Report Card - Next month</title>
+<meta http-equiv="content-type" content="text/html"; charset="iso-8859-1">
+<meta http-equiv="Window-target" content="_top">
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+<link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+<script language="javascript" type="text/javascript" src="assets/WikipediaStatistics13.js"></script> 
+<script language="javascript" type="text/javascript">
+
+function bar(w,h,txt1,txt2,txt3,txt4,txt5,txt6,color)	
+{
+	if (txt1 == '|') 
+	{ txt1 = '&nbsp;' ; }
+	if (txt2 == '|') 
+	{ txt2 = '&nbsp;' ; }
+	if (txt3 == '|') 
+	{ txt3 = '&nbsp;' ; }
+	if (txt4 == '|') 
+	{ txt4 = '&nbsp;' ; }
+	if (txt5 == '|') 
+	{ txt5 = '&nbsp;' ; }
+	if (txt6 == '|') 
+	{ txt6 = '&nbsp;' ; }
+  
+  line = "<td width=25 align=center valign=bottom class=chart>" ;
+
+  if (h < 75)       
+  { line += "<img src='assets/blanco.gif' width=" + w + " height=" + (75-h) + "><br>" ; } 
+
+  line += "<img src='assets/black.gif' width=" + w + " height=1><br>" + 
+          "<img src='assets/" + color + "bar.gif' width=" + w + " height=" + h + "><br>" + 
+          "<img src='assets/black.gif' width=" + w + " height=1>" ;
+  
+  if (txt1 !== '') {line += "<br>" + txt1 ; }
+  if (txt2 !== '') {line += "<br>" + txt2 ; }
+  if (txt3 !== '') {line += "<br>" + txt3 ; }
+  if (txt4 !== '') {line += "<br>" + txt4 ; }
+  if (txt5 !== '') {line += "<br>" + txt5 ; }
+  if (txt6 !== '') {line += "<br>" + txt6 ; }
+          
+  line += "</td>" ;  
+  document.write (line) ;
+}
+
+function bar2(w,h1,h2,txt1,txt2,txt3,txt4,txt5,txt6,color1,color2)	
+{
+	if (txt1 == '|') 
+	{ txt1 = '&nbsp;' ; }
+	if (txt2 == '|') 
+	{ txt2 = '&nbsp;' ; }
+	if (txt3 == '|') 
+	{ txt3 = '&nbsp;' ; }
+	if (txt4 == '|') 
+	{ txt4 = '&nbsp;' ; }
+	if (txt5 == '|') 
+	{ txt5 = '&nbsp;' ; }
+	if (txt6 == '|') 
+	{ txt6 = '&nbsp;' ; }
+  
+  line = "<td width=25 align=center valign=bottom class=chart>" ;
+
+  if (h1+h2 < 75)       
+  { line += "<img src='assets/blanco.gif' width=" + w + " height=" + (75-h1-h2) + "><br>" ; } 
+
+  line += "<img src='assets/black.gif' width=" + w + " height=1><br>" + 
+          "<img src='assets/" + color1 + "bar.gif' width=" + w + " height=" + h1 + "><br>" + 
+          "<img src='assets/black.gif' width=" + w + " height=1><br>" + 
+          "<img src='assets/" + color2 + "bar.gif' width=" + w + " height=" + h2 + "><br>" + 
+          "<img src='assets/black.gif' width=" + w + " height=1>" ;
+  
+  if (txt1 !== '') {line += "<br>" + txt1 ; }
+  if (txt2 !== '') {line += "<br>" + txt2 ; }
+  if (txt3 !== '') {line += "<br>" + txt3 ; }
+  if (txt4 !== '') {line += "<br>" + txt4 ; }
+  if (txt5 !== '') {line += "<br>" + txt5 ; }
+  if (txt6 !== '') {line += "<br>" + txt6 ; }
+          
+  line += "</td>" ;  
+  document.write (line) ;
+}
+
+</script>
+<style type="text/css">
+<!--
+body {font-family:arial,sans-serif;background-color:#B0B0B0}
+table,td,tr{background-color:#FFFFFF;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#000080;text-decoration:none}
+a:visited {color:#000080;text-decoration:none}
+a:active  {color:#000080;text-decoration:none}
+a:hover   {color:#0000FF;text-decoration:underline}
+a img     {border-color:black}
+hr        {color:#006000;width:95%;margin-top:10px}
+hr.fat    {color:#000000;background-color:#000000;width:100%;margin-top:5px;height:3px}
+hr.thin   {color:#C0E0C0;background-color:#C0E0C0;width:100%;margin-top:10px;height:1px}
+tr.h1     { color:#FFFFFF ; background-color:#000000}
+td.h2     { text-align:left ; padding:2px }
+.h1      {font-size:20px ; color:#FFFFFF ; background-color:#606060 ; font-weight: bold ; margin:5px ; padding:2px}
+.h2      {font-size:16px ; color:#000000 ;                            font-weight: bold ; margin:0px ; padding:0px}
+td.score {text-align:right}
+th.detail       {font-size:10px ; color:#000000 ; text-align:center }
+th.detail-header {font-size:10px ; color:#FFFFFF ; background-color:#707070 ; text-align:center }
+th.detail-left  {font-size:10px ; color:#000000 ; text-align:left}
+th.detail-left-red {font-size:10px ; color:#000000 ; background-color:#707070 ; text-align:left}
+th.detail-left-grey {font-size:10px ; color:#000000 ; background-color:#E0E0E0 ; text-align:left}
+td.detail       {font-size:10px ; color:#000000 ; text-align:center }
+td.detail-tiny  {font-size:8px ; color:#000000 ; text-align:center ; margin:0px }
+td.detail-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0 ; text-align:center }
+td.detail-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF ; text-align:center }
+td.detail-left-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF; text-align:left }
+td.detail-left-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0; text-align:left }
+td.detail-left  {font-size:10px ; color:#000000 ; text-align:left }
+td.detail-right {font-size:10px ; color:#000000 ; text-align:right ; }
+td.detail-right-blue  {font-size:10px ; background-color:#D8D8FF ; text-align:right ; }
+td.detail-right-green {font-size:10px ; background-color:#D0FFD0 ; text-align:right ; }
+td.date         {font-size:10px ; color:#90909A0 ; vertical-align:top ; text-align:right ; }
+.score   {font-size:16px ; background-color: #DDDDDD ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.scoreA  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.scoreB  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.scoreC  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.scoreD  {font-size:16px ; background-color: #C08080 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.scoreE  {font-size:16px ; background-color: #800000 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right}
+.comment {font-size:9px ; color:#707070 ; font-weight: normal;  padding:2px }
+.remark  {font-size:12px ; color:#000000 ; font-weight: normal;  padding:2px }
+.bgA     {background-color: #E0FFE0 ; font-weight:bold}
+.bgD     {background-color: #C08080 ; font-weight:bold}
+.bgE     {background-color: #800000 ; font-weight:bold}
+.bgAu    {background-color: #E0FFE0 ; text-decoration:underline ; font-weight:bold}
+.chart {font-size: 9px; text-align:center; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart-left {font-size: 9px; text-align:left; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart_scale {font-size: 8px; text-align:right; color: #000000; font-family: arial,sans-serif; padding: 0px;}
+.xsmall {font-size: 8px; color: #FF00FF; font-family: arial,sans-serif;}
+xsmall {font-size: 10px; color: #000000; font-family: arial,sans-serif;}
+
+
+
+table.score2 {
+	border-width: medium medium medium medium;
+	border-spacing: 0px;
+	border-style: outset outset outset outset;
+	border-color: black black black black;
+	border-collapse: separate;
+	background-color: rgb(255, 255, 240);
+}
+table.score2 th {
+	border-width: thin thin thin thin;
+	padding: 3px 3px 3px 3px;
+	border-style: inset inset inset inset;
+	border-color: black black black black;
+	background-color: rgb(255, 255, 240);
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+table.score2 td {
+	border-width: thin thin thin thin;
+	padding: 3px 3px 3px 3px;
+	border-style: inset inset inset inset;
+	border-color: black black black black;
+	background-color: rgb(255, 255, 240);
+	-moz-border-radius: 0px 0px 0px 0px;
+}
+</style>
+</head>
+<body>
+<table width=800 cellpadding=18 align=center>
+  <tr>
+  	<td align='center'>
+
+      <table width=95%>
+        <tr>
+        	<td width=100% colspan=99>
+   		      <table width=100%>
+              <tr>
+              	<td align=left width=100 valign=top><img src='assets/WikimediaLogo.png' width=30></td>		
+                <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>January 2010</font></h1></td>
+                <td align=right width=100 valign=top></td>
+              </tr>
+              <tr>
+              	<td align=left width=100 valign=bottom><small><a href='RC_2010_10_detailed.html'>&lArr;&nbsp;December</a></small></td>		
+                <td align=center valign=bottom><font color=#80000><b>Report will be issued March 2011</b></font></small>
+                	</td>
+                <td align=right width=100 valign=bottom><font color=#808080><small>February&nbsp;&rArr;</small></font></td>
+              </tr>
+            </table>
+          </td>
+        </tr>   
+    </td>  
+  </tr>
+</table>  
+</body>
+</html>
+

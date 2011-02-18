@@ -1,0 +1,729 @@
+<!== OUT DSC ==>
+  
+<html lang="en">
+<head>
+
+<!== OUT D ==>
+<title>Wikimedia Report Card - {{month}} {{yyyy}}</title>
+<!== OUT SC ==>
+<title>Wikimedia Report Card Summary - {{month}} {{yyyy}}</title>
+<!== OUT DSC ==>
+
+<meta http-equiv="content-type" content="text/html"; charset="iso-8859-1">
+<meta http-equiv="Window-target" content="_top">
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+<link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+
+<!== OUT D ==>
+<script src="assets/jquery-1.1.3.1.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.history_remote.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tabs.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tablesorter.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+$(function()
+{
+  $('#container-1').tabs();
+  $('#container-2').tabs();
+  $('#container-3').tabs();
+  $('#container-4').tabs();
+  $('#container-5').tabs();
+  $('#container-6').tabs();
+  $('#container-7').tabs();
+  $('#container-8').tabs();
+  $('#container-9').tabs();
+  $('#container-10').tabs();
+  $("#MoversShakers").tablesorter();
+})
+</script>
+
+<script type="text/javascript">
+$(document).ready(
+function()
+{ $("#MoversShakers").tablesorter(sortList: [[2,0]] ); }
+);
+</script>
+
+<link rel="stylesheet" href="assets/jquery.tabs.css" type="text/css" media="print, projection, screen">
+<!-- Additional IE/Win specific style sheet (Conditional Comments) -->
+<!--[if lte IE 7]>
+<link rel="stylesheet" href="assets/jquery.tabs-ie.css" type="text/css" media="projection, screen">
+<![endif]-->
+
+<!== OUT X ==>
+<script language="javascript" type="text/javascript" src="assets/WikipediaStatistics13.js"></script>
+<script language="javascript" type="text/javascript">
+
+function bar(w,h,txt1,txt2,txt3,txt4,txt5,txt6,color)
+{
+        if (txt1 == '|') { txt1 = '&nbsp;' ; }
+        if (txt2 == '|') { txt2 = '&nbsp;' ; }
+        if (txt3 == '|') { txt3 = '&nbsp;' ; }
+        if (txt4 == '|') { txt4 = '&nbsp;' ; }
+        if (txt5 == '|') { txt5 = '&nbsp;' ; }
+        if (txt6 == '|') { txt6 = '&nbsp;' ; }
+
+  line = "<td width=25 align=center valign=bottom class=chart>" ;
+
+  if (h < 75)
+  { line += "<img src='assets/blanco.gif' width=" + w + " height=" + (75-h) + "><br>" ; }
+
+  line += "<img src='assets/black.gif' width=" + w + " height=1><br>" +
+          "<img src='assets/" + color + "bar.gif' width=" + w + " height=" + h + "><br>" +
+          "<img src='assets/black.gif' width=" + w + " height=1>" ;
+
+  if (txt1 !== '') {line += "<br>" + txt1 ; }
+  if (txt2 !== '') {line += "<br>" + txt2 ; }
+  if (txt3 !== '') {line += "<br>" + txt3 ; }
+  if (txt4 !== '') {line += "<br>" + txt4 ; }
+  if (txt5 !== '') {line += "<br>" + txt5 ; }
+  if (txt6 !== '') {line += "<br>" + txt6 ; }
+
+  line += "</td>" ;
+  document.write (line) ;
+}
+
+function bar2(w,h1,h2,txt1,txt2,txt3,txt4,txt5,txt6,color1,color2)
+{
+        if (txt1 == '|') { txt1 = '&nbsp;' ; }
+        if (txt2 == '|') { txt2 = '&nbsp;' ; }
+        if (txt3 == '|') { txt3 = '&nbsp;' ; }
+        if (txt4 == '|') { txt4 = '&nbsp;' ; }
+        if (txt5 == '|') { txt5 = '&nbsp;' ; }
+        if (txt6 == '|') { txt6 = '&nbsp;' ; }
+
+  line = "<td width=25 align=center valign=bottom class=chart>" ;
+
+  if (h1+h2 < 75)
+  { line += "<img src='assets/blanco.gif' width=" + w + " height=" + (75-h1-h2) + "><br>" ; }
+
+  line += "<img src='assets/black.gif' width=" + w + " height=1><br>" +
+          "<img src='assets/" + color1 + "bar.gif' width=" + w + " height=" + h1 + "><br>" +
+          "<img src='assets/black.gif' width=" + w + " height=1><br>" +
+          "<img src='assets/" + color2 + "bar.gif' width=" + w + " height=" + h2 + "><br>" +
+          "<img src='assets/black.gif' width=" + w + " height=1>" ;
+
+  if (txt1 !== '') {line += "<br>" + txt1 ; }
+  if (txt2 !== '') {line += "<br>" + txt2 ; }
+  if (txt3 !== '') {line += "<br>" + txt3 ; }
+  if (txt4 !== '') {line += "<br>" + txt4 ; }
+  if (txt5 !== '') {line += "<br>" + txt5 ; }
+  if (txt6 !== '') {line += "<br>" + txt6 ; }
+
+  line += "</td>" ;
+  document.write (line) ;
+}
+
+</script>
+<!== OUT DSC ==>
+
+<!-- // http://tablesorter.com/docs  -->
+<style type="text/css">
+<!--
+body {font-family:arial,sans-serif;background-color:#B0B0B0}
+table,td,tr{background-color:#FFFFFF;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#000080;text-decoration:none}
+a:visited {color:#000080;text-decoration:none}
+a:active  {color:#000080;text-decoration:none}
+a:hover   {color:#0000FF;text-decoration:underline}
+a img     {border-color:black}
+hr        {color:#006000;width:95%;margin-top:10px}
+hr.fat    {color:#000000;background-color:#000000;width:100%;margin-top:5px;height:3px}
+hr.thin   {color:#C0E0C0;background-color:#C0E0C0;width:100%;margin-top:10px;height:1px}
+tr.h1     { color:#FFFFFF ; background-color:#000000}
+td.h2     { text-align:left ; padding:2px }
+.h1      {font-size:20px ; color:#FFFFFF ; background-color:#606060 ; font-weight: bold ; margin:5px ; padding:2px}
+.h2      {font-size:16px ; color:#000000 ;                            font-weight: bold ; margin:0px ; padding:0px}
+td.score {text-align:right ; white-space:nowrap;}
+th.detail       {font-size:10px ; color:#000000 ; text-align:center ;}
+th.detail-header {font-size:10px ; color:#FFFFFF ; background-color:#707070 ; text-align:center ; vertical-align:top}
+th.detail-left  {font-size:10px ; color:#000000 ; text-align:left}
+th.detail-left-red {font-size:10px ; color:#000000 ; background-color:#707070 ; text-align:left}
+th.detail-left-grey {font-size:10px ; color:#000000 ; background-color:#E0E0E0 ; text-align:left}
+td.detail       {font-size:10px ; color:#FF0000 ; text-align:center ;  }
+td.detail-tiny  {font-size:8px ; color:#000000 ; text-align:center ; margin:0px }
+td.detail-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0 ; text-align:center }
+td.detail-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF ; text-align:right }
+td.detail-left-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF; text-align:left }
+td.detail-left-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0; text-align:left }
+td.detail-left  {font-size:10px ; color:#000000 ; text-align:left ; font-weight: bold ;}
+td.detail-right {font-size:10px ; color:#000000 ; text-align:right ; }
+td.detail-right-blue  {font-size:10px ; background-color:#D8D8FF ; text-align:right ; }
+td.detail-right-green {font-size:10px ; background-color:#D0FFD0 ; text-align:right ; }
+td.date         {font-size:10px ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateA        {font-size:10px ; background-color: #E0FFE0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateE        {font-size:10px ; background-color: #FFD0D0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+.score   {font-size:16px ; background-color: #DDDDDD ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreA  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreB  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreC  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreD  {font-size:16px ; background-color: #C08080 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreE  {font-size:16px ; background-color: #FFD0D0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.comment {font-size:9px ; color:#707070 ; font-weight: normal;  padding:2px }
+.remark  {font-size:12px ; color:#000000 ; font-weight: normal;  padding:2px }
+.bgA     {background-color: #E0FFE0 ; font-weight:bold}
+.bgD     {background-color: #C08080 ; font-weight:bold}
+.bgE     {background-color: #FFD0D0 ; font-weight:bold}
+.bgAu    {background-color: #E0FFE0 ; text-decoration:underline ; font-weight:bold}
+.chart {font-size: 9px; text-align:center; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart-left {font-size: 9px; text-align:left; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart_scale {font-size: 8px; text-align:right; color: #000000; font-family: arial,sans-serif; padding: 0px;}
+.xsmall {font-size: 8px; color: #FF00FF; font-family: arial,sans-serif;}
+xsmall {font-size: 10px; color: #000000; font-family: arial,sans-serif;}
+
+table.score2
+{
+        border-width: medium medium medium medium;
+        border-spacing: 0px;
+        border-style: outset outset outset outset;
+        border-color: black black black black;
+        border-collapse: separate;
+        background-color: rgb(255, 255, 240);
+}
+table.score2 th
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+table.score2 td
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+
+/* tables */
+table.tablesorter
+{
+        font-family:arial;
+        background-color: #CDCDCD;
+        margin:10px 0pt 15px;
+        font-size: 7pt;
+        width: 80%;
+        text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th
+{
+        background-color: #99D;
+        border: 1px solid #FFF;
+        font-size: 8pt;
+        padding: 4px;
+}
+table.tablesorter thead tr .header
+{
+        background-image: url(bg.gif);
+        background-repeat: no-repeat;
+        background-position: center right;
+        cursor: pointer;
+}
+table.tablesorter tbody td
+{
+        color: #3D3D3D;
+        padding: 4px;
+        background-color: #CCF;
+        vertical-align: top;
+}
+table.tablesorter tbody tr.odd td
+{ background-color:#F0F0F6; }
+table.tablesorter thead tr .headerSortUp
+{ background-image: url(asc.gif); }
+table.tablesorter thead tr .headerSortDown
+{ background-image: url(desc.gif); }
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
+{ background-color: #44F; //#8dbdd8; }
+</style>
+</head>
+
+<!-- ============================================================================================= -->
+
+<body>
+
+<!-- ===== -->
+<!-- Intro -->
+
+<!== OUT DS ==>
+<table width=800 cellpadding=18 align=center>
+<!== OUT C ==>
+<table width=1500 cellpadding=18 align=center>
+<!== OUT DSC ==>
+<tr>
+  <td align='center'>
+
+    <table width=95%>
+
+    <tr>
+      <td width=100% colspan=99>
+        <table width=100%>
+        <tr>
+          <td align=left width=150 valign=top><img src='assets/WikimediaLogo.png' width=30></td>
+          <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>{{month}} {{yyyy}}</font></h1>
+                          <!-- <b><small><font color=#C00000>Internal use only, report contains comScore data of other web properties</font></small> </b> -->
+
+            <!-- <small>All up to date charts cover {{month}} {{yyyy-1}} - {{month}} {{yyyy}}</small>  -->
+          </td>
+          <td align=right width=150 valign=top><small><small>Published<br>{{month+2}}<br>{{yyyy+m2}}</small></small></td>
+        </tr>
+<!== OUT D ==>
+        <tr>
+          <td align=left width=150 valign=top><small><a href='RC_{{yyyy}}_{{mm-1}}_detailed.html'>&lArr;&nbsp;{{month-1}}</a></small></td>
+          <td align=center valign=top>
+            <small>&rArr; <a href='RC_{{yyyy}}_{{mm}}_summary.html'>Summary, 1 column</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_columns.html'>Summary, 2 columns</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_synopsis.html'>Synopsis</a></small>
+          </td>
+          <td align=right width=150 valign=top><small><a href='RC_{{yyyy}}_{{mm+1}}_detailed.html'>{{month+1}}&nbsp;&rArr;</a></small></td>
+        </tr>
+<!== OUT S ==>
+        <tr>
+          <td align=center valign=bottom colspan=99>
+            <small>&rArr; <a href='RC_{{yyyy}}_{{mm}}_detailed.html'>Detailed version</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_columns.html'>Summary, 2 columns</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_synopsis.html'>Synopsis</a></small>
+          </td>
+        </tr>
+<!== OUT C ==>
+        <tr>
+          <td align=left>
+            <small><a href='RC_0000_prints.html' target='_blank'>Print instructions</a></small>
+          </td>          
+          <td align=center valign=bottom>
+            <small>&rArr; <a href='RC_{{yyyy}}_{{mm}}_detailed.html'>Detailed version</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_summary.html'>Summary, 1 column</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_{{yyyy}}_{{mm}}_synopsis.html'>Synopsis</a></small>
+          </td>
+          <td>
+            &nbsp; 
+          </td>
+        </tr>
+<!== OUT DSC ==>
+        </table>
+      </td>
+    </tr>
+
+
+<tr><td colspan=99 align=center>   
+  <hr><font color=#008000><b>New: multi-year trends for most metrics.</b><br><small> Depending on available history reporting period can vary per metric.</small></font>
+</td></tr>
+
+<!-- ===== -->
+<!-- Reach -->
+<!-- Reach - Unique Visitors -->
+
+<!== OUT DSC ==>
+
+<!== H1 {Reach} ==>
+
+<!== OUT C ==>
+        <tr>
+          <td valign=top>
+            <table>
+
+<!== OUT DSC ==>
+
+<!== H2 UNIQUE VISITORS ==> 
+
+<!== OUT D ==>
+
+
+<!== OUT DSC ==>
+    <tr>
+      <!== TRENDS UNIQUE VISITORS ==>
+
+      <td align=left valign=middle>
+
+        <table>
+        <tr>
+          <td valign=middle>
+<!== OUT SC ==>
+        <img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Absolute-Linear.png'>
+<!== OUT D ==>
+        <!== TABS {10|Unique Visitors, log scale|UV, indexed|Reach Percentage, linear scale|RP, indexed} ==>
+        <!== TAB  {11|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Absolute-Linear.png'>} ==>
+        <!== TAB  {12|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Indexed.png'>} ==>
+        <!== TAB  {13|<img src='charts/{{yyyy}}-{{mm}}/Reach-Per-Region-Absolute-Linear.png'>} ==>
+        <!== TAB  {14|<img src='charts/{{yyyy}}-{{mm}}/Reach-Per-Region-Indexed.png'>} ==>
+
+<!== OUT DSC ==>
+          <!== COMMENT {source: comScore ; UV = Unique Visitors in millions ; PR = Page Requests in billions} ==>
+          </td>
+
+          <td>&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+
+
+            <!-- COMMENT {<br>source: comScore ; <font color=#008000>explanation for 30 days: percentage increase in last month: +3.8%, but after compensation for length of month: +14.9%</font>} -->
+<!== OUT DS ==>
+        <hr class=thin>
+<!== OUT DSC ==>
+      </td>
+
+    </tr>
+
+<!== OUT C ==>
+            </table>
+          </td>
+          <td valign=top>
+            <table>
+
+<!== OUT DSC ==>
+
+<!-- Reach - Page Requests -->
+
+<!== H2 PAGE REQUESTS ==>
+
+    <tr>
+
+      <!== TRENDS PAGE REQUESTS ==>
+
+      <!-- Reach: Page Requests: Tabs -->
+      <td align=left valign=middle>
+<!== OUT SC ==>
+        <img src='charts/{{yyyy}}-{{mm}}/Page-Views-Indexed-Wikis.png'>
+<!== OUT D ==>
+        <!== TABS {20|Page Requests, log|PR, linear|PR, ind. per wiki|Mobile|M&S} ==>
+        <!== TAB  {21|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Absolute-Log.png'><br>} ==>
+        <!== TAB  {22|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Absolute-Linear.png'><br>} ==>
+        <!== TAB  {23|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Indexed-Wikis.png'><br>} ==>
+        <!== TAB  {24|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Breakdown-Mobile-Traffic.png'><br>} ==>
+        <!== TAB  {25|START} ==>
+          <!-- Reach: Page Requests: Movers/Shakers -->
+            <center><small><b>Movers & Shakers in top 25 / {{month-1}}&nbsp;&rArr;&nbsp;{{month}}</b> <font color="808080">(click any table header to sort by that column)</font><br>
+                     <font color=#800000><b>Please keep in mind monthly changes are not normalized for length of month.<br>The effect of this shows particlarly in Jan &rArr; Feb and Feb &rArr; Mar.</font></b></small>
+
+
+              <table border=1 width=75% align=center id="MoversShakers" class=tablesorter>
+              <thead>
+              <tr>
+                <th class=detail-header align=center>Language +<br>Project</th>
+                <th class=detail-header align=center>Page Views<br>(millions)&nbsp;&nbsp;&nbsp;</th>
+                <th class=detail-header align=center>Monthly (%)<br>{{(mm/yy)-1}} &rArr; {{m}}/{{y}}&nbsp;&nbsp;&nbsp;</th>
+                <th class=detail-header align=center>Yearly (%)<br>{{m}}/{{y-1}} &rArr; {{m}}/{{y}}&nbsp;&nbsp;&nbsp;</th>
+              </tr>
+              </thead>
+<!-- Reach: Page Requests: Movers/Shakers Body -->
+<tbody>
+<!== INC PageViewsMoversShakersPopularWikis_{{yyyy}}_{{mm}}.html ==>
+</tbody>
+              <tr>
+                      <td colspan=99 class=chart>
+                        <!== COMMENT {source: Squid logs ; figures in millions ; / see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a>} ==>
+                      </td>
+             </tr>
+             </table>
+<br><small><small>Wb:Wikibooks, Wk:Wiktionary, Wn:Wikinews, Wp:Wikipedia, Wq:Wikiquote, Ws: Wikisource, Wv:Wikiversity, Wx:special wiki</small></small>
+           </center>
+        <!== TAB  {26|END} ==>
+<!== OUT DSC ==>
+          <!-- Reach: Page Requests: Movers/Shakers Footer -->
+          <br>
+            <!== COMMENT {<font color=#FF0000>Due to server problems page view counts from squid logs for December 2009 - March 2010 are too low, estimated underreporting 10%-25%</font>}==>
+            <!== COMMENT {<br>source: Squid logs ; see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a>}==>
+            <!== COMMENT {<br>view counts for all months have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc), this mainly shows in Jan&rArr;Feb and Feb&rArr;Mar}==>
+<!== OUT DS ==>
+          <hr class=thin>
+<!== OUT DSC ==>
+        </td>
+      </tr>
+<!== OUT C ==>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td valign=top>
+            <table>
+
+<!-- Reach - Web Properties -->
+
+<!== OUT C ==>
+
+<!== H1 {Reach} ==>
+
+<!== OUT DSC ==>
+
+<!== H2 WEB PROPERTIES ==>
+
+        <tr>
+          <!== TRENDS WEB PROPERTIES ==>
+
+          <td align=left valign=middle>
+
+<!== OUT PUBLIC ==>
+<!== OUT SC ==>
+        <img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Google-Absolute-Linear.png'>
+<!== OUT D ==>
+        <!== TABS {30|Unique Visitors, linear scale|Percentage of Total Internet Pop.} ==>
+        <!== TAB  {31|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Google-Absolute-Linear.png'>} ==>
+        <!== TAB  {32|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Google-Percentage-Linear.png'>} ==>
+        
+<!== OUT EXTENDED ==>
+<!== OUT SC ==>
+        <img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Log.png'>
+<!== OUT D ==>
+        <!== TABS {30|Top Web Properties, log scale|TWP, linear scale|TWP, indexed} ==>
+        <!== TAB  {31|<img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Log.png'>} ==>
+        <!== TAB  {32|<img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Linear.png'>} ==>
+        <!== TAB  {33|<img src='charts/{{yyyy}}-{{mm}}/Properties-Indexed.png'>} ==>
+<!--     
+        <!= = TAB  {34|START} = =>
+        <!= = TAB  {34|END} = =>
+-->
+<!== OUT DSC ==>
+
+<!== OUT ALWAYS ==>
+
+            <!== COMMENT {<br>source: comScore ; UV = Unique Visitors in millions} ==>
+
+         </td>
+       </tr>
+<!== OUT C ==>
+            </table>
+          </td>
+          <td valign=top>
+            <table>
+
+<!== OUT DSC ==>
+
+<!-- ======= -->
+<!-- Content -->
+<!-- Content - Commons Files -->
+
+<!== H1 {Content} ==>
+
+<!== OUT C ==>
+              
+<!== OUT DSC ==>
+<!== H2 COMMONS FILES ==>
+
+       <tr>
+          <!== TRENDS COMMONS FILES ==>
+
+          <td align=left valign=middle>
+<!== OUT SC ==>
+            <img src='charts/{{yyyy}}-{{mm}}/Binaries-Indexed.png'><br>
+<!== OUT D ==>
+            <!== TABS {100|Binary Files, log scale|BF, linear scale|BF, indexed} ==>
+            <!== TAB  {101|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Absolute-Log.png'><br>} ==>
+            <!== TAB  {102|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {103|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Indexed.png'><br>} ==>
+<!== OUT DSC ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaCOMMONS.htm#namespaces'>Wikistats</a>} ==>
+<!== OUT DS ==>
+            <hr class=thin>
+<!== OUT DSC ==>
+          </td>
+        </tr>              
+
+<!== OUT C ==>
+          </table>
+        </td>
+      </tr>
+
+<!-- Content - Article Count -->
+
+<!== OUT C ==>
+
+<!== H1 {Content} ==>
+
+<!== OUT C ==>
+      <tr>
+        <td>
+          <table> 
+
+<!== OUT DSC ==>
+<!== H2 ARTICLE COUNT ==>
+
+        <tr>
+          <!== TRENDS ARTICLE COUNT ==>
+
+          <td align=left valign=middle>
+<!== OUT SC ==>
+            <img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Log.png'><br>
+<!== OUT D ==>
+            <!== TABS {40|Article Count, log scale|AC, linear scale|AC, indexed per wiki|AC, indexed per project} ==>
+            <!== TAB  {41|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Log.png'><br>} ==>
+            <!== TAB  {42|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {43|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Indexed-Wikis.png'><br>} ==>
+            <!== TAB  {44|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Indexed-Projects.png'><br>} ==>
+<!== OUT DSC ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Wikistats</a>} ==>
+            <!== COMMENT {<br>Wikinews without Serbian (which is flooded by trivial bot updates)} ==>
+<!== OUT DS ==>
+            <hr class=thin>
+<!== OUT DSC ==>
+          </td>
+        </tr>
+
+<!== OUT C ==>
+            </table>
+          </td>
+          <td valign=top>
+            <table>
+<!== OUT DSC ==>
+
+<!-- Content - New Articles -->
+
+<!== H2 ARTICLES PER DAY ==>
+
+        <tr>
+          <!== TRENDS ARTICLES PER DAY ==>
+
+          <td align=left valign=middle>
+<!== OUT SC ==>
+            <img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Indexed-Wikis.png'><br>
+<!== OUT D ==>
+            <!== TABS {50|New Articles, log scale|NA, linear scale|NA, indexed per wiki|NA, indexed per project} ==>
+            <!== TAB  {51|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Absolute-Log.png'><br>} ==>
+            <!== TAB  {52|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {53|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Indexed-Wikis.png'><br>} ==>
+            <!== TAB  {54|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Indexed-Projects.png'><br>} ==>
+<!== OUT DSC ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesArticlesNewPerDay.htm'>Wikistats</a>} ==>
+<!== OUT DS ==>
+            <hr class=thin>
+<!== OUT DSC ==>
+          </td>
+        </tr>
+
+<!== OUT C ==>
+            </table>
+          </td>
+<!== OUT D ==>
+
+<!== H2 EDITS PER MONTH ==>
+
+        <tr>
+          <!== TRENDS EDITS PER MONTH ==>
+
+          <td align=left valign=middle>
+            <!== TABS {90|Edits per Month, log scale|EM, linear scale|EM, indexed per wiki|EM, indexed per project} ==>
+            <!== TAB  {91|<img src='charts/{{yyyy}}-{{mm}}/Edits-Absolute-Log.png'><br>} ==>
+            <!== TAB  {92|<img src='charts/{{yyyy}}-{{mm}}/Edits-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {93|<img src='charts/{{yyyy}}-{{mm}}/Edits-Indexed-Wikis.png'><br>} ==>
+            <!== TAB  {94|<img src='charts/{{yyyy}}-{{mm}}/Edits-Indexed-Projects.png'><br>} ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesDatabaseEdits.htm'>Wikistats</a>} ==>
+          </td>
+        </tr>
+
+
+<!-- ========= -->
+<!-- Community -->
+<!-- Community - New Editors -->
+
+<!== OUT DSC ==>
+
+<!== H1 {Community} ==>
+
+<!== OUT C ==>
+        <tr>
+          <td valign=top>
+            <table>
+<!== OUT DSC ==>
+
+<!== H2 NEW EDITORS PER MONTH ==>
+
+        <tr>
+          <!== TRENDS NEW EDITORS PER MONTH ==>
+
+          <td align=left valign=middle>
+<!== OUT SC ==>
+            <img src='charts/{{yyyy}}-{{mm}}/Editors-New-Indexed-Wikis.png'><br>
+<!== OUT D ==>
+            <!== TABS {60|New Editors, log scale|NE, linear scale|NE, indexed per wiki|NE, indexed per project} ==>
+            <!== TAB  {61|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Absolute-Log.png'><br>} ==>
+            <!== TAB  {62|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {63|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Indexed-Wikis.png'><br>} ==>
+            <!== TAB  {64|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Indexed-Projects.png'><br>} ==>
+<!== OUT DSC ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm'>Wikistats</a> / Registered users with 10+ edits since their registration} ==>
+<!== OUT DS ==>
+            <hr class=thin>
+<!== OUT DSC ==>
+          </td>
+        </tr>
+
+<!== OUT C ==>
+            </table>
+          </td>
+          <td valign=top>
+            <table>
+
+<!== OUT DSC ==>
+
+<!-- Community - Active Editors -->
+
+<!== H2 ACTIVE EDITORS ==>
+
+        <tr>
+          <!== TRENDS ACTIVE EDITORS ==>
+
+          <td align=left valign=middle>
+<!== OUT SC ==>
+            <img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Wikis.png'><br>
+<!== OUT D ==>
+            <!== TABS {70|Active Editors, log scale|AE, linear scale|AE, indexed per wiki|AE, indexed per project} ==>
+            <!== TAB {71|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Absolute-Log.png'><br>} ==>
+            <!== TAB {72|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Absolute-Linear.png'><br>} ==>
+            <!== TAB {73|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Wikis.png'><br>} ==>
+            <!== TAB {74|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Projects.png'><br>} ==>
+
+<!== OUT DSC ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded} ==>
+            <!== COMMENT {<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. } ==>
+            <!== COMMENT {<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
+<!== OUT D ==>
+            <hr class=thin>
+<!== OUT DSC ==>
+          </td>
+        </tr>
+
+<!== OUT D ==>
+
+<!-- Community - Very Active Editors -->
+
+<!== H2 VERY ACTIVE EDITORS ==>
+
+        <tr>
+          <!== TRENDS VERY ACTIVE EDITORS ==>
+
+          <td align=left valign=middle>
+            <!== TABS {80|Very Active Editors, log scale|VAE, linear scale|VAE, indexed per wiki|VAE, indexed per project} ==>
+            <!== TAB  {81|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Absolute-Log.png'><br>} ==>
+            <!== TAB  {82|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Absolute-Linear.png'><br>} ==>
+            <!== TAB  {83|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Indexed-Wikis.png'><br>} ==>
+            <!== TAB  {84|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Indexed-Projects.png'><br>} ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded} ==>
+            <!== COMMENT {<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. } ==>
+            <!== COMMENT {<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
+          </td>
+        </tr>
+<!== OUT C ==>
+            </table>
+          </td>
+        </tr>
+
+<!== OUT DSC ==>
+        </table>
+      </td>
+    </tr>
+
+<!-- Colophon -->
+    <tr>
+      <td colspan=99 align=center>
+      <hr class=thin>
+      <small><small><font color=808080>Author Erik Zachte - mail: ezachte@###.org (nospam: ###=wikimedia)</font></small></small>
+    </td>
+    </tr>
+    </table>  
+<!== OUT D ==>
+<!== OUT DSC ==>
+</body>
+</html>
+<!== OUT D ==>

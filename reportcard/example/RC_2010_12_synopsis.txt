@@ -1,0 +1,13 @@
+Y: Dec,2009->2010    k=thousand  m=million  b=billion
+M: 2010,Nov->Dec     M=monthly   D=daily    T=Total
+
+M Unique Visitors, All Projects   395 m (Y:+14.0% / M: -3.7%) 
+M Page Views, All Projects    14 b (Y:+22.6% / M: +2.4%) 
+  Site Rank              5   (Y: +0    / M: +0   ) 
+T Binary Files           8 m (Y:+43.1% / M: +3.0%) 
+M Wikipedia Article Count    18 m (Y:+20.0% / M: +1.5%) 
+D New Wikipedia Articles     9 k (Y:+16.5% / M: +5.1%) 
+M Wikipedia Edits per Month    12 m (Y: +3.6% / M: +3.8%) 
+M New Wikipedia Editors    15 k (Y:-16.6% / M: -2.5%) 
+M Active Wikipedia Editors    79 k (Y: -5.9% / M: -0.5%) 
+M Very Active Wikipedia Ed.    10 k (Y: -1.6% / M: +0.1%) 

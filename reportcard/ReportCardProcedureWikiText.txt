@@ -1,0 +1,157 @@
+This is an almost verbatim copy from my local wiki. Some references are to local folders.<br>
+The instructions were really only for personal reference and may be a bit cryptic and over concise.<br>
+Some day this needs a more verbose rewrite so that anyone can follow these instructions.<br>
+The whole report card folder tree is backuped on server bayes, in /a/backup/reportcard_[yyyy_mm_dd].zip   
+
+==<font color=#008000>Staff</font>: ComScore top web properties and reference sites==
+
+
+ Output:   http://stats.wikimedia.org/reportcard/staff user ‘WMF’ password '......'
+           requires WikipediaStatistics13.js
+ Work dir: W:\ReportCard
+ Process:  ComScoreTop1000.pl
+ ..
+ You can find 
+ - Top 1000 web properties, ranked by unique visitor counts
+ - All major reference sites according to comScore, ranked again by UV
+ Lots of data in these reports, yearly and monthly trends, both for rankings and for absolute visitors.
+ Rel. pop. , WM=100 shows relative popularity (~ traffic) compared to Wikimedia sites.
+ Coloring make fastest movers and shakers visible at a glance.
+ In both reports the main table is followed by an filtered edition with only the major movers.
+
+;Update
+ login comScore
+ MyMetrix
+ Ready For You (in sidebar) -> Manage -> Download -> Cut & Paste & Unzip -> W:\# Report Card\Data
+ Open in Excel -> Save As -> Other formats -> CSV
+ Open script ComScoreTop1000.pl in folder "W:\@ Report Card" in OptiPerl
+ Adapt input csv and output htm files (file names)
+ Run (OptiPerl F10)
+ ..
+ upload:
+ TotalCmd open SFTP Bayes /mnt/htdocs/reportcard/staff
+ or
+ upload to /a/out/reportcard ComScoreReferenceSites-yyyy-mm.htm and ComScoreReferenceSites.htm
+ upload to /a/out/reportcard ComScoreTop1000Properties-yyyy-mm.htm and ComScoreTop1000Properties.htm
+ on Bayes sudo mc - move to /mnt/htdocs/reportcard/staff
+
+==<font color=#008000>Report Card</font>==
+
+;Dummy Card for next month (to be automated)
+
+  go to W:/@ Report Card/Public
+  rename RC_yyyy_mm_detailed.html -> RC_yyyy_{mm+1}_detailed.html
+  edit RC_yyyy_{mm+1}_detailed.html
+  update current month / previous month (month name + file name) / next month (name)
+  copy to W:/@ Report Card/Extended
+
+===Collect Data===
+
+;Download Visitors and Reach Per Region
+
+ update comScore files (Multi-Country Media Trend (UVs by region| % reach by region)
+ login comScore
+ MyMetrix
+ Ready For You (in sidebar) -> Manage -> Download -> Unzip -> W:\# Report Card\Data
+
+;Wikistats output
+ run W:/# Out Bayes/get_csv.bat
+ wgets (and unzips) csv files from <nowiki>http://stats.wikimedia.org/</nowiki> [http://stats.wikimedia.org/csv_wb.zip wb] [http://stats.wikimedia.org/csv_wn.zip wn] [http://stats.wikimedia.org/csv_wp.zip wp] [http://stats.wikimedia.org/csv_wq.zip wq] [http://stats.wikimedia.org/csv_ws.zip ws] [http://stats.wikimedia.org/csv_wv.zip wv] [http://stats.wikimedia.org/csv_wx.zip wx] [http://stats.wikimedia.org/csv_wk.zip wk] to W:/# Out Bayes/csv_* folders 
+ manually unzip (Windows 7z hangs, needs fix)
+ check time stamps of zip files 
+ if out of date for some reason generate new zip files as follows 
+   bayes: in /home/ezachte/wikistats run ./zip_all xx (where xx is wb|wk|wn|wp|wq|ws|wv|wx)
+   bayes: sudo mc move *.zip files from /a/wikistats/zip_all to /mnt/htdocs/archive
+
+;Page Views
+
+ login Bayes
+ for yyyymm is previous month:
+ copy /a/wikistats/csv_wp/'''PageViewsMoversShakersPopularWikis[Normalized]_yyyy_mm.html''' -> W:\# Report Card\Input\
+ copy /a/wikistats/csv_wp/'''PageViewsPerMonthPopularWikis[Normalized]_yyyy_mm.csv'''       -> W:\# Report Card\Data\
+
+;Generate csv file StatisticsMonthly_yyyy_mm.csv
+
+ edit W:\@ Report Card\ReportCardExtractWikiCountsOutput.pl 
+  update $month_0, $year_0  
+  # update $file_regions_UV    = "Multi-Country Media Trend, UVs by region (June 2008 - Aug 2009).csv" ;
+  # update $file_regions_Reach = "Multi-Country Media Trend, % reach by region (June 2008 - Aug 2009).csv" ;
+  run W:\# Report Card\ReportCardExtractWikiCountsOutput.pl # -i "w:/# Out Bayes" -o "w:/@ Report Card/Data"
+  produces W:\@ Report Card\Data\StatisticsMonthly_yyyy_mm.csv
+
+===Build Spreadsheet===
+
+;Prepare spreadsheet '''StatisticsMonthly.xlsx'''
+
+ go to W:/@ Report Card/Data
+ copy "StatisticsMonthly_yyyy_mm.xlsx" to next month "StatisticsMonthly_((yyyy_mm)++).xlsx"
+ open in Excel new "StatisticsMonthly_((yyyy_mm)++).xlsx"
+ copy first sheet to new sheet for new month 
+ adjust column headers <font color=#800000>(shift month headers one to left: copy F3:Q3, paste E3, update Q3 manually)</font>
+ save / close / open (to get all headers in charts updated)
+
+;Transfer WikiCounts output to spreadsheet '''StatisticsMonthly.xlsx'''
+ copy columns A-Q from StatisticsMonthly_yyyy_mm.csv to StatisticsMonthly.xlsx ->
+   columns C-S
+   New Editors
+   Active Editors
+   Very Active Editors
+   Article Count
+   New Articles Per Day
+   Edits Per Month
+   Binaries Per Month
+
+;Transfer comScore data to spreadsheet '''StatisticsMonthly.xlsx'''
+ open Multi-Country Media Trend, UVs by region (...).csv
+   verify sort order of regions has not changed
+   copy E10-Q19  -> 
+   Unique Visitors by Region
+ .
+ open Multi-Country Media Trend, % reach by region (...).csv
+   verify sort order of regions has not changed
+   copy E10-Q19 -> 
+   Reach Percentage by Region
+ .
+ open Top_1000_poperties,_UV_trend_(...)_nnnnn.csv 
+   verify sort order of properties has not changed
+   copy C10-C22 next to existing label -> 
+   Ctrl-Z
+   copy block ->
+   Web Properties - Unique Visitors
+ .
+;Transfer page view stats to spreadsheet '''StatisticsMonthly.xlsx'''
+
+ <font color=red>update WikiCountsSummarizeProjectCounts.pl on bayes: should also show counts for mobile page views </font>
+ <font color=red>for July run on localmachine, with projectcounts files up to date till August 2010</font>
+ <font color=red>comment year/month hard values in WikiCountsSummarizeProjectCounts.pl:SetComparisonPeriods</font>
+ .
+ open W:\# Report Card\Data\/'''PageViewsPerMonthPopularWikisNormalized_yyyy_mm.csv'''
+ copy -> Page Views
+
+;Finalize spreadsheet '''StatisticsMonthly.xlsx'''
+ copy last month of charts from W:\@ Report Card\Extended\Charts\yyyy-(mm-1) to W:\@ Report Card\Extended\Charts\yyyy-mm
+ check all charts StatisticsMonthly.xlsx for proper y-axis range
+ tweak line widths and colors when Excel defaults are inconsistent between related charts or otherwise confusing
+ Update month name in all chart titles StatisticsMonthly.xlsx
+ copy each chart from Excel to Paintshop (preserves layout best)
+ only then save as file to W:\@ Report Card\Extended\Charts\yyyy-mm
+ copy charts from W:\@ Report Card\Extended\Charts\yyyy-mm to W:\@ Report Card\Public\Charts\yyyy-mm
+ remove Monthly-Web-Properties*.png from W:\@ Report Card\Public\Charts\yyyy-mm
+
+===Generate Report Cards===
+
+;Generate Report Cards
+
+ go to 'W:\@ Report Card\
+ edit ReportCardGenerateHtml.pl'
+   copy yearly and monthly trend figures from all tables from 'W:\@ Report Card\Data\StatisticsMonthly.xlsx' to perl file
+   calculate manually and add monthly/yearly trends in page views from [http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm] (from first column = Sigma)
+ run the perl file to generate four different reports: detailed + concise + two columns + synopsis
+
+ <font color=#FF0000>add a licensing notice to the pages on http://stats.wikimedia.org/reportcard/ ? I would suggest CC0 for data ( http://creativecommons.org/publicdomain/zero/1.0/ ) to keep things simple</font>
+
+;Upload to web site
+ copy new images and html files to respective folders in <nowiki>bayes:/mnt/htdocs/reportcard</nowiki>
+ copy newest RC_yyyy_mm_dd_detailed.html to index.html
+
+;Update [http://wikimediafoundation.org/wiki/Key_facts Key fact on wikimediafoundation.org]

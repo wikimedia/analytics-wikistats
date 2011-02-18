@@ -1,0 +1,180 @@
+<html lang="en">
+<head>
+<title>Wikimedia Report Card Synopsis - December 2010</title>
+<meta http-equiv="content-type" content="text/html"; charset="iso-8859-1">
+<meta http-equiv="Window-target" content="_top">
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+<link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+<script src="assets/jquery-1.1.3.1.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.history_remote.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tabs.pack.js" type="text/javascript"></script>
+<script src="assets/jquery.tablesorter.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+$(function()
+{
+  $("#Synopsis").tablesorter();
+})
+</script>
+
+<script type="text/javascript">
+$(document).ready(
+function()
+{
+$("#Synopsis").tablesorter(sortList: [[0,0]] );
+}
+);
+</script>
+
+<script type="text/javascript">
+$.tablesorter.addParser({
+  id: "nohtml",
+  is: function(s) { return false; },
+  format: function(s) { return s.replace(/<.*?>/g,"").replace(/&nbsp;/g,""); },
+  type: "text"
+});
+$.tablesorter.addParser({
+  id: "digitsonly",
+  is: function(s) { return false; },
+  format: function(s) { return tablesorter.formatFloat(s.replace(/<.*?>/g,"").replace(/&nbsp;/g,"").replace(/,/g,"").replace(/-/,"-1")); },
+  type: "numeric"
+});
+</script>
+
+<style type="text/css">
+/* tables */
+table.tablesorter
+{
+        font-family:arial;
+        background-color: #FFF; // #CDCDCD;
+        margin:10px 0pt 15px;
+        font-size: 7pt;
+        width: 80%;
+        text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th
+{
+        background-color: #AAB;
+        border: 1px solid #FFF;
+        font-size: 8pt;
+        padding: 4px;
+}
+table.tablesorter thead tr .header
+{
+        background-image: url(assets/bg.gif);
+        background-repeat: no-repeat;
+        background-position: center right;
+        cursor: pointer;
+}
+table.tablesorter tbody td
+{
+        color: #3D3D3D;
+        padding: 4px;
+        background-color: #FFF;
+        vertical-align: top;
+}
+table.tablesorter tbody tr.odd td
+{ background-color:#F0F0F6; }
+table.tablesorter thead tr .headerSortUp
+{ background-image: url(assets/asc.gif); }
+table.tablesorter thead tr .headerSortDown
+{ background-image: url(assets/desc.gif); }
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
+{ background-color: #BBF; //#8dbdd8; }
+<!--
+body {font-family:arial,sans-serif;background-color:#B0B0B0}
+table,td,tr{background-color:#FFFFFF;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#000080;text-decoration:none}
+a:visited {color:#000080;text-decoration:none}
+a:active  {color:#000080;text-decoration:none}
+a:hover   {color:#0000FF;text-decoration:underline}
+a img     {border-color:black}
+td.detail-left   {font-size:12px ; color:#000000 ; text-align:left ; }
+td.detail-center {font-size:12px ; color:#000000 ; text-align:center ;  }
+td.detail-right  {font-size:12px ; color:#000000 ; text-align:right ; }
+-->
+</style>
+</head>
+<body>
+<table width=800 cellpadding=18 align=center>
+<tr>
+  <td align='center'>
+
+    <table width=95%>
+
+    <tr>
+      <td width=100% colspan=99>
+        <table width=100%>
+        <tr>
+          <td align=left width=150 valign=top><img src='assets/WikimediaLogo.png' width=30></td>
+          <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>December 2010 </font></h1>
+          </td>
+          <td align=right width=150 valign=top><h1>Synopsis</h1></td>
+        <!-- <td align=right width=150 valign=top><small><small>Published<br>February<br>2011</small></small></td> -->
+        </tr>
+        <tr>
+          <td align=left width=150 valign=top><!--  <small><a href='RC_2010_11_synopsis.html'>&lArr;&nbsp;November</a></small>--> </td>
+          <td align=center valign=top>
+            <small>&rArr; <a href='RC_2010_12_detailed.html'>Detailed version</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_summary.html'>Summary, 1 column</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_columns.html'>Summary, 2 columns</a></small>
+          </td>
+          <td align=right width=150 valign=top><!--<small><a href='RC_2010_01_synopsis.html'>January&nbsp;&rArr;</a></small>--></td>
+        </tr>
+        </table>
+      </td>
+    </tr>
+ <tr>
+   <td colspan=99>
+   <small>
+     <center>
+       
+     </center> <!--  General comment -->
+   </small>
+  </td>
+</tr>
+<tr><td colspan=99 align=center>
+<table border=1 id='Synopsis' class=tablesorter>
+<!-- <tr> -->
+<!--   <td align='left' colspan=99> -->
+<!--  <font color=#800000><b><small>No English Wikipedia dump was produced this month.<br>Without it some totals and trends are also meaningless and left blank.</small></b></font> -->
+<!--   </td> -->
+<!-- </tr> -->
+<thead><tr><th class=detail-left   valign=top>&nbsp;<b>Metric</b>&nbsp;</th><th class=detail-center valign=top>&nbsp;<b>Now</b>&nbsp;<br>12/10</th><th class=detail-center valign=top>&nbsp;<b>Yearly change</b>&nbsp;<br>12/09 &rArr; 12/10</th><th class=detail-center valign=top>&nbsp;<b>Monthly change</b>&nbsp;<br>11/10 &rArr; 12/10</th><th class=detail-center valign=top>&nbsp;<b>Notes</b>&nbsp;</th></tr></thead>
+<tbody>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#unique_visitors'>Unique Visitors</a> <sup>All</sup></td><td class=detail-right>395 M</td><td class=detail-right>+14.0%</td><td class=detail-right> -3.7%</td><td class=detail-right>1</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#page_requests'>Page Requests</a> <sup>All</sup></td><td class=detail-right>14.0 B</td><td class=detail-right>+22.6%</td><td class=detail-right> +2.4%</td><td class=detail-right>2,3</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#web_properties'>Site Rank</a> <sup>All</sup></td><td class=detail-right>5th &nbsp;&nbsp;</td><td class=detail-right> +0   </td><td class=detail-right> +0   </td><td class=detail-right>4</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#commons_files'>Binary Files</a> <sup>Commons</sup> </td><td class=detail-right>8.0 M</td><td class=detail-right>+43.1%</td><td class=detail-right> +3.0%</td><td class=detail-right>5</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#article_count'>Article Count</a> <sup>Wp</sup> </td><td class=detail-right>17.6 M</td><td class=detail-right>+20.0%</td><td class=detail-right> +1.5%</td><td class=detail-right>&nbsp;</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#articles_per_day'>New Articles Per Day</a> <sup>Wp</sup> </td><td class=detail-right>8.6 k</td><td class=detail-right>+16.5%</td><td class=detail-right> +5.1%</td><td class=detail-right>&nbsp;</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#edits_per_month'>Edits</a> <sup>Wp</sup> </td><td class=detail-right>11.6 M</td><td class=detail-right> +3.6%</td><td class=detail-right> +3.8%</td><td class=detail-right>6</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#new_editors_per_month'>New Editors <sup>Wp</sup></a> </td><td class=detail-right>14.6 k</td><td class=detail-right>-16.6%</td><td class=detail-right> -2.5%</td><td class=detail-right>7</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#active_editors'>Active Editors</a> <sup>Wp</sup> </td><td class=detail-right>79.3 k</td><td class=detail-right> -5.9%</td><td class=detail-right> -0.5%</td><td class=detail-right>8</td></tr>
+<tr><td class=detail-left><a href='RC_2010_12_detailed.html#very_active_editors'>Very Active Editors</a> <sup>Wp</sup> </td><td class=detail-right>10.3 k</td><td class=detail-right> -1.6%</td><td class=detail-right> +0.1%</td><td class=detail-right>8</td></tr>
+</tbody>
+<tfoot><tr><td colspan=99>&nbsp;</td></tr>
+<tr><td colspan=99><b><small>Repeated observations below are grayed</small></b></td></tr>
+<tr><td class=detail-left colspan=99>Unique Visitors<br>1: Average for last 12 months 377M.</td></tr><tr><td class=detail-left colspan=99>Page Requests<br>2: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Mobile traffic</a> in Dec: 4.1% of total Wikipedia traffic (556M/13489M)<br><font color=#808080>3: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)</font><br></td></tr><tr><td class=detail-left colspan=99>Site Rank<br><font color=#808080>4: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable.</font></td></tr><tr><td class=detail-left colspan=99>Commons Files<br><font color=#808080>5: Tiff uploads increased 5-fold in July 2010, 13-fold in last 12 months.</font><br></td></tr><tr><td class=detail-left colspan=99>Edits<br><font color=#808080>6: Over the last 3 years there is fairly consistent growth in manual, registered edits.</font><br><font color=#808080>&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits.</font></td></tr><tr><td class=detail-left colspan=99>New Editors Per Day<br><font color=#808080>7:WMF recently commissioned in depth study of editor activity trends, which is ongoing.</font></td></tr><tr><td class=detail-left colspan=99>(Very) Active Editors<br><font color=#808080>8: Since a few months editors on Commons are no longer included in overall editor total,</font><br><font color=#808080>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.</font><br></td></tr><tr><td class=detail-left colspan=99><font color=#808080><small>All = All projects, Wp = Wikipedia project&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;B = billion, M = million, k = thousand</small></font></td></tr></tfoot>
+</table>
+</td></tr>
+    <tr>
+      <td colspan=99 align=center>
+      <hr class=thin>
+      <small><small><font color=808080>Author Erik Zachte - mail: ezachte@###.org (nospam: ###=wikimedia)</font></small></small>
+    </td>
+    </tr>
+    </table>
+<script type='text/javascript'>
+$('#Synopsis').tablesorter({
+  // debug:true,
+  headers:{0:{sorter:'nohtml'},1:{sorter:false},2:{sorter:'digitsonly'},3:{sorter:'digitsonly'},4:{sorter:false}}
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,500 @@
+  
+<html lang="en">
+<head>
+
+<title>Wikimedia Report Card Summary - December 2010</title>
+
+<meta http-equiv="content-type" content="text/html"; charset="iso-8859-1">
+<meta http-equiv="Window-target" content="_top">
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+<link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+<link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+
+<!-- <!--[if lte IE 7]> -->
+
+
+<style type="text/css">
+body {font-family:arial,sans-serif;background-color:#B0B0B0}
+table,td,tr{background-color:#FFFFFF;font-size:11pt}
+h1{font-size:22px}
+h2{font-size:18px ; color:#006000 ; margin-top:40px}
+h3{font-size:15px ; color:#006000}
+form{margin:0}
+a:link    {color:#000080;text-decoration:none}
+a:visited {color:#000080;text-decoration:none}
+a:active  {color:#000080;text-decoration:none}
+a:hover   {color:#0000FF;text-decoration:underline}
+a img     {border-color:black}
+hr        {color:#006000;width:95%;margin-top:10px}
+hr.fat    {color:#000000;background-color:#000000;width:100%;margin-top:5px;height:3px}
+hr.thin   {color:#C0E0C0;background-color:#C0E0C0;width:100%;margin-top:10px;height:1px}
+tr.h1     { color:#FFFFFF ; background-color:#000000}
+td.h2     { text-align:left ; padding:2px }
+.h1      {font-size:20px ; color:#FFFFFF ; background-color:#606060 ; font-weight: bold ; margin:5px ; padding:2px}
+.h2      {font-size:16px ; color:#000000 ;                            font-weight: bold ; margin:0px ; padding:0px}
+td.score {text-align:right ; white-space:nowrap;}
+th.detail       {font-size:10px ; color:#000000 ; text-align:center ;}
+th.detail-header {font-size:10px ; color:#FFFFFF ; background-color:#707070 ; text-align:center ; vertical-align:top}
+th.detail-left  {font-size:10px ; color:#000000 ; text-align:left}
+th.detail-left-red {font-size:10px ; color:#000000 ; background-color:#707070 ; text-align:left}
+th.detail-left-grey {font-size:10px ; color:#000000 ; background-color:#E0E0E0 ; text-align:left}
+td.detail       {font-size:10px ; color:#FF0000 ; text-align:center ;  }
+td.detail-tiny  {font-size:8px ; color:#000000 ; text-align:center ; margin:0px }
+td.detail-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0 ; text-align:center }
+td.detail-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF ; text-align:right }
+td.detail-left-blue  {font-size:10px ; color:#000000 ; background-color:#D8D8FF; text-align:left }
+td.detail-left-green {font-size:10px ; color:#000000 ; background-color:#D0FFD0; text-align:left }
+td.detail-left  {font-size:10px ; color:#000000 ; text-align:left ; font-weight: bold ;}
+td.detail-right {font-size:10px ; color:#000000 ; text-align:right ; }
+td.detail-right-blue  {font-size:10px ; background-color:#D8D8FF ; text-align:right ; }
+td.detail-right-green {font-size:10px ; background-color:#D0FFD0 ; text-align:right ; }
+td.date         {font-size:10px ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateA        {font-size:10px ; background-color: #E0FFE0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+td.dateE        {font-size:10px ; background-color: #FFD0D0 ; color:#90909A0 ; vertical-align:top ; text-align:right ; white-space:nowrap; }
+.score   {font-size:16px ; background-color: #DDDDDD ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreA  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreB  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreC  {font-size:16px ; background-color: #E0FFE0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreD  {font-size:16px ; background-color: #C08080 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.scoreE  {font-size:16px ; background-color: #FFD0D0 ; color:#000000 ; font-weight: bold; margin:5px ; padding:2px ; text-align:right ; white-space:nowrap ;}
+.comment {font-size:9px ; color:#707070 ; font-weight: normal;  padding:2px }
+.remark  {font-size:12px ; color:#000000 ; font-weight: normal;  padding:2px }
+.bgA     {background-color: #E0FFE0 ; font-weight:bold}
+.bgD     {background-color: #C08080 ; font-weight:bold}
+.bgE     {background-color: #FFD0D0 ; font-weight:bold}
+.bgAu    {background-color: #E0FFE0 ; text-decoration:underline ; font-weight:bold}
+.chart {font-size: 9px; text-align:center; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart-left {font-size: 9px; text-align:left; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart_scale {font-size: 8px; text-align:right; color: #000000; font-family: arial,sans-serif; padding: 0px;}
+.xsmall {font-size: 8px; color: #FF00FF; font-family: arial,sans-serif;}
+xsmall {font-size: 10px; color: #000000; font-family: arial,sans-serif;}
+
+table.score2
+{
+        border-width: medium medium medium medium;
+        border-spacing: 0px;
+        border-style: outset outset outset outset;
+        border-color: black black black black;
+        border-collapse: separate;
+        background-color: rgb(255, 255, 240);
+}
+table.score2 th
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+table.score2 td
+{
+        border-width: thin thin thin thin;
+        padding: 3px 3px 3px 3px;
+        border-style: inset inset inset inset;
+        border-color: black black black black;
+        background-color: rgb(255, 255, 240);
+        -moz-border-radius: 0px 0px 0px 0px;
+}
+
+/* tables */
+table.tablesorter
+{
+        font-family:arial;
+        background-color: #CDCDCD;
+        margin:10px 0pt 15px;
+        font-size: 7pt;
+        width: 80%;
+        text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th
+{
+        background-color: #99D;
+        border: 1px solid #FFF;
+        font-size: 8pt;
+        padding: 4px;
+}
+table.tablesorter thead tr .header
+{
+        background-image: url(bg.gif);
+        background-repeat: no-repeat;
+        background-position: center right;
+        cursor: pointer;
+}
+table.tablesorter tbody td
+{
+        color: #3D3D3D;
+        padding: 4px;
+        background-color: #CCF;
+        vertical-align: top;
+}
+table.tablesorter tbody tr.odd td
+{ background-color:#F0F0F6; }
+table.tablesorter thead tr .headerSortUp
+{ background-image: url(asc.gif); }
+table.tablesorter thead tr .headerSortDown
+{ background-image: url(desc.gif); }
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
+{ background-color: #44F; //#8dbdd8; }
+</style>
+</head>
+
+
+
+<body>
+
+
+
+
+<table width=800 cellpadding=18 align=center>
+<tr>
+  <td align='center'>
+
+    <table width=95%>
+
+    <tr>
+      <td width=100% colspan=99>
+        <table width=100%>
+        <tr>
+          <td align=left width=150 valign=top><img src='assets/WikimediaLogo.png' width=30></td>
+          <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>December 2010</font></h1>
+                          
+
+            
+          </td>
+          <td align=right width=150 valign=top><small><small>Published<br>February<br>2011</small></small></td>
+        </tr>
+        <tr>
+          <td align=center valign=bottom colspan=99>
+            <small>&rArr; <a href='RC_2010_12_detailed.html'>Detailed version</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_columns.html'>Summary, 2 columns</a>&nbsp;&nbsp;&nbsp;&nbsp; &rArr; <a href='RC_2010_12_synopsis.html'>Synopsis</a></small>
+          </td>
+        </tr>
+        </table>
+      </td>
+    </tr>
+
+
+<tr><td colspan=99 align=center>   
+  <hr><font color=#008000><b>New: multi-year trends for most metrics.</b><br><small> Depending on available history reporting period can vary per metric.</small></font>
+</td></tr>
+
+
+
+
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Reach</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+
+  <tr>
+    <td class=score><a id='unique_visitors' name='unique_visitors'></a><span class=bg>395 million</sup></span></td>
+    <td class=h2><span class=h2>Unique Visitors, All Projects</span><br></td>
+</tr>
+
+
+    <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+14.0%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-3.7%</td>
+        </tr>
+      </table>
+    </td>
+
+
+      <td align=left valign=middle>
+
+        <table>
+        <tr>
+          <td valign=middle>
+        <img src='charts/2010-12/Unique-Visitors-Per-Region-Absolute-Linear.png'>
+  <span class=comment>source: comScore ; UV = Unique Visitors in millions ; PR = Page Requests in billions</span
+
+          </td>
+
+          <td>&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+
+
+            
+        <hr class=thin>
+      </td>
+
+    </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='page_requests' name='page_requests'></a><span class=bg>14.0 billion</sup></span></td>
+    <td class=h2><span class=h2>Page Requests, All Projects</span><br></td>
+</tr>
+
+
+    <tr>
+
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+22.6%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+2.4%</td>
+        </tr>
+      </table>
+    </td>
+
+
+      
+      <td align=left valign=middle>
+        <img src='charts/2010-12/Page-Views-Indexed-Wikis.png'>
+          
+          <br>
+  <span class=comment><font color=#FF0000>Due to server problems page view counts from squid logs for December 2009 - March 2010 are too low, estimated underreporting 10%-25%</font></span
+
+  <span class=comment><br>source: Squid logs ; see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a></span
+
+  <span class=comment><br>view counts for all months have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc), this mainly shows in Jan&rArr;Feb and Feb&rArr;Mar</span
+
+          <hr class=thin>
+        </td>
+      </tr>
+
+  <tr>
+    <td class=score><a id='web_properties' name='web_properties'></a><span class=bg>5th in rank</sup></span></td>
+    <td class=h2><span class=h2>Web Properties - Unique Visitors</span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+0</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+0</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+
+        <img src='charts/2010-12/Unique-Visitors-Google-Absolute-Linear.png'>
+
+  <span class=comment><br>source: comScore ; UV = Unique Visitors in millions</span
+
+
+         </td>
+       </tr>
+
+
+
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Content</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+  <tr>
+    <td class=score><a id='commons_files' name='commons_files'></a><span class=bg>8.0 million</sup></span></td>
+    <td class=h2><span class=h2>Binary Files </span><br></td>
+</tr>
+
+
+       <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+43.1%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+3.0%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+            <img src='charts/2010-12/Binaries-Indexed.png'><br>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaCOMMONS.htm#namespaces'>Wikistats</a></span
+
+            <hr class=thin>
+          </td>
+        </tr>              
+
+  <tr>
+    <td class=score><a id='article_count' name='article_count'></a><span class=bg>17.6 million</sup></span></td>
+    <td class=h2><span class=h2>Wikipedia Articles, Comparison with Other Projects </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+20.0%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+1.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+            <img src='charts/2010-12/Article-Count-Absolute-Log.png'><br>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Wikistats</a></span
+
+  <span class=comment><br>Wikinews without Serbian (which is flooded by trivial bot updates)</span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='articles_per_day' name='articles_per_day'></a><span class=bg>8,555</sup></span></td>
+    <td class=h2><span class=h2>New Wikipedia Articles Per Day </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateA><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateA>+16.5%</td>
+        </tr>
+        <tr>
+          <td class=dateA><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateA>+5.1%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+            <img src='charts/2010-12/Articles-New-Per-Day-Indexed-Wikis.png'><br>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesArticlesNewPerDay.htm'>Wikistats</a></span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+  <tr>
+    <td class=h1 colspan=99><span class=h9>Community</span></td>
+  </tr>
+  <tr>
+    <td><small><small>&nbsp;</small></small></td>
+  </tr>
+
+
+
+  <tr>
+    <td class=score><a id='new_editors_per_month' name='new_editors_per_month'></a><span class=bg>14,607</sup></span></td>
+    <td class=h2><span class=h2>New Wikipedia Editors Per Month </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateE><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateE>-16.6%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-2.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+            <img src='charts/2010-12/Editors-New-Indexed-Wikis.png'><br>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm'>Wikistats</a> / Registered users with 10+ edits since their registration</span
+
+            <hr class=thin>
+          </td>
+        </tr>
+
+
+
+
+  <tr>
+    <td class=score><a id='active_editors' name='active_editors'></a><span class=bg>79,324</sup></span></td>
+    <td class=h2><span class=h2>Active Wikipedia Editors (5+ edits per month) </span><br></td>
+</tr>
+
+
+        <tr>
+    <td class=date>
+      <table border=0>
+        <tr>
+          <td class=dateE><b>Y</b>&nbsp;12/9&rArr;12/10</td>
+          <td class=dateE>-5.9%</td>
+        </tr>
+        <tr>
+          <td class=dateE><b>M</b>&nbsp;11/10&rArr;12/10</td>
+          <td class=dateE>-0.5%</td>
+        </tr>
+      </table>
+    </td>
+
+
+          <td align=left valign=middle>
+            <img src='charts/2010-12/Editors-Active-Indexed-Wikis.png'><br>
+  <span class=comment>source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded</span
+
+  <span class=comment><br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. </span
+
+  <span class=comment><br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).</span
+
+          </td>
+        </tr>
+
+        </table>
+      </td>
+    </tr>
+
+
+    <tr>
+      <td colspan=99 align=center>
+      <hr class=thin>
+      <small><small><font color=808080>Author Erik Zachte - mail: ezachte@###.org (nospam: ###=wikimedia)</font></small></small>
+    </td>
+    </tr>
+    </table>  
+</body>
+</html>
