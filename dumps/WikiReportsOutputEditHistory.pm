@@ -1035,6 +1035,35 @@ __HTML_INDEX_2__
   return ($html) ;
 }
 
+sub HtmlIndex3
+{
+  my $html = <<__HTML_INDEX_3__ ;
+<script type="text/javascript">
+<!--
+function toggle_visibility_index()
+{
+  var index1  = document.getElementById('index1');
+  var index2  = document.getElementById('index2');
+  var caption = document.getElementById('caption');
+  if (index1.style.display == 'block')
+  {
+    index1.style.display = 'none';
+    index2.style.display = 'block';
+    caption.innerHTML = '<font color=#A0A0A0>language</font> / <font color=#006600>language code</font>' ;
+  }
+  else
+  {
+    index1.style.display = 'block';
+    index2.style.display = 'none';
+    caption.innerHTML = '<font color=#006600>language</font> / <font color=#A0A0A0>language code</font>' ;
+  }
+}
+//-->
+</script>
+__HTML_INDEX_3__
+  return ($html) ;
+}
+
 sub GenerateYearlyGrowthStats
 {
   return if ! $wikimedia ;

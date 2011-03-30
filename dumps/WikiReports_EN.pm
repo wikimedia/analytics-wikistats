@@ -72,8 +72,10 @@ $out_categories   = "Category overview" ; # new # per Wikipedia
 $out_botactivity  = "Bot activity" ;     # new
 $out_stats_for    = "Statistics for " ; # new
 $out_stats_per    = "Statistics per " ; # new
-$out_documentation = "Documentation: see <a href='http://meta.wikipedia.org/wiki/Wikistats'>Meta</a>" ; #new
+#$out_documentation = "Documentation: see <a href='http://meta.wikipedia.org/wiki/Wikistats'>Meta</a>" ; #new
+$out_documentation = "Documentation" ;
 $out_scripts      = "Scripts" ;
+$out_csv_files    = "CSV files" ;
 
 $out_gigabytes    = "GB" ;
 $out_megabytes    = "MB" ;

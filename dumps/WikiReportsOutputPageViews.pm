@@ -8,7 +8,8 @@ sub WritePageViewsMonthly
 #                    "<script language=\"javascript\" type=\"text/javascript\" src=\"..\/jquery-1.2.6.min.js\"></script>\n" .
 #                    "<script language=\"javascript\" type=\"text/javascript\" src=\"..\/jquery.sparkline.js\"></script>\n" ;
 
-  $legend_pageviews_monthly = "<table><tr>" ;
+# $legend_pageviews_monthly = "<table><tr><td valign=center><b>Legend</b></td><td>" ;
+  $legend_pageviews_monthly  = "<table><tr>" ;
   $legend_pageviews_monthly .= &th ("<span class=d1>Yearly trend</span>") ;
   $legend_pageviews_monthly .= &td ("<table width=100% cellspacing=0 class=b style='margin-top:5px; border:solid 1px #000000'><tr><td class=cb bgcolor=#FFFFFF><span class=d1><b>r</b> th</span><br><span class=d2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>i</b> %</span></td></tr></table>") ;
   $legend_pageviews_monthly .= &td ("&nbsp;e.g.&nbsp;") ;
@@ -23,6 +24,7 @@ sub WritePageViewsMonthly
   $legend_pageviews_monthly .= &td ("&nbsp;&nbsp;&nbsp;") ;
   $legend_pageviews_monthly .= &td ("<span class=d1><b>c</b>%=change compared to previous month, &nbsp;<b>s</b>%=share of page views for this language, &nbsp;<b>r</b> th=rank this month<br>v=page views this month ($out_million = 10<sup>6</sup>, $out_thousand = 10<sup>3</sup>)</span>") ;
   $legend_pageviews_monthly .= "</tr></table>" ;
+# $legend_pageviews_monthly .= "</td></tr></table>" ;
 
   &GenerateComparisonTable (0) ;
 
@@ -44,19 +46,26 @@ sub WritePageViewsMonthly
   }
 
   my $file_html ;
-  if ($pageviews_normal)
+  if ($pageviews_non_mobile)
   {
     if ($normalize_days_per_month)
     { $file_html = $path_out . "TablesPageViewsMonthly.htm" ; }
     else
     { $file_html = $path_out . "TablesPageViewsMonthlyOriginal.htm" ; }
   }
-  else # $pageviews_mobile
+  elsif ($pageviews_mobile)
   {
     if ($normalize_days_per_month)
     { $file_html = $path_out . "TablesPageViewsMonthlyMobile.htm" ; }
     else
     { $file_html = $path_out . "TablesPageViewsMonthlyOriginalMobile.htm" ; }
+  }
+  else # $pageviews_combined
+  {
+    if ($normalize_days_per_month)
+    { $file_html = $path_out . "TablesPageViewsMonthlyCombined.htm" ; }
+    else
+    { $file_html = $path_out . "TablesPageViewsMonthlyOriginalCombined.htm" ; }
   }
 
   print "\n\nFILE HTML '$file_html'\n\n" ;
@@ -78,7 +87,8 @@ sub StoreHtmlPageviewsAllProjects
   else
   { return if $wp ne 'zz' and $wp ne '' ; } # test here to keep call tidy
 
-  return if ! $pageviews ; # test here to keep call tidy
+  return if ! $pageviews ;  # test here to keep call tidy
+  return if $region ne '' ; # test here to keep call tidy
 
   $data =~ s/,/&comma;/g ;
   $data =~ s/\n/&linebreak;/g ;
@@ -89,6 +99,7 @@ sub StoreHtmlPageviewsAllProjects
     $data =~ s/100.00\%// ;
     $data =~ s/--// ;
   }
+
   push @csv_pageviews_all_projects, "$keys_html_pageviews_all_projects,$keys,$data\n" ;
 # print "= $keys_html_pageviews_all_projects,,$keys,$data\n" ;
 }
@@ -96,7 +107,10 @@ sub StoreHtmlPageviewsAllProjects
 # write rendered html (header column and 'all languages' column = 'zz' = Sigma) for reuse on page views report for all projects
 sub WriteMonthlyStatsHtmlAllProjects
 {
-  &LogT ("\nWriteMonthlyStatsHtmlAllProjects") ;
+  &LogT ("\nWriteMonthlyStatsHtmlAllProjects\n") ;
+
+  return if ! $pageviews ;  # test here to keep call tidy
+  return if $region ne '' ; # test here to keep call tidy
 
   my (@csv,$source, $normalized) ;
 

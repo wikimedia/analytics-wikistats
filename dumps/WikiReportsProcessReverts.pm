@@ -25,7 +25,7 @@ sub ReadRevertHistoryGenerateReports
 
   foreach $wp (@languages)
   {
-    # next if $wp ne "fy" ;
+    # next if $wp ne "en" ;
 
     undef %reverts_per_article ;
     undef %reverts_in_non_article_namespaces ;

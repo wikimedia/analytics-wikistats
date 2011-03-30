@@ -211,6 +211,7 @@ sub SetLanguageInfo
   kaa=>"http://kaa.wikipedia.org Karakalpak [0.41,AS]",
   kab=>"http://ka.wikipedia.org Kabyle [8,AF]",
   kaw=>"http://kaw.wikipedia.org Kawi",
+  kbd=>"http://kbd.wikipedia.org Karbadian [1.6,AS]",
   kg=>"http://kg.wikipedia.org Kongo [7,AF]",
   ki=>"http://ki.wikipedia.org Kikuyu [5.4,AF]",
   kj=>"http://kj.wikipedia.org Kuanyama",
@@ -229,6 +230,7 @@ sub SetLanguageInfo
   ky=>"http://ky.wikipedia.org Kirghiz [5,AS]",
   la=>"http://la.wikipedia.org Latin [,W]",
   lad=>"http://lad.wikipedia.org Ladino [0.109,AS]",
+  ltg=>"http://ltg.wikipedia.org Latgalian [0.15,EU]",
   lb=>"http://lb.wikipedia.org Luxembourgish [0.39,EU]", # was Letzeburgesch
   lbe=>"http://lbe.wikipedia.org Lak [0.12,AS]",
   lg=>"http://lg.wikipedia.org Ganda [10,AF]",
@@ -299,6 +301,7 @@ sub SetLanguageInfo
   ps=>"http://ps.wikipedia.org Pashto [26,AS]",
   pt=>"http://pt.wikipedia.org Portuguese [290,EU,SA,AF,AS]",
   qu=>"http://qu.wikipedia.org Quechua [10.4,SA]",
+  rue=>"http://rue.wikipedia.org Rusyn [0.6,EU]",
   rm=>"http://rm.wikipedia.org Romansh [0.035,EU]", # was Rhaeto-Romance
   rmy=>"http://rmy.wikipedia.org Romani [2.5,EU]",
   rn=>"http://rn.wikipedia.org Kirundi [4.6,AF]",
@@ -569,6 +572,9 @@ sub SetLiterals
   $out_mainpage      = "http://" . $wp . ".wikipedia.org" ;
   $out_wikipage      = "/wiki/" ;
 
+  $out_csv_files     = "CSV files" ;
+
+
 # ten thousand two hundred three + 4/10 = 10,203.4
   $out_thousands_separator = "," ;
   $out_decimal_separator   = "." ;
@@ -614,7 +620,49 @@ sub SetLiterals
                      "<font color='#008000'>25\% &lt; x &lt; 75\%</font>&nbsp;&nbsp;&nbsp;&nbsp;" .
                      "<font color='#008000'><u>75\% &lt; x</u></font></small>\n" ;
 
-  $out_documentation = "For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>" ; #new
+  $out_documentation = "Documentation" ; # was "For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>" ;
+}
+
+sub GetProjectBaseUrl
+{
+  my $wp = shift ;
+  my $base ;
+
+  if ($mode_wb)
+  { $base = "http://$wp.wikibooks.org/" ; }
+  if ($mode_wk)
+  { $base = "http://$wp.wiktionary.org/" ; }
+  if ($mode_wn)
+  { $base = "http://$wp.wikinews.org/" ; }
+  if ($mode_wp)
+  { $base = "http://$wp.wikipedia.org/" ; }
+  if ($mode_wq)
+  { $base = "http://$wp.wikiquote.org/" ; }
+  if ($mode_ws)
+  { $base = "http://$wp.wikisource.org/" ; }
+  if ($mode_wv)
+  { $base = "http://$wp.wikiversity.org/" ; }
+  if ($mode_wx)
+  {
+    if ($wp eq "sources")
+    { $base = "http://wikisource.org/" ; }
+    elsif ($wp eq "sep11")
+    { $base = "http://sep11.wikipedia.org/" ; }
+    elsif ($wp eq "foundation")
+    { $base = "http://wikimediafoundation.org/" ; }
+    elsif ($wp =~ /(\w\w+)(wikimedia)/)
+    { $base = "http://$1.wikimedia.org/" ; }
+    elsif ($wp eq "species")
+    { $base = "http://species.wikipedia.org/" ; }
+    elsif ($wp eq "mediawiki")
+    { $base = "http://www.mediawiki.org/" ; }
+    else
+    { $base = "http://$wp.wikimedia.org/" ; }
+  }
+
+  $base =~ s/_/-/g ; # e.g. zh-min-nan
+
+  return $base ;
 }
 
 1;

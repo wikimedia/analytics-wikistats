@@ -34,6 +34,7 @@ sub ParseArguments
   $pageviews     = $options {"v"} ;
   $region        = $options {"r"} ;
   $normalize_days_per_month = $options {"n"} ;
+  $dump_gallery  = $options {"G"} ;
 
 # Indian languages
 # as Assamese (http://as.wikipedia.org)
@@ -60,7 +61,7 @@ sub ParseArguments
 # ur Urdu (http://ur.wikipedia.org)
   $wp_1st = "en" ;
   $wp_2nd = "de" ;
-  if ($region =~ /^india$/i) #misuse language
+  if ($region =~ /^india$/i)
   {
     $region = lc $region ;
     $some_languages_only = $true ;
@@ -74,7 +75,7 @@ sub ParseArguments
     $wp_1st = "ta" ;
     $wp_2nd = "hi" ;
   }
-  elsif ($region =~ /^(?:africa|america|asia|europe|oceania|artificial)$/i) #misuse language
+  elsif ($region =~ /^(?:africa|america|asia|europe|oceania|artificial)$/i)
   {
     $region = lc $region ;
     $region_uc = ucfirst $region ;
@@ -150,24 +151,38 @@ sub ParseArguments
   $langcode = uc ($language) ;
   $testmode = ((defined $options {"t"}) ? $true : $false) ;
 
+  if ($testmode)
+  { print "Test mode\n" ; }
+
   if (defined $pageviews)
   {
     if ($pageviews eq 'n')
-    { $pageviews_normal = $true ; print "Generate page views report for non-mobile site" ; }
+    {
+      $pageviews_non_mobile = $true ;
+      $keys_html_pageviews_all_projects = 'non-mobile,' ;
+      print "Generate page views report for non-mobile site" ;
+    }
     elsif ($pageviews eq 'm')
-    { $pageviews_mobile = $true ; print "Generate page views report for mobile site" ; }
+    {
+      $pageviews_mobile = $true ;
+      $keys_html_pageviews_all_projects = 'mobile,' ;
+      print "Generate page views report for mobile site" ;
+    }
+    elsif ($pageviews eq 'c')
+    {
+      $pageviews_combined = $true ;
+      $keys_html_pageviews_all_projects = 'combined,' ;
+      print "Generate page views report for mobile + non-mobile site" ;
+    }
     else { abort ("Invalid option for pageviews: specify '-v n' for non-mobile or '-v m' for mobile data") ; }
 
     $pageviews = $true ;
 
-    if ($pageviews_normal && $normalize_days_per_month)
-    { $keys_html_pageviews_all_projects = 'non-mobile,normalized' ; }
-    elsif ($pageviews_normal && (! $normalize_days_per_month))
-    { $keys_html_pageviews_all_projects = 'non-mobile,not-normalized' ; }
-    elsif ((! $pageviews_normal) && $normalize_days_per_month)
-    { $keys_html_pageviews_all_projects = 'mobile,normalized' ; }
+    if ($normalize_days_per_month)
+    { $keys_html_pageviews_all_projects .= 'normalized' ; }
     else
-    { $keys_html_pageviews_all_projects = 'mobile,not-normalized' ; }
+    { $keys_html_pageviews_all_projects .= 'not-normalized' ; }
+
     print "\nCollect pageviews for $keys_html_pageviews_all_projects\n\n" ;
   }
 
@@ -200,18 +215,30 @@ sub ParseArguments
   else
   { $path_in  =~ s/[\/]*$/\// ; }
 
-  if ($path_out =~ /\\/)
+  if ($dump_gallery)
   {
-    $path_out =~ s/[\\]*$/\\/ ;
-    $path_out_timelines = $path_out . "EN\\" ;
-    $path_out .= uc ($language) ;
+    if ($path_out =~ /\\/)
+    { $path_out  =~ s/[\\]*$/\\/ ; } # make sure there is one trailing (back)slash
+    else
+    { $path_out  =~ s/[\/]*$/\// ; }
+    $path_in .= "csv_$mode\\" ;
   }
   else
   {
-    $path_out =~ s/[\/]*$/\// . "\/" . uc ($language);
-    $path_out_timelines = $path_out . "EN\/" ;
-    $path_out .= uc ($language) ;
+    if ($path_out =~ /\\/)
+    {
+      $path_out =~ s/[\\]*$/\\/ ;
+      $path_out_timelines = $path_out . "EN\\" ;
+      $path_out .= uc ($language) ;
+    }
+    else
+    {
+      $path_out =~ s/[\/]*$/\// . "\/" . uc ($language);
+      $path_out_timelines = $path_out . "EN\/" ;
+      $path_out .= uc ($language) ;
+    }
   }
+
   if ($region ne '')
   { $path_out .= '_' . ucfirst ($region) ; }
   $path_out .= "\/" ;
@@ -298,6 +325,8 @@ else
   $file_csv_namespaces            = $path_in . "Namespaces.csv" ;
   $file_edits_per_namespace       = $path_in . "StatisticsEditsPerNamespace.csv" ;
   $file_edits_per_usertype        = $path_in . "StatisticsEditsPerUsertype.csv" ;
+  $file_pageviews_per_wiki        = $path_in . "StatisticsPageviewsPerWiki.csv" ;
+  $file_editors_per_wiki          = $path_in . "StatisticsEditorsPerWiki.csv" ;
 
   $file_log                       = $path_in . "WikiReportsLog.txt" ;
   $file_errors                    = $path_in . "WikiReportsErrors.txt" ;
@@ -329,12 +358,12 @@ else
   $file_animation_projects_growth    = "W:/@ Visualizations/Animation Projects Growth/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
   $file_animation_size_and_community = "W:/@ Visualizations/Animation Size And Community/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
 
-  if ($pageviews)
-  {
+# if ($pageviews)
+# {
     if (! -e $file_csv_pageviewsmonthly)
     { abort ("CSV file '" . $file_csv_pageviewsmonthly . "' not found or in use") ; }
-    return ;
-  }
+#   return ;
+# }
 
   if (! -e $file_csv_monthly_stats)
   { abort ("CSV file '" . $file_csv_monthly_stats . "' not found or in use") ; }
@@ -389,9 +418,9 @@ sub DetectWikiMedia
   }
 
   if ($wikimedia)
-  { &Log ("Script runs on Wikimedia server\n\n") ; }
+  { &Log ("Script runs for Wikimedia site") ; }
   else
-  { &Log ("Script does not run on WikiMedia server\n\n") ; }
+  { &Log ("Script does not run for WikiMedia site") ; }
 }
 
 sub InitGlobals
@@ -640,66 +669,121 @@ sub ReadMonthlyStats
 
   $month_max = 0 ;
 
-  open "FILE_IN", "<", $file_csv_users_activity_spread ;
+  if (! $pageviews)
+  {
+    open "FILE_IN", "<", $file_csv_users_activity_spread ;
+    while ($line = <FILE_IN>)
+    {
+      chomp ($line) ;
+      # count user with over x edits
+      # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+      # thresholds = 1,3,5,10,25,32,50,100,etc
+
+      ($wp, $date, $reguser_bot, $ns_group, @fields) = split (",", $line) ;
+    #  print "$wp, $date,  $reguser_bot, $ns_group\n" ;
+      if ($reguser_bot ne "R") { next ; } # R: registered user, B: bot
+      if ($ns_group    ne "A") { next ; } # A: articles, T: talk pages, O: other
+
+      $month = substr ($date,0,2) ;
+      $year  = substr ($date,6,4) ;
+      $m = ord (&yyyymm2b ($year, $month)) ;
+
+      $count_5   = $fields [2] ;
+      $count_25  = $fields [4] ;
+      $count_100 = $fields [7] ;
+
+      $user_edits_5   {"$wp,$date"} = $count_5 ;
+      $user_edits_100 {"$wp,$date"} = $count_100 ;
+
+      $editors_5    {$wp.$m} = $count_5 ;
+      $editors_25   {$wp.$m} = $count_25 ;
+      $editors_100  {$wp.$m} = $count_100 ;
+
+      if ($count_5 > $editors_max_5 {$wp})
+      {
+        $editors_max_5       {$wp} = $count_5 ;
+        $editors_month_max_5 {$wp} = $m ;
+      }
+      if (($editors_month_lo_5 {$wp} == 0) || ($editors_month_lo_5 {$wp} > $m))
+      { $editors_month_lo_5 {$wp} = $m ; }
+      if ($editors_month_hi_5 {$wp} < $m)
+      { $editors_month_hi_5 {$wp} = $m ; }
+    }
+
+    close "FILE_IN" ;
+  }
+
+
+  # this code is partly duplicated below for mode $pageviews, some day needs to be combined
+
+  &ReadFileCsv ($file_csv_log) ;
+  foreach $wp (@csv)
+  {
+    $wp =~ s/,.*$// ;
+    $wp =~ s/_/-/g ;
+    next if $some_languages_only and ! $include_language {$wp} ;
+    $wp_ok {$wp} = 1 ;
+    $wp_ok {"$wp.m"} = 1 ;
+  }
+  # find oldest month (to be skipped, probably incomplete)
+  # $oldest_month_pageviews  = "9999/99/99" ;
+  open "FILE_IN", "<", $file_csv_pageviewsmonthly ;
   while ($line = <FILE_IN>)
   {
-    chomp ($line) ;
-    # count user with over x edits
-    # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
-    # thresholds = 1,3,5,10,25,32,50,100,etc
+    chomp $line ;
+    ($wp, $date, $count) = split (",", $line) ;
 
-    ($wp, $date, $reguser_bot, $ns_group, @fields) = split (",", $line) ;
-  #  print "$wp, $date,  $reguser_bot, $ns_group\n" ;
-    if ($reguser_bot ne "R") { next ; } # R: registered user, B: bot
-    if ($ns_group    ne "A") { next ; } # A: articles, T: talk pages, O: other
+    next if $wp ne lc $wp ; # cruft
+    next if $some_languages_only and ! $include_language {$wp} ;
 
-    $user_edits_5   {"$wp,$date"} = $fields [2] ;
-    $user_edits_100 {"$wp,$date"} = $fields [7] ;
+  #  if ((! $mode_wp) && ($date eq '2008/05/31')) { next ; }  # skip incomplete first month
+
+    if ($wp_ok {$wp} == 0)
+    { $wp_nok {$wp} ++ ; }
+    if (($oldest_month_pageviews {$wp} eq "") || ($date lt $oldest_month_pageviews {$wp}))
+    { $oldest_month_pageviews {$wp} = $date ; }
+
+    $month = substr ($date,5,2) ;
+    $year  = substr ($date,0,4) ;
+
+    next if $year < 2001 ; # StatisticsMonthly.csv contains weird dates for tiny Wp's, to be fixed in counts job
+
+    next if $wp eq "ar" and $year < 2003 ; # clearly erroneous record for arwiki pollutes TablesWikipediaGrowthSummaryContributors.htm
+
+    $m = ord (&yyyymm2b ($year, $month)) ;
+
+    next if $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
+
+
+    # figures for current month are ignored when month has just begun
+
+
+    $days_in_month = days_in_month ($year, $month) ;
+    $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
+    $pageviews {$wp.$m} = $count_normalized ;
+    if ($count_normalized > $pageviews_max {$wp})
+    {
+      $pageviews_max       {$wp} = $count_normalized ;
+      $pageviews_month_max {$wp} = $m ;
+    }
+    if (($pageviews_month_lo {$wp} == 0) || ($pageviews_month_lo {$wp} > $m))
+    { $pageviews_month_lo {$wp} = $m ; }
+    if ($pageviews_month_hi {$wp} < $m)
+    { $pageviews_month_hi {$wp} = $m ; }
   }
   close "FILE_IN" ;
 
-  if ($pageviews)
+  my $msg = "\nLanguage codes skipped (not in StatisticsLog.csv):\n" ;
+  foreach $wp (sort keys %wp_nok)
+  { $msg .= "$wp," ; }
+  if ($msg =~ /,/)
   {
-    print "\nRead input for page views\n" ;
-    &ReadFileCsv ($file_csv_log) ;
-    foreach $wp (@csv)
-    {
-      $wp =~ s/,.*$// ;
-      $wp =~ s/_/-/g ;
-      next if $some_languages_only and ! $include_language {$wp} ;
-      $wp_ok {$wp} = 1 ;
-      $wp_ok {"$wp.m"} = 1 ;
-    }
-    # find oldest month (to be skipped, probably incomplete)
-    # $oldest_month_pageviews  = "9999/99/99" ;
-    open "FILE_IN", "<", $file_csv_pageviewsmonthly ;
-    while ($line = <FILE_IN>)
-    {
-      ($wp, $date, @fields) = split (",", $line) ;
-
-      next if $wp ne lc $wp ; # cruft
-      next if $some_languages_only and ! $include_language {$wp} ;
-
-    #  if ((! $mode_wp) && ($date eq '2008/05/31')) { next ; }  # skip incomplete first month
-
-      if ($wp_ok {$wp} == 0)
-      { $wp_nok {$wp} ++ ; }
-      if (($oldest_month_pageviews {$wp} eq "") || ($date lt $oldest_month_pageviews {$wp}))
-      { $oldest_month_pageviews {$wp} = $date ; }
-    }
-    close "FILE_IN" ;
-
-    my $msg = "\nLanguage codes skipped (not in StatisticsLog.csv):\n" ;
-    foreach $wp (sort keys %wp_nok)
-    { $msg .= "$wp," ; }
-    if ($msg =~ /,/)
-    {
-      $msg =~ s/,$/\n/ ;
-      print $msg ;
-    }
-
-    open "FILE_IN", "<", $file_csv_pageviewsmonthly ;
+    $msg =~ s/,$/\n/ ;
+    print $msg ;
   }
+
+  if ($pageviews)
+  { open "FILE_IN", "<", $file_csv_pageviewsmonthly ; }
   else
   { open "FILE_IN", "<", $file_csv_monthly_stats ; }
 
@@ -710,10 +794,9 @@ sub ReadMonthlyStats
     if ($pageviews)
     {
       ($wp, $date, @fields) = split (",", $line) ;
-
       next if $wp ne lc $wp ; # cruft
       next if $pageviews_mobile and $wp !~ /\.m/ ;
-      next if $pageviews_normal and $wp =~ /\.m/ ;
+      next if $pageviews_non_mobile and $wp =~ /\.m/ ;
       next if $some_languages_only and ! $include_language {$wp} ;
 
       $wp =~ s/\.m// ; # mobile postix is .m
@@ -738,53 +821,53 @@ sub ReadMonthlyStats
 
     }
     else
-    { ($wp, $date, @fields) = split (",", $line) ; }
-
-    # use newer counts, excluding bots from $file_csv_users_activity_spread
-
-    $fields [2] = $user_edits_5   {"$wp,$date"} ;
-    $fields [3] = $user_edits_100 {"$wp,$date"} ;
+    {
+      ($wp, $date, @fields) = split (",", $line) ;
+      # use newer counts, excluding bots from $file_csv_users_activity_spread
+      $fields [2] = $user_edits_5   {"$wp,$date"} ;
+      $fields [3] = $user_edits_100 {"$wp,$date"} ;
+    }
 
     next if $some_languages_only and ! $include_language {$wp} ;
 
     # if ($wp eq $wp_1st) { next ; } # Dec 2006: skip till counts are fixed
-    if ($mode_wk && (($wp eq "als") || ($wp eq "tlh")))  { next ; } # obsolete
-    if ($wp eq "dk") { next ; } # Dec 2006: dumps exist but site not
-    if ($wp eq "zz") { next ; }
-    if ($wp eq "test") { next ; }
-    if ($wp eq "tlh") { next ; } # Klignon
-    if ($wp eq "ru-sib") { next ; } # Siberian
-    if ($wp eq "ru_sib") { next ; } # Siberian
 
-    if ($wp =~ /mania/i)  { next ; }
-    if ($wp =~ /team/i)   { next ; }
-    if ($wp =~ /comcom/i) { next ; }
-    if ($wp =~ /closed/i) { next ; }
-    if ($wp =~ /chair/i) { next ; }
-    if ($wp =~ /langcom/i) { next ; }
-    if ($wp =~ /office/i) { next ; }
-    if ($wp =~ /searchcom/i) { next ; }
-    if ($wp =~ /sep11/i) { next ; }
-    if ($wp =~ /nostalgia/i) { next ; }
-    if ($wp =~ /stats/i) { next ; }
-    if (! $mode_wx && ($wp =~ /commons/i)) { next ; }
+    next if $mode_wk and ($wp eq "als" or $wp eq "tlh") ;  # obsolete
+    next if ! $mode_wx and $wp =~ /commons/i ;
+
+    next if $wp eq "dk" ;  # Dec 2006: dumps exist but site not
+    next if $wp eq "zz" ;
+    next if $wp eq "test" ;
+    next if $wp eq "tlh" ;  # Klignon
+    next if $wp eq "ru-sib" ;  # Siberian
+    next if $wp eq "ru_sib" ;  # Siberian
+
+    next if $wp =~ /mania/i ;
+    next if $wp =~ /team/i ;
+    next if $wp =~ /comcom/i ;
+    next if $wp =~ /closed/i ;
+    next if $wp =~ /chair/i ;
+    next if $wp =~ /langcom/i ;
+    next if $wp =~ /office/i ;
+    next if $wp =~ /searchcom/i ;
+    next if $wp =~ /sep11/i ;
+    next if $wp =~ /nostalgia/i ;
+    next if $wp =~ /stats/i ;
 
     # $date = &FixDateMonthlyStats ($date) ;
     $day   = substr ($date,3,2) ;
     $month = substr ($date,0,2) ;
     $year  = substr ($date,6,4) ;
 
-    if ($year < 2001)  # StatisticsMonthly.csv contains weird dates for tiny Wp's, to be fixed in counts job
-    { next ; }
-    if (($wp eq "ar") && ($year < 2003))  # clearly erroneous record for arwiki pollutes TablesWikipediaGrowthSummaryContributors.htm
-    { next ; }
+    next if $year < 2001 ;  # StatisticsMonthly.csv contains weird dates for tiny Wp's, to be fixed in counts job
+    next if $wp eq "ar" and $year < 2003 ;  # clearly erroneous record for arwiki pollutes TablesWikipediaGrowthSummaryContributors.htm
 
     $m = ord (&yyyymm2b ($year, $month)) ;
 
     next if $pageviews and $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
-    
-    next if $wp eq 'commons' and $m < 58 ;
-    
+
+    next if $wp eq 'commons' and $m < 58 ; # &yyyymm2b(2004,9) -> 59 ; there is stray record years earlier, ignore
+
     # figures for current month are ignored when month has just begun
     #                          (were)
 #    if ($day < 7)
@@ -809,7 +892,7 @@ sub ReadMonthlyStats
       }
 
       if ($pageviews || ($f < $#fields))
-      { $MonthlyStats {$wp.$m.$c[$f]} = $fields [$f] ; }
+      { $MonthlyStats {$wp.$m.$c[$f]}  += $fields [$f] ; } # += instead of = for combined page views: mobile + non-mobile
       else
       { $MonthlyStats {$wp.$m.$c[$f+2]} = $fields [$f] ; } # daily usage counts will be 'inserted' below,
                                                            # those used to be last columns in input,
@@ -983,13 +1066,22 @@ if ($false)
   }
 
   #collect totals
-  if ($mode_wb) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
-  if ($mode_wk) { $m1 = ord (&yyyymm2b (2002,12)) ; }
-  if ($mode_wn) { $m1 = ord (&yyyymm2b (2004, 7)) ; }
-  if ($mode_wp) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
-  if ($mode_wq) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
-  if ($mode_ws) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
-  if ($mode_wx) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+  if ($pageviews)
+  {
+    if ($mode_wp) { $m1 = ord (&yyyymm2b (2008, 1)) ; }
+    else
+    {               $m1 = ord (&yyyymm2b (2008, 6)) ; }
+  }
+  else
+  {
+    if ($mode_wb) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+    if ($mode_wk) { $m1 = ord (&yyyymm2b (2002,12)) ; }
+    if ($mode_wn) { $m1 = ord (&yyyymm2b (2004, 7)) ; }
+    if ($mode_wp) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+    if ($mode_wq) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+    if ($mode_ws) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+    if ($mode_wx) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+  }
 
   foreach $wp (@languages)
   {
@@ -1078,9 +1170,9 @@ if ($false)
 
         # except for pageviews, for last 12 months check if most prominent wiki has data
         # only for last 12 months: especially for region 'India' this is not so for early months
-        if ($pageviews) 
-	 { $zz += $MonthlyStats {$wp.$m.$c[$f]} ; }     
-	elsif (($m <= $md - 12) || ($MonthlyStats {$wp_1st.$m.$c[$f]} > 0))
+        if ($pageviews)
+        { $zz += $MonthlyStats {$wp.$m.$c[$f]} ; }
+        elsif (($m <= $md - 12) || ($MonthlyStats {$wp_1st.$m.$c[$f]} > 0))
         {
           if (($f >= 7) && ($f <= 10))
           { $zz += $MonthlyStats {$wp.$m.$c[$f]} * $MonthlyStats {$wp.$m.$c[4]} ; }
@@ -1633,10 +1725,10 @@ sub GetPercPageViewsMobile
   {
     my $year = substr ($maxdate,0,4) ;
     my $month = &month_english_short (substr ($maxdate,5,2)-1) ;
-    $msg_perc_mobile = "$month $year: Mobile traffic represents ${perc_mobile {$maxdate}}% of total traffic.\n" ;
-    $msg_perc_non_mobile = "$month $year: Non-mobile traffic represents ${perc_non_mobile {$maxdate}}% of total traffic.\n" ;
-    print $msg_perc_mobile ;
-    print $msg_perc_non_mobile ;
+    $msg_perc_mobile = "$month $year: mobile traffic represents ${perc_mobile {$maxdate}}% of total traffic" ;
+    $msg_perc_non_mobile = "$month $year: non-mobile traffic represents ${perc_non_mobile {$maxdate}}% of total traffic" ;
+    print "$msg_perc_mobile\n" ;
+    print "$msg_perc_non_mobile\n" ;
   }
 }
 

@@ -504,7 +504,6 @@ if (0)
                                   &tdrb (&w ($speakers)) .
                                   &tdrb (&w ($participation)) ;
 
-
       $out_html_verbose .= &tr ((($wikimedia && !$mode_wx)? &tdcb ($site) : &tdlb ($site)) .
                         (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                         &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'>T</a> | " .
@@ -3132,7 +3131,7 @@ sub GenerateComparisonTables
 {
   for ($f = 0 ; $f <= $fmax ; $f++)
   {
-    # if ($f == 6) { next ; } # skip obsolete alternate article counts
+    # if ($f == 5) { next ; } # skip obsolete alternate article counts
 
     if (($mode_wp) ||
         (($f != 5) && ($f != 9) && ($f != 10)))
@@ -3179,21 +3178,35 @@ sub GenerateComparisonTable
   if (index ("CD",            $c[$f]) > -1) { $colormode = 'G' ; }
   if ($pageviews)                           { $colormode = 'I' ; }
 
-  &GenerateHtmlStartComparisonTables ($f) ;
+  my $content = &GenerateHtmlStartComparisonTables ($f, $normalize_days_per_month) ;
 
-  if ($pageviews_normal)
+  if ($pageviews_mobile)
   {
-    $mode_wp ? $root = ".." : $root = "../.." ;
+    $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
+    $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
+  }
+  elsif ($pageviews_non_mobile)
+  {
+    $href_normalized     = 'TablesPageViewsMonthly.htm' ;
+    $href_not_normalized = 'TablesPageViewsMonthlyOriginal.htm' ;
+  }
+  else
+  {
+    $href_normalized     = 'TablesPageViewsMonthlyCombined.htm' ;
+    $href_not_normalized = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
+  }
+  $href_normalized2     = 'TablesPageViewsMonthlyCombined.htm' ;
+  $href_not_normalized2 = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
 
-    $out_xref = "<a href='$root/EN/TablesPageViewsMonthlyAllProjects.htm'>All projects, </a>\n" ;
-    $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='$root/wikibooks/EN/TablesPageViewsMonthly.htm'>Wikibooks, </a>\n") ;
-    $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='$root/wiktionary/EN/TablesPageViewsMonthly.htm'>Wiktionaries, </a>\n") ;
-    $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='$root/wikinews/EN/TablesPageViewsMonthly.htm'>Wikinews, </a>\n") ;
-    $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='$root/EN/TablesPageViewsMonthly.htm'>Wikipedias, </a>\n") ;
-    $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='$root/wikiquote/EN/TablesPageViewsMonthly.htm'>Wikiquotes, </a>\n") ;
-    $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='$root/wikisource/EN/TablesPageViewsMonthly.htm'>Wikisources, </a>\n") ;
-    $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='$root/wikiversity/EN/TablesPageViewsMonthly.htm'>Wikiversities, </a>\n") ;
-    $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='$root/wikispecial/EN/TablesPageViewsMonthly.htm'>Wikispecial</a>\n") ;
+  if ($normalize_days_per_month)
+  {
+    $href_current_file  =  $href_normalized ;
+    $href_current_file2 =  $href_normalized2 ;
+  }
+  else
+  {
+    $href_current_file  =  $href_not_normalized ;
+    $href_current_file2 =  $href_not_normalized2 ;
   }
 
   if ($wikimedia && ($f <= 1) && $mode_wp)
@@ -3206,92 +3219,116 @@ sub GenerateComparisonTable
 
   if ($pageviews)
   {
-    $out_html .= "<b><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are too low.</font></b> " .
-                 "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
-                 "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
-                 "<hr>" ;
-    $out_html .= "<p><b>Legend:</b><br>$legend_pageviews_monthly<br>&nbsp;<hr>" ;
+    $out_html .= "$legend_pageviews_monthly<hr>\n" ;
 
-    if ($pageviews_mobile)
-    {
-      if ($region eq '')
-      { $out_html .= "<p>$msg_perc_mobile" ; }
-      $out_html .= "<h3>Page views per language per month (mobile site) <font color=#A0A0A0>(plus links to edit trends)</font>&nbsp;&nbsp;&nbsp;&nbsp;<span id='wait'><font color='#666600'>" . $out_rendering . "</font></span></h3>\n" ;
-      $out_html .= "<p><b><font color=#008000>Mobile traffic only! </font></b>" ;
-    }
-    else
-    {
-      if ($region eq '')
-      { $out_html .= "<p>$msg_perc_non_mobile" ; }
-      $out_html .= "<h3>Page views per language per month <font color=#A0A0A0>(plus links to edit trends)</font>&nbsp;&nbsp;&nbsp;&nbsp;<span id='wait'><font color='#444400'>" . $out_rendering . "</font></span></h3>" ;
-      $out_html .= "<p><b><font color=#008000>Non-mobile traffic only! </font></b>" ;
-    }
+    $out_html .= "<p><h2>$content</h2><p>" ;
 
-    if ($normalize_days_per_month)
-    { $out_html .= "<b><font color=#008000>View counts on this page have been normalized to months of 30 days, for fair comparison.</font></b>. " ; }
-    else
-    { $out_html .= "<b><font color=#800000>View counts on this page have <font color=#FF0000>not</font> been normalized to months of 30 days.</font></b>. " ; }
+    $out_html .= "<b>Page views per language per month</b> (plus links to edit trends)\n" ;
 
-  # $out_html .= "<p><b><font color='#600000'>Everything on this page is about page views, except links named 'Edit Trend'</font></b>" ;
+    if ($pageviews_combined)
+    { $out_html .= " <b>Mobile + Non-mobile traffic</b>" ; }
+
+  # $out_html .= "<h3><span id='wait'>!!! <font color='#800000'>" . $out_rendering . "</font> !!!</span></h3>\n" ;
+
+    if ($mode_wp && ($region eq ''))
+    { $out_html .= " ($msg_perc_mobile)" ; }
 
     # for linear regression
     # use Statistics:LineFit ;
     # http://search.cpan.org/~randerson/Statistics-LineFit-0.07/lib/Statistics/LineFit.pm
 
     # http://forum.chromefans.org/problem-with-span-p-and-style-display-none-t389.html
-  # $out_html .= "\n<span id='wait'><left><font color='green'><b>" . $out_rendering . "</b></font></left><p></span>\n" ;
+    # $out_html .= "\n<span id='wait'><left><font color='green'><b>" . $out_rendering . "</b></font></left><p></span>\n" ;
 
-    if ($pageviews_mobile)
+    my $coverage ;
+    if ($mode_wp)
     {
-      $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
-      $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
+         if ($region eq '')           { $coverage1 = "<font color=#000080>Wikipedia All Languages, </font>" ; }
+      elsif ($region eq 'artificial') { $coverage1 = "<font color=#000080>Wikipedia Artificial Languages, </font>" ; }
+      else                            { $coverage1 = "<font color=#000080>Wikipedia " . ucfirst $region . ", </font>" ; }
+    }
+    elsif ($mode_wx)                  { $coverage = "<font color=#000080>Other Projects, </font>" ; }
+    else                              { $coverage = "<font color=#000080>$out_publication, </font>" ; }
+
+    if ($pageviews_mobile)            { $coverage2 = "<font color=#000080>Mobile, </font>" ; }
+    elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#000080>Non-Mobile, </font>" ; }
+    if ($pageviews_combined)          { $coverage2 = "<font color=#000080>All Platforms, </font>" ; }
+
+    ($coverage2b = $coverage) =~ s/<[^>]*>//g ;;
+
+    if ($normalize_days_per_month)
+    {
+      $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison. " ;
+      $raw_or_not = "Normalized, " ;
     }
     else
     {
-      $href_normalized     = 'TablesPageViewsMonthly.htm' ;
-      $href_not_normalized = 'TablesPageViewsMonthlyOriginal.htm' ;
-    }
-
-    if ($mode_wp)
-    {
-      if ($pageviews_mobile)
-      { $out_html .= "<p>Switch to <a href='TablesPageViewsMonthly.htm'>regular (non-mobile) page views</a>" ; }
-      else
-      { $out_html .= "<p>Switch to <a href='TablesPageViewsMonthlyMobile.htm'>mobile page views</a>" . blank_text_after ("15/09/2010"," <b><font color=#008000>(June 2010: New)</font></b>") ;    }
+      $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days. " ;
+      $raw_or_not = "Raw Data, " ;
     }
 
     if ($normalize_days_per_month)
     {
-      $out_html .= "<p>Switch to <a href='$href_not_normalized'>not normalized version</a>" ;
+      $out_html .= "<p>Switch to $coverage1$coverage2<a href='$href_not_normalized'>Raw Data</a>" ;
       $href_current_file =  $href_normalized ;
     }
     else
     {
-      $out_html .= "<p>For fairer comparison of monthly trends switch to <a href='$href_normalized'>normalized version</a>" ;
+      $out_html .= "<p>Switch to $coverage1$coverage2<a href='$href_normalized'>Normalized</a> (for fairer comparison of monthly trends)" ;
       $href_current_file =  $href_not_normalized ;
     }
 
     if ($mode_wp)
     {
-      $out_html .= "<p>Switch to " ;
-      if ($mode_wp && ($region ne ''))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN/$href_current_file'>all languages</a>, " ; }
-      if ($mode_wp && ($region ne 'africa'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_Africa/$href_current_file'>Africa</a>, " ; }
-      if ($mode_wp && ($region ne 'asia'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_Asia/$href_current_file'>Asia</a>, " ; }
-      if ($mode_wp && ($region ne 'america'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_America/$href_current_file'>America's</a>, " ; }
-      if ($mode_wp && ($region ne 'europe'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_Europe/$href_current_file'>Europe</a>, " ; }
-      if ($mode_wp && ($region ne 'india'))
-       { $out_html .= "<a href='http://stats.wikimedia.org/EN_India/$href_current_file'>India</a>, " ; }
-      if ($mode_wp && ($region ne 'oceania'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_Oceania/$href_current_file'>Oceania</a>, " ; }
-      if ($mode_wp && ($region ne 'artificial'))
-      { $out_html .= "<a href='http://stats.wikimedia.org/EN_Artificial/$href_current_file'>artificial languages</a>, " ; }
+      if ($pageviews_mobile)
+      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthly.htm'>Non-Mobile</a>, " .
+                     "<a href='TablesPageViewsMonthlyCombined.htm'>All Platforms</a>" ; }
+      elsif ($pageviews_non_mobile)
+      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthlyMobile.htm'>Mobile</a>, " .
+                     " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms</a>" ; }
+      else
+      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthly.htm'>Non-Mobile</a>, " .
+                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile</a>" ; }
+    }
+
+    $out_html .= "<p>Stay with $coverage2${raw_or_not}but ..." ;
+    if ($mode_wp)
+    {
+      $root = $testmode ? ".." : "../.." ;
+
+      $out_html .= "<p>Switch to Wikipedia " ;
+      if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>All Languages</a>, " ; }
+      if ($region ne 'africa')     { $out_html .= "<a href='$root/EN_Africa/$href_current_file'>Africa</a>, " ; }
+      if ($region ne 'asia')       { $out_html .= "<a href='$root/EN_Asia/$href_current_file'>Asia</a>, " ; }
+      if ($region ne 'america')    { $out_html .= "<a href='$root/EN_America/$href_current_file'>America's</a>, " ; }
+      if ($region ne 'europe')     { $out_html .= "<a href='$root/EN_Europe/$href_current_file'>Europe</a>, " ; }
+      if ($region ne 'india')      { $out_html .= "<a href='$root/EN_India/$href_current_file'>India</a>, " ; }
+      if ($region ne 'oceania')    { $out_html .= "<a href='$root/EN_Oceania/$href_current_file'>Oceania</a>, " ; }
+      if ($region ne 'artificial') { $out_html .= "<a href='$root/EN_Artificial/$href_current_file'>Artificial Languages</a>" ; }
       $out_html =~ s/, $// ;
     }
+
+  # if ($pageviews_non_mobile)
+  # {
+      $root = $mode_wp ? ".." : "../.." ;
+
+      $out_xref = "<a href='$root/EN/TablesPageViewsMonthlyAllProjects.htm'>All projects, </a>\n" ;
+      $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='$root/wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
+      $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='$root/wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
+      $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='$root/wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
+      $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='$root/EN/$href_current_file2'>Wikipedias, </a>\n") ;
+      $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='$root/wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
+      $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
+      $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='$root/wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
+      $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n") ;
+      $out_html .= "<p>Switch to All Platforms, $coverage2 " . $out_xref ;
+  # }
+
+
+    $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low, due to server overload.</font> " ;
+                 # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
+                 # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
+                 # "<hr>" ;
   }
 
   $out_html .= "<table border=1 cellspacing=0 id='table1' class=b style='margin-top:5px; border:solid 1px #000000' summary='Header comparison table'>\n" ;
@@ -3327,9 +3364,8 @@ sub GenerateComparisonTable
 
   &GenerateComparisonTableMonthlyData (ord (&yyyymm2b (2001,1)), $f, 0, 999, $true, $true) ;
 
-  if ($pageviews)
-  { # &GenerateComparisonTableMaxData (0) ;
-  }
+# if ($pageviews)
+# { &GenerateComparisonTableMaxData (0) ; }
 
 
 #  $line_languages =~ s/<\/?a[^>]*>//g ;
@@ -3537,7 +3573,7 @@ sub GenerateComparisonTable
                  "{ document.write (\"$legend\"); } \n" .
                  "<\/script>\n" ;
 
-      $out_html =~ s/(<hr[^>]*>)/$legend$out_xref$1/ ;
+    # $out_html =~ s/(<hr[^>]*>)/$legend$out_xref$1/ ;
     }
   }
 
@@ -3557,13 +3593,16 @@ sub GenerateComparisonTable
 
 sub GenerateComparisonTablePageviewsAllProjects
 {
-  my ($filter_source_normalized) = @_ ;
+  my ($normalized) = @_ ;
 
-  return if $pageviews_mobile ;
+  return if ! $pageviews_combined ;
   return if $mode ne 'wp' ; # test here to keep calling code simple
   return if ! $wikimedia ;  # test here to keep calling code simple
 
-  &LogT ("\nGenerateComparisonTablePageviewsAllProjects $filter_source_normalized") ;
+  my $javascript_ = $javascript ;
+  my $javascript  = $true ;
+
+  &LogT ("GenerateComparisonTablePageviewsAllProjects\n") ;
 
   $legend = "<table border='0'><tr><td valign=bottom><table border=1 cellspacing=0 id='legend' class=b style='margin-top:5px; border:solid 1px #000000'><tr>" .
              &TdBgColor ('I', '-50%') .
@@ -3580,7 +3619,8 @@ sub GenerateComparisonTablePageviewsAllProjects
              "</tr></table></td><td valign=bottom><table border='0'><tr><td>Percentage increase or decrease compared to previous $period</td></tr></table></td><tr></table>" ;
 
   $pageviews_all_projects = $true ;
-  &GenerateHtmlStartComparisonTables ;
+
+  my $content = &GenerateHtmlStartComparisonTables (-1, $normalized) ;
 
   if ($javascript)
   {
@@ -3590,9 +3630,6 @@ sub GenerateComparisonTablePageviewsAllProjects
                "<\/script>\n" ;
     $out_html =~ s/(<hr[^>]*>)/$legend$1/ ;
   }
-
-  $javascript_ = $javascript ;
-  $javascript  = $true ;
 
 #  if ($pageviews_mobile)
 #  {
@@ -3607,41 +3644,101 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   # $out_html .= "<p><b><font color='#600000'>Everything on this page is about page views, except links named 'Edit Trend'</font></b>" ;
 
-  $out_html .= "<b><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are too low.</font></b> " .
-               "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
-               "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<hr><p>" ;
+  $out_html .= "$legend_pageviews_monthly<hr>\n";
 
-  $out_html .= $legend_pageviews_monthly ;
+  $out_html .= "<p><h2>$content</h2><p>" ;
 
-  if ($pageviews_mobile)
+# if ($pageviews_mobile)
+# {
+#   $href_normalized     = 'TablesPageViewsMonthlyAllProjectsMobile.htm' ;
+#   $href_not_normalized = 'TablesPageViewsMonthlyAllProjectsOriginalMobile.htm' ;
+# }
+# else
+# {
+#   $href_normalized     = 'TablesPageViewsMonthlyAllProjects.htm' ;
+#   $href_not_normalized = 'TablesPageViewsMonthlyAllProjectsOriginal.htm' ;
+# }
+
+  $href_normalized     = 'TablesPageViewsMonthlyAllProjects.htm' ;
+  $href_not_normalized = 'TablesPageViewsMonthlyAllProjectsOriginal.htm' ;
+
+  if ($normalized)
   {
-    $href_normalized     = 'TablesPageViewsMonthlyAllProjectsMobile.htm' ;
-    $href_not_normalized = 'TablesPageViewsMonthlyAllProjectsOriginalMobile.htm' ;
+    $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison.." .
+                 "<p>Switch to All Projects, All Platforms, <a href='$href_not_normalized'>Raw Data.</a>" ;
+    $coverage3 = "Normalized, " ;
   }
   else
   {
-    $href_normalized     = 'TablesPageViewsMonthlyAllProjects.htm' ;
-    $href_not_normalized = 'TablesPageViewsMonthlyAllProjectsOriginal.htm' ;
+    $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days..<p>" .
+                 "<p>Switch to All Projects, All Platforms, <a href='$href_normalized'>Normalized</a>." ;
+    $coverage3 = "Raw Data, " ;
   }
 
-  if ($filter_source_normalized =~ /not-normalized/)
-  { $out_html .= "<p><b><font color=#800000>View counts on this page have <font color=#FF0000>not</font> been normalized to months of 30 days.</font></b>. " .
-                 "For fairer comparison of monthly trends <a href='$href_normalized'>switch to normalized version</a>." ; }
-  else
-  { $out_html .= "<p><b><font color=#008000>View counts on this page have been normalized to months of 30 days, for fair comparison.</font></b>. " .
-                 "<a href='$href_not_normalized'>Switch to not normalized version.</a>" ; }
+  $root = $testmode ? ".." : "../.." ;
+
+  $out_html .= "<p>Switch to All Platforms, " ;
+  $out_html .= "<a href='$root/wikibooks/EN/$href_current_file'>Wikibooks, </a>\n" ;
+  $out_html .= "<a href='$root/wiktionary/EN/$href_current_file'>Wiktionaries, </a>\n" ;
+  $out_html .= "<a href='$root/wikinews/EN/$href_current_file'>Wikinews, </a>\n" ;
+  $out_html .= "<a href='$root/EN/$href_current_file'>Wikipedias, </a>\n" ;
+  $out_html .= "<a href='$root/wikiquote/EN/$href_current_file'>Wikiquotes, </a>\n" ;
+  $out_html .= "<a href='$root/wikisource/EN/$href_current_file'>Wikisources, </a>\n" ;
+  $out_html .= "<a href='$root/wikiversity/EN/$href_current_file'>Wikiversities, </a>\n" ;
+  $out_html .= "<a href='$root/wikispecial/EN/$href_current_file'>Wikispecial</a>\n" ;
+
+  $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+              # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
+              # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low." .
+              # "<hr><p>" ;
 
   $out_html .= "<table border=1 cellspacing=0 id='table1' class=b style='margin-top:5px; border:solid 1px #000000' summary='Header comparison table'>\n" ;
 
   &Log ("\n") ;
-  my ($key1,$key2,$html) ;
+  my ($topic,$id,$html) ;
   $month_lo_pageviews = 999 ;
+  # add data for non-mobile projects
   foreach $code (qw (wb wk wn wp wq ws wv wx)) # in case of wx (wikispecial), file contains only results for commons
   {
     $path_in_views = $path_in ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
-    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
 
+    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+    if (! -e $file_views_html)
+    { print "$file_views_html not found\n" ; next ; }
+
+    $str_normalized = $normalized ? 'normalized' : 'not-normalized' ;
+
+    print "Read $file_views_html\n" ;
+    open CSV, '<', $file_views_html ;
+    while ($line = <CSV>)
+    {
+      next if $line !~ /^non-mobile,$str_normalized,/ ;
+      chomp $line ;
+      ($dummy1,$dummy2,$topic,$id,$html) = split (',', $line) ;
+      $html =~ s/&comma;/,/g ;
+      $html =~ s/&linebreak;/\n/g ;
+
+      # find first and last month to show
+      if ($id =~ /header_\d+/)
+      {
+        ($id2 = $id) =~ s/[^\d]//g ;
+        if ($id2 < $month_lo_pageviews)
+        { $month_lo_pageviews = $id2 ; }
+        if ($id2 > $month_hi_pageviews)
+        { $month_hi_pageviews = $id2 ; }
+      }
+      $html_pageviews_all_projects {"$code,$topic,$id"} = $html ;
+    }
+  }
+
+  # add data for mobile wikipedia
+  foreach $code (qw (wp))
+  {
+    $path_in_views = $path_in ;
+    $path_in_views =~ s/csv_$mode/csv_$code/ ;
+
+    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
     if (! -e $file_views_html)
     { print "$file_views_html not found\n" ; next ; }
 
@@ -3649,58 +3746,96 @@ sub GenerateComparisonTablePageviewsAllProjects
     open CSV, '<', $file_views_html ;
     while ($line = <CSV>)
     {
-      next if $line !~ /^$filter_source_normalized/ ;
+
+      next if $line !~ /^mobile,$str_normalized/ ;
       chomp $line ;
-      $line =~ s/$filter_source_normalized,// ;
-      ($key1,$key2,$html) = split (',', $line) ;
+      ($dummy1,$dummy2,$topic,$id,$html) = split (',', $line) ;
       $html =~ s/&comma;/,/g ;
-    # &Log ("< $line = $key1 $key2 $html\n") ;
       $html =~ s/&linebreak;/\n/g ;
 
-      if ($key2 =~ /header_\d+/)
+      # find first and last month to show
+      if ($id =~ /header_\d+/)
       {
-        ($key2b = $key2) =~ s/[^\d]//g ;
-        if ($key2b < $month_lo_pageviews)
-        { $month_lo_pageviews = $key2b ; }
-        if ($key2b > $month_hi_pageviews)
-        { $month_hi_pageviews = $key2b ; }
+        ($id2 = $id) =~ s/[^\d]//g ;
+        if ($id2 < $month_lo_pageviews)
+        { $month_lo_pageviews = $id2 ; }
+        if ($id2 > $month_hi_pageviews)
+        { $month_hi_pageviews = $id2 ; }
       }
-      $html_pageviews_all_projects {"$code,$key1,$key2"} = $html ;
-      $html_row_keys_all_projects  {$key1}++ ;
+      $html_pageviews_all_projects {"$code.m,$topic,$id"} = $html ;
     }
   }
-  print "\n\$month_hi_pageviews $month_hi_pageviews\n" ;
-  print "\$month_lo_pageviews $month_lo_pageviews\n" ;
+
+  # add data for all platforms for wikipedia
+  foreach $code (qw (wp))
+  {
+    $path_in_views = $path_in ;
+    $path_in_views =~ s/csv_$mode/csv_$code/ ;
+
+    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+    if (! -e $file_views_html)
+    { print "$file_views_html not found\n" ; next ; }
+
+    print "Read $file_views_html\n" ;
+    open CSV, '<', $file_views_html ;
+    while ($line = <CSV>)
+    {
+
+      next if $line !~ /^combined,$str_normalized/ ;
+      chomp $line ;
+      ($dummy1,$dummy2,$topic,$id,$html) = split (',', $line) ;
+      $html =~ s/&comma;/,/g ;
+      $html =~ s/&linebreak;/\n/g ;
+
+      # find first and last month to show
+      if ($id =~ /header_\d+/)
+      {
+        ($id2 = $id) =~ s/[^\d]//g ;
+        if ($id2 < $month_lo_pageviews)
+        { $month_lo_pageviews = $id2 ; }
+        if ($id2 > $month_hi_pageviews)
+        { $month_hi_pageviews = $id2 ; }
+      }
+      $html_pageviews_all_projects {"$code.c,$topic,$id"} = $html ;
+    }
+  }
+
+  # print "\n\$month_hi_pageviews $month_hi_pageviews\n" ; # qqq
+  # print "\$month_lo_pageviews $month_lo_pageviews\n" ;
 
   $out_html .= "<p>\n\n<table border=1>\n" ;
 
   my %project_names ;
-  $project_names {'wb'} = 'wikibooks' ;
-  $project_names {'wk'} = 'wiktionary' ;
-  $project_names {'wn'} = 'wikinews' ;
-  $project_names {'wp'} = 'wikipedia' ;
-  $project_names {'wq'} = 'wikiquote' ;
-  $project_names {'ws'} = 'wikisource' ;
-  $project_names {'wv'} = 'wikiversity' ;
-  $project_names {'wx'} = 'commons' ;
+  $project_names {'wb'}   = 'wikibooks' ;
+  $project_names {'wk'}   = 'wiktionary' ;
+  $project_names {'wn'}   = 'wikinews' ;
+  $project_names {'wp'}   = 'wikipedia<br>non-mobile' ;
+  $project_names {'wp.m'} = 'wikipedia<br>mobile' ;
+  $project_names {'wp.c'} = 'wikipedia<br>total' ;
+  $project_names {'wq'}   = 'wikiquote' ;
+  $project_names {'ws'}   = 'wikisource' ;
+  $project_names {'wv'}   = 'wikiversity' ;
+  $project_names {'wx'}   = 'commons' ;
 
   $url_report_pageviews {'wb'} = "http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm" ;
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wp wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   {
-    if ($pageviews_normal)
+    if ($pageviews_non_mobile)
     {
       $root = "http://stats.wikimedia.org" ;
 
-      if ($code eq 'wb') { $link = "<a href='$root/wikibooks/EN/TablesPageViewsMonthly.htm'>Wikibooks</a>" ; }
-      if ($code eq 'wk') { $link = "<a href='$root/wiktionary/EN/TablesPageViewsMonthly.htm'>Wiktionaries</a>" ; }
-      if ($code eq 'wn') { $link = "<a href='$root/wikinews/EN/TablesPageViewsMonthly.htm'>Wikinews</a>" ; }
-      if ($code eq 'wp') { $link = "<a href='$root/EN/TablesPageViewsMonthly.htm'>Wikipedia</a>" ; }
-      if ($code eq 'wq') { $link = "<a href='$root/wikiquote/EN/TablesPageViewsMonthly.htm'>Wikiquote</a>" ; }
-      if ($code eq 'ws') { $link = "<a href='$root/wikisource/EN/TablesPageViewsMonthly.htm'>Wikisource</a>" ; }
-      if ($code eq 'wv') { $link = "<a href='$root/wikiversity/EN/TablesPageViewsMonthly.htm'>Wikiversity</a>" ; }
-      if ($code eq 'wx') { $link = "<a href='$root/wikispecial/EN/TablesPageViewsMonthly.htm'>Commons</a>" ; }
+      if ($code eq 'wb')   { $link = "<a href='$root/wikibooks/EN/TablesPageViewsMonthly.htm'>Wikibooks<br>&nbsp;</a>" ; }
+      if ($code eq 'wk')   { $link = "<a href='$root/wiktionary/EN/TablesPageViewsMonthly.htm'>Wiktionaries<br>&nbsp;</a>" ; }
+      if ($code eq 'wn')   { $link = "<a href='$root/wikinews/EN/TablesPageViewsMonthly.htm'>Wikinews<br>&nbsp;</a>" ; }
+      if ($code eq 'wp')   { $link = "<a href='$root/EN/TablesPageViewsMonthly.htm'>Wikipedia<br>Non-mobile</a>" ; }
+      if ($code eq 'wp.m') { $link = "<a href='$root/EN/TablesPageViewsMonthlyMobile.htm'>Wikipedia<br>Mobile</a>" ; }
+      if ($code eq 'wp.c') { $link = "<a href='$root/EN/TablesPageViewsMonthlyMobile.htm'>Wikipedia<br>Total</a>" ; }
+      if ($code eq 'wq')   { $link = "<a href='$root/wikiquote/EN/TablesPageViewsMonthly.htm'>Wikiquote<br>&nbsp;</a>" ; }
+      if ($code eq 'ws')   { $link = "<a href='$root/wikisource/EN/TablesPageViewsMonthly.htm'>Wikisource<br>&nbsp;</a>" ; }
+      if ($code eq 'wv')   { $link = "<a href='$root/wikiversity/EN/TablesPageViewsMonthly.htm'>Wikiversity<br>&nbsp;</a>" ; }
+      if ($code eq 'wx')   { $link = "<a href='$root/wikispecial/EN/TablesPageViewsMonthly.htm'>Commons<br>&nbsp;</a>" ; }
       $line_html .= &th("&nbsp;$link&nbsp;") ;
     }
     else
@@ -3709,33 +3844,36 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= &tr ($line_html) ;
 
   $line_html = &the ;
-  foreach $code (qw (wb wk wn wp wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wq ws wv wx))
   {
-    if ($code eq 'wb') { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wk') { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wn') { $link = "$root/wikinews/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wp') { $link = "$root/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wq') { $link = "$root/wikiquote/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'ws') { $link = "$root/wikisource/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wv') { $link = "$root/wikiversity/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wx') { $link = "$root/wikispecial/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wn')   { $link = "$root/wikinews/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wp')   { $link = "$root/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wp.m') { $link = "$root/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wp.c') { $link = "$root/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wq')   { $link = "$root/wikiquote/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'ws')   { $link = "$root/wikisource/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wv')   { $link = "$root/wikiversity/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wx')   { $link = "$root/wikispecial/EN/PlotEditsZZ.png" ; }
     $line_html .= &tdcb ("<a href='$link'>Edit Trends</a>") ;
   }
   $out_html .= &tr ($line_html) ;
 
-  foreach $key1 (qw (year_trend view_rates sparklines forecast forecast2))
+  foreach $topic (qw (year_trend view_rates sparklines forecast forecast2))
   {
-    $line_html = $html_pageviews_all_projects {"wp,$key1,header"} ;
+    $line_html = $html_pageviews_all_projects {"wp,$topic,header"} ;
 
-    if ($key1 =~ /year_trend|forecast/)
+    if ($topic =~ /year_trend|forecast/)
     { $line_html .= "\n<script language='javascript'>\n" ; }
 
-    foreach $code (qw (wb wk wn wp wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
     {
-      $cell_html = $html_pageviews_all_projects {"$code,$key1,data"} ;
+      $cell_html = $html_pageviews_all_projects {"$code,$topic,data"} ;
+
       if ($cell_html eq '')
       {
-        if ($key1 =~ /year_trend|forecast|forecast2/)
+        if ($topic =~ /year_trend|forecast|forecast2/)
         { $cell_html = "tdg('');" ; }
         else
         { $cell_html = "<td>&nbsp;</td>" ; }
@@ -3743,7 +3881,7 @@ sub GenerateComparisonTablePageviewsAllProjects
       $line_html .= $cell_html ;
     }
 
-    if ($key1 =~ /year_trend|forecast|forecast2/)
+    if ($topic =~ /year_trend|forecast|forecast2/)
     { $line_html .= "\n</script>\n" ; }
 
     $out_html .= &tr ($line_html) ;
@@ -3755,7 +3893,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     next if $line_html eq '' ;
 
     $line_html .= "\n<script language='javascript'>\n" ;
-    foreach $code (qw (wb wk wn wp wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
@@ -3767,11 +3905,11 @@ sub GenerateComparisonTablePageviewsAllProjects
   }
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wp wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
   $out_html .= &tr ($line_html) ;
 
-  #    &GenerateComparisonTableEditPlots ;
+#    &GenerateComparisonTableEditPlots ;
 #    &GenerateComparisonTableYearlyGrowth (0) ;
 #    &GenerateComparisonTableViewRates (0) ;
 #    &GenerateComparisonTableSparklinesWithBars ;
@@ -3788,14 +3926,18 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $out_html .= "</body>\n</html>" ;
 
-  if ($filter_source_normalized =~ /not-normalized/)
-  { $file_html = $path_out . "TablesPageViewsMonthlyAllProjectsOriginal.htm" ; }
-  else
+  if ($normalized)
   { $file_html = $path_out . "TablesPageViewsMonthlyAllProjects.htm" ; }
+  else
+  { $file_html = $path_out . "TablesPageViewsMonthlyAllProjectsOriginal.htm" ; }
+
+  print "HTML FILE $file_html\n\n" ;
 
   open "FILE_HTML", ">", $file_html ;
   print FILE_HTML &AlignPerLanguage ($out_html) ;
   close "FILE_HTML" ;
+
+  $javascript = $javascript_ ;
 }
 
 sub BgColor
@@ -4468,7 +4610,6 @@ sub GenerateComparisonTableMonthlyData
 
   for (my $m = $dumpmonth_ord ; $m >= $m0 ; $m--)
   {
-
     $line_html = '' ;
     if (($m % 12 == 0) && ($m < $dumpmonth_ord) && ($m > $m0))
     {
@@ -4554,6 +4695,8 @@ sub GenerateComparisonTableMonthlyData
           }
         }
       }
+
+# print "$wp $m $value $total\n" ; # qqq
 
       if (($m < $MonthlyStatsWpStop {"zz"}) &&
           (($m == $MonthlyStatsWpStop {$wp}) && $MonthlyStatsWpIncomplete {$wp}))

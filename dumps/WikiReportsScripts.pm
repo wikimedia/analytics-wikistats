@@ -423,6 +423,108 @@ dev.off()
 
 __SCRIPT_EDIT_PLOT_ANONS__
 
+# PE = Plot Editors
+$out_script_plot_editors = <<__SCRIPT_EDIT_PLOT_EDITORS__ ;
+$out_script_multititle
+
+plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:5]
+counts   <- plotdata[2:4]
+dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
+dates
+
+plotdata = data.frame(date=dates,counts)
+plotdata
+attach (plotdata)
+
+#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
+ library(Cairo)
+ Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
+
+options("scipen"=20)
+r <- as.POSIXct(round(range(dates), "days"))
+r
+
+par(mar=c(2.5,4,2.5,1.5))
+par(oma=c(0,0,0,0))
+
+plot (dates,plotdata\$count_5,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
+
+axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
+
+title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+
+lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_25,col="COLOR_25", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=1.8)
+
+#legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits ", "(reg edits only)"), lty=1, lwd=2, col=c("COLOR_5","COLOR_25", "COLOR_100", "#F0F0F0"), inset=0.05, bg="#E0E0E0")
+legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.04, bg="#E0E0E0")
+
+mtext("max editors (5+ edits) in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("MAX_MONTH: EDITORS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
+
+box()
+dev.off()
+
+__SCRIPT_EDIT_PLOT_EDITORS__
+
+# PE = Plot Page Views
+$out_script_plot_pageviews = <<__SCRIPT_EDIT_PLOT_PAGEVIEWS__ ;
+$out_script_multititle
+
+plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:3]
+counts   <- plotdata[2:2]
+dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
+
+plotdata = data.frame(date=dates,counts)
+plotdata
+attach (plotdata)
+
+#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
+ library(Cairo)
+ Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
+
+options("scipen"=20)
+r <- as.POSIXct(round(range(dates), "days"))
+
+par(mar=c(3.5,4,2.5,1.5))
+par(oma=c(0,0,0,0))
+
+plot (dates,plotdata\$count_normalized,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+#axis(2, at=100000000*c(0:10),labels=100000000*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
+axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
+
+axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
+
+title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+
+lines(dates,plotdata\$count_normalized,col="green4", lty="solid", lwd=1.8)
+
+mtext("max page views in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("MAX_MONTH: VIEWS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
+mtext("page views have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)", cex=0.85, line=2.2, side=1, outer=FALSE, col="#808080")
+
+box()
+dev.off()
+
+__SCRIPT_EDIT_PLOT_PAGEVIEWS__
+
+
 
 $out_script_expand = <<__SCRIPT_EXPAND__ ;
 <script>

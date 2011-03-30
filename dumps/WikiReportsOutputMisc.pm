@@ -72,28 +72,117 @@ sub SpoolPreviousErrors
   }
 }
 
+#Hi Erik;
+#I have found a cool script for taking snapshots of webpages. I saw some time ago in your website a gallery with screenshots of Wikipedia mainpages. I loved that, and I have been searching for a script which works in Linux (you used urlbmp.exe, i guess).
+#The script is from a bot of RationalWiki.[1] I have tested it in my Linux PC and works fine (I attached you the files). You can run it:
+#python snap.py http://en.wikipedia.org --geometry 1024 1 > a.png
+#I have installed pyqt4-dev-tools and pyqt-tools with apt-get. It would be nice if you can run it in a cronjob in the WMF servers.
+#I will try it in Toolserver, but previously, I have to request to an admin to install those packages.
+#Regards,
+#emijrp
+#[1] http://rationalwiki.org/wiki/User:Capturebot2
+#[2] http://rationalwiki.org/wiki/User:Capturebot2/webkit2png.py
+
 sub GenerateGallery
 {
-  my $out_html = "<html><head><title>Wikipedia Main Page Gallery - screen shots taken on May 1, 2004</title></head>\n" .
-                 "<body bgcolor=black><table summary='Gallery'><tr>\n" ;
+  &LogT ("\nGenerate Gallery, mode $mode\n") ;
+  &LogT ("In:  $path_in\n") ;
+  &LogT ("Out: $path_out\n") ;
+
+  my $languages = @languages - 1 ; # minus 'zz'
+  my $date = &GetDate(time) ;
+
+  my $mode2 = ucfirst ($mode) ;
+  my $out_publication2 = $out_publication ;
+
+  if ($mode_wx)
+  { $out_publication2 = "Wikimedia Miscellaneous Projects" ; }
+
+  my $description = " Screenshots of $languages $out_publication2 main pages, collected on $date, sorted by average page views per project</a>. See <a href='index.html'><font color=#A0A0D0>more screenshots</font></a>" ;
+  my $footer  = "<small><font color=#A0A0A0> Screenshots collected with <a href='http://www.pixel-technology.com/freeware/url2bmp/'><font color=#A0A0D0>url2bmp.exe</font></a> (Windows freeware)<br>\n" .
+                " Please note: on a few pages javascript errors may have influenced page rendition<br>" .
+                " Script author: <a href='http://infodisiac.com'><font color=#A0A0D0>Erik Zachte</font></a></font></small>" ;
+  my $out_html = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+                 "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
+                 "<table summary='Gallery'><tr>\n" ;
+  my $out_html_40 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+                 "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
+                 "<table summary='Gallery'><tr>\n" ;
+  my $out_html_1024_768 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+                 "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
+                 "<table summary='Gallery'><tr>\n" ;
+  my $out_html_768_1024 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+                 "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
+                 "<table summary='Gallery'><tr>\n" ;
+
   foreach $wp (@languages)
   {
     if ($wp eq "zz") { next ; }
-    $out_bat .= "url2bmp.exe -url \"$wp.wikipedia.org\" -file \"$wp.png\" -format PNG -wx 1000 -wy 3000 -bx 400 -by 1200 -wait 1 -notinteractive\n" ;
-    $out_html .= "<td align='center' valign='top'>\n" .
-                 "<small><b><font color='#AAAAAA'>" . uc($wp) . "</font>" .
-                 "&nbsp;&nbsp;&nbsp;" .
-                 "<a href='http://$wp.wikipedia.org'><font color='#AAAAAA'>" . $out_languages {$wp} . "</font></a></small></b><p>" .
-                 "<img src='$wp.png'></td>\n" ;
-  }
-  $out_html .= "</tr></table></body>" ;
 
-  open "FILE_OUT", ">", $path_out . "Gallery.bat" ;
+    $gallery_image_list .= "'wp_$wp.png', // " . $out_languages {$wp} . "\n" ;
+
+    my $base = &GetProjectBaseUrl ($wp) ;
+    &LogT ("Base: " . sprintf ("%-10s", $wp) . " -> $base\n") ;
+
+    ($wp2 = $wp) =~ s/_/-/g ;
+    $url2bmp++ ;
+    $wait1 = '' ;
+    $wait2 = '' ;
+    if ($url2bmp % 3 == 0)
+    { $wait1 = "wait 1" ; }
+
+    # Q&D: download twice until bath image resize figured out with either convert.exe or nconvert.exe
+    $out_bat .= "rem url2bmp.exe -url \"$base?country=xx\" -file \"${mode}_$wp2.png\"      -format PNG -wx 1000 -wy 3000 -bx 1000 -by 3000 $wait1 -notinteractive\nrem $url2bmp/$languages\n" .
+                "rem url2bmp.exe -url \"$base?country=xx\" -file \"${mode}_${wp2}_40.png\" -format PNG -wx 1000 -wy 3000 -bx  250 -by 1200 $wait2 -notinteractive\nrem $url2bmp/$languages\n" .
+                "    url2bmp.exe -url \"$base?country=xx\" -file \"${mode}_$wp2_768_1024.png\"      -format PNG -wx 1024 -wy  768 -bx 1024 -by  768 $wait1 -notinteractive\nrem $url2bmp/$languages\n" .
+                "    url2bmp.exe -url \"$base?country=xx\" -file \"${mode}_$wp2_1024_768.png\"      -format PNG -wx  768 -wy 1024 -bx  768 -by 1024 $wait1 -notinteractive\nrem $url2bmp/$languages\n" ;
+                # "nconvert.exe -resize 40% 40% -o wx_commons_40.png wx_commons.png >> nconvert.txt 2>> nconvert2.err\n\n" ;
+    $out_html .= "<td align='center' valign='top'>\n" .
+                 "<small><b><font color='#AAAAAA'>" . uc($wp2) . "</font>" .
+                 "&nbsp;&nbsp;&nbsp;" .
+                 "<a href='$base'><font color='#AAAAAA'>" . $out_languages {$wp} . "</font></a></small></b><p>" .
+                 "<img src='${mode}_$wp2.png'></td>\n" ;
+    $out_html_40 .= "<td align='center' valign='top'>\n" .
+                 "<small><b><font color='#AAAAAA'>" . uc($wp2) . "</font>" .
+                 "&nbsp;&nbsp;&nbsp;" .
+                 "<a href='$base'><font color='#AAAAAA'>" . $out_languages {$wp} . "</font></a></small></b><p>" .
+                 "<img src='${mode}_${wp2}_40.png'></td>\n" ;
+    $out_html_1024_768 .= "<td align='center' valign='top'>\n" .
+                 "<small><b><font color='#AAAAAA'>" . uc($wp2) . "</font>" .
+                 "&nbsp;&nbsp;&nbsp;" .
+                 "<a href='$base'><font color='#AAAAAA'>" . $out_languages {$wp} . "</font></a></small></b><p>" .
+                 "<img src='${mode}_${wp2}_1024_768.png'></td>\n" ;
+    $out_html_768_1024 .= "<td align='center' valign='top'>\n" .
+                 "<small><b><font color='#AAAAAA'>" . uc($wp2) . "</font>" .
+                 "&nbsp;&nbsp;&nbsp;" .
+                 "<a href='$base'><font color='#AAAAAA'>" . $out_languages {$wp} . "</font></a></small></b><p>" .
+                 "<img src='${mode}_${wp2}_768_1024.png'></td>\n" ;
+  }
+  $out_html .= "</tr></table>\n<p>$footer</body>" ;
+  $out_html_40 .= "</tr></table>\n<p>$footer</body>" ;
+
+  open "FILE_OUT", ">", $path_out . "Gallery_$mode2.bat" ;
   print FILE_OUT $out_bat ;
   close "FILE_OUT" ;
 
-  open "FILE_OUT", ">", $path_out . "Gallery.htm" ;
+  open "FILE_OUT", ">", $path_out . "Gallery_$mode2.htm" ;
   print FILE_OUT $out_html ;
+  close "FILE_OUT" ;
+
+  open "FILE_OUT", ">", $path_out . "Gallery_${mode2}_40.htm" ;
+  print FILE_OUT $out_html_40 ;
+  close "FILE_OUT" ;
+
+  open "FILE_OUT", ">", $path_out . "Gallery_${mode2}_1024_768.htm" ;
+  print FILE_OUT $out_html_1024_768 ;
+  close "FILE_OUT" ;
+
+  open "FILE_OUT", ">", $path_out . "Gallery_${mode2}_768_1024.htm" ;
+  print FILE_OUT $out_html_768_1024 ;
+  close "FILE_OUT" ;
+
+  open "FILE_OUT", ">", $path_out . "Gallery_ImageList_${mode2}.txt" ;
+  print FILE_OUT $gallery_image_list ;
   close "FILE_OUT" ;
 }
 
@@ -646,7 +735,7 @@ sub TableSeeAlso
 
     if ($region eq '')
     {
-      if (($mode_wx) && ($growth_summary_generated))
+      if ((! $mode_wx) && ($growth_summary_generated))
       { $out_html .= &tr (&tdlb   (&w ("<a href='TablesWikipediaGrowthSummary.htm'>$out_creation_history</a>"))) ; }
 
       if ($mode_wx)
@@ -1013,8 +1102,12 @@ sub GenerateHtmlStartComparisonPlots
 
 sub GenerateHtmlStartComparisonTables
 {
+  &LogT ("GenerateHtmlStartComparisonTables\n") ;
+
   if ($pageviews)
   {
+    my ($dummy, $normalized) = @_ ;
+
     my $out_zoom = "" ;
     my $out_options = "" ;
     my $out_explanation = "" ;
@@ -1035,25 +1128,31 @@ sub GenerateHtmlStartComparisonTables
 
     $out_zoom = $out_color_buttons . " " . $out_zoom_buttons2 ;
 
-
     my ($out_html_title, $out_page_title) ;
+
     if ($pageviews_all_projects)
-    {
-      $out_html_title = "$out_wikimedia  $out_pageviews - All projects" ;
-      $out_page_title = "$out_wikimedia  $out_pageviews - All projects" ;
-    }
+    { $out_html_title = "$out_pageviews for <font color=#008000>$out_wikimedia, All Projects</font>" ; }
     else
-    {
-      $out_html_title = "$out_publication $out_pageviews" ;
-      $out_page_title = "$out_publication $out_pageviews" ;
-    }
+    { $out_html_title = "$out_pageviews for <font color=#008000>$out_publication</font>" ; }
 
     if ($region ne "")
-    {
-      $out_html_title .= " - " . ucfirst ($region) ;
-      $out_page_title .= " - " . ucfirst ($region) ;
-    }
+    { $out_html_title .= " for <font color=#008000>" . ucfirst ($region) . "</font>"; }
 
+    if ($pageviews_non_mobile)
+    { $out_html_title .= "<font color=#008000>, Non-mobile</font>" ; }
+    elsif ($pageviews_mobile)
+    { $out_html_title .= "<font color=#008000>, Mobile</font>" ; }
+    elsif ($pageviews_combined)
+    { $out_html_title .= "<font color=#008000>, All Platforms</font>" ; }
+
+    if ($normalized)
+    { $out_html_title .= "<font color=#008000>, Normalized</font>" ; }
+    else
+    { $out_html_title .= "<font color=#008000>, Raw data</font>" ; }
+
+    $out_page_title  = $out_html_title ;
+    $out_page_title2 = $out_html_title ;
+    $out_html_title  =~ s/<[^>]*>//g ;
 
     if (defined ($dumpdate_hi))
     {
@@ -1061,17 +1160,19 @@ sub GenerateHtmlStartComparisonTables
                            substr ($dumpdate_hi,6,2),
                            substr ($dumpdate_hi,4,2)-1,
                            substr ($dumpdate_hi,0,4)-1900) ;
-      $out_page_title .= "<b>" . &GetDate ($dumpdate2) . "<\/b>" ;
+      $out_page_title2 .= "<br><b>" . &GetDate ($dumpdate2) . "<\/b>" ;
     }
+
   #  $out_crossref = &GenerateCrossReference ($language) ;
 
   #  &ReadLog ($language) ;
 
-    &GenerateHtmlStart ($out_html_title,  $out_zoom,          $out_options,
-                        $out_page_title,  $out_page_subtitle, $out_explanation,
-                        $out_button_prev, $out_button_next,   $out_button_switch,
-                        $out_crossref,    $out_msg) ;
-    return ;
+    &GenerateHtmlStart ($out_html_title,   $out_zoom,          $out_options,
+                        $out_page_title2,  $out_page_subtitle, $out_explanation,
+                        $out_button_prev,  $out_button_next,   $out_button_switch,
+                        $out_crossref,     $out_msg) ;
+
+    return ($out_page_title) ;
   }
 
   my $ndx_report = shift ;
@@ -1080,7 +1181,7 @@ sub GenerateHtmlStartComparisonTables
   my $out_page_title    = $out_statistics ;
   my $out_page_subtitle = $out_report_descriptions [$ndx_report] ;
 
-    print "ndx_report $ndx_report out_page_subtitle $out_page_subtitle\n" ;
+  print "ndx $ndx_report -> page subtitle '$out_page_subtitle'\n" ;
 
   my $out_html_title    = $out_statistics . " - Tables - " . $out_page_subtitle ;
   my $out_explanation   = $out_tbl3_legend [$ndx_report] ;
@@ -1178,6 +1279,8 @@ sub GenerateHtmlStartComparisonTables
                       $out_page_title,  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
+
+  return $out_html_title ;
 }
 
 sub GenerateHtmlStart
@@ -1354,7 +1457,7 @@ sub GenerateColophon
                          substr ($dumpdate_hi,0,4)-1900) ;
   }
 
-  $path_scripts = "http://stats.wikimedia.org/scripts.zip" ;
+  $path_about = "http://stats.wikimedia.org/index.html#fragment-14" ;
 
   if ($out_delay ne "")
   { $out_delay = "$out_delay<p>" ; }
@@ -1374,8 +1477,7 @@ sub GenerateColophon
                $out_author . ":" . $out_myname .
                " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
                ($wikimedia ? $out_mail . ":" . $out_mymail . "<br>\n" : "") .
-               ($wikimedia ? $out_documentation . "<br>\n" : "" ) .
-               ($wikimedia ? $out_scripts . ": <a href='$path_scripts'>scripts.zip</a>\n" : "") .
+               ($wikimedia ? "$out_documentation / $out_scripts / $out_csv_files" . ": <a href='$path_about'>About WikiStats</a>\n" : "") .
                $out_translator . "\n" .
                $out_ploticus2 . $out_r . "\n" .
                ((! $wikimedia && $mail ne "") ? "<p>" .$siteadmin . "\n" . $mail . "\n" : "") .

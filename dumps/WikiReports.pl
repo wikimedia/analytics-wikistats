@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Copyright (C) 2003-2010 Erik Zachte , email erikzachte\@xxx.com (nospam: xxx=infodisiac)
+# Copyright (C) 2003-2008 Erik Zachte , email ezachte a-t wikimedia d-o-t org
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2
 # as published by the Free Software Foundation.
@@ -7,71 +7,105 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the GNU General Public License for more details, at
-# http://www.fsf.org/licenses/gpl.html
-
-# Disclaimer: most of these sources have been developed in limited free time.  
-# Over the years complexity of the sources grew, sometimes at the expense of maintainability.
-# Some design decisions have not scaled well.
-# Some parts of the code are hard to read due to overly concise or obscure variable names
-# (WikiCounts.. files suffer less from this than WikiReports.. files).
-# although in general I try to choose descriptive variable and function names.
-# There is little documentation, too few comments in the code. 
-# Sometimes obsolete code has been commented out rather than deleted to ease re-activation.
-# Some code contains hard coded file paths mainly to Erik's test environment (Windows)
-
-# On the bright side: 
-# Most code produces a decent audit trail, which can help understand process flow. 
-# Great care has been taken to produce output that is tuned to each specific project. 
+# http://www.fsf.org/licenses/gpl.html                                                                                         =
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
-  ez_lib_version (11) ;
+  ez_lib_version (14) ;
 
-# set defaults mainly for tests on local machine
-# default_argv "-a|-m wk|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wk'|-o 'D:\@Wikimedia\\# Out Test\\htdocs2'" ;
-# default_argv "-g|-t|-m wp|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wp'|-o 'D:\@Wikimedia\\# Out Test\\htdocs\\'" ;
-# default_argv "-t|-m wx|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wx'|-o 'D:\@Wikimedia\\# Out Test\\htdocs\\wikispecial'" ;
-# default_argv "-v m|-n|-g|-t|-m wp|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wp'|-o 'D:\@Wikimedia\\# Out Test\\htdocs'" ; # for page views
-#  default_argv "-r africa|-g|-t|-m wp|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wp'|-o 'D:\@Wikimedia\\# Out Test\\htdocs'" ;
-# default_argv "-g|-t|-m wp|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wp'|-o 'D:\@Wikimedia\\# Out Test\\htdocs'" ;
- default_argv "-v m|-r africa|-n|-g|-t|-m wp|-l en|-i 'D:\@Wikimedia\\# Out Bayes\\csv_wp'|-o 'D:\@Wikimedia\\# Out Test\\htdocs'" ;
+# build argument list for test run in OptiPerl IDE (Erik's home test env)
+# arguments are parsed in WikiReportsInput:ParseArguments
+  if (! $job_runs_on_production_server)
+  {
+    # push @arguments, '-a' ;       # generate input files (.js) for animations, see e.g.
+                                    # http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWp.html
+                                    # mutually exclusive with other reporting
+
+    # push @arguments, '-v m' ;     # generate tables with pageviews per wiki: mobile sites
+                                    # e.g. http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+                                    # mutually exclusive with other reporting
+    # push @arguments, '-v n' ;     # generate tables with pageviews per wiki: non-mobile traffic
+                                    # e.g. http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm
+                                    # mutually exclusive with other reporting
+      push @arguments, '-v c' ;     # generate tables with pageviews per wiki: mobile + non-mobile traffic
+                                    # e.g. http://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm
+                                    # mutually exclusive with other reporting
+    # push @arguments, '-n' ;       # normalize monthly page view data (see -v) to 30 days for each month
+
+    # push @arguments, '-G' ;       # generate .html and .bat (DOS batch) files to get screen shots of all Wikimedia main pages, using url2bmp.exe (Windows only)
+                                    # mutually exclusive with other reporting
+
+    # push @arguments, '-c' ;       # generate category trees
+                                    # mutually exclusive with other reporting
+
+    # push @arguments, '-r india' ; # only one region per run, no region specified -> all languages
+    # push @arguments, '-r africa' ;
+    # push @arguments, '-r america' ;
+    # push @arguments, '-r asia' ;
+    # push @arguments, '-r europe' ;
+    # push @arguments, '-r oceania' ;
+    # push @arguments, '-r articifial' ;
+
+    $mode = 'wp' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
+    $mode =~ s/\s//g ;
+    push @arguments, "-m $mode" ;
+
+       if ($mode eq 'wb') { $folder = 'wikibooks' ; }
+    elsif ($mode eq 'wk') { $folder = 'wiktionary' ; }
+    elsif ($mode eq 'wn') { $folder = 'wikinews' ; }
+    elsif ($mode eq 'wp') { ; }
+    elsif ($mode eq 'wq') { $folder = 'wikiquote' ; }
+    elsif ($mode eq 'ws') { $folder = 'wikisource' ; }
+    elsif ($mode eq 'wv') { $folder = 'wikiversity' ; }
+    elsif ($mode eq 'wx') { $folder = 'wikispecial' ; }
+
+    push @arguments, '-l en' ;    # output language (ISO codes), see WikiReportsLiterals for acceptable codes
+
+    push @arguments, "-i 'W:\\# Out Bayes\\csv_$mode'" ;           # input directory: csv files
+    if (join ('|', @arguments) =~ /-a/)
+    { push @arguments, "-o 'W:\\\@ Main Page Gallery'" ; }         # output directory: batch files for capturing all Wikimedia main pages
+    else
+    { push @arguments, "-o 'W:\\# Out Test\\htdocs\\$folder'" ; }  # output directory: html files, image files (plots)
+
+    push @arguments, '-g' ; # convert generated gif (Ploticus) nconvert.exe, on Windows platform only
+
+    push @arguments, '-t' ; # test mode
+
+    # push @arguments, '-p [some path]' ; # path to Ploticus exe
+    # push @arguments, '-s wikimedia' ; # site for which stats are run
+  }
+
+  default_argv (join ("\|", @arguments)) ;
 
 # to do
 # change: figures for first months are too low -> figures for early 2001
-
 # and remove this notice at all on project pages that start to report from 2002 or later
 
-
-  # use Statistics:LineFit ;
-  # use warnings ;
-  # use strict 'vars' ;
-
-  use WikiReportsInput ;
-  use WikiReportsOutputTables ;
-  use WikiReportsOutputCharts ;
-  use WikiReportsOutputPlots ;
-  use WikiReportsOutputMisc ;
-
-  use WikiReportsOutputAnimations ;
-  use WikiReportsOutputCategories ;
-  use WikiReportsOutputTimelines ;
-  use WikiReportsOutputWikibooks ;
-  use WikiReportsOutputPageViews ;
-  use WikiReportsProcessReverts ;
-  use WikiReportsOutputEditHistory ;
-
-  use WikiReportsScripts ;
+  use WikiReportsConversions ;
   use WikiReportsDate ;
   use WikiReportsHtml ;
-  use WikiReportsConversions ;
-  use WikiReportsLocalizations ;
+  use WikiReportsInput ;
   use WikiReportsLiterals ;
+  use WikiReportsLocalizations ;
   use WikiReportsNoWikimedia ;
+  use WikiReportsOutputAnimations ;
+  use WikiReportsOutputCategories ;
+  use WikiReportsOutputCharts ;
+  use WikiReportsOutputEditHistory ;
+  use WikiReportsOutputMisc ;
+  use WikiReportsOutputPageViews ;
+  use WikiReportsOutputPlots ;
+  use WikiReportsOutputSummaries ;
+  use WikiReportsOutputTables ;
+  use WikiReportsOutputTimelines ;
+  use WikiReportsOutputWikibooks ;
+  use WikiReportsProcessReverts ;
+  use WikiReportsScripts ;
 
   no warnings 'uninitialized';
 
-  $version   = "2.5" ;
+  $version   = "2.6" ; # versioning has not been maintained consistently
   $timestart = time ;
   $Kb        = 1024 ;
   $Mb        = $Kb * $Kb ;
@@ -118,6 +152,7 @@
     &GenerateAnimationsInputSizeAndCommunity ;
     &LogT ("Ready\n") ;
     close "FILE_LOG" ;
+    exit ;
   }
 
   &SetScripts ;
@@ -126,11 +161,11 @@
   {
     &LogT ("\nRead Monthly Statistics") ;
     &ReadMonthlyStats ;
-    &LogT ("\nWrite Page Views Totals Report") ;
+    &LogT ("\nWrite Page Views Totals Report\n") ;
     &WritePageViewsMonthly ;
     &WriteMonthlyStatsHtmlAllProjects ;
-    &GenerateComparisonTablePageviewsAllProjects ('non-mobile,normalized') ;
-    &GenerateComparisonTablePageviewsAllProjects ('non-mobile,not-normalized') ;
+    &GenerateComparisonTablePageviewsAllProjects ($true) ;  # normalized
+    &GenerateComparisonTablePageviewsAllProjects ($false) ; # not normalized
     &LogT ("\n\nExecution took " . ddhhmmss (time - $timestart). ".\n") ;
     &LogT ("Ready\n") ;
     close "FILE_LOG" ;
@@ -153,12 +188,13 @@
   &LogT ("\nRead Monthly Statistics") ;
   &ReadMonthlyStats ;
 
-#&GenerateTableZeitGeist ('commons') ;
-# generate .html and .bat (DOS batch) files to get screen shots of all Wikipedia main pages
-# reduced to 40% using url2bmp.exe
-#  &GenerateSiteMap ;
-# &GenerateGallery ;
-# exit ;
+  if ($dump_gallery)
+  {
+    # generate .html and .bat (DOS batch) files to get screen shots of all Wikipedia main pages
+    # reduced to 40% using url2bmp.exe
+    &GenerateGallery ;
+    exit ;
+  }
 
   &LogT ("\nGenerate Current Status") ;
   if (! $singlewiki)
@@ -169,6 +205,12 @@
   { &GenerateSiteMapNew ; }
   else
   { &GenerateSiteMap ; }
+
+ if ($mode_wp && ($language eq "en"))
+ {
+   &LogT ("\nGenerate Summaries Per Wiki") ;
+   &GenerateSummariesPerWiki ;
+ }
 
 # &GenerateTablesPerWiki ("zz") ;
 # &GenerateComparisonTables ;
@@ -233,7 +275,7 @@
   if ($mode_wp)
   { &GenerateTablesPerWiki ("zzz") ; }
 
-  &LogT ("\nGenerate Wikipedia Specific Charts") ;
+  &LogT ("\nGenerate Wikipedia Specific Charts" ) ;
   foreach $wp (@languages)
   { &GenerateChartsPerWikipedia ($wp) ; }
   if ($mode_wp)

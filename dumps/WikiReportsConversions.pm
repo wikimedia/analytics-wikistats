@@ -170,7 +170,7 @@ sub m2mmddyyyy
   { return (sprintf ("%02d/%02d/%04d", $dumpmonth, $dumpday, $dumpyear)) ; }
 }
 
-# code year,month as monthes since january 2000 (1 byte)
+# code year,month as monthes since 1 january 2000 (1 byte)
 sub yyyymm2b
 {
   my $year  = shift ;
