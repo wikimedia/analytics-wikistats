@@ -36,7 +36,21 @@ sub ParseArguments
   $normalize_days_per_month = $options {"n"} ;
   $dump_gallery  = $options {"G"} ;
 
-# Indian languages
+  if ($mode eq "")
+  { $mode = "wp" ; }
+  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx)$/)
+  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial)") ; }
+
+  if ($mode eq "wb") { $mode_wb = $true ; }
+  if ($mode eq "wk") { $mode_wk = $true ; }
+  if ($mode eq "wn") { $mode_wn = $true ; }
+  if ($mode eq "wp") { $mode_wp = $true ; }
+  if ($mode eq "wq") { $mode_wq = $true ; }
+  if ($mode eq "ws") { $mode_ws = $true ; }
+  if ($mode eq "wv") { $mode_wv = $true ; }
+  if ($mode eq "wx") { $mode_wx = $true ; }
+
+  # Indian languages
 # as Assamese (http://as.wikipedia.org)
 # bn Bengali (http://bn.wikipedia.org)
 # bh Bhojpuri (http://bh.wikipedia.org)
@@ -174,7 +188,7 @@ sub ParseArguments
       $keys_html_pageviews_all_projects = 'combined,' ;
       print "Generate page views report for mobile + non-mobile site" ;
     }
-    else { abort ("Invalid option for pageviews: specify '-v n' for non-mobile or '-v m' for mobile data") ; }
+    else { abort ("Invalid option for pageviews: specify '-v n' for non-mobile or '-v m' for mobile data or '-v c' for combination") ; }
 
     $pageviews = $true ;
 
@@ -186,22 +200,12 @@ sub ParseArguments
     print "\nCollect pageviews for $keys_html_pageviews_all_projects\n\n" ;
   }
 
+  if ($pageviews && (! $pageviews_non_mobile) && (! $mode_wp))
+  { abort ("For all projects expect Wikipedia only render page views reports for 'non-mobile' aka 'normal'") ; }
+
   if (defined $animation)
   { undef $pageviews ; undef $categorytrees ; }
 
-  if ($mode eq "")
-  { $mode = "wp" ; }
-  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx)$/)
-  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial)") ; }
-
-  if ($mode eq "wb") { $mode_wb = $true ; }
-  if ($mode eq "wk") { $mode_wk = $true ; }
-  if ($mode eq "wn") { $mode_wn = $true ; }
-  if ($mode eq "wp") { $mode_wp = $true ; }
-  if ($mode eq "wq") { $mode_wq = $true ; }
-  if ($mode eq "ws") { $mode_ws = $true ; }
-  if ($mode eq "wv") { $mode_wv = $true ; }
-  if ($mode eq "wx") { $mode_wx = $true ; }
 
 # if (! ($dumpdate =~ m/^\d{8,8}$/))
 # { abort ("Specify SQL dump date as: -d yyyymmdd\n") ; }

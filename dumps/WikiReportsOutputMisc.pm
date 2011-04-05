@@ -455,18 +455,22 @@ sub GenerateSiteMapNew
 
         $code_website = "<a href='${out_urls {$wpc}}'>$wpc3</a>" ;
 
-
         if ($sitemap_new_layout)
         {
         # $out_html .= &tr (&tdimg ("<a href='TablesWikipedia" . uc($wpc) . ".htm'><img src='../Tables.png'></a> " .
         # $out_language_article = "<a href='" . $out_article {$wpc} . "'><b><font size=+1 color='#0000A0' face=\'Times'>W</font></b></a>" ;
         # $out_language_article = "[<a href='" . $out_article {$wpc} . "'>?</a>]" ;
           $out_language_article = "<a href='" . $out_article {$wpc} . "'>?</a> |" ;
+
+          $dir_all_languages = '' ;
+          if ($region ne '')
+          { $dir_all_languages = '../EN/' ; }
+
           $out_html .= &tr (
                           # &tdcb ($out_language_article .
                           # "<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
-                            &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
-                            &tdcb (&w("<a href='ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
+                            &tdcb (&w("<a href='${dir_all_languages}TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
+                            &tdcb (&w("<a href='${dir_all_languages}ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
                           # &tdcb ("<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
                             (($wikimedia && (!$mode_wx)) ? &tdcb ($code_website) : &tdlb ($code_website)) .
                           # (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ($out_language_name . ' ' . $out_language_article) : "") : "") .
@@ -511,7 +515,7 @@ sub GenerateSiteMapNew
     { $out_html .= "<h2>" . $out_btn_charts . "</h2>\n" ; }
   }
 
-  $out_html .= "<a id='see_also' name='see_also'><table class='l' border=1 cellspacing=0 id=table3 style='' summary=''>\n" ;
+  $out_html .= "<a id='see_also' name='see_also'></a><table class='l' border=1 cellspacing=0 id=table3 style='' summary=''>\n" ;
 
   if ((! $mode_wx) && (! $singlewiki))
   {
@@ -1102,7 +1106,7 @@ sub GenerateHtmlStartComparisonPlots
 
 sub GenerateHtmlStartComparisonTables
 {
-  &LogT ("GenerateHtmlStartComparisonTables\n") ;
+  &LogT ("\nGenerateHtmlStartComparisonTables\n") ;
 
   if ($pageviews)
   {
@@ -1138,12 +1142,15 @@ sub GenerateHtmlStartComparisonTables
     if ($region ne "")
     { $out_html_title .= " for <font color=#008000>" . ucfirst ($region) . "</font>"; }
 
-    if ($pageviews_non_mobile)
-    { $out_html_title .= "<font color=#008000>, Non-mobile</font>" ; }
-    elsif ($pageviews_mobile)
-    { $out_html_title .= "<font color=#008000>, Mobile</font>" ; }
-    elsif ($pageviews_combined)
-    { $out_html_title .= "<font color=#008000>, All Platforms</font>" ; }
+    if ($mode_wp)
+    {
+      if ($pageviews_non_mobile)
+      { $out_html_title .= "<font color=#008000>, Non-mobile</font>" ; }
+      elsif ($pageviews_mobile)
+      { $out_html_title .= "<font color=#008000>, Mobile</font>" ; }
+      elsif ($pageviews_combined)
+      { $out_html_title .= "<font color=#008000>, All Platforms</font>" ; }
+    }
 
     if ($normalized)
     { $out_html_title .= "<font color=#008000>, Normalized</font>" ; }

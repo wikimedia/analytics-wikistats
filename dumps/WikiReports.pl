@@ -28,7 +28,7 @@
     # push @arguments, '-v n' ;     # generate tables with pageviews per wiki: non-mobile traffic
                                     # e.g. http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm
                                     # mutually exclusive with other reporting
-      push @arguments, '-v c' ;     # generate tables with pageviews per wiki: mobile + non-mobile traffic
+    # push @arguments, '-v c' ;     # generate tables with pageviews per wiki: mobile + non-mobile traffic
                                     # e.g. http://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm
                                     # mutually exclusive with other reporting
     # push @arguments, '-n' ;       # normalize monthly page view data (see -v) to 30 days for each month
@@ -39,7 +39,7 @@
     # push @arguments, '-c' ;       # generate category trees
                                     # mutually exclusive with other reporting
 
-    # push @arguments, '-r india' ; # only one region per run, no region specified -> all languages
+      push @arguments, '-r india' ; # only one region per run, no region specified -> all languages
     # push @arguments, '-r africa' ;
     # push @arguments, '-r america' ;
     # push @arguments, '-r asia' ;
@@ -206,11 +206,11 @@
   else
   { &GenerateSiteMap ; }
 
- if ($mode_wp && ($language eq "en"))
- {
-   &LogT ("\nGenerate Summaries Per Wiki") ;
-   &GenerateSummariesPerWiki ;
- }
+  if ($mode_wp && ($language eq "en"))
+  {
+    &LogT ("\nGenerate Summaries Per Wiki") ;
+    &GenerateSummariesPerWiki ;
+  }
 
 # &GenerateTablesPerWiki ("zz") ;
 # &GenerateComparisonTables ;
@@ -257,7 +257,7 @@
   &LogT ("\nGenerate Comparison Tables") ;
   &GenerateComparisonTables ;
 
-# $showplots = $false ; # for test only
+  # $showplots = $false ; # for test only
 
   if ($showplots)
   {
@@ -270,16 +270,19 @@
     &GeneratePlotFiles ;
   }
 
-  &LogT ("\nGenerate Wiki Specific Tables") ;
-  &GenerateWikiSpecificTables ;
-  if ($mode_wp)
-  { &GenerateTablesPerWiki ("zzz") ; }
+  if ((! $mode_wp) || ($region eq ''))
+  {
+    &LogT ("\nGenerate Wiki Specific Tables") ;
+    &GenerateWikiSpecificTables ;
+    if ($mode_wp)
+    { &GenerateTablesPerWiki ("zzz") ; }
 
-  &LogT ("\nGenerate Wikipedia Specific Charts" ) ;
-  foreach $wp (@languages)
-  { &GenerateChartsPerWikipedia ($wp) ; }
-  if ($mode_wp)
-  { &GenerateChartsPerWikipedia ("zzz") ; }
+    &LogT ("\nGenerate Wikipedia Specific Charts" ) ;
+    foreach $wp (@languages)
+    { &GenerateChartsPerWikipedia ($wp) ; }
+    if ($mode_wp)
+    { &GenerateChartsPerWikipedia ("zzz") ; }
+  }
 
 # &GenerateChartsPerWikipedia ("zz") ;
 # &GenerateChartsPerWikipedia ("en") ;

@@ -75,6 +75,7 @@
       $count = $totals {"month"} {$project} {$key} ;
 
       next if $project eq 'wx' and $lang ne 'commons' ;
+
       if ($lang eq 'commons')
       { $project2 = 'Commons' ; }
       elsif ($lang =~ /\.m/)
@@ -89,17 +90,21 @@
       $projects3 {$project3}++ ;
       $projects3 {'all'}++ ;
 
-      $totals_project {"month"} {$project2} {$date} += $count ;
-      if ($totals_project {"month"} {$project2} {$date} > $totals_project_max {"month"} {$project2})
-      { $totals_project_max {"month"} {$project2} = $totals_project {"month"} {$project2} {$date} ; }
+      # split is mobile or non-mobile
+      # combined is mobile plus non-mobile views for one project
+      # all = views for all wikis from all projects
 
-      $totals_project {"month"} {"$project3"} {$date} += $count ;
-      if ($totals_project {"month"} {$project3} {$date} > $totals_project_max {"month"} {$project3})
-      { $totals_project_max {"month"} {$project3} = $totals_project {"month"} {$project3} {$date} ; }
+      # $totals_project_month_split {$project2} {$date} += $count ;
+      # if ($totals_project_month_split {$project2} {$date} > $totals_project_month_split_max {$project2})
+      # { $totals_project_month_split_max {$project2} = $totals_project_month_split {$project2} {$date} ; }
 
-      $totals_project {"month"} {'all'} {$date} += $count ;
-      if ($totals_project {"month"} {'all'} {$date} > $totals_project_max {"month"} {'all'})
-      { $totals_project_max {"month"} {'all'} = $totals_project {"month"} {'all'} {$date} ; }
+      $totals_project_month_combined {"$project3"} {$date} += $count ;
+      if ($totals_project_month_combined {$project3} {$date} > $totals_project_month_combined_max {$project3})
+      { $totals_project_month_combined_max {$project3} = $totals_project_month_combined {$project3} {$date} ; }
+
+      $totals_project_month_combined {"all"} {$date} += $count ;
+      if ($totals_project_month_combined {"all"} {$date} > $totals_project_month_combined_max {"all"})
+      { $totals_project_month_combined_max {"all"} = $totals_project_month_combined {"all"} {$date} ; }
     }
   }
 
@@ -304,8 +309,8 @@ sub SetComparisonPeriods
   my ($month,$year) = (localtime(time))[4,5] ;
   my @months = qw(Xxx Jan Feb Mar Apr May Jun Jul Aug Sept Oct Nov Dec) ;
 
-# $year  = 110 ;
-# $month = 12 ;
+# $year  = 111 ;
+# $month = 1 ;
 
   $year_now  = $year + 1900 ;
   $month_now = $month + 1 ;
@@ -649,7 +654,7 @@ sub CountPageViews
         next ;
       }
 
-      # translate suffixes used in dammit.lt files into project codes often as used in wikistats
+      # translate suffixes used in dammit.lt files into project codes as used in wikistats
 
          if ($project eq "")   { $project = "wp"; }
       elsif ($project eq "b")  { $project = "wb"; } # wikibooks
@@ -741,10 +746,10 @@ sub WriteCsvFilesPerPeriod
       { $file_csv =~ s/\.csv/Normalized.csv/ ; }
       &Log ("File out: $file_out\n") ;
 
-      if (-e "$dir_out/PageViewsPerHourAll.csv")
+      if (-e "$dir_out/PageViewsPerHourAll.csv") # huge file, remove for now, reactivate when really used
       {
-        print "unlink $dir_out/PageViewsPerHourAll.csv (reactive when really used)\n" ;
-        unlink "$dir_out/PageViewsPerHourAll.csv" ; # huge, file reactivate when really used
+        print "unlink $dir_out/PageViewsPerHourAll.csv (reactivate when really used)\n" ;
+        unlink "$dir_out/PageViewsPerHourAll.csv" ;
       }
 
       &Log ("File csv: $file_csv\n") ;
@@ -792,6 +797,62 @@ sub WriteCsvHtmlFilesPopularWikis
 
   print CSV "=== $msg_normalized ===\n" ;
   print     "=== $msg_normalized ===\n" ;
+
+  print CSV "\n=== Page view totals non-mobile + mobile ===\n\n" ;
+  print     "\n=== Page view totals non-mobile + mobile ===\n\n" ;
+
+  print CSV ",,,,,,,," . $csv_recent_months ;
+  print                  $csv_recent_months ;
+
+  # write per popular language+wiki recent months of page view totals
+  # non mobile + mobile
+  $lines = 0 ;
+  foreach $line (@totals_lastmonth)
+  {
+    next if $line =~ /\.m/ ;
+
+    if (++$lines > $maxpopularwikis) { last ; }
+
+    ($project, $language) = split (',', $line) ;
+    $largest_projects {"$project-$language"} ++ ;
+
+    $language_name = $out_languages {$language} ;
+
+    print CSV ",,,,,,,," ;
+
+    if (($project ne "wp") && ($project ne "wx"))
+    {
+      print CSV "$language_name " . &GetProjectName ($project) . "," ;
+      print     "$language_name " . &GetProjectName ($project) . "," ;
+    }
+    else
+    {
+      print CSV "$language_name," ;
+      print     "$language_name," ;
+    }
+
+# %test = %{$totals {"month"} {"wp"} };
+# %test2 = @recent_months ;
+    for ($m = 0 ; $m < $months_recent ; $m++)
+    {
+      print CSV ($totals {"month"} {$project} {"$language,${recent_months [$m]}"} +
+                 $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"}) . "," ;
+      print     ($totals {"month"} {$project} {"$language,${recent_months [$m]}"} +
+                 $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"}) . "," ;
+    }
+
+    if (($project ne "wp") && ($project ne "wx"))
+    {
+      print CSV "$language_name " . &GetProjectName ($project) . "\n" ;
+      print     "$language_name " . &GetProjectName ($project) . "\n" ;
+    }
+    else
+    {
+      print CSV "$language_name\n" ;
+      print     "$language_name\n" ;
+    }
+
+  }
 
   print CSV "\n=== Page view totals non-mobile ===\n\n" ;
   print     "\n=== Page view totals non-mobile ===\n\n" ;
@@ -844,7 +905,6 @@ sub WriteCsvHtmlFilesPopularWikis
       print CSV "$language_name\n" ;
       print     "$language_name\n" ;
     }
-
   }
 
   print CSV "\n=== Page view totals mobile ===\n\n" ;
@@ -853,10 +913,10 @@ sub WriteCsvHtmlFilesPopularWikis
   # write per popular language+wiki recent months of page view totals
   # mobile
   $lines = 0 ;
+
   foreach $line (@totals_lastmonth)
   {
     next if $line !~ /\.m/ ;
-
     if (++$lines > $maxpopularwikis) { last ; }
     ($project, $language) = split (',', $line) ;
     $largest_projects {"$project-$language"} ++ ;
@@ -897,156 +957,156 @@ sub WriteCsvHtmlFilesPopularWikis
     }
   }
 
-  print CSV "\n=== Page view totals indexed non-mobile ===\n\n" ;
-  print     "\n=== Page view totals indexed non-mobile ===\n\n" ;
+#  print CSV "\n=== Page view totals indexed non-mobile ===\n\n" ;
+#  print     "\n=== Page view totals indexed non-mobile ===\n\n" ;
 
-  print CSV ",,,,,,,," . "$csv_recent_months" ;
-  print                  "$csv_recent_months" ;
+#  print CSV ",,,,,,,," . "$csv_recent_months" ;
+#  print                  "$csv_recent_months" ;
 
-  # write per popular language+wiki recent months of page view totals, normalized to first month = 100
-  # non mobile
-  $lines = 0 ;
-  foreach $line (@totals_lastmonth)
-  {
-    next if $line =~ /\.m/ ;
-    if (++$lines > $maxpopularwikis) { last ; }
+#  # write per popular language+wiki recent months of page view totals, normalized to first month = 100
+#  # non mobile
+#  $lines = 0 ;
+#  foreach $line (@totals_lastmonth)
+#  {
+#    next if $line =~ /\.m/ ;
+#    if (++$lines > $maxpopularwikis) { last ; }
 
-    ($project, $language) = split (',', $line) ;
-    $language_name = $out_languages {$language} ;
+#    ($project, $language) = split (',', $line) ;
+#    $language_name = $out_languages {$language} ;
 
-    if (($project ne "wp") && ($project ne "wx"))
-    { print CSV ",,,,,,,," . "$language_name " . &GetProjectName ($project) . "," ; }
-    else
-    { print CSV ",,,,,,,," . "$language_name," ; }
+#    if (($project ne "wp") && ($project ne "wx"))
+#    { print CSV ",,,,,,,," . "$language_name " . &GetProjectName ($project) . "," ; }
+#    else
+#    { print CSV ",,,,,,,," . "$language_name," ; }
 
-    $recent_month_0 = $totals {"month"} {$project} {"$language,${recent_months [ 0]}"} ;
-    for ($m = 0 ; $m < $months_recent ; $m++)
-    {
-      if ($recent_month_0 > 0)
-      {
-        print CSV sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language,${recent_months [$m]}"} / $recent_month_0) . "," ;
-        print     sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language,${recent_months [$m]}"} / $recent_month_0) . "," ;
-      }
-      else
-      {
-        print CSV "," ;
-        print     "," ;
-      }
-    }
+#    $recent_month_0 = $totals {"month"} {$project} {"$language,${recent_months [ 0]}"} ;
+#    for ($m = 0 ; $m < $months_recent ; $m++)
+#    {
+#      if ($recent_month_0 > 0)
+#      {
+#        print CSV sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language,${recent_months [$m]}"} / $recent_month_0) . "," ;
+#        print     sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language,${recent_months [$m]}"} / $recent_month_0) . "," ;
+#      }
+#      else
+#      {
+#        print CSV "," ;
+#        print     "," ;
+#      }
+#    }
 
-    if (($project ne "wp") && ($project ne "wx"))
-    { print CSV "$language_name " . &GetProjectName ($project) . "\n" ; }
-    else
-    { print CSV "$language_name\n" ; }
-  }
+#    if (($project ne "wp") && ($project ne "wx"))
+#    { print CSV "$language_name " . &GetProjectName ($project) . "\n" ; }
+#    else
+#    { print CSV "$language_name\n" ; }
+#  }
 
-  print CSV "\n=== Page view totals indexed mobile ===\n\n" ;
-  print     "\n=== Page view totals indexed mobile ===\n\n" ;
+#  print CSV "\n=== Page view totals indexed mobile ===\n\n" ;
+#  print     "\n=== Page view totals indexed mobile ===\n\n" ;
 
-  print CSV ",,,,,,,,,,,,,,,,,,,,,,," . $csv_recent_months ;
-  print                                 $csv_recent_months ;
+#  print CSV ",,,,,,,,,,,,,,,,,,,,,,," . $csv_recent_months ;
+#  print                                 $csv_recent_months ;
 
-  # write per popular language+wiki recent months of page view totals, normalized to first month = 100
-  # mobile
-  $lines = 0 ;
-  foreach $line (@totals_lastmonth)
-  {
-    next if $line !~ /\.m/ ;
-    if (++$lines > $maxpopularwikis) { last ; }
+#  # write per popular language+wiki recent months of page view totals, normalized to first month = 100
+#  # mobile
+#  $lines = 0 ;
+#  foreach $line (@totals_lastmonth)
+#  {
+#    next if $line !~ /\.m/ ;
+#    if (++$lines > $maxpopularwikis) { last ; }
 
-    ($project, $language) = split (',', $line) ;
-    ($language,$mobile)   = split ('\.', $language) ;
-    $language_name = $out_languages {$language} ;
-    if ($mobile eq 'm')
-    { $language_name .= ' Mobile' ; }
+#    ($project, $language) = split (',', $line) ;
+#    ($language,$mobile)   = split ('\.', $language) ;
+#    $language_name = $out_languages {$language} ;
+#    if ($mobile eq 'm')
+#    { $language_name .= ' Mobile' ; }
 
-    if (($project ne "wp") && ($project ne "wx"))
-    { print CSV  ",,,,,,,,,,,,,,,,,,,,,,," . "$language_name " . &GetProjectName ($project) . "," ; }
-    else
-    { print CSV  ",,,,,,,,,,,,,,,,,,,,,,," . "$language_name," ; }
+#    if (($project ne "wp") && ($project ne "wx"))
+#    { print CSV  ",,,,,,,,,,,,,,,,,,,,,,," . "$language_name " . &GetProjectName ($project) . "," ; }
+#    else
+#    { print CSV  ",,,,,,,,,,,,,,,,,,,,,,," . "$language_name," ; }
 
-    $m0 = &months_since_2000_01 (2010,5) ;
-    $recent_month_0 = $totals {"month"} {$project} {"$language,${recent_months [$m0]}"} ;
-    for ($m = $m0 ; $m < $months_recent ; $m++)
-    {
-      if ($recent_month_0 > 0)
-      {
-        print CSV sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"} / $recent_month_0) . "," ;
-        print     sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"} / $recent_month_0) . "," ;
-      }
-      else
-      {
-        print CSV "," ;
-        print     "," ;
-      }
-    }
+#    $m0 = &months_since_2000_01 (2010,5) ;
+#    $recent_month_0 = $totals {"month"} {$project} {"$language,${recent_months [$m0]}"} ;
+#    for ($m = $m0 ; $m < $months_recent ; $m++)
+#    {
+#      if ($recent_month_0 > 0)
+#      {
+#        print CSV sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"} / $recent_month_0) . "," ;
+#        print     sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"} / $recent_month_0) . "," ;
+#      }
+#      else
+#      {
+#        print CSV "," ;
+#        print     "," ;
+#      }
+#    }
 
-    if (($project ne "wp") && ($project ne "wx"))
-    { print CSV  "$language_name " . &GetProjectName ($project) . "\n" ; }
-    else
-    { print CSV  "$language_name\n" ; }
+#    if (($project ne "wp") && ($project ne "wx"))
+#    { print CSV  "$language_name " . &GetProjectName ($project) . "\n" ; }
+#    else
+#    { print CSV  "$language_name\n" ; }
 
-    print     "\n" ;
-  }
+#    print     "\n" ;
+#  }
 
   print CSV "\n=== Page view totals per project - non-mobile + mobile ===\n" ;
   print     "\n=== Page view totals per project - non-mobile + mobile ===\n" ;
 
-  print CSV "\n",,,,,,,,"$csv_recent_months" ;
+  print CSV "\n,,,,,,,,$csv_recent_months" ;
   print     "\n$csv_recent_months" ;
 
   # write per project recent months of page view totals
   $lines = 0 ;
-  foreach $project3 (sort { $totals_project_max {"month"} {$b} <=>  $totals_project_max {"month"} {$a}} keys %projects3)
+  foreach $project3 (sort { $totals_project_month_combined_max {$b} <=>  $totals_project_month_combined_max {$a}} keys %projects3)
   {
     print CSV ",,,,,,,," . &GetProjectName2 ($project3) . "," ;
     print                  &GetProjectName2 ($project3) . "," ;
 
     for ($m = 0 ; $m < $months_recent ; $m++)
     {
-      print CSV $totals_project {"month"} {$project3} {"${recent_months [$m]}"} . "," ;
-      print     $totals_project {"month"} {$project3} {"${recent_months [$m]}"} . "," ;
+      print CSV $totals_project_month_combined {$project3} {"${recent_months [$m]}"} . "," ;
+      print     $totals_project_month_combined {$project3} {"${recent_months [$m]}"} . "," ;
     }
     print CSV &GetProjectName2 ($project3) . "\n" ;
     print     &GetProjectName2 ($project3) . "\n" ;
   }
 
-  print CSV "\n=== Page view totals per project indexed - non-mobile + mobile ===\n" ;
-  print     "\n=== Page view totals per project indexed - non-mobile + mobile ===\n" ;
+#  print CSV "\n=== Page view totals per project indexed - non-mobile + mobile ===\n" ;
+#  print     "\n=== Page view totals per project indexed - non-mobile + mobile ===\n" ;
 
-  print CSV "\n",,,,,,,,"$csv_recent_months" ;
-  print     "\n$csv_recent_months" ;
+#  print CSV "\n",,,,,,,,"$csv_recent_months" ;
+#  print     "\n$csv_recent_months" ;
 
-  # write per project recent months of page view totals
-  $lines = 0 ;
+#  # write per project recent months of page view totals
+#  $lines = 0 ;
 
-  foreach $project3 (sort { $totals_project_max {"month"} {$b} <=>  $totals_project_max {"month"} {$a}} keys %projects3)
-  {
-    print CSV ",,,,,,,," . &GetProjectName2 ($project3) . "," ;
-    print                  &GetProjectName2 ($project3) . "," ;
+#  foreach $project3 (sort { $totals_project_month_combined_max {$b} <=>  $totals_project_month_combined_max {$a}} keys %projects3)
+#  {
+#    print CSV ",,,,,,,," . &GetProjectName2 ($project3) . "," ;
+#    print                  &GetProjectName2 ($project3) . "," ;
 
-    $recent_month_0 = $totals_project {"month"} {$project3} {$recent_months [0]} ;
+#    $recent_month_0 = $totals_project_month_combined {$project3} {$recent_months [0]} ;
 
-    for ($m = 0 ; $m < $months_recent ; $m++)
-    {
-      if ($recent_month_0 > 0)
-      {
-        print CSV sprintf ("%.2f", 100 * $totals_project {"month"} {$project3} {$recent_months [$m]} / $recent_month_0) . "," ;
-        print     sprintf ("%.2f", 100 * $totals_project {"month"} {$project3} {$recent_months [$m]} / $recent_month_0) . "," ;
-      }
-      else
-      {
-        print CSV "," ;
-        print     "," ;
-      }
-    }
+#    for ($m = 0 ; $m < $months_recent ; $m++)
+#    {
+#      if ($recent_month_0 > 0)
+#      {
+#        print CSV sprintf ("%.2f", 100 * $totals_project_month_combined {$project3} {$recent_months [$m]} / $recent_month_0) . "," ;
+#        print     sprintf ("%.2f", 100 * $totals_project_month_combined {$project3} {$recent_months [$m]} / $recent_month_0) . "," ;
+#      }
+#      else
+#      {
+#        print CSV "," ;
+#        print     "," ;
+#      }
+#    }
 
-    print CSV &GetProjectName2 ($project3) . "," ;
-    print     &GetProjectName2 ($project3) . "," ;
-  }
+#    print CSV &GetProjectName2 ($project3) . "," ;
+#    print     &GetProjectName2 ($project3) . "," ;
+#  }
 
-  print CSV &GetProjectName2 ($project3) . "\n" ;
-  print     &GetProjectName2 ($project3) . "\n" ;
+#  print CSV &GetProjectName2 ($project3) . "\n" ;
+#  print     &GetProjectName2 ($project3) . "\n" ;
 
   close CSV ;
 

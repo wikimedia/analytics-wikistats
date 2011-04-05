@@ -173,33 +173,33 @@ sub GetSummaryPerWiki
 
   # page views
 
-  $daysinmonth    = days_in_month (substr ($mmddyyyy,6,4), substr ($mmddyyyy,0,2)) ;
-  $pageviews = sprintf ("%.0f", ($PageViewsPerHour {$wp} * 24 * 30)) ; # use normalized count (month always 30 days)
-  $pageviews_day  = $pageviews / 30 ; # $daysinmonth ;
-  $pageviews_hour = $pageviews_day / 24 ;
-  $pageviews_min  = $pageviews_day / (24 * 60) ;
-  $pageviews_sec  = $pageviews_day / (24 * 60 * 60) ;
+  $daysinmonth     = days_in_month (substr ($mmddyyyy,6,4), substr ($mmddyyyy,0,2)) ;
+  $pageviews_month = sprintf ("%.0f", ($PageViewsPerHour {$wp} * 24 * 30)) ; # use normalized count (month always 30 days)
+  $pageviews_day   = $pageviews_month / 30 ; # $daysinmonth ;
+  $pageviews_hour  = $pageviews_day / 24 ;
+  $pageviews_min   = $pageviews_day / (24 * 60) ;
+  $pageviews_sec   = $pageviews_day / (24 * 60 * 60) ;
 
-  $this_month         = $pageviews ;
+  $this_month         = $pageviews_month ;
   $metric_PV_yearly   = "--" ;
   $metric_PV_monthly  = "--" ;
 
-  print "DAYSINMONTH $month_year: $daysinmonth, PAGEVIEWS $pageviews\n" ;
+  print "DAYSINMONTH $month_year: $daysinmonth, PAGEVIEWS $pageviews_month\n" ;
 
   $metric_PV_data     = &FormatSummary ($this_month) ;
 
-  $pageviews      = &format($pageviews,'X') ;
-  $pageviews_day  = &format($pageviews_day,'X') ;
-  $pageviews_hour = &format($pageviews_hour,'X') ;
-  $pageviews_min  = &format($pageviews_min,'X') ;
-  $pageviews_sec  = &format($pageviews_sec,'X') ;
+  $pageviews_month = &format($pageviews_month,'X') ;
+  $pageviews_day   = &format($pageviews_day,'X') ;
+  $pageviews_hour  = &format($pageviews_hour,'X') ;
+  $pageviews_min   = &format($pageviews_min,'X') ;
+  $pageviews_sec   = &format($pageviews_sec,'X') ;
 
   if ($pageviews_sec >= 1)
-  { $pageviews_per_unit = "$pageviews/month = $pageviews_day /day = $pageviews_hour /hour = $pageviews_min /minute = $pageviews_sec /second" ; }
+  { $pageviews_per_unit = "$pageviews_month/month = $pageviews_day /day = $pageviews_hour /hour = $pageviews_min /minute = $pageviews_sec /second" ; }
   elsif ($pageviews_min >= 1)
-  { $pageviews_per_unit = "$pageviews/month = $pageviews_day /day = $pageviews_hour /hour = $pageviews_min /minute" ; }
+  { $pageviews_per_unit = "$pageviews_month/month = $pageviews_day /day = $pageviews_hour /hour = $pageviews_min /minute" ; }
   else
-  { $pageviews_per_unit = "$pageviews/month = $pageviews_day /day = $pageviews_hour /hour " ; }
+  { $pageviews_per_unit = "$pageviews_month/month = $pageviews_day /day = $pageviews_hour /hour " ; }
   $pageviews_per_unit =~ s/M/million/g ;
   $pageviews_per_unit =~ s/k/thousand/g ;
   $pageviews_per_unit =~ s/\// per /g ;

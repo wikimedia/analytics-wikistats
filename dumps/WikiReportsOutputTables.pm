@@ -3180,33 +3180,36 @@ sub GenerateComparisonTable
 
   my $content = &GenerateHtmlStartComparisonTables ($f, $normalize_days_per_month) ;
 
-  if ($pageviews_mobile)
+  if ($pageviews)
   {
-    $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
-    $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
-  }
-  elsif ($pageviews_non_mobile)
-  {
-    $href_normalized     = 'TablesPageViewsMonthly.htm' ;
-    $href_not_normalized = 'TablesPageViewsMonthlyOriginal.htm' ;
-  }
-  else
-  {
-    $href_normalized     = 'TablesPageViewsMonthlyCombined.htm' ;
-    $href_not_normalized = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
-  }
-  $href_normalized2     = 'TablesPageViewsMonthlyCombined.htm' ;
-  $href_not_normalized2 = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
+    if ($pageviews_mobile)
+    {
+      $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
+      $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
+    }
+    elsif ($pageviews_non_mobile)
+    {
+      $href_normalized     = 'TablesPageViewsMonthly.htm' ;
+      $href_not_normalized = 'TablesPageViewsMonthlyOriginal.htm' ;
+    }
+    elsif ($pageviews_combined)
+    {
+      $href_normalized     = 'TablesPageViewsMonthlyCombined.htm' ;
+      $href_not_normalized = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
+    }
+    $href_normalized2     = 'TablesPageViewsMonthly.htm' ;
+    $href_not_normalized2 = 'TablesPageViewsMonthlyOriginal.htm' ;
 
-  if ($normalize_days_per_month)
-  {
-    $href_current_file  =  $href_normalized ;
-    $href_current_file2 =  $href_normalized2 ;
-  }
-  else
-  {
-    $href_current_file  =  $href_not_normalized ;
-    $href_current_file2 =  $href_not_normalized2 ;
+    if ($normalize_days_per_month)
+    {
+      $href_current_file  =  $href_normalized ;
+      $href_current_file2 =  $href_normalized2 ;
+    }
+    else
+    {
+      $href_current_file  =  $href_not_normalized ;
+      $href_current_file2 =  $href_not_normalized2 ;
+    }
   }
 
   if ($wikimedia && ($f <= 1) && $mode_wp)
@@ -3266,6 +3269,9 @@ sub GenerateComparisonTable
       $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days. " ;
       $raw_or_not = "Raw Data, " ;
     }
+
+    $out_html .= "<p><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Site map for all page view reports</a><p>" ;
+
 
     if ($normalize_days_per_month)
     {
