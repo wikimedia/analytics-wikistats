@@ -5,11 +5,9 @@
   $trace_on_exit = $true ;
   ez_lib_version (2) ;
 
-# $quarter_only = '2010 Q3' ;  # if not empty filter process for this quarter only
-
 # set defaults mainly for tests on local machine
 # default_argv "-m 201010   " ;
-  default_argv "-c " ;
+  default_argv "-c -q 2010Q4" ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -30,7 +28,7 @@
   $ratio_sqrt   = $true ;
   $ratio_linear = $false ;
 
-  getopt ("dm", \%options) ;
+  getopt ("dmq", \%options) ;
 
   if (-d "/a/squid")
   {
@@ -63,6 +61,15 @@
   if (defined ($options {"c"}))
   { $reportcountries = $true ; }
 
+  if (defined ($options {"q"}))
+  {
+    $quarter_only = $options {"q"} ;  # process for this quarter only
+    if ($quarter_only !~ /^2\d\d\dQ\d$/)
+    { abort ("Specify run for one single quarter as -q yyyyQ[1-4], e.g. -q 2011Q3, not '$quarter_only'\n") ; }
+    $quarter_only =~ s/^(\d\d\d\d)(Q\d)$/$1 $2/ ;
+    print "QUARTER ONLY  $quarter_only\n" ;
+  }
+
   # date range used to be read from csv file with ReadDate, now there are daily csv files
   # if earlier methods still is useful it needs to be tweaked
 # if (($reportmonth ne "") && ($reportmonth !~ /^\d{6}$/))
@@ -83,7 +90,7 @@
     &CollectRegionCounts ;
 
     &ReportCountries ('Saves');
-#    &ReportCountries ('Views');
+    &ReportCountries ('Views');
 
     exit ;
   }
@@ -1257,7 +1264,8 @@ sub ReadInputCountriesNames
   $path_csv_country_codes = "$path_in/$file_csv_country_codes" ;
   if (! -e $path_csv_country_codes) { abort ("Input file $path_csv_country_codes not found!") ; }
 
-  open CSV_COUNTRY_CODES, '<', $path_csv_country_codes ;
+  open    CSV_COUNTRY_CODES, '<', $path_csv_country_codes ;
+  binmode CSV_COUNTRY_CODES ;
   $country_names {"--"} = "Unknown" ;
   while ($line = <CSV_COUNTRY_CODES>)
   {
@@ -1265,6 +1273,7 @@ sub ReadInputCountriesNames
 
     next if $line =~ /^#/ ;
 
+    $line =~ s/[\x00-\x1f]//g ;
     $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
 
     ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
@@ -1295,11 +1304,13 @@ sub ReadInputCountriesMeta
 {
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
-  open COUNTRY_META_INFO, '<', "$path_in/$file_csv_country_meta_info" ;
+  open    COUNTRY_META_INFO, '<', "$path_in/$file_csv_country_meta_info" ;
+  binmode COUNTRY_META_INFO ;
   while ($line = <COUNTRY_META_INFO>)
   {
     chomp $line ;
 
+    $line =~ s/[\x00-\x1f]//g ;
     $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
 
     ($country,$link,$population,$connected,$icon) = split ',', $line ;
@@ -1363,6 +1374,9 @@ sub CollectRegionCounts
 
     # print "CODE $country_code NAME $country_name POP $population, $CONN $connected REGION $region_code NS $north_south_code PPR ${population_per_region {$region_code}}\n" ;
   }
+
+  if ($population_tot == 0)
+  { abort ("No valid data found: population_tot = 0 !") ; }
 }
 
 sub ReadInputCountriesMonthly
@@ -1424,7 +1438,6 @@ sub ReadInputCountriesMonthly
 
     $year    = substr ($yyyymm,0,4) ;
     $month   = substr ($yyyymm,5,2) ;
-  # print "year $year report_year month $month $report_year $report_month\n" ;
 
     $recently = $false ;
 
@@ -1622,7 +1635,6 @@ sub ReadInputCountriesDaily
       $new = &CorrectForMissingDays ($week  , ${$requests_per_week_per_country_code {$week  }} {$country_code}) ;
       $old = &CorrectForMissingDays ($week-1, ${$requests_per_week_per_country_code {$week-1}} {$country_code}) ;
 
-      # print "country_code $country_code\n" ;
       if ($old == 0)
       {
         if ($new > 0)
@@ -4432,7 +4444,10 @@ sub WriteReportPerCountryOverview
     $population2 = &i2KM2 ($population) ;
     $connected2  = &i2KM2 ($connected) ;
     $requests_this_country2 = &i2KM2 ($requests_this_country2) ;
-    $perc_population = &Percentage ($population / $population_tot) ;
+
+    if ($population_tot > 0)
+    { $perc_population = &Percentage ($population / $population_tot) ; }
+
     if ($perc_population =~ /\.0\d/)
     { $perc_population = "<small>$perc_population</small>" ; }
 
