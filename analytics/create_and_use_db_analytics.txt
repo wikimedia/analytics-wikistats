@@ -1,0 +1,77 @@
+-- invoke this file with "mysql --user=root --password=[...] < create_and_use_db_analytics.txt"
+
+/* Create database and two tables from scratch */
+
+DROP DATABASE IF EXISTS `analytics` ;
+CREATE DATABASE `analytics` ;
+USE `analytics` ;
+
+CREATE TABLE `comscore` (
+-- meta data (mostly for auditing, may not be sent over API on default) 
+/* 
+   store meta dat elsewhere,tbd
+  `id`             int auto_increment NOT NULL, 
+  `generated`      timestamp,
+  `source`         char (20),
+  `server`         char (20),
+  `script_name`    char (30),
+  `script_version` char (8),
+  `user`           char (20),
+*/
+-- analytics data  
+  `yyyymm`         char (7), 
+  `country_code`   char (3), 
+  `region_code`    char (2), 
+  `property`       char (20), 
+  `project`        char (10), 
+  `reach`          decimal (4,1) DEFAULT '-1', 
+  `visitors`       decimal (15)  DEFAULT '-1', 
+  PRIMARY KEY (yyyymm,country_code,region_code,property)
+) ;
+
+CREATE TABLE `comscore_regions` (
+  `region_code`    char (2), 
+  `language_code`  char (10),
+  `region_name`    char (18),
+  PRIMARY KEY (language_code,region_code)
+) ;  
+
+-- SHOW TABLES ;
+-- DESCRIBE comscore ;
+-- DESCRIBE comscore_regions ;
+
+/* Database Manipulation */
+/* Obviously in real world this is a separate script */
+
+
+-- show contents (debugging only) 
+-- SELECT * 
+--      FROM comscore_regions ;
+
+LOAD DATA INFILE 'c:/MySQL/analytics/analytics_in_comscore_regions.csv' 
+     INTO TABLE comscore_regions 
+     FIELDS TERMINATED BY ',' 
+     OPTIONALLY ENCLOSED BY '"' 
+     (language_code,region_code,region_name) ;
+
+LOAD DATA INFILE 'c:/MySQL/analytics/analytics_in_comscore.csv' 
+     INTO TABLE comscore 
+     FIELDS TERMINATED BY ',' 
+     OPTIONALLY ENCLOSED BY '"' 
+     (yyyymm,country_code,region_code,property,project,reach,visitors) ;
+
+-- show contents (debugging only) 
+   SELECT * 
+       FROM comscore 
+       ORDER BY yyyymm,country_code,region_code,property,project 
+       INTO OUTFILE 'c:/MySQL/analytics/analytics_out_comscore_full_table.csv' 
+       FIELDS TERMINATED BY ',' ; 
+
+-- export all relevant non-meta data from comsCore's reach by region (and comScore treats India and China as regions in this context)
+SELECT yyyymm,region_name,reach
+       FROM comscore LEFT JOIN comscore_regions ON comscore.region_code = comscore_regions.region_code AND comscore_regions.language_code = 'en'
+       WHERE (region_name != '') AND (yyyymm BETWEEN '2010-06' AND '2011-05') 
+       ORDER BY yyyymm,region_name 
+       INTO OUTFILE 'c:/MySQL/analytics/analytics_out_comscore_reach.csv' 
+       FIELDS TERMINATED BY ',' ; 
+       

@@ -16,6 +16,7 @@
 # Functionality:
 # comScore data can be downloaded as csv file, which each contain 14 months history
 # This script uses these files to update 'master' csv files which contain all known history
+# Note: only entities which are already in master file will be updated!
 # Then it merges these master files into one csv file which can be loaded into analytics database
 # Data are: reach by region, unique visitors by region, unique visitors by web property
 
@@ -25,6 +26,8 @@
 
 # Output:
 # updated master csv files + merged and formatted csv for import in MySQL
+
+# http://svn.wikimedia.org/viewvc/mediawiki/trunk/wikistats/analytics/
 
   use Getopt::Std ;
   use Cwd;
@@ -38,7 +41,7 @@
   $script_name    = "MySQLPrepComscoreData.pl" ;
   $script_version = "0.3" ;
 
-# test
+# EZ test only
 # $source       = "comscore" ;
 # $server       = "ez_test" ;
 # $generated    = "2011-05-06 00:00:00" ;
@@ -60,6 +63,10 @@
   $file_comscore_uv_property_master = "excel_out_comscore_UV_properties.csv" ;
   $file_comscore_uv_property_update = "*UV*trend*csv" ;
 
+  $layout_csv_reach      = 1 ;
+  $layout_csv_regions    = 2 ;
+  $layout_csv_properties = 3 ;
+
   print "Directories:\nAnalytics '$dir_analytics'\nUpdates '$dir_comscore_updates'\n\n" ;
 
   %region_codes = (
@@ -69,6 +76,7 @@
     "World-Wide" => "W",
     "Middle East - Africa" => "MA",
     "Asia Pacific"=> "AS",
+    "United States" => "US",
     "India" => "I",
     "China" => "C"
   ) ;
@@ -78,16 +86,14 @@
 
   @months_short = qw "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec" ;
 
-  # &ReadDataReachPerRegion ($file_comscore_reach_master, $file_comscore_reach_update, "%.1f") ;
-  # %reach_region_code = %data ;
+  &ReadDataReachPerRegion ($file_comscore_reach_master, $file_comscore_reach_update, "%.1f", 1, $layout_csv_reach) ;
+  %reach_region_code = %data ;
 
-  &ReadDataVisitorsPerRegion ($file_comscore_uv_region_master, $file_comscore_uv_region_update, "%.0f") ;
+  &ReadDataVisitorsPerRegion ($file_comscore_uv_region_master, $file_comscore_uv_region_update, "%.0f", 1000, $layout_csv_regions) ;
   %visitors_region_code = %data ;
 
-  exit ;
-  &ReadDataVisitorsPerProperty ($file_comscore_uv_property_master, $file_comscore_uv_property_update, "%.0f") ;
+  &ReadDataVisitorsPerProperty ($file_comscore_uv_property_master, $file_comscore_uv_property_update, "%.0f", 1000, $layout_csv_properties) ;
   %visitors_web_property = %data ;
-  exit ;
 
   &WriteDataAnalytics ;
 
@@ -96,7 +102,13 @@
 
 sub UpdateFromLatestComscoreData
 {
-  my ($file_comscore_master, $file_comscore_updates) = @_ ;
+  my ($file_comscore_master, $file_comscore_updates, $multiplier, $layout_csv, @update_only) = @_ ;
+
+  undef %update_only ;
+  undef %do_not_update ;
+
+  foreach $id (@update_only)
+  { $update_only {$id} = $true ; }
 
   if (! -e "$dir_analytics/$file_comscore_master")
   { abort ("File $file_comscore_master not found!") ; }
@@ -140,46 +152,85 @@ sub UpdateFromLatestComscoreData
   while ($line = <CSV>)
   {
     chomp $line ;
-    if ($line =~ /^Location.*?-.*?-.*?-/) # e.g. 'Location,Location,Jan-2010,Feb-2010,Mar-2010,Apr-2010,...'
+    $line = &GetNumberOnly ($line) ;
+
+    if ($line =~ /Jan-\d\d\d\d.*?Feb-\d\d\d\d/) # e.g. 'Location,Location,Jan-2010,Feb-2010,Mar-2010,Apr-2010,...'
     {
-      ($dummy1,$dummy2,@months) = split (',', $line) ;
+      if ($layout_csv == $layout_csv_properties)
+      { ($dummy1,$dummy2,$dummy3,@months) = split (',', $line) ; } # web properties csv file
+      else
+      { ($dummy1,$dummy2,@months) = split (',', $line) ; }         # uv / reach csv files
+
       @months = &mmm_yyyy2yyyy_mm (@months) ;
     }
-    if ($line =~ /^\d,/)
+
+    if ($line =~ /^\d+,/)
     {
-      ($index,$region,@data) = split (',', $line) ;
-      $region =~ s/^\s+// ;
-      $region =~ s/\s+$// ;
-      $region_code = $region_codes {$region} ;
+      if ($layout_csv == $layout_csv_properties)
+      {
+        ($index,$dummy,$property,@data) = split (',', $line) ;
+        $property =~ s/^\s+// ;
+        $property =~ s/\s+$// ;
+
+        $property =~ s/.*Google.*/Google/i ;
+        $property =~ s/.*Microsoft.*/Microsoft/i ;
+        $property =~ s/.*FACEBOOK.*/Facebook/i ;
+        $property =~ s/.*Yahoo.*/Yahoo/i ;
+        $property =~ s/.*Amazon.*/Amazon/i ;
+        $property =~ s/.*Apple.*/Apple/i ;
+        $property =~ s/.*AOL.*/AOL/i ;
+        $property =~ s/.*Wikimedia.*/Wikimedia/i ;
+        $property =~ s/.*Tencent.*/Tencent/i ;
+        $property =~ s/.*Baidu.*/Baidu/i ;
+        $property =~ s/.*CBS.*/CBS/i ;
+
+        $id = $property ;
+      }
+      else
+      {
+        ($index,$region,@data) = split (',', $line) ;
+        $region =~ s/^\s+// ;
+        $region =~ s/\s+$// ;
+        $id = $region_codes {$region} ;
+      }
+
+      if ($update_only {$id} == 0)
+      {
+        $do_not_update {$id}++ ;
+        next ;
+      }
 
       for ($m = 0 ; $m <= $#months ; $m++)
       {
         $yyyymm = $months [$m] ;
         $months {$yyyymm} ++ ;
-        $yyyymm_region_code = "$yyyymm,$region_code" ;
-        $data = $data [$m] ;
+        $yyyymm_id = "$yyyymm,$id" ;
+        $data = $data [$m] * $multiplier ;
 
-        if (! defined $data {$yyyymm_region_code})
+        if (! defined $data {$yyyymm_id})
         {
           $updates_found = $true ;
-          print "New data found: $yyyymm_region_code = $data\n" ;
-          $data {$yyyymm_region_code} = $data ;
+          print "New data found: $yyyymm_id = $data\n" ;
+          $data {$yyyymm_id} = $data ;
         }
       }
     }
   }
 
+  $ignored = join ', ', sort keys %do_not_update ;
+  print "\nEntities ignored:\n$ignored\n\n" ;
+
   if (! $updates_found)
-  { print "No new updates found.\n" ; }
+  { print "No new updates found\n" ; }
   else
-  { print "\nUpdates found, rewrite master file '$file_comscore_master'.\n\n" ; }
+  { print "\nUpdates found, rewrite master file '$file_comscore_master'\n\n" ; }
 
   return ($updates_found) ;
 }
 
 sub ReadDataReachPerRegion
 {
-  my ($file_comscore_master, $file_comscore_updates, $precision) = @_ ;
+  my ($file_comscore_master, $file_comscore_updates, $precision, $layout_csv) = @_ ;
 
   undef %months ;
   undef %data ;
@@ -214,7 +265,7 @@ sub ReadDataReachPerRegion
   }
   close IN ;
 
-  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates) ;
+  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates, 1, $layout_csv, @regions) ;
   return if ! $updates_found ;
 
   rename "$dir_analytics/$file_comscore_master", "$dir_analytics/$file_comscore_master.~" ;
@@ -241,7 +292,7 @@ sub ReadDataReachPerRegion
 
 sub ReadDataVisitorsPerRegion
 {
-  my ($file_comscore_master, $file_comscore_updates, $precision) = @_ ;
+  my ($file_comscore_master, $file_comscore_updates, $precision, $multiplier, $layout_csv) = @_ ;
 
   undef %months ;
   undef %data ;
@@ -264,20 +315,24 @@ sub ReadDataVisitorsPerRegion
     $field_ndx = 0 ;
     foreach (@data)
     {
-      $region      = $regions [$field_ndx++] ;
+      $region      = $regions [$field_ndx] ;
       $region_code = $region_codes {$region} ;
 
       $data      = $data    [$field_ndx] ;
       if ($data eq '')
       { $data = '0' ; }
 
+      # print "Old data $yyyymm,$region = $data\n" ;
+
       $months {$yyyymm} ++ ;
       $data {"$yyyymm,$region_code"} = $data ;
+
+      $field_ndx++ ;
     }
   }
   close IN ;
 
-  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates) ;
+  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates, 1000, $layout_csv, @regions) ;
   return if ! $updates_found ;
 
   rename "$dir_analytics/$file_comscore_master", "$dir_analytics/$file_comscore_master.~" ;
@@ -304,10 +359,11 @@ sub ReadDataVisitorsPerRegion
 
 sub ReadDataVisitorsPerProperty
 {
-  my ($file_comscore_master, $file_comscore_updates, $precision) = @_ ;
+  my ($file_comscore_master, $file_comscore_updates, $precision, $multiplier, $layout_csv) = @_ ;
 
   undef %months ;
   undef %data ;
+  undef @properties ;
 
   open IN,  '<', "$dir_analytics/$file_comscore_master" ;
 
@@ -317,8 +373,6 @@ sub ReadDataVisitorsPerProperty
   {
     chomp $line ;
 
-    $line = &GetNumberOnly ($line) ;
-
     ($yyyymm,@data) = split (',', $line) ;
     if ($lines++ == 0)
     { @properties = @data ; next ; }
@@ -326,36 +380,40 @@ sub ReadDataVisitorsPerProperty
     $field_ndx = 0 ;
     foreach (@data)
     {
-      $property = $properties [$field_ndx++] ;
-
+      $property = $properties [$field_ndx] ;
+      $property =~ s/.*Yahoo.*/Yahoo/ ;
       $data      = $data    [$field_ndx] ;
       if ($data eq '')
       { $data = '0' ; }
 
+      # print "Old data $yyyymm,$property = $data\n" ;
+
       $months {$yyyymm} ++ ;
       $data {"$yyyymm,$property"} = $data ;
+
+      $field_ndx++ ;
     }
   }
   close IN ;
 
-  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates) ;
+  my $updates_found = &UpdateFromLatestComscoreData ($file_comscore_master, $file_comscore_updates, 1000, $layout_csv, @properties) ;
   return if ! $updates_found ;
 
   rename "$dir_analytics/$file_comscore_master", "$dir_analytics/$file_comscore_master.~" ;
   open OUT,  '>', "$dir_analytics/$file_comscore_master" ;
 
   $line_out = "yyyymm" ;
-  foreach $region_name (@regions)
-  { $line_out .= ",$region_name" ; }
+  foreach $property (@properties)
+  { $line_out .= ",$property" ; }
   print OUT "$line_out" ;
 
   foreach $yyyymm (sort {$b cmp $a} keys %months)
   {
     $line_out = "\n$yyyymm" ;
-    foreach $region_name (@regions)
+    foreach $property (@properties)
     {
-      $yyyymm_region_code = $yyyymm . ',' . $region_codes {$region_name} ;
-      $line_out .= "," . sprintf ($precision, $data {$yyyymm_region_code}) ;
+      $yyyymm_property = "$yyyymm,$property" ;
+      $line_out .= "," . sprintf ($precision, $data {$yyyymm_property}) ;
     }
     print OUT "$line_out" ;
   }
@@ -367,7 +425,7 @@ sub WriteDataAnalytics
 {
   open OUT, '>', "c:/MySQL/analytics/analytics_in_comscore.csv" ;
 
-  $metric       = 'unique_visitors' ;
+  $metric = 'unique_visitors' ;
   foreach $yyyymm (sort keys %months)
   {
     # store meta data elsewhere
@@ -400,7 +458,7 @@ sub WriteDataAnalytics
 
       $line = "$yyyymm,$country_code,$region_code,$property,$project,$reach,$visitors\n" ;
       print OUT $line ;
-      print     $line ;
+      # print     $line ;
     }
   }
 }
