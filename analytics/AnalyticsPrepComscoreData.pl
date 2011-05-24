@@ -54,7 +54,7 @@
 # $dir_comscore_updates = "W:/@ Report Card/Data" ; # EZ test only
 
   if (($dir_analytics eq '') || ($dir_comscore_updates eq ''))
-  { abort ("Specify folder for 'master' csv files as '-m folder', folder for 'update' csv files as -u folder'") ; }
+  { Abort ("Specify folder for 'master' csv files as '-m folder', folder for 'update' csv files as -u folder'") ; }
 
   $file_comscore_reach_master     = "excel_out_comscore_reach_regions.csv" ;
   $file_comscore_reach_update     = "*reach*by*region*csv" ;
@@ -111,7 +111,7 @@ sub UpdateFromLatestComscoreData
   { $update_only {$id} = $true ; }
 
   if (! -e "$dir_analytics/$file_comscore_master")
-  { abort ("File $file_comscore_master not found!") ; }
+  { Abort ("File $file_comscore_master not found!") ; }
 
   $age_all = -M "$dir_analytics/$file_comscore_master" ;
   print "Latest comscore master file is " . sprintf ("%.0f", $age_all) . " days old: '$file_comscore_master'\n" ;
@@ -438,8 +438,10 @@ sub WriteDataAnalytics
       $reach        = $reach_region_code     {"$yyyymm,$region_code"} ;
       $visitors     = $visitors_region_code  {"$yyyymm,$region_code"} ;
 
-      if (! defined $reach)    { $reach = -1 ; }
-      if (! defined $visitors) { $reach = -1 ; }
+      if (! defined $reach)    { $reach    = -1 ; }
+      if (! defined $visitors) { $visitors = -1 ; }
+
+      next if $reach == -1 and $visitors == -1 ;
 
       $line = "$yyyymm,$country_code,$region_code,$property,$project,$reach,$visitors\n" ;
       print OUT $line ;
@@ -487,7 +489,7 @@ sub mmm_yyyy2yyyy_mm
   return @months ;
 }
 
-sub abort
+sub Abort
 {
   $msg = shift ;
 
