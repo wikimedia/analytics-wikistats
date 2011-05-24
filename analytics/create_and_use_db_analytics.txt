@@ -10,13 +10,13 @@ CREATE TABLE `comscore` (
 -- meta data (mostly for auditing, may not be sent over API on default) 
 -- not used right now, store meta dat elsewhere,tbd, kept for brainstorm 
 --
---`id`             int auto_increment NOT NULL, 
---`generated`      timestamp,
---`source`         char (20),
---`server`         char (20),
---`script_name`    char (30),
---`script_version` char (8),
---`user`           char (20),
+-- `id`             int auto_increment NOT NULL, 
+-- `generated`      timestamp,
+-- `source`         char (20),
+-- `server`         char (20),
+-- `script_name`    char (30),
+-- `script_version` char (8),
+-- `user`           char (20),
 --
 -- analytics data  
   `yyyymm`         char (7), 
