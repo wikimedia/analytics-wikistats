@@ -38,8 +38,8 @@
   $true  = 1 ;
   $false = 0 ;
 
-  $script_name    = "MySQLPrepComscoreData.pl" ;
-  $script_version = "0.3" ;
+  $script_name    = "AnalyticsPrepComscoreData.pl" ;
+  $script_version = "0.31" ;
 
 # EZ test only
 # $source       = "comscore" ;
@@ -50,8 +50,8 @@
   $dir_analytics        = $options {"m"} ;
   $dir_comscore_updates = $options {"u"} ;
 
-  $dir_analytics        = "c:/MySQL/analytics" ;    # EZ test only
-  $dir_comscore_updates = "W:/@ Report Card/Data" ; # EZ test only
+# $dir_analytics        = "c:/MySQL/analytics" ;    # EZ test only
+# $dir_comscore_updates = "W:/@ Report Card/Data" ; # EZ test only
 
   if (($dir_analytics eq '') || ($dir_comscore_updates eq ''))
   { abort ("Specify folder for 'master' csv files as '-m folder', folder for 'update' csv files as -u folder'") ; }
