@@ -14,6 +14,10 @@
 
 # to do: AdjustForMissingFilesAndUndercountedMonths for week and day level files
 
+# Added May 2001: 
+# For analytics database one file is written for all projects and languages combined,
+# with per month, not normalized and normalized page view counts in one row.
+
   use Archive::Tar;
   $tar = Archive::Tar->new;
 
@@ -45,6 +49,7 @@
   &InitProjectNames ;
 
 # &ScanFiles ; # (legacy) flat files
+  &ScanWhiteList ;
   &ScanTarFiles ; # fill @files with sorted list of file names starting with 'projectcounts'
   &FindMissingFiles ;
   &CountPageViews ;
@@ -97,7 +102,7 @@
       # $totals_project_month_split {$project2} {$date} += $count ;
       # if ($totals_project_month_split {$project2} {$date} > $totals_project_month_split_max {$project2})
       # { $totals_project_month_split_max {$project2} = $totals_project_month_split {$project2} {$date} ; }
-
+#qqq
       $totals_project_month_combined {"$project3"} {$date} += $count ;
       if ($totals_project_month_combined {$project3} {$date} > $totals_project_month_combined_max {$project3})
       { $totals_project_month_combined_max {$project3} = $totals_project_month_combined {$project3} {$date} ; }
@@ -237,16 +242,17 @@ sub ParseArguments
     $options {$key} =~ s/\@/\\@/g ;
   }
 
-  getopt ("iolpft", \%options) ;
+  getopt ("ioalpft", \%options) ;
 
   die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
   die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
 
-  $path_in  = $options {"i"} ;
-  $path_out = $options {"o"} ;
+  $path_in        = $options {"i"} ;
+  $path_out       = $options {"o"} ;
 
   die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
   die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
+
   die "Always specify project (-p) when you specify language (-l)" if ((! defined ($options {"p"})) && (defined ($options {"l"})));
 
   $select_project  = $options {"p"} ;
@@ -310,7 +316,7 @@ sub SetComparisonPeriods
   my @months = qw(Xxx Jan Feb Mar Apr May Jun Jul Aug Sept Oct Nov Dec) ;
 
 # $year  = 111 ;
-# $month = 1 ;
+# $month = 3 ;
 
   $year_now  = $year + 1900 ;
   $month_now = $month + 1 ;
@@ -398,6 +404,19 @@ sub SetComparisonPeriods
 
 #  @files = sort {$a cmp $b} @files ;
 #}
+
+sub ScanWhiteList
+{
+  print "$path_in/WhiteListWikis.csv\n" ;
+  open CSV_WHITE_LIST, '<', "$path_in/WhiteListWikis.csv" || die "Could not open $path_in/WhiteListWikis.csv" ;
+  while ($line = <CSV_WHITE_LIST>)
+  {
+    chomp $line ;
+    $whitelist {$line} ++ ;
+    $whitelist {"$line.m"} ++ ;
+  }
+  close CSV_WHITE_LIST ;
+}
 
 sub ScanTarFiles
 {
@@ -670,12 +689,21 @@ sub CountPageViews
 
       # select number of wikipedia's are presented as group wikispecial
       # omit mediawiki, no counts for that one available
-      if (($project eq "wp") && ($language =~ /commons|meta|species|nostalgia|incubator|sources|foundation|sep11/))
+      if (($project eq "wp") && ($language =~ /^(?:commons|meta|species|nostalgia|incubator|sources|foundation|sep11)$/))
       { $project = "wx" ; }
 
-      next if $project eq "wx" and $language !~ /commons|meta|species|nostalgia|incubator|sources|foundation|sep11/ ;
+      next if $project eq "wx" and $language !~ /^(?:commons|meta|species|nostalgia|incubator|sources|foundation|sep11)$/ ;
 
       next if $project eq "wx" and $year == 2007 and $month < 6 ;
+
+      if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
+      {
+        if ($blacklist {"$project,$language"} == 0)
+        { print "Not in white list: $project,$language\n" ; }
+        $blacklist {"$project,$language"}++ ;
+        next ;
+      }
+      $wikis_used {"$project,$language"}++ ;
 
       if (($select_project  ne "+") && ($select_project  ne $project))  { next ; }
       if (($select_language ne "+") && ($select_language ne $language)) { next ; }
@@ -711,10 +739,34 @@ sub CountPageViews
   &LogT ("All files parsed\n\n") ;
 
   $line = "" ;
-  foreach $language (sort {$b <=> $a} keys %lines_skipped)
+  foreach $language (sort {$lines_skipped {$b} <=> $lines_skipped {$a}} keys %lines_skipped)
   { $line .= "'$language':" . $lines_skipped {$language} . ", " ; }
   $line =~ s/,$// ;
   &LogT ("\nLines with invalid language code:\n$line\n\n") ;
+
+  $line = "" ;
+  foreach $language (sort keys %lines_skipped)
+  { $line .= "'$language':" . $lines_skipped {$language} . ", " ; }
+  $line =~ s/,$// ;
+  &LogT ("\nLines with invalid language code:\n$line\n\n") ;
+
+  $line = "" ;
+  foreach $language (sort {$blacklist {$b} <=> $blacklist {$a}} keys %blacklist)
+  { $line .= "'$language':" . $blacklist {$language} . ", " ; }
+  $line =~ s/,$// ;
+  &LogT ("\nValid codes not on white list:\n$line\n\n") ;
+
+  $line = "" ;
+  foreach $language (sort keys %blacklist)
+  { $line .= "'$language':" . $blacklist {$language} . ", " ; }
+  $line =~ s/,$// ;
+  &LogT ("\nValid codes not on white list:\n$line\n\n") ;
+
+  $line = "" ;
+  foreach $language (sort keys %wikis_used)
+  { $line .= "'$language':" . $wikis_used {$language} . ", " ; }
+  $line =~ s/,$// ;
+  &LogT ("\nValid codes used:\n$line\n\n") ;
 }
 
 sub WriteCsvFilesPerPeriod
@@ -759,12 +811,64 @@ sub WriteCsvFilesPerPeriod
         ($language,$yearmonth) = split (",", $key) ;
         # print "PERIOD $period PROJECT $project KEY $key\n" ;
         if ($period eq "month")
-        { print CSV "$language," . $date_high {"$yearmonth"} . "," . $totals{$period}{$project}{$key} . "\n" ; }
+        {
+          print CSV "$language," . $date_high {"$yearmonth"} . "," . $totals{$period}{$project}{$key} . "\n" ;
+
+          ($yyyymm = $yearmonth) =~ s/\//-/ ;
+
+          $is_mobile = ($language =~ /\.m/) ;
+          $language =~ s/\.m// ;
+
+          $project_language_yymmmm = "$project,$language,$yyyymm" ;
+          $csv_analytics_in_page_views_keys {$project_language_yymmmm}++ ;
+          if ($normalize)
+          {
+            if (! $is_mobile)
+            {
+              $csv_analytics_in_page_views_normalized_non_mobile     {$project_language_yymmmm}  = $totals{$period}{$project}{$key} ;
+            }
+            else
+            {
+              $project_language_yymmmm =~ s/\.// ;
+              $csv_analytics_in_page_views_normalized_mobile         {$project_language_yymmmm}  = $totals{$period}{$project}{$key} ;
+            }
+          }
+          else
+          {
+            if (! $is_mobile)
+            {
+              $csv_analytics_in_page_views_non_normalized_non_mobile {$project_language_yymmmm}  = $totals{$period}{$project}{$key} ;
+            }
+            else
+            {
+              $project_language_yymmmm =~ s/\.// ;
+              $csv_analytics_in_page_views_non_normalized_mobile     {$project_language_yymmmm}  = $totals{$period}{$project}{$key} ;
+            }
+          }
+        }
         else
         { print CSV "$key," . $totals{$period}{$project}{$key} . "\n" ; }
       }
       close CSV ;
     }
+  }
+
+  if ($normalize)
+  {
+    &LogT ("\nWrite totals per month for analytics database\n") ;
+    $file_csv = "$path_out/csv_wp/analytics_in_page_views.csv" ;
+    &Log ("\n\nFile out for analytics database: $file_csv\n\n") ;
+    open CSV, ">", $file_csv ;
+    foreach $project_language_yymmmm (sort keys %csv_analytics_in_page_views_keys)
+    {
+      print CSV $project_language_yymmmm . ',' .
+                ($csv_analytics_in_page_views_non_normalized_non_mobile {$project_language_yymmmm} + 0) . ',' .
+                ($csv_analytics_in_page_views_non_normalized_mobile     {$project_language_yymmmm} + 0) . ',' .
+                ($csv_analytics_in_page_views_normalized_non_mobile     {$project_language_yymmmm} + 0) . ',' .
+                ($csv_analytics_in_page_views_normalized_mobile         {$project_language_yymmmm} + 0) .
+                "\n";
+    }
+    close CSV ;
   }
 }
 
@@ -1165,6 +1269,12 @@ sub WriteCsvHtmlFilesPopularWikis
   &Log ("File html: $file_html\n") ;
 }
 
+# rather than using already stored data make this step as islated as possible: it could migrate to another job later
+
+sub RereadAndCombineCsvFilesPerMonth
+{
+
+}
 
 sub GetProjectName
 {
