@@ -113,4 +113,8 @@ class ApiAnalytics extends ApiBase {
 		}
 		return true;
 	}
+
+	public function getVersion() {
+		return __CLASS__ . ': $Id$';
+	}
 }
