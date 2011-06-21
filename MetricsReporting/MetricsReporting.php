@@ -64,23 +64,19 @@ $wgeAnalyticsValidParams = array(
 
 );
 
-
+$dir = dirname( __FILE__ );
 $wgAutoloadClasses['ApiAnalytics'] = $dir . '/api/ApiAnalytics.php';
 $wgAutoloadClasses['ApiAnalyticsMetric'] = $dir . '/api/ApiAnalyticsMetric.php';
 $wgAutoloadClasses['MetricsReportingQuery'] = $dir . '/MetricsReportingQuery.php';
-
-
-$dir = dirname( __FILE__ );
-
 
 $wgeAnalyticsMetricsList = array();
 $metricsdir = $dir."/metrics";
 $dh = opendir($metricsdir);
 while( ($file = readdir($dh)) !== false){
-	if(filetype($dir.$file) == "file" ){
-		$file_path_parts = pathinfo($dir.$file);
+	if(filetype($metricsdir."/".$file) == "file" ){
+		$file_path_parts = pathinfo($metricsdir."/".$file);
 		if($file_path_parts['extension'] == 'php'){
-			$wgAutoloadClasses["ApiAnalyticsMetric{$file_path_parts['filename']}"] = $dir.$file;
+			$wgAutoloadClasses["ApiAnalyticsMetric{$file_path_parts['filename']}"] = $metricsdir."/".$file;
 			$wgeAnalyticsMetricsList[] = $file_path_parts['filename'];
 		}
 	}
@@ -108,6 +104,4 @@ function wfAnalyticsMetricConnection() {
 	
 	return $db;
 }
-
-
-class 
+ 
