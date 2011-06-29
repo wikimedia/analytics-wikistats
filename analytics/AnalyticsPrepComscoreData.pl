@@ -39,7 +39,7 @@
   $false = 0 ;
 
   $script_name    = "AnalyticsPrepComscoreData.pl" ;
-  $script_version = "0.31" ;
+  $script_version = "0.32" ;
 
 # EZ test only
 # $source       = "comscore" ;
@@ -50,17 +50,19 @@
   $dir_analytics        = $options {"m"} ;
   $dir_comscore_updates = $options {"u"} ;
 
-# $dir_analytics        = "c:/MySQL/analytics" ;    # EZ test only
-# $dir_comscore_updates = "W:/@ Report Card/Data" ; # EZ test only
+  $dir_analytics        = "C:/@ Wikimedia/! MySQL/analytics" ;  # EZ test only
+  $dir_comscore_updates = "C:/@ Wikimedia/@ Report Card/Data" ; # EZ test only
 
   if (($dir_analytics eq '') || ($dir_comscore_updates eq ''))
   { Abort ("Specify folder for 'master' csv files as '-m folder', folder for 'update' csv files as -u folder'") ; }
 
-  $file_comscore_reach_master     = "excel_out_comscore_reach_regions.csv" ;
-  $file_comscore_reach_update     = "*reach*by*region*csv" ;
-  $file_comscore_uv_region_master = "excel_out_comscore_UV_regions.csv" ;
-  $file_comscore_uv_region_update = "*UVs*by*region*csv" ;
-  $file_comscore_uv_property_master = "excel_out_comscore_UV_properties.csv" ;
+  $file_comscore_reach_master       = "history_comscore_reach_regions.csv" ;
+  $file_comscore_reach_update       = "*reach*by*region*csv" ;
+
+  $file_comscore_uv_region_master   = "history_comscore_UV_regions.csv" ;
+  $file_comscore_uv_region_update   = "*UVs*by*region*csv" ;
+
+  $file_comscore_uv_property_master = "history_comscore_UV_properties.csv" ;
   $file_comscore_uv_property_update = "*UV*trend*csv" ;
 
   $layout_csv_reach      = 1 ;
@@ -113,33 +115,33 @@ sub UpdateFromLatestComscoreData
   if (! -e "$dir_analytics/$file_comscore_master")
   { Abort ("File $file_comscore_master not found!") ; }
 
-  $age_all = -M "$dir_analytics/$file_comscore_master" ;
-  print "Latest comscore master file is " . sprintf ("%.0f", $age_all) . " days old: '$file_comscore_master'\n" ;
+  $age_master = -M "$dir_analytics/$file_comscore_master" ;
+  print "\nLatest comscore master file is " . sprintf ("%.0f", $age_master) . " days old: '$file_comscore_master'\n" ;
 
   my $cwd = getcwd ;
   chdir $dir_comscore_updates ;
 
   @files = glob($file_comscore_updates) ;
-  $min_age_upd = 999999 ;
+  $age_update = 999999 ;
   $file_comscore_updates_latest = '' ;
   foreach $file (@files)
   {
     $age = -M $file ;
-    if ($age < $min_age_upd)
+    if ($age < $age_update)
     {
-      $min_age_upd = $age ;
+      $age_update = $age ;
       $file_comscore_updates_latest = $file ;
     }
   }
-  print "Latest comscore update file is " . sprintf ("%.0f", $min_age_upd) . " days old: '$file_comscore_updates_latest'\n" ;
+  print "\nLatest comscore update file is " . sprintf ("%.0f", $age_update) . " days old: '$file_comscore_updates_latest'\n" ;
 
-  if ($min_age_upd == 999999)
+  if ($age_update == 999999)
   {
     print "No valid update file found. Nothing to update." ;
     return ;
   }
 
-  if ($age_all > $min_age_upd)
+  if ($age_master < $age_update)
   {
     print "File with master data more recent than latest update csv from comScore. Nothing to update." ;
     return ;
@@ -423,7 +425,7 @@ sub ReadDataVisitorsPerProperty
 
 sub WriteDataAnalytics
 {
-  open OUT, '>', "c:/MySQL/analytics/analytics_in_comscore.csv" ;
+  open OUT, '>', "$dir_analytics/analytics_in_comscore.csv" ;
 
   $metric = 'unique_visitors' ;
   foreach $yyyymm (sort keys %months)
@@ -445,7 +447,7 @@ sub WriteDataAnalytics
 
       $line = "$yyyymm,$country_code,$region_code,$property,$project,$reach,$visitors\n" ;
       print OUT $line ;
-      print     $line ;
+      # print     $line ;
     }
 
     foreach $property (sort @properties)

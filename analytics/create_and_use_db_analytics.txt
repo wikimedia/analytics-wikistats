@@ -1,5 +1,4 @@
--- invoke this file with "mysql --user=root --password=[...] < create_and_use_db_analytics.txt"
--- for test queries make sure to delete output files *test*.csv first (MySQL on purpose forbids overwrite)
+-- make sure to delete output files *test*.csv first if any exist (MySQL on purpose forbids overwrite)
 
 -- tables implemented:
 --   comscore
@@ -8,18 +7,16 @@
 --   page_views     
 --   language names 
 
- 
--- more tables needed (O= optional, not needed for report card stage)
+-- more tables planned (O= optional, not needed for report card stage)
 --   project_names  
---   binaries       per project, per language, per month, per extension type
--- O edits          per project, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
--- O editors        per project, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
+--   binaries       per project_code, per language, per month, per extension type
+-- O edits          per project_code, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
+-- O editors        per project_code, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
 
 
 -- open issues: 
 -- only store basic data in database and calculate all aggregates on the fly or do some aggragation before hand ? (e.g. count for mobile / non-mobile / ==> total of both ? <==)
 -- for binaries, store one extension type per row? (future proof, more work to query), or a selected few as columns? (one row only needed per month)
-
 
 -- Create database and two tables from scratch 
 DROP DATABASE IF EXISTS `analytics` ;
@@ -29,117 +26,106 @@ CREATE DATABASE `analytics` ;
 USE `analytics` ;
 
 CREATE TABLE `comscore` (
--- meta data (mostly for auditing, may not be sent over API on default) 
--- not used right now, store meta dat elsewhere,tbd, kept for brainstorm 
---
--- `id`             int auto_increment NOT NULL, 
--- `generated`      timestamp,
--- `source`         char (20),
--- `server`         char (20),
--- `script_name`    char (30),
--- `script_version` char (8),
--- `user`           char (20),
---
--- analytics data  
-  `yyyymm`         char (7), 
-  `country_code`   char (3), 
-  `region_code`    char (2), 
-  `property`       char (20), 
-  `project`        char (10), 
-  `reach`          decimal (4,1) DEFAULT '-1', 
-  `visitors`       decimal (15)  DEFAULT '-1', 
-  PRIMARY KEY (yyyymm,country_code,region_code,property)
+  `date`           date NOT NULL, 
+  `country_code`   varchar (3), 
+  `region_code`    varchar (3), 
+  `web_property`   varchar (20), 
+  `project_code`   varchar (10), 
+  `reach`          decimal (4,1) DEFAULT NULL,
+  `visitors`       decimal (15)  DEFAULT NULL, 
+  PRIMARY KEY (date,country_code,region_code,project_code,web_property),
+  KEY (`country_code`)  
 ) ;
 
 CREATE TABLE `comscore_regions` (
-  `region_code`     char (2), 
-  `report_language` char (10),
-  `region_name`     char (18),
+  `region_code`      varchar (2), 
+  `report_language`  varchar (10),
+  `region_name`      varchar (18),
   PRIMARY KEY (report_language,region_code)
 ) ;  
 
 CREATE TABLE `wikistats` (
-  `yyyymm`                   char (7), 
-  `project`                  char (2),
-  `language_code`            char (15),
-  `editors_all_time`         decimal (10)  DEFAULT '-1', 
-  `editors_new`              decimal (7)   DEFAULT '-1', 
-  `editors_ge_5`             decimal (7)   DEFAULT '-1', 
-  `editors_ge_25`            decimal (7)   DEFAULT '-1', 
-  `editors_ge_100`           decimal (7)   DEFAULT '-1', 
-  `articles`                 decimal (12)  DEFAULT '-1', 
-  `articles_new_per_day`     decimal (9)   DEFAULT '-1', 
-  `articles_over_bytes_500`  decimal (12)  DEFAULT '-1', 
-  `articles_over_bytes_2000` decimal (12)  DEFAULT '-1', 
-  `edits_per_article`        decimal (9,1) DEFAULT '-1', 
-  `bytes_per_article`        decimal (9,1) DEFAULT '-1', 
-  `edits`                    decimal (12)  DEFAULT '-1', 
-  `size_in_bytes`            decimal (15)  DEFAULT '-1', 
-  `size_in_words`            decimal (15)  DEFAULT '-1', 
-  `links_internal`           decimal (15)  DEFAULT '-1', 
-  `links_interwiki`          decimal (15)  DEFAULT '-1', 
-  `links_image`              decimal (15)  DEFAULT '-1', 
-  `links_external`           decimal (15)  DEFAULT '-1', 
-  `redirects`                decimal (15)  DEFAULT '-1', 
-  PRIMARY KEY (yyyymm,project,language_code)
+  `date`                     date NOT NULL, 
+  `project_code`             varchar (10),
+  `language_code`            varchar (15),
+  `editors_all_time`         int (10)  DEFAULT NULL, 
+  `editors_new`              int (7)   DEFAULT NULL, 
+  `editors_ge_5`             int (7)   DEFAULT NULL, 
+  `editors_ge_25`            int (7)   DEFAULT NULL, 
+  `editors_ge_100`           int (7)   DEFAULT NULL, 
+  `articles`                 int (12)  DEFAULT NULL, 
+  `articles_new_per_day`     int (9)   DEFAULT NULL, 
+  `articles_over_bytes_500`  int (12)  DEFAULT NULL, 
+  `articles_over_bytes_2000` int (12)  DEFAULT NULL, 
+  `edits_per_article`        decimal (9,1) DEFAULT NULL, 
+  `bytes_per_article`        decimal (9,1) DEFAULT NULL, 
+  `edits`                    int (12)  DEFAULT NULL, 
+  `size_in_bytes`            int (15)  DEFAULT NULL, 
+  `size_in_words`            int (15)  DEFAULT NULL, 
+  `links_internal`           int (15)  DEFAULT NULL, 
+  `links_interwiki`          int (15)  DEFAULT NULL, 
+  `links_image`              int (15)  DEFAULT NULL, 
+  `links_external`           int (15)  DEFAULT NULL, 
+  `redirects`                int (15)  DEFAULT NULL, 
+  PRIMARY KEY (date,project_code,language_code)
 ) ;
 
 CREATE TABLE `page_views` (
 -- analytics data  
-  `yyyymm`                      char (7), 
-  `project`                     char (2),
+  `date`                        date NOT NULL, 
+  `project_code`                char (2),
   `language_code`               char (15),
-  `views_non_mobile_raw`        decimal (15)  DEFAULT '-1', 
-  `views_mobile_raw`            decimal (15)  DEFAULT '-1', 
-  `views_non_mobile_normalized` decimal (15)  DEFAULT '-1', 
-  `views_mobile_normalized`     decimal (15)  DEFAULT '-1', 
-  PRIMARY KEY (yyyymm,project,language_code)
+  `views_non_mobile_raw`        bigint (15), 
+  `views_mobile_raw`            bigint (15), 
+  `views_non_mobile_normalized` bigint (15), 
+  `views_mobile_normalized`     bigint (15), 
+  PRIMARY KEY (date,project_code,language_code)
 ) ;
 
 CREATE TABLE `language_names` (
-  `report_language`             char (15),   
-  `language_code`               char (15),
-  `language_name`               char (50),
+  `report_language`             varchar (15),   
+  `language_code`               varchar (15),
+  `language_name`               varchar (50),
   PRIMARY KEY (report_language,language_code)
 ) ;
 
--- SHOW TABLES ;
--- DESCRIBE comscore ;
--- DESCRIBE comscore_regions ;
--- DESCRIBE wikistats ;
--- DESCRIBE page_views ;
--- DESCRIBE language_names ;
+ -- SHOW TABLES ;
+ -- DESCRIBE comscore ;
+ -- DESCRIBE comscore_regions ;
+ -- DESCRIBE wikistats ;
+ -- DESCRIBE page_views ;
+ -- DESCRIBE language_names ;
 
 -- Database Manipulation
 -- Obviously in real world this is a separate script
 
-LOAD DATA LOCAL INFILE 'c:/MySQL/analytics/analytics_in_comscore.csv' 
+LOAD DATA LOCAL INFILE 'analytics_in_comscore.csv' 
      INTO TABLE comscore 
      FIELDS TERMINATED BY ',' 
      OPTIONALLY ENCLOSED BY '"' 
-     (yyyymm,country_code,region_code,property,project,reach,visitors) ;
+     (@date,country_code,region_code,web_property,project_code,reach,visitors)
+     SET date = last_day (str_to_date(concat (@date,'-01'),'%Y-%m-%d')) ;
 
-LOAD DATA LOCAL INFILE 'c:/MySQL/analytics/analytics_in_comscore_regions.csv' 
+LOAD DATA LOCAL INFILE 'analytics_in_comscore_regions.csv' 
      INTO TABLE comscore_regions 
      FIELDS TERMINATED BY ',' 
      OPTIONALLY ENCLOSED BY '"' 
      (report_language,region_code,region_name) ;
 
--- show contents (debugging only) 
-SELECT * 
-     FROM comscore_regions ;
-
 LOAD DATA LOCAL INFILE 'analytics_in_wikistats.csv' 
      INTO TABLE wikistats 
      FIELDS TERMINATED BY ',' 
      OPTIONALLY ENCLOSED BY '"' 
-     (project,language_code,yyyymm,editors_all_time,editors_new,editors_ge_5,editors_ge_25,editors_ge_100,articles,articles_new_per_day,articles_over_bytes_500,articles_over_bytes_2000,edits_per_article,bytes_per_article,edits,size_in_bytes,size_in_words,links_internal,links_interwiki,links_image,links_external,redirects) ;
+     (project_code,language_code,@date,editors_all_time,editors_new,editors_ge_5,editors_ge_25,editors_ge_100,articles,articles_new_per_day,articles_over_bytes_500,articles_over_bytes_2000,edits_per_article,bytes_per_article,edits,size_in_bytes,size_in_words,links_internal,links_interwiki,links_image,links_external,redirects) 
+     SET date = last_day (str_to_date(concat (@date,'-01'),'%Y-%m-%d')) ;
 
 LOAD DATA LOCAL INFILE 'analytics_in_page_views.csv' 
      INTO TABLE page_views 
      FIELDS TERMINATED BY ',' 
      OPTIONALLY ENCLOSED BY '"' 
-     (project,language_code,yyyymm,views_non_mobile_raw,views_mobile_raw,views_non_mobile_normalized,views_mobile_normalized) ;
+     (project_code,language_code,@date,views_non_mobile_raw,views_mobile_raw,views_non_mobile_normalized,views_mobile_normalized) 
+     SET date = last_day (str_to_date(concat (@date,'-01'),'%Y-%m-%d')) ;
+
 
 LOAD DATA LOCAL INFILE 'analytics_in_language_names.csv' 
      INTO TABLE language_names 
@@ -147,10 +133,31 @@ LOAD DATA LOCAL INFILE 'analytics_in_language_names.csv'
      OPTIONALLY ENCLOSED BY '"' 
      (report_language,language_code,language_name) ;
 
--- on views procedures and functions see http://www.paragoncorporation.com/ArticleDetail.aspx?ArticleID=28
+-- show contents (debugging only) 
+-- SELECT * FROM comscore ;
+-- SELECT * FROM comscore_regions ;
+-- SELECT * FROM wikistats ;
+-- SELECT * FROM page_views ;
+-- SELECT * FROM language_names ;
+
+
 -- view makes join implicit and adds aggregated fields (and provides default order, can be overidden)
+
+-- define views (experimental only, not for current project)
+
+CREATE VIEW comscore_v AS  
+       SELECT date, country_code, /* country_name, */ comscore.region_code, region_name, web_property, project_code, reach, visitors
+       FROM comscore LEFT JOIN comscore_regions /* LEFT JOIN country_names */  
+       ON comscore.region_code = comscore_regions.region_code 
+       -- AND comscore.country = country.country_code   
+       ORDER BY date,project_code,region_code ;
+
+-- test code
+-- SELECT * FROM comscore_v 
+--       WHERE region_code IS NULL ;
+
 CREATE VIEW page_views_v AS  
-       SELECT yyyymm, project, page_views.language_code, language_name, 
+       SELECT date, project_code, page_views.language_code, language_name, 
               views_non_mobile_raw, views_mobile_raw , 
               views_non_mobile_normalized, views_mobile_normalized, 
               views_non_mobile_raw+views_mobile_raw AS views_raw, 
@@ -158,72 +165,12 @@ CREATE VIEW page_views_v AS
               language_names.report_language 
        FROM page_views LEFT JOIN language_names 
        ON page_views.language_code = language_names.language_code 
-       ORDER BY yyyymm,project,language_name ;
+       ORDER BY date,project_code,language_code ;
 
-PREPARE page_views_s1
-       FROM
-       "SELECT yyyymm,project,language_code,language_name,views_normalized
-       FROM page_views_v 
-       WHERE (project = 'wp')  AND 
-             (yyyymm BETWEEN '2011-03' AND '2011-05') AND 
-             (language_code = 'nl') AND
-             (report_language=?)                     -- parameter needed
-       INTO OUTFILE 'c:/MySQL/analytics/analytics_out_page_views_test1.csv' 
-       FIELDS TERMINATED BY ','" ; 
-
-SET @report_language = 'en' ; -- used as parameter in prepared statements ; for tests databasee contains translations for 'en' and 'de'
-
-EXECUTE page_views_s1 USING @report_language ;
-
-SET @project = 'wp' ;
-SET @yyyymm_first = '2011-03' ;
-SET @yyyymm_last  = '2011-05' ;
-SET @language_code = 'nl' ;
-SET @report_language = 'de' ; 
-
-PREPARE page_views_s2
-       FROM
-       "SELECT yyyymm,project,language_code,language_name,views_normalized
-       FROM page_views_v 
-       WHERE (project = ?) AND  
-             (yyyymm BETWEEN ? AND ?) AND
-             (language_code = ?) AND
-             (report_language = ?)      
-       INTO OUTFILE 'c:/MySQL/analytics/analytics_out_page_views_test2.csv' 
-       FIELDS TERMINATED BY ','" ; 
-
-EXECUTE page_views_s2 USING @project, @yyyymm_first, @yyyymm_last, @language_code, @report_language ;
-
-
-/*
--- in progress: tests with using procedure to make invocation more flexible than with prepared statement
--- prep stats expects all parameters predefined 
-
--- could the following be done in MySQL: a variable where clause with variable number of variables ? (seems not exactly like in this example for other DMRS)
--- http://www.sqlteam.com/article/implementing-a-dynamic-where-clause
-
-DROP PROCEDURE IF EXISTS page_views_p1 ;
-DELIMITER // 
-CREATE PROCEDURE page_views_p1 (parm_project VARCHAR(30))
-       SELECT yyyymm,project,language_code,language_name,views_normalized
-       FROM page_views_v 
-       WHERE (project = parm_project) ; 
-       //
-DELIMITER ;
-
--- CALL page_views_p1 ('wk') ;       
-
-delimiter // 
-CREATE PROCEDURE dynamic(IN tbl CHAR(64), IN col CHAR(64))
-BEGIN
-    SET @s = CONCAT('SELECT ',col,' FROM ',tbl) ;
-    PREPARE stmt FROM @s;
-    EXECUTE stmt;
-END    
-//
-delimiter ;
-CALL dynamic ('comscore', 'yyyymm')
-*/
-
+-- test code
+-- SELECT *
+--        FROM page_views_v   
+--        WHERE (project_code = 'wv')  AND 
+--              (date >= '2011-01') AND (date <= '2011-03') ; 
 
 
