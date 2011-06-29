@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $wgeAnalyticsFieldNames = array(
 	'select_regions' => "REGION",
@@ -34,9 +34,9 @@ $wgeAnalyticsValidParams = array(
 	"US" => "United States",
 	"W" => "World",
 ),
-//"select_countries" => array(),
-//"select_web_properties"=> array(),
-"select_projects"=> array(
+// "select_countries" => array(),
+// "select_web_properties"=> array(),
+"select_projects" => array(
 	"wb" => "Wikibooks",
 	"wk" => "Wiktionary",
 	"wn" => "Wikinews",
@@ -45,19 +45,19 @@ $wgeAnalyticsValidParams = array(
 	"ws" => "Wikisource",
 	"wv" => "Wikiversity",
 	"co" => "Commons",
-	"wx" => "Other projects", 
+	"wx" => "Other projects",
 ),
-//"select_wikis"=> array(),
-"select_editors"=> array(
+// "select_wikis"=> array(),
+"select_editors" => array(
 	"A" => "Anonymous",
 	"R" => "Registered User",
 	"B" => "Bot",
 ),
-"select_edits"=> array(
+"select_edits" => array(
 	"M" => "Manual",
 	"B" => "Bot",
 ),
-"select_platform"=> array(
+"select_platform" => array(
 	"M" => "Moblie",
 	"N" => "Non-Mobile",
 ),
@@ -70,13 +70,13 @@ $wgAutoloadClasses['ApiAnalyticsMetric'] = $dir . '/api/ApiAnalyticsMetric.php';
 $wgAutoloadClasses['MetricsReportingQuery'] = $dir . '/MetricsReportingQuery.php';
 
 $wgeAnalyticsMetricsList = array();
-$metricsdir = $dir."/metrics";
-$dh = opendir($metricsdir);
-while( ($file = readdir($dh)) !== false){
-	if(filetype($metricsdir."/".$file) == "file" ){
-		$file_path_parts = pathinfo($metricsdir."/".$file);
-		if($file_path_parts['extension'] == 'php'){
-			$wgAutoloadClasses["ApiAnalyticsMetric{$file_path_parts['filename']}"] = $metricsdir."/".$file;
+$metricsdir = $dir . "/metrics";
+$dh = opendir( $metricsdir );
+while ( ( $file = readdir( $dh ) ) !== false ) {
+	if ( filetype( $metricsdir . "/" . $file ) == "file" ) {
+		$file_path_parts = pathinfo( $metricsdir . "/" . $file );
+		if ( $file_path_parts['extension'] == 'php' ) {
+			$wgAutoloadClasses["ApiAnalyticsMetric{$file_path_parts['filename']}"] = $metricsdir . "/" . $file;
 			$wgeAnalyticsMetricsList[] = $file_path_parts['filename'];
 		}
 	}
@@ -90,9 +90,9 @@ $wgAPIModules['analytics'] = 'ApiAnalytics';
 function wfAnalyticsMetricConnection() {
 	global $wgeAnalyticsMetricDBserver, $wgeAnalyticsMetricDBname;
 	global $wgeAnalyticsMetricDBuser, $wgeAnalyticsMetricDBpassword;
-	
+
 	static $db;
-	
+
 	if ( !$db ) {
 		$db = new DatabaseMysql(
 		$wgeAnalyticsMetricDBserver,
@@ -101,7 +101,7 @@ function wfAnalyticsMetricConnection() {
 		$wgeAnalyticsMetricDBname );
 		$db->query( "SET names utf8" );
 	}
-	
+
 	return $db;
 }
- 
+

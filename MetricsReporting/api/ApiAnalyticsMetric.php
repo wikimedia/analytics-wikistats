@@ -1,18 +1,18 @@
-<?php 
+<?php
 
-abstract class ApiAnalyticsMetric{
-	
-	
+abstract class ApiAnalyticsMetric {
+
+
 	protected $canBeNormalized = false;
-	
+
 	protected $name = null;
-	
-	protected function getAllowedFilterParams(){
+
+	protected function getAllowedFilterParams() {
 		return array();
 	}
-	
-	
-	
+
+
+
 }
 
 
