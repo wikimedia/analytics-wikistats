@@ -6,10 +6,10 @@
 --   wikistats 
 --   page_views     
 --   language names 
+--   binaries    
 
 -- more tables planned (O= optional, not needed for report card stage)
 --   project_names  
---   binaries       per project_code, per language, per month, per extension type
 -- O edits          per project_code, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
 -- O editors        per project_code, per language, per month, per normalization type (Y/N), editor type (manual, anonymous, bot), namespace group (articles, talk pages, other)  
 
@@ -71,7 +71,6 @@ CREATE TABLE `wikistats` (
 ) ;
 
 CREATE TABLE `page_views` (
--- analytics data  
   `date`                        date NOT NULL, 
   `project_code`                char (2),
   `language_code`               char (15),
@@ -89,12 +88,22 @@ CREATE TABLE `language_names` (
   PRIMARY KEY (report_language,language_code)
 ) ;
 
- -- SHOW TABLES ;
- -- DESCRIBE comscore ;
- -- DESCRIBE comscore_regions ;
- -- DESCRIBE wikistats ;
- -- DESCRIBE page_views ;
- -- DESCRIBE language_names ;
+CREATE TABLE `binaries` (
+  `date`                        date NOT NULL, 
+  `project_code`                char (2),
+  `language_code`               char (15),
+  `extension`                   varchar (10),
+  `binaries`                    bigint (15), 
+  PRIMARY KEY (date,project_code,language_code,extension)
+) ;
+
+-- SHOW TABLES ;
+-- DESCRIBE comscore ;
+-- DESCRIBE comscore_regions ;
+-- DESCRIBE wikistats ;
+-- DESCRIBE page_views ;
+-- DESCRIBE language_names ;
+-- DESCRIBE binaries ;
 
 -- Database Manipulation
 -- Obviously in real world this is a separate script
@@ -133,12 +142,21 @@ LOAD DATA LOCAL INFILE 'analytics_in_language_names.csv'
      OPTIONALLY ENCLOSED BY '"' 
      (report_language,language_code,language_name) ;
 
+LOAD DATA LOCAL INFILE 'analytics_in_binaries.csv' 
+     INTO TABLE binaries 
+     FIELDS TERMINATED BY ',' 
+     OPTIONALLY ENCLOSED BY '"' 
+     (project_code,language_code,@date,extension,binaries) 
+     SET date = last_day (str_to_date(concat (@date,'-01'),'%Y-%m-%d')) ;
+  
 -- show contents (debugging only) 
 -- SELECT * FROM comscore ;
 -- SELECT * FROM comscore_regions ;
 -- SELECT * FROM wikistats ;
 -- SELECT * FROM page_views ;
 -- SELECT * FROM language_names ;
+   SELECT * FROM binaries 
+   WHERE project = 'commons' ;
 
 
 -- view makes join implicit and adds aggregated fields (and provides default order, can be overidden)
