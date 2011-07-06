@@ -39,6 +39,7 @@
 
   &ParseArguments ;
   &ReadStatisticsMonthly ;
+  &FindLargestWikis ;
   &WriteMonthlyData ;
 
   print "\nReady\n\n" ;
@@ -54,14 +55,19 @@ sub ParseArguments
   { $arguments .= " -$arg " . $options {$arg} . "\n" ; }
   print ("\nArguments\n$arguments\n") ;
 
-# $options {"i"} = "w:/# out bayes" ;     # EZ test
-# $options {"o"} = "c:/MySQL/analytics" ; # EZ test
+  if (! -d '/mnt/') # EZ test
+  {
+    $path_in  = "c:/\@ wikimedia/# out bayes" ;
+    $path_out = "c:/MySQL/analytics" ;
+  }
+  else
+  {
+    die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
+    die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
 
-  die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
-  die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
-
-  $path_in  = $options {"i"} ;
-  $path_out = $options {"o"} ;
+    $path_in  = $options {"i"} ;
+    $path_out = $options {"o"} ;
+  }
 
   die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
   die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
@@ -158,6 +164,8 @@ sub ReadStatisticsMonthlyForProject
 
     ($month,$day,$year) = split ('\/', $date) ;
     $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
+    $months {$yyyymm} ++ ;
+#    print "YYYYMM $yyyymm\n" ;
 
     # data have been collected in WikiCountsProcess.pm and been written in WikiCountsOutput.pm
     # count user with over x edits
@@ -167,6 +175,11 @@ sub ReadStatisticsMonthlyForProject
     $edits_ge_25  = @counts [4] > 0 ? @counts [4] : 0 ;
     $edits_ge_100 = @counts [7] > 0 ? @counts [7] : 0 ;
     $data2 {"$project,$language,$yyyymm"} = "$edits_ge_5,$edits_ge_25,$edits_ge_100" ;
+
+    $total_edits_ge_5   {"$project,$language"} += $edits_ge_5 ;
+    $total_edits_ge_25  {"$project,$language"} += $edits_ge_25 ;
+    $total_edits_ge_100 {"$project,$language"} += $edits_ge_100 ;
+
     # prep string with right amount of comma's
     if ($data2_default eq '')
     {
@@ -237,12 +250,46 @@ sub ReadStatisticsMonthlyForProject
 #  }
 #}
 
+sub FindLargestWikis
+{
+  print "Largest projects (most accumulated very active editors):\n";
+  @total_edits_ge_100 = sort {$total_edits_ge_100 {$b} <=> $total_edits_ge_100 {$a}} keys %total_edits_ge_100 ;
+  $rank = 0 ;
+  foreach $project_language (@total_edits_ge_100)
+  {
+    $largest_projects {$project_language} = $rank++ ;
+    print "$project_language," ;
+    last if $rank > 10 ;
+  }
+  print "\n\n" ;
+
+  foreach $yyyymm (sort keys %months)
+  {
+    next if $yyyymm lt '2011' ;
+    foreach $project_language (keys %largest_projects)
+    {
+      ($project,$language) = split (',', $project_language) ;
+	  if ($data2 {"$project,$language,$yyyymm"} eq '')
+      {
+        print "No data yet for large wiki $project_language for $yyyymm-> skip month $yyyymm\n" ;
+        $months {$yyyymm} = 0 ;
+      }
+    }
+  }
+  exit ;
+}
+
 sub WriteMonthlyData
 {
   my $file_csv_out = "$path_out/$file_csv_analytics_in" ;
   open CSV_OUT, '>', $file_csv_out ;
   foreach $project_wiki_month (sort keys %data1)
   {
+    ($project,$wiki,$yyyymm) = split (',', $project_wiki_month) ;
+
+    # recent month misses on eor more large wikis?
+    next if $months {$yyyymm} == 0 ;
+
     $data1 = $data1 {$project_wiki_month} ;
     $data2 = $data2 {$project_wiki_month} ;
     if ($data2 eq '')
@@ -250,9 +297,12 @@ sub WriteMonthlyData
       print "Editor data missing for $project_wiki_month\n" ;
       $data2 = $data2_default ;
     }
-    $data1 =~ s/data2/$data2/ ; # insert rather than append to have all editor fields follow each other
+    $data1 =~ s/data2/$data2/ ; # insert rather than append to have all editor fields close together
     print CSV_OUT "$project_wiki_month,$data1\n" ;
   }
+  $total_edits_ge_5   {"$project,*,$yyyymm"} += $edits_ge_5 ;
+  $total_edits_ge_25  {"$project,*,$yyyymm"} += $edits_ge_25 ;
+  $total_edits_ge_100 {"$project,*,$yyyymm"} += $edits_ge_100 ;
   close CSV_OUT ;
 }
 

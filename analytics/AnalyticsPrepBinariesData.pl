@@ -17,21 +17,21 @@
 
 sub ParseArguments
 {
-#  my @options ;
-#  getopt ("io", \%options) ;
+  my @options ;
+  getopt ("io", \%options) ;
 
-#  die ("Specify input folder as: -i path")   if (! defined ($options {"i"})) ;
-#  die ("Specify output folder as: -o path'") if (! defined ($options {"o"})) ;
+  die ("Specify input folder as: -i path")   if (! defined ($options {"i"})) ;
+  die ("Specify output folder as: -o path'") if (! defined ($options {"o"})) ;
 
-#  $path_in  = $options {"i"} ;
-#  $path_out = $options {"o"} ;
+  $path_in  = $options {"i"} ;
+  $path_out = $options {"o"} ;
 
-#  die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
-#  die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
+  die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
+  die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
 
   # tests only
-  $path_in  = "C:/@ Wikimedia/# Out Bayes" ;
-  $path_out = "C:/analytics" ; # "w:/@ report card/data" ;
+  # $path_in  = "C:/@ Wikimedia/# Out Bayes" ;
+  # $path_out = "C:/analytics" ; # "w:/@ report card/data" ;
 
   print "Input  folder: $path_in\n" ;
   print "Output folder: $path_out\n" ;
