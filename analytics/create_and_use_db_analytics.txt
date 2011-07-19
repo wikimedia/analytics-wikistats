@@ -18,7 +18,7 @@
 -- only store basic data in database and calculate all aggregates on the fly or do some aggragation before hand ? (e.g. count for mobile / non-mobile / ==> total of both ? <==)
 -- for binaries, store one extension type per row? (future proof, more work to query), or a selected few as columns? (one row only needed per month)
 
--- Create database and two tables from scratch 
+-- Create database and tables from scratch 
 DROP DATABASE IF EXISTS `analytics` ;
 
 CREATE DATABASE `analytics` ;
@@ -95,6 +95,12 @@ CREATE TABLE `binaries` (
   `extension`                   varchar (10),
   `binaries`                    bigint (15), 
   PRIMARY KEY (date,project_code,language_code,extension)
+) ;
+
+CREATE TABLE `offline` (
+  `date`                        date NOT NULL,
+  `readers`                     bigint(12) NOT NULL DEFAULT '0',
+  PRIMARY KEY (date,readers)
 ) ;
 
 -- SHOW TABLES ;
