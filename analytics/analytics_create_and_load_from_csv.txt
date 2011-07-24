@@ -15,7 +15,7 @@
 
 
 -- open issues: 
--- only store basic data in database and calculate all aggregates on the fly or do some aggragation before hand ? (e.g. count for mobile / non-mobile / ==> total of both ? <==)
+-- only store basic data in database and calculate all aggregates on the fly or do some aggregation before hand ? (e.g. count for mobile / non-mobile / ==> total of both ? <==)
 -- for binaries, store one extension type per row? (future proof, more work to query), or a selected few as columns? (one row only needed per month)
 
 -- Create database and two tables from scratch 
@@ -41,7 +41,7 @@ CREATE TABLE `comscore_regions` (
   `region_code`      varchar (2), 
   `report_language`  varchar (10),
   `region_name`      varchar (18),
-  PRIMARY KEY (report_language,region_code)
+  PRIMARY KEY (region_code,report_language)
 ) ;  
 
 CREATE TABLE `wikistats` (
