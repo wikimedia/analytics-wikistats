@@ -80,7 +80,8 @@ CREATE TABLE `page_views` (
   `views_mobile_normalized`     bigint (15), 
   `views_raw`                   bigint (15), 
   `views_normalized`            bigint (15), 
-  PRIMARY KEY (date,project_code,language_code)
+  PRIMARY KEY (date,project_code,language_code),
+  KEY (date,language_code,project_code)
 ) ;
 
 CREATE TABLE `language_names` (
