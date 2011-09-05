@@ -6,8 +6,8 @@
   ez_lib_version (2) ;
 
 # set defaults mainly for tests on local machine
-# default_argv "-m 201010   " ;
-  default_argv "-c -q 2010Q4" ;
+  default_argv "-m 2011-07   " ;
+#  default_argv "-c -q 2010Q4" ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -117,11 +117,13 @@
   $file_html_methods      = "SquidReportMethods.htm" ;
   $file_html_origins      = "SquidReportOrigins.htm" ;
   $file_html_opsys        = "SquidReportOperatingSystems.htm" ;
+  $file_html_opsys_html   = "SquidReportOperatingSystemsHtmlOnly.htm" ;
   $file_html_scripts      = "SquidReportScripts.htm" ;
   $file_html_skins        = "SquidReportSkins.htm" ;
   $file_html_requests     = "SquidReportRequests.htm" ;
   $file_html_google       = "SquidReportGoogle.htm" ;
   $file_html_clients      = "SquidReportClients.htm" ;
+  $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
 
 # names till 2010-07-01
 #
@@ -303,16 +305,6 @@
 # &WriteCsvCountriesTimed ;
 # &WriteCsvCountriesTargets ;
   close "FILE_LOG" ;
-
-  if (-d "/a/squid")
-  {
-#   $cmd = "tar -cf $path_reports/$date_last\-csv.tar $path_reports_in/*.csv | bzip2 $path_reports/$date_last\-csv.tar" ;
-#   print "cmd = '$cmd'\n" ;
-#    `$cmd` ;
-    $cmd = "tar -cf $path_reports/$reportmonth\-html.tar $path_reports/*.htm | bzip2 $path_reports/$reportmonth\-html.tar" ;
-    print "cmd = '$cmd'\n" ;
-    `$cmd` ;
-  }
 
   print "\nReady\n\n" ;
   exit ;
@@ -561,9 +553,10 @@ sub ReadInputClients
 
     chomp ($line) ;
 
+    $mimecat = '' ; # page/image/other
     if ($line =~ /^E/)
     {
-      ($rectype, $engine, $count) = split (',', $line) ;
+      ($rectype, $engine, $count,$mimecat) = split (',', $line) ;
 
       next if ($engine !~ /^Gecko/) && ($engine !~ /^AppleWebKit/) ;
 
@@ -589,7 +582,11 @@ sub ReadInputClients
     }
     elsif ($line =~ /^G/)
     {
-      ($rectype, $mobile, $group, $count, $perc) = split (',', $line) ;
+      if ($line =~ /,(?:page|image|other),/)
+      { ($rectype, $mobile, $group, $mimecat, $count, $perc) = split (',', $line) ; }
+      else
+      { ($rectype, $mobile, $group, $count, $perc) = split (',', $line) ; }
+
       $total_clientgroups {$mobile} += $count ;
 
       $group =~ s/^KDDI.*$/KDDI/ ;
@@ -604,19 +601,38 @@ sub ReadInputClients
       $group =~ s/^PANTECH.*$/PanTech/i ;
       $group =~ s/^Palm_Pre/Palm Pre/i ;
       $clientgroups {"$mobile,$group"} += $count ;
+
+      if ($mimecat eq 'page')
+      {
+        $total_clientgroups_html_only {$mobile} += $count ;
+        $clientgroups_html_only {"$mobile,$group"} += $count ;
+      }
     }
     else
     {
-      ($rectype, $client, $count, $perc) = split (',', $line) ;
+      if ($line =~ /,(?:page|image|other),/)
+      { ($rectype, $client, $mimecat, $count, $perc) = split (',', $line) ; }
+      else
+      { ($rectype, $client, $count, $perc) = split (',', $line) ; }
 
       $total_clients += $count ;
+
       $client =~ s/_/./g ;
       $client =~ s/\.\./Other/g ;
       if ($client !=~ / \d/)
       { $client =~ s/\// / ; }
       if ($rectype eq "-") { $total_clients_non_mobile += $count ; }
       if ($rectype eq "M") { $total_clients_mobile     += $count ; }
+
       $clients {"$rectype,$client"} += $count ;
+
+      if ($mimecat eq 'page')
+      {
+        $total_clients_html_only += $count ;
+        if ($rectype eq "-") { $total_clients_non_mobile_html_only += $count ; }
+        if ($rectype eq "M") { $total_clients_mobile_html_only     += $count ; }
+        $clients_html_only {"$rectype,$client"} += $count ;
+      }
     }
   }
   close CSV_CLIENTS ;
@@ -820,7 +836,12 @@ sub ReadInputOpSys
     next if $line =~ /^:/ ; # csv header (not a comment)
 
     chomp $line ;
-    ($rectype, $os, $count, $perc) = split (',', $line) ;
+
+    $mimecat = '' ;
+    if ($line !~ /,(?:page|image|other),/)
+    { ($rectype, $os, $count, $perc) = split (',', $line) ; }
+    else
+    { ($rectype, $os, $mimecat, $count, $perc) = split (',', $line) ; }
 
     next if $count !~ /^\d+$/ ; # -,Linux Gentoo,,2,0.00% (extra comma !)
 
@@ -838,6 +859,13 @@ sub ReadInputOpSys
     if ($rectype eq "M") { $total_opsys_mobile     += $count ; }
 
     $opsys {"$rectype,$os"} += $count ;
+
+    if ($mimecat eq 'page')
+    {
+      $opsys_html_only {"$rectype,$os"} += $count ;
+      if ($rectype eq "-") { $total_opsys_non_mobile_html_only += $count ; }
+      if ($rectype eq "M") { $total_opsys_mobile_html_only     += $count ; }
+    }
   }
 }
 
@@ -1738,28 +1766,41 @@ sub ReadInputBrowserLanguages
 
 sub CalcPercentages
 {
-  my $total_opsys = $total_opsys_mobile + $total_opsys_non_mobile ;
+  my $total_opsys           = $total_opsys_mobile           + $total_opsys_non_mobile ;
+  my $total_opsys_html_only = $total_opsys_mobile_html_only + $total_opsys_non_mobile_html_only ;
   foreach $key (keys %opsys)
   { $opsys_perc {$key} = sprintf ("%.2f",(100*$opsys {$key}/$total_opsys)) . "%" ; }
+  foreach $key (keys %opsys_html_only)
+  { $opsys_perc_html_only {$key} = sprintf ("%.2f",(100*$opsys_html_only {$key}/$total_opsys_html_only)) . "%" ; }
 
   foreach $key (keys %clients)
   { $clients_perc {$key} = sprintf ("%.2f",(100*$clients {$key}/$total_clients)) . "%" ; }
+  foreach $key (keys %clients_html_only)
+  { $clients_perc_html_only {$key} = sprintf ("%.2f",(100*$clients_html_only {$key}/$total_clients_html_only)) . "%" ; }
 
   foreach $key (keys %clientgroups)
   {
-    $perc = 100*$clientgroups {$key}/$total_clients ;
+    $perc           = 100*$clientgroups           {$key}/$total_clients ;
+    $perc_html_only = 100*$clientgroups_html_only {$key}/$total_clients_html_only ;
     if ($key =~ /^M/)
     { $perc_threshold = 0.005 ; }
     else
     { $perc_threshold = 0.02 ; }
 
     if ($perc > $perc_threshold)
-    { $clientgroups_perc {$key} = sprintf ("%.2f",$perc) . "%" ; }
+    {
+      $clientgroups_perc           {$key} = sprintf ("%.2f",$perc)           . "%" ;
+      $clientgroups_perc_html_only {$key} = sprintf ("%.2f",$perc_html_only) . "%" ;
+    }
     else
     {
       ($mobile,$group) = split (',', $key) ;
-      $clientgroups_other {$mobile} += $clientgroups {$key} ;
-      $clientgroups {$key} = 0 ;
+
+      $clientgroups_other           {$mobile} += $clientgroups           {$key} ;
+      $clientgroups_other_html_only {$mobile} += $clientgroups_html_only {$key} ;
+
+      $clientgroups           {$key} = 0 ;
+      $clientgroups_html_only {$key} = 0 ;
     }
   }
 }
@@ -1773,14 +1814,26 @@ sub NormalizeCounts
   foreach $key (keys %clientgroups)
   { $clientgroups {$key} = &Normalize ($clientgroups {$key}) ; }
 
+  foreach $key (keys %clientgroups_html_only)
+  { $clientgroups_html_only {$key} = &Normalize ($clientgroups_html_only {$key}) ; }
+
   foreach $key (keys %clients)
   { $clients {$key} = &Normalize ($clients {$key}) ; }
+
+  foreach $key (keys %clients_html_only)
+  { $clients_html_only {$key} = &Normalize ($clients_html_only {$key}) ; }
 
   foreach $key (keys %clientgroups_other)
   { $clientgroups_other {$key} = &Normalize ($clientgroups_other {$key}) ; }
 
+  foreach $key (keys %clientgroups_other_html_only)
+  { $clientgroups_other_html_only {$key} = &Normalize ($clientgroups_other_html_only {$key}) ; }
+
   foreach $key (keys %total_clientgroups)
   { $total_clientgroups {$key} = &Normalize ($total_clientgroups {$key}) ; }
+
+  foreach $key (keys %total_clientgroups_html_only)
+  { $total_clientgroups_html_only {$key} = &Normalize ($total_clientgroups_html_only {$key}) ; }
 
   foreach $key (keys %total_engines)
   { $total_engines {$key} = &Normalize ($total_engines {$key}) ; }
@@ -1791,6 +1844,10 @@ sub NormalizeCounts
   $total_clients            = &Normalize ($total_clients) ;
   $total_clients_mobile     = &Normalize ($total_clients_mobile) ;
   $total_clients_non_mobile = &Normalize ($total_clients_non_mobile) ;
+
+  $total_clients_html_only            = &Normalize ($total_clients_html_only) ;
+  $total_clients_mobile_html_only     = &Normalize ($total_clients_mobile_html_only) ;
+  $total_clients_non_mobile_html_only = &Normalize ($total_clients_non_mobile_html_only) ;
 
 # ReadInputCrawlers
   foreach $key (keys %crawlers)
@@ -1958,6 +2015,7 @@ sub SortCounts
 
 sub WriteReportClients
 {
+  print "\nWriteReportClients -> $path_reports/$file_html_clients\n\n" ;
   open FILE_HTML_CLIENTS, '>', "$path_reports/$file_html_clients" ;
 
   $html  = $header ;
@@ -1975,27 +2033,34 @@ sub WriteReportClients
            "</td></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY
-  $html .= "<tr><td width=50% valign=top>" ;
+  $html .= "<tr><td width=50% valign=top style='vertical-align:top'>" ;
   $html .= "<table border=1 width=100%>\n" ;
   $html .= "<tr><th colspan=99 class=l><h3>In order of popularity</h3></th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browsers, non mobile</th></tr>\n" ;
+  # CLIENTS SORTED BY FREQUENCY, BROWSERS, NON MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browsers, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   $perc_total = 0 ;
+  $perc_total_html_only = 0 ;
   foreach $key (@clientgroups_sorted_count)
   {
     $count = $clientgroups {$key} ;
-
     next if $count == 0 ;
-
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-
     next if $mobile ne '-' ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
+
     $perc =~ s/\%// ;
+    $perc_html_only =~ s/\%// ;
+
     $perc_total += $perc ;
+    $perc_total_html_only += $perc_html_only ;
   }
 
   $perc = ".." ;
@@ -2005,104 +2070,146 @@ sub WriteReportClients
     $perc = sprintf ("%.2f", 100 * $clientgroups_other {'-'} / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ;
     $perc_total += $perc ;
   }
-  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td></tr>\n" ;
+  $perc_html_only = ".." ;
+  $count_html_only = $clientgroups_other_html_only {'-'} ;
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
+  {
+    $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only {'-'} / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ;
+    $perc_total_html_only += $perc_html_only ;
+  }
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
 
   $total = &FormatCount ($total_clientgroups {'-'}) ;
   $perc_total = sprintf ("%.1f", $perc_total) ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browsers, mobile</th></tr>\n" ;
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
+  $perc_total_html_only = sprintf ("%.1f", $perc_total_html_only) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+
+  # CLIENTS SORTED BY FREQUENCY, BROWSERS, MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clientgroups_sorted_count)
   {
     $count = $clientgroups {$key} ;
-
     next if $count == 0 ;
-
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-
     next if $mobile ne 'M' ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
-  $count = $clientgroups_other {'M'} ;
 
+  $count = $clientgroups_other {'M'} ;
   $perc = ".." ;
   if ($total_clientgroups {'-'} + $total_clientgroups {'M'} > 0)
   { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ; }
 
+  $count_html_only = $clientgroups_other_html_only {'M'} ;
+  $perc_html_only = ".." ;
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
+  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ; }
+
   $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
   $total = &FormatCount ($total_clientgroups {'M'}) ;
-  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser versions, non mobile</th></tr>\n" ;
+  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+
+  # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, NON MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
 
   foreach $key (@clients_sorted_count)
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-
     next if $rectype ne '-' ; # group
-
     $perc  = $clients_perc {$key} ;
-
     next if $perc lt "0.02%" ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clients_html_only {$key} ;
+    $perc_html_only  = $clients_perc_html_only {$key} ;
+
+    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
+
   $total = &FormatCount ($total_clients_non_mobile) ;
-
   $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser versions, mobile</th></tr>\n" ;
+  $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
+  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+
+  # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browser versions, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clients_sorted_count)
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-
     next if $rectype ne 'M' ; # group
-
     $perc  = $clients_perc {$key} ;
-
     next if $perc lt "0.02%" ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $perc_html_only  = $clients_perc_html_only {$key} ;
+    $count_html_only = $clients_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
   }
+
   $total = &FormatCount ($total_clients_mobile) ;
   $perc  = sprintf ("%.1f", (100 - $perc_total)) ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th></tr>\n" ;
+
+  $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
+  $perc_html_only  = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
   $html .= "</table>\n" ;
 
-  # CLIENTS In alphabetical order
+  # CLIENTS IN ALPHABETHICAL ORDER
   $html .= "</td><td width=50% valign=top>" ;
   $html .= "<table border=1 width=100%>\n" ;
   $html .= "<tr><th colspan=99 class=l><h3>In alphabetical order</h3></th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browsers, non mobile</th></tr>\n" ;
+  # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, NON MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browsers, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   $perc_total = 0 ;
+  $perc_total_html_only = 0 ;
   foreach $key (@clientgroups_sorted_alpha)
   {
     $count = $clientgroups {$key} ;
-
     next if $count == 0 ;
-
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-
     next if $mobile ne '-' ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
+
     $perc =~ s/\%// ;
     $perc_total += $perc ;
+
+    $perc_html_only =~ s/\%// ;
+    $perc_total_html_only += $perc_html_only ;
   }
 
   $count = $clientgroups_other {'-'} ;
@@ -2112,70 +2219,100 @@ sub WriteReportClients
   { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ; }
   $perc_total += $perc ;
   $perc_total = sprintf ("%.1f", $perc_total) ;
-  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browsers, mobile</th></tr>\n" ;
+  $count_html_only = $clientgroups_other_html_only {'-'} ;
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
+  $perc_html_only = ".." ;
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
+  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ; }
+  $perc_total_html_only += $perc_html_only ;
+  $perc_total_html_only = sprintf ("%.1f", $perc_total_html_only) ;
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+
+  # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clientgroups_sorted_alpha)
   {
     $count = $clientgroups {$key} ;
-
     next if $count == 0 ;
-
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-
     next if $mobile ne 'M' ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
+
   $count = $clientgroups_other {'M'} ;
   $total = &FormatCount ($total_clientgroups {'M'}) ;
   $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ;
   $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
-  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser versions, non mobile</th></tr>\n" ;
+  $count_html_only = $clientgroups_other_html_only {'M'} ;
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
+  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ;
+  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+
+  # CLIENTS IN ALPHABETHICAL ORDER, BROWSER VERSIONS, NON MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
 
   foreach $key (@clients_sorted_alpha)
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-
     next if $rectype ne '-' ; # group
-
     $perc  = $clients_perc {$key} ;
-
     next if $perc lt "0.02%" ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clients_html_only {$key} ;
+    $perc_html_only  = $clients_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_non_mobile) ;
   $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile)) ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th></tr>\n" ;
 
-  $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser versions, mobile</th></tr>\n" ;
+  $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only)) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
+
+  # CLIENTS IN ALPHABETHICAL ORDER, BROWSER VERSIONS, MOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Browser versions, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clients_sorted_alpha)
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-
     next if $rectype ne 'M' ; # group
-
     $perc  = $clients_perc {$key} ;
-
     next if $perc lt "0.02%" ;
-
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td></tr>\n" ;
+
+    $count_html_only = $clients_html_only {$key} ;
+    $perc_html_only  = $clients_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_mobile) ;
   $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile)) ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th></tr>\n" ;
+
+  $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only)) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser engines</th></tr>\n" ;
 
@@ -4931,7 +5068,7 @@ sub WriteWorldMapSvg
 # print "Convert world_map_$period.svg to gif\n" ;
 # `svg/convert.exe svg/world_map_$period.svg gif:svg/world_map_$period.gif` ;
 
-#  exit ; # qqq
+#  exit ;
 # exit ;
 #  sleep (2) ; # until computer fan fixed
 }
