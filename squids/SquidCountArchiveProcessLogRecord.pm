@@ -24,6 +24,7 @@ sub ProcessLine
     return ;
   }
 
+
   # remember for each squid per hour lowest and highest sequence number and number of events
   # later calc per hour average distance between events = (higest - lowest sequence number) / events - 1
   # distance between consecutive events that lay in different hour bin are ignored, begligible
@@ -49,6 +50,18 @@ sub ProcessLine
   $size       = $fields [6] ;
   $method     = $fields [7] ;
   $url        = lc ($fields [8]) ;
+
+  if ($url =~ /\.m\.wikipedia.org/)
+  {
+    $url_wikipedia_mobile ++ ;
+    $status_url_wikipedia_mobile {$status} ++ ;
+    $status_mime_url_wikipedia_mobile {"$status,$mime"} ++ ;
+    if ($status eq "TCP_MISS/302")
+    {
+      $redirected_to_mobile ++ ;
+      return ;
+    }
+  }
 
   $referer    = lc ($fields [11]) ;
   $agent      = $fields [13] ;
@@ -531,7 +544,7 @@ sub ProcessLine
     if ($os =~ /playstation/io)
     { $version = "NetFront (PlayStation)" ; }
 
-    $clients {"$mobile,$version"}++ ;
+    $clients {"$mobile,$version,$mimecat"}++ ;
 
     $operating_systems =~ s/,/&comma;/go ;
     $operating_systems {"$mobile,$os"} ++ ;
@@ -637,10 +650,17 @@ sub ProcessLine
 
   $clients_by_wiki {"$mobile,$version,$domain"}++ ;
 
+  # different output use either 'bot=N' or 'M'(anual) / 'bot=Y' or 'B'(ot)
   if ($bot)
-  { $ind_bot = 'bot=Y' ; }
+  {
+    $ind_bot  = 'bot=Y' ;
+    $ind_bot2 = 'B' ;
+  }
   else
-  { $ind_bot = 'bot=N' ; }
+  {
+    $ind_bot  = 'bot=N' ;
+    $ind_bot2 = 'M' ;
+  }
 
   if (($domain =~ /^\@/) || ($domain =~ /^\*/))
   {
@@ -686,6 +706,11 @@ sub ProcessLine
     $time_tt = $time_hh * 60 + $time_mm ;
     $time_tt2 = $time_tt - $time_tt % 15 ;
     $countries_timed {"$ind_bot,$domain,$country,$time_tt2"} ++ ;
+
+
+    $time2    = substr ($time,0,19) ; # omit msec
+    $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile,$os,$version,$mimecat\n" ;
+    $gz_csv_views_viz->gzwrite($line) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
   }
 }
 
