@@ -135,7 +135,19 @@ sub ReadSquidLogFiles
   print "Read log records in range $time_to_start till $time_to_stop\n\n" ;
 
   if ($job_runs_on_production_server && $scan_all_fields)
-  { open FILE_EDITS_SAVES, '>', "$path_out/$file_edits_saves" ; }
+  {
+    open FILE_EDITS_SAVES, '>', "$path_out/$file_edits_saves" ;
+
+    my $file_csv_views_viz2 = $file_csv_views_viz ;
+    my $date = substr ($time_to_start,0,4) . substr ($time_to_start,5,2) . substr ($time_to_start,8,2) ;
+    $file_csv_views_viz2 =~ s/date/$date/ ;
+    $gz_csv_views_viz = gzopen ($file_csv_views_viz2, "wb") || die "Unable to write $file_csv_views_viz2 $!\n" ;
+
+    $comment = "# Data from $time_to_start till $time_to_stop (yyyy-mm-ddThh:mm:ss) - all counts in thousands due to sample rate of log (1 = 1000)\n" ;
+    $gz_csv_views_viz->gzwrite($comment) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
+    $comment = ":time,ip,domain,bot,mobile,os,client\n" ;
+    $gz_csv_views_viz->gzwrite($comment) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
+  }
 
   my $lines = 0 ;
   while ($#files > -1)
@@ -241,7 +253,10 @@ sub ReadSquidLogFiles
   { return ($data_read) ; }
 
   if ($job_runs_on_production_server)
-  { close FILE_EDITS_SAVES ; }
+  {
+    close FILE_EDITS_SAVES ;
+    gzclose $gz_csv_views_viz ;
+  }
 
   $lines_read {$date_prev} = $lines_this_day ;
 
@@ -252,6 +267,17 @@ sub ReadSquidLogFiles
   }
   else
   { print "$lines_this_day out $lines_in_file processed\n" ; }
+
+  if ($url_wikipedia_mobile > 0)
+  {
+    print "\n$redirected_to_mobile out of $url_wikipedia_mobile (" . sprintf ("%.1f\%", 100 * $redirected_to_mobile / $url_wikipedia_mobile) . ") redirected to mobile wikipedia\n\n" ;
+    foreach $status (sort {$status_url_wikipedia_mobile {$b} <=> $status_url_wikipedia_mobile {$a}} keys %status_url_wikipedia_mobile)
+    { print "Status $status: " . $status_url_wikipedia_mobile {$status} . "\n" ; }
+    print "\n" ;
+  }
+
+  else
+  { print "\nNo mobile urls detected ?!?!\n\n" ; }
 
   return ($data_read) ;
 }
