@@ -6,6 +6,8 @@
   $trace_on_exit = $true ;
   ez_lib_version (13) ;
 
+  use Compress::Zlib;
+
   use SquidCountArchiveProcessLogRecord ;
   use SquidCountArchiveReadInput ;
   use SquidCountArchiveWriteOutput ;
@@ -135,6 +137,21 @@
 #  }
 
 #  &ProcessSquidSequenceNumbers ;
+
+  if ($url_wikipedia_mobile > 0)
+  {
+    print "\n$redirected_to_mobile out of $url_wikipedia_mobile (" . sprintf ("%.1f\%", 100 * $redirected_to_mobile / $url_wikipedia_mobile) . ") redirected to mobile wikipedia\n\n" ;
+    foreach $status (sort {$status_url_wikipedia_mobile {$b} <=> $status_url_wikipedia_mobile {$a}} keys %status_url_wikipedia_mobile)
+    { print "Status $status: " . $status_url_wikipedia_mobile {$status} . "\n" ; }
+    print "\n" ;
+    foreach $status_mime (sort {$status_mime_url_wikipedia_mobile {$b} <=> $status_mime_url_wikipedia_mobile {$a}} keys %status_mime_url_wikipedia_mobile)
+    { print "Status/Mime $status_mime : " . $status_mime_url_wikipedia_mobile {$status_mime} . "\n" ; }
+    print "\n" ;
+  }
+
+  else
+  { print "\nNo mobile urls detected ?!?!\n\n" ; }
+
 
   print "\n\nReady\n\n" ;
   exit ;
@@ -275,7 +292,10 @@ sub SetFileNames
   $file_ip_frequencies       = "private/SquidDataIpFrequenciesDoNotPublish.csv" ;
   $file_ip_frequencies_bz2   = "private/SquidDataIpFrequenciesDoNotPublish.csv.bz2" ;
   $file_out_referers         = "private/SquidDataReferersDoNotPublish.txt" ;
+
+  # two files with single events, written at SquidCountArchiveProcessLogRecord.pm, unlike aggregated data which are written at SquidCountArchiveWriteOutput.pm
   $file_edits_saves          = "private/SquidDataEditsSavesDoNotPublish.txt" ;
+  $file_csv_views_viz        = "private/SquidDataViewsVizDoNotPublish-date.gz" ;
 
   $file_csv_agents           = "public/SquidDataAgents.csv" ;
   $file_csv_banners          = "public/SquidDataBanners.csv" ;
