@@ -496,6 +496,8 @@ sub GenerateSiteMapNew
     }
     $out_html .= "</tbody>\n</table>\n" ;
 
+    $out_html .= $out_included ;
+
     if (($some_languages_only) || ($#languages < 25))
     { &TableSeeAlso (1) ; }
 
@@ -535,7 +537,6 @@ sub GenerateSiteMapNew
                           &tdlb2b (&w ("<a href='../EN/TablesPageViewsMonthly.htm'>All languages</a><br>" .
                                        "<a href='../EN_$region_uc/TablesPageViewsMonthly.htm'>$region_uc</a>"
                           ))) ;
-
       }
     }
 
@@ -1437,14 +1438,7 @@ sub GenerateColophon
   $out_sort_order3 = $out_sort_order . "<br>" ;
   if ((($comparison) && (! $mode_wx) && (! $singlewiki)) || $pageviews)
   {
-    $out_sort_order3 = $out_sort_order2 . "<br>" ;
-    if (($skip_threshold ne "") && ($skipprojects2 ne ""))
-    {
-      $out_comparison3 = "$out_comparison<br>" ;
-      $out_comparison3 =~ s/\{xxx\}/$skip_threshold/ ;
-      $out_comparison3 =~ s/\{yyy\}/\($not_skipped\)/ ;
-      $out_comparison3 .= "$out_not_included: $skipprojects2<p>" ;
-    }
+    $out_sort_order3 = $out_sort_order2 . "<br>" . $out_included ;
     # if ($generate_sitemap)
     # { $out_comparison3 = "" ; }
   }
