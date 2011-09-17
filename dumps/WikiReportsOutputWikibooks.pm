@@ -78,7 +78,6 @@ sub GenerateWikibookReports
 sub GenerateWikibookReport
 {
   my $wp = shift ;
-
   my $file_csv_wikibooks = $path_in . "Wikibooks".uc($wp).".csv" ;
   if (! -e $file_csv_wikibooks)
   { return ; }
@@ -299,7 +298,8 @@ sub GenerateWikibookReport
 #  print "\n" ;
 
     if (length ($char) > 1)
-    { $char = &UnicodeToHtml ($char) ; }
+    { $char = unicode_to_html ($char) ; }
+
     if ($char ne $charprev)
     {
       $line_html = "&nbsp;<br><font size='+1'><b>$char</b></font>&nbsp;\n". $html ;
@@ -327,7 +327,7 @@ sub GenerateWikibookReport
                       [\xf0-\xf7][\x80-\xbf]{3})).*$/$1/x ;
 
       if (length ($char) > 1)
-      { $char = &UnicodeToHtml ($char) ; }
+      { $char = unicode_to_html ($char) ; }
       #$char = substr ($book2,0,1) ;
       #if (ord ($char) > 127)
       #{
