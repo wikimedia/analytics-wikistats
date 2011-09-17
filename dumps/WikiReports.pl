@@ -11,7 +11,8 @@
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
-  $trace_on_exit = $true ;
+# $trace_on_exit = $true ;
+  $trace_on_exit_concise = $true ;
   ez_lib_version (14) ;
 
 # build argument list for test run in OptiPerl IDE (Erik's home test env)
@@ -39,7 +40,7 @@
     # push @arguments, '-c' ;       # generate category trees
                                     # mutually exclusive with other reporting
 
-      push @arguments, '-r india' ; # only one region per run, no region specified -> all languages
+    # push @arguments, '-r india' ; # only one region per run, no region specified -> all languages
     # push @arguments, '-r africa' ;
     # push @arguments, '-r america' ;
     # push @arguments, '-r asia' ;
@@ -100,6 +101,7 @@
   use WikiReportsOutputTables ;
   use WikiReportsOutputTimelines ;
   use WikiReportsOutputWikibooks ;
+  use WikiReportsProcessEditors ;
   use WikiReportsProcessReverts ;
   use WikiReportsScripts ;
 
@@ -141,6 +143,8 @@
   &SetLiterals ;
 
   &UpdateLanguageTranslations ;
+
+  &WhiteListLanguages ;
 
   if ($animation)
   {
@@ -184,6 +188,9 @@
 
   &LogT ("\nRead Bot Statistics") ;
   &ReadBotStats ;
+
+  if ($region eq '')
+  { &ProcessEditorStats ; }
 
   &LogT ("\nRead Monthly Statistics") ;
   &ReadMonthlyStats ;
@@ -254,14 +261,14 @@
     &GenerateWikibookReports ;
   }
 
-  &LogT ("\nGenerate Comparison Tables") ;
+  &LogT ("\n\nGenerate Comparison Tables") ;
   &GenerateComparisonTables ;
 
   # $showplots = $false ; # for test only
 
   if ($showplots)
   {
-    &LogT ("\nGenerate Plot Data Files") ;
+    &LogT ("\n\nGenerate Plot Data Files") ;
     &GeneratePlotDataFiles ;
 
     # &Log ("\nTest Ploticus output capabilities") ;
@@ -290,8 +297,9 @@
   &LogT ("\nGenerate Trends Report") ;
   &GenerateConsolidatedTablePlusCharts ;
 
-  &LogT ("\nCollect File Timestamps\n") ;
-  &CollectFileTimeStamps ;
+# legacy (do in bash script, when needed)
+# &LogT ("\nCollect File Timestamps\n") ;
+# &CollectFileTimeStamps ;
 
   &LogT ("\n\nExecution took " . ddhhmmss (time - $timestart). ".\n") ;
   &LogT ("Ready\n") ;

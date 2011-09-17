@@ -3136,6 +3136,8 @@ sub GenerateComparisonTables
     if (($mode_wp) ||
         (($f != 5) && ($f != 9) && ($f != 10)))
     {
+      &LogT ("\nGenerateComparisonTable " . "Tables" . $report_names [$f] . ".htm") ;
+
       &GenerateComparisonTable ($f) ;
 
       $postfix = $report_names [$f] ;
@@ -3253,21 +3255,24 @@ sub GenerateComparisonTable
     elsif ($mode_wx)                  { $coverage = "<font color=#000080>Other Projects, </font>" ; }
     else                              { $coverage = "<font color=#000080>$out_publication, </font>" ; }
 
-    if ($pageviews_mobile)            { $coverage2 = "<font color=#000080>Mobile, </font>" ; }
-    elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#000080>Non-Mobile, </font>" ; }
-    if ($pageviews_combined)          { $coverage2 = "<font color=#000080>All Platforms, </font>" ; }
+   #if ($pageviews_mobile)            { $coverage2 = "<font color=#0000FF>Mobile, </font>" ; }
+   # elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#0000FF>Non-Mobile, </font>" ; }
+   #if ($pageviews_combined)          { $coverage2 = "<font color=#0000FF>All Platforms, </font>" ; }
+    if ($pageviews_mobile)            { $coverage2 = "Mobile" ; }
+    elsif ($pageviews_non_mobile)     { $coverage2 = "Non-Mobile" ; }
+    if ($pageviews_combined)          { $coverage2 = "All Platforms" ; }
 
-    ($coverage2b = $coverage) =~ s/<[^>]*>//g ;;
+    ($coverage2b = $coverage) =~ s/<[^>]*>//g ;
 
     if ($normalize_days_per_month)
     {
       $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison. " ;
-      $raw_or_not = "Normalized, " ;
+      $raw_or_not = "Normalized" ;
     }
     else
     {
       $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days. " ;
-      $raw_or_not = "Raw Data, " ;
+      $raw_or_not = "Raw Data" ;
     }
 
     $out_html .= "<p><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Site map for all page view reports</a><p>" ;
@@ -3275,35 +3280,34 @@ sub GenerateComparisonTable
 
     if ($normalize_days_per_month)
     {
-      $out_html .= "<p>Switch to $coverage1$coverage2<a href='$href_not_normalized'>Raw Data</a>" ;
+      $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
       $href_current_file =  $href_normalized ;
     }
     else
     {
-      $out_html .= "<p>Switch to $coverage1$coverage2<a href='$href_normalized'>Normalized</a> (for fairer comparison of monthly trends)" ;
+      $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
       $href_current_file =  $href_not_normalized ;
     }
 
     if ($mode_wp)
     {
       if ($pageviews_mobile)
-      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthly.htm'>Non-Mobile</a>, " .
-                     "<a href='TablesPageViewsMonthlyCombined.htm'>All Platforms</a>" ; }
+      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
+                     "<a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       elsif ($pageviews_non_mobile)
-      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthlyMobile.htm'>Mobile</a>, " .
-                     " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms</a>" ; }
+      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a>, " .
+                     " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       else
-      { $out_html .= "<p>Switch to $coverage1$raw_or_not<a href='TablesPageViewsMonthly.htm'>Non-Mobile</a>, " .
-                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile</a>" ; }
+      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
+                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a>" ; }
     }
 
-    $out_html .= "<p>Stay with $coverage2${raw_or_not}but ..." ;
     if ($mode_wp)
     {
       $root = $testmode ? ".." : "../.." ;
 
       $out_html .= "<p>Switch to Wikipedia " ;
-      if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>All Languages</a>, " ; }
+      if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>All Languages</a>, or Per Region: " ; }
       if ($region ne 'africa')     { $out_html .= "<a href='$root/EN_Africa/$href_current_file'>Africa</a>, " ; }
       if ($region ne 'asia')       { $out_html .= "<a href='$root/EN_Asia/$href_current_file'>Asia</a>, " ; }
       if ($region ne 'america')    { $out_html .= "<a href='$root/EN_America/$href_current_file'>America's</a>, " ; }
@@ -3312,6 +3316,7 @@ sub GenerateComparisonTable
       if ($region ne 'oceania')    { $out_html .= "<a href='$root/EN_Oceania/$href_current_file'>Oceania</a>, " ; }
       if ($region ne 'artificial') { $out_html .= "<a href='$root/EN_Artificial/$href_current_file'>Artificial Languages</a>" ; }
       $out_html =~ s/, $// ;
+      $out_html .= " ($coverage2/${raw_or_not})" ;
     }
 
   # if ($pageviews_non_mobile)
@@ -3327,7 +3332,8 @@ sub GenerateComparisonTable
       $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
       $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='$root/wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
       $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n") ;
-      $out_html .= "<p>Switch to All Platforms, $coverage2 " . $out_xref ;
+    # $out_html .= "<p>Switch to All Platforms, $coverage2 " . $out_xref ;
+      $out_html .= "<p>Switch to " . $out_xref ;
   # }
 
 
@@ -3671,27 +3677,30 @@ sub GenerateComparisonTablePageviewsAllProjects
   if ($normalized)
   {
     $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison.." .
-                 "<p>Switch to All Projects, All Platforms, <a href='$href_not_normalized'>Raw Data.</a>" ;
+                 "<p>Switch to All Projects <a href='$href_not_normalized'> All Platforms/Raw Data.</a>" ;
     $coverage3 = "Normalized, " ;
   }
   else
   {
     $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days..<p>" .
-                 "<p>Switch to All Projects, All Platforms, <a href='$href_normalized'>Normalized</a>." ;
+                 "<p>Switch to All Projects <a href='$href_normalized'>All Platforms/Normalized</a>." ;
     $coverage3 = "Raw Data, " ;
   }
 
   $root = $testmode ? ".." : "../.." ;
 
+  $href_current_file2 = $href_current_file ;
+  $href_current_file2 =~ s/Combined// ;
+
   $out_html .= "<p>Switch to All Platforms, " ;
-  $out_html .= "<a href='$root/wikibooks/EN/$href_current_file'>Wikibooks, </a>\n" ;
-  $out_html .= "<a href='$root/wiktionary/EN/$href_current_file'>Wiktionaries, </a>\n" ;
-  $out_html .= "<a href='$root/wikinews/EN/$href_current_file'>Wikinews, </a>\n" ;
+  $out_html .= "<a href='$root/wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n" ;
+  $out_html .= "<a href='$root/wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n" ;
+  $out_html .= "<a href='$root/wikinews/EN/$href_current_file2'>Wikinews, </a>\n" ;
   $out_html .= "<a href='$root/EN/$href_current_file'>Wikipedias, </a>\n" ;
-  $out_html .= "<a href='$root/wikiquote/EN/$href_current_file'>Wikiquotes, </a>\n" ;
-  $out_html .= "<a href='$root/wikisource/EN/$href_current_file'>Wikisources, </a>\n" ;
-  $out_html .= "<a href='$root/wikiversity/EN/$href_current_file'>Wikiversities, </a>\n" ;
-  $out_html .= "<a href='$root/wikispecial/EN/$href_current_file'>Wikispecial</a>\n" ;
+  $out_html .= "<a href='$root/wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n" ;
+  $out_html .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n" ;
+  $out_html .= "<a href='$root/wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n" ;
+  $out_html .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n" ;
 
   $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
               # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
@@ -3847,10 +3856,11 @@ sub GenerateComparisonTablePageviewsAllProjects
     else
     { $line_html .= &th("&nbsp;" . ucfirst($project_names {$code}). "&nbsp;") ; }
   }
+  $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
 
   $line_html = &the ;
-  foreach $code (qw (wb wk wn wp wp.m wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   {
     if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
@@ -3864,9 +3874,11 @@ sub GenerateComparisonTablePageviewsAllProjects
     if ($code eq 'wx')   { $link = "$root/wikispecial/EN/PlotEditsZZ.png" ; }
     $line_html .= &tdcb ("<a href='$link'>Edit Trends</a>") ;
   }
+  $line_html .= &tdcb ("") ;
   $out_html .= &tr ($line_html) ;
 
-  foreach $topic (qw (year_trend view_rates sparklines forecast forecast2))
+# foreach $topic (qw (year_trend view_rates sparklines forecast forecast2))
+  foreach $topic (qw (year_trend view_rates sparklines))
   {
     $line_html = $html_pageviews_all_projects {"wp,$topic,header"} ;
 
@@ -3886,6 +3898,11 @@ sub GenerateComparisonTablePageviewsAllProjects
       }
       $line_html .= $cell_html ;
     }
+    if ($topic =~ /year_trend|forecast|forecast2/)
+    { $cell_html = "tdg('');" ; }
+    else
+    { $cell_html = "<td>&nbsp;</td>" ; }
+    $line_html .= $cell_html ;
 
     if ($topic =~ /year_trend|forecast|forecast2/)
     { $line_html .= "\n</script>\n" ; }
@@ -3893,6 +3910,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     $out_html .= &tr ($line_html) ;
   }
 
+  # very Q&D: parse javascript macro's, extract counts, build new macro for overall total
   for ($m = $month_hi_pageviews ; $m >= $month_lo_pageviews ; $m--)
   {
     $line_html = $html_pageviews_all_projects {"wp,monthly,header_$m"} ;
@@ -3904,8 +3922,81 @@ sub GenerateComparisonTablePageviewsAllProjects
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
       { $cell_html = "tdg('');" ; }
+
+      next if $code eq 'wp' or $code eq 'wp.m' ;
+
+      $cell_html =~ s/&nbsp;//g ;
+      $views = 0 ;
+      if ($cell_html =~ /^tdc\(/)
+      { ($views = $cell_html) =~ s/^[^']*'[^']*'[^']*'[^']*'[^']*'([^']*)'.*$/$1/ ; }
+      elsif ($cell_html =~ /^tdg\(/)
+      { ($views = $cell_html) =~ s/^[^']*'([^']*)'.*$/$1/ ; }
+      $views =~ s/,//g ;
+      if ($views =~ /M/i) { $views =~ s/M//i ; $views *= 1000000 ; }
+      if ($views =~ /k/i) { $views =~ s/k//i ; $views *= 1000 ; }
+      $views_tot_monthly {$m} += $views ;
+    }
+  }
+
+  # extremely Q&D (saves a few days restructuring):
+  # update javascript macro's with percentage of overall total + overall total as extra column
+  for ($m = $month_hi_pageviews ; $m >= $month_lo_pageviews ; $m--)
+  {
+    $line_html = $html_pageviews_all_projects {"wp,monthly,header_$m"} ;
+    next if $line_html eq '' ;
+
+    $line_html .= "\n<script language='javascript'>\n" ;
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    {
+      $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
+      if ($cell_html eq '')
+      { $cell_html = "tdg('');" ; }
+
+      $cell_html =~ s/&nbsp;//g ;
+
+      if ($cell_html =~ /1st/) # commons
+      {
+        # print "1 $cell_html\n" ;
+        $cell_html =~ s/ [0-9\.]+\%//g ;
+        $cell_html =~ s/ 1st// ;
+        # print "2 $cell_html\n\n" ;
+      }
+      else
+      { $cell_html =~ s/,\s+,/,,/g ; }
+
+      $views = 0 ;
+      if ($cell_html =~ /^tdc\(/)
+      { ($views = $cell_html) =~ s/^[^']*'[^']*'[^']*'[^']*'[^']*'([^']*)'.*$/$1/ ; }
+      elsif ($cell_html =~ /^tdg\(/)
+      { ($views = $cell_html) =~ s/^[^']*'([^']*)'.*$/$1/ ; }
+      $views =~ s/,//g ;
+      if ($views =~ /M/i) { $views =~ s/M//i ; $views *= 1000000 ; }
+      if ($views =~ /k/i) { $views =~ s/k//i ; $views *= 1000 ; }
+      $views_share = sprintf ("%.1f", 100 * $views / $views_tot_monthly {$m}) .'%' ;
+      $cell_html =~ s/,,/, $views_share,/ ;
+
       $line_html .= $cell_html ;
     }
+
+    $views_tot = sprintf ("%.0f",$views_tot_monthly {$m}/1000000) ;
+    $views_tot =~ s/(\d)(\d\d\d)$/$1,$2/ ;
+
+    $views_inc = '..' ;
+    if (($views_tot_monthly {$m-1} > 0) && ($m < $month_hi_pageviews))
+    {
+      $views_inc = sprintf ("%.1f", 100 * $views_tot_monthly {$m} / $views_tot_monthly {$m-1} - 100) ;
+
+      $views_col = &BgColor ('I', $views_inc) ;
+      if ($views_inc >= 0)
+      { $views_inc = "+$views_inc\%" ; }
+      else
+      { $views_inc = "-$views_inc\%" ; }
+      $cell_html = "tdc('$views_col','$views_inc, 100%,..&nbsp;&nbsp;&nbsp;','${views_tot}M');" ;
+    }
+    else
+    { $cell_html = "tdg('$views_tot M');" ; }
+
+    $line_html .= $cell_html ;
     $line_html .= "\n</script>\n" ;
     $out_html .= &tr ($line_html) ;
   }
@@ -3913,6 +4004,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $line_html = &the;
   foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
+  $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
 
 #    &GenerateComparisonTableEditPlots ;
@@ -4128,7 +4220,7 @@ sub TdBgColor
 
 sub GenerateConsolidatedTablePlusCharts
 {
-  &LogT ("\nGenerateConsolidatedTablePlusCharts") ;
+  &LogT ("\nGenerateConsolidatedTablePlusCharts ") ;
 
   my $md = $dumpmonth_ord ;
 
@@ -4410,7 +4502,7 @@ sub GenerateConsolidatedTablePlusCharts
 
 sub GenerateComparisonTableHeaders
 {
-  &LogT ("\nGenerateComparisonTableHeaders") ;
+# &LogT ("\nGenerateComparisonTableHeaders") ;
 
   my $f = shift ;
   my $link = shift ;
@@ -4468,7 +4560,7 @@ sub GenerateComparisonTableHeaders
 
 sub GenerateComparisonTableHeadersCascade
 {
-  &LogT ("\nGenerateComparisonTableHeadersCascade") ;
+# &LogT ("\nGenerateComparisonTableHeadersCascade") ;
 
   my $f     = shift ;
   my $link  = shift ;
@@ -4581,7 +4673,7 @@ sub GenerateComparisonTableHeadersCascade
 
 sub GenerateComparisonTableMonthlyData
 {
-  &LogT ("\nGenerateComparisonTableMonthlyData") ;
+# &LogT ("\nGenerateComparisonTableMonthlyData") ;
 
   my $m0 = shift ;
   my $f  = shift ;
@@ -4949,7 +5041,7 @@ sub GenerateComparisonTableMonthlyData
 
 sub GenerateComparisonTableMaxData
 {
-  &LogT ("\nGenerateComparisonTableMaxData") ;
+# &LogT ("\nGenerateComparisonTableMaxData") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
@@ -4983,7 +5075,7 @@ sub GenerateComparisonTableMaxData
 
 sub GenerateComparisonTableSparklines
 {
-  &LogT ("\nGenerateComparisonTableSparklines") ;
+# &LogT ("\nGenerateComparisonTableSparklines") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
@@ -5028,7 +5120,7 @@ sub GenerateComparisonTableSparklines
 
 sub GenerateComparisonTableSparklinesWithBars
 {
-  &LogT ("\nGenerateComparisonTableSparklinesWithBars") ;
+# &LogT ("\nGenerateComparisonTableSparklinesWithBars") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
@@ -5125,7 +5217,7 @@ sub GenerateComparisonTableSparklinesWithBars
 
 sub GenerateComparisonTableViewRates
 {
-  &LogT ("\nGenerateComparisonTableViewRates") ;
+# &LogT ("\nGenerateComparisonTableViewRates") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
@@ -5207,7 +5299,7 @@ sub GenerateComparisonTableViewRates
 
 sub GenerateComparisonTableYearlyGrowth
 {
-  &LogT ("\nGenerateComparisonTableYearlyGrowth") ;
+# &LogT ("\nGenerateComparisonTableYearlyGrowth") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
@@ -5315,7 +5407,7 @@ sub GenerateComparisonTableYearlyGrowth
 
 sub GenerateComparisonTableMonthlyTrends
 {
-  &LogT ("\nGenerateComparisonTableMonthlyTrends") ;
+# &LogT ("\nGenerateComparisonTableMonthlyTrends") ;
 
   my $f = shift ;
   my $line_html ;
@@ -5394,7 +5486,7 @@ sub GenerateComparisonTableMonthlyTrends
 
 sub GenerateComparisonTableForecasts
 {
-  &LogT ("\nGenerateComparisonTableForecasts") ;
+# &LogT ("\nGenerateComparisonTableForecasts") ;
 
   my $f = shift ;
   my $wpmax = shift ;
@@ -5625,7 +5717,7 @@ sub GenerateTablePageviewsPerRange
 
 sub GenerateComparisonTableEditPlots
 {
-  &LogT ("\nGenerateComparisonTableEditPlots") ;
+# &LogT ("\nGenerateComparisonTableEditPlots") ;
 
   my $f  = shift ;
   if ($f > 0) { return ; }
