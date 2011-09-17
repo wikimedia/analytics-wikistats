@@ -767,7 +767,7 @@ sub TableSeeAlso
 
       $out_html .= &tr (&tdlb ("Job progress: <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>Database dumps</a>&nbsp;/&nbsp;" .
                                "<a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>"))) ;
-      $out_html .= &tr (&tdlb ("Raw data: <a href='../csv/csv.zip'>csv.zip</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)")) ;
+      $out_html .= &tr (&tdlb ("Raw data: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/wikistats/csv_$mode.zip'>csv_$mode.zip</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)")) ;
     }
 
     $out_html .= "<\/table>\n" ;
@@ -1403,6 +1403,7 @@ sub GenerateHtmlStart
                "<title>".$out_html_title."</title>\n" .
                $out_meta_charset . $out_meta_robots .
                $out_scriptfile . $out_style .
+               $out_google_analytics .
                "</head>\n\n" .
                "<body bgcolor='#FFFFDD'>\n" .
                $out_page_header2 . $out_msg . "<hr class=b>$out_special_msg\n" ;
