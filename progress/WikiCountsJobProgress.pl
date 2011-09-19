@@ -124,7 +124,7 @@
   &ReadStatsCsv ("wv") ;
   &ReadStatsCsv ("wx") ;
 
-  &ReadStatsHtml ($dir_html,"") ;
+  &ReadStatsHtml ($dir_html,"wikipedia") ;
   &ReadStatsHtml ($dir_html,"wikibooks") ;
   &ReadStatsHtml ($dir_html,"wiktionary") ;
   &ReadStatsHtml ($dir_html,"wikinews") ;
@@ -314,7 +314,11 @@ sub ReadStatsHtml
   my $dir     = shift ;
   my $project = shift ;
 
-  $dir = "$dir/$project" ;
+  if ($project ne "wikipedia")
+  { $dir = "$dir/$project" ; }
+
+  my @languages ;
+
   my $lastdir = getcwd();
   chdir ($dir) || die "Cannot chdir to $dir\n";
   local (*DIR);
@@ -330,24 +334,46 @@ sub ReadStatsHtml
   }
   closedir DIR;
 
+  $project2 = ucfirst ($project) ;
+
+  $reports      {$project} = "<p><b>$project2</b> <small>[count]</small> " ;
+  $reports_cnt = 0 ;
   foreach $language (sort @languages)
   {
-    $file_age  = int (-M "$dir/$language/index.html") ;
-    $file_date = time - int (24*60*60*(-M "$dir/$language/index.html")) ;
-    if ($language eq "EN")
-    {
+    $language_lc = lc ($language) ;
+
+    $file_age      = -M "$dir/$language/index.html" ;
+    $file_age_days = int ($file_age) ;
+    $file_age_min  = int (24*60   *$file_age) ;
+    $file_age_secs = int (24*60*60*$file_age) ;
+    $file_date     = time - $file_age_secs ;
+    # if ($language eq "EN")
+    # {
       if ($project eq "")
       { $project = "wikipedia" ; }
-      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=gmtime($file_date);
-      my $now_gm = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
-      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime($file_date);
-      my $now = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
-      $project2 = ucfirst ($project) ;
-      $reports      {$project} = "<tr><td><small>$project2</small></td><td><small>$now EST</small></td><td><small>=</small></td><td><small>$now_gm GMT</small></td></tr>" ;
-      $report_dates {$project} = $file_date ;
-      $reports_total ++ ;
-    }
+
+      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime ($file_date);
+
+      $file_ago = $file_age_days ;
+      if ($file_ago == 0)
+      { $file_ago = " <u>0 days, $file_age_min min</u>" ; }
+
+      $color = "green" ;
+      if ($file_ago > 30)
+      { $color = "darkred" ; }
+      $reports      {$project} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ;
+      $reports_cnt ++ ;
+
+      if ($language eq "EN")
+      {
+        $report_dates {$project} = $file_date ;
+        $reports_total ++ ;
+      }
+    # }
   }
+  $reports {$project} =~ s/, $// ;
+  $reports {$project} =~ s/count/$reports_cnt/ ;
+
   chdir ($lastdir) ;
 }
 
@@ -504,12 +530,15 @@ sub WriteHtml
   {
     print HTML "<a name='reports' id='reports'></a>" .
                "<hr><b>Reports generated</b>\n" .
-               "<table>\n";
+               "<small>This section shows -per project per target language- the file age of index.html in days (for age < 24 hours in minutes). " .
+               "Note that a very recently generated report does not always contain counts up to the previous month. " .
+               "See above for how up to data counts are per project language. " .
+               "Color green here means: reports have been generated and published less than 30 days ago.</small>" ;
+
+
     foreach $report (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
     { print HTML $reports {$report} . "\n" ; }
-    print HTML "</table>\n</small>\n" ;
   }
-
 
   print HTML "<hr><p><b>Longest jobs</b> <small>\n" ;
   $html = "<table border=1 spacing=0><tr><td valign=top><table>\n" ;
@@ -628,6 +657,9 @@ sub WriteHtmlCurrent
              "</style>\n" .
 
              "<body bgcolor=#CCCCCC>\n" ;
+  print HTML "<h3>Disclaimer</h3>\n" ;
+  print HTML "<small>This report offers a very concise overview of wikistats status for data collecting and reporting." .
+             "This is not an official WMF publication. It has been built by Erik Zachte primarily for personal use.</small>\n" ;
   print HTML "<h3>Cached files from <a href='http://dammit.lt/wikistats'>http://dammit.lt/wikistats</a></h3>\n" ;
   print HTML "<p><small><pre>\n" ;
   print HTML "../projectcounts: " . sprintf ("%4d", $files_projectcounts) . " files, newest file $file_new_projectcounts\n" ;
@@ -645,7 +677,11 @@ sub WriteHtmlCurrent
 
   print HTML "</pre></small>" ;
 
-  print HTML "<hr><p><h3>Progress per project</h3>" ;
+  print HTML "<hr><p><h3>Progress per project, collecting data</h3>" .
+             "<small>This section shows -per project per wiki language- how many days ago data were collected and till when. " .
+             "Days ago is shown in superscript. For jobs which ran an hour or more this is followed by run time, and language code is shown in bold. " .
+             "The color signals up till which month data have been processed. Best is up till last month which is shown in green. See also <a href='#legend'>legend</a>.</small> " ;
+
   $html = "" ;
   $project_prev = "" ;
   foreach $run (sort keys %runtimes2)
@@ -718,6 +754,19 @@ sub WriteHtmlCurrent
   if ($project_prev eq $activeproject)
   { $project2 = "<u>$project2</u>" ; }
   print HTML "<p><b>$project2</b> <small>[$languages] $html</small>\n" ;
+
+  if ($reports_total > 0)
+  {
+    print HTML "<a name='reports' id='reports'></a>\n" .
+               "<hr><p><h3>Progress per project, reporting</h3>" .
+               "<small>This section shows -per project per target language- the file age of index.html in days (for age < 24 hours in minutes). " .
+               "Note that a very recently generated report does not always contain counts up to the previous month. " .
+               "See above for how up to data counts are per project language. " .
+               "Color green here means: reports have been generated and published less than 30 days ago.</small>" ;
+
+    foreach $report (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { print HTML $reports {$report} . "\n" ; }
+  }
 
   print HTML "<hr>" ;
   &WriteHtmlJobRunTimes ;
