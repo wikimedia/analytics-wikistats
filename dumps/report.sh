@@ -5,7 +5,7 @@
 # Whenever Englisgh reports have been updated run archive job
 
 interval=30  # only update non-English reports once per 'interval' days 
-force_run_report=1
+force_run_report=0
 
 function echo2 {
   echo $1
@@ -55,7 +55,7 @@ case "$1" in
 esac  
 echo2 "Generate and publish reports for project $project"
 
-for x in en bg br ca cs da de eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+for x in en ast bg br ca cs da de eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
 
   echo2 ""
@@ -85,21 +85,19 @@ do
   # Check if reports need to be run now for language x
   run_report=0
   if [ $force_run_report -ne 0 ] ; then
+    echo2 "Forced run of reports"					
     run_report=1		
     do_zip=1 
   else  
-    if [ "$secs_csv" -eq "$secs_out" ] ; then
-      if [ "$force_run_report" -eq 0  ] ; then
-        echo2 "Forced run of reports"					
-      else							
-        echo2 "Csv files are newer than reports ... "
-      fi
+    if [ "$secs_csv" -lt "$secs_out" ] ; then
+      echo2 "Csv files are newer than reports ... "
 
       if [ "$x" == "en" ] ; then
         do_zip=1
         run_report=1
       else  
-        if [ $days_out -gt $interval ] ; then
+        echo2 $days_out days since reports were generated, reporting interval is $interval days  
+	if [ $days_out -gt $interval ] ; then
           run_report=1
         else
 							if [ "$force_run_report" -ne 0 ] ; then
