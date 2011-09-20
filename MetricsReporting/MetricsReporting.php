@@ -1,107 +1,73 @@
 <?php
 
-$wgeAnalyticsFieldNames = array(
-	'select_regions' => "REGION",
-	'select_countries' => "COUNTRY",
-	'select_web_projects' => "WEBPROJ",
-	'select_wikis' => "WIKI",
-	'select_editors' => "EDITOR",
-	'select_edits' => "EDITS",
-	'select_platform' => "MOBILE",
-);
-
-$wgeAnalyticsFieldReturns = array(
-	'select_regions' => "region",
-	'select_countries' => "country",
-	'select_web_projects' => "web project",
-	'select_wikis' => "wiki",
-	'select_editors' => "editors",
-	'select_edits' => "edits",
-	'select_platform' => "mobile",
-);
-
-
-$wgeAnalyticsValidParams = array(
-
-"select_regions" => array(
-	"AS" => "Asia Pacific",
-	"C" => "China",
-	"EU" => "Europe",
-	"I"  => "India",
-	"LA" => "Latin-America",
-	"MA" => "Middle-East/Africa",
-	"NA" => "North-America",
-	"US" => "United States",
-	"W" => "World",
-),
-// "select_countries" => array(),
-// "select_web_properties"=> array(),
-"select_projects" => array(
-	"wb" => "Wikibooks",
-	"wk" => "Wiktionary",
-	"wn" => "Wikinews",
-	"wp" => "Wikipedia",
-	"wq" => "Wikiquote",
-	"ws" => "Wikisource",
-	"wv" => "Wikiversity",
-	"co" => "Commons",
-	"wx" => "Other projects",
-),
-// "select_wikis"=> array(),
-"select_editors" => array(
-	"A" => "Anonymous",
-	"R" => "Registered User",
-	"B" => "Bot",
-),
-"select_edits" => array(
-	"M" => "Manual",
-	"B" => "Bot",
-),
-"select_platform" => array(
-	"M" => "Moblie",
-	"N" => "Non-Mobile",
-),
-
-);
-
-$dir = dirname( __FILE__ );
-$wgAutoloadClasses['ApiAnalytics'] = $dir . '/api/ApiAnalytics.php';
-$wgAutoloadClasses['ApiAnalyticsMetric'] = $dir . '/api/ApiAnalyticsMetric.php';
-$wgAutoloadClasses['MetricsReportingQuery'] = $dir . '/MetricsReportingQuery.php';
-
-$wgeAnalyticsMetricsList = array();
-$metricsdir = $dir . "/metrics";
-$dh = opendir( $metricsdir );
-while ( ( $file = readdir( $dh ) ) !== false ) {
-	if ( filetype( $metricsdir . "/" . $file ) == "file" ) {
-		$file_path_parts = pathinfo( $metricsdir . "/" . $file );
-		if ( $file_path_parts['extension'] == 'php' ) {
-			$wgAutoloadClasses["ApiAnalyticsMetric{$file_path_parts['filename']}"] = $metricsdir . "/" . $file;
-			$wgeAnalyticsMetricsList[] = $file_path_parts['filename'];
-		}
-	}
+if ( !defined( 'MEDIAWIKI' ) ) {
+	die();
 }
 
+define( 'METRICS_REPORTING_VERSION', 0.1 );
 
+$wgExtensionCredits['other'][] = array(
+	'path' => __FILE__,
+	'name' => 'MetricsReporting',
+	'url' => 'http://www.mediawiki.org/wiki/Extension:MetricsReporting',
+	'author' => 'Sam Reed',
+	'version' => METRICS_REPORTING_VERSION,
+	'description' => 'Api for Wikimedia Metrics Reporting output',
+);
+
+$wgMetricAPIModules = array();
+
+$wgMetricsDBserver         = '';
+$wgMetricsDBname           = '';
+$wgMetricsDBuser           = '';
+$wgMetricsDBpassword       = '';
+$wgMetricsDBtype           = 'mysql';
+$wgMetricsDBprefix         = '';
+
+$dir = dirname( __FILE__ ) . '/';
+
+$wgAutoloadClasses['ApiAnalytics'] = $dir . 'ApiAnalytics.php';
 $wgAPIModules['analytics'] = 'ApiAnalytics';
 
+$wgAutoloadClasses['ApiAnalyticsBase'] = $dir . 'ApiAnalyticsBase.php';
 
+$metricsDir = $dir . 'metrics/';
 
-function wfAnalyticsMetricConnection() {
-	global $wgeAnalyticsMetricDBserver, $wgeAnalyticsMetricDBname;
-	global $wgeAnalyticsMetricDBuser, $wgeAnalyticsMetricDBpassword;
+$wgAutoloadClasses['GenericMetricBase'] = $metricsDir . 'GenericMetricBase.php';
 
-	static $db;
+$wgAutoloadClasses['ComScoreReachPercentageMetric'] = $metricsDir . 'ComScoreReachPercentageMetric.php';
+$wgMetricAPIModules['comscorereachpercentage'] = 'ComScoreReachPercentageMetric';
 
-	if ( !$db ) {
-		$db = new DatabaseMysql(
-		$wgeAnalyticsMetricDBserver,
-		$wgeAnalyticsMetricDBuser,
-		$wgeAnalyticsMetricDBpassword,
-		$wgeAnalyticsMetricDBname );
-		$db->query( "SET names utf8" );
-	}
+$wgAutoloadClasses['ComScoreUniqueVisitorMetric'] = $metricsDir . 'ComScoreUniqueVisitorMetric.php';
+$wgMetricAPIModules['comscoreuniquevisitors'] = 'ComScoreUniqueVisitorMetric';
 
-	return $db;
-}
+$wgAutoloadClasses['DumpActiveEditors100Metric'] = $metricsDir . 'DumpActiveEditors100Metric.php';
+$wgMetricAPIModules['dumpactiveeditors100'] = 'DumpActiveEditors100Metric';
+
+$wgAutoloadClasses['DumpActiveEditors5Metric'] = $metricsDir . 'DumpActiveEditors5Metric.php';
+$wgMetricAPIModules['dumpactiveeditors5'] = 'DumpActiveEditors5Metric';
+
+$wgAutoloadClasses['DumpArticleCountMetric'] = $metricsDir . 'DumpArticleCountMetric.php';
+$wgMetricAPIModules['dumparticlecount'] = 'DumpArticleCountMetric';
+
+$wgAutoloadClasses['DumpBinaryCountMetric'] = $metricsDir . 'DumpBinaryCountMetric.php';
+$wgMetricAPIModules['dumpbinarycount'] = 'DumpBinaryCountMetric';
+
+$wgAutoloadClasses['DumpEditsMetric'] = $metricsDir . 'DumpEditsMetric.php';
+$wgMetricAPIModules['dumpedits'] = 'DumpEditsMetric';
+
+$wgAutoloadClasses['DumpNewRegisteredEditorsMetric'] = $metricsDir . 'DumpNewRegisteredEditorsMetric.php';
+$wgMetricAPIModules['dumpnewregisterededitors'] = 'DumpNewRegisteredEditorsMetric';
+
+$wgAutoloadClasses['EstimateOfflineMetric'] = $metricsDir . 'EstimateOfflineMetric.php';
+$wgMetricAPIModules['estimateoffline'] = 'EstimateOfflineMetric';
+
+$wgAutoloadClasses['SquidPageViewsMetric'] = $metricsDir . 'SquidPageViewsMetric.php';
+$wgMetricAPIModules['squidpageviews'] = 'SquidPageViewsMetric';
+
+$wgAutoloadClasses['EditorsByGeographyMetric'] = $metricsDir . 'EditorsByGeographyMetric.php';
+$wgMetricAPIModules['editorsbygeography'] = 'EditorsByGeographyMetric';
+
+$wgAutoloadClasses['MobilePageViewsMetric'] = $metricsDir . 'MobilePageViewsMetric.php';
+$wgMetricAPIModules['mobilepageviews'] = 'MobilePageViewsMetric';
 
