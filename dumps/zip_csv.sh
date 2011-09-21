@@ -9,7 +9,11 @@ cd /a/wikistats/csv_$1
 
 echo "rebuild /a/wikistats/zip_all/csv_$1.zip"
 rm     /a/wikistats/zip_all/csv_$1.zip
-zip -q /a/wikistats/zip_all/csv_$1.zip *.csv
+zip -q /a/wikistats/zip_all/csv_$1.zip *.csv         -x Revert* EditsBreakdownPerUserPerMonth*XX*.csv
+
+echo "rebuild /a/wikistats/zip_all/csv_$1_reverts.zip"
+rm     /a/wikistats/zip_all/csv_$1_reverts.zip
+zip -q /a/wikistats/zip_all/csv_$1_reverts.zip *.csv -i Revert*
 
 echo "rebuild /a/wikistats/zip_all/bz2_$1.zip"
 rm     /a/wikistats/zip_all/bz2_$1.zip
