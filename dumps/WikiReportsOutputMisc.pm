@@ -102,16 +102,16 @@ sub GenerateGallery
   my $footer  = "<small><font color=#A0A0A0> Screenshots collected with <a href='http://www.pixel-technology.com/freeware/url2bmp/'><font color=#A0A0D0>url2bmp.exe</font></a> (Windows freeware)<br>\n" .
                 " Please note: on a few pages javascript errors may have influenced page rendition<br>" .
                 " Script author: <a href='http://infodisiac.com'><font color=#A0A0D0>Erik Zachte</font></a></font></small>" ;
-  my $out_html = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+  my $out_html = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_40 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+  my $out_html_40 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_1024_768 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+  my $out_html_1024_768 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_768_1024 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n" .
+  my $out_html_768_1024 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
 
@@ -212,6 +212,11 @@ sub GenerateSiteMapNew
   {
     $out_html_title .= " - " . ucfirst ($region) ;
     $out_page_title .= " - " . ucfirst ($region) ;
+    if ($region eq 'artificial')
+    {
+      $out_html_title .= " Languages" ;
+      $out_page_title .= " Languages" ;
+    }
   }
 
   if ($out_btn_plots eq "")
@@ -307,8 +312,11 @@ sub GenerateSiteMapNew
 
     if ($sitemap_new_layout)
     {
+
       $out_html .= "<thead>\n" ;
-      $out_html .= &tr (&tdcbt4 (&b ("Languages")) .
+
+    # $out_html .= &tr ($mode_wp ? &tdcbt5 (&b ("Languages")) : &tdcbt4 (&b ("Languages")) .
+      $out_html .= &tr (&tdcbt5 (&b ("Languages")) .
                         &tdcbt  (&b ("Regions")) .
                         &tdcbt3 (&b ("Participation")) .
                         &tdcbt  (&b ("Usage")) .
@@ -321,13 +329,13 @@ sub GenerateSiteMapNew
 #                       $out_participation {"header"} .
 #                       &tdcbt ("<small>Views<br>per hour</small>") .
 #                       &tdcbt ("<small>Article<br>count</small>")) ;
-      $out_html .= &tr (&the . &the .
+      $out_html .= &tr (&the . &the . &the .
                         (&tdcbt ("<small>Code<br>&rArr; Project<br>Main Page</small>")) .
                         (&tdlbt ("<small>Language<br>&rArr; Wikipedia article</small>")) .
                         $out_participation {"header"} .
                         &tdcbt ("<small>Views<br>per hour</small>") .
                         &tdcbt ("<small>Article<br>count</small>")) ;
-      $out_html .= &tr (&tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the) ;
+      $out_html .= &tr (&tdlb(blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>") . "&nbsp;") . &tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the) ;
     # $out_html .= &tr (&tdimg ("<a href='TablesWikipediaZZ.htm'><img src='../Tables.png'></a> <a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>") .
 
       if ($region eq '')
@@ -335,6 +343,7 @@ sub GenerateSiteMapNew
         $out_html .= &tr (
                         # &tdimg ("<font size=+1 color='#FFFFDD' face=\'Times'>W</font><a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>&nbsp;") .
                         # &tdimg ("<a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>&nbsp;") .
+                          &tde .
                           &tdcb (&w("<a href='TablesWikipediaZZ.htm'> " . $out_btn_tables . " </a>")) .
                           &tdcb (&w("<a href='ChartsWikipediaZZ.htm'> " . $out_btn_charts . " </a>")) .
                           &tdcbt ("<a href='$out_url_all'>&Sigma;</a>") .
@@ -389,6 +398,7 @@ sub GenerateSiteMapNew
                               ($wikimedia ? &tdcb ("&Sigma;") : &tdlb ("&Sigma;")) .
                               ($wikimedia ? &tdlb ($out_languages {$wpc} . "&nbsp;(" . $#languages . ")") : "") .
                               &tdcb ("<a href='$out_url_all'>" . &w($out_site) . "</a>") .
+                              &tde.
                               &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                              &tdcb (&w("<a href='ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>"))) ;
           }
@@ -469,6 +479,7 @@ sub GenerateSiteMapNew
           $out_html .= &tr (
                           # &tdcb ($out_language_article .
                           # "<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
+                            &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
                           # &tdcb ("<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
@@ -489,14 +500,16 @@ sub GenerateSiteMapNew
                             (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             (  $mode_wx ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             &tdcb ("<a href='" . $out_urls {$wpc} . "'>" . &w($out_site) . "</a>") .
+                            &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>"))) ;
         }
      }
     }
+    $out_html .= &tr ("<td class=l width=600 colspan=99>$out_included</td>") ;
+
     $out_html .= "</tbody>\n</table>\n" ;
 
-    $out_html .= $out_included ;
 
     if (($some_languages_only) || ($#languages < 25))
     { &TableSeeAlso (1) ; }
@@ -704,70 +717,85 @@ sub TableSeeAlso
     if ($region eq '')
     {
       if (! $mode_wb)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikibooks/$langcode/Sitemap.htm'>" . $out_wikibooks .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikibooks/$langcode/Sitemap.htm'>" . $out_wikibooks .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikibooks/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wk)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wiktionary/$langcode/Sitemap.htm'>" . $out_wiktionaries .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wiktionary/$langcode/Sitemap.htm'>" . $out_wiktionaries .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wiktionary/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wn)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikinews/$langcode/Sitemap.htm'>" . $out_wikinews .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikinews/$langcode/Sitemap.htm'>" . $out_wikinews .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikinews/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wp)
-      { $out_html .= &tr (&tdlb ("$more_stats <a href='http://stats.wikimedia.org/$langcode/Sitemap.htm'>" . $out_wikipedias .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$more_stats <a href='http://stats.wikimedia.org/$langcode/Sitemap.htm'>" . $out_wikipedias .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wq)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikiquote/$langcode/Sitemap.htm'>" . $out_wikiquotes .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikiquote/$langcode/Sitemap.htm'>" . $out_wikiquotes .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikiquote/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_ws)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikisource/$langcode/Sitemap.htm'>" . $out_wikisources .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikisource/$langcode/Sitemap.htm'>" . $out_wikisources .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikisource/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wv)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikiversity/$langcode/Sitemap.htm'>" . $out_wikiversities .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikiversity/$langcode/Sitemap.htm'>" . $out_wikiversities .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikiversity/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wx)
-      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikispecial/$langcode/Sitemap.htm'>" . $out_wikispecial .  "</a>")) ; }
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikispecial/$langcode/Sitemap.htm'>" . $out_wikispecial .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikispecial/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
     }
 
     if ($mode_wp && ($region ne ''))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/$langcode/Sitemap.htm'>" . $out_wikipedias .  ", all languages</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/$langcode/Sitemap.htm'>" . $out_wikipedias .  ", all languages</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'africa'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Africa/Sitemap.htm'>" . $out_wikipedias .  ", region Africa</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Africa/Sitemap.htm'>" . $out_wikipedias .  ", region Africa</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_Africa/ReportCardAfrica.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'asia'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Asia/Sitemap.htm'>" . $out_wikipedias .  ", region Asia</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Asia/Sitemap.htm'>" . $out_wikipedias .  ", region Asia</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_Asia/ReportCardAsia.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'america'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_America/Sitemap.htm'>" . $out_wikipedias .  ", region America's</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_America/Sitemap.htm'>" . $out_wikipedias .  ", region America's</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_America/ReportCardAmerica.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'europe'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Europe/Sitemap.htm'>" . $out_wikipedias .  ", region Europe</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Europe/Sitemap.htm'>" . $out_wikipedias .  ", region Europe</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_Europe/ReportCardEurope.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'india'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_India/Sitemap.htm'>" . $out_wikipedias .  ", region India</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_India/Sitemap.htm'>" . $out_wikipedias .  ", region India</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_India/ReportCardIndia.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'oceania'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Oceania/Sitemap.htm'>" . $out_wikipedias .  ", region Oceania</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Oceania/Sitemap.htm'>" . $out_wikipedias .  ", region Oceania</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_Oceania/ReportCardOceania.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+
     if ($mode_wp && ($region ne 'artificial'))
-    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Artificial/Sitemap.htm'>" . $out_wikipedias .  ", artificial languages</a>")) ; }
+    { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/EN_Artificial/Sitemap.htm'>" . $out_wikipedias .  ", artificial languages</a>"). &tdlb("<a href='http://stats.wikimedia.org/EN_Artificial/ReportCardArtificial.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
 
     if ($region eq '')
     {
       if ((! $mode_wx) && ($growth_summary_generated))
-      { $out_html .= &tr (&tdlb   (&w ("<a href='TablesWikipediaGrowthSummary.htm'>$out_creation_history</a>"))) ; }
+      { $out_html .= &tr (&tdlb   (&w ("<a href='TablesWikipediaGrowthSummary.htm'>$out_creation_history</a>") . &tde)) ; }
 
       if ($mode_wx)
       {
-        $out_html .= &tr (&tdlb (&w ("<a href='TablesCurrentStatusVerbose.htm'>$out_report_description_current_status</a> "))) ;
+        $out_html .= &tr (&tdlb (&w ("<a href='TablesCurrentStatusVerbose.htm'>$out_report_description_current_status</a> ") . &tde)) ;
       }
-      $out_html .= &tr (&tdlb ("<a href='../EN/CategoryOverviewIndex.htm'>$out_categories</a>")) ;
+      $out_html .= &tr (&tdlb ("<a href='../EN/CategoryOverviewIndex.htm'>$out_categories</a>") . &tde) ;
     # $out_html .= &tr (&tdlb ("<a href='../EN/BotActivityMatrix.htm'>$out_botactivity</a>")) ;
 
       if ($mode_wp)
-      { $out_html .= &tr (&tdlb ("<font color=#808080>$out_easytimeline</font>")) ; }
+      { $out_html .= &tr (&tdlb ("<font color=#808080>$out_easytimeline</font>") . &tde) ; }
     # { $out_html .= &tr (&tdlb ("<a href='../EN/TimelinesIndex.htm'>$out_easytimeline</a>")) ; }
 
       if ($mode_wb || $mode_wv)
-      { $out_html .= &tr (&tdlb ("<a href='../EN/WikiBookIndex.htm'>$out_stats_per $out_wikibook</a>")) ; }
+      { $out_html .= &tr (&tdlb ("<a href='../EN/WikiBookIndex.htm'>$out_stats_per $out_wikibook</a>") . &tde) ; }
 
       $out_html .= &tr (&tdlb ("Top 100 articles ranked <a href='http://stats.wikimedia.org/EN/TableRankArticleHistoryByArchiveSize.html'>by archive size</a>" .
                                blank_text_after ("30/04/2009", " <font color=#008000><b>NEW</b></font>") . "&nbsp;&nbsp;" .
                                "<a href='http://stats.wikimedia.org/EN/TableRankArticleHistoryByTotalEdits.html'>by edit count</a>" .
-                               blank_text_after ("30/04/2009", " <font color=#008000><b>NEW</b></font>") )) ;
-      $out_html .= &tr (&tdlb ("<a href='http://meta.wikimedia.org/wiki/Template:Wikimedia_Growth'>Wikimedia growth</a>")) ;
+                               blank_text_after ("30/04/2009", " <font color=#008000><b>NEW</b></font>") ) . &tde) ;
+      $out_html .= &tr (&tdlb ("<a href='http://meta.wikimedia.org/wiki/Template:Wikimedia_Growth'>Wikimedia growth</a>") . &tde) ;
       $out_html .= &tr (&tdlb ("Mailing list activity: <a href='http://www.infodisiac.com/Wikipedia/ScanMail/index.html'>All lists</a>&nbsp;/&nbsp;".
-                              "<a href='http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html'>Power posters</a>")) ;
+                              "<a href='http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html'>Power posters</a>") . &tde) ;
 
       $out_html .= &tr (&tdlb ("Job progress: <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>Database dumps</a>&nbsp;/&nbsp;" .
-                               "<a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>"))) ;
-      $out_html .= &tr (&tdlb ("Raw data: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/wikistats/csv_$mode.zip'>csv_$mode.zip</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)")) ;
+                               "<a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>")) . &tde) ;
+      $out_html .= &tr (&tdlb ("Raw data: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/wikistats/csv_$mode.zip'>csv_$mode.zip</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)") . &tde) ;
     }
 
     $out_html .= "<\/table>\n" ;
@@ -1107,7 +1135,7 @@ sub GenerateHtmlStartComparisonPlots
 
 sub GenerateHtmlStartComparisonTables
 {
-  &LogT ("\nGenerateHtmlStartComparisonTables\n") ;
+#  &LogT ("\nGenerateHtmlStartComparisonTables\n") ;
 
   if ($pageviews)
   {
@@ -1189,7 +1217,7 @@ sub GenerateHtmlStartComparisonTables
   my $out_page_title    = $out_statistics ;
   my $out_page_subtitle = $out_report_descriptions [$ndx_report] ;
 
-  print "ndx $ndx_report -> page subtitle '$out_page_subtitle'\n" ;
+  print " report id $ndx_report: '$out_page_subtitle'\n" ;
 
   my $out_html_title    = $out_statistics . " - Tables - " . $out_page_subtitle ;
   my $out_explanation   = $out_tbl3_legend [$ndx_report] ;

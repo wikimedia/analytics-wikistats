@@ -97,6 +97,7 @@ sub tdlbt   { return "<td class=lb valign=top>" .&trim(shift)."</td>" ; }
 sub tdcbt2  { return "<td class=cb valign=top colspan='2'>" .&trim(shift)."</td>" ; }
 sub tdcbt3  { return "<td class=cb valign=top colspan='3'>" .&trim(shift)."</td>" ; }
 sub tdcbt4  { return "<td class=cb valign=top colspan='4'>" .&trim(shift)."</td>" ; }
+sub tdcbt5  { return "<td class=cb valign=top colspan='5'>" .&trim(shift)."</td>" ; }
 sub tdc2    { return "<td class=c colspan=2>"  .&trim(shift)."</td>" ; }
 sub tdc3    { return "<td class=c colspan=3>"  .&trim(shift)."</td>" ; }
 sub tdc4    { return "<td class=c colspan=4>"  .&trim(shift)."</td>" ; }

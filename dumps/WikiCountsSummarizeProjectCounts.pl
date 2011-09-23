@@ -859,6 +859,7 @@ sub WriteCsvFilesPerPeriod
     $file_csv = "$path_out/csv_wp/analytics_in_page_views.csv" ;
     &Log ("\n\nFile out for analytics database: $file_csv\n\n") ;
     open CSV, ">", $file_csv ;
+    binmode CSV ; # enforce UNIX style linebreaks \012
     foreach $project_language_yymmmm (sort keys %csv_analytics_in_page_views_keys)
     {
       print CSV $project_language_yymmmm . ',' .

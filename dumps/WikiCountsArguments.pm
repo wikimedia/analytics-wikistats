@@ -178,6 +178,12 @@ sub SetEnvironment
         &LogT ("\nTotal edits in article namespace on previous run ($edits_total_namespace_a) exceeds $threshold_edits_only\nRun in edits only mode to speed up job\n") ;
         $edits_only = $true ;
       }
+
+      if ($edits_only && ($language =~ /^(?:id|jv)$/))
+      {
+        &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV\n") ;
+        $edits_only = $false ;
+      }
     }
   }
 
@@ -321,6 +327,7 @@ sub SetEnvironment
     }
     else
     {
+
       if ($edits_only)
       {
         &LogT ("\nRun in 'edits only' mode\n") ;
@@ -400,6 +407,9 @@ sub SetEnvironment
     $file_csv_monthly_reverts       = $path_out . "StatisticsRevertsPerMonth.csv" ;
 #   $file_csv_user                  = $path_out . "StatisticsUsers.csv" ;
     $file_csv_user                  = $path_out . "EditsPerUser" . uc($language) . ".csv" ;
+    $file_csv_user_month            = $path_out . "EditsBreakdownPerUserPerMonth" . uc($language) . ".csv" ;
+    $file_csv_user_month_article    = $path_temp . "EditsPerUserPerMonthPerArticle" . uc($language) . ".csv" ;
+    $file_csv_user_month_article_s  = $path_temp . "EditsPerUserPerMonthPerArticleSorted" . uc($language) . ".csv" ;
     $file_csv_anonymous_users       = $path_out . "StatisticsAnonymousUsers.csv" ;
     $file_csv_timelines             = $path_out . "StatisticsTimelines.csv" ;
     $file_events                    = $path_out . "StatisticsEvents.~1" ;
@@ -481,7 +491,7 @@ sub SetEnvironment
 
   # meta process grinded to a halt on RevisionCached > 100 Mb for revision history of meta: User:COIBot/LinkReports or nl: De Kroeg
   # meta needs more space for revision history than for internal tables, unlike e.g. enwiki
-  if (($hostname eq 'bayes') && (($project eq "metawiki") || ($project eq "nlwiki")))
+  if (($job_runs_on_production_server) && (($project eq "metawiki") || ($project eq "nlwiki")))
   {
     $threshold_filesize_large = 2000_000_000 ;
     $threshold_tie_file       = 2000_000_000 ;

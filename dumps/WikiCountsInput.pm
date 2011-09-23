@@ -2,43 +2,6 @@
 
 $start = time ;
 
-#for (1..9999999)
-#{ $text .= chr(int(rand(256))) ; }
-#  $text =~ s/&lt;/</sgo;
-#  $text =~ s/&gt;/>/sgo;
-#  $text =~ s/&apos;/\'/sgo;
-#  $text =~ s/&quot;/\"/sgo;
-#  $text =~ s/&amp;/&/sgo;
-#print "Ready in " . (time - $start) . " seconds" ;
-
-#$start = time ;
-#for (1..9999999)
-#{ $text2 .= chr(int(rand(256))) ;
-#  $text2 =~ s/&(?:lt|gt|apos|quot|amp);/&conv($1)/sgo ;
-#  print "Ready in " . (time - $start) . " seconds" ;
-#}
-#exit ;
-
-#sub conv
-#{
-#  $text =~ s/&lt;/</sgo;
-#  $text =~ s/&gt;/>/sgo;
-#  $text =~ s/&apos;/\'/sgo;
-#  $text =~ s/&quot;/\"/sgo;
-#  $text =~ s/&amp;/&/sgo;
-#}
-#  print "Ready in " . (time - $start) . " seconds" ;
-#exit ;
-
-sub conv
-{
-  $text =~ s/&gt;/>/sgo;
-  $text =~ s/&apos;/\'/sgo;
-  $text =~ s/&quot;/\"/sgo;
-  $text =~ s/&amp;/&/sgo;
-}
-
-
 use CGI::Carp qw(fatalsToBrowser);
 use Time::Local ;
 use Getopt::Std ;
@@ -235,6 +198,12 @@ sub ReadFileXml
 
   binmode FILE_IN ;
 
+  if (! $prescan)
+  {
+    open    EDITS_USER_MONTH_ARTICLE, ">", $file_csv_user_month_article ;
+    binmode EDITS_USER_MONTH_ARTICLE ;
+  }
+
   if (! $edits_only)
   {
     open REVERTS_SAMPLE, ">", $file_csv_reverts_sample ;
@@ -351,6 +320,9 @@ sub ReadFileXml
   }
 
   &LogT ("\n\nPages read: $pages_read. Revisions read: $revisions_read \n") ;
+
+  if (! $prescan)
+  { close EDITS_USER_MONTH_ARTICLE ; }
 
   if (! $edits_only)
   {
@@ -571,6 +543,8 @@ sub ReadInputXmlPage
   my $bytes_read_page = $bytes_read ;
 
   undef @revisions ;
+  undef %edits_user_month_article ;
+  undef %edits_user_month_article_28 ;
 
   if ($use_tie)
   {
@@ -925,6 +899,13 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
   undef %contributing_ip_users ;
   undef %contributing_reg_users_per_month ;
   undef %contributing_all_users_per_month ;
+
+  if (! $prescan)
+  {
+    # also log edit count for first 28 days of months (could be zero), so that normalized monthly activity (regardless of length of month) becomes feasible
+    foreach $edits_user_month (sort keys  %edits_user_month_article)
+    { print EDITS_USER_MONTH_ARTICLE "$edits_user_month," . $edits_user_month_article {$edits_user_month} . "," . ($edits_user_month_article_28 {$edits_user_month}+0)  . "\n" ; }
+  }
 
   if ($use_tie)
   {
@@ -1452,16 +1433,20 @@ code_complete ("ProcessRevision4", $start_process_revision4) if $record_time_pro
 
 sub CollectUserCounts
 {
-  my $namespace = shift ;
-  my $user      = shift ;
-  my $redirect  = shift ;
-  my $time      = shift ;
-  my $usertype  = shift ;
+  my ($namespace, $user, $redirect, $time, $usertype) = @_ ;
+  my ($namespace2, $user2) ;
 
-  my ($month, $year) = (localtime ($time))[4,5] ;
+  my ($day,$month, $year) = (localtime ($time))[3,4,5] ;
   $month++ ;
   $year += 1900 ;
-  my $yymm      = sprintf ("%02d%02d", $year - 2000, $month) ;
+  my $yymm    = sprintf ("%02d%02d",  $year - 2000, $month) ;
+  my $yyyymm  = sprintf ("%04d-%02d", $year, $month) ;
+
+  ($user2 = $user) =~ s/,/&comma;/g ;
+  $namespace2 = sprintf ("%03d", $namespace) ;
+  $edits_user_month_article {"$user2,$yyyymm,$namespace2"}++ ;
+  if ($day <= 28)
+  { $edits_user_month_article_28 {"$user2,$yyyymm,$namespace2"}++ ; }
 
   if (&NameSpaceArticle ($namespace)) # strategy
   { $edits_total_namespace_a ++ ; }

@@ -590,6 +590,7 @@ sub SetLiterals
   $out_svg_firefox  = "<br><a href='http://magnusmanske.de/wikimaps/index.php/How_to_SVG-enable_Firefox'>How to enable SVG in Firefox for Windows</a>" ;
 
   # used for category reports, for now only in English
+  $out_summary      = "Summary" ;
   $out_index        = "Index" ;
   $out_complete     = "Complete" ;
   $out_concise      = "Concise" ;

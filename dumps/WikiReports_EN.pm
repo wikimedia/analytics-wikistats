@@ -119,6 +119,7 @@ $out_sort_order   = "Wikipedias are ordered by number of internal links (excl. r
                     "Feedback and suggestions are welcome" ;
 
 $out_comparison   = "Wikipedias which contain {xxx} or more articles {yyy} are included here" ;
+$out_included     = "Only Wikipedias which contain {xxx} or more articles and which received {yyy} or more edits in last month are listed here" ;
 $out_not_included = "Not included" ; #new
 
 $out_average_1    = "average counts over shown months" ;

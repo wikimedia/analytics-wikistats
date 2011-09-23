@@ -56,6 +56,70 @@ $qr_csvkey_lang_date = qr/([^,]*,)(\d\d).(\d\d).(\d\d\d\d).*$/ ;
 
 
 # for CountUsersPerWeek
+
+sub SortAndCompactEditsUserMonth
+{
+  my $timestartsort = time ;
+
+  &LogPhase ("SortAndCompactEditsUserMonth") ;
+  &TraceMem ;
+
+  if (! $job_runs_on_production_server)
+  {
+    &Log ("Not on Linux system, skip this step, which involves external sort.\n") ;
+    return ;
+  }
+
+  $filesize_in = &i2KbMb (-s $file_csv_user_month_article) ;
+  $cmd = "sort $file_csv_user_month_article -o $file_csv_user_month_article_s -T $path_temp" ;
+  $result = `$cmd` ;
+  &Log ("Cmd $cmd -> $result\n") ;
+  &LogT ("\nSort took " . ddhhmmss (time - $timestartsort). ".\n") ;
+# unlink $file_csv_user_month_article ;
+
+  &TraceMem ;
+
+  &Log ("Compact into $file_csv_user_month\n") ;
+  open    EDITS_USER_MONTH_ARTICLE, "<", $file_csv_user_month_article_s ;
+  open    EDITS_USER_MONTH,         ">", $file_csv_user_month ;
+  binmode EDITS_USER_MONTH_ARTICLE ;
+  binmode EDITS_USER_MONTH ;
+
+  print EDITS_USER_MONTH "# Edit counts per registered user per month per namespace, produced by monthly wikistats job\n" ;
+  print EDITS_USER_MONTH "# user, month, namespace, edits in whole month, edits in first 28 days (for normalized trends with equal length partial months)\n" ;
+  $user_month_ns_prev = '' ;
+  my ($count_all, $count_all_28) ;
+  while ($line = <EDITS_USER_MONTH_ARTICLE>)
+  {
+    chomp $line ;
+    my ($user,$month,$namespace,$count,$count_28) = split (',', $line) ;
+    $namespace += 0 ; # remove leading zeroes, used to influence sort order
+    if (("$user,$month,$namespace" ne $user_month_ns_prev) &&  ($user_month_ns_prev ne ''))
+    {
+      print EDITS_USER_MONTH "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
+      $count_all    = $count ;
+      $count_all_28 = $count_28 ;
+    }
+    else
+    {
+      $count_all    += $count ;
+      $count_all_28 += $count_28 ;
+    }
+
+    $user_month_ns_prev = "$user,$month,$namespace" ;
+  }
+  print EDITS_USER_MONTH "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
+  close EDITS_USER_MONTH ;
+  close EDITS_USER_MONTH_ARTICLE ;
+
+  $filesize_out = &i2KbMb (-s $file_csv_user_month) ;
+  &Log ("\nFile '$file_csv_user_month' ($filesize_in -> $filesize_out))\n") ;
+
+  &TraceMem ;
+# unlink $file_csv_user_month_article_s ;
+  &TraceMem ;
+}
+
 sub SortArticleHistoryOnDateTime
 {
   &LogPhase ("SortArticleHistoryOnDateTime") ;

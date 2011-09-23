@@ -9,28 +9,29 @@
 # See the GNU General Public License for more details, at
 # http://www.fsf.org/licenses/gpl.html
 
-# Disclaimer: most of these sources have been developed in limited free time.  
+# Disclaimer: most of these sources have been developed in limited free time.
 # Over the years complexity of the sources grew, sometimes at the expense of maintainability.
 # Some design decisions have not scaled well.
 # Some parts of the code are hard to read due to overly concise or obscure variable names
 # (WikiCounts.. files suffer less from this than WikiReports.. files).
 # although in general I try to choose descriptive variable and function names.
-# There is little documentation, too few comments in the code. 
+# There is little documentation, too few comments in the code.
 # Sometimes obsolete code has been commented out rather than deleted to ease re-activation.
 # Version numbering has been inconsistent.
 # Some code contains hard coded file paths mainly to Erik's test environment (Windows)
 
-# On the bright side: 
-# Most code produces a decent audit trail, which can help understand process flow. 
+# On the bright side:
+# Most code produces a decent audit trail, which can help understand process flow.
 # The scripts have been modified again and again to cope with ever more colossal input files,
 # without overtaxing system resources. (e.g. by externalizing huge memory structures)
-# Great care has been taken to produce output that is tuned to each specific project. 
+# Great care has been taken to produce output that is tuned to each specific project.
 
 # Rudimentary documentations at:
 # http://meta.wikimedia.org/wiki/Wikistats
 # http://www.mediawiki.org/wiki/Manual:Wikistats/TrafficReports
- 
-# to do on revert counts:
+
+
+# to do revert
 #   eliminate self reverts
 #   separate revert rv from vandal rvv
 #   count reverts per user
@@ -71,7 +72,7 @@
   use WikiCountsTimelines ;
 # use WikiCountsWebalizer ;
 
-  $version   = "3.0" ;
+  $version   = "2.3" ;
   $timestart = time ;
   $bhi       = 127 ;
   $b2hi      = 128*128-1 ;
@@ -94,7 +95,7 @@
                                      # to this end an average ratio for last six motnhs was determined between
                                      # (very) active editors on day x  / (very) active editors for full month
 
-  if ($hostname eq 'bayes')
+  if ($job_runs_on_production_server)
   {
     $threshold_filesize_large = 1000_000_000 ; # compressed dump size (to do: make this dependant on compression type)
     $threshold_tie_file       = 1000_000_000 ; # compressed dump size (to do: make this dependant on compression type)
@@ -227,6 +228,8 @@
     &UpdateZeitGeist ;
 
     &UpdateLog ;
+
+    &SortAndCompactEditsUserMonth ;
 
     if ($mode eq "wp")
     { &WriteTimelineOverviews ; }

@@ -1,9 +1,7 @@
 #!/usr/bin/perl
 
-sub SetScriptImageFormat
+sub SetScriptTrackerCode
 {
-  my $format = shift ;
-
 $out_google_analytics = <<__GOOGLE_ANALYTICS__ ;
 <script type="text/javascript">
 
@@ -19,8 +17,13 @@ $out_google_analytics = <<__GOOGLE_ANALYTICS__ ;
 
 </script>
 __GOOGLE_ANALYTICS__
+}
 
-$out_script_embedded_imageformat = <<__SCRIPT_EMBEDDED2__ ;
+sub SetScriptImageFormat
+{
+  my $format = shift ;
+
+  $out_script_embedded_imageformat = <<__SCRIPT_EMBEDDED2__ ;
 
 <script>
 <!--

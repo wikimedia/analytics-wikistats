@@ -46,9 +46,9 @@
     # push @arguments, '-r asia' ;
     # push @arguments, '-r europe' ;
     # push @arguments, '-r oceania' ;
-    # push @arguments, '-r articifial' ;
+    # push @arguments, '-r artificial' ;
 
-    $mode = 'wp' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
+    $mode = 'wq' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
     $mode =~ s/\s//g ;
     push @arguments, "-m $mode" ;
 
@@ -213,9 +213,9 @@
   else
   { &GenerateSiteMap ; }
 
-  if ($mode_wp && ($language eq "en"))
+  if ($language eq "en")
   {
-    &LogT ("\nGenerate Summaries Per Wiki") ;
+    &LogT ("\nGenerate Summaries Per Wiki\n\n") ;
     &GenerateSummariesPerWiki ;
   }
 

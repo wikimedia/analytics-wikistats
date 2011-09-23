@@ -280,6 +280,7 @@ sub ParseArguments
   if (! -d $path_out)
   { abort ("Output directory '" . $path_out . "' not found and could not be created") ; }
 
+  $path_temp = "/a/tmp/wikistats" ;
 
 if ($false)
 {
@@ -344,6 +345,7 @@ else
 
   $file_csv_pageviewsmonthly_html = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
 
+  $file_csv_whitelist_wikis       = $path_in . "WhiteListWikis.csv" ;
   $file_publish                   = $path_out . "#publish.txt" ;
 
   if ($testmode)
@@ -430,6 +432,8 @@ sub DetectWikiMedia
 sub InitGlobals
 {
   &Log ("InitGlobals\n") ;
+
+  &SetScriptTrackerCode ;
 
   if ($pageviews)
   {
@@ -658,12 +662,172 @@ sub ReadBotStats
   }
 }
 
+# WhiteListLanguages = filter acceptable language codes
+# Note on coding practice:
+# Read '$wp' as '$language' (naming relict from old days, when Wikistats script only knew Wikipedia project)
+# @languages will contain sorted list of acceptable language codes
+# expect following loop everywhere: "foreach $wp (@languages) ... "
+sub WhiteListLanguages
+{
+  $threshold_articles = 10 ;
+  $threshold_edits    = 10 ;
+
+  &LogT ("\nWhiteListLanguages\n") ;
+  my $file_monthly_stats ;
+
+  &ReadFileCsv ($file_csv_log) ;
+  foreach $line (@csv)
+  {
+    $line =~ s/,.*$// ;
+    $wp = $line ;
+
+    if ($wp =~ /mania|team|comcom|closed|chair|langcom|office|searchcom|sep11|nostalgia|stats|test/i)
+    { $wp_ignore_keyword_prohibited {$wp}++ ; next ; }
+
+    if ($wp =~ /^(?:dk|tlh|ru_sib)/i) # dk=dumps exist(ed?) but site not, tlh=Klignon, ru-sib=Siberian
+    { $wp_ignore_wiki_obsolete {$wp}++ ; next ; }
+    if ($mode_wk and ($wp eq "als" or $wp eq "tlh"))
+    { $wp_ignore_wiki_obsolete {$wp}++ ; next ; }
+
+    if (! $mode_wx and ($wp eq "commons"))
+    { $wp_ignore_wrong_list {$wp}++ ; next ; }
+
+    if ($wp =~ /^zz+/i) # blast!, zz and zzz are used for totals (zz=all, zzz=minus English), now language code appeared ??!!
+    { $wp_ignore_keyword_reserved {$wp}++ ; next ; }
+
+    if ($some_languages_only and ! $include_language {$wp})
+    { $wp_ignore_outside_selection {$wp}++ ; next ; }
+
+    $wp_whitelist {$wp} = 1 ;
+    $wp_whitelist {"$wp.m"} = 1 ; # relevant when processing page views, allow for mobile version
+    # some day check all code for this ambiguity, for now white list 'roa-rup' and 'roa_rup' etc
+    $wp =~ s/_/-/g ;
+    $wp_whitelist {$wp} = 1 ;
+    $wp_whitelist {"$wp.m"} = 1 ; # relevant when processing page views, allow for mobile version
+  }
+
+  # for pageviews once each day update white list, so that WikiCountsSummarizeProjectCounts.pl step in pageviews_monthly.sh can use this same list next day
+  if (($pageviews) && ($region eq ''))
+  {
+    open CSV_WHITE_LIST, '>', $file_csv_whitelist_wikis ;
+    foreach $key (sort keys %wp_whitelist)
+    {
+      next if $key =~ /\.m/ ;
+      print CSV_WHITE_LIST "$mode,$key\n" ;
+    }
+    close CSV_WHITE_LIST ;
+  }
+
+  if ($pageviews)
+  { $file_monthly_stats = "PageViewsPerMonthAll.csv" ; }
+  else
+  { $file_monthly_stats = "StatisticsMonthly.csv" ; }
+
+  &ReadFileCsv ($path_in . $file_monthly_stats) ;
+  foreach $line (@csv)
+  {
+    ($wp, $date, @fields) = split (",", $line) ;
+    $line =~ s/,.*$// ;
+    $line =~ s/_/-/g ;
+    $wp = $line ;
+
+    if ($wp ne lc $wp)
+    { $wp_ignore_code_not_lowercase {$wp}++ ; next ; } ; # cruft
+
+    if ($wp_whitelist {$wp} == 0)
+    {
+      if ($wp_ignore_keyword_prohibited {$wp} +
+          $wp_ignore_wiki_obsolete      {$wp} +
+          $wp_ignore_wrong_list         {$wp} +
+          $wp_ignore_keyword_reserved   {$wp} +
+          $wp_ignore_outside_selection  {$wp} == 0)
+      { $wp_ignore_no_dump_processed {$wp}++ ; next ; } ;
+    }
+
+    if (! $pageviews)
+    {
+      $article_counts_last_month {$wp} = $fields  [4] ;
+      $edit_counts_last_month    {$wp} = $fields [11] ;
+    }
+  }
+
+  if (! $pageviews)
+  {
+    foreach $wp (keys %article_counts_last_month)
+    {
+      if (($wp_whitelist {$wp} > 0) && ($article_counts_last_month {$wp} < $threshold_articles))
+      {
+        $wp_whitelist {$wp} = 0 ;
+        $wp_ignore_too_few_articles      {$wp}++ ;
+        $wp_ignore_too_small_or_inactive {$wp}++ ;
+      }
+    }
+    foreach $wp (keys %edit_counts_last_month)
+    {
+      if (($wp_whitelist {$wp} > 0) && ($edit_counts_last_month {$wp} < $threshold_edits))
+      {
+        $wp_whitelist {$wp} = 0 ;
+        $wp_ignore_too_few_edits         {$wp}++ ;
+        $wp_ignore_too_small_or_inactive {$wp}++ ;
+      }
+    }
+  }
+
+  # needed in ProcessEditorStats, before ReadMonthlyStats
+  my %languages ;
+  foreach $wp (sort keys %wp_whitelist)
+  {
+    if (($wp !~ /\./) && ($wp !~ /-/)) # skip mobile and alias
+    { $languages {$wp}++ ; }
+  }
+  @languages = join (',', sort keys %languages) ;
+
+
+  &Log ("\nLanguage codes not accepted, but dump processing logged in StatisticsLog.csv:\n\n") ;
+  &Log ("- Keyword prohibited: " . join (',', sort keys %wp_ignore_keyword_prohibited) . "\n") ;
+  &Log ("- Keyword reserved: "   . join (',', sort keys %wp_ignore_keyword_reserved) . "\n") ;
+  &Log ("- Wiki obsolete: "      . join (',', sort keys %wp_ignore_wiki_obsolete) . "\n") ;
+  &Log ("- Wrong list: "         . join (',', sort keys %wp_ignore_wrong_list) . "\n") ;
+  &Log ("- Outside selection: "  . join (',', sort keys %wp_ignore_outside_selection) . "\n") ;
+
+  &Log ("\nLanguage codes not on white or black list, but monthly counts available in $file_monthly_stats:\n\n") ;
+  &Log ("- Not lowercase: "      . join (',', sort keys %wp_ignore_not_lowercase) . "\n") ;
+  &Log ("- No dump processed: "  . join (',', sort keys %wp_ignore_no_dump_processed) . "\n") ;
+
+  if (! $pageviews)
+  {
+    &Log ("- < $threshold_articles articles: " . join (',', sort keys %wp_ignore_too_few_articles) . "\n") ;
+    &Log ("- < $threshold_edits edits: "       . join (',', sort keys %wp_ignore_too_few_edits) . "\n\n") ;
+  }
+
+  if ($out_included ne '')
+  {
+    $out_included =~ s/\{xxx\}/$threshold_articles/ ;
+    $out_included =~ s/\{yyy\}/$threshold_edits/ ;
+
+    $project_cnt = 0 ;
+    foreach $wp (sort keys %wp_ignore_too_small_or_inactive)
+    {
+      $projects_omitted .= "$wp:<a href='" . $out_urls{$wp} . "'>".$out_languages {$wp}."</a>, " ;
+      if (++ $project_cnt % 7 == 0)
+      { $projects_omitted .= "<br>" ; }
+    }
+
+    if ($projects_omitted eq '')
+    { $out_included = '' ; }
+    else
+    {
+      $projects_omitted =~ s/, // ;
+      $out_included = "<p><small>$out_included<br>$out_not_included: $projects_omitted</small><p>" ;
+    }
+  }
+}
+
 sub ReadMonthlyStats
 {
   my ($wp, $day, $month, $year, $days, $m, $prev, $curr, $forecast, @fc) ;
   my $md = $dumpmonth_ord ;
   my @oldest_month ;
-  my (%wp_ok,%wp_nok) ;
   undef (@languages) ;
   undef (@max_links) ;
 
@@ -717,18 +881,6 @@ sub ReadMonthlyStats
     close "FILE_IN" ;
   }
 
-
-  # this code is partly duplicated below for mode $pageviews, some day needs to be combined
-
-  &ReadFileCsv ($file_csv_log) ;
-  foreach $wp (@csv)
-  {
-    $wp =~ s/,.*$// ;
-    $wp =~ s/_/-/g ;
-    next if $some_languages_only and ! $include_language {$wp} ;
-    $wp_ok {$wp} = 1 ;
-    $wp_ok {"$wp.m"} = 1 ;
-  }
   # find oldest month (to be skipped, probably incomplete)
   # $oldest_month_pageviews  = "9999/99/99" ;
   open "FILE_IN", "<", $file_csv_pageviewsmonthly ;
@@ -737,13 +889,9 @@ sub ReadMonthlyStats
     chomp $line ;
     ($wp, $date, $count) = split (",", $line) ;
 
-    next if $wp ne lc $wp ; # cruft
-    next if $some_languages_only and ! $include_language {$wp} ;
-
+    next if $wp_whitelist {$wp} == 0 ;
   #  if ((! $mode_wp) && ($date eq '2008/05/31')) { next ; }  # skip incomplete first month
 
-    if ($wp_ok {$wp} == 0)
-    { $wp_nok {$wp} ++ ; }
     if (($oldest_month_pageviews {$wp} eq "") || ($date lt $oldest_month_pageviews {$wp}))
     { $oldest_month_pageviews {$wp} = $date ; }
 
@@ -777,15 +925,6 @@ sub ReadMonthlyStats
   }
   close "FILE_IN" ;
 
-  my $msg = "\nLanguage codes skipped (not in StatisticsLog.csv):\n" ;
-  foreach $wp (sort keys %wp_nok)
-  { $msg .= "$wp," ; }
-  if ($msg =~ /,/)
-  {
-    $msg =~ s/,$/\n/ ;
-    print $msg ;
-  }
-
   if ($pageviews)
   { open "FILE_IN", "<", $file_csv_pageviewsmonthly ; }
   else
@@ -798,18 +937,14 @@ sub ReadMonthlyStats
     if ($pageviews)
     {
       ($wp, $date, @fields) = split (",", $line) ;
-      next if $wp ne lc $wp ; # cruft
+      next if $wp_whitelist {$wp} == 0 ;
       next if $pageviews_mobile and $wp !~ /\.m/ ;
       next if $pageviews_non_mobile and $wp =~ /\.m/ ;
-      next if $some_languages_only and ! $include_language {$wp} ;
 
       $wp =~ s/\.m// ; # mobile postix is .m
 
-      if ($date eq $oldest_month_pageviews {$wp}) # skip first month, probably incomplete
-      { next ; }
+      next if $date eq $oldest_month_pageviews {$wp} ; # skip first month, probably incomplete
 
-      if ($wp_nok {$wp} > 0)                # invalid language code or project in different group
-      { next ; }                            # e.g. special wikipedias are not mixed with normal wikipedias
 
       if ($normalize_days_per_month)
       {
@@ -832,31 +967,7 @@ sub ReadMonthlyStats
       $fields [3] = $user_edits_100 {"$wp,$date"} ;
     }
 
-    next if $some_languages_only and ! $include_language {$wp} ;
-
-    # if ($wp eq $wp_1st) { next ; } # Dec 2006: skip till counts are fixed
-
-    next if $mode_wk and ($wp eq "als" or $wp eq "tlh") ;  # obsolete
-    next if ! $mode_wx and $wp =~ /commons/i ;
-
-    next if $wp eq "dk" ;  # Dec 2006: dumps exist but site not
-    next if $wp eq "zz" ;
-    next if $wp eq "test" ;
-    next if $wp eq "tlh" ;  # Klignon
-    next if $wp eq "ru-sib" ;  # Siberian
-    next if $wp eq "ru_sib" ;  # Siberian
-
-    next if $wp =~ /mania/i ;
-    next if $wp =~ /team/i ;
-    next if $wp =~ /comcom/i ;
-    next if $wp =~ /closed/i ;
-    next if $wp =~ /chair/i ;
-    next if $wp =~ /langcom/i ;
-    next if $wp =~ /office/i ;
-    next if $wp =~ /searchcom/i ;
-    next if $wp =~ /sep11/i ;
-    next if $wp =~ /nostalgia/i ;
-    next if $wp =~ /stats/i ;
+    next if $wp_whitelist {$wp} == 0 ;
 
     # $date = &FixDateMonthlyStats ($date) ;
     $day   = substr ($date,3,2) ;
@@ -1208,7 +1319,7 @@ if ($false)
       # stats for en may be missing, this would effect totals too much
       # if ($wikimedia && ($MonthlyStats {$wp_1st.$m.$c[$f]} == 0))
       # { $zz = 0 ; }
-
+#qqq #########################################################################################################
       if ((! $LargeWikiDataMissing3) ||
          (($f < 5) || ($f == 6) || ($f == 7) || ($f == 11) || ($f == 18)))
       {
@@ -1222,6 +1333,7 @@ if ($false)
           $MonthlyStatsHighMonth {$wp.$c[$f]} = $m ;
         }
       }
+#qqq #########################################################################################################
     }
 
     $wp = "zz" ;
@@ -1570,49 +1682,6 @@ if ($false)
     # if (@MonthlyStats {$wp.$c[11].'%'} >999)
     # { @MonthlyStats {$wp.$c[11].'%'} = "&gt;999" ; }
   }
-  }
-  if (! $pageviews)
-  {
-    # skip sites with less than xx articles in last 6 months,
-    # except when larger than yy articles in any month
-    $skip_threshold  = 10 ;
-    $skip_threshold2 = 10000 ;
-    $not_skipped = 0 ;
-    @languages_alpha  = sort { $a cmp $b } keys %languages ;
-    foreach my $wp (@languages_alpha)
-    {
-      $skip {$wp} = $true ;
-      if ($MonthlyStats {$wp.$MonthlyStatsWpStop {$wp}.$c[4]} >= $skip_threshold)
-      {
-        $skip {$wp} = $false ;
-        $not_skipped ++ ;
-      }
-
-  #    for ($m = $m1 ; $m >= $m0 ; $m--)
-  #    {
-  #      if ($MonthlyStats {$wp.$m.$c[4]} >= $skip_threshold2)
-  #      { @skip {$wp} = $false ; last ; }
-  #    }
-
-  #    if (@skip {$wp})
-  #    {
-  #      for ($m = $m1 ; $m >= $m2 ; $m--)
-  #      {
-  #        if ($MonthlyStats {$wp.$m.$c[4]} >= $skip_threshold)
-  #        { @skip {$wp} = $false ; last ; }
-  #      }
-  #    }
-      if ($skip {$wp})
-      {
-        if ($skipprojects ne "") { $skipprojects .= ", " ; }
-        $skipprojects .= "$wp" ;
-        if ($skipprojects2 ne "") { $skipprojects2 .= ", " ; }
-        $skipprojects2 .= "$wp:<a href='" . $out_urls{$wp} . "'>".$out_languages {$wp}."</a>" ;
-      }
-    }
-    if ($skipprojects ne "")
-  # { &Log ("\n\nSkip projects with less than $skip_threshold articles between months $m2-$m1:\n$skipprojects\n") ; }
-    { &Log ("\n\nSkip projects with less than $skip_threshold articles:\n$skipprojects\n") ; }
   }
 
   # cumulative value for largest languages
