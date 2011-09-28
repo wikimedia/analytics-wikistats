@@ -155,21 +155,30 @@
 
       &Log ("Write file $path, set date $date2\n") ;
 
-      $cmd = "wget -a /a/dammit.lt/wget.log -O $path http://mituzas.lt/wikistats/$subdir$file" ;
+      $cmd = "wget -a /a/dammit.lt/wget.log -O $path http://dammit.lt/wikistats/$subdir$file" ;
       $result = `$cmd` ;
-      if ($result == 0)
+      if ((-e $path) && (-s $path == 0))
+      {
+        $result = "Empty file -> remove $path" ;
+        unlink $path ;
+      }
+      elsif ($result == 0)
       { $result = "OK" ; }
+
       &Log ("Cmd '$cmd' -> $result \n\n") ;
 
-      `touch $path -t $date2` ;
-
-      if ($file =~ /^projectcounts/)
+      if (-e $path)
       {
-        $cmd = "tar --append --file=$tar_file $file" ;
-        &Log ("Cmd '$cmd'\n") ;
-        $result = `$cmd` ;
-        print "$result\n" ;
-        unlink $path ;
+        `touch $path -t $date2` ;
+
+        if ($file =~ /^projectcounts/)
+        {
+          $cmd = "tar --append --file=$tar_file $file" ;
+          &Log ("Cmd '$cmd'\n") ;
+          $result = `$cmd` ;
+          print "$result\n" ;
+          unlink $path ;
+        }
       }
     }
   }
