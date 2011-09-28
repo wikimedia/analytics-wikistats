@@ -102,7 +102,7 @@ CREATE TABLE `binaries` (
 
 CREATE TABLE `offline` (
   `date`                        date NOT NULL,
-  `source`						varchar (255),
+  `source`                      varchar (255),
   `readers`                     bigint (12),
   PRIMARY KEY (date,source)
 ) ;
