@@ -6,7 +6,7 @@ It executes SQL from analytics_create_and_load_from_csv.txt
 
 == analytics_upd.sh ==
 Prepares new csv files (delegated to analytics_generate_csv_files.sh),
-and empties and reloads all tables for which csv files are in this folder.   
+and empties/reloads all tables for which csv files are in this folder.   
 It executes SQL from analytics_refresh_from_csv.txt
 
 == CSV files ==

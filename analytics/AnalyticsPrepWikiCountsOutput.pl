@@ -47,6 +47,7 @@
 
 sub ParseArguments
 {
+  print "ParseArguments\n" ;
   my (@options, $arguments) ;
 
   getopt ("io", \%options) ;
@@ -80,6 +81,7 @@ sub ParseArguments
 
 sub ReadStatisticsMonthly
 {
+  print "ReadStatisticsMonthly\n" ;
   &ReadStatisticsMonthlyForProject ("wb") ;
   &ReadStatisticsMonthlyForProject ("wk") ;
   &ReadStatisticsMonthlyForProject ("wn") ;
@@ -252,6 +254,7 @@ sub ReadStatisticsMonthlyForProject
 
 sub FindLargestWikis
 {
+  print "FindLargestWikis\n" ;
   print "Largest projects (most accumulated very active editors):\n";
   @total_edits_ge_100 = sort {$total_edits_ge_100 {$b} <=> $total_edits_ge_100 {$a}} keys %total_edits_ge_100 ;
   $rank = 0 ;
@@ -269,18 +272,18 @@ sub FindLargestWikis
     foreach $project_language (keys %largest_projects)
     {
       ($project,$language) = split (',', $project_language) ;
-	  if ($data2 {"$project,$language,$yyyymm"} eq '')
+          if ($data2 {"$project,$language,$yyyymm"} eq '')
       {
         print "No data yet for large wiki $project_language for $yyyymm-> skip month $yyyymm\n" ;
         $months {$yyyymm} = 0 ;
       }
     }
   }
-  exit ;
 }
 
 sub WriteMonthlyData
 {
+  print "WriteMonthlyData\n" ;
   my $file_csv_out = "$path_out/$file_csv_analytics_in" ;
   open CSV_OUT, '>', $file_csv_out ;
   foreach $project_wiki_month (sort keys %data1)
