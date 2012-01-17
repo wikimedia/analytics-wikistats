@@ -2,7 +2,7 @@
 
 sub ReadLanguageSettings
 {
-  &LogT ("Read Langage Settings") ;
+  &LogT ("Read Language Settings") ;
   # http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/languages/messages/
   # code probably needs update
   # these files have no been parsed for quite some time

@@ -47,6 +47,18 @@ sub ReadInputXml
   if ($dump2csv)
   { open "FILE_DUMP_CSV", ">", $file_dump_csv || abort ("Perl file '$file_dump_csv' could not be opened.") ; }
 
+  open "FILE_CREATES", ">", $file_csv_creates || abort ("Perl file '$file_csv_creates' could not be opened.") ;
+  print FILE_CREATES "# fields: count_flag,yyyymmddhhnn,namespace,usertype,user,title\n" ;
+  print FILE_CREATES "# usertype  = [A:anonymous|B:bot|R:registered user]\n" ;
+  print FILE_CREATES "# countflag = [-:page contains no internal link|R:page is redirect|S:(link list, deprecated)|S:stub|+:normal article]\n" ;
+  print FILE_CREATES "# when processing full archive dump: count article only when it contains an internal link (official article definition), and is not a redirect\n" ;
+  print FILE_CREATES "# when processing full archive dump: only difference for stubs is : those are not counted for alternate article count \n" ;
+  print FILE_CREATES "# when processing stub dump: article content is unavailable (no test for redirect or stub threshold) -> article count will be higher\n" ;
+  if ($edits_only)
+  { print FILE_CREATES "# this file was generated from stub dump\n" ; }
+  else
+  { print FILE_CREATES "# this file was generated from full archive dump\n" ; }
+
   if ($mode eq "wp")
   {
     open "FILE_TIMELINES",         ">", $file_temp_timelines         || abort ("Temp file '$file_temp_timelines' could not be opened.") ;
@@ -89,6 +101,7 @@ sub ReadInputXml
   close FILE_CATEGORIES ;
   if ($dump2csv)
   { close FILE_DUMP_CSV ; }
+  close FILE_CREATES ;
 
   if ($use_tie && ! $edits_only && ($size_rev_0_gt + $size_rev_0_eq > 0))
   { &LogT ("\n\nRevisions cached on $size_rev_0_gt / " . (($size_rev_0_gt + $size_rev_0_eq)/1000) . "K articles or " .
@@ -340,8 +353,12 @@ sub XmlReadUntil
   {
     if ($edits_only)
     {
+      # only when full archive dump is processed check each revision for being a redirect
+      # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
+      # note that very last revision in dump could be beyond last date which should be processed, could cause small (negligible) discrepancies
+      # when article changed from redirect to normal or vice versa very recently
       if ($line =~ /<redirect \/>/)
-      { $redirect_last_revision = $true ; }
+      { $last_revision_is_redirect = $true ; }
     }
 
     $bytes_read += length ($line) ;
@@ -591,8 +608,10 @@ sub ReadInputXmlPage
   if (! $prescan)
   { $total_per_namespace {$namespace} ++ ; }
 
-  if ($edits_only)
-  { $redirect_last_revision = $false ; }
+  # only when full archive dump is processed check each revision for being a redirect
+  # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
+  $last_revision_is_redirect = $false ; # will be relevant for stub dumps only
+  $last_revision_count_flag  = '-' ;    # will be relevant for full archive dumps only, see comment at UpdateMonthlyStats
 
   &XmlReadUntil ('<id>.*<\/id>') ; # zzz
   $pageid = $line ;
@@ -625,6 +644,23 @@ sub ReadInputXmlPage
   while ($line =~ /<revision>/)
   {
     ($article, $time, $user, $usertype, $comment, $md5) = &ReadInputXmlRevision ;
+
+    if ($first_revision)
+    {
+      my ($title2, $user2) ;
+      ($title2   = $title)   =~ s/,/&comma;/g ;
+      ($user2    = $user)    =~ s/,/&comma;/g ;
+
+      $user_page_creator = $user2 ;
+      $yyyymmddhhnn      = substr ($time,0,4).'-'.substr ($time,4,2).'-'.substr ($time,6,2).' '.substr ($time,8,2).':'.substr ($time,10,2) ;
+      $data_page_created = "$yyyymmddhhnn,$namespace,$usertype,$user2,$title2" ;
+
+      my ($year,$month,$day,$hour,$min,$sec) = $time =~ m/(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/ ;
+      my $time_gm    = timegm ($sec, $min, $hour, $day, $month-1, $year-1900) ;
+      my $days_passed = int (($dumpdate_gm - $time_gm) / (1440 * 60)) ;
+
+      $page_created_recently = ($days_passed < 30) ;
+    }
 
     if ((! $edits_only) && (! $prescan))
     { &DetectReverts ($namespace, $time, $user, $usertype, $comment, $md5) ; }
@@ -821,6 +857,24 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
 
     $current_revision = $false ;
   }
+
+  if ((! $last_revision_is_redirect) && ($last_revision_count_flag !~ /-|R/)) # only when processing full archive dump article do_count flag can be redirect (R) or without internal link (-)
+  {
+    if (&NameSpaceArticle ($namespace))
+    { &IncUserData ($user_page_creator, $useritem_create_reg_namespace_a) ; }
+    else
+    { &IncUserData ($user_page_creator, $useritem_create_reg_namespace_x) ; }
+
+    if ($page_created_recently)
+    {
+      if (&NameSpaceArticle ($namespace))
+      { &IncUserData ($user_page_creator, $useritem_create_reg_recent_namespace_a) ; }
+      else
+      { &IncUserData ($user_page_creator, $useritem_create_reg_recent_namespace_x) ; }
+    }
+  }
+
+  print FILE_CREATES "$last_revision_count_flag,$data_page_created\n" ;
 
   if (&NameSpaceArticle ($namespace) && (! $prescan)) # strategy
   {
@@ -1366,25 +1420,7 @@ my $start_process_revision1 = code_started() if $record_time_process_revision_ma
       { $user = "an.on.ym.ous" ; }
     }
 
-#   $userid = @users {$user} ;
     $userid = &GetUserData ($user, $useritem_id) ; # may invoke PutUserData first to create new user record
-#    if ($userid == 0)
-#    {
-#      if (&IpAddress ($user))
-#      {
-#        $cnt_users_ip += 2 ;
-#        $userid = $cnt_users_ip ;
-##       @userdata {$user} = $userid ;
-#        &PutUserData ($user, $useritem_id, $userid) ;
-#      }
-#      else
-#      {
-#        $cnt_users_reg += 2 ;
-#        $userid = $cnt_users_reg ;
-##       @userdata {$user} = $userid ;
-#        &PutUserData ($user, $useritem_id, $userid) ;
-#      }
-#    }
   }
 
 code_complete ("ProcessRevision1", $start_process_revision1) if $record_time_process_revision_main ;
@@ -1426,24 +1462,26 @@ code_complete ("ProcessRevision3", $start_process_revision3) if $record_time_pro
 my $start_process_revision4 = code_started() if $record_time_process_revision_main ;
 
   if (! $prescan)
-  { &CollectUserCounts ($namespace, $user, $redirect, $time_gm, $usertype) ; }
+  { &CollectUserCounts ($namespace, $user, $title, $redirect, $time_gm, $usertype) ; }
 
 code_complete ("ProcessRevision4", $start_process_revision4) if $record_time_process_revision_main ;
 }
 
 sub CollectUserCounts
 {
-  my ($namespace, $user, $redirect, $time, $usertype) = @_ ;
+  my ($namespace, $user, $title, $redirect, $time, $usertype) = @_ ;
   my ($namespace2, $user2) ;
 
   my ($day,$month, $year) = (localtime ($time))[3,4,5] ;
   $month++ ;
   $year += 1900 ;
-  my $yymm    = sprintf ("%02d%02d",  $year - 2000, $month) ;
-  my $yyyymm  = sprintf ("%04d-%02d", $year, $month) ;
+  my $yymm   = sprintf ("%02d%02d", $year - 2000, $month) ;
+  my $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
 
   ($user2 = $user) =~ s/,/&comma;/g ;
+  ($title2 = $title) =~ s/,/&comma;/g ;
   $namespace2 = sprintf ("%03d", $namespace) ;
+
   $edits_user_month_article {"$user2,$yyyymm,$namespace2"}++ ;
   if ($day <= 28)
   { $edits_user_month_article_28 {"$user2,$yyyymm,$namespace2"}++ ; }
@@ -1457,31 +1495,33 @@ sub CollectUserCounts
   {
     if (&NameSpaceArticle ($namespace)) # strategy
     {
-      &IncUserData ($user, $useritem_ip_namespace_a) ;
+      &IncUserData ($user, $useritem_edit_ip_namespace_a) ;
       $edits_total_ip_namespace_a ++ ;
     }
     else
     {
-      &IncUserData ($user, $useritem_ip_namespace_x) ;
+      &IncUserData ($user, $useritem_edit_ip_namespace_x) ;
       $edits_total_ip_namespace_x ++ ;
     }
+
     return ;
   }
 
-  # remember edits per user
+  # count edits/creates per user
+
   if (&NameSpaceArticle ($namespace)) # strategy
-  { &IncUserData ($user, $useritem_reg_namespace_a) ; }
+  { &IncUserData ($user, $useritem_edit_reg_namespace_a) ; }
   else
-  { &IncUserData ($user, $useritem_reg_namespace_x) ; }
+  { &IncUserData ($user, $useritem_edit_reg_namespace_x) ; }
 
   my $days_passed = int (($dumpdate_gm - $time) / (1440 * 60)) ;
 
   if ($days_passed < 30)
   {
     if (&NameSpaceArticle ($namespace)) # strategy
-    { &IncUserData ($user, $useritem_reg_recent_namespace_a) ; }
+    { &IncUserData ($user, $useritem_edit_reg_recent_namespace_a) ; }
     else
-    { &IncUserData ($user, $useritem_reg_recent_namespace_x) ; }
+    { &IncUserData ($user, $useritem_edit_reg_recent_namespace_x) ; }
   }
 
 # if ($namespace != 0) # strategy
@@ -1497,9 +1537,9 @@ sub CollectUserCounts
   }
 
   # remember edits per user per month
+  ($user2 = $user) =~ s/,/&#44;/g ;
   if (! $redirect)
   {
-    ($user2 = $user) =~ s/,/&#44;/g ;
     if ($filesizelarge) # zzz
     {
       my $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
@@ -1554,18 +1594,22 @@ sub CollectUserCounts
   my $record = $userdata {$user} ;
 
 # $useritem_id = 0 ;
-#  $useritem_first = 1 ;
-#  $useritem_last = 2 ;
-#  $useritem_ip_namespace_a = 3 ;
-#  $useritem_ip_namespace_x = 4 ;
-#  $useritem_reg_namespace_a = 5 ;
-#  $useritem_reg_namespace_x = 6 ;
-#  $useritem_reg_recent_namespace_a = 7 ;
-#  $useritem_reg_recent_namespace_x = 8 ;
-#  $useritem_edits_10 = 9 ;
+# $useritem_edit_first = 1 ;
+# $useritem_edit_last = 2 ;
+# $useritem_edit_ip_namespace_a = 3 ;
+# $useritem_edit_ip_namespace_x = 4 ;
+# $useritem_edit_reg_namespace_a = 5 ;
+# $useritem_edit_reg_namespace_x = 6 ;
+# $useritem_edit_reg_recent_namespace_a = 7 ;
+# $useritem_edit_reg_recent_namespace_x = 8 ;
+# $useritem_create_reg_namespace_a = 9 ;
+# $useritem_create_reg_namespace_x = 10 ;
+# $useritem_create_reg_recent_namespace_a = 11 ;
+# $useritem_create_reg_recent_namespace_x = 12 ;
+# $useritem_edits_10 = 13 ;
 
   my @fields = split (',', $record) ;
-  if (($record eq "") || ($fields [$useritem_first] eq ""))
+  if (($record eq "") || ($fields [$useritem_edit_first] eq ""))
   {
 
     if ($time == 0)
@@ -1576,11 +1620,11 @@ sub CollectUserCounts
 #   {
       if ($record eq "")
       {
-        $record = ",,,,,,,,#" ;
+        $record = ",,,,,,,,,,,,#" ;
         my @fields = split (',', $record) ;
       }
-      $fields [$useritem_first] = $time ;
-      $fields [$useritem_last]  = $time ;
+      $fields [$useritem_edit_first] = $time ;
+      $fields [$useritem_edit_last]  = $time ;
       $fields [$useritem_edits_10] = $time ;
       $userdata {$user} = join (',', @fields) ;
 #   }
@@ -1588,19 +1632,19 @@ sub CollectUserCounts
   else
   {
     $userdata_dirty = $false ;
-    if ($time < $fields [$useritem_first])
+    if ($time < $fields [$useritem_edit_first])
     {
       # ignore redirect pages for this purpose
       # a database bug files moved pages under false date
 #     if (! $redirect)
 #     {
-        $fields [$useritem_first] = $time ;
+        $fields [$useritem_edit_first] = $time ;
         $userdata_dirty = $true ;
 #     }
     }
-    if ($time > $fields [$useritem_last])
+    if ($time > $fields [$useritem_edit_last])
     {
-      $fields [$useritem_last] = $time ;
+      $fields [$useritem_edit_last] = $time ;
       $userdata_dirty = $true ;
     }
 
@@ -1627,7 +1671,7 @@ sub CollectUserCounts
     if ($userdata_dirty)
     { $userdata {$user} = join (',', @fields) ; }
 
-    if ($fields [$useritem_last] == 0)
+    if ($fields [$useritem_edit_last] == 0)
     { print "USER $user USERDATA " . $userdata {$user} . "\n" ; }
 
   }
@@ -1651,13 +1695,18 @@ sub CollectArticleCounts
   if ($article eq "#@")
   { $skip_counts = $true ; }
 
+  # only when full archive dump is processed check each revision for being a redirect
+  # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
   if ($edits_only)
   {
-    $redirect = $redirect_last_revision ;
+    $redirect = $last_revision_is_redirect ;
     if ($redirect)
     { $do_count = "R" ; }
     else
     { $do_count = "+" ; }
+
+    $last_revision_count_flag = $do_count ;
+
     $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $do_count . &i2bbbb (0) . &i2bbbb (0) .
              &i2bb (0) . &i2b (0) . &i2b (0) . &i2b (0) . &i2b (0) .
              &i2bbb (0) . &i2bbbb ($userid) . "\n" ;
@@ -1676,6 +1725,8 @@ sub CollectArticleCounts
   $size = length ($article) ;
 
   $do_count      = "-" ;
+  $last_revision_count_flag = $do_count ;
+
   $links         = 0 ;
   $wikilinks     = 0 ;
   $imagelinks    = 0 ;
@@ -1692,14 +1743,13 @@ sub CollectArticleCounts
 
 my $start_collect_articlecounts1 = code_started() if $record_time_collect_article_counts ;
 
-    if ($edits_only)
-    { $redirect = $redirect_last_revision ; }
-    else
-    { $redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ; }
+    $redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ;
 
     if ($redirect)
-    { $do_count = "R" ; }
-
+    {
+      $do_count = "R" ;
+      $last_revision_count_flag = $do_count ;
+    }
 code_complete ("CollectArticleCounts1", $start_collect_articlecounts1) if $record_time_collect_article_counts ;
 
     if (! $redirect)
@@ -1710,6 +1760,7 @@ my $start_collect_articlecounts2 = code_started() if $record_time_collect_articl
       if ($article =~ m/\[\[/)
       {
         $do_count = "+" ;
+        $last_revision_count_flag = $do_count ;
 
         #  strip headers, wiki formatting, html
         $article2 = $article;
@@ -1770,6 +1821,7 @@ my $start_collect_articlecounts2e = code_started() if $record_time_collect_artic
         if ($article eq "")
         { $do_count = "S" ; }
         elsif ($length2 < $length_stub) { $do_count = "S" ; } # stub
+        $last_revision_count_flag = $do_count ;
 
         $words = 0 ;
         $unicodes = 0 ;

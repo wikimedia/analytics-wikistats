@@ -24,9 +24,24 @@ sub GenerateSummariesPerWiki
   $language_count = $#languages + 1 ;
   foreach $wp (@languages)
   {
-    $explanation = &HtmlSummaryExplanation ($out_languages {$wp}, $out_article {$wp}, "Sitemap.htm") ;
-    $explanation_report_card = &HtmlSummaryExplanationReportCard ($explanation) ;
-    $explanation =~ s/<p>/<p>&nbsp;<p>/ ;
+    $language         = $out_languages {$wp} ;
+    $language_article = $out_article {$wp} ;
+    $explanation  = &HtmlSummaryExplanation ("Sitemap.htm") ;
+    $explanation2 = $explanation ;
+
+    if ($mode_wx)
+    {
+      $explanation  =~ s/ARTICLE_LANGUAGE// ;
+      $explanation2 =~ s/ARTICLE_LANGUAGE// ;
+    }
+    else
+    {
+      $explanation  =~ s/ARTICLE_LANGUAGE/Data are from the <a href='$language_article'>English Wikipedia page on $language<\/a>./ ;
+      $explanation2 =~ s/ARTICLE_LANGUAGE/Data are from the English Wikipedia page for each language./ ;
+    }
+
+    $explanation_report_card = &HtmlSummaryExplanationReportCard ($explanation2) ;
+    $explanation  =~ s/<p>/<p>&nbsp;<p>/ ;
 
     $summaries_index ++ ;
     $summaries_progress = "$summaries_index/$language_count" ;
@@ -38,6 +53,12 @@ sub GenerateSummariesPerWiki
     }
 
     $out_html = &GetSummaryPerWiki ($wp, $summaries_progress) ;
+
+    if ($wp eq 'commons')
+    {
+      &GeneratePlotBinaries ($wp,1) ;
+      &GeneratePlotBinaries ($wp,2) ;
+    }
 
     &GeneratePlotEditors   ($wp) ;
     &GeneratePlotPageviews ($wp) ;
@@ -56,8 +77,8 @@ sub GenerateSummariesPerWiki
     $out_html_multiple_wikis =~ s/SEE_ALSO// ;
     $out_html_single_wiki    =~ s/SEE_ALSO/$see_also/ ;
 
-    $out_html_multiple_wikis =~ s/SOURCE/$source/ ;
-    $out_html_single_wiki    =~ s/SOURCE// ;
+    $out_html_multiple_wikis =~ s/DATASOURCES/$source/ ;
+    $out_html_single_wiki    =~ s/DATASOURCES// ;
 
     $out_html_multiple_wikis =~ s/TOP/<a href='#top'>top<\/a>&nbsp;&lArr;/ ;
     $out_html_single_wiki    =~ s/TOP/&nbsp;/ ;
@@ -92,7 +113,9 @@ sub GenerateSummariesPerWiki
   else
   {
     $file_html_all  = $path_out . "ReportCardTopWikis.htm" ;
-    if ($summaries_collected < 50)
+    if ($mode_wx)
+    { $title_content = "Report Card: summaries for Commons and " . ($summaries_collected - 1) . " other projects" ; }
+    elsif ($summaries_collected < 50)
     { $title_content = "$out_publication Report Card: summaries for $summaries_collected languages" ; }
     else
     { $title_content = "$out_publication Report Card: summaries for 50 most visited languages" ; }
@@ -114,15 +137,17 @@ sub GenerateSummariesPerWiki
 
 sub GetSummaryPerWiki
 {
-  my ($wp,$progress) = @_ ;
+  my ($wp,$progress,$wiki) = @_ ;
 
   my @months_en = qw (January February March April May June July August September October November December);
 
   my $html ;
 
-  my $m = $MonthlyStatsWpStop {$wp} ;
-  if ($month_max_incomplete)
-  { $m-- ; }
+  # my $m = $MonthlyStatsWpStop {$wp} ;
+  # if ($month_max_incomplete)
+  # { $m-- ; }
+
+  $m = $editors_month_hi_5 {$wp} ;
   my $mmddyyyy = &m2mmddyyyy ($m) ;
 
   $month_year = $months_en [substr ($mmddyyyy,0,2)-1] . " " . substr ($mmddyyyy,6,4) ;
@@ -171,7 +196,6 @@ sub GetSummaryPerWiki
   $this_month         = $MonthlyStats {$wp.$m.$c[4]} ;
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[4]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[4]} ;
-# print "Article Count 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_AC_yearly   = &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_AC_monthly  = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_AC_data     = &FormatSummary ($this_month) ;
@@ -181,7 +205,6 @@ sub GetSummaryPerWiki
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[6]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[6]} ;
   $this_month =~ s/(\d)(\d\d\d)/$1,$2/g ;
-# print "New Articles Per Day 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_NAD_yearly  = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_NAD_monthly = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_NAD_data    = &FormatSummary ($this_month) ;
@@ -190,7 +213,6 @@ sub GetSummaryPerWiki
   $this_month         = $MonthlyStats {$wp.$m.$c[11]} ;
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[11]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[11]} ;
-# print "Edits Per Month 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_EPM_yearly  = &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_EPM_monthly = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_EPM_data    = &FormatSummary ($this_month) ;
@@ -199,7 +221,6 @@ sub GetSummaryPerWiki
   $this_month         = $MonthlyStats {$wp.$m.$c[2]} ;
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[2]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[2]} ;
-# print "Active Editors 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_AE_yearly   = &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_AE_monthly  = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_AE_data     = &FormatSummary ($this_month) ;
@@ -208,7 +229,6 @@ sub GetSummaryPerWiki
   $this_month         = $MonthlyStats {$wp.$m.$c[3]} ;
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[3]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[3]} ;
-# print "Very Active Editors 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_VAE_yearly  = &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_VAE_monthly = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_VAE_data    = &FormatSummary ($this_month) ;
@@ -217,38 +237,50 @@ sub GetSummaryPerWiki
   $this_month         = $MonthlyStats {$wp.$m.$c[1]} ;
   $prev_month         = $MonthlyStats {$wp.($m-1).$c[1]} ;
   $prev_year          = $MonthlyStats {$wp.($m-12).$c[1]} ;
-# print "New Editors 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
   $metric_NE_yearly   = &SummaryTrendChange ($this_month, $prev_year) ;
   $metric_NE_monthly  = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_NE_data     = &FormatSummary ($this_month) ;
 
-  # million speakers
-  $speakers = $out_speakers {$wp} ;
-  $editors  = $MonthlyStats {$wp.$m.$c[2]} ;
-# print "SPEAKERS $speakers EDITORS $editors\n" ;
-  if ($speakers == 0)
-  { $participation = "" ; }
-  elsif ($editors / $speakers >= 1)
-  { $participation = sprintf ("%.0f", $editors / $speakers) ; }
-  else
-  { $participation = sprintf ("%.1f", $editors / $speakers) ; }
+  if (! $mode_wx)
+  {
+    # million speakers
+    $speakers = $out_speakers {$wp} ;
+    $editors  = $MonthlyStats {$wp.$m.$c[2]} ;
 
-  $this_month         = $speakers ;
-  $metric_MS_yearly   = '--&nbsp;&nbsp;&nbsp;&nbsp;'  ;
-  $metric_MS_monthly  = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_month) ;
-  $metric_MS_data     = &FormatSummary (sprintf ("%.0f", $this_month * 1000000)) ;
+    if ($speakers == 0)
+    { $participation = "?" ; }
+    elsif ($editors / $speakers >= 1)
+    { $participation = sprintf ("%.0f", $editors / $speakers) ; }
+    else
+    { $participation = sprintf ("%.1f", $editors / $speakers) ; }
 
-  # editors per million speakers
-  $metric_EMS_yearly   = '--&nbsp;&nbsp;&nbsp;&nbsp;' ;
-  $metric_EMS_monthly  = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_month) ;
-  $metric_EMS_data     = $participation ;
+    $this_month         = $speakers ;
+    $metric_MS_yearly   = '--&nbsp;&nbsp;&nbsp;&nbsp;'  ;
+    $metric_MS_monthly  = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_month) ;
+    if ($speakers eq '')
+    { $metric_MS_data   = '?' ; }
+    else
+    { $metric_MS_data   = &FormatSummary (sprintf ("%.0f", $this_month * 1000000)) ; }
+
+    # editors per million speakers
+    $metric_EMS_yearly   = '--&nbsp;&nbsp;&nbsp;&nbsp;' ;
+    $metric_EMS_monthly  = '--&nbsp;&nbsp;&nbsp;&nbsp;' ; # &SummaryTrendChange ($this_month, $prev_month) ;
+    $metric_EMS_data     = $participation ;
+  }
 
   $out_style2 = $out_style ;
   $out_style2 =~ s/td   {white-space:nowrap;/td   {font-size:12px; white-space:nowrap;/ ;
   $out_style2 =~ s/body\s*\{.*?\}/body {font-family:arial,sans-serif;background-color:#C0C0C0}/ ;
 
+  $plot_binaries1 = 'PlotBinaries'  . uc ($wp) . '1.png' ;
+  $plot_binaries2 = 'PlotBinaries'  . uc ($wp) . '2.png' ;
   $plot_editors   = 'PlotEditors'   . uc ($wp) . '.png' ;
   $plot_pageviews = 'PlotPageviews' . uc ($wp) . '.png' ;
+
+  if ($mode_wx)
+  { $wiki = $out_language_name ; }
+  else
+  { $wiki = "$out_language_name $out_publication" ; }
 
 $html = <<__HTML_SUMMARY__ ;
 <a id='lang_$wp' name='lang_$wp'></a>
@@ -262,7 +294,7 @@ $html = <<__HTML_SUMMARY__ ;
         <table width=100% border=0>
         <tr>
           <td class=l width=80% valign=top>
-            <h2><a href='$main_page'><font color=$col_highlight>$out_language_name $out_publication</font></a></h2>
+            <h2><a href='$main_page'><font color=$col_highlight>$wiki</font></a></h2>
           </td>
           <td class=r width=20% valign=top><a href='http://www.wikimedia.org'>$logo_project</td>
         </tr>
@@ -275,7 +307,7 @@ $html = <<__HTML_SUMMARY__ ;
     <table width=100% border=0>
     <tr>
       <td class=l colspan=99 width=100%>
-         <b>$out_language_name  $out_publication at a glance</b>&nbsp;<i>$month_year</i>&nbsp;&nbsp;<br>
+         <b>&nbsp;$wiki at a glance</b>&nbsp;<i>$month_year</i>&nbsp;&nbsp;<br>
       </td>
     <tr>
     <!--
@@ -366,6 +398,29 @@ $html = <<__HTML_SUMMARY__ ;
             <td colspan=99><hr></td>
           </tr>
 
+          SPEAKERS
+          PARTICIPATION
+          BINARIES
+        </table>
+      </td>
+    </tr>
+
+    PLOT_BINARIES
+    PLOT_EDITORS
+    PLOT_PAGEVIEWS
+
+    EXPLANATION
+    SEE_ALSO
+    DATASOURCES
+    </table>
+
+  </td>
+</tr>
+</table>
+
+__HTML_SUMMARY__
+
+$html_speakers = <<__HTML_SUMMARY_SPEAKERS__ ;
           <tr>
             <td class=l>Speakers</td>
             <td class=r>$metric_MS_data</td>
@@ -375,7 +430,9 @@ $html = <<__HTML_SUMMARY__ ;
           <tr>
             <td colspan=99><hr></td>
           </tr>
+__HTML_SUMMARY_SPEAKERS__
 
+$html_participation = <<__HTML_SUMMARY_PARTICIPATION__ ;
           <tr>
             <td class=l>Editors per Million Speakers</td>
             <td class=r>$metric_EMS_data</td>
@@ -385,84 +442,105 @@ $html = <<__HTML_SUMMARY__ ;
           <tr>
             <td colspan=99><hr></td>
           </tr>
+__HTML_SUMMARY_PARTICIPATION__
 
-        </table>
-      </td>
-    </tr>
-
-    <!--
+$html_plot_binaries = <<__HTML_SUMMARY_PLOT_BINARIES__ ;
     <tr>
-      <td class=l colspan=99 width=100%>
-      &nbsp;<p><b>Active Editors</b>
-    </tr>
-    -->
-    <tr>
-    <!--
-      <td width=5%>
-        &nbsp;
-      </td>
-      <td class=l colspan=99 width=95%>
-    -->
       <td class=c colspan=99 width=100%>
-      &nbsp;<p><img src='$plot_editors'>
+      &nbsp;<p><img src='$plot_binaries1'>
       </td>
     </tr>
     <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_binaries2'>
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_BINARIES__
 
-    <!--
+$html_plot_editors = <<__HTML_SUMMARY_PLOT_EDITORS__ ;
     <tr>
-      <td class=l colspan=99 width=100%>
-      &nbsp;<p><b>Page Views per Month</b><br>&nbsp;
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_editors'></td>
     </tr>
-    -->
+__HTML_SUMMARY_PLOT_EDITORS__
+
+$html_plot_pageviews = <<__HTML_SUMMARY_PLOT_PAGEVIEWS__ ;
     <tr>
-    <!--
-      <td width=5%>
-        &nbsp;
-      </td>
-      <td class=l colspan=99 width=95%>
-    -->
       <td class=c colspan=99 width=100%>
       &nbsp;<p><img src='$plot_pageviews'>
-      </td>
+      <br><small><font color=#808080>page views: $pageviews_per_unit</font></small></td>
     </tr>
+__HTML_SUMMARY_PLOT_PAGEVIEWS__
 
-EXPLANATION
-SEE_ALSO
-SOURCE
-    </table>
-
-  </td>
-</tr>
-</table>
-
-__HTML_SUMMARY__
-
-if ($region eq '')
-{
-  $langcode = 'EN' ;
-  if ($mode_wb)
-  { $url_base = "http://stats.wikimedia.org/wikibooks/$langcode" ; }
-  if ($mode_wk)
-  { $url_base = "http://stats.wikimedia.org/wiktionary/$langcode" ; }
-  if ($mode_wn)
-  { $url_base = "http://stats.wikimedia.org/wikinews/$langcode" ; }
-  if ($mode_wp)
-  { $url_base = "http://stats.wikimedia.org/$langcode" ; }
-  if ($mode_wq)
-  { $url_base = "http://stats.wikimedia.org/wikiquote/$langcode" ; }
-  if ($mode_ws)
-  { $url_base = "http://stats.wikimedia.org/wikisource/$langcode" ; }
-  if ($mode_wv)
-  { $url_base = "http://stats.wikimedia.org/wikiversity/$langcode" ; }
   if ($mode_wx)
-  { $url_base = "http://stats.wikimedia.org/wikispecial/$langcode" ; }
-}
+  {
+    if ($wp eq 'commons')
+    {
+      $html =~ s/BINARIES/&ReadStatisticsBinariesCommons/e ;
+      $html =~ s/SPEAKERS// ;
+      $html =~ s/PARTICIPATION// ;
+      $html =~ s/PLOT_BINARIES/$html_plot_binaries/ ;
+      $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
+      $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ;
+    }
+    else
+    {
+      $html =~ s/BINARIES// ;
+      $html =~ s/SPEAKERS// ;
+      $html =~ s/PARTICIPATION// ;
+      $html =~ s/PLOT_BINARIES// ;
+      $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
 
-$url_trends   = "$url_base/TablesWikipedia".uc($wp).".htm" ;
-$url_site_map = "$url_base/Sitemap.htm" ;
+      if ($pageviews_max {$wp} == 0)
+    # { $html =~ s/PLOT_PAGEVIEWS/<tr><td class=c><p><font color=#800000><small>Page views unknown<\/small><\/font><\/td><\/tr>/ ; }
+      { $html =~ s/PLOT_PAGEVIEWS// ; }
+      else
+      { $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ; }
+    }
+  }
+  else
+  {
+    $html =~ s/BINARIES// ;
+    $html =~ s/SPEAKERS/$html_speakers/ ;
+    if ($speakers * 1000000 >= 100000) # enough speakers for participation metric ?
+    { $html =~ s/PARTICIPATION/$html_participation/ ; }
+    else
+    { $html =~ s/PARTICIPATION// ; }
+    $html =~ s/PLOT_BINARIES// ;
+    $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
 
-$see_also = <<__HTML_SUMMARY_SEE_ALSO__ ;
+    if ($pageviews_max {$wp} == 0)
+  # { $html =~ s/PLOT_PAGEVIEWS/<tr><td class=c><p><font color=#800000><small>Page views unknown<\/small><\/font><\/td><\/tr>/ ; }
+    { $html =~ s/PLOT_PAGEVIEWS// ; }
+    else
+    { $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ; }
+  }
+
+  if ($region eq '')
+  {
+    $langcode = 'EN' ;
+    if ($mode_wb)
+    { $url_base = "http://stats.wikimedia.org/wikibooks/$langcode" ; }
+    if ($mode_wk)
+    { $url_base = "http://stats.wikimedia.org/wiktionary/$langcode" ; }
+    if ($mode_wn)
+    { $url_base = "http://stats.wikimedia.org/wikinews/$langcode" ; }
+    if ($mode_wp)
+    { $url_base = "http://stats.wikimedia.org/$langcode" ; }
+    if ($mode_wq)
+    { $url_base = "http://stats.wikimedia.org/wikiquote/$langcode" ; }
+    if ($mode_ws)
+    { $url_base = "http://stats.wikimedia.org/wikisource/$langcode" ; }
+    if ($mode_wv)
+    { $url_base = "http://stats.wikimedia.org/wikiversity/$langcode" ; }
+    if ($mode_wx)
+    { $url_base = "http://stats.wikimedia.org/wikispecial/$langcode" ; }
+  }
+
+  $url_trends   = "$url_base/TablesWikipedia".uc($wp).".htm" ;
+  $url_site_map = "$url_base/Sitemap.htm" ;
+
+  $see_also = <<__HTML_SUMMARY_SEE_ALSO__ ;
     <tr>
       <td class=c colspan=99 width=100%>
         <table width=100%>
@@ -489,16 +567,330 @@ $see_also = <<__HTML_SUMMARY_SEE_ALSO__ ;
     </tr>
 __HTML_SUMMARY_SEE_ALSO__
 
+$language_article = $out_article {$wp}  ;
+
+if ($mode_wx)
+{ $source_wikipedia = "" ;  }
+else
+{ $source_wikipedia = " / <a href='$language_article'>Wikipedia</a>" ; }
+
 $source = <<__HTML_SUMMARY_SOURCE__ ;
     <tr>
       <td colspan=99 class=c>
-      <small><font color=#808080>page views: $pageviews_per_unit</font></small><p>
-      <i><small>Source <a href='http://stats.wikimedia.org'>stats.wikimedia.org</a> / Published $summaries_published</small></i>
+      <p><i><small>Sources <a href='http://stats.wikimedia.org'>stats.wikimedia.org</a> $source_wikipedia / Published $summaries_published</small></i>
       </td>
     </tr>
 __HTML_SUMMARY_SOURCE__
 
   return ($html) ;
+}
+
+sub ReadStatisticsBinariesCommons
+{
+  my $file_csv_in = "$path_in/StatisticsPerBinariesExtension.csv" ;
+
+  my (%extensions, @extensions, $extension, @counts) ;
+  my ($pdf,$image,$audio_video,$scan,$other,$type,%types) ;
+  my $html_binaries ;
+
+  my $ext_documents     = qr/pdf/i ;
+  my $ext_scans         = qr/djvu/i ;
+  my $ext_audios_videos = qr/(?:ogg|oga|ogv|mid)/i ;
+  my $ext_images        = qr/(?:jpg|jpeg|gif|tif|png|svg|bmp|xcf)/i ;
+
+  if (! -e $file_csv_in)
+  { &Abort ("Input file '$file_csv_in' not found") ; }
+
+  print "Read '$file_csv_in'\n" ;
+  open CSV_IN, '<', $file_csv_in ;
+  while ($line = <CSV_IN>)
+  {
+    chomp $line ;
+    ($language,$date,$data) = split (',', $line, 3) ;
+
+    if ($language ne "commons") { next ; }
+
+    if ($date eq "00/0000")
+    {
+      @extensions = split (',', $data) ; # this line show extension names, not counts
+      $field_ndx = 0 ;
+      foreach $extension (@extensions)
+      {
+        $extensions {$field_ndx} = $extension ;
+
+           if ($extension =~ $ext_documents)     { $type = 'pdf' ; }
+        elsif ($extension =~ $ext_images)        { $type = 'image' ; }
+        elsif ($extension =~ $ext_scans)         { $type = 'scan' ; }
+        elsif ($extension =~ $ext_audios_videos) { $type = 'audio/video' ; }
+        else                                     { $type = 'other' ; }
+
+        if ($extension_codes {$type} ne '')
+        { $extension_codes {$type} .= "/" ; }
+        $extension_codes {$type} .= $extension ;
+
+        # print "ndx $field_ndx : ext $extension\n" ;
+        $field_ndx ++ ;
+      }
+      next ;
+    }
+
+    ($month,$year) = split ('\/', $date) ;
+    my $m = &months_since_2000_01 ($year,$month) ;
+    next if $m < $m_start ;
+
+    @counts = split (',', $data) ;
+    $field_ndx = 0 ;
+    foreach $count (@counts)
+    {
+      $ext = lc ($extensions {$field_ndx}) ;
+
+         if ($ext =~ $ext_documents)     { $type = 'pdf' ; }
+      elsif ($ext =~ $ext_images)        { $type = 'image' ; }
+      elsif ($ext =~ $ext_scans)         { $type = 'scan' ; }
+      elsif ($ext =~ $ext_audios_videos) { $type = 'audio/video' ; }
+      else                               { $type = 'other' ; }
+
+      $ext =~ s/jpeg/jpg/ ;
+      $binaries_per_month {"$m|$type"} += $count ;
+      $binaries_per_month {"$m|$ext"}  += $count ;
+      $field_ndx ++ ;
+    }
+  }
+  close CSV_IN ;
+
+  # my $m = $MonthlyStatsWpStop {$wp} ;
+  # if ($month_max_incomplete)
+  # { $m-- ; }
+  $m = $editors_month_hi_5 {$wp} ;
+
+  $html .= &HtmlSummaryBinaries ($m, 'image',       'Images') ;
+  $html .= &HtmlSummaryBinaries ($m, 'audio/video', 'Audio/Video') ;
+  $html .= &HtmlSummaryBinaries ($m, 'pdf',         'Documents') ;
+  $html .= &HtmlSummaryBinaries ($m, 'scan',        'Scans') ;
+  $html .= &HtmlSummaryBinaries ($m, 'other',       'Other') ;
+
+  return ($html) ;
+}
+
+# code year,month as monthes since january 2000 (1 byte)
+sub months_since_2000_01
+{
+  my $year  = shift ;
+  my $month = shift ;
+  my $m = ($year - 2000) * 12 + $month ;
+  return $m ;
+}
+
+sub GeneratePlotBinaries
+{
+  my ($wp,$pass) = @_ ;
+
+  my @months_en = qw (Jan Feby Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @factors   = qw (0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9);
+
+  my $wp = shift ;
+
+  return if $wp ne 'commons' ;
+
+# &LogT ("GeneratePlotBinaries $wp\n") ;
+
+  my $file_csv_input    = $file_binaries_per_wiki ;
+  my $path_png_raw      = "$path_out_plots\/PlotBinaries" . uc($wp) . "$pass.png" ;
+  my $path_png_trends   = "$path_out_plots\/PlotBinariesTrends" . uc($wp) . "$pass.png" ;
+  my $path_svg          = "$path_out_plots\/PlotBinaries" . uc($wp) . "$pass.svg" ;
+  my $out_script_plot ;
+
+  my $out_script_plot   = $out_script_plot_binaries ;
+
+  my $out_language_name = $out_languages {$wp} ;
+  my $month_max         = $editors_month_hi_5 {$wp} ;
+
+  $m = $editors_month_hi_5 {$wp} ;
+
+  if ($pass == 1)
+  { $binaries_max = $binaries_per_month {"$m|image"} ; }
+  else
+  {
+    print $binaries_per_month {"$m|audio/video"} . "\n" ;
+    print $binaries_per_month {"$m|pdf"} . "\n" ;
+    print $binaries_per_month {"$m|scan"} . "\n" ;
+    print $binaries_per_month {"$m|other"} . "\n" ;
+    $binaries_max = $binaries_per_month {"$m|audio/video"} +
+                    $binaries_per_month {"$m|pdf"} +
+                    $binaries_per_month {"$m|scan"} +
+                    $binaries_per_month {"$m|other"};
+  }
+
+  my $code              = uc ($wp) ;
+
+  $file_csv_input       =~ s/\\/\//g ;
+  $path_png_raw         =~ s/\\/\//g ;
+  $path_png_trends      =~ s/\\/\//g ;
+  $path_svg             =~ s/\\/\//g ;
+  $out_language_name    =~ s/&nbsp;/ /g ;
+
+  open BINARIES_OUT, '>', $file_csv_input || &Abort ("Could not open file $file_csv_input") ;
+
+  print BINARIES_OUT "language,month,count_1,count_2,count_3,count_4,count_5\n" ;
+
+  # start in year where value exceeds 1/100 of max value
+
+  $binaries_month_lo = &months_since_2000_01 (2004,01) ;
+
+  $period = month_year_english_short ($binaries_month_lo) . ' ' . month_year_english_short ($editors_month_hi_5 {$wp}) ;
+
+  for ($m = $binaries_month_lo ; $m <= $editors_month_hi_5 {$wp} ; $m++)
+  {
+    # make boundary not show at 2010-01-31 but at 2010-01-01 as follows:
+    # instead of value for last day of month, present it as value for first day of next month
+    # this requires outputting extra first value for 20xx-01-01 (to make chart start at January)
+    if ($pass == 1)
+    {
+      $count_1 = 0 +  $binaries_per_month {"$m|image"} / 1000000 ;
+      $count_2 = 0 + ($binaries_per_month {"$m|jpg"} + $binaries_per_month {"$m|jpeg"}) / 1000000 ;
+      $count_3 = 0 +  $binaries_per_month {"$m|png"} / 1000000 ;
+      $count_4 = 0 +  $binaries_per_month {"$m|svg"} / 1000000 ;
+      $count_5 = 0 + ($binaries_per_month {"$m|image"} - $binaries_per_month  {"$m|jpg"} - $binaries_per_month  {"$m|png"} - $binaries_per_month  {"$m|svg"}) / 1000000 ;
+    }
+    else
+    {
+      $count_1 = 0 +  $binaries_per_month {"$m|audio/video"}  / 1000 ;
+      $count_2 = 0 +  $binaries_per_month {"$m|pdf"}  / 1000 ;
+      $count_3 = 0 +  $binaries_per_month {"$m|djvu"} / 1000 ;
+      $count_4 = 0 ;
+      $count_5 = 0 ;
+    }
+
+    if ($m == $binaries_month_lo)
+    {
+      $date = &m2mmddyyyy ($m) ;
+      $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+      print BINARIES_OUT "$wp,$date,$count_1,$count_2,$count_3,$count_4,$count_5\n" ;
+    }
+
+    $date = &m2mmddyyyy ($m+1) ;
+    $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+
+    print BINARIES_OUT "$wp,$date,$count_1,$count_2,$count_3,$count_4,$count_5\n" ;
+  }
+  close BINARIES_OUT ;
+
+  # calc plot parameters
+
+  if ($binaries_max > 0)
+  {
+    # get nice rounded upper boundary for chart y axis
+    $binaries_max_rounded = 10000000000000 ;
+
+    while ($binaries_max_rounded / 10 > $binaries_max)  { $binaries_max_rounded /= 10 ; }
+
+    foreach $factor (@factors)
+    {
+     if ($binaries_max_rounded * $factor > $binaries_max)
+     { $binaries_max_rounded *= $factor ; last ; }
+   }
+
+    if ($pass == 1)
+    { $binaries_max_rounded = sprintf ("%.0f", $binaries_max_rounded / 1000000) ; }
+    else
+    { $binaries_max_rounded = sprintf ("%.0f", $binaries_max_rounded / 1000) ; }
+  # print "$wp binaries max $binaries_max -> binaries max rounded $binaries_max_rounded\n" ;
+
+    $binaries_max =~ s/(\d)(\d\d\d)$/$1,$2/ ;
+    $binaries_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+    $binaries_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+    $binaries_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+  }
+  else
+  { $binaries_max = '10' ; }
+
+  # edit plot parameters
+
+  if ($wp eq 'zz')
+  { $out_script_plot =~ s/TITLE/Images on all $out_publications (x 1,000,000)/g ; }
+  elsif ($mode_wx)
+  { $out_script_plot =~ s/TITLE/Images on $out_language_name wiki (x 1,000,000)/g ; }
+  else
+  {
+    $out_script_plot =~ s/TITLE/Images on LANGUAGE $out_publication (x 1,000,000)/g ;
+    $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+    $out_script_plot =~ s/CODE/$code/g ;
+  }
+
+  if ($pass == 2)
+  {
+    $out_script_plot =~ s/Images/Other Binaries/g;
+    $out_script_plot =~ s/1,000,000/x 1000/g;
+  }
+
+  $mmddyyyy = &m2mmddyyyy ($month_max) ;
+  $month_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+
+  $out_script_plot =~ s/Wikipedia/$out_publication/g ;
+
+  $out_script_plot =~ s/FILE_CSV/$file_csv_input/g ;
+  $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
+  $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
+  $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+  $out_script_plot =~ s/CODE/$code/g ;
+
+  if ($pass == 1)
+  { $out_script_plot =~ s/MAX_VALUE/max images/ ; }
+  else
+  { $out_script_plot =~ s/MAX_VALUE/max other binaries/ ; }
+
+  $out_script_plot =~ s/MAX_MONTH/$month_max/g ;
+  $out_script_plot =~ s/BINARIES/$binaries_max/g ;
+  $out_script_plot =~ s/YLIM_MAX/$binaries_max_rounded/g ;
+  $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+  $out_script_plot =~ s/PERIOD/$period/g ;
+
+  if ($pass == 1)
+  {
+    $out_script_plot =~ s/LABEL_1/All images/g ;
+    $out_script_plot =~ s/LABEL_2/Jpg/g ;
+    $out_script_plot =~ s/LABEL_3/Png/g ;
+    $out_script_plot =~ s/LABEL_4/Svg/g ;
+    $out_script_plot =~ s/LABEL_5//g ; # no enough to stand out from x axis yet
+  # $out_script_plot =~ s/LABEL_5/Other images/g ;
+  }
+  else
+  {
+    $out_script_plot =~ s/LABEL_1/Audio\/Video (ogg\/oga\/ogv\/mid)/g ;
+    $out_script_plot =~ s/LABEL_2/Doc's (pdf)/g ;
+    $out_script_plot =~ s/LABEL_3/Scans (djvu)/g ;
+    $out_script_plot =~ s/LABEL_4//g ;
+    $out_script_plot =~ s/LABEL_5//g ;
+  }
+
+  if ($pass == 1)
+  {
+    $out_script_plot =~ s/COLOR_1/orange/g ;
+    $out_script_plot =~ s/COLOR_2/darkorange4/g ;
+    $out_script_plot =~ s/COLOR_3/olivedrab4/g ;
+    $out_script_plot =~ s/COLOR_4/mediumpurple4/g ;
+    $out_script_plot =~ s/COLOR_5/#E0E0E0/g ;
+  }
+  else
+  {
+    $out_script_plot =~ s/COLOR_1/orange/g ;
+    $out_script_plot =~ s/COLOR_2/darkorange4/g ;
+    $out_script_plot =~ s/COLOR_3/olivedrab4/g ;
+    $out_script_plot =~ s/COLOR_4/#E0E0E0/g ; # background color
+    $out_script_plot =~ s/COLOR_5/#E0E0E0/g ;
+  }
+
+  my $file_script = $path_in . "R-PlotBinaries.txt" ;
+  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
+  print R_SCRIPT $out_script_plot ;
+  close R_SCRIPT ;
+
+  $cmd = "R CMD BATCH \"$file_script\"" ;
+
+  if ($generate_edit_plots++ == 0)
+  { print "$cmd\n" ; }
+
+  @result = `$cmd` ;
 }
 
 sub GeneratePlotEditors
@@ -521,6 +913,8 @@ sub GeneratePlotEditors
   my $month_max         = $editors_month_max_5 {$wp} ;
   my $code              = uc ($wp) ;
 
+  if ($month_max == 0)
+  { print "$wp: \$month_max = \$editors_month_max_5 \{\$wp\} <- == 0\n" ; return ; }
   $file_csv_input       =~ s/\\/\//g ;
   $path_png_raw         =~ s/\\/\//g ;
   $path_png_trends      =~ s/\\/\//g ;
@@ -606,6 +1000,7 @@ sub GeneratePlotEditors
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
   $out_script_plot =~ s/CODE/$code/g ;
+  $out_script_plot =~ s/MAX_VALUE/max editors (5+ edits) in/ ;
   $out_script_plot =~ s/MAX_MONTH/$month_max/g ;
   $out_script_plot =~ s/EDITORS/$editors_max/g ;
   $out_script_plot =~ s/YLIM_MAX/$editors_max_rounded/g ;
@@ -636,6 +1031,9 @@ sub GeneratePlotPageviews
   my $wp = shift ;
 
   return if $wp =~ /^z+$/ ;
+
+  if ($pageviews_max {$wp} == 0)
+  { print "\nNo pageviews found for wiki $wp!\n\n" ; return ; }
 
 # &LogT ("GeneratePlotPageviews $wp\n") ;
 
@@ -679,9 +1077,15 @@ sub GeneratePlotPageviews
 
   $period = month_year_english_short ($pageviews_month_lo {$wp}) . ' ' . month_year_english_short ($pageviews_month_hi {$wp}-1) ;
 
-  for ($m = $pageviews_month_lo {$wp} ; $m < $pageviews_month_hi {$wp} ; $m++)
+  $pageviews_month_lo = $pageviews_month_lo {$wp} - $pageviews_month_lo {$wp} % 12 ; # always start in January, to align x axis properly
+
+  for ($m = $pageviews_month_lo ; $m < $pageviews_month_hi {$wp} ; $m++)
   {
-    $count_normalized = sprintf ("%.0f", $pageviews {$wp.$m} / $pageviews_unit) ;
+    if ($m < $pageviews_month_lo {$wp})
+    { $count_normalized = "" ; }
+    else
+    { $count_normalized = sprintf ("%.0f", $pageviews {$wp.$m} / $pageviews_unit) ; }
+
     # $days_in_month =  days_in_month (substr($date,6,4),substr($date,0,2)) ;
     # $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
 
@@ -794,15 +1198,16 @@ sub SummaryAddIndexes
   $index_languages1 = join ', ', @index_languages1 ;
   $index_languages2 = join ', ', @index_languages2 ;
 # $index_languages3 = join ', ', @index_languages3 ;
-  $index_html = &HtmlIndex3 ; # in WikiReportsOutputEditHistory
+  $index_html = "\n\n" . &HtmlIndex3 ; # in WikiReportsOutputEditHistory
   $index_html .= "<tr><td class=l><b>Language index by <span id='caption'><font color=#006600>language name</font> / <font color=#A0A0A0>language code</font></span></b><br>&nbsp;</td><td class=r colspan=99><a href=\"#\" id='toggle' onclick=\"toggle_visibility_index();\">Toggle index</a></td></tr>\n" ;
   $index_html .= "<tr><td class=lwrap colspan=99>\n" .
                  "<span id='index1' style=\"display:block\">\n$index_languages1\n</span>\n" .
                  "<span id='index2' style=\"display:none\">\n$index_languages2\n</span>\n" .
                # "<span id='index3' style=\"display:none\">\n$index_languages3\n</span>" .
-                 "</td></tr>\n" ;
+                 "</td></tr>\n\n\n" ;
   return ($index_html) ;
 }
+
 sub SummaryTrendChange
 {
   my ($now, $prev) = @_ ;
@@ -834,41 +1239,74 @@ sub HtmlLogoProject
 {
   my $html ;
 
-     if ($mode_wb) { $html = "<a href='http://en.wikipedia.org/wikistats/wikibooks/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/30px-Wikibooks-logo.svg.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wk) { $html = "<a href='http://en.wikipedia.org/wikistats/wiktionary/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/30px-Wiktionary-logo-en.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wn) { $html = "<a href='http://en.wikipedia.org/wikistats/wikinews/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='40' height='24' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wp) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/30px-Wikipedia-logo.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wq) { $html = "<a href='http://en.wikipedia.org/wikistats/wikiquote/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/30px-Wikiquote-logo.svg.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_ws) { $html = "<a href='http://en.wikipedia.org/wikistats/wikisource/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='40' height='32' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wv) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/wikiversity/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikiversity-logo.svg/30px-Wikiversity-logo.svg.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
-  elsif ($mode_wx) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/wikispecial/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/30px-Wikimedia-logo.svg.png' width='30' height='30' border='0'  alt='Wikipedia'border=0 /></a>" ; }
+     if ($mode_wb) { $html = "<a href='http://en.wikipedia.org/wikistats/wikibooks/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/30px-Wikibooks-logo.svg.png' width='30' height='30' border='0'  alt='Wikibooks' border=0 /></a>" ; }
+  elsif ($mode_wk) { $html = "<a href='http://en.wikipedia.org/wikistats/wiktionary/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/30px-Wiktionary-logo-en.png' width='30' height='30' border='0'  alt='Wiktionary' border=0 /></a>" ; }
+  elsif ($mode_wn) { $html = "<a href='http://en.wikipedia.org/wikistats/wikinews/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='40' height='24' border='0'  alt='Wikinews' border=0 /></a>" ; }
+  elsif ($mode_wp) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/30px-Wikipedia-logo.png' width='30' height='30' border='0'  alt='Wikipedia' border=0 /></a>" ; }
+  elsif ($mode_wq) { $html = "<a href='http://en.wikipedia.org/wikistats/wikiquote/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/30px-Wikiquote-logo.svg.png' width='30' height='30' border='0'  alt='Wikiquote' border=0 /></a>" ; }
+  elsif ($mode_ws) { $html = "<a href='http://en.wikipedia.org/wikistats/wikisource/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='40' height='32' border='0'  alt='Wikisource' border=0 /></a>" ; }
+  elsif ($mode_wv) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/wikiversity/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikiversity-logo.svg/30px-Wikiversity-logo.svg.png' width='30' height='30' border='0'  alt='Wikiversity' border=0 /></a>" ; }
+  elsif ($mode_wx) { $html = "<a href='http://en.wikipedia.org/wikistats/EN/wikispecial/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/30px-Wikimedia-logo.svg.png' width='30' height='30' border='0'  alt='Wikimedia' border=0 /></a>" ; }
 
   return ($html) ;
 }
 
 sub HtmlSummaryExplanation
 {
-  my ($language, $language_article, $page_sitemap, $pageviews) = @_ ;
+  my ($page_sitemap) = @_ ;
+
+  my $explanation_proper_articles     = "Metrics are about proper articles only (aka 'real' content or  <a href='http://www.mediawiki.org/wiki/Help:Namespaces'>namespace 0 pages</a>), not discussion/help/project pages, etc.\n" ;
+  my $explanation_page_views          = "<dt><b><A href='../EN/TablesPageViewsMonthly.htm'>Page Views</a> <sup>1</sup></b><dd>\n" ;
+  my $explanation_page_views_2        = "<dt><b><A href='../EN/TablesPageViewsMonthly.htm'>Page Views</a> </b><dd>\n" ;
+  my $explanation_articles_total      = "<dt><b><a href='../EN/TablesArticlesTotal.htm'>Article Count</a> <sup>1</sup></b><dd>An article is defined as any 'real' content page which contains at least one link to any other page\n" ;
+  my $explanation_articles_per_day    = "<dt><b><a href='../EN/TablesArticlesNewPerDay.htm'>New Articles per Day</a></b><dd>\n" ;
+  my $explanation_edits_per_month     = "<dt><b><a href='../EN/TablesDatabaseEdits.htm'>Edits per Month</a></b><dd>\n" ;
+  my $explanation_active_editors      = "<dt><b><a href='../EN/TablesWikipediansEditsGt5.htm'>Active Editors</a></b><dd>Registered (and signed in) users who made 5 or more edits in a month\n" ;
+  my $explanation_very_active_editors = "<dt><b><a href='../EN/TablesWikipediansEditsGt100.htm'>Very Active Editors</a></b><dd>Registered (and signed in) users who made 100 or more edits in a month\n" ;
+  my $explanation_new_editors         = "<dt><b><a href='../EN/TablesWikipediansNew.htm'>New Editors</a></b><dd>Registered (and signed in) users who completed their all time 10th edit in this month\n" ;
+  my $explanation_speakers            = "<dt><b>Speakers <sup>1</sup></b><dd>Includes secondary language speakers. ARTICLE_LANGUAGE\n" ;
+  my $explanation_editors_per_million = "<dt><b>Editors per Million Speakers <sup>1</sup></b><dd> aka Participation Rate.\n" ;
+  my $explanation_comparison          = "<sup>1</sup> For comparison see also <a href='$page_sitemap'>$out_publication sitemap</a>.\n" ;
 
   my $html = <<__HTML_SUMMARY_EXPLANATION__ ;
       <td class=l colspan=99 width=100%>
+      <a id='definitions' name='definitions'></a>
          <p><b>Definitions</b><p>
-         Metrics are about proper articles only (aka 'real' content or  <a href='http://www.mediawiki.org/wiki/Help:Namespaces'>namespace 0 pages</a>), not discussion/help/project pages, etc.
+         $explanation_proper_articles
          <p>
          <dl>
-         <dt><b><A href='../EN/TablesPageViewsMonthly.htm'>Page Views</a> <sup>1</sup></b><dd>
-         <dt><b><a href='../EN/TablesArticlesTotal.htm'>Article Count</a> <sup>1</sup></b><dd>An article is defined as any 'real' content page which contains at least one link to any other page
-         <dt><b><a href='../EN/TablesArticlesNewPerDay.htm'>New Articles per Day</a></b><dd>
-         <dt><b><a href='../EN/TablesDatabaseEdits.htm'>Edits per Month</a></b><dd>
-         <dt><b><a href='../EN/TablesWikipediansEditsGt5.htm'>Active Editors</a></b><dd>Registered (and signed in) users who made 5 or more edits in a month
-         <dt><b><a href='../EN/TablesWikipediansEditsGt100.htm'>Very Active Editors</a></b><dd>Registered (and signed in) users who made 100 or more edits in a month
-         <dt><b><a href='../EN/TablesWikipediansNew.htm'>New Editors</a></b><dd>Registered (and signed in) users who completed their all time 10th edit in this month
-         <dt><b>Speakers <sup>1</sup></b><dd>Includes secondary language speakers. Data are from the <a href='$language_article'>English Wikipedia page on $language</a>.
-         <dt><b>Editors per Million Speakers <sup>1</sup></b><dd> aka Participation Rate.
+         $explanation_page_views
+         $explanation_articles_total
+         $explanation_articles_per_day
+         $explanation_edits_per_month
+         $explanation_edits_per_month
+         $explanation_active_editors
+         $explanation_very_active_editors
+         $explanation_new_editors
+         $explanation_speakers
+         $explanation_editors_per_million
          </dl>
-         <sup>1</sup> For comparison see also <a href='$page_sitemap'>$out_publication sitemap</a>.
+         $explanation_comparison
       </td>
 __HTML_SUMMARY_EXPLANATION__
+
+  if ($wp eq 'commons')
+  {
+    $html = <<__HTML_SUMMARY_EXPLANATION_2__ ;
+      <td class=l colspan=99 width=100%>
+         <p><b>Definitions</b><p>
+         $explanation_proper_articles
+         <p>
+         <dl>
+         $explanation_page_views_2
+         $explanation_edits_per_month
+         $explanation_active_editors
+         $explanation_very_active_editors
+         $explanation_new_editors
+         </dl>
+      </td>
+__HTML_SUMMARY_EXPLANATION_2__
+  }
 
   if ($mode_wp)
   { $html =~ s/TablesPageViewsMonthly.htm/TablesPageViewsMonthlyCombined.htm/ ; }
@@ -880,7 +1318,7 @@ sub HtmlSummaryExplanationReportCard
 {
   my $explanation = shift ;
   my $html = <<__HTML_SUMMARY_EXPLANATION_2__ ;
-<table width=660 cellpadding=18 align=center border=1>
+<table width=660 cellpadding=18 align=center border=1 style="background-color:white">
 <tr>
   $explanation
 </tr>
@@ -915,6 +1353,8 @@ __HTML_SUMMARY_SINGLE_WIKI__
 sub HtmlHeaderReportCard
 {
   my ($logo_project, $index, $cross_ref, $title_content) = @_ ;
+
+
   my $html = <<__HTML_SUMMARY_HEADER_ALL__ ;
 <a name='top' id='top'></a>
 <table width=660 cellpadding=18 align=center border=1 style="background-color:white">
@@ -923,7 +1363,7 @@ sub HtmlHeaderReportCard
 
     <table width=100% border=0>
     <tr>
-      <td width=100% colspan=99>
+      <td class=l width=100% colspan=99>
 
         <table width=100% border=0>
         <tr>
@@ -940,6 +1380,7 @@ sub HtmlHeaderReportCard
         </tr>
         </table>
 
+        <p>See <a href='#definitions'>definitions</a> below.
       </td>
     </tr>
     </table>
@@ -979,7 +1420,7 @@ __HTML_SUMMARY_REPORT_CARD__
 
 sub HtmlSummariesCrossReference
 {
-  my ($html_xref_wp, $html_xref_wm) ; ;
+  my ($html, $html_xref_wp, $html_xref_wm) ; ;
 
   if ($mode_wp)
   {
@@ -1027,9 +1468,9 @@ sub HtmlSummariesCrossReference
   }
 
   if (! $mode_wp)
-  { $html_xref_wm .= "<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Wikipedia</a>\n" ; }
+  { $html_xref_wm = "<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Wikipedia</a>\n" ; }
   else
-  { $html_xref_wm .= "<font color='#808080'>Wikipedia</font>\n" ; }
+  { $html_xref_wm = "<font color='#808080'>Wikipedia</font>\n" ; }
 
   if (! $mode_wk)
   { $html_xref_wm .= ", <a href='http://stats.wikimedia.org/wiktionary/EN/ReportCardTopWikis.htm'>Wiktionary</a>\n" ; }
@@ -1066,9 +1507,45 @@ sub HtmlSummariesCrossReference
   else
   { $html_xref_wm .= ", <font color='#808080'>Other projects</font>\n" ; }
 
-  $html .= "&nbsp;<br><a href='http:www.wikimedia.org'>WMF</a> <b>Projects: </b>" . $html_xref_wm ;
+  $html .= "\n\n&nbsp;<br><a href='http:www.wikimedia.org'>WMF</a> <b>Projects: </b>" . $html_xref_wm . "\n\n" ;
 
-  return ("$html") ;
+  return ($html) ;
+}
+
+sub HtmlSummaryBinaries
+{
+  my ($month, $type, $description) = @_ ;
+
+  my $html = <<__HTML_SUMMARY_BINARIES__ ;
+          <tr>
+            <td class=l>CAPTION</td>
+            <td class=r>METRIC_DATA</td>
+            <td class=r>METRIC_YEARLY</td>
+            <td class=r>METRIC_MONTHLY</td>
+          </tr>
+          <tr>
+            <td colspan=99><hr></td>
+          </tr>
+__HTML_SUMMARY_BINARIES__
+
+  # binaries: images
+  $this_month     = $binaries_per_month {"$month|$type"} ;
+  $prev_month     = $binaries_per_month {($month-1) . "|$type"} ;
+  $prev_year      = $binaries_per_month {($month-12) . "|$type"} ;
+
+  # print "Ext $type 0:$this_month, -1:$prev_month, -12:$prev_year\n" ;
+  $metric_yearly  = &SummaryTrendChange ($this_month, $prev_year) ;
+  $metric_monthly = &SummaryTrendChange ($this_month, $prev_month) ;
+  $metric_data    = &FormatSummary ($this_month) ;
+
+  $caption_images = "Binaries - $description (" . $extension_codes {$type} . ")" ;
+
+  $html =~ s/CAPTION/$caption_images/ ;
+  $html =~ s/METRIC_DATA/$metric_data/ ;
+  $html =~ s/METRIC_YEARLY/$metric_yearly/ ;
+  $html =~ s/METRIC_MONTHLY/$metric_monthly/ ;
+
+  return ($html) ;
 }
 
 1;

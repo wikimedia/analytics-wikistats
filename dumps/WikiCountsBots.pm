@@ -4,9 +4,6 @@ sub ReadBots
 {
   &LogT ("ReadBots\n") ;
 
-  if ($file_in_sql_usergroups =~ /enwiki/)
-  { $file_in_sql_usergroups =~ s/20100130/20100116/g ; } # Q&D fix for empty enwiki file
-
   &ReadStoredBotCount ;
 
   $read_stored_bots = $false ;
@@ -99,7 +96,7 @@ sub ReadBots
   }
   else
   {
-    &Log ("For once ignore empty user group file and reuse 6 months old data\n") ; 
+    &Log ("For once ignore empty user group file and reuse 6 months old data\n") ;
   }
 }
 
@@ -171,6 +168,8 @@ sub ReadStoredBots
 # when a user is registered as bot on 10+ wikis it is probably a bot here as well
 sub AssumeBots
 {
+  &Log ("AssumeBots\n") ;
+
   my (%bots3, @botnames) ;
 
   if (($mode eq "wp") && ($language eq "en"))
@@ -252,7 +251,10 @@ sub TestBot
   if ($botsndx {$index} > 0)
   { $bots {$name} = 1 ; }
   if (($name =~ /bot\b/) && ($name !~ /(?:Paucabot|Niabot|Marbot)\b/i)) # name(part) ends on bot, Paucabot is verified real user
-  { $sounds_like_bot {$name} = 1 ; }
+  {
+    $sounds_like_bot {$name} = 1 ;
+    # &Log ("Sounds like bot: $name\n") ;
+  }
 }
 
 1;

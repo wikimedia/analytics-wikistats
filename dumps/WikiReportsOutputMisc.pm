@@ -365,7 +365,9 @@ sub GenerateSiteMapNew
 
     my @languages2 = @languages ;
     if ($sitemap_new_layout)
-    { @languages2 = @languages_speakers ; }
+    {
+      @languages2 = @languages_speakers ;
+    }
 
     foreach $wp (@languages2)
     {
@@ -559,8 +561,10 @@ sub GenerateSiteMapNew
 
     $out_html .= &tr (&tdlb   (&w ($out_report_description_current_status)) .
                       &tdlb2b (&w ("<a href='TablesCurrentStatusVerbose.htm'>$out_btn_tables</a> "))) ;
-    $out_html .= &tr (&tdlb   (&w ($out_botactivity)) .
-                      &tdlb2b (&w ("<a href='../EN/BotActivityMatrix.htm'>$out_btn_tables</a>"))) ;
+    $out_html .= &tr (&tdlb   (&w ("$out_botactivity article editing")) .
+                      &tdlb2b (&w ("<a href='../EN/BotActivityMatrixEdits.htm'>$out_btn_tables</a>"))) ;
+    $out_html .= &tr (&tdlb   (&w ("$out_botactivity article creation")) .
+                      &tdlb2b (&w ("<a href='../EN/BotActivityMatrixCreates.htm'>$out_btn_tables</a>" . blank_text_after ("31/03/2012", " <font color=#008000><b>NEW</b></font>")))) ;
     $out_html .= &tr (&tde3b) ;
   }
 

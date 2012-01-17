@@ -9,6 +9,8 @@
 # See the GNU General Public License for more details, at
 # http://www.fsf.org/licenses/gpl.html                                                                                         =
 
+  print "WikiReports.pl\n" ;
+
   use lib "/home/ezachte/lib" ;
   use EzLib ;
 # $trace_on_exit = $true ;
@@ -48,9 +50,11 @@
     # push @arguments, '-r oceania' ;
     # push @arguments, '-r artificial' ;
 
-    $mode = 'wq' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
+    $mode = 'wp' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
     $mode =~ s/\s//g ;
     push @arguments, "-m $mode" ;
+
+    $folder = '' ;
 
        if ($mode eq 'wb') { $folder = 'wikibooks' ; }
     elsif ($mode eq 'wk') { $folder = 'wiktionary' ; }
@@ -237,8 +241,9 @@
   &LogT ("\nGenerate Growth Summary") ;
   &GenerateGrowthSummary ;
 
-  &LogT ("\nGenerate Bots Summary") ;
-  &GenerateBotSummary ;
+  &LogT ("\nGenerate Bots Summaries") ;
+  &GenerateBotSummary ($bot_mode_edits) ;
+  &GenerateBotSummary ($bot_mode_creates) ;
 
   if ($categorytrees)
   {

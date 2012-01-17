@@ -12,8 +12,17 @@
 
   use WikiReportsNoWikimedia ;
 
-  $refresh_language_files_after_days_php = 30 ;
-  $refresh_language_files_after_days_wp  = 30 ;
+  if (! $job_runs_on_production_server)
+  {
+    $refresh_language_files_after_days_php = 365 ;
+    $refresh_language_files_after_days_wp  = 365 ;
+  }
+  else
+  {
+    $refresh_language_files_after_days_php = 365 ; # 30
+    $refresh_language_files_after_days_wp  = 365 ; # 30
+  }
+
   $refresh_translate_wiki_data           =  1 ;
 
 sub TestLanguageTranslations
@@ -311,6 +320,10 @@ sub Localization
     $out_report_descriptions [2] =~ s/($out_wikipedians)/(substr($1,0,1) eq uc (substr($1,0,1))) ? ucfirst ($out_publishers) : lcfirst ($out_publishers)/ieg ;
     $out_report_descriptions [3] =~ s/($out_wikipedians)/(substr($1,0,1) eq uc (substr($1,0,1))) ? ucfirst ($out_publishers) : lcfirst ($out_publishers)/ieg ;
     $out_tbl8_intro              =~ s/($out_wikipedians)/(substr($1,0,1) eq uc (substr($1,0,1))) ? ucfirst ($out_publishers) : lcfirst ($out_publishers)/ieg ;
+
+    if ($out_tbl1_hdr14 eq '')  { $out_tbl1_hdr14   = "Creates" ; }
+    if ($out_tbl1_hdr15 eq '')  { $out_tbl1_hdr15   = "Counts" ; }
+    if ($out_tbl1_hdr16 eq '')  { $out_tbl1_hdr16   = "User<br>Contributions" ; }
 
     # if ($mode_wx)
     # { $out_tbl3_legend [0] .= " (sep11: all)" ; }

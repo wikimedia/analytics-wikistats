@@ -206,6 +206,8 @@ sub ParseArguments
   if (defined $animation)
   { undef $pageviews ; undef $categorytrees ; }
 
+  if ($pageviews && $mode_wp && ($region eq '') && $pageviews_non_mobile && $keys_html_pageviews_all_projects =~ /not-normalized/)
+  { $log_forecasts = $true ; }
 
 # if (! ($dumpdate =~ m/^\d{8,8}$/))
 # { abort ("Specify SQL dump date as: -d yyyymmdd\n") ; }
@@ -303,7 +305,7 @@ else
   $file_csv_weekly_stats          = $path_in . "StatisticsWeekly.csv" ;
   $file_csv_users                 = $path_in . "StatisticsUsers.csv" ;
   $file_csv_active_users          = $path_in . "StatisticsActiveUsers.csv" ;
-  $file_csv_bot_edits             = $path_in . "StatisticsBots.csv" ;
+  $file_csv_bot_actions           = $path_in . "StatisticsBots.csv" ;
   $file_csv_bots                  = $path_in . "Bots.csv" ;
   $file_csv_access_levels         = $path_in . "StatisticsAccessLevels.csv" ;
   $file_csv_sleeping_users        = $path_in . "StatisticsSleepingUsers.csv" ;
@@ -323,6 +325,7 @@ else
   $file_csv_edits_per_article     = $path_in . "EditsPerArticle.csv" ;
   $file_csv_users_activity_spread = $path_in . "StatisticsUserActivitySpread.csv" ;
   $file_csv_views_yearly_growth   = $path_in . "PageViewsGrowthLastYear.csv" ;
+  $file_csv_views_log_forecast    = $path_in . "PageViewsLogForecast.csv" ;
   $file_csv_growth                = $path_in . "WikimediaGrowthStats.csv" ;
   $file_txt_growth                = $path_in . "WikimediaGrowthStats.txt" ;
 
@@ -332,6 +335,7 @@ else
   $file_edits_per_usertype        = $path_in . "StatisticsEditsPerUsertype.csv" ;
   $file_pageviews_per_wiki        = $path_in . "StatisticsPageviewsPerWiki.csv" ;
   $file_editors_per_wiki          = $path_in . "StatisticsEditorsPerWiki.csv" ;
+  $file_binaries_per_wiki         = $path_in . "StatisticsPlotBinariesPerWiki.csv" ;
 
   $file_log                       = $path_in . "WikiReportsLog.txt" ;
   $file_errors                    = $path_in . "WikiReportsErrors.txt" ;
@@ -470,7 +474,7 @@ sub InitGlobals
     $dumpmonth_incomplete = ($dumpday < days_in_month ($dumpyear, $dumpmonth)) ;
   }
 
-  if (($dumpday < 10) || ($dumpday == days_in_month ($dumpyear, $dumpmonth)))
+  if (($dumpday < 5) || ($dumpday == days_in_month ($dumpyear, $dumpmonth)))
   { $show_forecasts = $false ; }
   else
   { $show_forecasts = $true ; }
@@ -490,6 +494,9 @@ sub InitGlobals
   $category_index        = $true ;
 
   $color_outofdate = "#FFA0A0" ;
+
+  $bot_mode_edits   = 'edits' ;
+  $bot_mode_creates = 'creates' ;
 
 #  $dumpdate_hi = "20030815" ;  # test only
 }
@@ -628,8 +635,10 @@ sub ReadDumpDateAndForecastFactors
 
 sub ReadBotStats
 {
-  if (! -e $file_csv_bot_edits)
-  { &Log ("$file_csv_bot_edits not found!\n") ; return ; }
+  my @fields ;
+
+  if (! -e $file_csv_bot_actions)
+  { &Log ("$file_csv_bot_actions not found!\n") ; return ; }
   if (! -e $file_csv_bots)
   { &Log ("$file_csv_bots not found!\n") ; return ; }
 
@@ -642,23 +651,43 @@ sub ReadBotStats
     {
       if ($bot ne "MediaWiki default")
       {
-        $BotStatsWpBot1 {"$wp|$bot"} = 0 ;
-        $BotStatsWpBot2 {"$wp|$bot"} = 0 ;
+        $BotEditsArticlesPerWikiPerBot {"$wp|$bot"} = 0 ;
+        $BotEditsArticlesPerWikiPerBot {"$wp|$bot"} = 0 ;
       }
     }
   }
-  &ReadFileCsv ($file_csv_bot_edits) ;
+
+  &ReadFileCsv ($file_csv_bot_actions) ;
+
   foreach $line (@csv)
   {
-    ($wp,$bot,$edits1,$edits2) = split (',',$line) ;
-    $BotStatsWpBot1  {"$wp|$bot"}   = $edits1 ;
-    $BotStatsBotTot1 {"$bot"}      += $edits1 ;
-    $BotStatsWpTot1  {"$wp"}       += $edits1 ;
-    $BotStatsTotGen1               += $edits1 ;
-    $BotStatsWpBot2  {"$wp|$bot"}   = $edits2 ;
-    $BotStatsBotTot2 {"$bot"}      += $edits2 ;
-    $BotStatsWpTot2  {"$wp"}       += $edits2 ;
-    $BotStatsTotGen2               += $edits2 ;
+    @fields = split (",", $line) ;
+
+    if ($#fields < 11) # old format, without creates
+    {
+      ($wp, $bot, $edits_0, $edits_x) = split (",", $line) ;
+      $creates_0 = $creates_x = 0 ;
+    }
+    else
+    { ($wp, $bot, $edits_0, $edits_x, $creates_0, $creates_x) = split (",", $line) ; }
+
+    $BotEditsArticlesPerWikiPerBot   {"$wp|$bot"}   = $edits_0 ;
+    $BotEditsArticlesPerBot          {"$bot"}      += $edits_0 ;
+    $BotEditsArticlesPerWiki         {"$wp"}       += $edits_0 ;
+    $BotEditsArticlesTotal                         += $edits_0 ;
+  # $BotEditsOtherPerWpPerBot        {"$wp|$bot"}   = $edits_x ;
+  # $BotEditsOtherPerBot             {"$bot"}      += $edits_x ;
+  # $BotEditsOtherPerWiki            {"$wp"}       += $edits_x ;
+  # $BotEditsOtherTotal                            += $edits_x ;
+
+    $BotCreatesArticlesPerWikiPerBot {"$wp|$bot"}   = $creates_0 ;
+    $BotCreatesArticlesPerBot        {"$bot"}      += $creates_0 ;
+    $BotCreatesArticlesPerWiki       {"$wp"}       += $creates_0 ;
+    $BotCreatesArticlesTotal                       += $creates_0 ;
+  # $BotCreatesOtherPerWpPerBot      {"$wp|$bot"}   = $creates_x ;
+  # $BotCreatesOtherPerBot           {"$bot"}      += $creates_x ;
+  # $BotCreatesOtherPerWiki          {"$wp"}       += $creates_x ;
+  # $BotCreatesOtherTotal                          += $creates_x ;
   }
 }
 
@@ -818,7 +847,7 @@ sub WhiteListLanguages
     else
     {
       $projects_omitted =~ s/, // ;
-      $out_included = "<p><small>$out_included<br>$out_not_included: $projects_omitted</small><p>" ;
+      $out_included = "<small>$out_included<br>$out_not_included: $projects_omitted</small>" ;
     }
   }
 }
@@ -867,6 +896,8 @@ sub ReadMonthlyStats
       $editors_25   {$wp.$m} = $count_25 ;
       $editors_100  {$wp.$m} = $count_100 ;
 
+# if ($wp eq 'de')
+# { print "\$wp=de, $m='$', count_5 = '$count_5', \$editors_max_5 \{\$wp\}=" . $editors_max_5 {$wp} . "\n" ; }
       if ($count_5 > $editors_max_5 {$wp})
       {
         $editors_max_5       {$wp} = $count_5 ;
@@ -1123,8 +1154,8 @@ sub ReadMonthlyStats
   if ($sort_pageviews)
   {
     @languages  = sort { $PageViewsPerHour {&Underscore($b)} <=> $PageViewsPerHour {&Underscore($a)} } keys %languages ;
-    foreach $lang (@languages2)
-    { $lang =~ s/-/_/g ; }
+    # foreach $lang (@languages)
+    # { $lang =~ s/-/_/g ; }
     @languages2 = @languages ;
   }
   else
@@ -1465,9 +1496,13 @@ if ($false)
   }
 
   # forecasts
+  if ($log_forecasts)
+  { open LOG_FORECASTS, '>>', $file_csv_views_log_forecast ; }
+
   if ($show_forecasts)
   {
     my $factor = days_in_month ($dumpyear, $dumpmonth) / ($dumpday-0.5) ;
+    &Log ("Forecast factor: days in month ". days_in_month ($dumpyear, $dumpmonth) . ", dump day $dumpday -> $factor\n") ;
 
     $m = $md ;
     foreach $wp (@languages)
@@ -1492,7 +1527,15 @@ if ($false)
         elsif (($c eq 'G') || ($c eq 'H') || ($c eq 'I') || ($c eq 'T') || ($c eq 'U'))
         { $forecast = $curr ; }
         elsif (($c eq 'B') || ($c eq 'L') || ($c eq 'A' && $pageviews))
-        { $forecast = $factor * $curr ; }
+        {
+          $forecast = $factor * $curr ;
+          if ($log_forecasts && ($f == 0))
+          {
+            $factor2   = sprintf ("%.3f", $factor) ;
+            $forecast2 = sprintf ("%.0f", $forecast) ;
+            print LOG_FORECASTS "$datemax,$factor2,$wp,$curr,$forecast2\n" ;
+          }
+        }
         elsif (index ($curr, "%") != -1)
         { $forecast = $curr ; }
         elsif ($curr < $prev)
@@ -1511,6 +1554,9 @@ if ($false)
       }
     }
   }
+
+  if ($log_forecasts)
+  { close LOG_FORECASTS ; }
 
   # recent percentual increases per month
   @fc = (0,2,3,4,5,6,11,12,13,14,15,16,17,18,19,20) ;

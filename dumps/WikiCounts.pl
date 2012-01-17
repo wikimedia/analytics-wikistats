@@ -42,8 +42,8 @@
   ez_lib_version (10) ;
 
   # set defaults mainly for tests on local machine
-# default_argv "-u 10|-f|-x|-m wp|-t|-l strategy|-d 20100930|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
-  default_argv "-e|-f|-x|-m wp|-t|-l strategy|-d 20100930|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+  default_argv "-e|-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+# default_argv    "-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
 
 # todo WikiCountsOutput update UpdateEditsPerArticle, one file per language
 #      WikiCountsInput  make 25 language dependent: if ($tot_revisions >= 25)
@@ -111,15 +111,19 @@
   }
 
   $useritem_id = 0 ;
-  $useritem_first = 1 ;
-  $useritem_last = 2 ;
-  $useritem_ip_namespace_a = 3 ;
-  $useritem_ip_namespace_x = 4 ;
-  $useritem_reg_namespace_a = 5 ;
-  $useritem_reg_namespace_x = 6 ;
-  $useritem_reg_recent_namespace_a = 7 ;
-  $useritem_reg_recent_namespace_x = 8 ;
-  $useritem_edits_10 = 9 ;
+  $useritem_edit_first = 1 ;
+  $useritem_edit_last = 2 ;
+  $useritem_edit_ip_namespace_a = 3 ;            # anon, article namespace (for most wikis ns 0)
+  $useritem_edit_ip_namespace_x = 4 ;            # anon, all other namespaces
+  $useritem_edit_reg_namespace_a = 5 ;           # reg user, article namespace
+  $useritem_edit_reg_namespace_x = 6 ;           # reg user, all other namespaces
+  $useritem_edit_reg_recent_namespace_a = 7 ;    # reg user, article namespace, if in last 30 days
+  $useritem_edit_reg_recent_namespace_x = 8 ;    # reg user, other namespace namespace, if in last 30 days
+  $useritem_create_reg_namespace_a = 9 ;        # reg user, article namespace
+  $useritem_create_reg_namespace_x = 10 ;        # reg user, all other namespaces
+  $useritem_create_reg_recent_namespace_a = 11 ; # reg user, article namespace, if in last 30 days
+  $useritem_create_reg_recent_namespace_x = 12 ; # reg user, other namespace namespace, if in last 30 days
+  $useritem_edits_10 = 13 ;                       # count if user made 10 or more edits
 
   $file_log_concise = "./WikiCountsLogConcise.txt" ;
 

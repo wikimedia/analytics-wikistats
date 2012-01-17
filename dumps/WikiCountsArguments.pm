@@ -179,9 +179,9 @@ sub SetEnvironment
         $edits_only = $true ;
       }
 
-      if ($edits_only && ($language =~ /^(?:id|jv)$/))
+      if ($edits_only && ($language =~ /^(?:id|jv|sv)$/))
       {
-        &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV\n") ;
+        &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV, 2011-05: special request on SV\n") ;
         $edits_only = $false ;
       }
     }
@@ -319,9 +319,7 @@ sub SetEnvironment
     if ($testmode)
     {
       if ($edits_only)
-    # { $file_in_xml_full = $path_in . "pages_stubs_" .$language_ . ".xml" ; }
-    # { $file_in_xml_full = "w:/enwiki-20090618-no-redirects-history.xml" ; }
-      { $file_in_xml_full = "w:/# In Dumps/strategywiki-20101016-stub-meta-history.xml" ; }
+      { $file_in_xml_full = $path_in . "pages_stubs_" .$language_ . ".xml" ; }
       else
       { $file_in_xml_full = $path_in . "pages_full_" .$language_ . ".xml" ; }
     }
@@ -422,12 +420,13 @@ sub SetEnvironment
     $file_csv_binaries_stats        = $path_out . "StatisticsPerBinariesExtension.csv" ;
     $file_csv_namespaces            = $path_out . "Namespaces.csv" ;
     $file_csv_bots                  = $path_out . "Bots.csv" ;
-    $file_csv_bot_edits             = $path_out . "StatisticsBots.csv" ;
+    $file_csv_bot_actions           = $path_out . "StatisticsBots.csv" ;
     $file_csv_access_levels         = $path_out . "StatisticsAccessLevels.csv" ;
     $file_csv_run_stats             = $path_out . "StatisticsLogRunTime.csv" ;
     $file_csv_babel_templates       = $path_out . "BabelTemplates.csv" ;
     $file_csv_reverts_sample        = $path_out . "RevertsSample" . uc ($language)  . ".csv" ;
     $file_csv_reverted_edits        = $path_out . "RevertedEdits" . uc ($language)  . ".csv" ;
+    $file_csv_creates               = $path_out . "Creates" . uc ($language)  . ".csv" ;
 
     $file_timelines                 = $path_timelines . "Timelines" . uc ($language) . ".htm" ;
     $file_timelines_skipped         = $path_timelines . "TimelinesSkipped" . uc ($language) . ".htm" ;

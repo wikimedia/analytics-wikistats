@@ -119,7 +119,7 @@ $out_sort_order   = "Wikipedias are ordered by number of internal links (excl. r
                     "Feedback and suggestions are welcome" ;
 
 $out_comparison   = "Wikipedias which contain {xxx} or more articles {yyy} are included here" ;
-$out_included     = "Only Wikipedias which contain {xxx} or more articles and which received {yyy} or more edits in last month are listed here" ;
+$out_included     = "Only Wikipedias which contain {xxx} or more articles and which received {yyy} or more edits in last month are listed above" ;
 $out_not_included = "Not included" ; #new
 
 $out_average_1    = "average counts over shown months" ;
@@ -163,13 +163,16 @@ $out_tbl1_hdr3    = "First edit" ;
 $out_tbl1_hdr4    = "Last edit" ;
 $out_tbl1_hdr5    = "date" ;
 $out_tbl1_hdr6    = "days<br>ago" ;
-$out_tbl1_hdr7    = "total" ; # new
-$out_tbl1_hdr8    = "last<br>30 days" ; # new
-$out_tbl1_hdr9    = "rank" ; # new
+$out_tbl1_hdr7    = "Total" ; # new
+$out_tbl1_hdr8    = "Last<br>30 days" ; # new
+$out_tbl1_hdr9    = "Rank" ; # new
 $out_tbl1_hdr10   = "now" ; # new
 $out_tbl1_hdr11   = "&Delta;" ; # $out_new
 $out_tbl1_hdr12   = "Articles" ; # new
 $out_tbl1_hdr13   = "Other" ; # new
+$out_tbl1_hdr14   = "Creates" ; # new
+$out_tbl1_hdr15   = "Counts" ; # new
+$out_tbl1_hdr16   = "User<br>Contributions" ; # new
 
 $out_tbl2_intro  = "[[3]] recently absent wikipedians, " .
                    "ordered by number of contributions" ;

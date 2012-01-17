@@ -290,10 +290,10 @@ if (0)
 
       $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
       if ($cnt > 0)
-      { $edits_bot = sprintf ("%.0f", 100 * $BotStatsWpTot1 {$wp} / $cnt) . "%" ; }
+      { $edits_bot = sprintf ("%.0f", 100 * $BotEditsArticlesPerWiki {$wp} / $cnt) . "%" ; }
       else
       { $edits_bot = "0%" ; }
-      if (($wp eq "en") && ($BotStatsWpTot1 {$wp} == 0))
+      if (($wp eq "en") && ($BotEditsArticlesPerWiki {$wp} == 0))
       { $edits_bot = "" ; } # no data yet
 
       $words      = &i2KM  (@MonthlyStats {$wp.$MonthlyStatsWpStop{$wp}.$c[13]}) ;
@@ -310,9 +310,9 @@ if (0)
       $binaries2  = &i2KM3 (@MonthlyStats {$wp.$MonthlyStatsWpStop{$wp}.$c[16]}) ;
       $redirects2 = &i2KM3 (@MonthlyStats {$wp.$MonthlyStatsWpStop{$wp}.$c[18]}) ;
 
-      $edits_anonymous = sprintf ("%.0f", 100 * $edits_total_ip {$wp} / ($edits_total {$wp} - $BotStatsWpTot1 {$wp})) . "%" ;
+      $edits_anonymous = sprintf ("%.0f", 100 * $edits_total_ip {$wp} / ($edits_total {$wp} - $BotEditsArticlesPerWiki {$wp})) . "%" ;
 
-      ($wp, $date, $ns0, $ns2, $ns4, $ns6, $ns8, $ns10, $ns12, $ns14, $ns16, $ns100, $ns102, $ns104) = split (',', $namespaces {$wp}) ;
+      ($dummy, $date, $ns0, $ns2, $ns4, $ns6, $ns8, $ns10, $ns12, $ns14, $ns16, $ns100, $ns102, $ns104) = split (',', $namespaces {$wp}) ;
 
       $ns0   = &i2KM3 ($ns0) ;
       $ns2   = &i2KM3 ($ns2) ;
@@ -888,17 +888,75 @@ if (0)
 
 sub GenerateBotSummary
 {
-  &LogT ("\nGenerateBotSummary") ;
+  my ($mode) = @_ ;
 
-  @bots = sort { $BotStatsBotTot1 {$b} <=> $BotStatsBotTot1 {$a}} keys %BotStatsBotTot1 ;
+  my $actions_edits           = 'edits' ;
+  my $actions_creates         = 'creates' ;
+  my $action_editing          = 'all bot editing activity' ;
+  my $action_creating         = 'bot article creations only' ;
+  my $action_edits            = 'article edits' ;
+  my $action_creates          = 'articles created' ;
+  my $file_html_edits         = 'BotActivityMatrixEdits.htm' ;
+  my $file_html_creates       = 'BotActivityMatrixCreates.htm' ;
 
-  my $out_html_title    = $out_statistics . " \- " . "Bot activity" ;
+  my $actions_total_edits     = 'total edits' ;
+  my $actions_total_creates   = 'total articles created' ;
+  my $actions_manual_edits    = 'manual edits' ;
+  my $actions_manual_creates  = 'manually created articles' ;
+  my $actions_bot_edits       = 'edits by bots' ;
+  my $actions_bot_creates     = 'articles created by bots' ;
+
+  my ($action, $actions, $file_html, $out_html_title, $out_page_subtitle) ;
+  if ($mode eq $bot_mode_edits)
+  {
+    $actions        = $action_edits ;
+    $actions_total  = $actions_total_edits ;
+    $actions_manual = $actions_manual_edits ;
+    $actions_bot    = $actions_bot_edits ;
+
+    $file_html = $path_out . $file_html_edits ;
+
+    %BotActionsArticlesPerWikiPerBot = %BotEditsArticlesPerWikiPerBot ;
+    %BotActionsArticlesPerBot        = %BotEditsArticlesPerBot ;
+    %BotActionsArticlesPerWiki       = %BotEditsArticlesPerWiki ;
+    $BotActionsArticlesTotal         = $BotEditsArticlesTotal;
+  }
+  else
+  {
+    $actions        = $action_creates ;
+    $actions_total  = $actions_total_creates ;
+    $actions_manual = $actions_manual_creates ;
+    $actions_bot    = $actions_bot_creates ;
+
+    $file_html = $path_out . $file_html_creates ;
+
+    %BotActionsArticlesPerWikiPerBot = %BotCreatesArticlesPerWikiPerBot ;
+    %BotActionsArticlesPerBot        = %BotCreatesArticlesPerBot ;
+    %BotActionsArticlesPerWiki       = %BotCreatesArticlesPerWiki ;
+    $BotActionsArticlesTotal         = $BotCreatesArticlesTotal;
+  }
+
+  &LogT ("\nGenerateBotSummary $mode") ;
+
+  @bots = sort { $BotActionsArticlesPerBot {$b} <=> $BotActionsArticlesPerBot {$a}} keys %BotActionsArticlesPerBot ;
+
   my $out_page_title    = $out_statistics ;
-  my $out_page_subtitle = "Bot activity" ;
+
+  if ($mode eq $bot_mode_edits)
+  {
+    $out_html_title    = $out_statistics . " \- " . ucfirst $action_editing ;
+    $out_page_subtitle = ucfirst "$action_editing (see also <a href='$file_html_creates'>$action_creating</a>)" ;
+  }
+  else
+  {
+    $out_html_title    = $out_statistics . " \- " . ucfirst $action_creating ;
+    $out_page_subtitle = ucfirst "$action_creating (see also <a href='$file_html_edits'>$action_editing</a>)" ;
+  }
+
   my $language ;
   my $out_button_switch = "home" ;
-  my $out_explanation = "Only registered bots have been included. Only bot edits for articles have been counted.<br>" .
-                        "Names registered as bot on at least 10 projects are assumed to be bot on all projects." ;
+  my $out_explanation = "Only registered bots have been included. Only article namespace(s) have been counted.<br>" .
+                        "Names registered as bot on 10 projects or more are assumed to be bot on all projects." ;
   my $out_msg = "" ;
 
   &GenerateHtmlStart ($out_html_title,  $out_zoom_buttons2, $out_options,
@@ -906,6 +964,7 @@ sub GenerateBotSummary
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
 
+  $out_html .= "yyyyy" ;
   $out_html .= "<a id='botmatrix' name='botmatrix'></a>" . &b($out_tbl_bot_usage_matrix_summary_intro) ;
   $out_html .= "<table border=1 cellspacing=0 id='table1' style=''  summary='Bots Usage Matrix'>\n" ;
 
@@ -915,44 +974,99 @@ sub GenerateBotSummary
   if ($wikimedia)
   { &GenerateComparisonTableHeaders ($f, $true) ; }
 
-  $line_html  = &tdlb (&w ("&Sigma; total edits")) ;
+  $line_html  = &tdlb (&w ("&Sigma; $actions_total")) ;
   $line_html .= &tdrb ("xxx") ;
   $tot_gen = 0 ;
+
+  # ignore languages [0]: 'zz' (for totals)
+  if ($#languages > 20)
+  { $top_wikis = 20 ; }
+  else
+  { $top_wikis = $#languages ; }
+
+  $data_for_all_large_wikis = $true ;
+  my $msg_no_data = "Project wide totals (&Sigma;) for all bots combined will only be shown when data for top $top_wikis wikis are available. No data yet for language: " ;
+  my $wikis_no_data = 0 ;
+  my $wikis_checked = 0 ;
+
+# determine if data for top x wikis are available, if not suppress project wide totals for lal bots combined
+  foreach my $wp (@languages)
+  {
+    if ($wp eq "zz") { next ; }
+    if ($BotActionsArticlesPerWiki {$wp} == 0)
+    {
+      $msg_no_data .= "<b>$wp</b>, " ;
+      $wikis_no_data ++ ;
+      if ($wikis_no_data > 1)
+      { $msg_no_data =~ s/language:/languages:/ ; }
+      $lines++ ;
+    }
+    last if ++$wikis_checked > $top_wikis - 1 ;
+  }
+  $msg_no_data =~ s/, $/./ ;
+  if ($wikis_no_data > 0)
+  {
+    $data_for_all_large_wikis = $false ;
+    $out_html =~ s/yyyyy/$msg_no_data<br>/ ;
+  }
+  else
+  { $out_html =~ s/yyyyy// ; }
+
+# row 'totals articles created'
   foreach my $wp (@languages)
   {
     if ($wp eq "zz") { next ; }
     if ($skip {$wp}) { next ; }
-    $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
+
+    if ($mode eq $bot_mode_edits)
+    { $cnt = $MonthlyStats {$wp.$c[11].'tot'} ; }
+    else
+    { $cnt = $MonthlyStats {$wp.$MonthlyStatsWpStop {$wp}.$c[4]} ; }
+
     $tot_gen += $cnt ;
     $cnt = &i2KM ($cnt) ;
-    if (($wp eq "en") && ($BotStatsWpTot1 {$wp} == 0))
-    { $cnt = "" ; } # no data yet
+    # if (($wp eq "en") && ($BotActionsArticlesPerWiki {$wp} == 0))
+    # { $cnt = "" ; } # no data yet
     $line_html .= &tdrb (&w ($cnt)) ;
   }
+
   $tot = &i2KM ($tot_gen) ;
+  if (! $data_for_all_large_wikis)
+  { $tot = '' ; }
   $line_html =~ s/xxx/$tot/ ;
   $out_html  .= &tr ($line_html) ;
 
-  $line_html =  &tdlb (&w ("&Sigma; manual edits")) ;
+  $line_html =  &tdlb (&w ("&Sigma; $actions_manual")) ;
   $line_html .= &tdrb ("xxx") ; # &tde ;
   $tot_man = 0 ;
+
+# row 'manually created articles'
   foreach my $wp (@languages)
   {
     if ($wp eq "zz") { next ; }
     if ($skip {$wp}) { next ; }
-    $cnt = @MonthlyStats {$wp.$c[11].'tot'} - $BotStatsWpTot1 {$wp} ;
+
+    if ($mode eq $bot_mode_edits)
+    { $cnt = $MonthlyStats {$wp.$c[11].'tot'}  - $BotActionsArticlesPerWiki {$wp} ; ; }
+    else
+    { $cnt = $MonthlyStats {$wp.$MonthlyStatsWpStop {$wp}.$c[4]}  - $BotActionsArticlesPerWiki {$wp} ; ; }
+
     $tot_man += $cnt ;
     $cnt = &i2KM ($cnt) ;
-    if (($wp eq "en") && ($BotStatsWpTot1 {$wp} == 0))
-    { $cnt = "" ; } # no data yet
+  # if (($wp eq "en") && ($BotActionsArticlesPerWiki {$wp} == 0))
+  #  { $cnt = "" ; } # no data yet
     $line_html .= &tdrb (&w ($cnt)) ;
   }
+
   $tot = &i2KM ($tot_man) ;
+  if (! $data_for_all_large_wikis)
+  { $tot = '' ; }
   $line_html =~ s/xxx/$tot/ ;
   $out_html  .= &tr ($line_html) ;
 
-  $line_html =  &tdlb (&w (&b ("<font color='#400040'>&Sigma; bot edits</font>"))) ;
-  $line_html .= &tdrb (&w (&b (&i2KM ($BotStatsTotGen1)))) ;
+# row 'articles created by bots'
+  $line_html =  &tdlb (&w (&b ("<font color='#400040'>&Sigma; $actions_bot</font>"))) ;
+  $line_html .= &tdrb (&w (&b ('xxx'))) ;
   $columns = 2 ;
 
   $tot_bot = 0 ;
@@ -960,57 +1074,78 @@ sub GenerateBotSummary
   {
     if ($wp eq "zz") { next ; }
     if ($skip {$wp}) { next ; }
-    $cnt = $BotStatsWpTot1 {$wp} ;
+    $cnt = $BotActionsArticlesPerWiki {$wp} ;
     $tot_bot += $cnt ;
-    $cnt = &i2KM ($cnt) ;
+    if ($cnt == 0)
+    { $cnt = '-' ; }
+    else
+    { $cnt = &i2KM ($cnt) ; }
     $line_html .= &tdrb (&b (&w ($cnt))) ;
     $columns++ ;
   }
+  $tot = &i2KM ($BotActionsArticlesTotal) ;
+  if (! $data_for_all_large_wikis)
+  { $tot = '' ; }
+  $line_html =~ s/xxx/$tot/ ;
   $out_html  .= &tr ($line_html) ;
 
-  $line_html =  &tdlb (&w (&b ("<font color='#400040'>Share of bot edits</font>"))) ;
+# row 'share of articles created by bots'
+  $line_html =  &tdlb (&w (&b ("<font color='#400040'>Share of $actions_bot</font>"))) ;
   $line_html .= &tdrb ("xxx") ; # &tde ;
+
   foreach my $wp (@languages)
   {
     if ($wp eq "zz") { next ; }
     if ($skip {$wp}) { next ; }
-    $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
-    if (($cnt > 0) && ($BotStatsWpTot1 {$wp} > 0))
+
+    if ($mode eq $bot_mode_edits)
+    { $cnt = $MonthlyStats {$wp.$c[11].'tot'} ; }
+    else
+    { $cnt = $MonthlyStats {$wp.$MonthlyStatsWpStop {$wp}.$c[4]} ; }
+
+    if (($cnt > 0) && ($BotActionsArticlesPerWiki {$wp} > 0))
     {
-      $perc = 100 * $BotStatsWpTot1 {$wp} / $cnt ;
-      if ($perc >= 1)
-      { $perc = sprintf ("%.0f", $perc) . "%" ; }
-      else
-      { $perc = sprintf ("%.1f", $perc) . "%" ; }
+      $perc = 100 * $BotActionsArticlesPerWiki {$wp} / $cnt ;
+      $perc = sprintf ("%.0f", $perc) . "%" ;
     }
     else
-    { $perc = "" ; }
-    if (($wp eq "en") && ($BotStatsWpTot1 {$wp} == 0))
-    { $perc = "" ; } # no data yet
+    { $perc = "-" ; }
+    # if (($wp eq "en") && ($BotActionsArticlesPerWiki {$wp} == 0))
+    # { $perc = "" ; } # no data yet
     $line_html .= &tdrb (&w (&b ($perc))) ;
   }
-  $perc_bot = &b (sprintf ("%.1f", 100 * $tot_bot / $tot_gen) . "%") ;
+
+  if ($tot_gen == 0)
+  { $perc_bot = '-' ; }
+  else
+  { $perc_bot = &b (sprintf ("%.1f", 100 * $tot_bot / $tot_gen) . "%") ; }
+
+  if (! $data_for_all_large_wikis)
+  { $perc_bot = '' ; }
   $line_html =~ s/xxx/$perc_bot/ ;
   $out_html  .= &tr ($line_html) ;
-
   $out_html  .= &tr ("<td colspan=$columns></td>") ;
 
+  $botrows = 0 ;
   foreach $bot (@bots)
   {
     if ($botrows++ > 1000)          { last ; }
-    if ($BotStatsBotTot1 {"$bot"} < 100) { last ; }
+    if ($BotActionsArticlesPerBot {"$bot"} < 100) { last ; }
 
     $line_html  = &tdlb ($bot) ;
-    $line_html .= &tdrb (&b (&i2KM ($BotStatsBotTot1 {"$bot"}))) ;
+
+    $line_html .= &tdrb (&b (&i2KM ($BotActionsArticlesPerBot {"$bot"}))) ;
     $cnt0 = 0 ;
     $cols = 0 ;
+
     foreach my $wp (@languages)
     {
       if ($wp eq "zz") { next ; }
       if ($skip {$wp}) { next ; }
       $cols++ ;
-      $cnt = $BotStatsWpBot1 {"$wp|$bot"} ;
-      if (($cnt == 0) && (defined ($BotStatsWpBot1 {"$wp|$bot"})))
+      $cnt = $BotActionsArticlesPerWikiPerBot {"$wp|$bot"} ;
+
+      if (($cnt == 0) && (defined ($BotActionsArticlesPerWikiPerBot {"$wp|$bot"})))
       { $cnt = "*" ; }
 
       if ($cnt == 0)
@@ -1026,7 +1161,7 @@ sub GenerateBotSummary
 
         if ($cnt > 0)
         {
-          if ($BotStatsTotGen1 > 10000)
+          if ($BotActionsArticlesTotal > 10000)
           { $cnt = &i2KM ($cnt) ; }
 
           if ($cnt =~ /\d\./)
@@ -1035,10 +1170,11 @@ sub GenerateBotSummary
             { $cnt =~ s/\./$out_decimal_separator/ ; }
           }
 
-          $line_html .= &tdrb ($cnt) ;
+          $line_html .= &tdrb ("<a href='" . $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' . "$bot'>$cnt</a>") ;
         }
       }
     }
+
 
     if ($cnt0 == 1)
     { $line_html .= &tdrb (&w (0)) ; }
@@ -1052,7 +1188,6 @@ sub GenerateBotSummary
 
   &GenerateColophon ($false, $false) ;
   $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
-  $file_html = $path_out . "BotActivityMatrix.htm" ;
 
   $out_html =~ s/roa_rup/roa-rup/g ;
   $out_html =~ s/zh_min_nan/zh-min-nan/g ;
@@ -2252,7 +2387,7 @@ sub GenerateTableMostActiveUsers
 
   if ($#csv < 0) { return ; }
   my @fields = split (",", $csv [0]) ;
-  if ($#fields < 9) { return ; } # old format, without other namespace counts
+  if ($#fields < 9) { return ; } # very old format, without other namespace counts
 
   $out_html .= "<br><a id='wikipedians' name='wikipedians'>&nbsp;</a><hr><p>" . &b($out_tbl1_intro) ;
   if (defined ($out_tbl1_intro2))
@@ -2263,25 +2398,33 @@ sub GenerateTableMostActiveUsers
   $out_html .= blank_text_after ("15/06/2009", "<small><b><p><font color=#800000>Note May 21, 2009: some names have nog been recognized as bot names on last run and may be listed here. Will be fixed on next run.</font></b></small>") ;
 
   $out_html .= "<br>&nbsp;<table border=1 cellspacing=0 id='table2' style='' summary='Most active users'>\n" ;
+
   $out_html .= &trh (
-               &tdlr2b   (&b($out_tbl1_hdr1)) .
-               &tdc6b    (&b(&w($out_tbl1_hdr2))) .
-               &tdcr2b   (&b(&w($out_tbl1_hdr3)))) ;
+               &tdl2b  (&b($out_tbl1_hdr1)) .       # User
+               &tdc8b  (&b($out_tbl1_hdr2)) .       # Edits
+               &tdc4b  (&b(&w($out_tbl1_hdr14 . blank_text_after ("15/03/2012", " <font color=#008000>(". &b(ucfirst($out_new). ") ") . "</font>"))))) ; # Creates
   $out_html .= &trh (
-               &tdc4b    (&b(&w($out_tbl1_hdr12))) .
-               &tdc2b    (&b(&w($out_tbl1_hdr13)))) ;
-  $out_html .= &trh2b    (
-               &tdltr2b  ("&nbsp;") .
-               &tdc2b    ($out_tbl1_hdr9) .
-               &tdctr2b  ($out_tbl1_hdr8) .
-               &tdctr2b  ($out_tbl1_hdr7) .
-               &tdctr2b  ($out_tbl1_hdr7) .
-               &tdctr2b  ($out_tbl1_hdr8) .
-               &tdctr2b  ($out_tbl1_hdr5) .
-               &tdctr2b  ($out_tbl1_hdr6)) ;
-  $out_html .= &trh2(
-               &tdctb    ($out_tbl1_hdr10) .
-               &tdctb    ($out_tbl1_hdr11)) ;
+               &tdr2b ("&nbsp;") .                  # blank
+               &tdc2b  (&b(&w($out_tbl1_hdr9))) .   # Rank
+               &tdc2b  (&b(&w($out_tbl1_hdr12))) .  # Articles
+               &tdc2b  (&b(&w($out_tbl1_hdr13))) .  # Other
+               &tdc2b  (&b(&w($out_tbl1_hdr3))) .   # First Edit
+               &tdc2b  (&b(&w($out_tbl1_hdr12))) .  # Articles
+               &tdc2b  (&b(&w($out_tbl1_hdr13))));  # Other
+  $out_html .= &trh (
+               &tdr2b  ($out_tbl1_hdr16) .          # User Contributions
+               &tdcb   ($out_tbl1_hdr10) .          # Now
+               &tdcb   ($out_tbl1_hdr11) .          # Delta
+               &tdcb   ($out_tbl1_hdr7) .           # Total
+               &tdcbg  ($out_tbl1_hdr8) .           # Last 30 days
+               &tdcb   ($out_tbl1_hdr7) .           # Total
+               &tdcbg  ($out_tbl1_hdr8) .           # Last 30 days
+               &tdcb   ($out_tbl1_hdr5) .           # Date
+               &tdcb   ($out_tbl1_hdr6) .           # Days ago
+               &tdcb   ($out_tbl1_hdr7) .           # Total
+               &tdcbg  ($out_tbl1_hdr8) .           # Last 30 days
+               &tdcb   ($out_tbl1_hdr7) .           # Total
+               &tdcbg  ($out_tbl1_hdr8)) ;          # Last 30 days
 
   $active_users  = 0 ;
   $recently_active_users = 0 ;
@@ -2290,12 +2433,17 @@ sub GenerateTableMostActiveUsers
   if (! defined ($userpage))
   { $userpage = "user" ; }
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
+  $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
+
+  my ($dummy, $user, $edits_0, $edits_recent_0, $edits_x, $edits_recent_x, $rank_now, $rank_prev, $first, $days) ;
 
   foreach $line (@csv)
   {
-    my ($dummy, $user,
-        $edits_0, $edits_recent_0, $edits_x, $edits_recent_x,
-        $rank_now, $rank_prev, $first, $days) = split (",", $line) ;
+    if ($#fields < 13) # old format, without creates
+    { ($dummy, $user, $edits_0, $edits_recent_0, $edits_x, $edits_recent_x, $rank_now, $rank_prev, $first, $days) = split (",", $line) ; }
+    else
+    { ($dummy, $user, $edits_0, $edits_recent_0, $edits_x, $edits_recent_x, $creates_0, $creates_recent_0, $creates_x, $creates_recent_x, $rank_now, $rank_prev, $first, $days) = split (",", $line) ; }
+
     $user =~ s/ /_/g ;
 
     my $delta = "" ;
@@ -2313,14 +2461,19 @@ sub GenerateTableMostActiveUsers
     $recently_active_users ++ ;
 
     $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
-                      &tdrb ($rank_now).
-                      &tdrb ($delta).
-                      &tdrb ($edits_recent_0).
-                      &tdrb ($edits_0).
-                      &tdrb ($edits_x).
-                      &tdrb ($edits_recent_x).
-                      &tdrb (&w(&GetDateShort ($first,$true))).
-                      &tdrb ($days)) ;
+                      &tdlb ("<a href='$url_rc$user'>UC</a>").
+                      &tdrb  ($rank_now).
+                      &tdrb  ($delta).
+                      &tdrb  (&d ($edits_0)).
+                      &tdrbg (&d ($edits_recent_0)).
+                      &tdrb  (&d ($edits_x)).
+                      &tdrbg (&d ($edits_recent_x)).
+                      &tdrb  (&w(&GetDateShort ($first,$true))).
+                      &tdrb  ($days).
+                      &tdrb  (&d ($creates_0)).
+                      &tdrbg (&d ($creates_recent_0)).
+                      &tdrb  (&d ($creates_x)).
+                      &tdrbg (&d ($creates_recent_x))) ;
   }
   $out_html .= "</table>\n" ;
   $out_html =~ s/\[\[1\]\]/$active_users/ ;
@@ -2334,53 +2487,70 @@ sub GenerateTableMostActiveBots
   if ($wp =~ /^zzz?$/)
   { return ; }
 
-  if (! -e $file_csv_bot_edits) { return ; }
+  if (! -e $file_csv_bot_actions) { return ; }
 
-  &ReadFileCsv ($file_csv_bot_edits, $wp) ;
+  &ReadFileCsv ($file_csv_bot_actions, $wp) ;
 
   if ($#csv < 0)    { return ; }
   my @fields = split (",", $csv [0]) ;
-  if ($#fields < 9) { return ; } # old format, without other namespaces
+  if ($#fields < 9) { return ; } # very old format, without other namespaces
 
   $out_html .= "<br><a id='bots' name='bots'>&nbsp;</a>&nbsp;<hr><p>" . &b($out_tbl10_intro) ;
 
   if (defined ($out_tbl1_intro2))
   { $out_html .= "<br><small>" . $out_tbl1_intro2 . "</small>" ; }
-  $out_html .= "<br>&nbsp;<table border=1 cellspacing=0 id='table3' style='' summary='Sleeping users'>\n" ;
-  $out_html .= &trh (&tdlb (&b($out_tbl1_hdr1)) .
-               &tdc2b (&b(&w($out_tbl1_hdr2))) .
-               &tdc2b (&b(&w($out_tbl1_hdr3))) .
-               &tdc2b (&b(&w($out_tbl1_hdr4)))) ;
-  $out_html .= &trh2(&tdeb .
-               &tdcb  ($out_tbl1_hdr9) .
-               &tdcb  ($out_tbl1_hdr7) .
-               &tdcb  ($out_tbl1_hdr5) .
-               &tdcb  ($out_tbl1_hdr6) .
-               &tdcb  ($out_tbl1_hdr5) .
-               &tdcb  ($out_tbl1_hdr6)) ;
 
+  $out_html .= "<br>&nbsp;<table border=1 cellspacing=0 id='table3' style='' summary='Most active bots'>\n" ;
+  $out_html .= &trh (
+               &tdl2b  (&b($out_tbl1_hdr1)) .       # User
+               &tdc6b  (&b($out_tbl1_hdr2)) .       # Edits
+               &tdc2b  (&b(&w($out_tbl1_hdr14 . blank_text_after ("15/03/2012", " <font color=#008000>(". &b(ucfirst($out_new). ") ") . "</font>"))))) ; # Creates
+  $out_html .= &trh (
+               &tdr2b ("&nbsp;") .                  # blank
+               &tdctr2 ($out_tbl1_hdr9) .           # Rank
+               &tdctr2 ($out_tbl1_hdr7) .           # Total
+               &tdc2b  (&b(&w($out_tbl1_hdr3))) .   # First edit
+               &tdc2b  (&b(&w($out_tbl1_hdr4))) .   # Last edits
+               &tdctr2 ($out_tbl1_hdr7) .           # Total
+               &tdctr2 ($out_tbl1_hdr8)) ;          # Last 30 days
+  $out_html .= &trh2(
+               &tdr2b  ($out_tbl1_hdr16) .          # User Contributions
+               &tdcb   ($out_tbl1_hdr5) .            # Date
+               &tdcb   ($out_tbl1_hdr6) .            # Days ago
+               &tdcb   ($out_tbl1_hdr5) .            # Date
+               &tdcb   ($out_tbl1_hdr6)) ;           # Days ago
   my $bots = 0 ;
 
   $userpage = $out_userpages {$wp} ;
   if (! defined ($userpage))
   { $userpage = "user" ; }
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
+  $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
+  # edits/creates 0 = article namespace, usually ns 0
+  # edits/creates x = other namespaces
 
+  my ($dummy, $user, $edits_0, $edits_x, $rank_now, $rank_prev, $first, $days_first, $last, $days_last) ;
   foreach $line (@csv)
   {
-    my ($dummy, $user, $edits_0, $edits_x, $rank_now, $rank_prev,
-        $first, $days_first, $last, $days_last) = split (",", $line) ;
+    if ($#fields < 11) # old format, without creates
+    { ($dummy, $user, $edits_0, $edits_x, $rank_now, $rank_prev, $first, $days_first, $last, $days_last) = split (",", $line) ; }
+    else
+    { ($dummy, $user, $edits_0, $edits_x, $creates_0, $creates_x, $rank_now, $rank_prev, $first, $days_first, $last, $days_last) = split (",", $line) ; }
+
     $user =~ s/ /_/g ;
 
     $bots ++ ;
 
     $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
+                      &tdlb ("<a href='$url_rc$user'>UC</a>").
                       &tdrb ($rank_now).
-                      &tdrb ($edits_0).
+                      &tdrb (&d ($edits_0)).
                       &tdrb (&w(&GetDateShort ($first,$true))).
                       &tdrb ($days_first).
                       &tdrb (&w(&GetDateShort ($last,$true))).
-                      &tdrb ($days_last)) ;
+                      &tdrb (&d ($days_last)).
+                      &tdrb (&d ($creates_0)).
+                      &tdrb (&d ($creates_x))) ;
     if ($bots >= 50) { last ; }
   }
   $out_html .= "</table>\n" ;
@@ -2406,18 +2576,24 @@ sub GenerateTableSleepingUsers
 
   if (defined ($out_tbl1_intro2))
   { $out_html .= "<br><small>" . $out_tbl1_intro2 . "</small>" ; }
+
   $out_html .= "<br>&nbsp;<table border=1 cellspacing=0 id='table3' style='' summary='Sleeping users'>\n" ;
-  $out_html .= &trh (&tdlb (&b($out_tbl1_hdr1)) .
-               &tdc2b (&b(&w($out_tbl1_hdr2))) .
-               &tdc2b (&b(&w($out_tbl1_hdr3))) .
-               &tdc2b (&b(&w($out_tbl1_hdr4)))) ;
-  $out_html .= &trh2(&tdeb .
-               &tdcb  ($out_tbl1_hdr9) .
-               &tdcb  ($out_tbl1_hdr7) .
-               &tdcb  ($out_tbl1_hdr5) .
-               &tdcb  ($out_tbl1_hdr6) .
-               &tdcb  ($out_tbl1_hdr5) .
-               &tdcb  ($out_tbl1_hdr6)) ;
+  $out_html .= &trh (
+               &tdl2b (&b($out_tbl1_hdr1)) .       # User
+               &tdc6b (&b($out_tbl1_hdr2))) ;     # Edits
+  $out_html .= &trh (
+               &tdr2b ("&nbsp;") .                  # blank
+               &tdc2b (&b(&w($out_tbl1_hdr15))) . # Counts
+               &tdc2b (&b(&w($out_tbl1_hdr3))) .  # First edit
+               &tdc2b (&b(&w($out_tbl1_hdr4)))) ; # Last edit
+  $out_html .= &trh2(
+               &tdr2b  ($out_tbl1_hdr16) .          # User Contributions
+               &tdcb  ($out_tbl1_hdr9) .          # Rank
+               &tdcb  ($out_tbl1_hdr7) .          # Total
+               &tdcb  ($out_tbl1_hdr5) .          # Date
+               &tdcb  ($out_tbl1_hdr6) .          # Days ago
+               &tdcb  ($out_tbl1_hdr5) .          # Date
+               &tdcb  ($out_tbl1_hdr6)) ;         # Days ago
 
   $memorable_absent_users = 0 ;
 
@@ -2425,6 +2601,7 @@ sub GenerateTableSleepingUsers
   if (! defined ($userpage))
   { $userpage = "user" ; }
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
+  $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
 
   foreach $line (@csv)
   {
@@ -2435,6 +2612,7 @@ sub GenerateTableSleepingUsers
     $memorable_absent_users ++ ;
 
     $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
+                      &tdlb ("<a href='$url_rc$user'>UC</a>").
                       &tdrb ($rank_now).
                       &tdrb ($edits_0).
                       &tdrb (&w(&GetDateShort ($first,$true))).
@@ -3129,6 +3307,8 @@ my $start_zeitgeist3 = Time::HiRes::time() ;
 
 sub GenerateComparisonTables
 {
+  &LogT ("\nGenerateComparisonTables\n") ;
+
   for ($f = 0 ; $f <= $fmax ; $f++)
   {
     # if ($f == 5) { next ; } # skip obsolete alternate article counts
@@ -3136,7 +3316,7 @@ sub GenerateComparisonTables
     if (($mode_wp) ||
         (($f != 5) && ($f != 9) && ($f != 10)))
     {
-      &LogT ("\nGenerateComparisonTable " . "Tables" . $report_names [$f] . ".htm") ;
+      &LogT ("GenerateComparisonTable " . "Tables" . $report_names [$f] . ".htm ") ;
 
       &GenerateComparisonTable ($f) ;
 
@@ -3338,6 +3518,13 @@ sub GenerateComparisonTable
 
 
     $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low, due to server overload.</font> " ;
+    $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
+    if ($pageviews_mobile)
+    { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
+    $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
+
+    $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+
                  # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
                  # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
                  # "<hr>" ;
@@ -3614,6 +3801,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   my $javascript_ = $javascript ;
   my $javascript  = $true ;
 
+  undef %views_tot_monthly ;
+
   &LogT ("GenerateComparisonTablePageviewsAllProjects\n") ;
 
   $legend = "<table border='0'><tr><td valign=bottom><table border=1 cellspacing=0 id='legend' class=b style='margin-top:5px; border:solid 1px #000000'><tr>" .
@@ -3703,6 +3892,13 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n" ;
 
   $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+  $out_html .= blank_text_after ("31/12/2011", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
+  $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well) </font>") ;
+  if (! $normalized)
+  { $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>Till Jan 2012 totals for all projects (right-most column) were about twice too high, in this report only. Has been fixed.</font>") ; }
+
+  $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+
               # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
               # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low." .
               # "<hr><p>" ;

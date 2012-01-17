@@ -2,7 +2,7 @@
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
-  $trace_on_exit = $true ;
+  $trace_on_exit_concise = $true ;
   ez_lib_version (2) ;
 
 # plot 2 hele legenda in orde maken

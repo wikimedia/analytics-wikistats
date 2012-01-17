@@ -60,6 +60,7 @@ sub tde     { return "<td class=cb>&nbsp;</td>" ; }
 sub tdeb    { return "<td class=cb>&nbsp;</td>" ; }
 sub tde2    { return "<td rowspan='2'>&nbsp;</td>" ; }
 sub tde2b   { return "<td rowspan='2' class=cb>&nbsp;</td>" ; }
+sub tde2c   { return "<td colspan='2'>&nbsp;</td>" ; }
 sub tde3    { return "<td colspan='3'>&nbsp;</td>" ; }
 sub tde3b   { return "<td colspan='3' class=cb>&nbsp;</td>" ; }
 sub tder2   { return "<td rowspan='2'>&nbsp;</td>" ; }
@@ -76,6 +77,7 @@ sub td      { return "<td>".&w(&trim(shift))."</td>" ; }
 sub th      { return "<th>".&w(&trim(shift))."</th>" ; }
 sub tdr     { return "<td>".&w(&trim(shift))."</td>" ; }
 sub tdrb    { return "<td class=rb>".&w(&trim(shift))."</td>" ; }
+sub tdrbg   { return "<td class=rbg>".&w(&trim(shift))."</td>" ; }
 sub tdrbc   { return "<td class=rb colspan=".(shift).">".&w(&trim(shift))."</td>" ; }
 sub tdrs    { return "<td class=sigma>".&w(&trim(shift))."</td>" ; }
 sub tdr4    { return "<td colspan='4'>".&w(&trim(shift))."</td>" ; }
@@ -84,6 +86,7 @@ sub tdlb    { return "<td class=lb>".&w(&trim(shift))."</td>" ; }
 sub thrb    { return "<th class=rb>".&w(&trim(shift))."</th>" ; }
 sub tdl2    { return "<td class=l colspan='2'>" .&w(&trim(shift))."</td>" ; }
 sub tdl2b   { return "<td class=lb colspan='2'>".&w(&trim(shift))."</td>" ; }
+sub tdr2b   { return "<td class=rb colspan='2'>".&w(&trim(shift))."</td>" ; }
 sub tdlb2   { return "<td class=l colspan='2'>" .&w(&trim(shift))."</td>" ; }
 sub tdlb2b  { return "<td class=lb colspan='2'>".&w(&trim(shift))."</td>" ; }
 sub tders   { return "<td rowspan=" . (shift) . ">&nbsp;</td>" ; }
@@ -91,6 +94,7 @@ sub tdersb  { return "<td class=cb rowspan=" . (shift) . ">&nbsp;</td>" ; }
 sub tdecrsb  { return "<td class=cb colspan=" . (shift) . " rowspan=" . (shift) . ">&nbsp;</td>" ; }
 sub tdc     { return "<td class=c>"            .&trim(shift)."</td>" ; }
 sub tdcb    { return "<td class=cb>"           .&trim(shift)."</td>" ; }
+sub tdcbg   { return "<td class=cbg>"          .&trim(shift)."</td>" ; }
 sub tdcbr2  { return "<td class=cb rowspan='2'>".&trim(shift)."</td>" ; }
 sub tdcbt   { return "<td class=cb valign=top>" .&trim(shift)."</td>" ; }
 sub tdlbt   { return "<td class=lb valign=top>" .&trim(shift)."</td>" ; }
@@ -133,6 +137,14 @@ sub thl2nb  { return "<th class=lb colspan=2 style='text-align:left'>".&trim(shi
 sub tr_hr   { return "<tr><td class='thin' colspan=999 height=4></td></tr>" ; }
 sub tdlmr   { return "<td class=l valign=middle rowspan=".(shift).">".&trim(shift)."</td>" ; }
 sub tdrmr   { return "<td class=r valign=middle rowspan=".(shift).">".&trim(shift)."</td>" ; }
+
+sub d  # show dash on empty field
+{
+  my $val = shift ;
+  if ($val == 0)
+  { $val = '-' ; }
+  return ($val) ;
+}
 
 sub sign
 {

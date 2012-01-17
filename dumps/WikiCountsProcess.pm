@@ -634,7 +634,7 @@ sub CountArticlesPerMonth
 
   &LogT ("-----: 1:real_articles, 2:mean_versions, 3:mean_articlesize, 4:articles_over_size1, 5:articles_over_size2\n" .
          "-----: 6:all_size, 7:tot_links, 8:tot_wiki_links, 9:tot_image_links, 10:tot_ext_links\n" .
-         "-----: 11:tot_redirects, 12:alternate_articles, 13:tot_words, 14:tot_categorized\n") ;
+         "-----: 11:tot_redirects, 12:alternate_articles, 13:tot_words, 14:tot_categorized, 15:not articles\n") ;
 
   while (($year <  $year_dump) ||
          (($year == $year_dump) && ($month <= $month_dump)))
@@ -685,6 +685,7 @@ sub CountArticlesUpTo
   # set compare date/time to end of this month
   $month_upto = &yyyymm2bb ($year, $month) ;
   $real_articles = 0 ;
+  $pages_without_internal_link = 0 ;
   $alternate_articles = 0 ;
 # $edits      = 0 ;
   $real_size  = 0 ;
@@ -733,6 +734,7 @@ sub CountArticlesUpTo
   #  if ($count ne "R")
   #  { $real_edits ++ ; }
 
+    # raise counters for last revision of this article within current period
     if (($ndx_article ne $ndx_article_prev) && ($event_prev ne ""))
     { &CountPrev ($event_prev) ; }
 
@@ -793,7 +795,8 @@ sub CountArticlesUpTo
                $tot_words . "," .
  #             $articles_ns10 . "," .
  #             $articles_ns14 . "," .
-               $tot_categorized ;
+               $tot_categorized . "," .
+               $pages_without_internal_link ;
 
   return ($counts) ;
 }
@@ -820,7 +823,7 @@ sub CountPrev
   if ($count eq "R")
   { $tot_redirects++ ; }
 
-  if (($count eq "+") || ($count eq "L") || ($count eq "S"))
+  elsif (($count eq "+") || ($count eq "L") || ($count eq "S"))
   {
     for ($s = 32, $i = 0 ; $s < $size2 ; $s *= 2 , $i ++) { ; }
     if ($i > 12) { $i = 12 ; }
@@ -845,6 +848,10 @@ sub CountPrev
     if ($cat_links > 0)
     { $tot_categorized ++ ; }
   }
+
+  elsif ($count eq "-")
+  { $pages_without_internal_link++ ; }
+
   $all_size += $size ;
 }
 
@@ -1130,26 +1137,31 @@ sub CollectUserStats
     my $record = $userdata {$user} ;
     # &Log ("Record4 $record\n") ;
     my @fields = split (',', $record) ;
-    if (@fields [$useritem_reg_namespace_a] == 0) { next ; }
-    $first = @fields [$useritem_first] ;
-    $last  = @fields [$useritem_last] ;
+    if (@fields [$useritem_edit_reg_namespace_a] == 0) { next ; }
+    $first = @fields [$useritem_edit_first] ;
+    $last  = @fields [$useritem_edit_last] ;
     @edits_10 = split ('\|', $fields [$useritem_edits_10]) ;
     $tenth = @edits_10 [9] ;
 
     if ($first == 0) { next ; } # user did only edit redirects
     # if (! (defined ($first))) { next ; } # user only edited redirects
 
-    my $line = sprintf ("%8d %8d %8d %8d %5s %5s %10d %10d %10d %s", # strategy
-                        @fields [$useritem_reg_namespace_a],
-                        @fields [$useritem_reg_recent_namespace_a],
-                        @fields [$useritem_reg_namespace_x],
-                        @fields [$useritem_reg_recent_namespace_x],
+    my $line = sprintf ("%8d %8d %8d %8d %8d %8d %8d %8d %5s %5s %10d %10d %10d %s", # strategy
+                        @fields [$useritem_edit_reg_namespace_a],
+                        @fields [$useritem_edit_reg_recent_namespace_a],
+                        @fields [$useritem_edit_reg_namespace_x],
+                        @fields [$useritem_edit_reg_recent_namespace_x],
+                        @fields [$useritem_create_reg_namespace_a],
+                        @fields [$useritem_create_reg_recent_namespace_a],
+                        @fields [$useritem_create_reg_namespace_x],
+                        @fields [$useritem_create_reg_recent_namespace_x],
                         'rank1',
                         'rank2',
                         $first,
                         $last,
                         $tenth,
                         $user) ;
+
     if ($bots {$user})
     { push (@user_stats_bot, $line) ; } # -> UpdateBotEdits
     else
@@ -1182,8 +1194,8 @@ sub RankUserStats
 #   return (sprintf ("%08d", (99999999 - ($edits_namespace_a - $edits_prev_namespace_0))) . sprintf ("%10d", $first)) ;
 # }
   @user_stats_reg = sort {
-                           ($x=sprintf ("%08d", (99999999 - (substr ($a,0,8) - substr ($a,10,8)))) . substr ($a,48,10),$x) cmp
-                           ($y=sprintf ("%08d", (99999999 - (substr ($b,0,8) - substr ($b,10,8)))) . substr ($b,48,10),$y)
+                           ($x=sprintf ("%08d", (99999999 - (substr ($a,0,8) - substr ($a,10,8)))) . substr ($a,84,10),$x) cmp
+                           ($y=sprintf ("%08d", (99999999 - (substr ($b,0,8) - substr ($b,10,8)))) . substr ($b,84,10),$y)
                          }
                          @user_stats_reg ;
 
@@ -1192,7 +1204,7 @@ sub RankUserStats
 open USERRANK, '>', "c:/userrank2.txt" ;
   foreach $user_stat (@user_stats_reg)
   {
-    $user = substr ($user_stat,81) ;
+    $user = substr ($user_stat,117) ;
     if ((index (lc($user), "conversion") != -1) ||
         ((index (lc($user), "konvertilo") != -1) & ($language eq "eo")))
     { next ; }
@@ -1211,7 +1223,7 @@ open USERRANK, '>', "c:/userrank1.txt" ;
   $rank = 0 ;
   foreach $user_stat (@user_stats_reg)
   {
-    $user = substr ($user_stat,81) ;
+    $user = substr ($user_stat,117) ;
     if ((index (lc($user), "conversion") != -1) ||
         ((index (lc($user), "konvertilo") != -1) & ($language eq "eo")))
     { next ; }
@@ -1227,8 +1239,8 @@ close USERRANK ;
 # @user_stats_bot = sort {&csvkey_editsprev_first ($a) cmp &csvkey_editsprev_first ($b)} @user_stats_bot ;
 # see above
   @user_stats_bot = sort {
-                           ($x=sprintf ("%08d", (99999999 - (substr ($a,0,8) - substr ($a,10,8)))) . substr ($a,48,10),$x) cmp
-                           ($y=sprintf ("%08d", (99999999 - (substr ($b,0,8) - substr ($b,10,8)))) . substr ($b,48,10),$y)
+                           ($x=sprintf ("%08d", (99999999 - (substr ($a,0,8) - substr ($a,10,8)))) . substr ($a,84,10),$x) cmp
+                           ($y=sprintf ("%08d", (99999999 - (substr ($b,0,8) - substr ($b,10,8)))) . substr ($b,84,10),$y)
                          }
                          @user_stats_bot ;
   $rank = 0 ;
@@ -1248,8 +1260,8 @@ close USERRANK ;
 #   return (sprintf ("%08d", (99999999 - $edits_namespace_a)) . sprintf ("%10d", $first)) ;
 # }
   @user_stats_bot = sort {
-                          ($x=sprintf ("%08d", (99999999 - substr ($a,0,8))) . substr ($a,48,10),$x) cmp
-                          ($y=sprintf ("%08d", (99999999 - substr ($b,0,8))) . substr ($b,48,10),$y)
+                          ($x=sprintf ("%08d", (99999999 - substr ($a,0,8))) . substr ($a,84,10),$x) cmp
+                          ($y=sprintf ("%08d", (99999999 - substr ($b,0,8))) . substr ($b,84,10),$y)
                          } @user_stats_bot ;
   $rank = 0 ;
   foreach $user_stat (@user_stats_bot)
@@ -1279,7 +1291,7 @@ sub NewUserData
 {
   my $user = shift ;
 
-  $record = ",,,,,,,,,#" ;
+  $record = ",,,,,,,,,,,,,#" ;
   my @fields = split (',', $record) ;
 
   if (&IpAddress ($user))

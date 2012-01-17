@@ -22,6 +22,10 @@ sub UpdateWeeklyStats
   undef (@weekly_stats) ;
 }
 
+# article count will be lower when full archive dump is processed!!
+# in stub dump all revisions for an article are either redirect or not determined by existence of one attribute for whole page: <redirect />
+# in full archive each revision can qualify for article count or not, an article can alternate between redirect and normal copntent
+# also revisions without internal link [[...]] do not qualify as article
 sub UpdateMonthlyStats
 {
   &LogPhase ("UpdateMonthlyStats") ;
@@ -43,8 +47,8 @@ sub UpdateMonthlyStats
   @csv_prev = @csv ;
   &ReadFileCsv ($file_csv_monthly_stats) ;
 
-# @user_stats_reg = sort {substr ($a,48,10) <=> substr ($b,48,10)} @user_stats_reg ;
-  @user_stats_reg_10_edits = sort {substr ($a,70,10) <=> substr ($b,70,10)} @user_stats_reg_10_edits ; # sort by tenth edit
+# @user_stats_reg = sort {substr ($a,84,10) <=> substr ($b,84,10)} @user_stats_reg ;
+  @user_stats_reg_10_edits = sort {substr ($a,106,10) <=> substr ($b,106,10)} @user_stats_reg_10_edits ; # sort by tenth edit
 
   # determine month, year of first edit
   # (in human format -> 1 <= month <= 12 )
@@ -67,8 +71,8 @@ sub UpdateMonthlyStats
   { $date = timegm (0,0,0,1,0,($year+1)-1900) ; }
 
   # add dummy record to simplify loop condition
-# push @user_stats_reg,          "99999999 99999999 99999999 99999999 99999 99999 9999999999 9999999999 9999999999" ;
-  push @user_stats_reg_10_edits, "99999999 99999999 99999999 99999999 99999 99999 9999999999 9999999999 9999999999" ;
+# push @user_stats_reg,          "99999999 99999999 99999999 99999999 99999999 99999999 99999999 99999999 99999 99999 9999999999 9999999999 9999999999" ;
+  push @user_stats_reg_10_edits, "99999999 99999999 99999999 99999999 99999999 99999999 99999999 99999999 99999 99999 9999999999 9999999999 9999999999" ;
   $users = 0 ;
   $prev_users = 0 ;
   $prev_articles = 0 ;
@@ -77,9 +81,9 @@ sub UpdateMonthlyStats
   {
     $edits_namespace_a        = substr ($user_rec, 0, 8) ;
     $edits_recent_namespace_a = substr ($user_rec, 9, 8) ;
-    $first                    = substr ($user_rec,48,10) ;
-    $tenth                    = substr ($user_rec,70,10) ;
-    $user                     = substr ($user_rec,81) ;
+    $first                    = substr ($user_rec,84,10) ;
+    $tenth                    = substr ($user_rec,106,10) ;
+    $user                     = substr ($user_rec,117) ;
 
     # if (index (lc($user), "conversion") != -1) { next ; }
     # if (index (lc($user), "konvertilo") != -1) { next ; } # eo:
@@ -115,7 +119,7 @@ sub UpdateMonthlyStats
        $tot_bytes, $tot_links, $tot_links_wiki,
        $tot_links_images, $tot_links_external,
        $tot_redirects, $articles_alt, $tot_words,
-       $tot_categorized) = split (',', $counts) ;
+       $tot_categorized, $pages_without_internal_link) = split (',', $counts) ;
 
       $new_articles = $articles - $prev_articles ;
       $new_articles_per_day = sprintf ("%.0f", ($new_articles / $days_passed)) ;
@@ -135,7 +139,8 @@ sub UpdateMonthlyStats
              $over_size1, $over_size2,
              $dummy8,
              $tot_bytes, $tot_words, $tot_links,
-             $tot_links_wiki, $tot_links_images, $tot_links_external, $tot_redirects, $tot_categorized) = split (',', $line) ;
+             $tot_links_wiki, $tot_links_images, $tot_links_external, $tot_redirects, $tot_categorized,
+             $pages_without_internal_link) = split (',', $line) ;
 
              if ($articles_alt_prev > $articles_alt)
              { $articles_alt = $articles_alt_prev ; }
@@ -165,7 +170,8 @@ sub UpdateMonthlyStats
               &csv ($tot_links_images).
               &csv ($tot_links_external).
               &csv ($tot_redirects).
-              &csv ($tot_categorized);
+              &csv ($tot_categorized).
+              &csv ($pages_without_internal_link);
 
       $line =~ s/.$// ;
       push @csv, $line ;
@@ -216,6 +222,8 @@ sub UpdateMonthlyStats
             if ($active_users == 0) { last ; }
             $line .= &csv ($active_users) ;
           }
+          # if ($t == 0)
+          # { &Log ("!! UpdateMonthlyStats: no counts for $line\n") ; }
           $line =~ s/.$// ;
           push @csv4, $line ;
         }
@@ -240,7 +248,6 @@ sub UpdateMonthlyStats
       $prev_articles = $articles ;
     }
   }
-
 
   &TraceRelease ("Release table \%articles_per_month") ;
   undef (%articles_per_month) ;
@@ -324,18 +331,22 @@ sub UpdateUsers
     if ($user_rec eq "")
     { next ; }
 #print USERSTATSREG "USER_REC '$user_rec'\n" ;
-    $edits_namespace_a        = substr ($user_rec, 0, 8) ;
-    $edits_recent_namespace_a = substr ($user_rec, 9, 8) ;
-    $edits_namespace_x        = substr ($user_rec,18, 8) ;
-    $edits_recent_namespace_x = substr ($user_rec,27, 8) ;
-    $rank_now                 = substr ($user_rec,36, 5) ;
-    $rank_prev                = substr ($user_rec,42, 5) ;
-    $first                    = substr ($user_rec,48,10) ;
-    $last                     = substr ($user_rec,59,10) ;
-    $tenth                    = substr ($user_rec,70,10) ;
-    $user                     = substr ($user_rec,81) ;
-    $days_first               = int (($dumpdate_gm - $first) / $secsinday) ;
-    $days_last                = int (($dumpdate_gm - $last)  / $secsinday) ;
+    $edits_namespace_a          = substr ($user_rec, 0, 8) ;
+    $edits_recent_namespace_a   = substr ($user_rec, 9, 8) ;
+    $edits_namespace_x          = substr ($user_rec,18, 8) ;
+    $edits_recent_namespace_x   = substr ($user_rec,27, 8) ;
+    $creates_namespace_a        = substr ($user_rec,36, 8) ;
+    $creates_recent_namespace_a = substr ($user_rec,45, 8) ;
+    $creates_namespace_x        = substr ($user_rec,54, 8) ;
+    $creates_recent_namespace_x = substr ($user_rec,63, 8) ;
+    $rank_now                   = substr ($user_rec,72, 5) ;
+    $rank_prev                  = substr ($user_rec,78, 5) ;
+    $first                      = substr ($user_rec,84,10) ;
+    $last                       = substr ($user_rec,95,10) ;
+    $tenth                      = substr ($user_rec,106,10) ;
+    $user                       = substr ($user_rec,117) ;
+    $days_first                 = int (($dumpdate_gm - $first) / $secsinday) ;
+    $days_last                  = int (($dumpdate_gm - $last)  / $secsinday) ;
 
 #   if ($edits_namespace_a < 3)
 #   { next ; }
@@ -417,18 +428,20 @@ sub UpdateBotEdits
   &LogPhase ("UpdateBotEdits") ;
   &TraceMem ;
 
-  &ReadFileCsv ($file_csv_bot_edits) ;
+  &ReadFileCsv ($file_csv_bot_actions) ;
 
   foreach $user_rec (@user_stats_bot)
   {
-    $edits_namespace_a = substr ($user_rec, 0, 8) ;
-    $edits_namespace_x = substr ($user_rec,18, 8) ;
-    $rank_now          = substr ($user_rec,36, 5) ;
-    $rank_prev         = substr ($user_rec,42, 5) ;
-    $first             = substr ($user_rec,48,10) ;
-    $last              = substr ($user_rec,59,10) ;
-    $tenth             = substr ($user_rec,70,10) ;
-    $user              = substr ($user_rec,81) ;
+    $edits_namespace_a          = substr ($user_rec, 0, 8) ;
+    $edits_namespace_x          = substr ($user_rec,18, 8) ;
+    $creates_namespace_a        = substr ($user_rec,36, 8) ;
+    $creates_recent_namespace_a = substr ($user_rec,45, 8) ;
+    $rank_now                   = substr ($user_rec,72, 5) ;
+    $rank_prev                  = substr ($user_rec,78, 5) ;
+    $first                      = substr ($user_rec,84,10) ;
+    $last                       = substr ($user_rec,95,10) ;
+    $tenth                      = substr ($user_rec,106,10) ;
+    $user                       = substr ($user_rec,117) ;
 
     $days_first   = int (($dumpdate_gm - $first) / $secsinday) ;
     $days_last    = int (($dumpdate_gm - $last)  / $secsinday) ;
@@ -441,6 +454,8 @@ sub UpdateBotEdits
                &csv ($user).
                &csv ($edits_namespace_a).
                &csv ($edits_namespace_x).
+               &csv ($creates_namespace_a).
+               &csv ($creates_recent_namespace_a).
                &csv ($rank_now).
                &csv ($rank_prev).
                &csv (&mmddyyyy ($first)).
@@ -449,8 +464,8 @@ sub UpdateBotEdits
                &csv ($days_last) ;
   }
 
-  @csv = sort {&csvkey_lang_rank_first3 ($a) cmp &csvkey_lang_rank_first3 ($b)} @csv ;
-  &WriteFileCsv ($file_csv_bot_edits) ;
+  @csv = sort {&csvkey_lang_rank_first4 ($a) cmp &csvkey_lang_rank_first4 ($b)} @csv ;
+  &WriteFileCsv ($file_csv_bot_actions) ;
 
   &TraceRelease ("Release table \@user_stats_bot") ;
   undef (@user_stats_bot) ;
@@ -495,11 +510,11 @@ sub UpdateUsersAnonymous
   {
     my $record = @userdata {$user} ;
     my @fields = split (',', $record) ;
-    if (@fields [$useritem_ip_namespace_a] >= $threshold)
+    if (@fields [$useritem_edit_ip_namespace_a] >= $threshold)
     {
       push @csv2, &csv ($language) .
-                  &csv  (@fields [$useritem_ip_namespace_a]) .
-                  &csv  (@fields [$useritem_ip_namespace_x]) .
+                  &csv  (@fields [$useritem_edit_ip_namespace_a]) .
+                  &csv  (@fields [$useritem_edit_ip_namespace_x]) .
                   &csv2 ($user) ;
     }
   }
@@ -541,18 +556,22 @@ sub UpdateActiveUsers
   $scan_users = 50 ;
   foreach $user_rec (@user_stats_reg)
   {
-    $edits_namespace_a        = substr ($user_rec, 0, 8) ;
-    $edits_recent_namespace_a = substr ($user_rec, 9, 8) ;
-    $edits_namespace_x        = substr ($user_rec,18, 8) ;
-    $edits_recent_namespace_x = substr ($user_rec,27, 8) ;
-    $rank_now                 = substr ($user_rec,36, 5) ;
-    $rank_prev                = substr ($user_rec,42, 5) ;
-    $first                    = substr ($user_rec,48,10) ;
-    $last                     = substr ($user_rec,59,10) ;
-    $tenth                    = substr ($user_rec,70,10) ;
-    $user                     = substr ($user_rec,81) ;
-    $days_first               = int (($dumpdate_gm - $first) / $secsinday) ;
-    $days_last                = int (($dumpdate_gm - $last)  / $secsinday) ;
+    $edits_namespace_a          = substr ($user_rec, 0, 8) ;
+    $edits_recent_namespace_a   = substr ($user_rec, 9, 8) ;
+    $edits_namespace_x          = substr ($user_rec,18, 8) ;
+    $edits_recent_namespace_x   = substr ($user_rec,27, 8) ;
+    $creates_namespace_a        = substr ($user_rec,36, 8) ;
+    $creates_recent_namespace_a = substr ($user_rec,45, 8) ;
+    $creates_namespace_x        = substr ($user_rec,54, 8) ;
+    $creates_recent_namespace_x = substr ($user_rec,63, 8) ;
+    $rank_now                   = substr ($user_rec,72, 5) ;
+    $rank_prev                  = substr ($user_rec,78, 5) ;
+    $first                      = substr ($user_rec,84,10) ;
+    $last                       = substr ($user_rec,95,10) ;
+    $tenth                      = substr ($user_rec,106,10) ;
+    $user                       = substr ($user_rec,117) ;
+    $days_first                 = int (($dumpdate_gm - $first) / $secsinday) ;
+    $days_last                  = int (($dumpdate_gm - $last)  / $secsinday) ;
 
 #   if ($user =~ m/^\d+\.\d+\.\d+\./) { next ; } # moved to RankUSerStats
 
@@ -574,6 +593,10 @@ sub UpdateActiveUsers
                  &csv ($edits_recent_namespace_a).
                  &csv ($edits_namespace_x).
                  &csv ($edits_recent_namespace_x).
+                 &csv ($creates_namespace_a).
+                 &csv ($creates_recent_namespace_a).
+                 &csv ($creates_namespace_x).
+                 &csv ($creates_recent_namespace_x).
                  &csv ($rank_now).
                  &csv ($rank_prev).
                  &csv (&mmddyyyy ($first)).
@@ -597,14 +620,16 @@ sub UpdateSleepingUsers
   $scan_users = 20 ;
   foreach $user_rec (@user_stats_reg)
   {
-    $edits_namespace_a = substr ($user_rec, 0, 8) ;
-    $edits_namespace_x = substr ($user_rec,18, 8) ;
-    $rank_now          = substr ($user_rec,36, 5) ;
-    $rank_prev         = substr ($user_rec,42, 5) ;
-    $first             = substr ($user_rec,48,10) ;
-    $last              = substr ($user_rec,59,10) ;
-    $tenth             = substr ($user_rec,70,10) ;
-    $user              = substr ($user_rec,81) ;
+    $edits_namespace_a   = substr ($user_rec, 0, 8) ;
+    $edits_namespace_x   = substr ($user_rec,18, 8) ;
+    $creates_namespace_a = substr ($user_rec,36, 8) ;
+    $creates_namespace_x = substr ($user_rec,54, 8) ;
+    $rank_now            = substr ($user_rec,72, 5) ;
+    $rank_prev           = substr ($user_rec,78, 5) ;
+    $first               = substr ($user_rec,84,10) ;
+    $last                = substr ($user_rec,95,10) ;
+    $tenth               = substr ($user_rec,106,10) ;
+    $user                = substr ($user_rec,117) ;
 
     $days_first   = int (($dumpdate_gm - $first) / $secsinday) ;
     $days_last    = int (($dumpdate_gm - $last)  / $secsinday) ;

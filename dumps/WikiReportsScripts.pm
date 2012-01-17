@@ -327,6 +327,7 @@ dev.off()
 
 __SCRIPT_EDIT_PLOT_REVERTS__
 
+
 #----------------------------------------------------------
 
 # PA = Plot Anons
@@ -442,6 +443,61 @@ dev.off()
 
 __SCRIPT_EDIT_PLOT_ANONS__
 
+# PB = Plot Binaries
+$out_script_plot_binaries = <<__SCRIPT_EDIT_PLOT_BINARIES__ ;
+$out_script_multititle
+
+plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:7]
+counts   <- plotdata[2:6]
+dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
+dates
+
+plotdata = data.frame(date=dates,counts)
+plotdata
+attach (plotdata)
+
+#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
+ library(Cairo)
+ Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
+
+options("scipen"=20)
+r <- as.POSIXct(round(range(dates), "days"))
+r
+
+par(mar=c(2.5,4,2.5,1.5))
+par(oma=c(0,0,0,0))
+
+#plot (dates,plotdata\$count_1,type="l", log="y", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0.001,YLIM_MAX))
+ plot (dates,plotdata\$count_1,type="l",          col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
+
+axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
+
+title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+
+lines(dates,plotdata\$count_1,col="COLOR_1", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_2,col="COLOR_2", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_3,col="COLOR_3", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_4,col="COLOR_4", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
+
+legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.04, bg="#E0E0E0")
+
+mtext("MAX_VALUE", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("MAX_MONTH: BINARIES ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
+
+box()
+dev.off()
+
+__SCRIPT_EDIT_PLOT_BINARIES__
+
 # PE = Plot Editors
 $out_script_plot_editors = <<__SCRIPT_EDIT_PLOT_EDITORS__ ;
 $out_script_multititle
@@ -484,7 +540,7 @@ lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=1.8)
 #legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits ", "(reg edits only)"), lty=1, lwd=2, col=c("COLOR_5","COLOR_25", "COLOR_100", "#F0F0F0"), inset=0.05, bg="#E0E0E0")
 legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.04, bg="#E0E0E0")
 
-mtext("max editors (5+ edits) in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("MAX_VALUE", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext("MAX_MONTH: EDITORS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
 mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
@@ -832,8 +888,10 @@ td.l {text-align:left;}
 td.lwrap {white-space:normal; text-align:left; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px}
 
 td.cb    {text-align:center; border: inset 1px #FFFFFF}
+td.cbg   {text-align:center; border: inset 1px #FFFFFF ; color:#808080; }
 td.lb    {text-align:left;   border: inset 1px #FFFFFF}
 td.rb    {text-align:right;  border: inset 1px #FFFFFF}
+td.rbg   {text-align:right;  border: inset 1px #FFFFFF ; color:#808080; }
 td.sigma {color:#400040;     border: inset 1px #FFFFFF}
 td.img   {padding:0px ; margin:0px ; border: inset 1px #FFFFFF}
 

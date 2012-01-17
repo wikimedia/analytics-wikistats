@@ -282,7 +282,7 @@ sub csvkey_edits_first
 {
   my $record = shift ;
   my $edits_namespace_a = substr ($record,0,8) ;
-  my $first             = substr ($record,48,10) ;
+  my $first             = substr ($record,84,10) ;
   return (sprintf ("%08d", (99999999 - $edits_namespace_a)) . sprintf ("%10d", $first)) ;
 }
 
@@ -291,7 +291,7 @@ sub csvkey_editsprev_first
   my $record = shift ;
   my $edits_namespace_a      = substr ($record,0,8) ;
   my $edits_prev_namespace_0 = substr ($record,10,8) ;
-  my $first                  = substr ($record,48,10) ;
+  my $first                  = substr ($record,84,10) ;
   return (sprintf ("%08d", (99999999 - ($edits_namespace_a - $edits_prev_namespace_0))) . sprintf ("%10d", $first)) ;
 }
 
@@ -308,6 +308,7 @@ sub csvkey_lang_rank_first2
 {
   my ($language, $name,
       $edits_namespace_a, $edits_recent_namespace_a,  $edits_namespace_x, $edits_recent_namespace_x,
+      $creates_namespace_a, $creates_recent_namespace_a,  $creates_namespace_x, $creates_recent_namespace_x,
       $rank, $rank2, $first, $ago) = split (",", (shift)) ;
 
   return ($language . sprintf ("%05d", $rank) . sprintf ("%05d", (99999 - $ago))) ;
@@ -316,6 +317,12 @@ sub csvkey_lang_rank_first2
 sub csvkey_lang_rank_first3
 {
   my ($language, $name, $edits_namespace_a, $edits_namespace_x, $rank, $rank2, $first, $ago) = split (",", (shift)) ;
+  return ($language . sprintf ("%05d", $rank) . sprintf ("%05d", (99999 - $ago))) ;
+}
+
+sub csvkey_lang_rank_first4
+{
+  my ($language, $name, $edits_namespace_a, $edits_namespace_x, $creates_namespace_a, $creates_namespace_x, $rank, $rank2, $first, $ago) = split (",", (shift)) ;
   return ($language . sprintf ("%05d", $rank) . sprintf ("%05d", (99999 - $ago))) ;
 }
 
