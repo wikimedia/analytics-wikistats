@@ -35,6 +35,19 @@
     a img     {border-color:black}
     ul { padding-left: 12px; margin-left: 10;  }
   </style>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25704186-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 
 <body>
@@ -126,13 +139,28 @@ document.write ("<ul>" +
   </div>
 
   <div id="fragment-12" style="background-color:#FFFFDD;">
-    <a href='#growth'>Growth</a> - <a href='#views'>Page Views</a> - <a href='#requests'>Server Requests</a> - <a href='#edits'>Edits</a> - <a href='#surges'>Traffic Surges</a> - <a href='#bots'>Bot Activity</a> - <a href='#mails'>Mailing Lists</a>
-    <p> 
-    <a href='#creation'>Creation History</a> - <a href='#recent'>Recent Months</a> - <a href='#status'>Current Status</a> - 
-    <a href='#dumps'>Dumps</a> - <a href='#categories'>Categories</a> - <a href='#books'>Wikibooks</a> 
+    <a href='#summaries'>Summaries</a> - <a href='#growth'>Growth</a> - 
+    <a href='#views'>Page Views</a> - <a href='#requests'>Server Requests</a> - <a href='#edits'>Edits</a> -
+    <a href='#surges'>Traffic Surges</a> - <a href='#feedback'>User Feedback</a><br>  
+    <a href='#bots'>Bot Activity</a> - <a href='#mails'>Mailing Lists</a> - 
+    <a href='#creation'>Creation History</a> -
+    <a href='#recent'>Recent Months</a> - <a href='#status'>Current Status</a> - <a href='#dumps'>Dumps</a> <br>
+    <a href='#categories'>Categories</a> - <a href='#books'>Wikibooks</a> - <a href='#booktool'>Book Tool</a>
     
     <hr width=500 align=left>
     <p>
+		<a id='summaries' name='summaries'></a>	
+		<h3><a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summaries for all Wikimedia Wikis</a></h3>
+		<p>For almost every Wikimedia wiki there is a summary report, to help you quickly assess<br>fundamentals, without getting avalanched by too many details from unwieldy tables.
+		<p>There are sets of summaries, also known as report cards, per project:<br><a title="report card Wikipedia" href="http://stats.wikimedia.org/EN/ReportCardTopWikis.htm">Wikipedia</a>, <a title="report card Wiktionary" href="http://stats.wikimedia.org/wiktionary/EN/ReportCardTopWikis.htm">Wiktionary</a>, <a title="report card Wikibooks" href="http://stats.wikimedia.org/wikibooks/EN/ReportCardTopWikis.htm">Wikibooks</a>, <a title="report card Wikinews" href="http://stats.wikimedia.org/wikinews/EN/ReportCardTopWikis.htm">Wikinews</a>, <a title="report card Wikiquote" href="http://stats.wikimedia.org/wikiquote/EN/ReportCardTopWikis.htm">Wikiquote</a>, <a title="report card Wikiversity" href="http://stats.wikimedia.org/wikiversity/EN/ReportCardTopWikis.htm">Wikiversity</a>, <a title="report card Wikisource" href="http://stats.wikimedia.org/wikisource/EN/ReportCardTopWikis.htm">Wikisource </a>and <a title="report card other WIkimedia projects" href="http://stats.wikimedia.org/wikispecial/EN/ReportCardTopWikis.htm">Other Projects</a>.</p>
+    <p>For Wikipedia there are also sets of summaries per region:<br><a title="report card Africa" href="http://stats.wikimedia.org/EN_Africa/ReportCardAfrica.htm">Africa</a>, <a title="report card America's" href="http://stats.wikimedia.org/EN_America/ReportCardAmerica.htm">America’s</a>, <a title="report card Asia" href="http://stats.wikimedia.org/EN_Asia/ReportCardAsia.htm">Asia</a>, <a title="report card Europe" href="http://stats.wikimedia.org/EN_Europe/ReportCardEurope.htm">Europe</a>, <a title="report card India" href="http://stats.wikimedia.org/EN_India/ReportCardIndia.htm">India</a>, <a title="report card Oceania" href="http://stats.wikimedia.org/EN_Oceania/ReportCardOceania.htm">Oceania</a>, and also for <a title="report card Artificial Languages" href="http://stats.wikimedia.org/EN_Artificial/ReportCardArtificial.htm">Artificial Languages</a>.</p>
+    <p>Finally for every wiki there is also a new ‘Summary’ link in the project sitemaps:&nbsp;<br><a title="Wikipedia sitemap" href="http://stats.wikimedia.org/EN/Sitemap.htm">Wikipedia</a>, <a title="Wiktionary sitemap" href="http://stats.wikimedia.org/wiktionary/EN/Sitemap.htm">Wiktionary</a>, <a title="Wikibooks sitemap" href="http://stats.wikimedia.org/wikibooks/EN/Sitemap.htm">Wikibooks</a>, <a title="Wikinews sitemap" href="http://stats.wikimedia.org/wikinews/EN/Sitemap.htm">Wikinews</a>, <a title="Wikiquote sitemap" href="http://stats.wikimedia.org/wikiquote/EN/Sitemap.htm">Wikiquote</a>, <a href="http://stats.wikimedia.org/wikiversity/EN/Sitemap.htm">Wikiversity</a>, <a title="Wikisource sitemap" href="http://stats.wikimedia.org/wikisource/EN/Sitemap.htm">Wikisource</a> and <a title="Sitemap other Wikimedia projects" href="http://stats.wikimedia.org/wikispecial/EN/Sitemap.htm">Other Projects</a>.</p>
+
+		<p>  
+		<a href='WikimediaProjectsGrowth.png'><img src='summary.png' width=500 border=1></a><br>
+    <hr width=500 align=left>
+    <p>
+
 		<a id='growth' name='growth'></a>	
 		<h3><a href='WikimediaProjectsGrowth.png'>Growth per Major Project</a></h3>
 		<p>
@@ -162,17 +190,19 @@ document.write ("<ul>" +
     <p>
 
 		<a id='views' name='views'></a>	
-    <h3><a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm">Page Views per Project</a></h3>
+    <h3><a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm">Page Views per Project</a></h3>
     <p>
     <a href="http://stats.wikimedia.org/wikibooks/EN/TablesPageViewsMonthly.htm">Wikibooks</a>, 
     <a href="http://stats.wikimedia.org/wikinews/EN/TablesPageViewsMonthly.htm">Wikinews</a>, 
-    <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm">Wikipedia</a>, 
+    <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm">Wikipedia</a>,
     <a href="http://stats.wikimedia.org/wikiquote/EN/TablesPageViewsMonthly.htm">Wikiquote</a>, 
     <a href="http://stats.wikimedia.org/wikisource/EN/TablesPageViewsMonthly.htm">Wikisource</a>, 
     <a href="http://stats.wikimedia.org/wikiversity/EN/TablesPageViewsMonthly.htm">Wikiversity</a>, 
     <a href="http://stats.wikimedia.org/wikispecial/EN/TablesPageViewsMonthly.htm">Wikispecial</a>, 
     <a href="http://stats.wikimedia.org/wiktionary/EN/TablesPageViewsMonthly.htm">Wiktionary</a>
-    <br>Also <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm">Summary for all projects</a>
+    <br>Also <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm">Summary for all projects</a>, 
+       <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm">Wikipedia main site only</a>, 
+       <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm">Wikipedia mobile site only</a>
 
     <p>
     <a href="http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm"><img src="PageViewsNew.png" border="1"></a>
@@ -258,8 +288,23 @@ document.write ("<ul>" +
       
     <hr width=500 align=left>
     <p>
+		<a id='feedback' name='feedback'></a>	
+    <h3><a href="http://toolserver.org/~dartar/moodbar/">User Feedback</a></h3>
+    <p>
+    <a href="http://toolserver.org/~dartar/moodbar/">Moodbar</a>, total daily posts, also breakdown by editor class<br> 
+    <a href="http://toolserver.org/~dartar/wikilove/">Wikilove</a>, daily messages<br> 
+    <a href="http://toolserver.org/~dartar/aft/">Article Feedback Trend</a>, daily ratings, also ratings per page view</a><br> 
+    <a href="http://toolserver.org/~dartar/aft2/">Article Feedback per Article</a> 
+    <p>
+    <a href="http://toolserver.org/~dartar/moodbar/"><img src="moodbar.jpg" border="1"></a>
+    <p>
+    <hr width=500 align=left>
+    <p>
+
+    <hr width=500 align=left>
+    <p>
 		<a id='bots' name='bots'></a>	
-    <h3><a href="http://stats.wikimedia.org/EN/BotActivityMatrix.htm">Bot activity</a></h3>
+    <h3><a href="http://stats.wikimedia.org/EN/BotActivityMatrix.htm">Bot Activity</a></h3>
     <p>
     <a href="http://stats.wikimedia.org/wikibooks/EN/BotActivityMatrix.htm">Wikibooks</a>, 
     <a href="http://stats.wikimedia.org/wikinews/EN/BotActivityMatrix.htm">Wikinews</a>, 
@@ -375,6 +420,13 @@ document.write ("<ul>" +
     <a href="http://stats.wikimedia.org/wikispecial/EN/TablesRecentTrends.htm">Wikispecial</a>, 
     <a href="http://stats.wikimedia.org/wiktionary/EN/TablesRecentTrends.htm">Wiktionary</a>
 
+
+    <hr width=500 align=left>
+    <p>
+		<a id='booktool' name='booktool'></a>	
+    <h3><a href="http://stats.wikimedia.org/reportcard/booktool/BookTool.html">Book Tool</a></h3>
+    <p>
+    <a href="http://stats.wikimedia.org/reportcard/booktool/BookTool.html"><img src="booktool.png" border="1"></a>
 
     <hr width=500 align=left>
     <p>
@@ -641,6 +693,7 @@ document.write ("<ul>" +
     <p>Anonymous edits per day/hour for current month
     <p>Author <a href='http://meta.wikimedia.org/wiki/User:Krinkle'>user Krinkle</a>
       (see also <a href='http://meta.wikimedia.org/wiki/User:Krinkle/Tools'>many other tools</a> by Krinkle)
+    <hr width=500 align=left>      
 
     <h3><a href='http://toolserver.org/~krinkle/wikimedia-svn-stats.php'>SVN Statistics</h3>
     <p>
@@ -648,8 +701,30 @@ document.write ("<ul>" +
     <p>SVN edits by category
     <p>Author <a href='http://meta.wikimedia.org/wiki/User:Krinkle'>user Krinkle</a>
       (see also <a href='http://meta.wikimedia.org/wiki/User:Krinkle/Tools'>many other tools</a> by Krinkle)
-
     <hr width=500 align=left>      
+      
+    <p>
+    <h3><a href='http://visualdata.dw-world.de/de/wikipedia/'>10 Years German Wikipedia</h3>
+    <p>
+    <a href="http://visualdata.dw-world.de/de/wikipedia/"><img src="german_wikipedia.jpg" border="1"></a>
+    <p>Wikistats trends for German Wikipedia, visualized as spiral
+    <p>Authors Steffen Leidel, Gregor Aisch (<a href='http://www.dw-world.de/'>Deutsche Welle</a>)
+    <hr width=500 align=left>      
+      
+    <p>
+    <h3><a href='http://inkdroid.org:3000/'>Wikistream</h3>
+    <p>
+    <a href="http://inkdroid.org:3000/"><img src="wikistream.png" border="1"></a>
+    <p>Real-time scrolling display of all Wikipedia edits. Background shows recently uploaded images.
+    <p>Authors: Ed Summers (<a href='http://twitter.com/edsu'>Twitter: edsu</a>), Sean Hannan (<a href='http://twitter.com/mrdys'>Twitter: MrDys</a>), Delphine Ménard (<a href='http://twitter.com/notafish'>Twitter: notafish</a>)
+    <hr width=500 align=left>      
+
+    <p>
+    <h3><a href='http://en.wikipedia.org/wiki/Wikipedia:WikiProject_Birds/Popular_pages'>WikiProject Popular Pages</h3>
+    <p>
+    <a href='http://en.wikipedia.org/wiki/Wikipedia:WikiProject_Birds/Popular_pages'><img src="PopularPages.png" border="1"></a>
+    <p>Popular pages per WikiProject, added to the project talk page by a bot, by special request.
+    <p>Author: <a href='http://en.wikipedia.org/wiki/User_talk:Mr.Z-man'>Mr.Z-man</a>
   </div>
 
   <div id="fragment-14" style="background-color:#FFFFDD;">
@@ -718,14 +793,14 @@ document.write ("<ul>" +
     <p>
     <a href='http://stats.wikimedia.org/csv_wp.zip'><img src="csv-file.png" border="1"></a><p>
     Raw data in <a href='http://en.wikipedia.org/wiki/Comma-separated_values'>csv format</a> (can be imported in spreadsheet):<br> 
-    <a href='http://stats.wikimedia.org/csv_wb.zip'>Wikibooks</a>, 
-    <a href='http://stats.wikimedia.org/csv_wn.zip'>Wikinews</a>, 
-    <a href='http://stats.wikimedia.org/csv_wp.zip'>Wikipedia</a>, 
-    <a href='http://stats.wikimedia.org/csv_wq.zip'>Wikiquote</a>, 
-    <a href='http://stats.wikimedia.org/csv_ws.zip'>Wikisource</a>, 
-    <a href='http://stats.wikimedia.org/csv_wv.zip'>Wikiversity</a>, 
-    <a href='http://stats.wikimedia.org/csv_wx.zip'>Wikispecial</a>, 
-    <a href='http://stats.wikimedia.org/csv_wk.zip'>Wiktionary</a>
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wb.zip'>Wikibooks</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wn.zip'>Wikinews</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wp.zip'>Wikipedia</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wq.zip'>Wikiquote</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_ws.zip'>Wikisource</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wv.zip'>Wikiversity</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wx.zip'>Wikispecial</a>, 
+    <a href='http://dumps.wikimedia.org/other/pagecounts-ez/dumps/csv_wk.zip'>Wiktionary</a>
     
     <p>
     <a href='http://stats.wikimedia.org/scripts.zip'><img src="perl.png" border="1"></a><p>
@@ -920,6 +995,7 @@ document.write ("<ul>" +
 			<br><a href='http://stats.wikimedia.org/EN/BotActivityMatrix.htm'>Their contribution</a> increased considerably over the years. Distinguishing between human editors and bots
 	    <br>has therefore become more and more urgent, and is now a work in progress. For example <a href='http://stats.wikimedia.org/EN/TablesWikipediaEN.htm#activitylevels'>edit activity</a> is now differentiated. 
   	</dl>		
+
 		<p>
     <hr width=500 align=left>
     <table>
