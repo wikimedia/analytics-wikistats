@@ -24,7 +24,7 @@
     $root_out = '@html' ;
     $do_iconv = $false ;
   }
-
+  
   $version  = '0.2' ;
   $datetime = &GetDateTimeEnglishShort (time) ;
 
@@ -97,6 +97,9 @@ sub Init
 'charles.r.matthews at ntlworld.com' => 'Charles Matthews',
 'delirium@hackish.org' => 'Delirium',
 'Effe iets anders' => 'effe iets anders',
+'effeietsanders@gmail.com' => 'effe iets anders',
+'lodewijk@effeietsanders.org' => 'effe iets anders',
+'Lodewijk' => 'effe iets anders',
 'Elly Waterman' => 'Ellywa',
 'epzachte@chello.nl' => 'Erik Zachte',
 'erik_moeller@gmx.de' => 'Erik Moeller',
@@ -282,6 +285,7 @@ sub ScanFile
 
     if ($line =~ /^From\:.*\((.*)\)/i)
     {
+
       ($name) = $line =~ /^From\:.*?\((.*)\)\s*$/ ;
       $name =~ s/\s*\(gmail\)\s*//i ;
       $name =~ s/\s*\.+\s*$//i ;
@@ -351,6 +355,8 @@ sub ScanFile
 
       elsif  (($name eq 'Tim Shell')         && ($period > 2004*12+5) && ($period < 2006*12+12))
       { $board = $true ; }
+
+      $board = $false ; # June 2011, disable all board counts (for now)
 
       if ($board == $true)
       {
@@ -670,6 +676,9 @@ sub WriteTopNameStats
       $green3 = "\#00${green2}00" ;
       $blue3  = "\#0000${blue2}" ;
       $mix   = "\#${red2}${green2}${blue2}" ;
+
+      &Log ("Name $name " . @totposts {"#800000"} ." , " . @totposts {"#008000"} . " , "  . @totposts {"#000080"} . "\n") ;
+      &Log ("Name $name red $red $red2 $red3, green $green $green2 $green3, blue $blue $blue2 $blue3 mix $mix maxcolor $maxcolor\n") ;
     }
 
     $images = "<td bgcolor=$red3>&nbsp;</td>" .
@@ -693,7 +702,9 @@ sub WriteTopNameStats
       $folder =~ s/\|.*$// ;
 
       $color = '#800000' ;
-      if ($folder =~ /(?:tech|cvs|mediawiki|server|bots|commons|translator)/i)
+      if ($folder =~ /research/i)
+      { ; }
+      elsif ($folder =~ /(?:tech|cvs|mediawiki|server|bots|commons|translator|dump|pywiki)/i)
       { $color = '#000080' ; }
       elsif (($folder =~ /(?:^wiki|wiktio|textbook)/i) && ($folder !~ /^wikimedia/i))
       { $color = '#008000' ; }
@@ -712,7 +723,7 @@ sub WriteTopNameStats
 
   $output .= "<small><a id='colours' name='colours'><p>" .
              "Mailing lists have been divided into three groups:" .
-             "<ul><li><font color='800000'>F: Mainly foundation or chapter oriented</font>" .
+             "<ul><li><font color='800000'>F: Mainly movement, foundation or chapter oriented</font>" .
              "<li><font color='008000'>P: Mainly project oriented</font>" .
              "<li><font color='000080'>T: Mainly technically oriented</font>" .
              "</ul><p>" .
@@ -727,9 +738,11 @@ sub WriteTopNameStats
 
 sub GetFolderColor
 {
-        my $folder = shift ;
+  my $folder = shift ;
   my $color= '#800000' ;
-  if ($folder =~ /(?:tech|cvs|mediawiki|server|bots|commons|translator)/i)
+  if ($folder =~ /research/i)
+  { ; }
+  elsif ($folder =~ /(?:tech|cvs|mediawiki|server|bots|commons|translator|dump|pywiki|wikitext|maps)/i)
   { $color = '#000080' ; }
   elsif (($folder =~ /(?:^wiki|wiktio|textbook)/i) && ($folder !~ /^wikimedia/i))
   { $color = '#008000' ; }
@@ -831,7 +844,7 @@ sub WriteListIndex
 
   $output .= "<small><a id='colours' name='colours'><p>" .
              "Mailing lists have been divided into three groups:" .
-             "<ul><li><font color='800000'>F: Mainly foundation or chapter oriented</font>" .
+             "<ul><li><font color='800000'>F: Mainly movement, foundation or chapter oriented</font>" .
              "<li><font color='008000'>P: Mainly project oriented</font>" .
              "<li><font color='000080'>T: Mainly technically oriented</font>" .
              "</ul><p>" .
