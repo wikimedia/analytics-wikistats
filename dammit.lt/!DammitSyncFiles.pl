@@ -2,6 +2,11 @@
 
 # 27 April 2010 renamed from WikiStatsDammitSync.pl
 
+# Up till October 2011: copy new files from dammit.lt/wikistats
+# Starting November 2011: copy new files directly from WMF server
+# Later maybe don't copy large pagecounts files at all. Rather process these files directly from other server.
+# For now do copy files to this server until other jobs are ready to accept new location (and not unlinking after compression step etc).
+
   use Time::Local ;
   use Archive::Tar;
 
