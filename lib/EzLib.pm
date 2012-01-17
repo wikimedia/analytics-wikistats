@@ -503,7 +503,7 @@ END
     print "\n" . '=' x 80 . "\n\n$msg\n\n" ;
   }
 
-  if ($trace_on_exit || $trace_on_exit_verbose)
+  if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)
   {
     print "Prog: $name_program\n" ;
     print "Path: $path_program\n" ;
