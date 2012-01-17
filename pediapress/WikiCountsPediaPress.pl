@@ -14,21 +14,29 @@
   use WikiCountsLog ;
 
   $dir_in  = "W:/\# In PediaPress" ;
-  $dir_out = "W:/\# Out Test/csv_wp" ;
+  $dir_out = "W:/\@ Report Card/PediaPress" ;
 
   $file_csv_country_codes = "CountryCodes.csv" ;
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
   &ReadInputCountriesNames ;
 
-  &ReadMonthlySales ("$dir_in/wmf-report-2010-08.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf-report-2010-09.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2010-08.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2010-09.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2010-10.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2010-11.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2010-12.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2011-01.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2011-02.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2011-03.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2011-04.csv") ;
+  &ReadMonthlySales ("$dir_in/wmf_report_2011-05.csv") ;
 
   &ProcessMonthlySales ;
 
-  &WriteMonthlySales ("$dir_out/PediaPressSalesMonthlyCountriesHorizontal.csv",
-                      "$dir_out/PediaPressSalesMonthlyCountriesVertical.csv",
-                      "$dir_out/PediaPressSalesMonthlyCountriesPlotBooks.csv") ;
+  &WriteMonthlySales ("$dir_out/BookToolSalesMonthlyDetailedOneRowPerMonth.csv",
+                      "$dir_out/BookToolSalesMonthlyDetailedBreakdownPerCountry.csv",
+                      "$dir_out/BookToolSalesMonthlyConciseBooksShippedOnly.csv") ;
 
   print "\n\Ready\n\n" ;
   exit ;
@@ -177,7 +185,7 @@ sub WriteMonthlySales
   print         "$line_csv2\n" ;
   print CSV_OUT "$line_csv2\n" ;
 
-  foreach $month (sort {$b cmp $a} keys %months)
+  foreach $month (sort {$a cmp $b} keys %months)
   {
     $line_csv = "$month" ;
     foreach $country (sort {$sales_per_country {$b} <=> $sales_per_country {$a}} keys %sales_per_country)
@@ -207,7 +215,7 @@ sub WriteMonthlySales
     print          $line_csv ;
     print CSV_OUT  $line_csv ;
 
-    foreach $month (sort {$b cmp $a} keys %months)
+    foreach $month (sort {$a cmp $b} keys %months)
     {
       $line_csv = "$month," . $metrics_monthly {"$month,$country_code"} . "\n";
       print          $line_csv ;
@@ -233,7 +241,7 @@ sub WriteMonthlySales
   print          "$line_csv\n" ;
   print CSV_OUT  "$line_csv\n" ;
 
-  foreach $month (sort {$b cmp $a} keys %months)
+  foreach $month (sort {$a cmp $b} keys %months)
   {
     $line_csv   = "$month" ;
     foreach $country_code (sort {$sales_per_country {$b} <=> $sales_per_country {$a}} keys %sales_per_country)
