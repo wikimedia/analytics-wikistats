@@ -1,17 +1,9 @@
-  #!/usr/local/bin/perl
+#!/usr/local/bin/perl
 
 # 4/27/2010 renamed from WikiStatsCompactDammitFiles.pl
 
-# http://article.gmane.org/gmane.science.linguistics.wikipedia.technical/38154/match=new+statistics+stuff
-# http://svn.wikimedia.org/viewvc/mediawiki/trunk/webstatscollector/
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=13541
-# http://de.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases
-
-# Ideas:
-# 1 namespace string -> namespace number ? (may not save much space: compress will deal with recurring patterns like these)
-# 2 frequenty distribution hits per file per first letter _-> manifest crawler
-#   assuming crawler collects articles in alphabetical order
-# 3 first letter uppercase -> sort (in sections per first two chars ?)
+# 17/11/2011 removed most dead code
+# removed WriteTotalsPerNameSpace, these dayta were discarded anyway on next step: merging daily aggregates into monthly aggregate
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
@@ -26,6 +18,7 @@
   use URI::Escape;
   use Getopt::Std ;
   use Cwd ;
+
   $bayes = -d "/a/dammit.lt" ;
   $path_7za = "/usr/lib/p7zip/7za" ;
   if (! $bayes)
@@ -40,7 +33,6 @@
   $true  = 1 ;
   $false = 0 ;
   $threshold = 0 ;
-  undef %totals_per_namespace ;
 
   $filter = "^(?:outreach|quality|strategy|usability)\.m\$" ;
   print "Filter: $filter\n" ;
@@ -160,7 +152,7 @@ sub MergeFilesFullDay
   my $month = substr ($date,4,2) ;
   my $day   = substr ($date,6,2) ;
 
-  my ($file_out1, $file_out2, $file_out3, $out_gz) ;
+  my ($file_out2, $out_gz) ;
 
   $dir_out = "$dir_out/${year}-${month}" ;
   if (! -d $dir_out)
@@ -215,16 +207,12 @@ sub MergeFilesFullDay
   # open OUT, ">", $file_out ;
   # binmode $file_out ;
 
-  # print "File_out1 $file_out1\n" ;
   # print "File_out2 $file_out2\n" ;
-  # print "File_out3 $file_out3\n" ;
 
-# my $out_gz1 = IO::Compress::Gzip->new ($file_out1) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
   if ($bayes)
   {
-  # $file_out1 = "$dir_out/pagecounts-$year$month$day" . "_fd"  ; # full day
     $file_out2 = "$dir_out/pagecounts-$year$month$day" . "_h" ; # full day, hourly data
-  # $file_out3 = "$dir_out/pagecounts-$year$month$day" . "_d" ; # full day, compact, just daily totals
+
     if ((-e "$file_out2.7z") || (-e "$file_out2.bz2") || (-e "$file_out2.zip") || (-e "$file_out2.gz"))
     {
       &Log ("\nTarget file '$file_out2.[7z|bz2|zip|gz]' exists already. Skip this date.\n") ;
@@ -237,20 +225,14 @@ sub MergeFilesFullDay
     }
 
     open $out_gz2, ">", "$file_out2" || &Abort ("Output file '$file_out2' could not be opened.") ;
-  # open $out_gz3, ">", "$file_out3" || &Abort ("Output file '$file_out3' could not be opened.") ;
   }
   else
   {
-  # $file_out1 = "$dir_out/pagecounts-$year$month$day" . "_fd.gz"  ; # full day
     $file_out2 = "$dir_out/pagecounts-$year$month$day" . "_h.gz" ; # full day, count above threshold
     $out_gz2 = IO::Compress::Gzip->new ($file_out2) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-  # $file_out3 = "$dir_out/pagecounts-$year$month$day" . "_d.gz" ; # full day, count above threshold
-  # $out_gz3 = IO::Compress::Gzip->new ($file_out3) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
   }
 
-# binmode $out_gz1 ;
   binmode $out_gz2 ;
-# binmode $out_gz3 ;
 
   $file_filtered = "$dir_filtered/pagecounts-$year$month$day.txt" ;
   &Log ("\nFilter file: $file_filtered\n") ;
@@ -301,7 +283,6 @@ sub MergeFilesFullDay
   $comment .= "# Counts format is total per day, followed by count per hour if larger than zero, hour 0..23 shown as A..X (saves up to 22 bytes per line compared to comma separated values)\n" ;
   $comment .= "# If data are missing for some hour (file missing or corrupt) a question mark (?) is shown (and for each missing hour the daily total is incremented with hourly average)\n" ;
   print $out_gz2 $comment ;
-# print $out_gz3 $comment ;
 
   if ($files_in_found < 24)
   {
@@ -320,9 +301,8 @@ sub MergeFilesFullDay
   {
     print $out_gz2 "#\n" ;
     print $out_gz2 "# In this file data are missing for hour(s) $hours_missing!\n" ;
-  # print $out_gz3 "#\n" ;
-  # print $out_gz3 "# In this file data are missing for hour(s) $hours_missing!\n" ;
   }
+
   $comment  = "#\n" ;
   $comment .= "# Lines starting with ampersand (@) show totals per 'namespace' (including omitted counts for low traffic articles)\n" ;
   $comment .= "# Since valid namespace string are not known in the compression script any string followed by colon (:) counts as possible namespace string\n" ;
@@ -331,8 +311,8 @@ sub MergeFilesFullDay
   $comment .= "#\n" ;
   $comment .= "# Page titles are shown unmodified (preserves sort sequence)\n" ;
   $comment .= "#\n" ;
+
   print $out_gz2 $comment ;
-# print $out_gz3 $comment ;
 
   $key_low_prev = "" ;
   while ($files_in_open > 0)
@@ -437,8 +417,6 @@ sub MergeFilesFullDay
     }
 
     # print OUT "$key_low $total$counts\n" ;
-#    print $out_gz1 "$key_low $total$counts\n" ;
-
     ($lang,$title) = split (' ', $key_low) ;
 
     $title =~ s/\%20/_/g ;
@@ -457,17 +435,11 @@ sub MergeFilesFullDay
       { print "F $lang\n" ; }
       # else
       # { print "- $lang\n" ; }
-
-      &WriteTotalsPerNamespace ($out_gz2, $langprev) ;
-    # &WriteTotalsPerNamespace ($out_gz3, $langprev) ;
-      undef %totals_per_namespace ;
     }
     $langprev = $lang ;
 
     if (($files_in_found < 24) && ($files_in_found > 0)) # always > 0 actually
     { $total = sprintf ("%.0f",($total / $files_in_found) * 24) ; }
-
-    $totals_per_namespace {"$lang $namespace"} += $total ;
 
     if ($filter_matches)
     { print $out_filtered "$key_low $total$counts\n" ; }
@@ -481,16 +453,13 @@ sub MergeFilesFullDay
     }
 
     if ($total >= $threshold)
-    { print $out_gz2 "$key_low $total$counts\n" ;
-    # print $out_gz3 "$key_low $total\n" ;
-    }
+    { print $out_gz2 "$key_low $total$counts\n" ; }
 
     $key_low_prev = $key_low ;
   # print "OUT $key_low $counts\n" ;
   }
 
   &WriteTotalsPerNamespace ($out_gz2, $langprev) ;
-# &WriteTotalsPerNamespace ($out_gz3, $langprev) ;
 
   &Log ("File production took " . (time-$time_start) . " seconds\n\n") ;
 
@@ -499,9 +468,7 @@ sub MergeFilesFullDay
 
   if ($bayes)
   {
-  # close $out_gz1 ;
     close $out_gz2 ;
-  # close $out_gz3 ;
     close $out_filtered ;
 
 #    $cmd = "$path_7za a $file_out2.7z $file_out2" ;
@@ -543,17 +510,11 @@ sub MergeFilesFullDay
       # unlink "$file_out2.7z" ;
     }
 
-  # $cmd = "bzip2 -9 -v $file_out3" ;
-  # &Log ("\n$cmd ->\n") ;
-  # $result = `$cmd` ;
-  # &Log ("\n\n") ;
     &Log ("Compression took " . (time-$time_start_compression) . " seconds\n\n") ;
   }
   else
   {
-  # $out_gz1->close() ;
     $out_gz2->close() ;
-  # $out_gz3->close() ;
     close $out_filtered ;
   }
 
@@ -563,33 +524,6 @@ sub MergeFilesFullDay
 
   &Log ("\nTotals per namespace written: $lines_namespace_counts\n") ;
   &Log ("Processed in " . (time-$time_start) . " seconds\n\n") ;
-}
-
-sub WriteTotalsPerNamespace
-{
-  my $out_gz = shift ;
-  my $lang = shift ;
-  my $total ;
-  my $totals_per_namespace_other ;
-
-  foreach my $key (sort keys %totals_per_namespace)
-  {
-    $total = $totals_per_namespace {$key} ;
-    if ($total < 5)
-    { $totals_per_namespace_other += $total ; }
-    else
-    {
-      # print "@ $key $total\n"  ;
-      print $out_gz "@ $key $total\n"  ;
-      $lines_namespace_counts ++ ;
-    }
-  }
-  if ($totals_per_namespace_other > 0 )
-  {
-    # print "@ $lang -other- $totals_per_namespace_other\n"  ;
-    print $out_gz "@ $lang -other- $totals_per_namespace_other\n"  ;
-    $lines_namespace_counts ++ ;
-  }
 }
 
 sub Log
@@ -607,358 +541,15 @@ sub Abort
   exit ;
 }
 
-#=============================================================================================================
+# http://article.gmane.org/gmane.science.linguistics.wikipedia.technical/38154/match=new+statistics+stuff
+# http://svn.wikimedia.org/viewvc/mediawiki/trunk/webstatscollector/
+# https://bugzilla.wikimedia.org/show_bug.cgi?id=13541
+# http://de.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=general|namespaces|namespacealiases
 
-#sub Compact
-#{
-#  my $day = shift ;
-#  &Log ("Compact files for $day\n") ;
-
-#  $file_in  = "pagecounts-$day.out" ;
-#  $file_out1 = "pagecounts-${day}_all.gz" ;
-#  $file_out2 = "pagecounts-${day}_10plus.gz" ;
-#  open IN, "<", $file_in ;
-#  binmode $file_in ;
-
-#  my $out_gz1 = IO::Compress::Gzip->new ($file_out1) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-#  my $out_gz2 = IO::Compress::Gzip->new ($file_out2) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-
-#  open OUT, ">", $file_out ;
-#  binmode $file_out ;
-
-#  $lang_prev = "" ;
-#  while ($line = <IN>)
-#  {
-#    chomp ($line) ;
-#    ($lang, $title, $counts) = split (' ', $line) ;
-#    $title2 = $title ;
-#    $title =~ s/\%20/_/g ;
-#    $title =~ s/\%3A/:/g ;
-#  # $title =~ s/\%([0-9A-F]{2})/chr(hex($1))/ge ;
-#  # if ($title =~ /[\x00-\x1F]/)
-#  # { &Log ("> '$title2'\n") ; }
-#    $title =~ s/\x00-\x1F/"%" . sprintf ("%X", ord($1)) ;/ge ;
-#    print $out_gz1 "$lang $title $counts\n" ;
-#    ($counts2 = $counts) =~ s/^(\d+).*/$1/ ;
-#    if ($counts2 >= $threshold)
-#    { print $out_gz2 "$lang $title $counts\n" ; }
-#    $lang_prev = $lang ;
-#  }
-#
-#  close IN ;
-#  $out_gz1->close() ;
-#  $out_gz2->close() ;
-#}
-
-
-#sub GetViewDistribution
-#{
-#  open OUT, ">", "Views.csv" ;
-#  foreach $file_in (@files)
-#  {
-#    ($hour = $file_in) =~ s/^pagecounts-\d+-(\d\d)\d+\.gz$/$1/ ;
-#    $hour = chr(ord('A')+$hour) ;
-#    &Log ("Process $hour $file_in\n") ;
-
-#    $in_gz1 = IO::Uncompress::Gunzip->new ($file_in) || &Abort ("IO::Uncompress::Gunzip failed: $GunzipError\n") ;
-#    while ($line = <$in_gz1>)
-#    {
-#      ($lang,$title,$count,$dummy) = split (' ', $line) ;
-#      if (($lang eq "en") && ($title !~ /:/)) # only en: and namespace 0
-#      {
-#        $tot {$hour} += $count ;
-#        if ($count < 3)
-#        { @counts {$hour . substr ($title,0,1)}++ ; }
-#      }
-#    }
-#    $in_gz1->close () ;
-#  }
-#
-#  print OUT "," ;
-#  foreach $hour ('A'..'X')
-#  {  print OUT $hour . ", " ; }
-#  print OUT "\n" ;
-#
-#  print OUT "," ;
-#  foreach $hour ('A'..'X')
-#  {  print OUT $tot {$hour} . ", " ; }
-#  print OUT "\n" ;
-#
-#  for ($c=0; $c < 256; $c++)
-#  {
-#    # do not print chars " and , as such: confuses csv format
-#    if ($c < 33)
-#    { print OUT "chr($c), " ; }
-#    elsif (chr($c) eq '"')
-#    { print OUT "dquote, " ; }
-#    elsif (chr($c) eq ',')
-#    { print OUT "comma, " ; }
-#    else
-#    { print OUT chr($c) . ", " ; }
-#
-#    foreach $hour ('A'..'X')
-#    {  print OUT (0+@counts {$hour.chr($c)}) , ", " ; }
-#
-#    if ($c < 255)
-#    { print OUT "\n" ; }
-#  }
-#  close OUT ;
-#}
-
-
-#sub RecompactVisitorStats
-#{
-#  my $dir_in = "D:/Wikipedia_Visitors/full_day/" ;
-#  chdir ($dir_in) || &Abort ("Cannot chdir to $dir_in\n") ;
-#  local (*DIR);
-#  opendir (DIR, ".");
-#  @files = () ;
-#  while ($file_in = readdir (DIR))
-#  {
-#    next if $file_in !~ /^pagecounts-\d{8,8}_fd.gz$/ ;
-#
-#    push @files, $file_in ;
-#  }
-
-#  $filecnt = $#files+1 ;
-#  @files = sort { substr ($a, 20,2) <=> substr ($b, 20,2)} @files ;
-
-#  foreach $file (@files)
-#  { &RecompactVisitorStats2 ($file) ; }
-#  closedir (DIR, ".");
-#}
-
-#sub RecompactVisitorStats2
-#{
-## http://www.7-zip.org/7z.html
-#  my $file = shift ;
-#  my $time_start = time ;
-#  my $path_7z  = "D:/Wikipedia_Visitors/7z.exe" ;
-## my $file_in  = "D:/Wikipedia_Visitors/full_day/2008-07-pagecounts/pagecounts-20080702_fd.gz" ;
-#  my $file_in  = "D:/Wikipedia_Visitors/full_day/$file" ;
-#  my $file_out ; ($file_out  = $file_in) =~ s/gz$/txt/ ;
-#  my $file_7z ;  ($file_7z  = $file_in) =~ s/gz$/7z/ ;
-
-#  &Log ("Process $file_in\n") ;
-
-#  $in_gz  = IO::Uncompress::Gunzip->new ($file_in) || &Abort ("IO::Uncompress::Gunzip failed for '$file_in': $GunzipError\n") ;
-#  binmode $in_gz ;
-#  open OUT, ">", $file_out ;
-#  binmode OUT ;
-
-#  my ($title, $title2) ;
-#  while ($line = <$in_gz>)
-#  {
-#    chomp ($line) ;
-#    ($lang,$title,$counts) = split (" ", $line) ;
-
-#    if ($lang ne $lang_prev) { print "$lang " ; }
-#    $lang_prev = $lang ;
-
-#    # test pagecounts-20080701_fd.gz
-#    # all records  424 Mib compressed (1984 uncompressed)
-#    # count > 1    212 Mib compressed ( 733 uncompressed)
-#    # count > 2    169 Mib compressed ( 551 uncompressed)
-#    next if $counts <= 1 ;
-
-#    $title =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/seg;
-#    $title =~ s/\s/_/g;
-#    $lang  =~ s/\.z// ; # remove codes that were added to fix sort sequence
-#    $lang  =~ s/\.y/2/ ;
-
-#    print OUT "$lang $title $counts\n" ;
-#  }
-
-#  print "Close files\n" ;
-#  $in_gz  -> close () ;
-#  close (OUT) ;
-
-#  &Log ("Compress $file_out\n") ;
-
-#  unlink $file_7z ;
-#  $result = `$path_7z a $file_7z $file_out` ;
-#  &Log ("Compressed\n") ;
-#  &Log ("Result " . ($result+0) . " \n") ;
-#  if ((-e $file_7z) && (-s $file_7z > 0) && (($result == 0) || ($result == 7)))
-#  { unlink $file_out ; }
-
-#  &Log ("Processed in " . (time-$time_start) . " seconds\n\n") ;
-## 0 No error
-## 1 Warning (Non fatal error(s)). For example, one or more files were locked by some other application, so they were not compressed.
-## 2 Fatal error
-## 7 Command line error
-## 8 Not enough memory for operation
-## 255 User stopped the process
-#}
-
-
-#sub RecompactVisitorStats3
-#{
-## http://www.7-zip.org/7z.html
-#  my $path_7z  = "D:/Wikipedia_Visitors/7z.exe" ;
-#  my $file_in  = "D:/Wikipedia_Visitors/full_day/2008-07-pagecounts/pagecounts-20080702_fd.gz" ;
-#  my $file_out ; ($file_out  = $file_in) =~ s/gz$/txt/ ;
-#  my $file_7z ;  ($file_7z  = $file_in) =~ s/gz$/7z/ ;
-## my $file_log = "D:/Wikipedia_Visitors/full_day/2008-07-pagecounts/pagecounts.log" ;
-
-#  $in_gz  = IO::Uncompress::Gunzip->new ($file_in) || &Abort ("IO::Uncompress::Gunzip failed for '$file_in': $GunzipError\n") ;
-#  binmode $in_gz ;
-## $out_gz = IO::Compress::Gzip->new ($file_out) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-## binmode $out_gz ;
-#  open OUT, ">", $file_out ;
-#  binmode OUT ;
-## open LOG, ">", $file_log ;
-## binmode LOG ;
-
-#  my ($title, $title2) ;
-#  while ($line = <$in_gz>)
-#  {
-#    chomp ($line) ;
-#    ($lang,$title,$counts) = split (" ", $line) ;
-
-#    if ($lang ne $lang_prev) { print "$lang\n" ; }
-##   last if $lang gt "fs" ;
-#    $lang_prev = $lang ;
-
-#    # test pagecounts-20080701_fd.gz
-#    # all records  424 Mib compressed (1984 uncompressed)
-#    # count > 1    212 Mib compressed ( 733 uncompressed)
-#    # count > 2    169 Mib compressed ( 551 uncompressed)
-#    next if $counts <= 1 ;
-
-##   next if $lang !~ /^(?:ar|fr)/ ;
-
-#if ($false)
-#{
-#    $title1b = $title ;
-#    $title1b =~ s/(\%[A-Fa-f0-9]{2})/uc($1)/seg;
-#    $title1b =~ s/\%28/(/g ;
-#    $title1b =~ s/\%29/)/g ;
-#    $title1b =~ s/\%3A/:/g ;
-#    $title1b =~ s/\%2F/\//g ;
-#    $title1b =~ s/\%5C/\\/g ;
-#    $title1b =~ s/\%2A/*/g ;
-#    $title1b =~ s/\%21/!/g ;
-#    $title1b =~ s/\%5F/_/g ;
-#    $title1b =~ s/\%2C/,/g ;
-#    $title1b =~ s/\%2E/./g ;
-#    $title1b =~ s/\%2D/-/g ;
-#    $title1b =~ s/\%25/%/g ;
-#    $title1b =~ s/\%7E/~/g ;
-#    $title1b =~ s/\%27/'/g ;
-#    $title1b =~ s/\%3D/=/g ;
-#    $title1b =~ s/\%26/&/g ;
-#    $title1b =~ s/\%3B/;/g ;
-#    $title1b =~ s/\%3F/?/g ;
-#    $title1b =~ s/\%2B/+/g ;
-#    $title2 = $title1b ;
-#    $title2 =~ s/%([A-F0-9]{2})/chr(hex($1))/seg;
-
-#    if ($title1b ne $title2) # if changed anything at all
-#    {
-#      $title3 = uri_escape ($title2) ;
-#      $title3 =~ s/\%28/(/g ;
-#      $title3 =~ s/\%29/)/g ;
-#      $title3 =~ s/\%3A/:/g ;
-#      $title3 =~ s/\%2F/\//g ;
-#      $title3 =~ s/\%5C/\\/g ;
-#      $title3 =~ s/\%2A/\*/g ;
-#      $title3 =~ s/\%21/\!/g ;
-#      $title3 =~ s/\%5F/\_/g ;
-#      $title3 =~ s/\%2C/,/g ;
-#      $title3 =~ s/\%2E/./g ;
-#      $title3 =~ s/\%2D/-/g ;
-#      $title3 =~ s/\%25/%/g ;
-#      $title3 =~ s/\%7E/~/g ;
-#      $title3 =~ s/\%27/'/g ;
-#      $title3 =~ s/\%3D/=/g ;
-#      $title3 =~ s/\%26/&/g ;
-#      $title3 =~ s/\%3B/;/g ;
-#      $title3 =~ s/\%3F/?/g ;
-#      $title3 =~ s/\%2B/+/g ;
-
-#      if ($title1b eq $title3) # process reversible ?
-#      {
-#        $y++ ;
-#        $title2 =~ s/\s/_/g;
-#        $title = $title2 ;
-#      }
-#      else
-#      {
-#        $n++ ;
-#        print "Y $y N $n\n$title\n$title3\n\n" ;
-#        print LOG "Y $y N $n\n$title\n$title3\n\n" ;
-#      }
-#    }
-#}
-#    $title =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/seg;
-#    $title =~ s/\s/_/g;
-#    $lang  =~ s/\.z// ; # remove codes that were added to fix sort sequence
-#    $lang  =~ s/\.y/2/ ;
-
-#  # print $out_gz "$lang $title $counts\n" ;
-#    print OUT "$lang $title $counts\n" ;
-#  }
-
-#  print "Close files\n" ;
-#  $in_gz  -> close () ;
-## $out_gz -> close () ;
-#  close (OUT) ;
-#  $result = `$path_7z a $file_out $file_txt` ;
-#  print $result ;
-#}
-
-
-
-# test (partial) reversibility of process
-#sub UncompactVisitorStats
-#{
-#  my $file_in = "out/2009-03/pagecounts-20090301_fdt1" ;
-#  my $dir_out = "out" ;
-#  # $in_gz = IO::Uncompress::Gunzip->new ($file_in) || &Abort ("IO::Uncompress::Gunzip failed for '$file_in': $GunzipError\n") ;
-#  open $in_gz, '<', $file_in ;
-#  binmode $in_gz ;
-
-#  for ($h=0 ; $h<=23 ; $h++)
-#  {
-#    $time = sprintf ("%02d",$h) . "0000" ;
-##   $file_out = "$dir_out/pagecounts-20090301-$time.gz" ;
-#    $file_out = "$dir_out/pagecounts-20090301-$time" ;
-#    open $out_gz [$h], '>', $file_out ;
-##    $out_gz [$h] = IO::Compress::Gzip->new ($file_out) ||  &Abort ("IO::Compress::Gzip failed: $GzipError\n");
-#    binmode $out_gz [$h] ;
-#  }
-
-#  while ($line = <$in_gz>)
-#  {
-#    next if $line =~ /^#/ ;
-#    next if $line =~ /^@/ ;
-#    chomp ($line) ;
-##   print "$line\n" ;
-#   if ($lines++ > 10000) { exit ; }
-#    ($lang,$title,$counts) = split (" ", $line) ;
-#    $lang =~ s/\.z// ;
-#    $lang =~ s/\.y/2/ ;
-#    $counts =~ s/^\d+// ; # remove (redundant) preceding total
-#    while ($counts ne "")
-#    {
-#      $letter = substr ($counts,0,1) ;
-#      $counts = substr ($counts,1) ;
-#      ($count = $counts) =~ s/^(\d+).*$/$1/ ;
-#      $counts =~ s/^\d+(.*)$/$1/ ;
-#      $h = ord ($letter) - ord ('A') ;
-#      $file = $out_gz [$h] ;
-#      $writes {$h} ++ ;
-#      print $file "$lang $title $count\n" ;
-#    }
-
-#  }
-
-#  for ($h=0 ; $h<=23 ; $h++)
-#  {
-##   $out_gz [$h] -> close () ;
-#    close $out_gz [$h] ;
-#  }
-#}
+# Ideas:
+# 1 namespace string -> namespace number ? (may not save much space: compress will deal with recurring patterns like these)
+# 2 frequenty distribution hits per file per first letter _-> manifest crawler
+#   assuming crawler collects articles in alphabetical order
+# 3 first letter uppercase -> sort (in sections per first two chars ?)
 
 
