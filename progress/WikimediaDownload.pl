@@ -19,7 +19,7 @@
   $url_matrix = "http://www.mediawiki.org/wiki/Special:SiteMatrix" ;
 
   $file_matrix          = "site_matrix.html" ;
-  $file_test_input      = "backup-index.html" ;
+  $file_test_input      = "Test.html" ;
   $file_htm             = "WikimediaDownload.htm" ;
   $file_csv_lastrun     = "WikimediaDumpsLastRun.csv" ;
   $file_csv_lastsuccess = "WikimediaDumpsLastSuccess.csv" ;
@@ -235,8 +235,12 @@ sub FilterInput
         else
         { $date = "?" ; }
 
-        ($project = $href) =~ s/([^\/]+)\/.*$/$1/ ;
+        if ($test)
+        { ($project = $href) =~ s/http:\/\/download.wikimedia.org\/([^\/]+)\/.*$/$1/ ; }
+        else
+        { ($project = $href) =~ s/([^\/]+)\/.*$/$1/ ; }
       }
+      next if $project =~ /labs/ ;
 
       $projectcount++ ;
       &Log ("\n=== $projectcount: Project $project ===\n\n") ;
@@ -529,7 +533,6 @@ sub CollectProjectStats
     }
 
     ($date,$project,$href,$usable_dumps) = split (',', $projectinfo_lastsuccess) ;
-
     if ($project =~ /^(?:tlh|strategyapp)/) # obsolete info, project abandoned
     { next ; }
 

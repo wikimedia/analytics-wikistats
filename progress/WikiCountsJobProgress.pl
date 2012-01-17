@@ -328,7 +328,7 @@ sub ReadStatsHtml
   {
     if (! -d $file)
     { next ; }
-    if ($file !~ /^[A-Z]+$/)
+    if ($file !~ /^[A-Z]+(?:_[A-Z][a-z]+)?$/)
     { next ; }
     push @languages, $file ;
   }
@@ -338,6 +338,7 @@ sub ReadStatsHtml
 
   $reports      {$project} = "<p><b>$project2</b> <small>[count]</small> " ;
   $reports_cnt = 0 ;
+
   foreach $language (sort @languages)
   {
     $language_lc = lc ($language) ;
@@ -349,6 +350,12 @@ sub ReadStatsHtml
     $file_date     = time - $file_age_secs ;
     # if ($language eq "EN")
     # {
+      $project_folder = $project ;
+      if ($project_folder =~ /Wikipedia/i)
+      { $project_folder = '' ; }
+
+      $language_uc = uc $language ;
+
       if ($project eq "")
       { $project = "wikipedia" ; }
 
@@ -356,12 +363,33 @@ sub ReadStatsHtml
 
       $file_ago = $file_age_days ;
       if ($file_ago == 0)
-      { $file_ago = " <u>0 days, $file_age_min min</u>" ; }
+    # { $file_ago = " <u>0 days, $file_age_min min</u>" ; }
+      { $file_ago = " <u>$file_age_min min</u>" ; }
 
       $color = "green" ;
+      if ($language =~ /_/) # regional report
+      {
+        $language_lc = "<i>$language_lc</i>" ; # color = "#004000" ;
+        ($region = $language) =~ s/^[^_]+_// ; # en_india -> EN_India
+        $language_uc = "EN_" . ucfirst $region ;
+      }
+
       if ($file_ago > 30)
       { $color = "darkred" ; }
-      $reports      {$project} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ;
+
+      if ($language_lc eq 'en') # make English report more prominent, this one is more often refreshed
+      { $language_lc = "<b>[[en]]</b>" ; }
+
+      $reports {$project} .= "<a href='http://stats.wikimedia.org/$project_folder/$language_uc/Sitemap.htm'><small><font color=$color>$language_lc<sup>$file_ago</sup></font></small></a>, " ;
+
+      if ($language_lc =~ /\[\[en\]\]/) # make English report more prominent, this one is more often refreshed
+      { $reports_english {$project} = "<a href='http://stats.wikimedia.org/$project_folder/$language_uc/Sitemap.htm'><small><font color=$color>$project<sup>$file_ago</sup></font></small></a>" }
+
+    # if ($project !~ /_/)
+    # { $reports {$project} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ; }
+    # else
+    # { $reports {"$project regional"} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ; }
+
       $reports_cnt ++ ;
 
       if ($language eq "EN")
@@ -433,12 +461,13 @@ sub WriteHtml
              "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n" .
              "<meta http-equiv=\"refresh\" content=\"60\">\n" .
              "<title>WikiStats data gathering progress</title>\n" .
-             # "<style type=\text/css\">\n" .
-             # "li    { background-color: #f4f4f4; list-style-type: none; }\n" .
-             # "li li { background-color: white; }\n" .
-             # "li ul { margin-top: 4px; margin-bottom: 8px; text-color: #900000}\n" .
-             # "</style>\n" .
-             "<body bgcolor=#CCCCCC>\n" ;
+             "<style type=\text/css\">\n" .
+             "a:link { color:blue;text-decoration:none;}\n" .
+             "a:visited {color:#0000FF;text-decoration:none;}\n" .
+             "a:active  {color:#0000FF;text-decoration:none;}\n" .
+             "a:hover   {color:#FF00FF;text-decoration:underline}\n" .
+             "</style>\n" .
+             "</head>\n<body bgcolor=#CCCCCC>\n" ;
 
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=gmtime(time);
   $now_gm = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
@@ -530,14 +559,13 @@ sub WriteHtml
   {
     print HTML "<a name='reports' id='reports'></a>" .
                "<hr><b>Reports generated</b>\n" .
-               "<small>This section shows -per project per target language- the file age of index.html in days (for age < 24 hours in minutes). " .
+               "<small>This section shows -per project per target language- the <b>file age of index.html in days</b> (for age < 24 hours in minutes). " .
                "Note that a very recently generated report does not always contain counts up to the previous month. " .
                "See above for how up to data counts are per project language. " .
                "Color green here means: reports have been generated and published less than 30 days ago.</small>" ;
 
-
-    foreach $report (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
-    { print HTML $reports {$report} . "\n" ; }
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { print HTML $reports {$project} . "\n" ; }
   }
 
   print HTML "<hr><p><b>Longest jobs</b> <small>\n" ;
@@ -653,6 +681,10 @@ sub WriteHtmlCurrent
              "td.cb   {text-align:center; border: inset 1px #FFFFFF}\n" .
              "td.lb   {text-align:left;   border: inset 1px #FFFFFF}\n" .
              "td.rb   {text-align:right;  border: inset 1px #FFFFFF}\n" .
+             "a:link    { color:blue;text-decoration:none;}\n" .
+             "a:visited {color:#0000FF;text-decoration:none;}\n" .
+             "a:active  {color:#0000FF;text-decoration:none;}\n" .
+             "a:hover   {color:#FF00FF;text-decoration:underline}\n" .
              "-->\n" .
              "</style>\n" .
 
@@ -757,15 +789,21 @@ sub WriteHtmlCurrent
 
   if ($reports_total > 0)
   {
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { $reports_english .= $reports_english {$project} . ", "; }
+    $reports_english =~ s/, $// ;
+
     print HTML "<a name='reports' id='reports'></a>\n" .
                "<hr><p><h3>Progress per project, reporting</h3>" .
-               "<small>This section shows -per project per target language- the file age of index.html in days (for age < 24 hours in minutes). " .
+               "<small>This section shows -per project per target language- the <b>file age of index.html in days</b> (for age < 24 hours in minutes). " .
                "Note that a very recently generated report does not always contain counts up to the previous month. " .
                "See above for how up to data counts are per project language. " .
-               "Color green here means: reports have been generated and published less than 30 days ago.</small>" ;
+               "Color green here means: reports have been generated and published less than 30 days ago. English reports are generated more often (performance issue), and therefore also listed separately.</small><p>" .
+               "<b>English reports</b>: $reports_english<p>" ;
 
-    foreach $report (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
-    { print HTML $reports {$report} . "\n" ; }
+
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { print HTML $reports {$project} . "\n" ; }
   }
 
   print HTML "<hr>" ;
