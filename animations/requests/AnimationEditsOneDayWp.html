@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+<head>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="shortcut icon" href="http://www.infodisiac.com/favicon.ico" />
+  <meta name="language" content="en,English" />
+  <meta name="robots" content="index,follow" />
+  <meta name="keywords" content="wikimedia, wikistats, animation, 'Erik Zachte', infodisiac" />
+  
+  <title>Wikipedia edits on a random day</title>
+
+  <style>
+    body   {font-family:arial,sans-serif; font-size:14px; background-color:#808080; color:#808080;}
+    canvas {border:0px; }
+    a:link    {color:#808080;text-decoration:none;  }
+    a:visited {color:#808080;text-decoration:none; }
+    a:active  {color:#808080;text-decoration:none;  }
+    a:hover   {color:#C0C0C0;text-decoration:underline}
+  </style>
+
+  
+</head>
+
+
+<body 
+  onload      = "eventPageLoaded ('3000px-Whole_world_land_and_oceans.jpg',
+                                  '3000px-Whole_world_borders_map.png',
+                                  '1500px-Whole_world_borders_map.png',
+                                  '3000px-Whole_world_population_density-2010.jpg');
+                                  htmlHide ('msg_wait');" 
+  onkeypress  = "eventKeyPressed (event);" 
+>
+
+<center>
+<div id='msg_wait'>
+  <font style="font-size:20px" color='#FFFF00'><b>Loading 370K edit events (3Mb).... Please wait</b></font>
+</div>
+
+<div style="position: relative;">
+ 
+ <canvas id="cv" width="1" height="1" style="position: absolute; left: 0; top: 0; z-index: 1" tabindex=0   
+  onmousemove = "eventMouseMove (event);"
+  onmousedown = "eventMouseDown (event);"
+  onmouseup   = "eventMouseUp   (event);"
+  onmouseout  = "eventMouseOut  (event);"> 
+  <font color='#800000'>This browser does not support the html5 canvas tag.</font>
+ ></canvas>
+ 
+</div>
+</center>
+
+<script type="text/javascript" src="sprintf.js"></script>
+<script type="text/javascript" src="WikipediaRequestsMain.js" onload="prepCanvas();"></script>
+<script type='text/javascript' src='WikipediaRequestsInit-2011-08-8.js'></script> 
+
+</body>
+</html>
