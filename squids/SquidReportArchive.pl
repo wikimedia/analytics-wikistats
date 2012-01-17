@@ -6,8 +6,10 @@
   ez_lib_version (2) ;
 
 # set defaults mainly for tests on local machine
-  default_argv "-m 2011-07   " ;
-#  default_argv "-c -q 2010Q4" ;
+# default_argv "-m 2011-07   " ;
+#  default_argv "-c -q 2010Q1" ;
+# default_argv "-w" ;  # refresh country info from Wikipedia (population etc)
+  default_argv "-c" ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -29,6 +31,8 @@
   $ratio_linear = $false ;
 
   getopt ("dmq", \%options) ;
+
+  undef %country_code_not_specified_reported ;
 
   if (-d "/a/squid")
   {
@@ -52,11 +56,13 @@
   print "Path in  = $path_in\n" ;
   print "Path out = $path_out\n" ;
 
+  $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
+
   # periodically harvest updated metrics from
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_population'
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'
   if (defined ($options {"w"}))
-  { &ReadWikipedia ; exit ; }
+  { &ReadWikipedia ; print "Ready\n" ; exit ; }
 
   if (defined ($options {"c"}))
   { $reportcountries = $true ; }
@@ -77,7 +83,6 @@
   &InitProjectNames ;
 
   $file_csv_country_codes     = "CountryCodes.csv" ;
-  $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
   &ReadInputCountriesNames ;
 
@@ -384,7 +389,7 @@ sub ReportCountries
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Trends" ;
   &WriteReportPerCountryTrends ($title, $views_edits, &UnLink ($links,$offset_links+3)) ;
 
-  $links =~ s/,.*$// ;
+# $links =~ s/,.*$// ;
   $title = "$title_main - <font color=#008000>$views_edits Per Wikipedia Language</font> - Breakdown" ;
   &WriteReportPerLanguageBreakDown ($title, $views_edits, &UnLink ($links,$offset_links+4)) ;
 }
@@ -480,8 +485,23 @@ sub PrepHtml
             "<input type='button' value=' Archive ' onclick='window.location=\"http://stats.wikimedia.org/archive/squid_reports\"'> " .
             "<input type='button' value=' Wikimedia Statistics ' onclick='window.location=\"http://stats.wikimedia.org\"'>" .
             "</td></tr>\n</table><hr>" .
-            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<p>" ;
+          # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<p>" ;
+            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ;
 
+  if ($reportcountries)
+  {
+    $header .= "<p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
+               "&nbsp;Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world." ;
+  }
+  else
+  {
+    $header .= "<font color=#900000>WMF traffic logging service suffered from server capacity problems in Aug/Sep/Oct 2011.<br>" .
+               "Absolute traffic counts for October 2011 are approximatly 7% too low.<br>" .
+               "Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world.<br>" .
+               "and may have also skewed relative figures like share of traffic per browser or operating system.</font><p>" ;
+    $header .= "<font color=#900000>In a an unrelated server outage precisely half of traffic to WMF mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic).<br>" .
+               "WMF has since improved server monitoring, so that similar outages should be detected and fixed much faster from now on.</font><p>" ;
+  }
   # to be localized some day like any reports
   $out_license      = "All data and images on this page are in the public domain." ;
   $out_generated    = "Generated on " ;
@@ -619,7 +639,7 @@ sub ReadInputClients
 
       $client =~ s/_/./g ;
       $client =~ s/\.\./Other/g ;
-      if ($client !=~ / \d/)
+      if ($client !~ / \d/)
       { $client =~ s/\// / ; }
       if ($rectype eq "-") { $total_clients_non_mobile += $count ; }
       if ($rectype eq "M") { $total_clients_mobile     += $count ; }
@@ -1332,6 +1352,7 @@ sub ReadInputCountriesMeta
 {
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
+  print "Read $path_in/$file_csv_country_meta_info\n" ;
   open    COUNTRY_META_INFO, '<', "$path_in/$file_csv_country_meta_info" ;
   binmode COUNTRY_META_INFO ;
   while ($line = <COUNTRY_META_INFO>)
@@ -1342,6 +1363,7 @@ sub ReadInputCountriesMeta
     $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
 
     ($country,$link,$population,$connected,$icon) = split ',', $line ;
+    print "COUNTRY $country\nLINK $link\nPOPULATION $population\nCONNECTED $connected\n\n" ;
     $country =~ s/&comma;/,/g ;
 
     # use country names as given by MaxMind
@@ -1533,10 +1555,10 @@ sub ReadInputCountriesMonthly
   $months_recently = keys %months_recently ;
   if ($months_recently == 0) { die "\$months_recently == 0\n" ; }
 
-  $requests_recently_start = substr ($requests_recently_start,5,2) . "/" . substr ($requests_recently_start,2,2) ;
-  $requests_recently_stop  = substr ($requests_recently_stop ,5,2) . "/" . substr ($requests_recently_stop ,2,2) ;
-  $requests_start          = substr ($requests_start,5,2)          . "/" . substr ($requests_start,2,2) ;
-  $requests_stop           = substr ($requests_stop ,5,2)          . "/" . substr ($requests_stop ,2,2) ;
+  $requests_recently_start = substr ($requests_recently_start,0,4) . '/' . substr ($requests_recently_start,5,2);
+  $requests_recently_stop  = substr ($requests_recently_stop ,0,4) . '/' . substr ($requests_recently_stop ,5,2) ;
+  $requests_start          = substr ($requests_start,0,4)          . '/' . substr ($requests_start,5,2) ;
+  $requests_stop           = substr ($requests_stop ,0,4)          . '/' . substr ($requests_stop ,5,2) ;
 
   foreach $yyyymm (keys %$yyyymm)
   {
@@ -4644,9 +4666,6 @@ sub WriteReportPerCountryOverview
   $html_total .= "<tr><td colspan=99>&nbsp;</td></tr>" ;
 
 
-  undef @keys_regions ;
-#  foreach $key (sort keys %population_per_hemisphere)
-#  { push @keys_regions, $key ; }
   $html_regions = '' ;
   foreach $key (qw (N S AF AS AU EU CA NA SA OC))
   {
@@ -5150,19 +5169,19 @@ sub WriteReportPerCountryBreakdown
   my $views_edits_lc = lc $views_edits ;
 
   if ($show_logcount)
-  { $report_version = "<p>This is the extended version of this report, with even small percentages included (> $cutoff_percentage\%) (see also bottom of page). " .
-             "Switch to <a href='$file_html_per_country_breakdown'>regular version</a>" ; }
+  { $report_version = "<p>Showing even small percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
+             "Switch to <a href='$file_html_per_country_breakdown'>concise version</a>" ; }
   else
-  { $report_version = "<p>This is the regular version of this report, with only major percentages (> $cutoff_percentage\%) included." .
-             " Switch to <a href='$file_html_per_country_breakdown_huge'>extended version</a>" ; }
+  { $report_version = "<p>Showing only only major percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
+             " Switch to <a href='$file_html_per_country_breakdown_huge'>detailed version</a>" ; }
 
   $html  = $header ;
   $html =~ s/TITLE/$title/ ;
   $html =~ s/HEADER/$title/ ;
   $html =~ s/LINKS// ;
-  $html =~ s/ALSO/$links/ ;
+  $html =~ s/ALSO/$links$report_version/ ;
   $html =~ s/NOTES// ;
-  $html =~ s/X1000/.&nbsp;Period <b>$requests_recently_start - $requests_recently_stop<\/b><br>$report_version/ ;
+  $html =~ s/X1000/.&nbsp;Period <b>$requests_recently_start - $requests_recently_stop<\/b>/ ;
   $html =~ s/DATE// ;
 
   $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a>\n" ;
@@ -5262,7 +5281,7 @@ sub WriteReportPerCountryBreakdown
   # $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   }
   $html .= "</table>" ;
-  $html .= "<p><b>Share<\/b> is the percentage of requesting ip addresses (out of the global total) which originated from this country" .
+  $html .= "<p><a name='more' id='more'></a><b>Share<\/b> is the percentage of requesting ip addresses (out of the global total) which originated from this country" .
            "<br>&nbsp;Further percentages show per country share of $views_edits_lc per Wikipedia visited" ;
   $html .= "<p><b>Countries</b> are only included if the number of requests in the period exceeds $cutoff_requests,000 ($cutoff_requests matching records in 1:1000 sampled log)" ;
   $html .= "<p><b>Wikipedia's</b> are only listed for some country if the share of visitors for that particular country exceeds $cutoff_percentage\%." ;
@@ -5308,6 +5327,12 @@ sub WriteReportPerCountryTrends
   $html =~ s/NOTES// ;
   $html =~ s/X1000/.&nbsp;Period <b>$requests_start - $requests_stop<\/b>/ ;
   $html =~ s/DATE// ;
+
+  if ($views_edits eq 'Page Views')
+  {
+    $html .= "<p><font color=#800000>Nov 2011: For some countries the share of page views on the English Wikipedia was significantly higher in 2010 than in 2009 and 2011,<br>" .
+           "especially in Q1 and Q2. We don't know yet what caused this, this might be an artifact. Please be cautious to draw conclusions from this.</font>" ;
+  }
 
   $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a>\n" ;
 
@@ -5892,10 +5917,15 @@ sub Percentage
 
 sub ReadWikipedia
 {
+  print "ReadWikipedia\n\n" ;
+
   use LWP::Simple qw($ua get);
 
   $ua->agent('Wikipedia Wikicounts job');
   $ua->timeout(60);
+
+
+  print "Read List_of_countries_by_population\n\n" ;
   my $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
   my $html = get $url || die "Timed out!";
 
@@ -5955,8 +5985,11 @@ sub ReadWikipedia
     $link    =~ s/,/&comma;/g ;
     $icon    =~ s/,/&comma;/g ;
 
+    print "country: $country\nlink: $link\npopulation: $population\nconnected: $connected\nicon: $icon\n\n" ;
     $countries {$country} = "$country,$link,$population,connected,$icon\n" ;
   }
+
+  print "List_of_countries_by_number_of_Internet_users\n\n" ;
 
   $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users';
   $html = get $url || die "Timed out!";
@@ -5995,10 +6028,12 @@ sub ReadWikipedia
     $country =~ s/Timor Leste/Timor-Leste/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
 
+    print "country: $country\nconnected: $connected\n\n" ;
     $countries {$country} =~ s/connected/$connected/ ;
   }
 
-  open COUNTRY_META_INFO, '>', "$path_out/SquidReportCountryMetaInfo.csv" ;
+  print "Write $path_in/$file_csv_country_meta_info\n\n" ; # use $path_in, not $path_out  so that next step picks up proper file
+  open COUNTRY_META_INFO, '>', "$path_in/$file_csv_country_meta_info" ;
   foreach $country (sort keys %countries)
   { print COUNTRY_META_INFO $countries {$country} ; }
   close COUNTRY_META_INFO ;
@@ -6086,11 +6121,11 @@ sub i2KM2
 sub UnLink
 {
   my ($links,$index) = @_ ;
-# print "\n\nUnLink $index\n\n" ;
+  # print "\n\nUnLink $index\n\n" ;
   my @segments = split '(?=<a )', $links ;
-# print "SEGMENT 1 $segments[$index]\n" ;
+  # print "SEGMENT 1 $segments[$index]\n" ;
   $segments [$index] =~ s/^.*?<a .*?>([^<]*)<\/a>/<font color=#008000><b>$1<\/b><\/font>/ ;
-# print "SEGMENT 2 $segments[$index]\n" ;
+  # print "SEGMENT 2 $segments[$index]\n" ;
   $links = join '', @segments ;
   return ($links) ;
 }
@@ -6139,8 +6174,8 @@ sub HtmlSortTable
   id: "millions",
   is: function(s) { return false; },
 //failed so far to turn 1.2M into 1200000, so figures with decimal point are sorted out of place
-//format: function(s) { return \$.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/&nbsp;/g,"").replace(/\\.(\d)M/,$1+"00000").replace(/M/,"000000").replace(/&#1052;/,"000000").replace(/K/,"000").replace(/&#1050;/i,"000")); },
-  format: function(s) { return \$.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/&nbsp;/g,"").                               replace(/M/,"000000").replace(/&#1052;/,"000000").replace(/K/,"000").replace(/&#1050;/i,"000")); },
+//format: function(s) { return \$.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/&nbsp;/g,"").replace(/\\.(\\d)M/,$1+"00000").replace(/M/,"000000").replace(/&#1052;/,"000000").replace(/K/,"000").replace(/&#1050;/i,"000")); },
+  format: function(s) { return \$.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/&nbsp;/g,"").                                replace(/M/,"000000").replace(/&#1052;/,"000000").replace(/K/,"000").replace(/&#1050;/i,"000")); },
   type: "numeric"
 });
 
@@ -6211,7 +6246,7 @@ table.tablesorter thead tr .headerSorthown, table.tablesorter thead tr .headerSo
 }
 </style>
 __HTML_SORT_TABLE__
-return ($html) ;
+  return ($html) ;
 }
 
 sub HtmlSortTableColumns

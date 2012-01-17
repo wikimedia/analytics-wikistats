@@ -510,6 +510,7 @@ sub InitGlobals # qqq
   undef %squid_events ;
   undef %squid_seqno ;
   undef %statusses ;
+  undef %total_clients ;
   undef %unrecognized_domains ;
   undef %wikis ;
 # undef @files ;

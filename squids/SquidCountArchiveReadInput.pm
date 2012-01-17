@@ -1,5 +1,10 @@
  #!/usr/bin/perl
 
+# /usr/local/bin/geoiplogtag uses /usr/share/GeoIP/GeoIP.dat
+# test:
+# echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
+# refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+
 sub CollectFilesToProcess
 {
   trace CollectFilesToProcess ;
@@ -161,7 +166,7 @@ sub ReadSquidLogFiles
     if ($job_runs_on_production_server)
     {
       if ($file_in =~ /\.gz$/o)
-      { open IN, "-|", "gzip -dc $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
       else
       { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
       $fields_expected = 14 ;
@@ -184,9 +189,35 @@ sub ReadSquidLogFiles
     #   print $line ;
     # }
 
+
+# ugly Q&D code to circumvent spaces in agent string
+# $line2 = $line ;
+      chomp $line ;
       @fields = split (' ', $line) ;
-      if ($#fields < $fields_expected) { $fields_too_few  ++ ; next ; }
-      if ($#fields > $fields_expected) { $fields_too_many ++ ; next ; }
+# next if $line =~ /upload/ ;
+# next if $line !~ /en\.m\.wikipedia/ ;
+# next if $fields[10] eq '-' ;
+# print "mime " . $fields[10] . "\n" ;
+#next if $fields [9] eq '-' ;
+#next if $fields [9] =~ /NONE/ ;
+     if ($#fields > 14)
+     {
+# print "line $line2\n" ;
+# print "fields " . $#fields . "\n$line\n" ;
+      $country_code = $fields [$#fields] ;
+      $fields [$#fields] = '' ;
+      $line = join (' ', @fields) ;
+# print "2 $line\n" ;
+      @fields = split (' ', $line, 14) ;
+      $fields [14] = $country_code ;
+# print "\n\n12: " . $fields [12] . "\n"  ;
+# print "13: " . $fields [13] . "\n"  ;
+# print "14: " . $fields [14] . "\n"  ;
+# print "15: " . $fields [15] . "\n"  ;
+      }
+
+      if ($#fields < $fields_expected) { $fields_too_few  ++ ; print "invalid field count " . $#fields . "\n" ; next ; }
+      if ($#fields > $fields_expected) { $fields_too_many ++ ; print "invalid field count " . $#fields . "\n" ; next ; }
 
       $time = $fields [2] ;
 

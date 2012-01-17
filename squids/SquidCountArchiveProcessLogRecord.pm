@@ -4,12 +4,19 @@ sub ProcessLine
 {
   my $line = shift ;
 
-  my @fields = split (' ', $line) ;
   $time = $fields [2] ;
   $date = substr ($time,0,10) ;
 
   $client_ip  = $fields [4] ;
   $mime       = $fields [10] ;
+  $url        = lc ($fields [8]) ;
+
+  if ($mime eq '-')
+  {
+    # no mime type on log records from varnish, assume 'page request' on most, until that stream had been fixed
+    if (($url =~ /\.m\..*?\/wiki\//) || ($url =~ /\.m\..*?\/w\/index.php/))
+    { $mime = "text/html" ; }
+  }
 
   if ($scan_ip_frequencies) # phase 1
   {
@@ -49,7 +56,11 @@ sub ProcessLine
   $status     = $fields [5] ;
   $size       = $fields [6] ;
   $method     = $fields [7] ;
-  $url        = lc ($fields [8]) ;
+
+  $referer    = lc ($fields [11]) ;
+  $agent      = $fields [13] ;
+
+# print "\ntime '$time', client_ip '$client_ip', mime '$mime', squid '$squid', seqno '$seqno', \nstatus '$status', size '$size', method '$method', referer '$referer',\nurl '$url', agent '$agent'\n" ;
 
   if ($url =~ /\.m\.wikipedia.org/)
   {
@@ -62,9 +73,6 @@ sub ProcessLine
       return ;
     }
   }
-
-  $referer    = lc ($fields [11]) ;
-  $agent      = $fields [13] ;
 
   $url =~ s/^http\w?\:\/\///o ;
   $url =~ s/\%3A/:/gio ;
@@ -355,7 +363,11 @@ sub ProcessLine
 
   if ($os =~ /Linux/o)
   {
-    ($osx = $agent2) =~ s/^.*?((?:Android|Ubuntu|Gentoo|PCLinuxOS|CentOS|Red Hat|Mandriva|SUSE|Fedora|Epiphany|Debian|Motor\w+)[^\s;\[\]\(\)]*).*$/ucfirst($1)/ieo ;
+    ($cpu = $agent2) =~ s/^.*?(armv\d+|i\d+|x[0-9_]+).*$/$1/o ;
+    if ($cpu eq $agent2)
+    { $cpu = '' ; }
+
+    ($osx = $agent2) =~ s/^.*?((?:Android|Xubuntu|Kubuntu|Ubuntu|Gentoo|PCLinuxOS|CentOS|Oracle|Mandriva|Red Hat|Mandriva|openSUSE|SUSE|Fedora|Epiphany|Mint|Mips|Arch|Debian|Slackware|Motor\w+)[^\s;\[\]\(\)]*).*$/ucfirst($1)/ieo ;
     if ($osx ne $agent2)
     {
       $osx =~ s/(\d+\_\d+).*$/$1/o ;
@@ -363,8 +375,18 @@ sub ProcessLine
       $osx =~ s/_/\./o ;
       $osx =~ s/(\d+\.\d+).*$/$1/o ;
       $osx =~ s/^(Motor)(\w+).*$/ucfirst(lc($1)).uc($2)/ieo ;
-      $os = "$os $osx" ;
     }
+    else
+    { $osx = "Other" ; }
+
+    $os = "$os $cpu $osx" ;
+    $os =~ s/\s\s+/ /g ;
+
+    # testing:
+    # if ($osx eq $agent2)
+    # { print "Linux ?? -> $agent2\n" ; }
+    # elsif ($osx !~ /(?:Android|Ubuntu)/i)
+    # { print "Linux !! $cpu $osx -> $agent2\n" ; }
   }
 
   $os =~ s/(Windows NT \d+\.\d+).*$/$1/o ;
@@ -1189,7 +1211,7 @@ sub ProcessUploadPath
   ($path = $url) =~ s/^.*?\.org\///o ;
   ($file = $path) =~ s/^.*\/([^\/]*)$/$1/go ; # remove path
 
-  $binaries {$file} ++ ;
+  $binaries {$path} ++ ; # Jan 2012 store path, not file only
 
   if ($file =~ /(?:gif|jpg|jpeg|png|svg)$/io)
   {
