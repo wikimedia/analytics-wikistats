@@ -643,6 +643,7 @@ sub ReadInputClients
       { $client =~ s/\// / ; }
       if ($rectype eq "-") { $total_clients_non_mobile += $count ; }
       if ($rectype eq "M") { $total_clients_mobile     += $count ; }
+      if ($rectype eq "W") { $total_clients_wiki_mobile+= $count ; }
 
       $clients {"$rectype,$client"} += $count ;
 
@@ -651,6 +652,7 @@ sub ReadInputClients
         $total_clients_html_only += $count ;
         if ($rectype eq "-") { $total_clients_non_mobile_html_only += $count ; }
         if ($rectype eq "M") { $total_clients_mobile_html_only     += $count ; }
+        if ($rectype eq "W") { $total_clients_wiki_mobile_html_only     += $count ; }
         $clients_html_only {"$rectype,$client"} += $count ;
       }
     }
@@ -847,8 +849,10 @@ sub ReadInputOpSys
         $line =~ s/^.*?: // ;
         ($month_upd_keywords_mobile = $line) =~ s/^.*?\(([^\)]+)\).*$/$1/ ;
         ($keywords_mobile = $line)           =~ s/ \([^\)]+\).*$// ;
+        ($keywords_wiki_mobile = $line)           =~ s/ \([^\)]+\).*$// ;
         $keywords_mobile =~ s/\|/, /g ;
         $keywords_mobile =~ s/((?:[^,]+,){10})/$1<br>/g ;
+        $keywords_wiki_mobile =~ s/((?:[^,]+,){10})/$1<br>/g ;
         next ;
       }
       next ;
@@ -1865,11 +1869,13 @@ sub NormalizeCounts
 
   $total_clients            = &Normalize ($total_clients) ;
   $total_clients_mobile     = &Normalize ($total_clients_mobile) ;
+  $total_clients_wiki_mobile= &Normalize ($total_clients_wiki_mobile) ;
   $total_clients_non_mobile = &Normalize ($total_clients_non_mobile) ;
 
   $total_clients_html_only            = &Normalize ($total_clients_html_only) ;
   $total_clients_mobile_html_only     = &Normalize ($total_clients_mobile_html_only) ;
   $total_clients_non_mobile_html_only = &Normalize ($total_clients_non_mobile_html_only) ;
+  $total_clients_wiki_mobile_html_only = &Normalize ($total_clients_wiki_mobile_html_only) ;
 
 # ReadInputCrawlers
   foreach $key (keys %crawlers)
@@ -2061,8 +2067,8 @@ sub WriteReportClients
 
   # CLIENTS SORTED BY FREQUENCY, BROWSERS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
-  $perc_total = 0 ;
-  $perc_total_html_only = 0 ;
+  $perc_total_nonmobile = 0 ;
+  $perc_total_html_only_nonmobile = 0 ;
   foreach $key (@clientgroups_sorted_count)
   {
     $count = $clientgroups {$key} ;
@@ -2081,37 +2087,41 @@ sub WriteReportClients
     $perc =~ s/\%// ;
     $perc_html_only =~ s/\%// ;
 
-    $perc_total += $perc ;
-    $perc_total_html_only += $perc_html_only ;
+    $perc_total_nonmobile += $perc ;
+    $perc_total_html_only_nonmobile += $perc_html_only ;
   }
 
   $perc = ".." ;
   $count = $clientgroups_other {'-'} ;
-  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} > 0)
+  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'}> 0)
   {
-    $perc = sprintf ("%.2f", 100 * $clientgroups_other {'-'} / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ;
-    $perc_total += $perc ;
+    $perc = sprintf ("%.2f", 100 * $clientgroups_other {'-'} / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ;
+    $perc_total_nonmobile += $perc ;
   }
   $perc_html_only = ".." ;
   $count_html_only = $clientgroups_other_html_only {'-'} ;
-  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} +
+$total_clientgroups_html_only {'W'} > 0)
   {
-    $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only {'-'} / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ;
-    $perc_total_html_only += $perc_html_only ;
+    $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only {'-'} / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} +
+$total_clientgroups_html_only {'W'})) ;
+    $perc_total_html_only_nonmobile += $perc_html_only ;
   }
 
   $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
 
   $total = &FormatCount ($total_clientgroups {'-'}) ;
-  $perc_total = sprintf ("%.1f", $perc_total) ;
+  $perc_total_nonmobile = sprintf ("%.1f", $perc_total_nonmobile) ;
 
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
-  $perc_total_html_only = sprintf ("%.1f", $perc_total_html_only) ;
+  $perc_total_html_only_nonmobile = sprintf ("%.1f", $perc_total_html_only_nonmobile) ;
 
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_nonmobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSERS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  $perc_total_mobile = 0 ;
+  $perc_total_html_only_mobile = 0 ;
   foreach $key (@clientgroups_sorted_count)
   {
     $count = $clientgroups {$key} ;
@@ -2127,26 +2137,75 @@ sub WriteReportClients
 
     $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
+    $perc_html_only =~ s/\%// ;
+
+    $perc_total_mobile += $perc ;
+    $perc_total_html_only_mobile += $perc_html_only ;
   }
 
   $count = $clientgroups_other {'M'} ;
   $perc = ".." ;
-  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} > 0)
-  { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ; }
+  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'}> 0)
+  { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'} )) ; }
 
   $count_html_only = $clientgroups_other_html_only {'M'} ;
   $perc_html_only = ".." ;
-  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
-  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ; }
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'} > 0)
+  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ; }
 
-  $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
+  $perc_total_mobile = sprintf ("%.1f", $perc_total_mobile) ;
   $total = &FormatCount ($total_clientgroups {'M'}) ;
+  $perc_total_html_only_mobile = sprintf ("%.1f", $perc_total_html_only_mobile) ;
 
-  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
 
   $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_mobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
+
+  # CLIENTS SORTED BY FREQUENCY, BROWSERS, WIKIMOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Wiki applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  $perc_total_wiki = 0 ;
+  $perc_total_html_only_wiki = 0 ;
+
+  foreach $key (@clientgroups_sorted_count)
+  {
+    $count = $clientgroups {$key} ;
+    next if $count == 0 ;
+    $perc  = $clientgroups_perc {$key} ;
+    ($mobile,$group) = split (',', $key) ;
+    next if $mobile ne 'W' ;
+    $count = &FormatCount ($count) ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
+    $perc =~ s/\%// ;
+    $perc_html_only =~ s/\%// ;
+    $perc_total_wiki += $perc ;
+    $perc_total_html_only_wiki += $perc_html_only ;
+  }
+
+  $count = $clientgroups_other {'W'} ;
+  $perc = ".." ;
+  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'}> 0)
+  { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ; }
+
+  $count_html_only = $clientgroups_other_html_only {'W'} ;
+  $perc_html_only = ".." ;
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'} > 0)
+  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ; }
+
+  $total = &FormatCount ($total_clientgroups {'W'}) ;
+
+  $perc_total_wiki = sprintf ("%.1f", $perc_total_wiki) ;
+  $perc_total_html_only_wiki = sprintf ("%.1f", $perc_total_html_only_wiki) ;
+
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'W'}) ;
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_wiki\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2168,12 +2227,10 @@ sub WriteReportClients
   }
 
   $total = &FormatCount ($total_clients_non_mobile) ;
-  $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
-  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
 
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_nonmobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2194,10 +2251,36 @@ sub WriteReportClients
   }
 
   $total = &FormatCount ($total_clients_mobile) ;
-  $perc  = sprintf ("%.1f", (100 - $perc_total)) ;
+  $perc  = sprintf ("%.1f", $perc_total_mobile) ;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
-  $perc_html_only  = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+  $perc_html_only  = sprintf ("%.1f", (100 - $perc_total_html_only_mobile)) ;
+
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
+
+  # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, WIKIMOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Wiki applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  foreach $key (@clients_sorted_count)
+  {
+    $count = $clients {$key} ;
+    ($rectype, $client) = split (',', $key,2) ;
+    next if $rectype ne 'W' ; # group
+    $perc  = $clients_perc {$key} ;
+    next if $perc lt "0.005%" ;
+    $count = &FormatCount ($count) ;
+
+    $perc_html_only  = $clients_perc_html_only {$key} ;
+    $count_html_only = $clients_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
+  }
+
+  $total = &FormatCount ($total_clients_wiki_mobile) ;
+  $perc  = sprintf ("%.1f", $perc_total_wiki) ;
+
+  $total_html_only = &FormatCount ($total_clients_wiki_mobile_html_only) ;
+  $perc_html_only  = sprintf ("%.1f", $perc_total_html_only_wiki) ;
 
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -2210,8 +2293,6 @@ sub WriteReportClients
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
-  $perc_total = 0 ;
-  $perc_total_html_only = 0 ;
   foreach $key (@clientgroups_sorted_alpha)
   {
     $count = $clientgroups {$key} ;
@@ -2228,30 +2309,23 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
 
     $perc =~ s/\%// ;
-    $perc_total += $perc ;
-
     $perc_html_only =~ s/\%// ;
-    $perc_total_html_only += $perc_html_only ;
-  }
+   }
 
   $count = $clientgroups_other {'-'} ;
   $total = &FormatCount ($total_clientgroups {'-'}) ;
   $perc = ".." ;
-  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} > 0)
-  { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ; }
-  $perc_total += $perc ;
-  $perc_total = sprintf ("%.1f", $perc_total) ;
-
+  if ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'}> 0)
+  { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ; }
+ 
   $count_html_only = $clientgroups_other_html_only {'-'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
   $perc_html_only = ".." ;
   if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
-  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ; }
-  $perc_total_html_only += $perc_html_only ;
-  $perc_total_html_only = sprintf ("%.1f", $perc_total_html_only) ;
+  { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ; }
 
   $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_nonmobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2274,16 +2348,44 @@ sub WriteReportClients
 
   $count = $clientgroups_other {'M'} ;
   $total = &FormatCount ($total_clientgroups {'M'}) ;
-  $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'})) ;
-  $perc_total = sprintf ("%.1f", (100 - $perc_total)) ;
+  $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ;
 
   $count_html_only = $clientgroups_other_html_only {'M'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
-  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'})) ;
-  $perc_total_html_only = sprintf ("%.1f", (100 - $perc_total_html_only)) ;
+  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ;
 
   $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_mobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
+
+  # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, WIKIMOBILE
+  $html .= "<tr><th class=l>&nbsp;<br>Applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  foreach $key (@clientgroups_sorted_alpha)
+  {
+    $count = $clientgroups {$key} ;
+    next if $count == 0 ;
+    $perc  = $clientgroups_perc {$key} ;
+    ($mobile,$group) = split (',', $key) ;
+    next if $mobile ne 'W' ;
+    $count = &FormatCount ($count) ;
+
+    $count_html_only = $clientgroups_html_only {$key} ;
+    $perc_html_only  = $clientgroups_perc_html_only {$key} ;
+    $count_html_only = &FormatCount ($count_html_only) ;
+
+    $html .= "<tr><td class=l>$group</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
+    $perc =~ s/\%// ;
+  }
+
+  $count = $clientgroups_other {'W'} ;
+  $total = &FormatCount ($total_clientgroups {'W'}) ;
+  $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ;
+
+  $count_html_only = $clientgroups_other_html_only {'W'} ;
+  $total_html_only = &FormatCount ($total_clientgroups_html_only {'W'}) ;
+  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ;
+
+  $html .= "<tr><td class=l>Other</th><td class=r>$count</td><td class=r>$perc\%</td><td class=r>$count_html_only</td><td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_wiki\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSER VERSIONS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2304,10 +2406,11 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_non_mobile) ;
-  $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile)) ;
+  $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only)) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only +
+$total_clients_wiki_mobile_html_only)) ;
 
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -2317,7 +2420,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' ; # group
+    next if $rectype ne 'M' && $rectype ne 'W' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -2329,10 +2432,11 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$client</a></td><td class=r>$count</td><td class=r>$perc</td><td class=r>$count_html_only</td><td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_mobile) ;
-  $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile)) ;
+  $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only)) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only +
+$total_clients_wiki_mobile_html_only)) ;
 
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -2351,7 +2455,7 @@ sub WriteReportClients
     if (($engine2 ne $engine_prev) && ($engine_prev ne ""))
     {
       $total_engine = $total_engines {$engine_prev} ;
-      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile)) ;
+      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
       $total_engine = &FormatCount ($total_engine) ;
       $html .= "<tr><th class=l>Total</th><th class=r>$total_engine</th><th class=r>$perc_engine\%</th></tr>\n" ;
     }
@@ -2360,7 +2464,7 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$engine</td><td class=r>$total</td><td class=r>&nbsp;</td></tr>\n" ;
   }
   $total_engine = $total_engines {$engine_prev} ;
-  $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile)) ;
+  $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
   $total_engine = &FormatCount ($total_engine) ;
   $html .= "<tr><th class=l>Total</th><th class=r>$total_engine</th><th class=r>$perc_engine\%</th></tr>\n" ;
 
@@ -2377,7 +2481,7 @@ sub WriteReportClients
     if (($engine2 ne $engine_prev) && ($engine_prev ne ""))
     {
       $total_engine = $total_engines {$engine_prev} ;
-      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile)) ;
+      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
       $total_engine = &FormatCount ($total_engine) ;
       $html .= "<tr><th class=l>Total</th><th class=r>$total_engine</th><th class=r>$perc_engine\%</th></tr>\n" ;
     }
@@ -2386,7 +2490,7 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$engine</td><td class=r>$total</td><td class=r>&nbsp;</td></tr>\n" ;
   }
   $total_engine = $total_engines {$engine_prev} ;
-  $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile)) ;
+  $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
   $total_engine = &FormatCount ($total_engine) ;
   $html .= "<tr><th class=l>Total</th><th class=r>$total_engine</th><th class=r>$perc_engine\%</th></tr>\n" ;
 

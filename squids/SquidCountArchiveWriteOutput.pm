@@ -237,7 +237,7 @@ sub WriteOutputSquidLogs
   print CSV_SEARCH          $comment ;
   print CSV_BOTS            $comment ;
   print CSV_GOOGLEBOTS      $comment ;
-  print CSV_OPSYS           $comment . "# mobile: $tags_mobile ($tags_mobile_upd)\n" .
+  print CSV_OPSYS           $comment . "# mobile: $tags_wiki_mobile, $tags_mobile ($tags_mobile_upd)\n" .
                                       "# pos 1: - = non mobile, M = mobile ('-'+'M'=100%), G = aggregated Group\n" ;
   print CSV_CLIENTS         $comment ;
   print CSV_LANGUAGES       $comment ;

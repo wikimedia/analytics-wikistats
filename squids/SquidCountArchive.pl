@@ -60,8 +60,10 @@
   else
   { $path_root = "w:/! perl/squids/archive/test" ; }
 
-  $tags_mobile     = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|Mobile|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm Pre|Playstation|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|Wikiamo|Wikipanion" ;
-  $tags_mobile_upd = "March 2011" ;
+  $tags_wiki_mobile = "Wikiamo|Wikipanion|Wikimedia" ;
+
+  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|Mobile|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation Portable|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC_Touch|KDDI|FOMA|HTC_HD2|Polaris|Teleca" ;
+  $tags_mobile_upd  = "August 2011" ;
 
   $pattern_url_pre  = "(?:^|[a-zA-Z0-9-]+\\.)*?" ;
   $pattern_url_post = "\\.(?:biz|com|info|name|net|org|pro|aero|asia|cat|coop|edu|gov|int|jobs|mil|mobi|museum|tel|travel|arpa|[a-zA-Z0-9-]{2}|(?:com?|ne)\\.[a-zA-Z0-9-]{2})\$" ;

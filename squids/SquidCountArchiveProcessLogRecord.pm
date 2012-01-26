@@ -275,7 +275,9 @@ sub ProcessLine
 
   # MOBILE
   $mobile = '-' ;
-  if ($agent2 =~ /(?:$tags_mobile)/io)
+  if ($agent2 =~ /(?:$tags_wiki_mobile)/io)
+  { $mobile = 'W' ; }
+  elsif ($agent2 =~ /(?:$tags_mobile)/io)
   { $mobile = 'M' ; }
 
   $os = ".." ;
@@ -332,7 +334,7 @@ sub ProcessLine
   elsif ($agent2 =~ /J2ME\/MIDP/io)     { $os = "Java/ME" ; }
   elsif ($agent2 =~ /Kindle/io)         { $os = "Kindle" ; }
 
-  if (($os eq '..') && ($mobile eq 'M'))
+  if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
     $os = "Mobile other" ;
     $mobile_other {$agent2} ++ ;
