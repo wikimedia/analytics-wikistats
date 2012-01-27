@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
-  use lib "/home/ezachte/lib" ;
+  use config
+  use lib $liblocation ;
+
   use EzLib ;
   $trace_on_exit = $true ;
   ez_lib_version (2) ;
@@ -49,8 +51,8 @@
   else
   {
     print "Job runs local for tests\n\n" ;
-    $path_in  = "W:/# Out Locke" ;
-    $path_out = "W:/# Out Test/Locke" ;
+    $path_in  = "/srv/erik/" ;
+    $path_out = "/srv/erik/" ;
   }
 
   print "Path in  = $path_in\n" ;

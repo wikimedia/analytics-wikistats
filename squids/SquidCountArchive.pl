@@ -1,6 +1,7 @@
  #!/usr/bin/perl
 
-  use lib "/home/ezachte/lib" ;
+  use config ;
+  use lib $liblocation ;
   use EzLib ;
 
   $trace_on_exit = $true ;
@@ -13,7 +14,7 @@
   use SquidCountArchiveWriteOutput ;
 
   # set defaults mainly for tests on local machine
-  default_argv "-d 2011/04/01" ;
+  default_argv $default_argv;
 
 # http://wikitech.wikimedia.org/view/Squid_log_format
 # 1. Hostname
@@ -55,10 +56,7 @@
 
   $time_start = time ;
 
-  if ($job_runs_on_production_server)
-  { $path_root = "/a/ezachte" ; }
-  else
-  { $path_root = "w:/! perl/squids/archive/test" ; }
+  $path_root = "/srv/erik" ;
 
   $tags_wiki_mobile = "Wikiamo|Wikipanion|Wikimedia" ;
 
@@ -512,7 +510,6 @@ sub InitGlobals # qqq
   undef %squid_events ;
   undef %squid_seqno ;
   undef %statusses ;
-  undef %total_clients ;
   undef %unrecognized_domains ;
   undef %wikis ;
 # undef @files ;

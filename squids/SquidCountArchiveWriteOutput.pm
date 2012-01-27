@@ -1,6 +1,7 @@
  #!/usr/bin/perl
 
-  use lib "/home/ezachte/lib" ;
+  use config ;
+  use lib $liblocation ;
   use EzLib ;
 
 sub WriteOutputIpFrequencies

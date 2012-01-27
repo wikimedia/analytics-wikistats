@@ -3,7 +3,8 @@
 ## sub CollectRawData -> SquidDataCountries.csv
 ## sub ProcessRawData <- SquidDataCountries.csv -> ??
 
-  use lib "/home/ezachte/lib" ;
+  use config ;
+  use lib $liblocation ;
   use EzLib ;
   $trace_on_exit = $true ;
 

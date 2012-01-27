@@ -4,6 +4,7 @@
 # test:
 # echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+use config ;
 
 sub CollectFilesToProcess
 {
@@ -22,8 +23,6 @@ sub CollectFilesToProcess
   my $all_files_found = $true ;
 
   my ($date_archived) ;
-
-  $dir_in  = "/a/squid/archive" ;
 
   $some_files_found = $false ;
   $full_range_found = $false ;
@@ -46,9 +45,9 @@ sub CollectFilesToProcess
 
     ($sec,$min,$hour,$day,$month,$year) = localtime ($time_start - $days_ago_inspect * 24 * 3600) ;
     $date_archived = sprintf ("%4d%02d%02d", $year+1900, $month+1, $day) ;
-    print "\n- Inspect file saved $days_ago_inspect days ago: sampled-1000.log-$date_archived.gz\n" ;
+    print "\n- Inspect file saved $days_ago_inspect days ago: $logname-$date_archived.gz\n" ;
 
-    my $file = "$dir_in/sampled-1000.log-$date_archived.gz" ;
+    my $file = "$dir_in/$logname-$date_archived.gz" ;
 
     if (! -e $file)
     { print "- File not found: $file\n" ; }
