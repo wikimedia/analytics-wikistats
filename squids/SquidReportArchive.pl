@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-  use config
+  use config ;
   use lib $liblocation ;
 
   use EzLib ;
