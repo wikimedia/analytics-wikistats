@@ -14,7 +14,7 @@
 
 # to do: AdjustForMissingFilesAndUndercountedMonths for week and day level files
 
-# Added May 2001: 
+# Added May 2001:
 # For analytics database one file is written for all projects and languages combined,
 # with per month, not normalized and normalized page view counts in one row.
 
@@ -27,7 +27,13 @@
   ez_lib_version (4) ;
 
   # set defaults mainly for tests on local machine
-  default_argv "-i 'w:/# In Dammit.lt/projectcounts'|-o 'w:/# out test'" ;
+  default_argv "-i 'w:/# In Dammit.lt/projectcounts/test_in'|-o 'w:/# In Dammit.lt/projectcounts/test_out'" ;
+
+  # by default process up to and including last completed month,
+  # to recreate older stats, set following variables which will be used instead of system time
+  # $assume_current_year  = 2012 ;
+  # $assume_current_month = 1 ;
+  # (to do: make this scripts parameters)
 
   $| = 1; # flush screen output
   $true  = 1 ;
@@ -102,7 +108,7 @@
       # $totals_project_month_split {$project2} {$date} += $count ;
       # if ($totals_project_month_split {$project2} {$date} > $totals_project_month_split_max {$project2})
       # { $totals_project_month_split_max {$project2} = $totals_project_month_split {$project2} {$date} ; }
-#qqq
+
       $totals_project_month_combined {"$project3"} {$date} += $count ;
       if ($totals_project_month_combined {$project3} {$date} > $totals_project_month_combined_max {$project3})
       { $totals_project_month_combined_max {$project3} = $totals_project_month_combined {$project3} {$date} ; }
@@ -315,8 +321,11 @@ sub SetComparisonPeriods
   my ($month,$year) = (localtime(time))[4,5] ;
   my @months = qw(Xxx Jan Feb Mar Apr May Jun Jul Aug Sept Oct Nov Dec) ;
 
-# $year  = 111 ;
-# $month = 3 ;
+  # by default process up to and including last completed month, may be overruled here
+  if ($assume_current_year ne '')
+  { $year = $assume_current_year - 1900 ; }
+  if ($assume_current_month ne '')
+  { $month = $assume_current_month - 1 ; }
 
   $year_now  = $year + 1900 ;
   $month_now = $month + 1 ;
@@ -331,7 +340,7 @@ sub SetComparisonPeriods
   ($year,$month) = $month > 0 ? ($year,$month-1) : ($year-1,11) ;
   $month_0_minus_1 = sprintf ("%04d/%02d",$year+1900,$month+1) ;
 
-  print "\nWrite trend data up till month: $month_0\n\n" ;
+  print "\nWrite trend data up till month: $month_0 to $month_0_file\n\n" ;
   print "Compare with previous month: $month_0_minus_1, previous year: $month_0_minus_12\n\n" ;
 
 #  $csv_recent_months = "project," ;
@@ -446,6 +455,8 @@ sub ScanTarFiles
 
       next if $file ge "projectcounts-20100611-000000" and $file lt "projectcounts-20100617-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20100627-000000" and $file lt "projectcounts-20100628-000000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20110908-000000" and $file lt "projectcounts-20110915-000000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20111223-010000" and $file lt "projectcounts-20111226-160000" ; # bad measurements on these dates
 
       push @files, $file ;
       $file_in_tar {$file} = $file_in ;
@@ -556,13 +567,14 @@ sub AdjustForMissingFilesAndUndercountedMonths
         print "Month $period: $processed processed, $missing missing -> rescale * $rescale\n" ;
       }
 
+      # summer 2010: correct for data loss (percentages derived from widened gaps in squid log sequence numbers)
          if ($period eq '2010/04') { $rescale2 = 1.241 ; }
       elsif ($period eq '2010/05') { $rescale2 = 1.310 ; }
       elsif ($period eq '2010/06') { $rescale2 = 1.328 ; }
       elsif ($period eq '2010/07') { $rescale2 = 1.295 ; }
 
       if ($rescale2 != 1)
-      { print "Month $period: rescale * $rescale2 to compensate for missed UDP messages at locke\n" ; }
+      { print "Month $period: rescale * $rescale2 to compensate for missed UDP messages at squid log processing servers\n" ; }
 
       next if $rescale == 1 and $rescale2 == 1 ;
 
@@ -650,6 +662,7 @@ sub CountPageViews
     $hours_processed {"weekday"} {"$weekday"} ++ ;
 
     $tar_file = $file_in_tar {$file} ;
+
     if ($tar_file ne $tar_file_prev)
     {
       $tar->read($tar_file);
@@ -717,7 +730,7 @@ sub CountPageViews
 # print "$project $language $year/$month: " . $totals {"month"} {$project}{"$language,$year/$month"} . "\n" ;
       $totals {"week"}    {$project} {"$language,$year,$week"} += $count ;
       $totals {"day"}     {$project} {"$language,$year/$month/$day"} += $count ;
-    # $totals {"hour"}    {$project} {"$language,$year/$month/$day,$hour"} = $count ; # huge file, reactivate when really used
+      $totals {"hour"}    {$project} {"$language,$year/$month/$day,$hour"} = $count ; # huge file, reactivate when really used
       $totals {"weekday"} {$project} {"$language,$weekday"} += $count ;
 
       if ("$year/$month" eq $month_0) # determines sort order, no need to rescale for missing projectcount files
@@ -798,11 +811,11 @@ sub WriteCsvFilesPerPeriod
       { $file_csv =~ s/\.csv/Normalized.csv/ ; }
       &Log ("File out: $file_out\n") ;
 
-      if (-e "$dir_out/PageViewsPerHourAll.csv") # huge file, remove for now, reactivate when really used
-      {
-        print "unlink $dir_out/PageViewsPerHourAll.csv (reactivate when really used)\n" ;
-        unlink "$dir_out/PageViewsPerHourAll.csv" ;
-      }
+      # if (-e "$dir_out/PageViewsPerHourAll.csv") # huge file, remove for now, reactivate when really used
+      # {
+      #   print "unlink $dir_out/PageViewsPerHourAll.csv (reactivate when really used)\n" ;
+      #   unlink "$dir_out/PageViewsPerHourAll.csv" ;
+      # }
 
       &Log ("File csv: $file_csv\n") ;
       open CSV, ">", $file_csv ;
@@ -938,12 +951,13 @@ sub WriteCsvHtmlFilesPopularWikis
 
 # %test = %{$totals {"month"} {"wp"} };
 # %test2 = @recent_months ;
+
     for ($m = 0 ; $m < $months_recent ; $m++)
     {
       print CSV ($totals {"month"} {$project} {"$language,${recent_months [$m]}"} +
                  $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"}) . "," ;
-      print     ($totals {"month"} {$project} {"$language,${recent_months [$m]}"} +
-                 $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"}) . "," ;
+      print      $totals {"month"} {$project} {"$language,${recent_months [$m]}"} +
+                 $totals {"month"} {$project} {"$language\.m,${recent_months [$m]}"} . "," ;
     }
 
     if (($project ne "wp") && ($project ne "wx"))
@@ -1215,6 +1229,8 @@ sub WriteCsvHtmlFilesPopularWikis
 
   close CSV ;
 
+  my (%growth_figures_text,%growth_figures_html) ;
+
   # write ready made table rows for report card: page views top 25 movers shakers
   foreach $key (keys %largest_projects)
   {
@@ -1222,9 +1238,9 @@ sub WriteCsvHtmlFilesPopularWikis
 
     next if $language =~ /\.m/ ; # skip mobile for now
 
-    $total_lastmonth = $totals {"month"} {$project} {"$language,$month_0"} ;
-    $total_prevmonth = $totals {"month"} {$project} {"$language,$month_0_minus_1"} ;
-    $total_prevyear  = $totals {"month"} {$project} {"$language,$month_0_minus_12"} ;
+    $total_lastmonth = $totals {"month"} {$project} {"$language,$month_0"}          + $totals {"month"} {$project} {"$language\.m,$month_0"} ;
+    $total_prevmonth = $totals {"month"} {$project} {"$language,$month_0_minus_1"}  + $totals {"month"} {$project} {"$language\.m,$month_0_minus_1"};
+    $total_prevyear  = $totals {"month"} {$project} {"$language,$month_0_minus_12"} + $totals {"month"} {$project} {"$language\.m,$month_0_minus_12"};
 
     $perc_month = "no data" ;
     $perc_year  = "no data" ;
