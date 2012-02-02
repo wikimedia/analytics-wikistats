@@ -16,27 +16,45 @@
   $dir_in  = "W:/\# In PediaPress" ;
   $dir_out = "W:/\@ Report Card/PediaPress" ;
 
+  print "Read from folder $dir_in\n" ;
+  print "Write from folder $dir_out\n" ;
+
   $file_csv_country_codes = "CountryCodes.csv" ;
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
   &ReadInputCountriesNames ;
 
-  &ReadMonthlySales ("$dir_in/wmf_report_2010-08.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2010-09.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2010-10.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2010-11.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2010-12.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2011-01.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2011-02.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2011-03.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2011-04.csv") ;
-  &ReadMonthlySales ("$dir_in/wmf_report_2011-05.csv") ;
+  ($mm_now,$yyyy_now) = (gmtime(time)) [4,5] ;
+  $yyyy_now += 1900 ;
+  $mm_now ++ ;
+
+  $yyyy = 2010 ;
+  $mm = 8 ;
+  while (($yyyy < $yyyy_now) || (($yyyy == $yyyy_now) && ($mm <$mm_now)))
+  {
+    $yyyy_mm = sprintf ("%04d-%02d", $yyyy, $mm) ;
+    $file  = "$dir_in/wmf_report_$yyyy_mm.csv" ;
+
+    if (- $file)
+    {
+      print "Read $file\n" ;
+      &ReadMonthlySales ($file) ;
+    }
+
+
+    $mm ++ ;
+    if ($mm > 12)
+    { $mm = 1 ; $yyyy++ ; }
+  }
 
   &ProcessMonthlySales ;
 
   &WriteMonthlySales ("$dir_out/BookToolSalesMonthlyDetailedOneRowPerMonth.csv",
                       "$dir_out/BookToolSalesMonthlyDetailedBreakdownPerCountry.csv",
                       "$dir_out/BookToolSalesMonthlyConciseBooksShippedOnly.csv") ;
+
+  print "\nRead from folder $dir_in\n" ;
+  print "Write from folder $dir_out\n" ;
 
   print "\n\Ready\n\n" ;
   exit ;
