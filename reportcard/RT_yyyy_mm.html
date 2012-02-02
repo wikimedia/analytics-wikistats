@@ -245,6 +245,19 @@ table.tablesorter thead tr .headerSortDown
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp
 { background-color: #44F; //#8dbdd8; }
 </style>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-25704186-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </head>
 
 <!-- ============================================================================================= -->
@@ -309,7 +322,10 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 
 
 <tr><td colspan=99 align=center>   
-  <hr><font color=#008000><b>New: multi-year trends for most metrics.</b><br><small> Depending on available history reporting period can vary per metric.</small></font>
+  <hr><small><font color=#008000>Oct 2011: The WMF Report Card will be transformed into a more fully featured Dashboard, see this  
+    <a href='http://project2.wikimedia.org/reportCard/reportcardModules.html'>prototype</a>.
+    <br>Until then this legacy report will still appear at least quarterly.</font>
+  </small><br>
 </td></tr>
 
 <!-- ===== -->
@@ -344,7 +360,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
         <img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Absolute-Linear.png'>
 <!== OUT D ==>
-        <!== TABS {10|Unique Visitors, log scale|UV, indexed|Reach Percentage, linear scale|RP, indexed} ==>
+        <!== TABS {10|Unique Visitors, linear scale|indexed|Reach Percentage, linear scale|indexed} ==>
         <!== TAB  {11|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Absolute-Linear.png'>} ==>
         <!== TAB  {12|<img src='charts/{{yyyy}}-{{mm}}/Unique-Visitors-Per-Region-Indexed.png'>} ==>
         <!== TAB  {13|<img src='charts/{{yyyy}}-{{mm}}/Reach-Per-Region-Absolute-Linear.png'>} ==>
@@ -386,14 +402,15 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
       <!-- Reach: Page Requests: Tabs -->
       <td align=left valign=middle>
 <!== OUT SC ==>
-        <img src='charts/{{yyyy}}-{{mm}}/Page-Views-Indexed-Wikis.png'>
+        <img src='charts/{{yyyy}}-{{mm}}/Page-Views-Total-Indexed.png'>
 <!== OUT D ==>
-        <!== TABS {20|Page Requests, log|PR, linear|PR, ind. per wiki|Mobile|M&S} ==>
-        <!== TAB  {21|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Absolute-Log.png'><br>} ==>
-        <!== TAB  {22|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Absolute-Linear.png'><br>} ==>
-        <!== TAB  {23|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Indexed-Wikis.png'><br>} ==>
-        <!== TAB  {24|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Breakdown-Mobile-Traffic.png'><br>} ==>
-        <!== TAB  {25|START} ==>
+        <!== TABS {20|log scale|linear scale|indexed per wiki|indexed per project|Mobile|M&S} ==>
+        <!== TAB  {21|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Total-Absolute-Log.png'><br>} ==>
+        <!== TAB  {22|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Total-Absolute-Linear.png'><br>} ==>
+        <!== TAB  {23|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Total-Indexed-Wikis.png'><br>} ==>
+        <!== TAB  {24|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Total-Indexed-Projects.png'><br>} ==>
+        <!== TAB  {25|<img src='charts/{{yyyy}}-{{mm}}/Page-Views-Breakdown-Mobile-Traffic.png'><br>} ==>
+        <!== TAB  {26|START} ==>
           <!-- Reach: Page Requests: Movers/Shakers -->
             <center><small><b>Movers & Shakers in top 25 / {{month-1}}&nbsp;&rArr;&nbsp;{{month}}</b> <font color="808080">(click any table header to sort by that column)</font><br>
                      <font color=#800000><b>Please keep in mind monthly changes are not normalized for length of month.<br>The effect of this shows particlarly in Jan &rArr; Feb and Feb &rArr; Mar.</font></b></small>
@@ -410,7 +427,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
               </thead>
 <!-- Reach: Page Requests: Movers/Shakers Body -->
 <tbody>
-<!== INC PageViewsMoversShakersPopularWikis_{{yyyy}}_{{mm}}.html ==>
+<!== INC PageViewsMoversShakersPopularWikisNormalized_{{yyyy}}_{{mm}}.html ==>
 </tbody>
               <tr>
                       <td colspan=99 class=chart>
@@ -424,9 +441,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT DSC ==>
           <!-- Reach: Page Requests: Movers/Shakers Footer -->
           <br>
-            <!== COMMENT {<font color=#FF0000>Due to server problems page view counts from squid logs for December 2009 - March 2010 are too low, estimated underreporting 10%-25%</font>}==>
-            <!== COMMENT {<br>source: Squid logs ; see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a>}==>
-            <!== COMMENT {<br>view counts for all months have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc), this mainly shows in Jan&rArr;Feb and Feb&rArr;Mar}==>
+            <!== COMMENT {<b><font color=#008000>Jan 2011: Page request count does now also include traffic to mobile Wikipedia site</font></b><br>Due to server problems page view counts from squid logs for December 2009 - March 2010 are too low, estimated underreporting 10%-25%<br>source: Squid logs ; see also <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm'>wikistats report</a><br>view counts for all months have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc), this mainly shows in Jan&rArr;Feb and Feb&rArr;Mar}==>
 <!== OUT DS ==>
           <hr class=thin>
 <!== OUT DSC ==>
@@ -467,7 +482,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
         <img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Log.png'>
 <!== OUT D ==>
-        <!== TABS {30|Top Web Properties, log scale|TWP, linear scale|TWP, indexed} ==>
+        <!== TABS {30|log scale|linear scale|indexed} ==>
         <!== TAB  {31|<img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Log.png'>} ==>
         <!== TAB  {32|<img src='charts/{{yyyy}}-{{mm}}/Properties-Absolute-Linear.png'>} ==>
         <!== TAB  {33|<img src='charts/{{yyyy}}-{{mm}}/Properties-Indexed.png'>} ==>
@@ -509,7 +524,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
             <img src='charts/{{yyyy}}-{{mm}}/Binaries-Indexed.png'><br>
 <!== OUT D ==>
-            <!== TABS {100|Binary Files, log scale|BF, linear scale|BF, indexed} ==>
+            <!== TABS {100|log scale|linear scale|indexed} ==>
             <!== TAB  {101|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Absolute-Log.png'><br>} ==>
             <!== TAB  {102|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Absolute-Linear.png'><br>} ==>
             <!== TAB  {103|<img src='charts/{{yyyy}}-{{mm}}/Binaries-Indexed.png'><br>} ==>
@@ -547,14 +562,13 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
             <img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Log.png'><br>
 <!== OUT D ==>
-            <!== TABS {40|Article Count, log scale|AC, linear scale|AC, indexed per wiki|AC, indexed per project} ==>
+            <!== TABS {40|log scale|linear scale|indexed per wiki|comparison other projects} ==>
             <!== TAB  {41|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Log.png'><br>} ==>
             <!== TAB  {42|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Absolute-Linear.png'><br>} ==>
             <!== TAB  {43|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Indexed-Wikis.png'><br>} ==>
             <!== TAB  {44|<img src='charts/{{yyyy}}-{{mm}}/Article-Count-Indexed-Projects.png'><br>} ==>
 <!== OUT DSC ==>
-            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Wikistats</a>} ==>
-            <!== COMMENT {<br>Wikinews without Serbian (which is flooded by trivial bot updates)} ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesArticlesTotal.htm'>Wikistats</a> <br>Wikinews without Serbian (which is flooded by trivial bot updates)} ==>
 <!== OUT DS ==>
             <hr class=thin>
 <!== OUT DSC ==>
@@ -579,7 +593,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
             <img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Indexed-Wikis.png'><br>
 <!== OUT D ==>
-            <!== TABS {50|New Articles, log scale|NA, linear scale|NA, indexed per wiki|NA, indexed per project} ==>
+            <!== TABS {50|log scale|linear scale|indexed per wiki|comparison other projects} ==>
             <!== TAB  {51|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Absolute-Log.png'><br>} ==>
             <!== TAB  {52|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Absolute-Linear.png'><br>} ==>
             <!== TAB  {53|<img src='charts/{{yyyy}}-{{mm}}/Articles-New-Per-Day-Indexed-Wikis.png'><br>} ==>
@@ -603,7 +617,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
           <!== TRENDS EDITS PER MONTH ==>
 
           <td align=left valign=middle>
-            <!== TABS {90|Edits per Month, log scale|EM, linear scale|EM, indexed per wiki|EM, indexed per project} ==>
+            <!== TABS {90|log scale|linear scale|indexed per wiki|comparison other projects} ==>
             <!== TAB  {91|<img src='charts/{{yyyy}}-{{mm}}/Edits-Absolute-Log.png'><br>} ==>
             <!== TAB  {92|<img src='charts/{{yyyy}}-{{mm}}/Edits-Absolute-Linear.png'><br>} ==>
             <!== TAB  {93|<img src='charts/{{yyyy}}-{{mm}}/Edits-Indexed-Wikis.png'><br>} ==>
@@ -636,7 +650,7 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
             <img src='charts/{{yyyy}}-{{mm}}/Editors-New-Indexed-Wikis.png'><br>
 <!== OUT D ==>
-            <!== TABS {60|New Editors, log scale|NE, linear scale|NE, indexed per wiki|NE, indexed per project} ==>
+            <!== TABS {60|log scale|linear scale|indexed per wiki|indexed per project} ==>
             <!== TAB  {61|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Absolute-Log.png'><br>} ==>
             <!== TAB  {62|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Absolute-Linear.png'><br>} ==>
             <!== TAB  {63|<img src='charts/{{yyyy}}-{{mm}}/Editors-New-Indexed-Wikis.png'><br>} ==>
@@ -668,16 +682,14 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
 <!== OUT SC ==>
             <img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Wikis.png'><br>
 <!== OUT D ==>
-            <!== TABS {70|Active Editors, log scale|AE, linear scale|AE, indexed per wiki|AE, indexed per project} ==>
+            <!== TABS {70|log scale|linear scale|indexed per wiki|indexed per project} ==>
             <!== TAB {71|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Absolute-Log.png'><br>} ==>
             <!== TAB {72|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Absolute-Linear.png'><br>} ==>
             <!== TAB {73|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Wikis.png'><br>} ==>
             <!== TAB {74|<img src='charts/{{yyyy}}-{{mm}}/Editors-Active-Indexed-Projects.png'><br>} ==>
 
 <!== OUT DSC ==>
-            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded} ==>
-            <!== COMMENT {<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. } ==>
-            <!== COMMENT {<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects.<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
 <!== OUT D ==>
             <hr class=thin>
 <!== OUT DSC ==>
@@ -694,14 +706,12 @@ table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSo
           <!== TRENDS VERY ACTIVE EDITORS ==>
 
           <td align=left valign=middle>
-            <!== TABS {80|Very Active Editors, log scale|VAE, linear scale|VAE, indexed per wiki|VAE, indexed per project} ==>
+            <!== TABS {80|log scale|linear scale|indexed per wiki|indexed per project} ==>
             <!== TAB  {81|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Absolute-Log.png'><br>} ==>
             <!== TAB  {82|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Absolute-Linear.png'><br>} ==>
             <!== TAB  {83|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Indexed-Wikis.png'><br>} ==>
             <!== TAB  {84|<img src='charts/{{yyyy}}-{{mm}}/Editors-Very-Active-Indexed-Projects.png'><br>} ==>
-            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded} ==>
-            <!== COMMENT {<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects. } ==>
-            <!== COMMENT {<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
+            <!== COMMENT {source: <a href='http://stats.wikimedia.org/EN/TablesWikipediaZZ.htm#activitylevels'>Wikistats</a> / Bots and anonymous (or logged out) editing excluded<br>&nbsp;Aug 2010: Editors on Commons are no longer included in overall total, on the assumption that most also edit on one or more other projects.<br>&nbsp;More precise detection of double counts between any projects and languages is planned for late 2010 (using Single User Login registration).} ==>
           </td>
         </tr>
 <!== OUT C ==>
