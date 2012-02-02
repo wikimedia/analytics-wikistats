@@ -9,8 +9,8 @@
   use Getopt::Std ;
 
   # !! adapt these for every run !!
-  $p_year  = 2010 ;
-  $p_month = 12  ;
+  $p_year  = 2011 ;
+  $p_month = 12    ;
 
   $debug = $false ;
 
@@ -89,53 +89,566 @@
 
   print "\n"."="x80 . "\n\n" ;
 
-# !! This is rather crummy Q&D way to collect variable data, data need to be externalized !!
+# !! This is rather crummy if not outright stupid Q&D way to collect variable data, data need to be externalized !!
+
+## if ($2011_12)
+## {                                                                  # projects
+  @rank                = qw (           5th    x    0      0    th) ; # All     - Web Properties - Unique Visitors
+  @reach               = qw (            31.7  x    1.8   -1.3  %) ;  # All     - Reach Percentage by Region
+  @visitors            = qw (   457,063,000    m   15.6   -3.7  %) ;  # All     - Unique Visitors by Region
+  @page_requests       = qw (16,365,306,811    b   17.3   -6.1  %) ;  # All     - copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+  @commons_files       = qw (    11,974,179    m   50.1    1.8  %) ;  # Commons - Binaries per month - Absolute
+  @article_count       = qw (    20,845,401    m   18.6    1.9  %) ;  # Wp      - Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+  @new_articles        = qw (        12,759    k   50.0   67.2  %) ;  # Wp      - New articles per day - Absolute
+  @edits               = qw (    11,636,349    m    1.0    4.7  %) ;  # Wp      - Edits per month - Absolute
+  @new_editors         = qw (        15,181    k   -9.1   -6.4  %) ;  # All     - New editors - Absolute
+  @active_editors      = qw (        83,293    k    1.6    0.1  %) ;  # All     - Active editors - Absolute
+  @very_active_editors = qw (        11,041    k    2.7    2.8  %) ;  # All     - Very active editors - Absolute
+                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+  push @reach,    "2|Reach<br>#2: Change in reach in 3 years: (avg Oct-Dec 08 -&gt; avg Oct-Dec 11) pp= percentage points: <br>" .
+                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +9pp, (38%-&gt;47%), North-Am +10pp (35%-&gt;45%), Asia +1pp (16%-&gt;18%),<br>" .
+                  "#&nbsp;&nbsp;&nbsp;&nbsp;Latin-America +6pp (35%-&gt;41%), Middle East-Africa +2pp (30%-&gt;32%),<br>" .
+                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +16pp (20%-&gt;35%), World +4.8pp (27.8%-&gt;32.7%)" ;
+  push @visitors, "3,4|Unique Visitors<br>#3: 8% higher than average for last 12 months (422M).<br>" .
+#                 "&nbsp;&nbsp;&nbsp;&nbsp;4.9% higher than previous month (which was also an all time high)<br>" .
+                  "#4: Change in UV's in 3 years: (avg Oct-Dec 08 -&gt; avg Oct-Dec 11): <br>" .
+                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +68%, North-Am +46%, Latin-Am: +103%, Asia: +58%, World +69%<br>" .
+                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +164%, Middle East-Africa: +180%" ;
+ push @page_requests, "5,6,7,8,9|Page Requests<br>" .
+                  "5: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm'>Fastest and slowest growth in page requests in top 25 Wikipedias in 2011</a>:<br>" .
+                  "&nbsp;&nbsp;&nbsp;&nbsp;Fast: Chinese +323%, Persian +114%, Ukranian +69%, Korean +65%, Arabic +43%,<br>" .
+                  "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Indonesian +40%, Hebrew +40%, Russian +38%, Thai +35%, Commons +33%.<br>" .
+                  "&nbsp;&nbsp;&nbsp;&nbsp;Slow: Finnish +2%, Hungarian +5%.<br>" .
+                  "6: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm'>Projects ranked by growth in page requests in 2011</a>:<br>" .
+                  "&nbsp;&nbsp;&nbsp;&nbsp;Wikiquote: +127%, Wiktionary: +57%, Commons: +33%, Wikibooks: +26%, Wikisource: +23%,<br>" .
+                  "&nbsp;&nbsp;&nbsp;&nbsp;Wikipedia: +16%, Wikinews: +12%, Wikiversity: +5%<br>" .
+                  "7: Numbers have been corrected for 88 hours of missing traffic data.<br>" .
+                  "8: Wiktionary traffic back to normal after massive botnet spam in Oct/Nov.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Reassesment may follow later.<br>" ;
+#                  "6: Note that total requests <b>from mobile devices</b> is even much higher, approx half go to regular site" ;
+#                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 7.2%!<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-04/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+#                  "7: Note: Requests from mobile devices to the non-mobile site, which are redirected to the mobile site<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;are probably counted twice. Follow up requests from the mobile device via internal links<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;are not affected. Number of double counts not yet known.<br>" .
+#                  "#8: Page views for Chinese Wikipedia went from 52M in January to 163M in April.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;#Unique visitors from China stayed low as usual, even dropped 6% from January to April.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;#(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+                   "#9: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+# push @commons_files, "7|Commons Files<br>7: Recent growth in  " .
+#                  "<br>&nbsp;&nbsp;&nbsp;&nbsp;Probably related to Wiki Loves Monuments contest (WLM)</a><br>" ;
+
+ push @article_count, "10|Article Count<br>10: Some Wikipedias contain massive amounts of bot created stubs,<br>" .
+                    "&nbsp;&nbsp;&nbsp;&nbsp;(e.g. Dutch Wikipedia 42% of total, Volapük 92% of total)<br>" .
+                    "&nbsp;&nbsp;&nbsp;&nbsp;which makes article count a questionable metric of community effort.<br>" .
+                    "&nbsp;&nbsp;&nbsp;&nbsp;see also <a href='http://stats.wikimedia.org/EN/BotActivityMatrixCreates.htm'>new report</a> on bot induced article creation activity per wiki." ;
+
+
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+push @new_articles, "10|New Articles Per Day<br>" .
+                     "10: On Dutch Wikipedia <a href='http://nl.wikipedia.org/wiki/Speciaal:Bijdragen/Joopwikibot'>Joopwikibot</a> created roughly 164k of trivial taxonomy stubs in last 3 months." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+#  push @new_editors, "8|New Editors Per Month<br>" .
+#                     "8: Continued decline in new editors at large wikipedias, but sharp rise at Commons (WLM)" ;
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+#  push @active_editors, "7|(Very) Active Editors<br>" .
+#                     "7: Recent spike in (very) active editors on Commons probably caused by Wiki Loves Monuments project (temporary), but also by improved upload facilities (permanent)." ;
+#  push @very_active_editors, "7|" ;
+#                     "&nbsp;&nbsp;&nbsp;&nbsp;Rise in many wikipedias outweighed <a href='charts/2011-09/Editors-Active-Indexed-Wikis.png'>slow decline</a> (-10% in 3 years) in English, German, Japanese" ;
+
+## }
+
+
+
+### if ($2011_11)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            33.0  x    1.7   -0.3  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   474,273,000    m   15.6   -0.4  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (17,522,412,261    b   17.3    2.5  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (    11,556,871    m   51.8    1.9  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    20,450,945    m   18.1    1.1  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (        11,519    k   45.3   56.2  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    11,123,498    m    0.1   -1.9  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        15,605    k   -5.7   -1.6  %) ;  # New editors - Absolute
+#  @active_editors      = qw (        83,444    k    0.7   -0.4  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        10,747    k   -0.3   -1.3  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#  push @reach,    "2|Reach<br>#2: Change in reach in 3 years: (avg Sep-Nov 08 -&gt; avg Sep-Nov 11) pp= percentage points: <br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +9pp (37%-&gt;46%), North-Am +10pp (35%-&gt;45%), Asia +1pp (17%-&gt;18%),<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Latin-America +6pp (39%-&gt;45%), Middle East-Africa +2pp (29%-&gt;31%),<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +16pp (19%-&gt;35%), World +4.6pp (28.5%-&gt;30.9%)" ;
+#  push @visitors, "3,4|Unique Visitors<br>#3: 14% higher than average for last 12 months (417M).<br>" .
+##                 "&nbsp;&nbsp;&nbsp;&nbsp;4.9% higher than previous month (which was also an all time high)<br>" .
+#                  "#4: Change in UV's in 3 years: (avg Sep-Nov 08 -&gt; avg Sep-Nov 11): <br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +70%, North-Am +45%, Latin-Am: +102%, Asia: +55%, World +69%<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +169%, Middle East-Africa: +188%" ;
+## push @page_requests, "5|Page Requests<br>" .
+##                  "5: Registration of mobile traffic for October has been incomplete due to technical problems.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;Reassesment may follow later.<br>" ;
+##                  "6: Note that total requests <b>from mobile devices</b> is even much higher, approx half go to regular site" ;
+##                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 7.2%!<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-04/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+##                  "7: Note: Requests from mobile devices to the non-mobile site, which are redirected to the mobile site<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are probably counted twice. Follow up requests from the mobile device via internal links<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are not affected. Number of double counts not yet known.<br>" .
+##                  "#8: Page views for Chinese Wikipedia went from 52M in January to 163M in April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#Unique visitors from China stayed low as usual, even dropped 6% from January to April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+##                  "#9: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+## push @commons_files, "7|Commons Files<br>7: Recent growth in  " .
+##                  "<br>&nbsp;&nbsp;&nbsp;&nbsp;Probably related to Wiki Loves Monuments contest (WLM)</a><br>" ;
+
+## push @article_count, "2|Article Count<br>2: Spanish Wikipedia <a href='http://stats.wikimedia.org/reportcard/charts/2011-04/Article-Count-Indexed-Wikis.png'>consistently grows faster</a> in number of articles than other large Wikipedias." ;
+
+
+###                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "6|New Articles Per Day<br>" .
+##                     "6: Unusual strong growth in article creation in several wikis in recent months caused by bots,<br>" .
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;(e.g. Dutch Wikipedia created roughly 100k taxonomy stubs in October)<br>" .
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;see also <a href='http://stats.wikimedia.org/EN/BotActivityMatrixCreates.htm'>new report</a> on bot induced article creation activity per wiki." ;
+### push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+###                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+###               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+###              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+###              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+##  push @new_editors, "8|New Editors Per Month<br>" .
+##                     "8: Continued decline in new editors at large wikipedias, but sharp rise at Commons (WLM)" ;
+###                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+###                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+###                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+###                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+###                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+###                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+###                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+##  push @active_editors, "7|(Very) Active Editors<br>" .
+##                     "7: Recent spike in (very) active editors on Commons probably caused by Wiki Loves Monuments project (temporary), but also by improved upload facilities (permanent)." ;
+##  push @very_active_editors, "7|" ;
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;Rise in many wikipedias outweighed <a href='charts/2011-09/Editors-Active-Indexed-Wikis.png'>slow decline</a> (-10% in 3 years) in English, German, Japanese" ;
+
+### }
+
+### if ($2011_10)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            33.3  x    2      1.3  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   476,627,000    m   16.7    4.9  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (16,804,239,498    b   15.6    6.1  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (    11,556,871    m   52.0    2.3  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    20,648,383    m   18.5    1.8  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (        11,519    k   45.3   56.2  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    11,380,885    m   -1.1    3.9  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        15,349    k   -8.8    0.4  %) ;  # New editors - Absolute
+#  @active_editors      = qw (        84,426    k    0.8    1.4  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        11,008    k   -1.1    1.9  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#  push @reach,    "2|Reach<br>#2: Change in reach in 3 years: (avg Aug-Oct 08 -&gt; avg Aug-Oct 11) pp= percentage points: <br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +9pp (35%-&gt;44%), North-Am +10pp (34%-&gt;44%), Asia +0pp (17%),<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Latin-America +6pp (39%-&gt;45%), Middle East-Africa +2pp (27%-&gt;29%),<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +20pp (20%-&gt;35%), World +4.4pp (27.4%-&gt;31.8%)" ;
+#  push @visitors, "3,4|Unique Visitors<br>3: 16% higher than average for last 12 months (412M).<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;4.9% higher than previous month (which was also an all time high)<br>" .
+#                  "#4: Change in UV's in 3 years: (avg Aug-Oct 08 -&gt; avg Aug-Oct 11): <br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Europe +74%, North-Am +46%, Latin-Am: +99%, Asia: +52%, World +70%<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;India +167%, Middle East-Africa: +197%" ;
+#  push @page_requests, "5|Page Requests<br>" .
+#                   "5: Registration of mobile traffic for October has been incomplete due to technical problems.<br>" .
+#                   "&nbsp;&nbsp;&nbsp;&nbsp;Reassesment may follow later.<br>" ;
+##                  "6: Note that total requests <b>from mobile devices</b> is even much higher, approx half go to regular site" ;
+##                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 7.2%!<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-04/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+##                  "7: Note: Requests from mobile devices to the non-mobile site, which are redirected to the mobile site<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are probably counted twice. Follow up requests from the mobile device via internal links<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are not affected. Number of double counts not yet known.<br>" .
+##                  "#8: Page views for Chinese Wikipedia went from 52M in January to 163M in April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#Unique visitors from China stayed low as usual, even dropped 6% from January to April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+##                  "#9: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+## push @commons_files, "7|Commons Files<br>7: Recent growth in  " .
+##                  "<br>&nbsp;&nbsp;&nbsp;&nbsp;Probably related to Wiki Loves Monuments contest (WLM)</a><br>" ;
+
+## push @article_count, "2|Article Count<br>2: Spanish Wikipedia <a href='http://stats.wikimedia.org/reportcard/charts/2011-04/Article-Count-Indexed-Wikis.png'>consistently grows faster</a> in number of articles than other large Wikipedias." ;
+
+
+###                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+# push @new_articles, "6|New Articles Per Day<br>" .
+#                     "6: Strong growth in several wikis probably caused by bots<br>" .
+#                     "&nbsp;&nbsp;&nbsp;&nbsp;(confirmed for Dutch Wikipedia, which created 90,000 taxonomy stubs)." ;
+### push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+###                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+###               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+###              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+###              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+##  push @new_editors, "8|New Editors Per Month<br>" .
+##                     "8: Continued decline in new editors at large wikipedias, but sharp rise at Commons (WLM)" ;
+###                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+###                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+###                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+###                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+###                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+###                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+###                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+#  push @active_editors, "7|(Very) Active Editors<br>" .
+#                     "7: Recent spike in (very) active editors on Commons probably caused by Wiki Loves Monuments project (temporary), but also by improved upload facilities (permanent)." ;
+#  push @very_active_editors, "7|" ;
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;Rise in many wikipedias outweighed <a href='charts/2011-09/Editors-Active-Indexed-Wikis.png'>slow decline</a> (-10% in 3 years) in English, German, Japanese" ;
+
+### }
+
+
+### if ($2011_09)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            32    x    1.2    2.0  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   454,529,000    m   14.2    7.5  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (15,840,000,000    b    9.0    5.2  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (    11,302,577    m   52.4    3.8  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    19,883,825    m   18.0    1.1  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (         6,982    k   -6.7   -5.8  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    10,943,206    m   -7.6   -2.8  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        14,582    k   -9.2  -12.1  %) ;  # New editors - Absolute !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#  @active_editors      = qw (        83.164    k    1.6   -2.8  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        10,763    k   -2.6   -4.3  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#  push @reach,    "2|Reach<br>2: Change in reach in 3 years: (avg Jul-Sep 08 -> avg Jul-Sep 11) pp= percentage points: <br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe +9pp (33%->42%), North-Am +9.7pp (33%->42%), Asia +0pp (17%),<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;India +15pp (20%->35%), World +3.5pp (26.5%->30%)" ;
+#  push @visitors, "3,4|Unique Visitors<br>3: Average for last 12 months 406M.<br>" .
+#                  "4:Change in UV's in 3 years: (avg Jul-Sep 08 -> avg Jul-Sep 11): <br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe +73%, North-Am +47%, Latin-Am: +93%, Asia: +45%, World +66%<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;India +162%, Middle East-Africa: +179%" ;
+##                 "4: Growth in UV count in last 12 / 36 months 10% / 63% (for whole internet 8% / 62%).=><br>" .
+###                "&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia audience grew slightly faster than total internet audience in last 3 years.<br>" .
+##                 "4: India and Middle East show fastest growth in last 3 years<br>" .
+##                 "5: Unique visitors for last month as percentage of all time maximum per region:<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe 89%, North-Am 89%, Asia 87%, Latin-Am 95%, India 85%!, Middle East-Africa 92%<br>" ;
+###               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
+#   push @page_requests, "5,6|Page Requests<br>" .
+#                   "5: Growth in traffic <b>to mobile site</b> is huge, in last 12 months for largest wikipedias:<br>" .
+#                   "&nbsp;&nbsp;&nbsp;&nbsp;English:+80%, Japanese:+244%, Spanish:+258%, German:+105%, French:+71%, Russian:+148%<br>" .
+#                   "6: Note that total requests <b>from mobile devices</b> is even much higher, approx half go to regular site" ;
+##                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 7.2%!<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-04/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+##                  "7: Note: Requests from mobile devices to the non-mobile site, which are redirected to the mobile site<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are probably counted twice. Follow up requests from the mobile device via internal links<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;are not affected. Number of double counts not yet known.<br>" .
+##                  "#8: Page views for Chinese Wikipedia went from 52M in January to 163M in April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#Unique visitors from China stayed low as usual, even dropped 6% from January to April.<br>" .
+##                  "&nbsp;&nbsp;&nbsp;&nbsp;#(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+##                  "#9: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+#  push @commons_files, "7|Commons Files<br>7: <a href='charts/2011-09/Binaries-Indexed.png'>Total tiff's</a> doubled in August (19k->35k) and again in September (35k->75k) " .
+#                  "<br>&nbsp;&nbsp;&nbsp;&nbsp;Probably related to Wiki Loves Monuments contest (WLM)</a><br>" ;
+
+## push @article_count, "2|Article Count<br>2: Spanish Wikipedia <a href='http://stats.wikimedia.org/reportcard/charts/2011-04/Article-Count-Indexed-Wikis.png'>consistently grows faster</a> in number of articles than other large Wikipedias." ;
+
+
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "7|New Articles Per Day<br>" .
+##                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+#  push @new_editors, "8|New Editors Per Month<br>" .
+#                     "8: Continued decline in new editors at large wikipedias, but sharp rise at Commons (WLM)" ;
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+#  push @active_editors, "9|Active Editors<br>" .
+#                     "9: Active editors for all wikipedias grew 5% in last year. Commons: +43% in Aug/Sep (WLM?).<br>" .
+#                     "&nbsp;&nbsp;&nbsp;&nbsp;Rise in many wikipedias outweighed <a href='charts/2011-09/Editors-Active-Indexed-Wikis.png'>slow decline</a> (-10% in 3 years) in English, German, Japanese" ;
+
+### }
+
+
+### if ($2011_04)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            27.9  x   -2.9   -1.7  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   380,716,000    m   1.6    -4.8  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (14,614,000,000    b   -3.7   -3.4  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (    10,126,767    m   56.0    2.0  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    18,622,355    m   19.4    1.3  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (         9,568    k   12.9   22.9  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    11,633,104    m   -3.5   -1.5  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        16,405    k  -13.2   -7.9  %) ;  # New editors - Absolute
+#  @active_editors      = qw (        86,912    k   -2.6   -3.1  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        10,888    k   -3.8   -3.3  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#  push @reach,    "2|Reach<br>2: Change in reach in 3 years: (avg Feb-Apr 08 -> avg Feb-Apr 11) pp= percentage points: <br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe +3pp (39%->42%), North-Am +5pp (34%->39%), Asia -6pp (20%->14%),<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;India +11pp (19%->30%), other regions +/- 2.5pp<br>" ;
+#  push @visitors, "3,4,5|Unique Visitors<br>3: Average for last 12 months 391M.<br>" .
+##                "4: Growth in UV count in last 12 / 36 months 10% / 63% (for whole internet 8% / 62%).=><br>" .
+##                "&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia audience grew slightly faster than total internet audience in last 3 years.<br>" .
+#                 "4: India and Middle East show fastest growth in last 3 years<br>" .
+#                 "5: Unique visitors for last month as percentage of all time maximum per region:<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe 89%, North-Am 89%, Asia 87%, Latin-Am 95%, India 85%!, Middle East-Africa 92%<br>" ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
+#  push @page_requests, "5,6,7,8,9|Page Requests<br>" .
+#                  "5: Mobile page requests is growing steadily: March 620M (4.1% of total)-> April 727 (5.0% of total)<br>" .
+#                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 7.2%!<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-04/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+#                  "7: Note: Requests from mobile devices to the non-mobile site, which are redirected to the mobile site<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;are probably counted twice. Follow up requests from the mobile device via internal links<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;are not affected. Number of double counts not yet known.<br>" .
+#                  "#8: Page views for Chinese Wikipedia went from 52M in January to 163M in April.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;#Unique visitors from China stayed low as usual, even dropped 6% from January to April.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;#(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+#                  "#9: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+#  push @commons_files, "9|Commons Files<br>#9: <a href='charts/2011-04/Binaries-Absolute-Linear.png'>21% growth in Feb/Mar</a> " .
+#                  "(8.2M -> 9.9M) due to a <a href='http://commons.wikimedia.org/wiki/Category:Images_from_the_Geograph_British_Isles_project_needing_categories_by_date'>mass upload of Geograph images</a> (Jan-Mar +1.7 M)<br>" ;
+
+#  push @article_count, "10|Article Count<br>10: Spanish Wikipedia <a href='http://stats.wikimedia.org/reportcard/charts/2011-04/Article-Count-Indexed-Wikis.png'>consistently grows faster</a> in number of articles than other large Wikipedias." ;
+
+
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "7|New Articles Per Day<br>" .
+##                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+## push @new_editors, "10|New Editors Per Month<br>" .
+##                     "10: English Wikipedia: March 2011 figure 11% less than in March 2010<br>" .
+##                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+### }
+
+### if ($2011_03)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            29.6  x   -0.9    1.3  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   400,011,000    m   7.9     5.4  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (15,131,000,000    b     ?    -2.5  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (     9,941,948    m   58.0    5.5  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    18,369,156    m   19.7    1.3  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (         7,853    k    4.7   -4.3  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    11,825,328    m   -2.1    7.4  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        17,471    k  -13.9    1.5  %) ;  # New editors - Absolute
+#  @active_editors      = qw (        89,880    k   -3.1    3.3  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        11,264    k   -3.7    2.8  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#  push @reach,    "2|Reach<br>2: Change in reach in 3 years: (avg Jan-Mar 08 -> avg Jan-Mar 11) pp= percentage points: <br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Europe +5pp (39%->44%), North-Am +7pp (34%->41%), Asia -5pp (20%->15%),<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;India +13pp (19%->32%), other regions +/- 2.5pp<br>" ;
+#  push @visitors, "3,4|Unique Visitors<br>3: Average for last 12 months 390M.<br>" .
+##                "4: Growth in UV count in last 12 / 36 months 10% / 63% (for whole internet 8% / 62%).=><br>" .
+##                "&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia audience grew slightly faster than total internet audience in last 3 years.<br>" .
+#                 "#4: India, Latin America, Middle East consistenly show fastest growth in last year" ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
+#  push @page_requests, "4,5,6,7,8|Page Requests<br>" .
+#                  "4: Yearly growth unknown (data for March 2010 were incomplete)<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;(April 2010 -> April 2011: page requests for non-mobile Wikipedia's -8%, but mobile<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;almost made up for it, together -2.7%)<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;we also have data feeds to other high profile sites, but no view stats for those<br>" .
+#                  "5: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Page requests to mobile Wikipedia site</a> in 4.1% of total Wikipedia requests (620M/14654M)<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;(in April even 5.0%)<br>" .
+#                  "6: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in March: 6.6%<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-03/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+#                  "7: Page views for Chinese Wikipedia went from 52M in January to 142M in March, (even 163M in April).<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;Unique visitors from China stayed low as usual, even dropped 6% from January to March.<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;(Chinese community said year ago they had issues with Google ranking, maybe these were fixed?)<br>" .
+#                  "#8: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+#  push @commons_files, "9|Commons Files<br>#9: <a href='charts/2011-03/Binaries-Absolute-Linear.png'>20% growth in two months</a> <a href='file:///W:/@%20Report%20Card/Extended/charts/2011-02/Articles-New-Per-Day-Indexed-Projects.png'>(8.3M -> 9.4M)</a> due to a <a href='http://commons.wikimedia.org/wiki/Category:Images_from_the_Geograph_British_Isles_project_needing_categories_by_date'>mass upload of Geograph images</a> (Jan-Mar +1.6 M)<br>" ;
+
+##push @article_count, "8|Article Count<br>#8: From Sep 2010 this metric is for Wikipedia projects only. This prevents adding apples and oranges." ;
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "7|New Articles Per Day<br>" .
+##                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+# push @new_editors, "10|New Editors Per Month<br>" .
+#                     "10: English Wikipedia: March 2011 figure 11% less than in March 2010<br>" .
+#                     "&nbsp;&nbsp;&nbsp;&nbsp;yet with 8120 best result in last 10 months (average last 12 months: 7805)" ;
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+### }
+
+
+### if ($2011_02)
+### {
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @reach               = qw (            28.3  x   -1     -1.8  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   379,415,000    m   9.9    -8.3  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (15,536,996,987    b    ?      1.8  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @commons_files       = qw (     9,435,594    m   54.0   14.2  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (    18,138,317    m   19.9    1.3  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (         8,216    k   12     -9.4  %) ;  # New articles per day - Absolute
+#  @edits               = qw (    11,024,066    m   -2.8  -13.7  %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (        16,490    k  -10.5   -9.8  %) ;  # New editors - Absolute
+#  @active_editors      = qw (        87,118    k   -0.4   -4.8  %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (        10,957    k   -1.2   -7.1  %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+#  push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+## push @reach,    "2|2: Unlike drop in other metrics drop in reach can not be attributed to short month automatically<br>" ;
+#  push @visitors, "2,3|Unique Visitors<br>2: Average for last 12 months 388M.<br>" .
+##                "4: Growth in UV count in last 12 / 36 months 10% / 63% (for whole internet 8% / 62%).=><br>" .
+##                "&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia audience grew slightly faster than total internet audience in last 3 years.<br>" .
+#                 "#3: India, Latin America, Miiddle East consistenly show fastest growth" ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
+#  push @page_requests, "4,5,6,7|Page Requests<br>" .
+#                  "4: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Page requests to mobile Wikipedia site</a> in Feb: 4.6% of total Wikipedia requests (690M/14981M)<br>" .
+#                  "5: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in Feb: 6.8%<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-02/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+#                  "6: Yearly growth can not be established, due to considerable underreporting from Dec 09 till Mar 10<br>" .
+#                  "#7: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+#  push @commons_files, "8|Commons Files<br>8: <a href='charts/2011-02/Binaries-Absolute-Linear.png'>14% growth in one month</a> <a href='file:///W:/@%20Report%20Card/Extended/charts/2011-02/Articles-New-Per-Day-Indexed-Projects.png'>(8.3M -> 9.4M)</a> due to a <a href='http://commons.wikimedia.org/wiki/Category:Images_from_the_Geograph_British_Isles_project_needing_categories_by_date'>mass upload of Geograph images</a> (Feb/Mar 1.8 M)<br>" ;
+
+##push @article_count, "8|Article Count<br>#8: From Sep 2010 this metric is for Wikipedia projects only. This prevents adding apples and oranges." ;
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "7|New Articles Per Day<br>" .
+##                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+## push @new_editors, "7|New Editors Per Day<br>" .
+##                     "10: Signifant decline in last month (All projects: -10.5%, <a href='http://stats.wikimedia.org/EN/ChartsWikipediaZZ.htm'>Wikipedias -11.2%</a>).<br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+## push @active_editors, "8|(Very) Active Editors<br>" .
+##                   "11: Recent drops are well within normal bandwidth, largest drop was in <a href='charts/2010-08/Monthly-Active-Users-Since-Jan-2006.png'>June 2006</a>.<br>" .
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+## push @very_active_editors, "8|" ; #Very Active Editors<br>14: Ukrain +84% (61->112), Indonesian +180% (22->62) (during contest), Swedish -13% (141->122)." ;
+### }
+
+### if ($2011_01)
+### {
+#  @reach               = qw (            31.1  x   1.7     1.2  %) ;  # Reach Percentage by Region
+#  @visitors            = qw (   413,957,000    m  13.5     4.7  %) ;  # Unique Visitors by Region
+#  @page_requests       = qw (14,567,000,000    b    ?      8.8  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+#  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+#  @commons_files       = qw (     8,046,377    m   43.1    3.0  %) ;  # Binaries per month - Absolute
+#  @article_count       = qw (             ?    m    ?      ?    %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+#  @new_articles        = qw (             ?    k    ?      ?    %) ;  # New articles per day - Absolute
+#  @edits               = qw (             ?    m    ?      ?    %) ;  # Edits per month - Absolute
+#  @new_editors         = qw (             ?    k    ?      ?    %) ;  # New editors - Absolute
+#  @active_editors      = qw (             ?    k    ?      ?    %) ;  # Active editors - Absolute
+#  @very_active_editors = qw (             ?    k    ?      ?    %) ;  # Very active editors - Absolute
+#                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
+# push @rank,     "1|Site Rank<br>#1: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+# push @reach,    "2|2: Highest reach in Europe (46%) and North America (43%). Both &plusmn; 1/4 higher than 3 years ago.<br>" ;
+# push @visitors, "3,4,5|Unique Visitors<br>3: Average for last 12 months 385M.<br>" .
+#                 "4: Growth in UV count in last 12 / 36 months 14% / 71% (for whole internet 8% / 62%).=><br>" .
+#                 "&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia audience grew slightly faster than total internet audience in last 3 years.<br>" .
+#                 "5: India, Latin America, Miiddle East consistenly show fastest growth" ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
+#  push @page_requests, "6,7,8,9,10|Page Requests<br>" .
+#                  "6: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Page requests to mobile Wikipedia site</a> in Jan: 4.8% of total Wikipedia requests (670M/14083M)<br>" .
+#                  "7: <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm'>Total file requests from mobile devices for all Wikimedia projects</a> in Jan: 6.8%<br>" .
+#                  "&nbsp;&nbsp;&nbsp;&nbsp;See also <a href='charts/2011-01/RatioMobileTraffic.png'>Plot for both metrics.</a><br>" .
+#                  "8: Page requests counts presented here does now include traffic to mobile site<br>" .
+#                  "9: Yearly growth can not be established, due to considerable underreporting from Dec 09 till Mar 10<br>" .
+#                  "#10: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+## push @commons_files, "7,8|Commons Files<br>#7: Tiff uploads increased 5-fold in July 2010, 12-fold in last 12 months.<br>" ;
+
+##push @article_count, "8|Article Count<br>#8: From Sep 2010 this metric is for Wikipedia projects only. This prevents adding apples and oranges." ;
+##                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
+## push @new_articles, "7|New Articles Per Day<br>" .
+##                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
+## push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+##               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
+##              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
+##              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
+## push @new_editors, "7|New Editors Per Day<br>" .
+##                     "10: Signifant decline in last month (All projects: -10.5%, <a href='http://stats.wikimedia.org/EN/ChartsWikipediaZZ.htm'>Wikipedias -11.2%</a>).<br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
+##                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
+##                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+## push @active_editors, "8|(Very) Active Editors<br>" .
+##                   "11: Recent drops are well within normal bandwidth, largest drop was in <a href='charts/2010-08/Monthly-Active-Users-Since-Jan-2006.png'>June 2006</a>.<br>" .
+##                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+##                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+##                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
+## push @very_active_editors, "8|" ; #Very Active Editors<br>14: Ukrain +84% (61->112), Indonesian +180% (22->62) (during contest), Swedish -13% (141->122)." ;
+### }
+
 
 ## if ($2010_12)
 ## {
-  @visitors            = qw (   395,472,000    m  14.0    -3.7  %) ;  # Unique Visitors by Region
-  @page_requests       = qw (13,976,000,000    b  22.6     2.4  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
-  @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
-  @commons_files       = qw (     8,046,377    m   43.1    3.0  %) ;  # Binaries per month - Absolute
-  @article_count       = qw (    17,616,951    m   20.0    1.5  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
-  @new_articles        = qw (         8,555    k   16.5    5.1  %) ;  # New articles per day - Absolute
-  @edits               = qw (    11,566,371    m    3.6    3.8  %) ;  # Edits per month - Absolute
-  @new_editors         = qw (        14,607    k  -16.6   -2.5  %) ;  # New editors - Absolute
-  @active_editors      = qw (        79,324    k   -5.9   -0.5  %) ;  # Active editors - Absolute
-  @very_active_editors = qw (        10,254    k   -1.6    0.1  %) ;  # Very active editors - Absolute
-  @reach               = qw (            31.1  x    1.5   -1.4  %) ;  # Reach Percentage by Region
+# @visitors            = qw (   395,472,000    m  14.0    -3.7  %) ;  # Unique Visitors by Region
+# @page_requests       = qw (13,976,000,000    b  22.6     2.4  %) ;  # copy/calc manually monthly total and monthly and yearly growth from 1st column (Sigma)  of http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm (Wikipedia only is good enough)
+# @rank                = qw (           5th    x    0      0    th) ; # Web Properties - Unique Visitors
+# @commons_files       = qw (     8,046,377    m   43.1    3.0  %) ;  # Binaries per month - Absolute
+# @article_count       = qw (    17,616,951    m   20.0    1.5  %) ;  # Starting Sep-2010 Wikipedia articles only / Article count (official) - Absolute
+# @new_articles        = qw (         8,555    k   16.5    5.1  %) ;  # New articles per day - Absolute
+# @edits               = qw (    11,566,371    m    3.6    3.8  %) ;  # Edits per month - Absolute
+# @new_editors         = qw (        14,607    k  -16.6   -2.5  %) ;  # New editors - Absolute
+# @active_editors      = qw (        79,324    k   -5.9   -0.5  %) ;  # Active editors - Absolute
+# @very_active_editors = qw (        10,254    k   -1.6    0.1  %) ;  # Very active editors - Absolute
+# @reach               = qw (            29.9  x    1.5   -1.4  %) ;  # Reach Percentage by Region
                                                                       # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
- push @visitors, "1|Unique Visitors<br>1: Average for last 12 months 377M." ;
+#push @visitors, "1|Unique Visitors<br>1: Average for last 12 months 377M." ;
 #                "2: Growth in UV count in last 12 months 18.8% (for whole internet 8.9%)." ;
 #               "&nbsp;&nbsp;&nbsp;&nbsp;(avg 28.3%, low 25.7% in July 09). Reach in Asia lags behind other regions (15.9%)" ;
-  push @page_requests, "2,3|Page Requests<br>" .
-                  "2: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Mobile traffic</a> in Dec: 4.1% of total Wikipedia traffic (556M/13489M)<br>" .
+# push @page_requests, "2,3|Page Requests<br>" .
+#                 "2: <a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyMobile.htm'>Mobile traffic</a> in Dec: 4.1% of total Wikipedia traffic (556M/13489M)<br>" .
 #                   "&nbsp;&nbsp;&nbsp;&nbsp;Look ahead for page requests: Dec -> Jan = 13367M -> 14724M = +10.1%<br>" .
-                  "#3: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
-  push @rank,     "4|Site Rank<br>#4: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
- push @commons_files, "5|Commons Files<br>#5: Tiff uploads increased 5-fold in July 2010, 13-fold in last 12 months.<br>" ;
+#                 "#3: Page requests have been normalized to 30 days (Jan*30/31, Feb*30/28, Mar*30/31, etc)<br>" ;
+# push @rank,     "4|Site Rank<br>#4: 5th position will be stable for long time: differences with those ranked 4th and 6th are considerable." ;
+#push @commons_files, "5|Commons Files<br>#5: Tiff uploads increased 5-fold in July 2010, 13-fold in last 12 months.<br>" ;
 #                      "#7: Commons consistently fastest growing project, 48% in last 12 months." ;
 
 #push @article_count, "8|Article Count<br>#8: From Sep 2010 this metric is for Wikipedia projects only. This prevents adding apples and oranges." ;
 #                      "9: Seven Wiktionaries in top 25 Wikimedia projects" ;
 # push @new_articles, "7|New Articles Per Day<br>" .
 #                     "7: Strong growth in August by peaks on 3 wikis: Catalan/Dutch 3-fold inc., Slovene 17-fold (bots?)." ;
- push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
-                   "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
+#push @edits, "6|Edits<br>#6: Over the last 3 years there is fairly consistent growth in manual, registered edits.<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;Net growth in constructive edits is less clear, as this metric includes most reverting edits." ;
 #               "&nbsp;&nbsp;&nbsp;&nbsp;Strong one-monthly dip in July due to World Cup Socker?." ;
 #              "#13: Average monthly manual edits by registered users for all Wikipedia's combined, in millions<br>" .
 #              "&nbsp;&nbsp;&nbsp;&nbsp;#2006 &rArr; 2010: &nbsp;&nbsp;7.7 &rArr; 9.9 &rArr; 11.5 &rArr; 12.4 &rArr; 12.7" ;
- push @new_editors, "7|New Editors Per Day<br>" .
+#push @new_editors, "7|New Editors Per Day<br>" .
 #                     "10: Signifant decline in last month (All projects: -10.5%, <a href='http://stats.wikimedia.org/EN/ChartsWikipediaZZ.htm'>Wikipedias -11.2%</a>).<br>" .
 #                    "&nbsp;&nbsp;&nbsp;&nbsp;Arguably slowing influx of editors can partly be attributed to (multi-factorial) <a href='http://en.wikipedia.org/wiki/Market_saturation'>saturation process(es)</a><br>" .
 #                    "&nbsp;&nbsp;&nbsp;&nbsp;But 19% drop for Wikipedias in half year (comparing 3-monthly averages) is not consistent with that.<br>" .
-                    "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
- push @active_editors, "8|(Very) Active Editors<br>" .
+#                   "#7:WMF recently commissioned in depth study of editor activity trends, which is ongoing." ;
+#push @active_editors, "8|(Very) Active Editors<br>" .
 #                   "11: Recent drops are well within normal bandwidth, largest drop was in <a href='charts/2010-08/Monthly-Active-Users-Since-Jan-2006.png'>June 2006</a>.<br>" .
-                   "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
-                   "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
+#                  "#8: Since a few months editors on Commons are no longer included in overall editor total,<br>" .
+#                  "#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; on the assumption that most of these also edit on one or more other projects.<br>" ;
 #                   "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #Detection of double counts between any projects and languages is planned for late 2010." ;
- push @very_active_editors, "8|" ; #Very Active Editors<br>14: Ukrain +84% (61->112), Indonesian +180% (22->62) (during contest), Swedish -13% (141->122)." ;
+#push @very_active_editors, "8|" ; #Very Active Editors<br>14: Ukrain +84% (61->112), Indonesian +180% (22->62) (during contest), Swedish -13% (141->122)." ;
 ## }
 
 
@@ -151,7 +664,7 @@
 #  @new_editors         = qw (             ?    k    ?      ?    %) ;  # New editors - Absolute
 #  @active_editors      = qw (             ?    k    ?      ?    %) ;  # Active editors - Absolute
 #  @very_active_editors = qw (             ?    k    ?      ?    %) ;  # Very active editors - Absolute
-#  @reach               = qw (            31.1  x    2.6    0.0  %) ;  # Reach Percentage by Region
+#  @reach               = qw (            31.3  x    2.6    0.0  %) ;  # Reach Percentage by Region
 #                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
 #  push @visitors, "1,2|Unique Visitors<br>1: 410M UV's exceeds Oct 2010 record with 2M. Average for last 12 months 377M.<br>" .
 #                 "2: Growth in UV count in last 12 months 18.8% (for whole internet 8.9%)." ;
@@ -173,7 +686,7 @@
 #  @new_editors         = qw (             ?    k    ?      ?    %) ;  # New editors - Absolute
 #  @active_editors      = qw (             ?    k    ?      ?    %) ;  # Active editors - Absolute
 #  @very_active_editors = qw (             ?    k    ?      ?    %) ;  # Very active editors - Absolute
-#  @reach               = qw (            31.1  x    2.3    0.5  %) ;  # Reach Percentage by Region
+#  @reach               = qw (            31.3  x    2.3    0.5  %) ;  # Reach Percentage by Region
 #                                                                      # http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm
 #  push @visitors, "1,2|Unique Visitors<br>1: 408M UV's beats September 2010 record with 10M.<br>" .
 #                 "2: Growth in UV count in last 12 months 18.5% (for whole internet 9.6%)." ;
@@ -764,21 +1277,21 @@ sub WriteReports
       { $line =~ s/\{\{yyyy\}\}_\{\{mm\+1\}\}/{{yyyy+1}}_{{mm+1}}/ ; } # Q&D temp fix
     }
 
-  #  $no_upd = "<font color=#800000>*<\/font>" ;
+#   $no_upd = "<font color=#C00000><small>No data yet for English Wikipedia.</small><\/font>" ;
 
     if ($true) # test ?
     {
       # $no_upd = "&nbsp;&nbsp;<small><small><font color=#FF0000><b>chart could not be updated for current month</b></font></small></small>" ;
-      $line =~ s/H2 (UNIQUE VISITORS)/A[$1] H2 {${visitors [0]} million|Unique Visitors, All Projects}/ ;
-      $line =~ s/H2 (PAGE REQUESTS)/A[$1] H2 {${page_requests[0]} billion|Page Requests, All Projects}/ ;
+      $line =~ s/H2 (UNIQUE VISITORS)/A[$1] H2 {${visitors [0]} million|Unique Visitors for All Wikimedia Projects}/ ;
+      $line =~ s/H2 (PAGE REQUESTS)/A[$1] H2 {${page_requests[0]} billion|Page Requests for All Wikimedia Projects}/ ;
       $line =~ s/H2 (WEB PROPERTIES)/A[$1] H2 {${rank[0]} in rank|Web Properties - Unique Visitors}/ ;
-      $line =~ s/H2 (COMMONS FILES)/A[$1] H2 {${commons_files[0]} million|Binary Files $no_upd}/ ;
-      $line =~ s/H2 (ARTICLE COUNT)/A[$1] H2 {${article_count[0]} million|Wikipedia Articles, Comparison with Other Projects $no_upd}/ ;
+      $line =~ s/H2 (COMMONS FILES)/A[$1] H2 {${commons_files[0]} million|Binary Files}/ ;
+      $line =~ s/H2 (ARTICLE COUNT)/A[$1] H2 {${article_count[0]} million|Wikipedia Articles $no_upd}/ ;
       $line =~ s/H2 (ARTICLES PER DAY)/A[$1] H2 {${new_articles[0]}|New Wikipedia Articles Per Day $no_upd}/ ;
       $line =~ s/H2 (EDITS PER MONTH)/A[$1] H2 {${edits[0]} million|Wikipedia Edits Per Month $no_upd}/ ;
-      $line =~ s/H2 (NEW EDITORS PER MONTH)/A[$1] H2 {${new_editors[0]}|New Wikipedia Editors Per Month $no_upd}/ ;
-      $line =~ s/H2 (ACTIVE EDITORS)/A[$1] H2 {${active_editors[0]}|Active Wikipedia Editors (5+ edits per month) $no_upd}/ ;
-      $line =~ s/H2 (VERY ACTIVE EDITORS)/A[$1] H2 {${very_active_editors[0]}|Very Active Wikipedia Editors (100+ edits per month) $no_upd}/ ;
+      $line =~ s/H2 (NEW EDITORS PER MONTH)/A[$1] H2 {${new_editors[0]}|New Editors Per Month for All Wikimedia Projects $no_upd}/ ;
+      $line =~ s/H2 (ACTIVE EDITORS)/A[$1] H2 {${active_editors[0]}|Active Wikimedia Editors for All Wikimedia Projects <small>(5+ edits per month)<\/small> $no_upd}/ ;
+      $line =~ s/H2 (VERY ACTIVE EDITORS)/A[$1] H2 {${very_active_editors[0]}|Very Active Editors for All Wikimedia Projects <small>(100+ edits per month)<\/small> $no_upd}/ ;
 
       $line =~ s/TRENDS UNIQUE VISITORS/TRENDS {$trend_one_year|${visitors[2]}%}{$trend_one_month|${visitors[3]}%}/ ;
       $line =~ s/TRENDS PAGE REQUESTS/TRENDS {$trend_one_year|${page_requests[2]}%}{$trend_one_month|${page_requests[3]}%}/ ;
@@ -1046,8 +1559,8 @@ sub WriteSynopsis
 {
   my $path_out = shift ;
 
-  $notice_synopsis = "" ;
-  # "<font color=#008000><b>New: multi-year trends for most metrics. Depending on history available reporting period can vary.</b></font>" ;
+  $notice_synopsis = "<font color=#008000><b>Please keep in mind December has one day more than November, which influences some of the metrics.</b></font><br>" .
+   "<font color=#008000>Exception: page request counts are always normalized to 30 day months.</font>" ;
 
   open SYNOPSIS, '>', "$path_out/RC_${p_year}_${p_month_d2}_synopsis.txt" ;
   print SYNOPSIS $synopsis ;
@@ -1147,9 +1660,9 @@ h1{font-size:22px}
 h2{font-size:18px ; color:#006000 ; margin-top:40px}
 h3{font-size:15px ; color:#006000}
 form{margin:0}
-a:link    {color:#000080;text-decoration:none}
-a:visited {color:#000080;text-decoration:none}
-a:active  {color:#000080;text-decoration:none}
+a:link    {color:#0000FF;text-decoration:none}
+a:visited {color:#0000FF;text-decoration:none}
+a:active  {color:#0000FF;text-decoration:none}
 a:hover   {color:#0000FF;text-decoration:underline}
 a img     {border-color:black}
 td.detail-left   {font-size:12px ; color:#000000 ; text-align:left ; }
@@ -1170,7 +1683,7 @@ td.detail-right  {font-size:12px ; color:#000000 ; text-align:right ; }
         <table width=100%>
         <tr>
           <td align=left width=150 valign=top><img src='assets/WikimediaLogo.png' width=30></td>
-          <td align=center valign=top><h1>Wikimedia Report Card <font color=#008000>{{month}} {{yyyy}} </font></h1>
+          <td align=center valign=top><h1>Wikimedia&nbsp;Report&nbsp;Card&nbsp;<font color=#008000>{{month}}&nbsp;{{yyyy}}</font></h1>
           </td>
           <td align=right width=150 valign=top><h1>Synopsis</h1></td>
         <!-- <td align=right width=150 valign=top><small><small>Published<br>{{month+2}}<br>{{yyyy+m2}}</small></small></td> -->
@@ -1236,18 +1749,20 @@ __SYNOPSIS__
 
 # $comment_prev_month = "<sup><font color=#800000>*</font></sup>" ; # qqq
 
+  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#web_properties'>Site Rank</a> <sup>All</sup>", "", @rank) ;
+  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#reach'>Reach</a> <sup>All</sup>", "", @reach) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#unique_visitors'>Unique Visitors</a> <sup>All</sup>", "", @visitors) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#page_requests'>Page Requests</a> <sup>All</sup>", "", @page_requests) ;
-  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#web_properties'>Site Rank</a> <sup>All</sup>", "", @rank) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#commons_files'>Binary Files</a> <sup>Commons</sup> $comment_prev_month", "", @commons_files) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#article_count'>Article Count</a> <sup>Wp</sup> $comment_prev_month", "", @article_count) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#articles_per_day'>New Articles Per Day</a> <sup>Wp</sup> $comment_prev_month", "", @new_articles) ;
   $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#edits_per_month'>Edits</a> <sup>Wp</sup> $comment_prev_month", "", @edits) ;
-  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#new_editors_per_month'>New Editors <sup>Wp</sup></a> $comment_prev_month", "", @new_editors) ;
-  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#active_editors'>Active Editors</a> <sup>Wp</sup> $comment_prev_month", "", @active_editors) ;
-  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#very_active_editors'>Very Active Editors</a> <sup>Wp</sup> $comment_prev_month", "", @very_active_editors) ;
+  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#new_editors_per_month'>New Editors <sup>All</sup></a> $comment_prev_month", "", @new_editors) ;
+  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#active_editors'>Active Editors</a> <sup>All</sup> $comment_prev_month", "", @active_editors) ;
+  $data .= &FormatSynopsisTable ("<a href='RC_{{yyyy}}_{{mm}}_detailed.html#very_active_editors'>Very Active Editors</a> <sup>All</sup> $comment_prev_month", "", @very_active_editors) ;
   $data .= "</tbody>\n<tfoot><tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $data .= "<tr><td colspan=99><b><small>Repeated observations below are grayed</small></b></td></tr>\n" ;
+# $data .= "<tr><td colspan=99><b><small><font color=#008000>Please keep in mind February has 3 days less than January. This explains part of monthly drops in most metrics. Exception: page request counts are always normalized to 30 day months.</font></small></b></td></tr>\n" ;
 
   foreach $note (@synopsis_notes)
   {
