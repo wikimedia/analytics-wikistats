@@ -4,7 +4,7 @@
 ## sub ProcessRawData <- SquidDataCountries.csv -> ??
 
   use SquidCountryScanConfig ;
-  use lib $liblocation ;
+  use lib $cfg_liblocation ;
   use EzLib ;
   $trace_on_exit = $true ;
 
@@ -23,7 +23,7 @@
   # exit ;
   }
 
-  $path_root = $job_runs_on_production_server ? $path_root_production : $path_root_test ;
+  $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
 
   $file_raw_data_monthly_visits  = "$path_root/SquidDataVisitsPerCountryMonthly.csv" ;
   $file_raw_data_daily_visits    = "$path_root/SquidDataVisitsPerCountryDaily.csv" ;

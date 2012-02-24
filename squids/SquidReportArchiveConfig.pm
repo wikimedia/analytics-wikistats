@@ -1,15 +1,16 @@
 #!/usr/bin/perl
 
-  $liblocation = "/home/ezachte/lib" ;
+  $cfg_liblocation = "/home/ezachte/lib" ;
 
-# $path_in_local  = "W:/# Out Locke" ;      # Erik
-# $path_out_local = "W:/# Out Test/Locke" ; # Erik
+  $cfg_path_in_production  = "/a/ezachte" ;
+  $cfg_path_out_production = "/a/ezachte" ;
+# $cfg_path_in_test        = "W:/# Out Locke" ;      # Erik
+# $cfg_path_out_test       = "W:/# Out Test/Locke" ; # Erik
+  $cfg_path_in_test        = "/srv/erik/" ;          # André
+  $cfg_path_out_test       = "/srv/erik/" ;          # André
 
-  $path_in  = "/srv/erik/" ;                # André
-  $path_out = "/srv/erik/" ;                # André
-
-# set defaults for tests on local machine
-# $default_argv = "-m 2011-07" ;   # monthly report
-# $default_argv = "-w" ;           # refresh country info from Wikipedia (population etc)
-# $default_argv = "-c" ;           # country/regional reports
-  $default_argv = "-c -q 2011Q4" ; # country/regional reports based on data for one quarter only
+# set default arguments for test on local machine
+# $cfg_default_argv = "-m 2011-07" ;   # monthly report
+# $cfg_default_argv = "-w" ;           # refresh country info from Wikipedia (population etc)
+# $cfg_default_argv = "-c" ;           # country/regional reports
+  $cfg_default_argv = "-c -q 2011Q4" ; # country/regional reports based on data for one quarter only

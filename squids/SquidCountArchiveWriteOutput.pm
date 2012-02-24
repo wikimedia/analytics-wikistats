@@ -1,7 +1,7 @@
  #!/usr/bin/perl
 
-  use config ;
-  use lib $liblocation ;
+  use SquidCountArchiveConfig ;
+  use lib $cfg_liblocation ;
   use EzLib ;
 
 sub WriteOutputIpFrequencies

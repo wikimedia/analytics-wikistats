@@ -1,13 +1,13 @@
 #!/usr/bin/perl
 
   use SquidReportArchiveConfig ;
-  use lib $liblocation ;
+  use lib $cfg_liblocation ;
 
   use EzLib ;
   $trace_on_exit = $true ;
   ez_lib_version (2) ;
 
-  default_argv ($default_argv) ;
+  default_argv ($cfg_default_argv) ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -32,12 +32,12 @@
 
   undef %country_code_not_specified_reported ;
 
-  if (-d "/a/squid")
-  {
-    &Log ("\n\nJob runs on server $hostname\n\n") ;
-    $path_in  = "/a/ezachte" ;
-    $path_out = "/a/ezachte" ;
-  }
+  $path_in  = $job_runs_on_production_server ? $cfg_path_in_production  : $cfg_path_in_test ;
+  $path_out = $job_runs_on_production_server ? $cfg_path_out_production : $cfg_path_out_test ;
+
+  &Log ("Path in  = $path_in\n") ;
+  &Log ("Path out = $path_out\n") ;
+
 # following test needs to change -> remove server name dependency (new run argument ?)
 # elsif ($hostname eq 'bayes')
 # {
@@ -45,15 +45,6 @@
 #   $path_in  = "/home/ezachte/wikistats/animation" ;
 #   $path_out = "/home/ezachte/wikistats/animation" ;
 # }
-  else
-  {
-    print "Job runs local for tests\n\n" ;
-    $path_in  = $path_in_local ;
-    $path_out = $path_out_local ;
-  }
-
-  &Log ("Path in  = $path_in\n") ;
-  &Log ("Path out = $path_out\n") ;
 
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 

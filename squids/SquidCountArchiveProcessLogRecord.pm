@@ -18,14 +18,22 @@ sub ProcessLine
     { $mime = "text/html" ; }
   }
 
+  $count_event = 1 ;
+  # from Oct 16, 2011 00:00 hrs till Nov 29, 2011 20:00 hrs one of the two servers which process requests to the mobile site did not send log lines
+  # since the two servers are load-balanced, selected stats (e.g. breakdown browser, OS) can be repaired by counting requests to mobile site twice in this period
+  # note: do not count twice for metrics where specific ip addresses are considered, this would inflate number of assumed bots (based on ip address freq.)
+  if ((($time ge '2011-10-16T00') && ($time lt '2011-11-29T20')) and
+       ($url =~ /\.m\./))
+  { $count_event = 2 ; }
+
   if ($scan_ip_frequencies) # phase 1
   {
     return if $line =~ /Banner(?:Cont|List|Load|beheer)/io ;
 
     if ($mime eq "text/html")
     {
-      $ip_frequencies {$client_ip} ++ ;
-      $html_pages_found ++ ;
+      $ip_frequencies {$client_ip} ++ ; # do not use $count_event here!
+      $html_pages_found += $count_event ;
     }
 
     return ;
@@ -33,8 +41,8 @@ sub ProcessLine
 
 
   # remember for each squid per hour lowest and highest sequence number and number of events
-  # later calc per hour average distance between events = (higest - lowest sequence number) / events - 1
-  # distance between consecutive events that lay in different hour bin are ignored, begligible
+  # later calc per hour average distance between events = (highest - lowest sequence number) / events - 1
+  # distance between consecutive events that lay in different hour bin are ignored, negligible
   $squid = $fields [0] ;
   $seqno = $fields [1] ;
   $hour = substr ($time, 11, 2) ;
@@ -64,12 +72,12 @@ sub ProcessLine
 
   if ($url =~ /\.m\.wikipedia.org/)
   {
-    $url_wikipedia_mobile ++ ;
-    $status_url_wikipedia_mobile {$status} ++ ;
-    $status_mime_url_wikipedia_mobile {"$status,$mime"} ++ ;
+    $url_wikipedia_mobile += $count_event ;
+    $status_url_wikipedia_mobile {$status} += $count_event ;
+    $status_mime_url_wikipedia_mobile {"$status,$mime"} += $count_event ;
     if ($status eq "TCP_MISS/302")
     {
-      $redirected_to_mobile ++ ;
+      $redirected_to_mobile += $count_event ;
       return ;
     }
   }
@@ -81,13 +89,13 @@ sub ProcessLine
 
   ($agent2 = $agent) =~ s/\%20/ /g ; # mainly to make line content more readable on debugging
   $agent2 =~ s/\%2F/\//g ; # mainly to make line content more readable on debugging
-  $agents_raw {$agent2}++ ;
+  $agents_raw {$agent2} += $count_event ;
 
   ($file,$ext) = &GetFileExt ($url) ;
-  $exts {$ext}++ ;
+  $exts {$ext} += $count_event ;
 
   if (($ext eq "js") || ($ext eq "css"))
-  { $scripts {"$ext,$file,"} ++ ; }
+  { $scripts {"$ext,$file,"} += $count_event ; }
 
   $title = "" ;
   $parm  = "" ;
@@ -103,14 +111,14 @@ sub ProcessLine
     if ($parm eq "?") { return ; } # error
     $file =~ s/,/&comma;/go ;
     $parm =~ s/,/&comma;/go ;
-    $scripts {"php,$file,$parm"} ++ ;
+    $scripts {"php,$file,$parm"} += $count_event ;
     $ext .= "($file)" ; # add filename behind extension php
   }
 
   if ($mime eq "text/html")
   {
     $mimecat = "page" ;
-    $tot_mime_html ++ ;
+    $tot_mime_html += $count_event ;
   }
   elsif ($mime =~ /(?:gif|png|jpeg)/o)
   { $mimecat = "image" ; }
@@ -137,12 +145,12 @@ sub ProcessLine
 
   if ($line =~ /(?:BannerCont|BannerList|BannerLoad|Bannerbeheer)/io)
   {
-    $banners {"$country,$url"} ++ ;
-    $banner_requests_ignored ++ ;
+    $banners {"$country,$url"} += $count_event ;
+    $banner_requests_ignored += $count_event ;
     return ;
   }
 
-  $countries {$country}++ ;
+  $countries {$country} += $count_event ; ;
 
   $agent2 = $agent ;
   $agent2 =~ s/\%20/ /g ;
@@ -202,13 +210,13 @@ sub ProcessLine
     if ($agent2 !~ /MSIE \d+\/\d+/o) # most likely false positives
     {
       $bot = $true ;
-      @bots {"$mime,$agent2"} ++ ;
+      @bots {"$mime,$agent2"} += $count_event ;
     }
   }
   elsif (($agent2 =~ /bot/io) || (($agent2 =~ /crawl(?:er)?/io) && ($agent2 !~ /MSIEcrawler/io)) || ($agent2 =~ /spider/io) || ($agent2 =~ /parser/io))
   {
     $bot = $true ;
-    @bots {"$mime,$agent2"} ++ ;
+    @bots {"$mime,$agent2"} += $count_event ;
   }
 
   # GECKO
@@ -337,7 +345,7 @@ sub ProcessLine
   if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
     $os = "Mobile other" ;
-    $mobile_other {$agent2} ++ ;
+    $mobile_other {$agent2} += $count_event ; 
   }
 
   if ($version =~ /(?:Ipod|Iphone)/io)
@@ -557,21 +565,21 @@ sub ProcessLine
   {
     $engine  =~ s/,/&comma;/go ;
     if ($gecko ne "")
-    { $engines {$gecko} ++ ; }
+    { $engines {$gecko} += $count_event ; }
     elsif ($applewebkit ne "")
     {
       $applewebkit =~ s/AppleWebKit\//AppleWebKit /o ;
-      $engines {$applewebkit} ++ ;
+      $engines {$applewebkit} += $count_event ; ;
     }
 
     $version =~ s/,/&comma;/go ;
     if ($os =~ /playstation/io)
     { $version = "NetFront (PlayStation)" ; }
 
-    $clients {"$mobile,$version,$mimecat"}++ ;
+    $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
-    $operating_systems {"$mobile,$os"} ++ ;
+    $operating_systems {"$mobile,$os"} += $count_event ; ;
   }
 
   if ($count_hits_per_ip_range)
@@ -583,16 +591,16 @@ sub ProcessLine
 
   if ($status =~ /^TCP/)
   {
-    $statusses {"$method:$status"}++ ;
-    $statusses {"$method:total"}++ ;
+    $statusses {"$method:$status"} += $count_event ;
+    $statusses {"$method:total"}   += $count_event ;
   }
   else
-  { $statusses_non_tcp ++ ; }
+  { $statusses_non_tcp += $count_event ; }
 
   if ($url =~ /org\/skins/o)
   {
     ($url2 = $url) =~ s/^.*?\/skins/skins/o ;
-    $skins {$url2} ++ ;
+    $skins {$url2} += $count_event ; ;
   }
 
   if ($url =~ /^upload\.wikimedia\.org\//o) # count image size if applicable
@@ -604,7 +612,7 @@ sub ProcessLine
 
   # for diagnostics
   if (($referer =~ /google/o) || ($agent =~ /google/io))
-  { $googles++ ; }
+  { $googles += $count_event ; }
 
   $referer =~ s/^http\w?\:\/\///o ;
   $referer =~ s/\.php\?.*$/\.php\?../go ;
@@ -622,7 +630,7 @@ sub ProcessLine
   if (($domain =~ /\./o) ||
       ($domain !~ /^[\*\@\%]?!(wb|wn|wp|wq|ws|wv|wk|wx|xx|wm|mw|wmf)\:/o))
   {
-    $unrecognized_domains {$domain_original} ++ ;
+    $unrecognized_domains {$domain_original} += $count_event ;
     $domain = 'other' ;
   }
 
@@ -641,24 +649,24 @@ sub ProcessLine
 
   if ($referer_external)
   {
-    $tot_referers_external++ ;
+    $tot_referers_external += $count_event ; ;
 
     ($origin, $toplevel) = &DetectOrigin ($client_ip, $referer_original, $agent, $mime, $mimecat, $service, $ext) ;
 
     &CountOrigin ("external", $origin, $toplevel, $mimecat) ;
 
     if ($origin !~ /^\!/o)
-    { $origins_unsimplified {$referer_original} ++ ; }
+    { $origins_unsimplified {$referer_original} += $count_event ; }
     else
     {
-      $origin_simplified {"$origin [$referer] <- $referer_original"} ++ ;
-      $origins_external   {$origin} ++ ;
+      $origin_simplified {"$origin [$referer] <- $referer_original"} += $count_event ; ;
+      $origins_external   {$origin} += $count_event ;
     }
   }
   else
   {
-    $tot_referers_internal ++ ;
-    $referers_internal {$referer} ++ ;
+    $tot_referers_internal += $count_event ;
+    $referers_internal {$referer} += $count_event ;
     $referer =~ s/!//go ; # ! was marker to signal pattern was recognized as wikimedia project
     &CountOrigin ("internal", $referer, "org" , $mimecat) ;
   }
@@ -670,9 +678,8 @@ sub ProcessLine
   if ($domain =~ /!/o)
   { print ERR "still ! in domain: '$domain' <- '$domain_original'\n" ; }
 
-  $requests {"$domain|$referer|$ext|$mime|$parm"}++ ;
-
-  $clients_by_wiki {"$mobile,$version,$domain"}++ ;
+  $requests {"$domain|$referer|$ext|$mime|$parm"} += $count_event ; ;
+  $clients_by_wiki {"$mobile,$version,$domain"}   += $count_event ; ;
 
   # different output use either 'bot=N' or 'M'(anual) / 'bot=Y' or 'B'(ot)
   if ($bot)
@@ -689,13 +696,13 @@ sub ProcessLine
   if (($domain =~ /^\@/) || ($domain =~ /^\*/))
   {
     # print "Requests wap $domain | $ext | $mime | $parm | $country | $ind_bot\n" ;
-    $requests_wap {"$domain|$ext|$mime|$parm|$country|$ind_bot"} ++ ;
+    $requests_wap {"$domain|$ext|$mime|$parm|$country|$ind_bot"} += $count_event ; ;
   }
 
   if ($domain =~ /^\%/)
   {
     # print "Requests m $domain | $ext | $mime | $parm | $country | $ind_bot\n" ;
-    $requests_m {"$domain|$ext|$mime|$parm|$country|$ind_bot"} ++ ;
+    $requests_m {"$domain|$ext|$mime|$parm|$country|$ind_bot"} += $count_event ; ;
   }
                               # $title !~ /:/ -> only namespace 0 (minus few titles with colon in name)
   if (($url =~ /index.php\?/o) && ($title !~ /:/o) && ($mime eq "text/html") && (($url =~ /action=edit/o) || ($url =~ /action=submit/o)))
@@ -708,34 +715,40 @@ sub ProcessLine
     $key =~ s/,/&comma;/go ;
     $key =~ s/\|/,/go ;
 
-    $index_php_raw {$key}++ ;
+    $index_php_raw {$key} += $count_event ; ;
     $client_ip_record_cnt {$client_ip}++ ;
   }
 
   if ($mimecat eq "page")
   {
-    $tot_mime_html2 ++ ;
+    $tot_mime_html2 += $count_event ;
 
     if (($ind_bot =~ /N/) and ($ip_frequencies {$client_ip} > 2))
     { $ind_bot = 'bot=Y' ; }
 
-    $countries_views {"$ind_bot,$domain,$country"} ++ ;
-
+    $countries_views {"$ind_bot,$domain,$country"} += $count_event ; ;
                                   # $title !~ /:/ -> only namespace 0 (minus few titles with colon in name)
     if (($url =~ /index.php\?/o) && ($title !~ /:/) && ($mime eq "text/html") && ($url =~ /action=submit/o) && ($status =~ /302/o))
-    { $countries_saves {"$ind_bot,$domain,$country"} ++ ; }
+    { $countries_saves {"$ind_bot,$domain,$country"} += $count_event ; }
 
     $time_hh = substr ($time,11,2) ;
     $time_mm = substr ($time,14,2) ;
     $time_tt = $time_hh * 60 + $time_mm ;
     $time_tt2 = $time_tt - $time_tt % 15 ;
-    $countries_timed {"$ind_bot,$domain,$country,$time_tt2"} ++ ;
+    $countries_timed {"$ind_bot,$domain,$country,$time_tt2"} += $count_event ;
 
-
-    $time2    = substr ($time,0,19) ; # omit msec
-    $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile,$os,$version,$mimecat\n" ;
-    $gz_csv_views_viz->gzwrite($line) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
+    if (! $test)
+    {
+      $time2    = substr ($time,0,19) ; # omit msec
+      $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile,$os,$version,$mimecat\n" ;
+      $gz_csv_views_viz->gzwrite($line) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
+    }
   }
+
+  $records {"$mobile,$mimecat"} += $count_event ;
+  $records {"*,$mimecat"}       += $count_event ;
+  $records {"$mobile,*"}        += $count_event ;
+  $records {"*,*"}              += $count_event ;
 }
 
 sub ExtractLanguage
@@ -747,10 +760,10 @@ sub ExtractLanguage
   $regexp_lang = "[a-z]{2}(?:-[a-zA-Z]{2,3})?(?:-[a-zA-Z]{2,3})?" ;
   ($language = $agent) =~ s/^.*?; ($regexp_lang)[\);].*$/$1/o ;
   if ($language eq $agent)
-  { $languages_unrecognized {$agent} ++ ; }
+  { $languages_unrecognized {$agent} += $count_event ; }
   else
   {
-    $languages {"$application,$language"} ++ ;
+    $languages {"$application,$language"} += $count_event ;
     $agent =~ s/ $language//o ;
   }
   return ($agent) ;
@@ -823,7 +836,8 @@ sub NormalizeParms
 
   foreach $parm (@parms)
   {
-    next if $parm eq "" ;
+    next if $parm eq '' ;
+    next if $parm eq '*' ;
 
     if (($parm !~ /=/) && ($parm !~ /^[\w\d\-\_]+$/o))
     { $error = "parm probably invalid: '$parm' in '$url' -> skip\n" ; $invalid = $true ; last }
@@ -901,7 +915,7 @@ sub Abbreviate
   $domain =~ s/\.m\./.%/o ;
 
   if ($domain =~ /^error:/o)
-  { $domain_errors {$domain}++ ; }
+  { $domain_errors {$domain} += $count_event ; }
   $domain =~ s/error:.*$/!error:1/o ;
 
   $domain =~ s/^([^\.\/]+)\.([^\.\/]+)\.org/$2:$1/o ;
@@ -1018,16 +1032,16 @@ sub DetectOrigin
     if (($googlematch eq "- - z") && ($service =~ /GoogleBot/io))
     {
       $service = "GoogleBot?" ;
-      $google_imposters {$agent}++ ;
+      $google_imposters {$agent} += $count_event ;
     }
 
     # obsolete? to be considered ?
     # if (($googlematch ne "- - z") || ($service =~ /(?:Earth|Desktop)/o))
-    # { $search {"'$googlematch',google,$referer2,$service,$agent2,$mimecat,$top_level_domain"} ++ ; }
+    # { $search {"'$googlematch',google,$referer2,$service,$agent2,$mimecat,$top_level_domain"} += $count_event ; }
     # else
     # { $accept = "not" ; }
 
-    $search {"'$googlematch',google,$referer2,$service,$agent2,$mimecat,$top_level_domain"} ++ ;
+    $search {"'$googlematch',google,$referer2,$service,$agent2,$mimecat,$top_level_domain"} += $count_event ;
 
     $googlebins2 {"$accept [$googlematch]  " . sprintf ("%-14s",$service) . $referer} ++ ;
     $googlebins {$googlematch}++ ;
@@ -1055,7 +1069,7 @@ sub DetectOrigin
   #  }
 
   if ($origin =~ /wiki/o)
-  { $wikis {$origin} ++ ; }
+  { $wikis {$origin} += $count_event ; }
 
   if ($origin eq "wikipedia")
   {
@@ -1187,7 +1201,7 @@ sub CountOrigin
 
   if ($source eq "external")
   {
-    $tot_origins_external_counted ++ ;
+    $tot_origins_external_counted += $count_event ;
     $origin =~ s/\:.*$//o ;
     if (is_valid_ip_address ($origin))
     { $origin = "unmatched ip address" ; $toplevel = "" ; }
@@ -1203,7 +1217,7 @@ sub CountOrigin
       # print "$origin\n" ;
     }
   }
-  $origins {"$source,$origin,$toplevel,$mimecat"} ++ ;
+  $origins {"$source,$origin,$toplevel,$mimecat"} += $count_event ;
 }
 
 sub ProcessUploadPath
@@ -1213,7 +1227,7 @@ sub ProcessUploadPath
   ($path = $url) =~ s/^.*?\.org\///o ;
   ($file = $path) =~ s/^.*\/([^\/]*)$/$1/go ; # remove path
 
-  $binaries {$path} ++ ; # Jan 2012 store path, not file only
+  $binaries {$path} += $count_event ; # Jan 2012 store path, not file only
 
   if ($file =~ /(?:gif|jpg|jpeg|png|svg)$/io)
   {
@@ -1227,10 +1241,10 @@ sub ProcessUploadPath
     {
       ($size = $file) =~ s/^.*?(\d+)px.*$/$1/o ;
        $sizerange = sprintf ("%5d",(int ($size / 20)) * 20) . "-"  . sprintf ("%5d",(((int ($size / 20))+1) * 20 - 1)) ;
-       $imagesizes {$sizerange} ++ ;
+       $imagesizes {$sizerange} += $count_event ;
     }
     else
-    { $imagesizes {"???"} ++ ; }
+    { $imagesizes {"???"} += $count_event ; }
   }
 }
 

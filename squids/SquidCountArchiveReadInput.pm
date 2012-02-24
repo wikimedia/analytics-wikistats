@@ -4,7 +4,7 @@
 # test:
 # echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-use config ;
+use SquidCountArchiveConfig ;
 
 sub CollectFilesToProcess
 {
@@ -23,6 +23,8 @@ sub CollectFilesToProcess
   my $all_files_found = $true ;
 
   my ($date_archived) ;
+
+  $dir_in = $job_runs_on_production_server ? $cfg_dir_in_production : $cfg_dir_in_test ; 
 
   $some_files_found = $false ;
   $full_range_found = $false ;
@@ -47,7 +49,7 @@ sub CollectFilesToProcess
     $date_archived = sprintf ("%4d%02d%02d", $year+1900, $month+1, $day) ;
     print "\n- Inspect file saved $days_ago_inspect days ago: $logname-$date_archived.gz\n" ;
 
-    my $file = "$dir_in/$logname-$date_archived.gz" ;
+    my $file = "$dir_in/$cfg_logname-$date_archived.gz" ;
 
     if (! -e $file)
     { print "- File not found: $file\n" ; }
@@ -173,8 +175,8 @@ sub ReadSquidLogFiles
     else
     {
       open IN, '<', $file_in ;
-    #  $fields_expected = 14 ;
-      $fields_expected = 13 ;
+      $fields_expected = 14 ; # add fake country code
+    # $fields_expected = 13 ;
     }
 
     $line = "" ;
@@ -192,6 +194,12 @@ sub ReadSquidLogFiles
 # ugly Q&D code to circumvent spaces in agent string
 # $line2 = $line ;
       chomp $line ;
+
+      if ($test)
+      { $line .= ' XX' ; }
+
+      $line =~ s/x-www-form-urlencoded; charset=UTF-8/x-www-form-urlencoded;%20charset=UTF-8/ ; # log lines are space delimited, other spaces should be encoded
+
       @fields = split (' ', $line) ;
 # next if $line =~ /upload/ ;
 # next if $line !~ /en\.m\.wikipedia/ ;
@@ -201,22 +209,45 @@ sub ReadSquidLogFiles
 #next if $fields [9] =~ /NONE/ ;
      if ($#fields > 14)
      {
+if (! $scan_ip_frequencies)
+{
 # print "line $line2\n" ;
 # print "fields " . $#fields . "\n$line\n" ;
+}
+
       $country_code = $fields [$#fields] ;
       $fields [$#fields] = '' ;
       $line = join (' ', @fields) ;
-# print "2 $line\n" ;
       @fields = split (' ', $line, 14) ;
       $fields [14] = $country_code ;
+ $fields [13] =~ s/ /%20/g ;
+
+if (! $scan_ip_frequencies)
+{
+# print "2 $line\n" ;
 # print "\n\n12: " . $fields [12] . "\n"  ;
 # print "13: " . $fields [13] . "\n"  ;
 # print "14: " . $fields [14] . "\n"  ;
 # print "15: " . $fields [15] . "\n"  ;
+}
       }
 
-      if ($#fields < $fields_expected) { $fields_too_few  ++ ; print "invalid field count " . $#fields . "\n" ; next ; }
-      if ($#fields > $fields_expected) { $fields_too_many ++ ; print "invalid field count " . $#fields . "\n" ; next ; }
+      if ($#fields < $fields_expected)
+      {
+        $fields_too_few  ++ ;
+        print "invalid field count " . $#fields . "\n" ;
+        print ERR $#fields . " fields: \"$line\"\n" ;
+        next ;
+      }
+
+      if ($#fields > $fields_expected)
+      {
+        @a = @fields ;
+        $fields_too_many ++ ;
+        print "invalid field count " . $#fields . "\n" ;
+        print ERR $#fields . " fields: \"$line\"\n" ;
+        next ;
+      }
 
       $time = $fields [2] ;
 
@@ -230,7 +261,7 @@ sub ReadSquidLogFiles
 
       if ($time lt $time_to_start)
       {
-        if (++ $times % 100000 == 0)
+        if (++ $times % 1000000 == 0)
         { print "[$time]\n" ; }
         next ;
       }
@@ -266,12 +297,23 @@ sub ReadSquidLogFiles
 #next if $line !~ /http:\/\/\w+\.m\./ ;
 #print "$line\n" ;
       &ProcessLine ($line) ;
-      if (++ $lines_processed % 10000 == 0)
+      if (++ $lines_processed % 50000 == 0)
       {
+        if (! $scan_ip_frequencies) # phase 2
+        {
+          $perc_mobile_all = '-' ;
+          if ($records {"*,*"} > 0)
+          { $perc_mobile_all = sprintf ("%.1f", 100 * $records {"M,*"} / $records {"*,*"}) ; }
+          $perc_mobile_pages = '-' ;
+          if ($records {"*,page"} > 0)
+          { $perc_mobile_pages = sprintf ("%.1f", 100 * $records {"M,page"} / $records {"*,page"}) ; }
+          $perc_mobile = " (mobile: all $perc_mobile_all\%, pages $perc_mobile_pages\%)" ;
+        }
+
         if ($banner_requests_ignored == 0)
-        { print "$time $lines_processed\n" ; }
+        { print "$time $lines_processed$perc_mobile\n" ; }
         else
-        { print "$time $lines_processed ($banner_requests_ignored banner requests ignored)\n" ; }
+        { print "$time $lines_processed$perc_mobile ($banner_requests_ignored banner requests ignored)\n" ; }
       }
       if ($test and $lines_processed >= $test_maxlines)
       { last ; }

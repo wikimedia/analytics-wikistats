@@ -1,7 +1,7 @@
  #!/usr/bin/perl
 
-  use config ;
-  use lib $liblocation ;
+  use SquidCountArchiveConfig ;
+  use lib $cfg_liblocation ;
   use EzLib ;
 
   $trace_on_exit = $true ;
@@ -13,8 +13,7 @@
   use SquidCountArchiveReadInput ;
   use SquidCountArchiveWriteOutput ;
 
-  # set defaults mainly for tests on local machine
-  default_argv $default_argv;
+  default_argv $cfg_default_argv ;
 
 # http://wikitech.wikimedia.org/view/Squid_log_format
 # 1. Hostname
@@ -43,25 +42,24 @@
 # todo: parm -r root folder
 
   $test = $false  ;
-  $test_maxlines = 4000000 ;
+  $test_maxlines = $cfg_text_maxlines ;
+  $file_test     = $cfg_file_test ;
 
   if (! $job_runs_on_production_server)
   {
     $test = $true ;
-    $file_test = "w:/# Out Locke/sampled-1000-log-20110401.txt" ;
-  # $file_test = getcwd . "/SquidDataFilterFY.txt" ;
-    if (! -e $file_test)
+    if (! -e $cfg_file_test)
     { abort "Test input file '$file_test' not found" ; }
   }
 
   $time_start = time ;
 
-  $path_root = "/srv/erik" ;
+  $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
 
   $tags_wiki_mobile = "Wikiamo|Wikipanion|Wikimedia" ;
 
   $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|Mobile|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation Portable|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC_Touch|KDDI|FOMA|HTC_HD2|Polaris|Teleca" ;
-  $tags_mobile_upd  = "August 2011" ;
+  $tags_mobile_upd  = "February 2012" ;
 
   $pattern_url_pre  = "(?:^|[a-zA-Z0-9-]+\\.)*?" ;
   $pattern_url_post = "\\.(?:biz|com|info|name|net|org|pro|aero|asia|cat|coop|edu|gov|int|jobs|mil|mobi|museum|tel|travel|arpa|[a-zA-Z0-9-]{2}|(?:com?|ne)\\.[a-zA-Z0-9-]{2})\$" ;
@@ -502,6 +500,7 @@ sub InitGlobals # qqq
   undef %origins_external ;
   undef %origins_unsimplified ;
   undef %referers_internal ;
+  undef %records ;
   undef %requests ;
   undef %scripts ;
   undef %search ;
@@ -510,6 +509,7 @@ sub InitGlobals # qqq
   undef %squid_events ;
   undef %squid_seqno ;
   undef %statusses ;
+  undef %total_clients ;
   undef %unrecognized_domains ;
   undef %wikis ;
 # undef @files ;
