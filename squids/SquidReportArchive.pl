@@ -38,13 +38,13 @@
 
   if (-d "/a/squid")
   {
-    print "\n\nJob runs on server $hostname\n\n" ;
+    &Log ("\n\nJob runs on server $hostname\n\n") ;
     $path_in  = "/a/ezachte" ;
     $path_out = "/a/ezachte" ;
   }
   elsif ($hostname eq 'bayes')
   {
-    print "\n\nJob runs on server $hostname\n\n" ;
+    &Log ("\n\nJob runs on server $hostname\n\n") ;
     $path_in  = "/home/ezachte/wikistats/animation" ;
     $path_out = "/home/ezachte/wikistats/animation" ;
   }
@@ -55,8 +55,8 @@
     $path_out = "/srv/erik/" ;
   }
 
-  print "Path in  = $path_in\n" ;
-  print "Path out = $path_out\n" ;
+  &Log ("Path in  = $path_in\n") ;
+  &Log ("Path out = $path_out\n") ;
 
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
@@ -64,7 +64,7 @@
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_population'
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'
   if (defined ($options {"w"}))
-  { &ReadWikipedia ; print "Ready\n" ; exit ; }
+  { &ReadWikipedia ; &Log ("Ready\n") ; exit ; }
 
   if (defined ($options {"c"}))
   { $reportcountries = $true ; }
@@ -75,7 +75,7 @@
     if ($quarter_only !~ /^2\d\d\dQ\d$/)
     { abort ("Specify run for one single quarter as -q yyyyQ[1-4], e.g. -q 2011Q3, not '$quarter_only'\n") ; }
     $quarter_only =~ s/^(\d\d\d\d)(Q\d)$/$1 $2/ ;
-    print "QUARTER ONLY  $quarter_only\n" ;
+    &Log ("QUARTER ONLY  $quarter_only\n") ;
   }
 
   # date range used to be read from csv file with ReadDate, now there are daily csv files
@@ -84,13 +84,13 @@
 
   &InitProjectNames ;
 
-  $file_csv_country_codes     = "CountryCodes.csv" ;
+  $file_csv_country_codes = "CountryCodes.csv" ;
 
   &ReadInputCountriesNames ;
 
   if ($reportcountries)
   {
-    $project_mode = "wp" ;
+    $project_mode = "wp" ; # discard all log data from other projects than Wikipedia
 
     &ReadInputCountriesMeta ;
 
@@ -106,14 +106,14 @@
   $reportmonth     = $options {"m"} ;
 
   if (($reportmonth !~ /^\d\d\d\d-\d\d$/) && ($reportdaysback !~ /^-\d+$/))
-  { print "Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)" ; exit ; }
+  { &Log ("Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)") ; exit ; }
 
   if ($reportdaysback =~ /^-\d+$/)
   {
     ($sec,$min,$hour,$day,$month,$year) = localtime (time+$reportdaysback*86400) ;
     $reportmonth = sprintf ("%04d-%02d",$year+1900,$month+1) ;
   }
-  print "Report month = $reportmonth\n" ;
+  &Log ("Report month = $reportmonth\n") ;
 
   $threshold_mime    = 0 ;
   $threshold_project = 10 ;
@@ -237,9 +237,9 @@
   {
     print "\nDays input = $days_input_found\n" ;
     $multiplier = 1 / $days_input_found ;
-    print "\nMultiplier = " . sprintf ("%.4f", $multiplier) . "\n" ;
+    &Log ("\nMultiplier = " . sprintf ("%.4f", $multiplier) . "\n") ;
   }
-  else { print "\nDays input = 0 (zero!)\n" ; }
+  else { &Log ("\nDays input = 0 (zero!)\n") ; }
 
   &WriteCsvCountriesTimed ;
   &WriteCsvCountriesGoTo ;
@@ -313,12 +313,13 @@
 # &WriteCsvCountriesTargets ;
   close "FILE_LOG" ;
 
-  print "\nReady\n\n" ;
+  &Log ("\nReady\n\n") ;
   exit ;
 
 sub ReportCountries
 {
   my $mode_report = shift ;
+  &Log ("\nReportCountries $mode_report\n\n") ;
 
   if ($mode_report eq 'Views')
   {
@@ -398,6 +399,8 @@ sub ReportCountries
 
 sub ReadDate
 {
+  &Log ("ReadDate\n") ;
+
   open  CSV_CRAWLERS, '<', "$path_process/$file_csv_crawlers" ;
   $line = <CSV_CRAWLERS> ;
   close CSV_CRAWLERS ;
@@ -425,12 +428,14 @@ sub ReadDate
 
   $timespan   = ($timetill - $timefrom) / 3600 ;
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
-  print "Multiplier = $multiplier\n" ;
+  &Log ("Multiplier = $multiplier\n") ;
   $header =~ s/DATE/Daily averages, based on sample period: $period (yyyy-mm-dd)/ ;
 }
 
 sub SetPeriod
 {
+  &Log ("SetPeriod\n") ;
+
   $year_first  = substr ($date_first,0,4) ;
   $month_first = substr ($date_first,5,2) ;
   $day_first   = substr ($date_first,8,2) ;
@@ -447,11 +452,13 @@ sub SetPeriod
 
   $period = sprintf ("%d %s %d - %d %s %d", $day_first, month_english_short ($month_first-1), $year_first, $day_last, month_english_short ($month_last-1), $year_last) ;
   $header =~ s/DATE/Daily averages, based on sample period: $period/ ;
-  print "Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n" ;
+  &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n") ;
 }
 
 sub PrepHtml
 {
+  &Log ("\nPrepHtml\n\n") ;
+
   $language = "en" ;
   $header = "<!DOCTYPE FILE_HTML PUBLIC '-//W3C//DTD FILE_HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>\n" .
             "<html lang='en'>\n" .
@@ -547,6 +554,8 @@ sub PrepHtml
 
 sub ReadCountryCodes
 {
+  &Log ("ReadCountryCodes\n") ;
+
   open CODES, '<', "$path_in/$file_csv_country_codes" ;
   while ($line = <CODES>)
   {
@@ -563,6 +572,8 @@ sub ReadCountryCodes
 
 sub ReadInputClients
 {
+  &Log ("ReadInputClients\n") ;
+
   my $file_csv = "$path_process/$file_csv_clients" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputClients: file $file_csv not found!!!") ; }
@@ -678,6 +689,8 @@ sub ReadInputClients
 
 sub ReadInputCrawlers
 {
+  &Log ("ReadInputCrawlers\n") ;
+
   my $file_csv = "$path_process/$file_csv_crawlers" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputCrawlers: file $file_csv not found!!!\n") ; }
@@ -733,6 +746,8 @@ sub ReadInputCrawlers
 
 sub ReadInputMethods
 {
+  &Log ("ReadInputMethods\n") ;
+
   my $file_csv = "$path_process/$file_csv_methods" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputMethods: file $file_csv not found!!!") ; }
@@ -751,6 +766,8 @@ sub ReadInputMethods
 
 sub ReadInputMimeTypes
 {
+  &Log ("ReadInputMimeTypes\n") ;
+
   my $file_csv = "$path_process/$file_csv_requests" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputMimeTypes: file $file_csv not found!!!") ; }
@@ -838,6 +855,8 @@ sub ReadInputMimeTypes
 
 sub ReadInputOpSys
 {
+  &Log ("ReadInputOpSys\n") ;
+
   my $file_csv = "$path_process/$file_csv_opsys" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputOpSys: file $file_csv not found!!!") ; }
@@ -898,6 +917,8 @@ sub ReadInputOpSys
 
 sub ReadInputOrigins
 {
+  &Log ("ReadInputOrigins\n") ;
+
   my $file_csv = "$path_process/$file_csv_origins" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputOrigins: file $file_csv not found!!!") ; }
@@ -981,6 +1002,8 @@ sub ReadInputOrigins
 
 sub ReadInputScripts
 {
+  &Log ("ReadInputScripts\n") ;
+
   my $file_csv = "$path_process/$file_csv_scripts" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputScripts: file $file_csv not found!!!") ; }
@@ -1081,6 +1104,8 @@ sub ReadInputScripts
 
 sub ReadInputGoogle
 {
+  &Log ("ReadInputGoogle\n") ;
+
   my $file_csv = "$path_process/$file_csv_google" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputGoogle: file $file_csv not found!!!") ; }
@@ -1138,6 +1163,8 @@ sub ReadInputGoogle
 
 sub ReadInputSkins
 {
+  &Log ("ReadInputSkins\n") ;
+
   my $file_csv = "$path_process/$file_csv_skins" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputSkins: file $file_csv not found!!!") ; }
@@ -1159,6 +1186,8 @@ sub ReadInputSkins
 
 sub ReadInputIndexPhp
 {
+  &Log ("ReadInputIndexPhp\n") ;
+
   my $file_csv = "$path_process/$file_csv_indexphp" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputIndexPhp: file $file_csv not found!!!") ; }
@@ -1285,6 +1314,8 @@ sub ReadInputIndexPhp
 
 sub ReadInputCountriesTimed
 {
+  &Log ("ReadInputCountriesTimed\n") ;
+
   my $file_csv = "$path_process/public/$file_csv_countries_timed" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputSkins: file $file_csv not found!!! ") ; }
@@ -1315,6 +1346,8 @@ sub ReadInputCountriesTimed
 
 sub ReadInputCountriesNames
 {
+  &Log ("ReadInputCountriesNames\n") ;
+
   $path_csv_country_codes = "$path_in/$file_csv_country_codes" ;
   if (! -e $path_csv_country_codes) { abort ("Input file $path_csv_country_codes not found!") ; }
 
@@ -1356,9 +1389,11 @@ sub ReadInputCountriesNames
 
 sub ReadInputCountriesMeta
 {
+  &Log ("ReadInputCountriesMeta\n") ;
+
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
-  print "Read $path_in/$file_csv_country_meta_info\n" ;
+  &Log ("Read $path_in/$file_csv_country_meta_info\n") ;
   open    COUNTRY_META_INFO, '<', "$path_in/$file_csv_country_meta_info" ;
   binmode COUNTRY_META_INFO ;
   while ($line = <COUNTRY_META_INFO>)
@@ -1405,6 +1440,8 @@ sub ReadInputCountriesMeta
 
 sub CollectRegionCounts
 {
+  &Log ("CollectRegionCounts\n") ;
+
   my ($country_code, $region_code, $north_south_code, $country_name) ;
 
   foreach $country_code (keys %country_names)
@@ -1437,6 +1474,8 @@ sub CollectRegionCounts
 
 sub ReadInputCountriesMonthly
 {
+  &Log ("ReadInputCountriesMonthly\n") ;
+
   my $project_mode = shift ;
 
   undef %yyyymm_ ;
@@ -1474,7 +1513,7 @@ sub ReadInputCountriesMonthly
   $report_year  += 1900 ;
   $report_month ++ ;
 
-  print "Process project $project_mode\n\n" ;
+  &Log ("Only process data for project $project_mode (wp=Wikipedia, etc)\n") ;
 
   open CSV_SQUID_COUNTS_MONTHLY, '<', $path_csv_squid_counts_monthly ;
   while ($line = <CSV_SQUID_COUNTS_MONTHLY>)
@@ -1547,19 +1586,20 @@ sub ReadInputCountriesMonthly
       $requests_recently_per_language                        {$language}             += $count ;
     }
   }
+  &Log ("$lines lines read from $path_csv_squid_counts_monthly\n") ;
 
-  print "\n" ;
   @quarters = keys_sorted_alpha_desc %quarters ;
   foreach $quarter (@quarters)
   {
-    print "Quarter $quarter: requests: " . (0+$requests_per_quarter {$quarter}) . "\n" ;
+    &Log ("Quarter $quarter: requests: " . (0+$requests_per_quarter {$quarter}) . "\n") ;
+
     if ($requests_per_quarter {$quarter} == 0)
     { abort ("No known requests found for quarter $quarter") ; }
   }
-  print "\n" ;
+  &Log ("\n") ;
 
   $months_recently = keys %months_recently ;
-  if ($months_recently == 0) { die "\$months_recently == 0\n" ; }
+  if ($months_recently == 0) { abort ("\$months_recently == 0\n") ; }
 
   $requests_recently_start = substr ($requests_recently_start,0,4) . '/' . substr ($requests_recently_start,5,2);
   $requests_recently_stop  = substr ($requests_recently_stop ,0,4) . '/' . substr ($requests_recently_stop ,5,2) ;
@@ -1591,6 +1631,8 @@ sub ReadInputCountriesMonthly
 
 sub ReadInputCountriesDaily
 {
+  &Log ("ReadInputCountriesDaily\n") ;
+
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
 
@@ -1617,7 +1659,7 @@ sub ReadInputCountriesDaily
   $report_year  += 1900 ;
   $report_month ++ ;
 
-  print "Process project $project_mode\n\n" ;
+  &Log ("Process project $project_mode\n\n") ;
 
   $yyyymmdd_prev = "" ;
   open CSV_SQUID_COUNTS_DAILY, '<', $path_csv_squid_counts_daily ;
@@ -1626,7 +1668,7 @@ sub ReadInputCountriesDaily
     chomp $line ;
     ($yyyymmdd,$project,$language,$code,$bot,$count) = split (',', $line) ;
 
-    die "\$yyyymmdd $yyyymmdd lt \$yyyymmdd_prev $yyyymmdd_prev" if $yyyymmdd lt $yyyymmdd_prev ;
+    abort ("\$yyyymmdd $yyyymmdd lt \$yyyymmdd_prev $yyyymmdd_prev") if $yyyymmdd lt $yyyymmdd_prev ;
     $yyyymmdd_prev = $yyyymmdd ;
 
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
@@ -1715,13 +1757,15 @@ sub ReadInputCountriesDaily
   print TRACE sort @trace ;
   close TRACE ;
 
-  # die "\$connected_us == 0" if $connected_us == 0 ;
+  # abort ("\$connected_us == 0") if $connected_us == 0 ;
   if ($connected_us > 0)
   { $max_requests_per_connected_us_week = sprintf ("%.1f", (($max_requests_per_week_us * 1000) / $connected_us)) ; }
 }
 
 sub NormalizeSquidInput
 {
+# &Log ("NormalizeSquidInput\n") ;
+
   my ($code,$language) = @_ ;
 
   if ($language eq "jp") { $language = "ja" ; }
@@ -1742,6 +1786,8 @@ sub NormalizeSquidInput
 
 sub DiscardSquidInput
 {
+# &Log ("DiscardSquidInput\n") ;
+
   ($bot,$project,$project_mode,$code,$language) = @_ ;
   if ($bot ne "U"  or # user
       $project ne $project_mode or # eg 'wp'
@@ -1775,6 +1821,8 @@ sub GetCountryName
 
 sub ReadInputBrowserLanguages
 {
+  &Log ("ReadInputBrowserLanguages\n") ;
+
   my $file_csv = "$path_process/$file_csv_browser_languages" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputBrowserLanguages: file $file_csv not found!!! ") ; }
@@ -1794,6 +1842,8 @@ sub ReadInputBrowserLanguages
 
 sub CalcPercentages
 {
+  &Log ("CalcPercentages\n") ;
+
   my $total_opsys           = $total_opsys_mobile           + $total_opsys_non_mobile ;
   my $total_opsys_html_only = $total_opsys_mobile_html_only + $total_opsys_non_mobile_html_only ;
   foreach $key (keys %opsys)
@@ -1835,7 +1885,8 @@ sub CalcPercentages
 
 sub NormalizeCounts
 {
-# ReadInputClients
+  &Log ("NormalizeCounts\n") ;
+
   foreach $key (keys %engines)
   { $engines {$key} = &Normalize ($engines {$key}) ; }
 
@@ -1982,6 +2033,8 @@ sub NormalizeCounts
 
 sub SortCounts
 {
+  &Log ("SortCounts\n") ;
+
 # ReadInputClients
 # @engines_sorted_count              = keys_sorted_by_value_num_desc %engines ;
   @engines_sorted_alpha              = keys_sorted_alpha_asc %engines ;
@@ -2045,7 +2098,8 @@ sub SortCounts
 
 sub WriteReportClients
 {
-  print "\nWriteReportClients -> $path_reports/$file_html_clients\n\n" ;
+  &Log ("WriteReportClients -> $path_reports/$file_html_clients\n") ;
+
   open FILE_HTML_CLIENTS, '>', "$path_reports/$file_html_clients" ;
 
   $html  = $header ;
@@ -2514,6 +2568,8 @@ $total_clients_wiki_mobile_html_only)) ;
 
 sub WriteReportCrawlers
 {
+  &Log ("WriteReportCrawlers\n") ;
+
   open FILE_HTML_CRAWLERS, '>', "$path_reports/$file_html_crawlers" ;
 
   $html  = $header ;
@@ -2688,6 +2744,8 @@ sub WriteReportCrawlers
 
 sub WriteReportMethods
 {
+  &Log ("WriteReportMethods\n") ;
+
   open FILE_HTML_METHODS, '>', "$path_reports/$file_html_methods" ;
 
   $html  = $header ;
@@ -2768,6 +2826,8 @@ sub WriteReportMethods
 
 sub WriteReportMimeTypes
 {
+  &Log ("WriteReportMimeTypes\n") ;
+
   open FILE_HTML_REQUESTS, '>', "$path_reports/$file_html_requests" ;
 
   $html = $header ;
@@ -2938,6 +2998,8 @@ sub WriteReportMimeTypes
 
 sub WriteReportOpSys
 {
+  &Log ("WriteReportOpSys\n") ;
+
   open FILE_HTML_OPSYS, '>', "$path_reports/$file_html_opsys" ;
 
   $html  = $header ;
@@ -3153,6 +3215,8 @@ sub WriteReportOpSys
 # http://en.wikipedia.org/wiki/Domain_name
 sub WriteReportOrigins
 {
+  &Log ("WriteReportOrigins\n") ;
+
   open FILE_HTML_ORIGINS, '>', "$path_reports/$file_html_origins" ;
 
   $html  = $header ;
@@ -3758,6 +3822,8 @@ if (0)
 
 sub WriteReportScripts
 {
+  &Log ("WriteReportScripts\n") ;
+
   open FILE_HTML_SCRIPTS, '>', "$path_reports/$file_html_scripts" ;
 
   $html  = $header ;
@@ -3935,6 +4001,8 @@ sub WriteReportScripts
 
 sub WriteReportGoogle
 {
+  &Log ("WriteReportGoogle\n") ;
+
   open FILE_HTML_SEARCH, '>', "$path_reports/$file_html_google" ;
 
   $html  = $header ;
@@ -4256,6 +4324,8 @@ sub WriteReportGoogle
 
 sub WriteReportSkins
 {
+  &Log ("WriteReportSkins\n") ;
+
   open FILE_HTML_SKINS, '>', "$path_reports/$file_html_skins" ;
 
   $html  = $header ;
@@ -4310,6 +4380,8 @@ sub WriteReportSkins
 
 sub WriteCsvGoogleBots
 {
+  &Log ("WriteCsvGoogleBots\n") ;
+
   open CSV_GOOGLE_BOTS_OUT, '>', "$path_reports/$file_csv_google_bots" ;
   print CSV_GOOGLE_BOTS_OUT "Date Time,Ip Range,Hits\n" ;
   foreach $path_process (@dirs_process)
@@ -4338,6 +4410,8 @@ sub WriteCsvGoogleBots
 
 sub WriteCsvBrowserLanguages
 {
+  &Log ("WriteCsvBrowserLanguages\n") ;
+
   open CSV_BROWSER_LANGUAGES, '>', "$path_reports/$file_csv_browser_languages" ;
   print CSV_BROWSER_LANGUAGES "Browser,Languages,Hits\n" ;
   foreach $key (keys_sorted_alpha_asc %browser_languages)
@@ -4347,6 +4421,8 @@ sub WriteCsvBrowserLanguages
 
 sub WriteCsvCountriesTimed
 {
+  &Log ("WriteCsvCountriesTimed: $path_out/$file_csv_countries_timed\n") ;
+
   $multiplier_1000 = 1000 * $multiplier ;
   print "WriteCsvCountriesTimed: $path_out/$file_csv_countries_timed\n" ;
   open CSV_COUNTRIES_TIMED, '>', "$path_out/$file_csv_countries_timed" ;
@@ -4401,7 +4477,8 @@ sub WriteCsvCountriesTimed
 # http://www.maxmind.com/app/iso3166 country codes
 sub WriteCsvCountriesGoTo
 {
-  print "WriteCsvCountriesGoTo: $path_out/$file_csv_countries_languages_visited\n" ;
+  &Log ("WriteCsvCountriesGoTo: $path_out/$file_csv_countries_languages_visited\n") ;
+
   open CSV_COUNTRIES_LANGUAGES_VISITED, '>', "$path_out/$file_csv_countries_languages_visited" ;
 
   foreach $country (sort keys %countries)
@@ -4465,7 +4542,7 @@ sub WriteCsvCountriesGoTo
 
 sub WriteReportPerLanguageBreakDown
 {
-  print "\nWriteReportPerLanguageBreakDown\n" ;
+  &Log ("WriteReportPerLanguageBreakDown\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -4573,7 +4650,7 @@ sub WriteReportPerLanguageBreakDown
 
 sub WriteReportPerCountryOverview
 {
-  print "\nWriteReportPerCountryOverview\n" ;
+  &Log ("WriteReportPerCountryOverview\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -4876,7 +4953,9 @@ sub WriteReportPerCountryOverview
 
 sub WriteCsvSvgFilePerCountryOverview
 {
-  my ($views_edits, $period, $ref_requests_per_period_per_country_code, $max_requests_per_connected_us, $desc_animation) = @_ ;
+  &Log ("WriteCsvSvgFilePerCountryOverview\n") ;
+
+  my ($views_edits, $period, $ref_requests_per_period_per_country_code, $max_requests_per_connected_user, $desc_animation) = @_ ;
 
   my %requests_per_country_code      = %{$ref_requests_per_period_per_country_code -> {$period}} ;
   my %requests_per_country_code_prev = %{$ref_requests_per_period_per_country_code -> {$period_prev}} ;
@@ -4886,7 +4965,6 @@ sub WriteCsvSvgFilePerCountryOverview
   my $postfix     = $descriptions_per_period {$period} ;
 # $test = join '', sort values %requests_per_country_code ;
 # print $test . "\n\n" ;
-  print "\nWriteCsvSvgFilePerCountryOverview\n" ;
 
   my ($link_country,$country,$code,$population,$connected,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot,$requests_max,$requests_this_country,$requests_this_country2) ;
   my (@index_countries,@csv_countries,%svg_groups,%percentage_of_total_pageviews,%requests_per_connected_persons) ;
@@ -4908,11 +4986,11 @@ sub WriteCsvSvgFilePerCountryOverview
 #    $requests_tot += $requests_per_country_code {$country_code} ;
 #  }
 
-#  die "\$requests_cnt == 0" if $requests_cnt == 0 ;
+#  abort ("\$requests_cnt == 0") if $requests_cnt == 0 ;
 #  $requests_avg = $requests_tot / $requests_cnt ;
 #  print "requests cnt: $requests_cnt, tot: $requests_tot, avg: $requests_avg\n" ;
 
-#  die "\$requests_avg == 0" if $requests_avg == 0 ;
+#  abort ("\$requests_avg == 0") if $requests_avg == 0 ;
 #  foreach $country_code (keys %requests_per_country_code)
 #  { $requests_per_country_code {$country_code} *= 100/$requests_avg ; }
 #  # normalize complete
@@ -5104,6 +5182,8 @@ next ;
 
 sub WriteWorldMapSvg
 {
+  &Log ("WriteWorldMapSvg\n") ;
+
   ($period, $description) = @_ ;
 
   open SVG_IN, "world_map_blank_plain2.svg" ;
@@ -5115,7 +5195,7 @@ sub WriteWorldMapSvg
 #  { $line =~ s/COUNTRY_STYLES/$svg_text/ ; }
 
   ($text1,$text2) = split ' - ', $description ;
-  print "Animation description: $description -> $text1 | $text2\n" ;
+  &Log ("Animation description: $description -> $text1 | $text2\n") ;
 
   $lines = join '', @lines ;
   $lines =~ s/<circle[^>]*?>//gs ;
@@ -5186,7 +5266,7 @@ sub WriteWorldMapSvg
   }
   close SVG_OUT ;
 
-  print "Convert world_map_$period.svg to png\n" ;
+  &Log ("Convert world_map_$period.svg to png\n") ;
  `svg/convert.exe svg/world_map_$period.svg png:svg/world_map_$period.png` ;
 # print "Convert world_map_$period.svg to jpg\n" ;
 # `svg/convert.exe svg/world_map_$period.svg jpg:svg/world_map_$period.jpg` ;
@@ -5266,7 +5346,7 @@ sub RatioAndFillColor2
 
 sub WriteReportPerCountryBreakdown
 {
-  print "\nWriteReportPerCountryBreakDown\n" ;
+  &Log ("WriteReportPerCountryBreakDown\n") ;
 
   my ($title,$views_edits,$links,$cutoff_requests, $cutoff_percentage, $show_logcount) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -5418,7 +5498,7 @@ sub WriteReportPerCountryBreakdown
 
 sub WriteReportPerCountryTrends
 {
-  print "\nWriteReportPerCountryTrends\n" ;
+  &Log ("WriteReportPerCountryTrends\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -5672,6 +5752,8 @@ sub Log
 
 sub InitProjectNames
 {
+  &Log ("InitProjectNames\n") ;
+
   # copied from WikiReports.pl
 
   %wikipedias = (
@@ -6023,7 +6105,7 @@ sub Percentage
 
 sub ReadWikipedia
 {
-  print "ReadWikipedia\n\n" ;
+  &Log ("ReadWikipedia\n") ;
 
   use LWP::Simple qw($ua get);
 
@@ -6031,9 +6113,9 @@ sub ReadWikipedia
   $ua->timeout(60);
 
 
-  print "Read List_of_countries_by_population\n\n" ;
+  &Log ("Read List_of_countries_by_population\n\n") ;
   my $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
-  my $html = get $url || die "Timed out!";
+  my $html = get $url || abort ("Timed out!") ;
 
 # open TEST, '<', 'List_of_countries_by_population.html' ;
 # @lines = <TEST> ;
@@ -6095,10 +6177,10 @@ sub ReadWikipedia
     $countries {$country} = "$country,$link,$population,connected,$icon\n" ;
   }
 
-  print "List_of_countries_by_number_of_Internet_users\n\n" ;
+  &Log ("List_of_countries_by_number_of_Internet_users\n\n") ;
 
   $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users';
-  $html = get $url || die "Timed out!";
+  $html = get $url || abort ("Timed out!") ;
 
   # split file on <tr>'s, remove all behind </tr>
   $html =~ s/\n/\\n/gs ;
@@ -6163,7 +6245,7 @@ sub CountryMetaInfo
   if ($country_meta_info {$country}  eq "")
   {
     if ($country_meta_info_not_found_reported {$country} ++ == 0)
-    { print "Meta info not found for country '$country'\n" ; }
+    { &Log ("Meta info not found for country '$country'\n") ; }
     $link_country = $country ;
     return ($country,'','..','..') ;
   }
