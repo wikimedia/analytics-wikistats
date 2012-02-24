@@ -347,6 +347,7 @@ sub ReportCountries
   $file_html_per_country_trends         = "SquidReport${selection}PerCountryTrends.htm" ;
   $file_html_per_language_breakdown     = "SquidReport${selection}PerLanguageBreakdown.htm" ;
   $file_csv_per_country_overview        = "SquidReport${selection}PerCountryOverview.csv" ;
+  $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;
 
   $path_csv_squid_counts_monthly  = "$path_in/$file_csv_squid_counts_monthly" ;
   if (! -e $path_csv_squid_counts_monthly)  { abort ("Input file $path_csv_squid_counts_monthly not found!") ; }
@@ -363,6 +364,7 @@ sub ReportCountries
 # { &WriteCsvSvgFilePerCountryOverview ($views_edits, $week, \%requests_per_week_per_country_code, $max_requests_per_connected_us_week, "Wikipedia " . lc $views_edits . " per person") } ;
 # foreach $yyyymm (sort keys %yyyymm_)
 # { &WriteCsvSvgFilePerCountryOverview ($views_edits, $yyyymm, \%requests_per_month_per_country_code, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") } ;
+  &WriteCsvFilePerCountryDensity ($views_edits, '2011 Q4', \%requests_per_quarter_per_country, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") ;
 
   &PrepHtml ;
 
@@ -4428,7 +4430,6 @@ sub WriteCsvCountriesTimed
   &Log ("WriteCsvCountriesTimed: $path_out/$file_csv_countries_timed\n") ;
 
   $multiplier_1000 = 1000 * $multiplier ;
-  print "WriteCsvCountriesTimed: $path_out/$file_csv_countries_timed\n" ;
   open CSV_COUNTRIES_TIMED, '>', "$path_out/$file_csv_countries_timed" ;
 
   foreach $target (sort keys %targets)
@@ -4955,6 +4956,150 @@ sub WriteReportPerCountryOverview
 #  return ($html) ;
 #}
 
+# input for http://gunn.co.nz/map/
+sub WriteCsvFilePerCountryDensity
+{
+  my ($views_edits, $period, $ref_requests_per_period_per_country, $max_requests_per_connected_us, $desc_animation) = @_ ;
+
+  &Log ("\nWriteCsvFilePerCountryDensity $views_edits\n\n") ;
+
+  my %requests_per_country_code = %{$ref_requests_per_period_per_country -> {$period}} ;
+
+  my $description = $descriptions_per_period {$period} ;
+  my $postfix     = $descriptions_per_period {$period} ;
+# $test = join '', sort values %requests_per_country_code ;
+# print $test . "\n\n" ;
+
+  my ($link_country,$country,$code,$population,$connected,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot,$requests_max,$requests_this_country,$requests_this_country2) ;
+  my (@index_countries,@csv_countries,%svg_groups,%percentage_of_total_pageviews,%requests_per_connected_persons) ;
+
+  undef @csv_countries ;
+  $header_csv_countries = "# Wikimedia Traffic Analysis Report - Wikipedia $views_edits Per Country Per Internet User\n" .
+                          "# Data file is input for http://gunn.co.nz/map/\n" .
+                          "# See also http://infodisiac.com/blog/2012/02/wikipedia-readers/\n" .
+                          "country,requests,population,monthly views per inhabitant,internet users,%connected,requests per user\n" ;
+                        # "country,code,views,population,internet users,%connected,views per user,%global views\n" ;
+
+  $requests_tot = 0 ;
+  undef %fills ;
+
+#  # normalize to 100% average
+#  $requests_cnt = 0 ;
+#  $requests_tot = 0 ;
+#  foreach $country_code (keys %requests_per_country_code)
+#  {
+#    $requests_cnt ++ ;
+#    $requests_tot += $requests_per_country_code {$country_code} ;
+#  }
+
+#  abort ("\$requests_cnt == 0") if $requests_cnt == 0 ;
+#  $requests_avg = $requests_tot / $requests_cnt ;
+#  print "requests cnt: $requests_cnt, tot: $requests_tot, avg: $requests_avg\n" ;
+
+#  abort ("\$requests_avg == 0") if $requests_avg == 0 ;
+#  foreach $country_code (keys %requests_per_country_code)
+#  { $requests_per_country_code {$country_code} *= 100/$requests_avg ; }
+#  # normalize complete
+
+# print "$code, $country: $requests_this_country\n" ;
+  $requests_this_country  = $requests_per_country_code {$country_code} ;
+
+  foreach $country_code (keys_sorted_by_value_num_desc %requests_per_country_code)
+  {
+    ($country,$code) = split ('\|', $country_code) ;
+
+    $country =~ s/Korea, Republic of/South Korea/ ;
+
+    if ($country =~ /korea/i)
+    { $a = 1 ; }
+    ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
+
+    $requests_this_country  = $requests_per_country_code {$country_code} ;
+
+    $requests_this_country  = &CorrectForMissingDays ($period, $requests_per_country_code {$country_code} * 1000, $code, "\$requests_this_country") ;
+
+    $requests_this_country  = sprintf ("%.1f", $requests_this_country) ; # quarterly -> monthly average
+    $requests_tot += $requests_this_country ;
+
+    $requests_per_person = ".." ;
+    if ($population > 0)
+    { $requests_per_person    = sprintf ("%.4f", $requests_this_country / $population) ; }
+
+    $requests_per_connected_person = ".." ;
+    if ($connected > 0)
+    {
+    # if ($requests_this_country / $connected >= 1.95)
+    # { $requests_per_connected_person = sprintf ("%.0f", $requests_this_country / $connected) ; }
+    #  else
+    #  { $requests_per_connected_person = sprintf ("%.1f", $requests_this_country / $connected) ; }
+      $requests_per_connected_person = sprintf ("%.4f", $requests_this_country / $connected) ;
+    }
+
+    $perc = '0.0' ;
+    $requests_all = &CorrectForMissingDays ($period, $requests_all_per_period {$period} * 1000, $code, "\$requests_all") ;
+    if ($requests_all > 0)
+    { $perc = &Percentage ($requests_this_country / $requests_all) ; }
+    $perc_tot += $perc ;
+
+    $perc_connected = ".." ;
+    if ($population > 0)
+    { $perc_connected = sprintf ("%.1f", 100 * $connected / $population) .'%' ; }
+
+    # now use country names that are suitable for http://gunn.co.nz/map/
+    $country =~ s/Moldova, Republic of/Moldova/ ;
+    $country =~ s/Korea, Republic of/South Korea/ ;
+    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $country =~ s/Iran, Islamic Republic of/Iran/ ;
+    $country =~ s/UAE/United Arab Emirates/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+  # $country =~ s/^Congo$/Republic of the Congo/ ;
+    $country =~ s/Syrian Arab Republic/Syria/ ;
+    $country =~ s/Tanzania, United Republic of/Tanzania/ ;
+    $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
+  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
+    $country =~ s/Serbia/republic of serbia/ ;
+    $country =~ s/Lao People's Democratic Republic/Laos/ ;
+    $country =~ s/,/./g ;
+
+#Missing values for large countries (large as visible on http://gunn.co.nz/map/)
+#Democratic Republic of the Congo,372000.0,..,..,..,..
+#Sudan,1917000.0,30894000,..,0.0%,..
+#Somalia,35000.0,9557000,..,0.0%,..
+#Republic of the Congo,114000.0,4140000,..,0.0%,..
+#Myanmar,663000.0,48337000,..,0.0%,..
+#North Korea,10000.0,..,..,..,..
+#South Korea,61397000.0,48219000,..,0.0%,..
+#Sierra Leone,65000.0,5997000,..,0.0%,..
+
+  # push @csv_countries, "\"$country\",$code,$requests_this_country,$population,$connected,$perc_connected,$requests_per_connected_person,$perc,$requests_svg,$ratio_svg,$fill_svg\n" ;
+    # for http://gunn.co.nz/map/
+    push @csv_countries,"$country,$requests_this_country,$population,$requests_per_person,$connected,$perc_connected,$requests_per_connected_person\n" ;
+
+    $requests_per_connected_persons {lc $code} = $requests_per_connected_person ;
+    $requests_per_persons           {lc $code} = $requests_per_person ;
+    $percentage_of_total_pageviews  {lc $code} = $perc ;
+  }
+
+  $requests_per_person_tot =  '..' ;
+
+  if ($population_tot > 0)
+  { $requests_per_person_tot = sprintf ("%.1f", $requests_tot / $population_tot) ; }
+
+  if ($connected_tot > 0)
+  { $requests_per_connected_person_tot = sprintf ("%.1f", $requests_tot / $connected_tot) ; }
+
+  $perc_connected_tot = ".." ;
+  if ($population_tot > 0)
+  { $perc_connected_tot = sprintf ("%.1f", 100 * $connected_tot / $population_tot) .'%' ; }
+
+# push @csv_countries, "world,*,$requests_tot,$population_tot,$connected_tot,$perc_connected_tot,$requests_per_connected_person_tot,100%\n" ;
+  print "$period $requests_tot\n" ;
+
+# $file_csv_per_country_overview2 =  $file_csv_per_country_overview ;
+# $file_csv_per_country_overview2 =~ s/\.csv/-$postfix.csv/ ;
+  &PrintCsv  ($header_csv_countries . join ('', sort @csv_countries), "$path_out/$file_csv_per_country_density") ;
+}
+
 sub WriteCsvSvgFilePerCountryOverview
 {
   &Log ("WriteCsvSvgFilePerCountryOverview\n") ;
@@ -4962,8 +5107,6 @@ sub WriteCsvSvgFilePerCountryOverview
   my ($views_edits, $period, $ref_requests_per_period_per_country_code, $max_requests_per_connected_user, $desc_animation) = @_ ;
 
   my %requests_per_country_code      = %{$ref_requests_per_period_per_country_code -> {$period}} ;
-  my %requests_per_country_code_prev = %{$ref_requests_per_period_per_country_code -> {$period_prev}} ;
-  $period_prev = $period ;
 
   my $description = $descriptions_per_period {$period} ;
   my $postfix     = $descriptions_per_period {$period} ;
@@ -5103,7 +5246,7 @@ next ;
     $country =~ s/Serbia/republic of serbia/ ;
     $country =~ s/Lao People's Democratic Republic/Laos/ ;
 
-  # ($requests_svg,$ratio_svg,$fill_svg) = RatioAndFillColor ($code, $requests_per_connected_person, $max_requests_per_connected_us, $ratio_sqrt) ;
+  # ($requests_svg,$ratio_svg,$fill_svg) = RatioAndFillColor ($code, $requests_per_connected_person, $max_requests_per_connected_user, $ratio_sqrt) ;
     ($requests_svg,$ratio_svg,$fill_svg) = RatioAndFillColor ($code, $requests_per_person,  3, $ratio_sqrt) ;
     $ratio_svg = sprintf ("%.1f", $ratio_svg) ;
     push @csv_countries, "\"$country\",$code,$requests_this_country,$population,$connected,$perc_connected,$requests_per_connected_person,$perc,$requests_svg,$ratio_svg,$fill_svg\n" ;
@@ -5153,18 +5296,18 @@ next ;
 # foreach $code (keys %requests_per_connected_persons)
 # {
 #   $requests = $requests_per_connected_persons {$code} ;
-#   if ($requests >  $max_requests_per_connected_us)
-#   { $requests = $max_requests_per_connected_us ; }
+#   if ($requests >  $max_requests_per_connected_user)
+#   { $requests = $max_requests_per_connected_user ; }
 #   $svg_groups {$requests} .= "." . lc ($code) . ", " ;
 # }
 
 #foreach $code (keys %requests_per_connected_persons)
 #  {
 #    $requests = $requests_per_connected_persons {$code} ;
-#    if ($requests >  $max_requests_per_connected_us)
-#    { $requests = $max_requests_per_connected_us ; }
+#    if ($requests >  $max_requests_per_connected_user)
+#    { $requests = $max_requests_per_connected_user ; }
 
-#    $ratio = sqrt ($requests / $max_requests_per_connected_us) ;
+#    $ratio = sqrt ($requests / $max_requests_per_connected_user) ;
 #    if ($ratio >= 0.20)
 #    {
 #      $green = 180 ;
@@ -6223,10 +6366,6 @@ sub ReadWikipedia
     else
     { $country = "n.a." ; }
 
-    ($connected = $cells [3]) =~ s/<td[^>]*>(.*?)<.*$/$1/, $connected =~ s/,/_/g ;
-    # print "POP $population\n\n" ;
-
-    $country =~ s/,/&comma;/g ;
     $country =~ s/Bosnia-Herzegovina/Bosnia and Herzegovina/ ;
     $country =~ s/C.*.+te d'Ivoire/Cote d'Ivoire/ ;
     $country =~ s/Macao/Macau/ ; # will be changed back later
@@ -6241,7 +6380,11 @@ sub ReadWikipedia
     $country =~ s/Bahamas, The/The Bahamas/ ;
     $country =~ s/,/&comma;/g ;
 
-    print "country: $country\nconnected: $connected\n\n" ;
+    ($connected = $cells [3]) =~ s/<td[^>]*>(.*?)<.*$/$1/, $connected =~ s/,/_/g ;
+    # print "POP $population\n\n" ;
+
+    # print "Country: $country\nconnected: '$connected'\n\n" ;
+
     $countries {$country} =~ s/connected/$connected/ ;
   }
 
