@@ -3,7 +3,7 @@
 ## sub CollectRawData -> SquidDataCountries.csv
 ## sub ProcessRawData <- SquidDataCountries.csv -> ??
 
-  use config ;
+  use SquidCountryScanConfig ;
   use lib $liblocation ;
   use EzLib ;
   $trace_on_exit = $true ;
@@ -23,8 +23,7 @@
   # exit ;
   }
 
-  $path_root = "/a/ezachte/" ;
-# $path_root = "w:/! perl/squids/archive/" ;
+  $path_root = $job_runs_on_production_server ? $path_root_production : $path_root_test ;
 
   $file_raw_data_monthly_visits  = "$path_root/SquidDataVisitsPerCountryMonthly.csv" ;
   $file_raw_data_daily_visits    = "$path_root/SquidDataVisitsPerCountryDaily.csv" ;
@@ -38,7 +37,7 @@
 
   &CollectRawData ('visits', $file_per_country_visits, $file_per_country_visits_old, $file_raw_data_monthly_visits, $file_raw_data_daily_visits) ;
   &CollectRawData ('saves',  $file_per_country_saves,  $file_per_country_saves_old,  $file_raw_data_monthly_saves,  $file_raw_data_daily_saves) ;
-# &ProcessRawData ;
+  &ProcessRawData ;
 
   exit ;
 
