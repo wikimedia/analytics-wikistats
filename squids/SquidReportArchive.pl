@@ -1,17 +1,13 @@
 #!/usr/bin/perl
 
-  use config ;
+  use SquidReportArchiveConfig ;
   use lib $liblocation ;
 
   use EzLib ;
   $trace_on_exit = $true ;
   ez_lib_version (2) ;
 
-# set defaults mainly for tests on local machine
-# default_argv "-m 2011-07   " ;
-  default_argv "-c -q 2011Q4" ;
-# default_argv "-w" ;  # refresh country info from Wikipedia (population etc)
-# default_argv "-c" ;
+  default_argv ($default_argv) ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -42,17 +38,18 @@
     $path_in  = "/a/ezachte" ;
     $path_out = "/a/ezachte" ;
   }
-  elsif ($hostname eq 'bayes')
-  {
-    &Log ("\n\nJob runs on server $hostname\n\n") ;
-    $path_in  = "/home/ezachte/wikistats/animation" ;
-    $path_out = "/home/ezachte/wikistats/animation" ;
-  }
+# following test needs to change -> remove server name dependency (new run argument ?)
+# elsif ($hostname eq 'bayes')
+# {
+#   &Log ("\n\nJob runs on server $hostname\n\n") ;
+#   $path_in  = "/home/ezachte/wikistats/animation" ;
+#   $path_out = "/home/ezachte/wikistats/animation" ;
+# }
   else
   {
     print "Job runs local for tests\n\n" ;
-    $path_in  = "/srv/erik/" ;
-    $path_out = "/srv/erik/" ;
+    $path_in  = $path_in_local ;
+    $path_out = $path_out_local ;
   }
 
   &Log ("Path in  = $path_in\n") ;
@@ -667,9 +664,9 @@ sub ReadInputClients
       if ($mimecat eq 'page')
       {
         $total_clients_html_only += $count ;
-        if ($rectype eq "-") { $total_clients_non_mobile_html_only += $count ; }
-        if ($rectype eq "M") { $total_clients_mobile_html_only     += $count ; }
-        if ($rectype eq "W") { $total_clients_wiki_mobile_html_only     += $count ; }
+        if ($rectype eq "-") { $total_clients_non_mobile_html_only  += $count ; }
+        if ($rectype eq "M") { $total_clients_mobile_html_only      += $count ; }
+        if ($rectype eq "W") { $total_clients_wiki_mobile_html_only += $count ; }
         $clients_html_only {"$rectype,$client"} += $count ;
       }
     }
@@ -874,7 +871,7 @@ sub ReadInputOpSys
         $line =~ s/^.*?: // ;
         ($month_upd_keywords_mobile = $line) =~ s/^.*?\(([^\)]+)\).*$/$1/ ;
         ($keywords_mobile = $line)           =~ s/ \([^\)]+\).*$// ;
-        ($keywords_wiki_mobile = $line)           =~ s/ \([^\)]+\).*$// ;
+        ($keywords_wiki_mobile = $line)      =~ s/ \([^\)]+\).*$// ;
         $keywords_mobile =~ s/\|/, /g ;
         $keywords_mobile =~ s/((?:[^,]+,){10})/$1<br>/g ;
         $keywords_wiki_mobile =~ s/((?:[^,]+,){10})/$1<br>/g ;
@@ -1931,9 +1928,9 @@ sub NormalizeCounts
   $total_clients_wiki_mobile= &Normalize ($total_clients_wiki_mobile) ;
   $total_clients_non_mobile = &Normalize ($total_clients_non_mobile) ;
 
-  $total_clients_html_only            = &Normalize ($total_clients_html_only) ;
-  $total_clients_mobile_html_only     = &Normalize ($total_clients_mobile_html_only) ;
-  $total_clients_non_mobile_html_only = &Normalize ($total_clients_non_mobile_html_only) ;
+  $total_clients_html_only             = &Normalize ($total_clients_html_only) ;
+  $total_clients_mobile_html_only      = &Normalize ($total_clients_mobile_html_only) ;
+  $total_clients_non_mobile_html_only  = &Normalize ($total_clients_non_mobile_html_only) ;
   $total_clients_wiki_mobile_html_only = &Normalize ($total_clients_wiki_mobile_html_only) ;
 
 # ReadInputCrawlers
@@ -2379,7 +2376,7 @@ $total_clientgroups_html_only {'W'})) ;
   $perc = ".." ;
   if ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'}> 0)
   { $perc = sprintf ("%.2f", 100 * $count / ($total_clientgroups {'-'} + $total_clientgroups {'M'} + $total_clientgroups {'W'})) ; }
- 
+
   $count_html_only = $clientgroups_other_html_only {'-'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
   $perc_html_only = ".." ;
