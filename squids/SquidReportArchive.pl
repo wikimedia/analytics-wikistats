@@ -9,9 +9,9 @@
 
 # set defaults mainly for tests on local machine
 # default_argv "-m 2011-07   " ;
-#  default_argv "-c -q 2010Q1" ;
+  default_argv "-c -q 2011Q4" ;
 # default_argv "-w" ;  # refresh country info from Wikipedia (population etc)
-  default_argv "-c" ;
+# default_argv "-c" ;
 
 # to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
@@ -508,6 +508,8 @@ sub PrepHtml
                "Absolute traffic counts for October 2011 are approximatly 7% too low.<br>" .
                "Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world.<br>" .
                "and may have also skewed relative figures like share of traffic per browser or operating system.</font><p>" ;
+    $header .= "<font color=#900000>From mid September till late November squid log records for mobile traffic were in invalid format.<br>" .
+               "Data could be repaired for logs from mid October onwards. Older logs were no longer available.<p>" ;
     $header .= "<font color=#900000>In a an unrelated server outage precisely half of traffic to WMF mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic).<br>" .
                "WMF has since improved server monitoring, so that similar outages should be detected and fixed much faster from now on.</font><p>" ;
   }
@@ -1401,16 +1403,15 @@ sub ReadInputCountriesMeta
     chomp $line ;
 
     $line =~ s/[\x00-\x1f]//g ;
-    $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
 
     ($country,$link,$population,$connected,$icon) = split ',', $line ;
-    print "COUNTRY $country\nLINK $link\nPOPULATION $population\nCONNECTED $connected\n\n" ;
+    # print "COUNTRY $country\nLINK $link\nPOPULATION $population\nCONNECTED $connected\n\n" ;
     $country =~ s/&comma;/,/g ;
 
     # use country names as given by MaxMind
     $country =~ s/Brunei/Brunei Darussalam/ ;
-    $country =~ s/Congo, The Democratic Republic of the/Republic of the Congo/ ;
-    $country =~ s/Dem. Rep. of Congo/Congo - The Democratic Republic of the/ ;
+  # $country =~ s/Congo, The Democratic Republic of the/Democratic Republic of the Congo/ ;
+  # $country =~ s/Dem. Rep. of Congo/Democratic Republic of the Congo/ ;
     $country =~ s/East timor/Timor-Leste/ ;
     $country =~ s/Guyane/French Guiana/ ;
     $country =~ s/Iran/Iran, Islamic Republic of/ ;
@@ -1418,17 +1419,20 @@ sub ReadInputCountriesMeta
     $country =~ s/Libya/Libyan Arab Jamahiriya/ ;
     $country =~ s/Macau/Macao/ ;
     $country =~ s/Moldova/Moldova, Republic of/ ;
-    $country =~ s/North Korea/Korea, Republic of/ ;
+  # $country =~ s/North Korea/Korea, Republic of/ ;
     $country =~ s/Palestine/Palestinian Territory/ ;
-    $country =~ s/Republic of the Congo/Congo/ ;
+  # $country =~ s/Republic of the Congo/Congo/ ;
     $country =~ s/Russia/Russian Federation/ ;
-    $country =~ s/North Korea/Korea, Democratic People's Republic of/ ;
-    $country =~ s/South Korea/Korea, Republic of/ ;
+  # $country =~ s/North Korea/Korea, Democratic People's Republic of/ ;
+  # $country =~ s/South Korea/Korea, Republic of/ ;
     $country =~ s/Syria/Syrian Arab Republic/ ;
     $country =~ s/Tanzania/Tanzania, United Republic of/ ;
     $country =~ s/U.S. Virgin Islands/Virgin Islands, British/ ;
     $country =~ s/Vatican City/Holy See (Vatican City State)/ ;
-    $country =~ s/^Korea$/South Korea/ ;
+  # $country =~ s/^Korea$/South Korea/ ;
+
+    if ($connected eq 'connected')
+    { &Log ("connected unknown: $country\n") ; }
     $connected =~ s/connected/../g ;
     $country_meta_info {$country} = "$link,$population,$connected,$icon" ;
 
@@ -4767,12 +4771,12 @@ sub WriteReportPerCountryOverview
     # now use country names that are suitable for http://gunn.co.nz/map/
     $country2 = $country ;
     $country2 =~ s/Moldova, Republic of/Moldova/ ;
-    $country2 =~ s/Korea, Republic of/South Korea/ ;
-    $country2 =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+  # $country2 =~ s/Korea, Republic of/South Korea/ ;
+  # $country2 =~ s/Korea, Democratic People's Republic of/North Korea/ ;
     $country2 =~ s/Iran, Islamic Republic of/Iran/ ;
     $country2 =~ s/UAE/United Arab Emirates/ ;
     $country2 =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-    $country2 =~ s/^Congo$/Republic of the Congo/ ;
+  # $country2 =~ s/^Congo$/Republic of the Congo/ ;
     $country2 =~ s/Syrian Arab Republic/Syria/ ;
     $country2 =~ s/Tanzania, United Republic of/Tanzania/ ;
     $country2 =~ s/Libyan Arab Jamahiriya/Libya/ ;
@@ -5091,7 +5095,7 @@ next ;
     $country =~ s/Iran, Islamic Republic of/Iran/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
     $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-    $country =~ s/^Congo$/Republic of the Congo/ ;
+  # $country =~ s/^Congo$/Republic of the Congo/ ;
     $country =~ s/Syrian Arab Republic/Syria/ ;
     $country =~ s/Tanzania, United Republic of/Tanzania/ ;
     $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
@@ -6173,7 +6177,21 @@ sub ReadWikipedia
     $link    =~ s/,/&comma;/g ;
     $icon    =~ s/,/&comma;/g ;
 
-    print "country: $country\nlink: $link\npopulation: $population\nconnected: $connected\nicon: $icon\n\n" ;
+    $country =~ s/Bosnia-Herzegovina/Bosnia and Herzegovina/ ;
+    $country =~ s/C.*.+te d'Ivoire/Cote d'Ivoire/ ;
+    $country =~ s/Macao/Macau/ ; # will be changed back later
+    $country =~ s/Samoa/American Samoa/ ;
+    $country =~ s/Timor Leste/Timor-Leste/ ;
+    $country =~ s/UAE/United Arab Emirates/ ;
+    $country =~ s/Korea, South/South Korea/ ;
+    $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
+    $country =~ s/Congo, Republic of/Republic of the Congo/ ;
+    $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
+    $country =~ s/Gambia, The/Gambia/ ;
+    $country =~ s/Bahamas, The/The Bahamas/ ;
+    $country =~ s/,/&comma;/g ;
+
+    # print "country: $country\nlink: $link\npopulation: $population\nconnected: $connected\nicon: $icon\n\n" ;
     $countries {$country} = "$country,$link,$population,connected,$icon\n" ;
   }
 
@@ -6210,17 +6228,33 @@ sub ReadWikipedia
 
     $country =~ s/,/&comma;/g ;
     $country =~ s/Bosnia-Herzegovina/Bosnia and Herzegovina/ ;
-    $country =~ s/Cote d'Ivoire/C&ocirc;te d'Ivoire/ ;
+    $country =~ s/C.*.+te d'Ivoire/Cote d'Ivoire/ ;
     $country =~ s/Macao/Macau/ ; # will be changed back later
     $country =~ s/Samoa/American Samoa/ ;
     $country =~ s/Timor Leste/Timor-Leste/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
+    $country =~ s/Korea, South/South Korea/ ;
+    $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
+    $country =~ s/Congo, Republic of/Republic of the Congo/ ;
+    $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
+    $country =~ s/Gambia, The/Gambia/ ;
+    $country =~ s/Bahamas, The/The Bahamas/ ;
+    $country =~ s/,/&comma;/g ;
 
     print "country: $country\nconnected: $connected\n\n" ;
     $countries {$country} =~ s/connected/$connected/ ;
   }
 
-  print "Write $path_in/$file_csv_country_meta_info\n\n" ; # use $path_in, not $path_out  so that next step picks up proper file
+  &Log ("Metric 'connected' unknown for:\n\n") ;
+  foreach $country (sort keys %countries)
+  {
+    $data = $countries {$country} ;
+
+    if ($data =~ /connected/)
+    { &Log ("$country\n") ; }
+  }
+
+  &Log ("Write $path_in/$file_csv_country_meta_info\n\n") ; # use $path_in, not $path_out  so that next step picks up proper file
   open COUNTRY_META_INFO, '>', "$path_in/$file_csv_country_meta_info" ;
   foreach $country (sort keys %countries)
   { print COUNTRY_META_INFO $countries {$country} ; }
