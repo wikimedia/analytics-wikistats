@@ -42,7 +42,7 @@
 # todo: parm -r root folder
 
   $test = $false  ;
-  $test_maxlines = $cfg_text_maxlines ;
+  $test_maxlines = $cfg_test_maxlines ;
   $file_test     = $cfg_file_test ;
 
   if (! $job_runs_on_production_server)
