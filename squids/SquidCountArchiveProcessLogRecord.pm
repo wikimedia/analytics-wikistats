@@ -349,7 +349,7 @@ sub ProcessLine
     $mobile_other {$agent2} += $count_event ; 
   }
 
-  if ($version =~ /(?:Ipod|Iphone|iPhone|iPad|iPod)/io)
+  if ($version =~ /(?:iPod|iPhone|iPad)/io)
   {
     if ($os !~ /Iphone OS \d/io)
     { $os = "iPhone OS 1_X" ; }
