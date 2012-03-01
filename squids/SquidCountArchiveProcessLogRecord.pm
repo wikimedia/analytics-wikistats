@@ -290,7 +290,7 @@ sub ProcessLine
 
   $os = ".." ;
 
-     if ($agent2 =~ /(?:Wikiamo|Wikipanion)/io) { $os = "iPhone" ; }
+  if ($agent2 =~ /CFNetwork/io)     { $os = "iPhone" ; }
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
   elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
@@ -341,6 +341,7 @@ sub ProcessLine
   elsif ($agent2 =~ /Danger/io)         { $os = "Danger" ; }
   elsif ($agent2 =~ /J2ME\/MIDP/io)     { $os = "Java/ME" ; }
   elsif ($agent2 =~ /Kindle/io)         { $os = "Kindle" ; }
+  elsif ($agent2 =~ /Dalvik/io)         { $os = "Android" ; }
 
   if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
@@ -348,7 +349,7 @@ sub ProcessLine
     $mobile_other {$agent2} += $count_event ; 
   }
 
-  if ($version =~ /(?:Ipod|Iphone)/io)
+  if ($version =~ /(?:Ipod|Iphone|iPhone|iPad|iPod)/io)
   {
     if ($os !~ /Iphone OS \d/io)
     { $os = "iPhone OS 1_X" ; }
@@ -419,49 +420,6 @@ sub ProcessLine
   elsif ($agent2 =~ /webOS\/\d+\.\d+.*Pre\/\d/io)
   { ($version = $agent2) =~ s/^.*?(Pre\/\d+\.?\d*).*$/Palm_$1/o ; }
 
-  # ANDROID
-  elsif ($agent2 =~ /Android\/\d+/io)
-  { ($version = $agent2) =~ s/^.*?(Android\/\d+\.?\d*).*$/$1/o ; }
-
-  # EXPLORER
-  elsif ($agent2 =~ /Mozilla\/\d+\.\d+ \(compatible;.*MSIE/io)
-  { ($version = $agent2) =~ s/^.*?(MSIE \d+\.\d+).*$/$1/o ; }
-
-  # CHROME
-  elsif ($agent2 =~ /Chrome\/\d/io) # Chrome sometimes mimicked Safari to work around Hotmail bug
-  {
-    $agent2 =~ s/Windows NT \d\.\d/Windows/o ;
-    $agent2 =~ s/(Chrome\/\d+\.\d+)[^;\) ]+/$1/o ;
-
-    $agent2 = &ExtractLanguage ($agent2, 'Chrome') ;
-
-    ($version = $agent2) =~ s/^.*?(Chrome\/\d+\.\d+).*$/$1/o ;
-  }
-
-  # SAFARI
-  elsif ($agent2 =~ /Safari\/[^\s]+$/io)
-  {
-    $agent2 = &ExtractLanguage ($agent2, 'Safari') ;
-    $agent2 =~ s/(Safari\/\d+\.\d+)[^;\) ]+/$1/o ;
-    if ($agent2 =~ /Safari\/\d+\.\d+/o)
-    { ($version = $agent2) =~ s/^.*?(Safari\/\d+\.\d+).*$/$1/o ; }
-    elsif ($agent2 =~ /Safari\/\d+/o)
-    { ($version = $agent2) =~ s/^.*?(Safari\/\d+).*$/$1/o ; }
-  }
-
-  # FIREFOX
-  elsif ($agent2 =~ /Firefox\/[^\s]+/io)
-  {
-    $agent2 = &ExtractLanguage ($agent2, 'Firefox') ;
-    $agent2 =~ s/X11; Linux [^;]+/Linux/o ;
-    $agent2 =~ s/(Firefox\/\d+\.\d+)[^;\) ]+/$1/o ;
-
-    if ($agent2 =~ /Firefox\/\d+\.\d+/o)
-    { ($version = $agent2) =~ s/^.*?(Firefox\/\d+\.\d+).*$/$1/o ; }
-    elsif ($agent2 =~ /Firefox\/\d+/o)
-    { ($version = $agent2) =~ s/^.*?(Firefox\/\d+).*$/$1/o ; }
-  }
-
   # OPERA
   # new format
   elsif ($agent2 =~ /^Opera\/\d/io)
@@ -506,6 +464,59 @@ sub ProcessLine
     $agent2 =~ s/X11; Linux [^;\)]+/Linux/o ;
     ($version = $agent2) =~ s/^.*?(Opera\/\d+\.\d+).*$/$1/o ;
     $version =~ s/^\s*(.*?)\s*$/$1/o ; # remove leading/trailing spaces
+  }
+
+  # CHROME MOBILE
+  elsif ($agent2 =~ /CrMo\/\d+/io)
+  { ($version = $agent2) =~ s/^.*?(CrMo\/\d+\.\d+).*$/$1/o ; 
+    $version =~ s/CrMo/ChromeMobile/o ;
+  }
+
+  # DALVIK (applications on Android)
+  elsif ($agent2 =~ /Dalvik\/\d+/io)
+  { ($version = $agent2) =~ s/^.*?(Dalvik\/\d+\.?\d*).*$/$1/o ; }
+
+  # ANDROID
+  elsif ($agent2 =~ /Android\/\d+/io)
+  { ($version = $agent2) =~ s/^.*?(Android\/\d+\.?\d*).*$/$1/o ; }
+
+  # EXPLORER
+  elsif ($agent2 =~ /Mozilla\/\d+\.\d+ \(compatible;.*MSIE/io)
+  { ($version = $agent2) =~ s/^.*?(MSIE \d+\.\d+).*$/$1/o ; }
+
+  # CHROME
+  elsif ($agent2 =~ /Chrome\/\d/io) # Chrome sometimes mimicked Safari to work around Hotmail bug
+  {
+    $agent2 =~ s/Windows NT \d\.\d/Windows/o ;
+    $agent2 =~ s/(Chrome\/\d+\.\d+)[^;\) ]+/$1/o ;
+
+    $agent2 = &ExtractLanguage ($agent2, 'Chrome') ;
+
+    ($version = $agent2) =~ s/^.*?(Chrome\/\d+\.\d+).*$/$1/o ;
+  }
+
+  # SAFARI
+  elsif ($agent2 =~ /Safari\/[^\s]+$/io)
+  {
+    $agent2 = &ExtractLanguage ($agent2, 'Safari') ;
+    $agent2 =~ s/(Safari\/\d+\.\d+)[^;\) ]+/$1/o ;
+    if ($agent2 =~ /Safari\/\d+\.\d+/o)
+    { ($version = $agent2) =~ s/^.*?(Safari\/\d+\.\d+).*$/$1/o ; }
+    elsif ($agent2 =~ /Safari\/\d+/o)
+    { ($version = $agent2) =~ s/^.*?(Safari\/\d+).*$/$1/o ; }
+  }
+
+  # FIREFOX
+  elsif ($agent2 =~ /Firefox\/[^\s]+/io)
+  {
+    $agent2 = &ExtractLanguage ($agent2, 'Firefox') ;
+    $agent2 =~ s/X11; Linux [^;]+/Linux/o ;
+    $agent2 =~ s/(Firefox\/\d+\.\d+)[^;\) ]+/$1/o ;
+
+    if ($agent2 =~ /Firefox\/\d+\.\d+/o)
+    { ($version = $agent2) =~ s/^.*?(Firefox\/\d+\.\d+).*$/$1/o ; }
+    elsif ($agent2 =~ /Firefox\/\d+/o)
+    { ($version = $agent2) =~ s/^.*?(Firefox\/\d+).*$/$1/o ; }
   }
 
   # BLACKBERRY
