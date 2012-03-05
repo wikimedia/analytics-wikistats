@@ -1856,13 +1856,16 @@ sub CalcPercentages
     $perc_html_only = 100*$clientgroups_html_only {$key}/$total_clients_html_only ;
     if ($key =~ /^M/)
     { $perc_threshold = 0.005 ; }
+    elsif ($key =~ /^W/)
+    { $perc_threshold = 0.001 ; }
     else
     { $perc_threshold = 0.02 ; }
 
     if ($perc > $perc_threshold)
     {
-      $clientgroups_perc           {$key} = sprintf ("%.2f",$perc)           . "%" ;
-      $clientgroups_perc_html_only {$key} = sprintf ("%.2f",$perc_html_only) . "%" ;
+      $precision = ($key =~ /^W/) ? "%.3f" : "%.2f" ;
+      $clientgroups_perc           {$key} = sprintf ($precision,$perc)           . "%" ;
+      $clientgroups_perc_html_only {$key} = sprintf ($precision,$perc_html_only) . "%" ;
     }
     else
     {
@@ -2150,11 +2153,10 @@ sub WriteReportClients
   }
   $perc_html_only = ".." ;
   $count_html_only = $clientgroups_other_html_only {'-'} ;
-  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} +
-$total_clientgroups_html_only {'W'} > 0)
+  if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'} > 0)
   {
     $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only {'-'} / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} +
-$total_clientgroups_html_only {'W'})) ;
+                                                                                                                          $total_clientgroups_html_only {'W'})) ;
     $perc_total_html_only_nonmobile += $perc_html_only ;
   }
 
@@ -2213,7 +2215,7 @@ $total_clientgroups_html_only {'W'})) ;
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_mobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSERS, WIKIMOBILE
-  $html .= "<tr><th class=l>&nbsp;<br>Wiki applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  $html .= "<tr><th class=l>&nbsp;<br>Mobile applications</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   $perc_total_wiki = 0 ;
   $perc_total_html_only_wiki = 0 ;
 
@@ -2290,7 +2292,7 @@ $total_clientgroups_html_only {'W'})) ;
     ($rectype, $client) = split (',', $key,2) ;
     next if $rectype ne 'M' ; # group
     $perc  = $clients_perc {$key} ;
-    next if $perc lt "0.02%" ;
+    next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
 
     $perc_html_only  = $clients_perc_html_only {$key} ;
@@ -2309,14 +2311,14 @@ $total_clientgroups_html_only {'W'})) ;
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc\%</th><th class=r>$total_html_only</th><th class=r>$perc_html_only\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, WIKIMOBILE
-  $html .= "<tr><th class=l>&nbsp;<br>Wiki applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  $html .= "<tr><th class=l>&nbsp;<br>Mobile application versions</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clients_sorted_count)
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
     next if $rectype ne 'W' ; # group
     $perc  = $clients_perc {$key} ;
-    next if $perc lt "0.005%" ;
+    next if $perc lt "0.001%" ;
     $count = &FormatCount ($count) ;
 
     $perc_html_only  = $clients_perc_html_only {$key} ;
@@ -2408,7 +2410,7 @@ $total_clientgroups_html_only {'W'})) ;
   $html .= "<tr><th class=l>Total</th><th class=r>$total</th><th class=r>$perc_total_mobile\%</th><th class=r>$total_html_only</th><th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, WIKIMOBILE
-  $html .= "<tr><th class=l>&nbsp;<br>Applications, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
+  $html .= "<tr><th class=l>&nbsp;<br>Mobile applications</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
   foreach $key (@clientgroups_sorted_alpha)
   {
     $count = $clientgroups {$key} ;
@@ -2446,7 +2448,7 @@ $total_clientgroups_html_only {'W'})) ;
     ($rectype, $client) = split (',', $key,2) ;
     next if $rectype ne '-' ; # group
     $perc  = $clients_perc {$key} ;
-    next if $perc lt "0.02%" ;
+    next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clients_html_only {$key} ;
