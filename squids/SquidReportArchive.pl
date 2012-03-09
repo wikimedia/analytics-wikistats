@@ -103,6 +103,8 @@
   }
   &Log ("Report month = $reportmonth\n") ;
 
+  $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
+
   $threshold_mime    = 0 ;
   $threshold_project = 10 ;
 
@@ -419,7 +421,7 @@ sub ReadDate
   $timespan   = ($timetill - $timefrom) / 3600 ;
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
   &Log ("Multiplier = $multiplier\n") ;
-  $header =~ s/DATE/Daily averages, based on sample period: $period (yyyy-mm-dd)/ ;
+  $header =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
 }
 
 sub SetPeriod
@@ -441,7 +443,7 @@ sub SetPeriod
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
 
   $period = sprintf ("%d %s %d - %d %s %d", $day_first, month_english_short ($month_first-1), $year_first, $day_last, month_english_short ($month_last-1), $year_last) ;
-  $header =~ s/DATE/Daily averages, based on sample period: $period/ ;
+  $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
   &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n") ;
 }
 
@@ -450,61 +452,30 @@ sub PrepHtml
   &Log ("\nPrepHtml\n\n") ;
 
   $language = "en" ;
-  $header = "<!DOCTYPE FILE_HTML PUBLIC '-//W3C//DTD FILE_HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>\n" .
-            "<html lang='en'>\n" .
-            "<head>\n" .
-            "<title>TITLE</title>\n" .
-            "<meta http-equiv='Content-type' content='text/html; charset=iso-8859-1'>\n" .
-            "<meta name='robots' content='index,follow'>\n" .
-            "<script language='javascript' type='text/javascript' src='../WikipediaStatistics13.js'></script>\n" .
-            "<style type='text/css'>\n" .
-            "<!--\n" .
-            "body {font-family:arial,sans-serif; font-size:12px }\n" .
-            "h2   {margin:0px 0px 3px 0px; font-size:18px}\n" .
-            "table {font-size:12px ;}\n" .
-            "td   {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:middle}\n" .
-            "th   {white-space:nowrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:top ; font-width:bold}\n" .
-            "th.small {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:11px ; vertical-align:top ; font-width:bold}\n" .
-            "td.hl {text-align:left;vertical-align:top;}\n" .
-            "td.hr {text-align:right;vertical-align:top;}\n" .
-            "td.hc {text-align:center;vertical-align:top;}\n" .
-            "td.r {text-align:right;  border: inset 1px #FFFFFF}\n" .
-            "td.c {text-align:center; border: inset 1px #FFFFFF}\n" .
-            "td.l {text-align:left;   border: inset 1px #FFFFFF}\n" .
-            "th.c {text-align:center; border: inset 1px #FFFFFF}\n" .
-            "th.l {text-align:left;   border: inset 1px #FFFFFF}\n" .
-            "th.r {text-align:right;  border: inset 1px #FFFFFF}\n" .
-            "th.lh3 {text-align:left;   border: inset 1px #FFFFFF ; font-size:14px}\n" .
-            "a:link { color:blue;text-decoration:none;}\n" .
-            "a:visited {color:#0000FF;text-decoration:none;}\n" .
-            "a:active  {color:#0000FF;text-decoration:none;}\n" .
-            "a:hover   {color:#FF00FF;text-decoration:underline}\n" .
-            "-->\n" .
-            "</style>\n" .
-            "<body bgcolor='\#FFFFDD'>\n<table width=100%>\n<tr><td class=hl>\n<h2>HEADER</h2>\n<b>DATE</b>\n</td>\n<td class=hr>" .
-            "<input type='button' value=' Archive ' onclick='window.location=\"http://stats.wikimedia.org/archive/squid_reports\"'> " .
-            "<input type='button' value=' Wikimedia Statistics ' onclick='window.location=\"http://stats.wikimedia.org\"'>" .
-            "</td></tr>\n</table><hr>" .
-          # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<p>" ;
-            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ;
+  $header = &HtmlHead ;
+  $form   = &HtmlForm ;
+  $header.=  "<body bgcolor='\#FFFFDD'>\n$form\n<hr>" .
+          # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
+            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids)<p>\nALSO, and <a href='#errata'><b>notes about reliability of these data<\/b><\/a><br><br>" ;
 
   if ($reportcountries)
   {
-    $header .= "<p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
+    $errata .= "<p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
                "&nbsp;Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world." ;
   }
   else
   {
-    $header .= "<font color=#900000>WMF traffic logging service suffered from server capacity problems in Aug/Sep/Oct 2011.<br>" .
+    $errata .= "<font color=#900000>WMF traffic logging service suffered from server capacity problems in Aug/Sep/Oct 2011.<br>" .
                "Absolute traffic counts for October 2011 are approximatly 7% too low.<br>" .
                "Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world.<br>" .
                "and may have also skewed relative figures like share of traffic per browser or operating system.</font><p>" ;
-    $header .= "<font color=#900000>From mid September till late November squid log records for mobile traffic were in invalid format.<br>" .
-               "Data could be repaired for logs from mid October onwards. Older logs were no longer available.<p>" ;
-    $header .= "<font color=#900000>In a an unrelated server outage precisely half of traffic to WMF mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic).<br>" .
+    $errata .= "<font color=#900000>From mid September till late November squid log records for mobile traffic were in invalid format.<br>" .
+               "Data could be repaired for logs from mid October onwards. Older logs were no longer available.</font><p>" ;
+    $errata .= "<font color=#900000>In a an unrelated server outage precisely half of traffic to WMF mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic).<br>" .
                "WMF has since improved server monitoring, so that similar outages should be detected and fixed much faster from now on.</font><p>" ;
   }
   # to be localized some day like any reports
+  $out_explorer     = "<font color=#800000>Note: page may load slower on Microsoft Internet explorer than on other major browsers</font>" ;
   $out_license      = "All data and images on this page are in the public domain." ;
   $out_generated    = "Generated on " ;
   $out_author       = "Author" ;
@@ -514,12 +485,13 @@ sub PrepHtml
   $out_mymail = "ezachte@### (no spam: ### = wikimedia.org)" ;
   $out_mysite = "http://infodisiac.com/" ;
 
-  $colophon = "<p>\n" .
+  $colophon = "<p><a id='errata' name='errata'><b>Errata:</b><p>$errata<p>" .
                $out_generated . date_time_english (time) . "\n<br>" .
                $out_author . ":" . $out_myname .
                " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
                "$out_mail: $out_mymail<br>\n" .
-               "$out_license" .
+               "$out_license<br>" .
+               "$out_explorer" .
                "</small>\n" .
                "</body>\n" .
                "</html>\n" ;
@@ -2107,6 +2079,22 @@ sub WriteReportClients
   $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
+# test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
+# thus scale these test figures in reverse direction first
+# $html .= &ShowCount (891234567890/1000) . "<br>" ;
+# $html .= &ShowCount (91234567890/1000) . "<br>" ;
+# $html .= &ShowCount (1234567890/1000) . "<br>" ;
+# $html .= &ShowCount (234567890/1000) . "<br>" ;
+# $html .= &ShowCount (34567890/1000) . "<br>" ;
+# $html .= &ShowCount (4567890/1000) . "<br>" ;
+# $html .= &ShowCount (567890/1000) . "<br>" ;
+# $html .= &ShowCount (67890/1000) . "<br>" ;
+# $html .= &ShowCount (7890/1000) . "<br>" ;
+# $html .= &ShowCount (890/1000) . "<br>" ;
+# $html .= &ShowCount (90/1000) . "<br>" ;
+# $html .= &ShowCount (1/1000) . "<br>" ;
+# $html .= &ShowCount (0)     . "<br>" ;
+
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td class=l colspan=99 wrap>The following overview of page requests per client (~browser) application is based on the <a href='http://en.wikipedia.org/wiki/User_agent'>user agent</a> information that accompanies most server requests.<br>" .
            "Please note that agent information does not follow strict guidelines and some programs may provide wrong information on purpose.<br>" .
@@ -2462,8 +2450,7 @@ sub WriteReportClients
   $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only +
-$total_clients_wiki_mobile_html_only)) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
 
   $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -2488,8 +2475,7 @@ $total_clients_wiki_mobile_html_only)) ;
   $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only +
-$total_clients_wiki_mobile_html_only)) ;
+  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
 
   $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -3875,7 +3861,7 @@ sub WriteReportScripts
     {
       ($script2,$action) = split (',', $key) ;
       if (($script eq $script2) && ($actions {$key} < $scripts_php {$script}))
-      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;<small>$action</small></td>" . &ShowCountSmall (&FormatCount ($actions {$key})) . "</td></tr>\n" ; }
+      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCount (&FormatCount ($actions {$key})) . "</tr>\n" ; }
     }
   }
   $total_php = &FormatCount ($total_php) ;
@@ -3921,7 +3907,7 @@ sub WriteReportScripts
     {
       ($script2,$action) = split (',', $key) ;
       if (($script eq $script2) && ($actions {$key} < $scripts_php {$script}))
-      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;<small>$action</small></td>" . &ShowCountSmall (&FormatCount ($actions {$key})) . "</tr>\n" ; }
+      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCount (&FormatCount ($actions {$key})) . "</tr>\n" ; }
     }
   }
   $html .= "<tr><th class=l>total php</th>" . &ShowCountBold ($total_php) . "</tr>\n" ;
@@ -5800,28 +5786,30 @@ sub FormatCount
   return ($count) ;
 }
 
-sub ShowCount
+sub ShowCount # qqq2
 {
-  my ($num, $color) = @_ ;
-  if (! defined $color)
-  { return ("<td class=r>$num</td>") ; }
-  else
-  { return ("<td class=r><font color=$color>$num</font></td>") ; }
-}
+  my ($num) = @_ ;
+  $num =~ s/,//g ;
 
-sub ShowCountSmall
-{
-  my ($num, $color) = @_ ;
-  &ShowCount ("<small>" . &ShowCount ($num,$color) . "</small>") ;
+  if ($num eq '&nbsp;') # to do: remove &nbsp;'s from perl code, send 0 instead, formatting in javascript
+  { $num = 0 ; }
+
+  if ($num =~ /^[\d\.]+$/) # numeric string
+  { $num *= 1000 ; }
+
+  if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
+  { $num ="\"$num\"" ; }
+
+  $num = "<script>showCount($num);</script>" ;
+  return ("<td class=r>$num</td>") ;
 }
 
 sub ShowCountBold
 {
-  my ($num, $color) = @_ ;
-  if (! defined $color)
-  { return ("<th class=r>$num</th>") ; }
-  else
-  { return ("<th class=r><font color=$color>$num</font></th>") ; }
+  my ($num) = @_ ;
+  $num = &ShowCount ($num) ;
+  $num =~ s/td/th/g ;
+  return ($num) ;
 }
 
 sub SortMime
@@ -6536,6 +6524,203 @@ sub PrintCsv
   close HTML_CSV ;
 }
 
+sub HtmlHead
+{
+# substitute      this                                with          this
+  $regexp_from1 = '/(\d)(\d\d\d)$/' ;                 $regexp_to1 = '"$1,$2"' ;
+  $regexp_from2 = '/(\d)(\d\d\d)(\d\d\d)$/' ;         $regexp_to2 = '"$1,$2,$3"' ;
+  $regexp_from3 = '/(\d)(\d\d\d)(\d\d\d)(\d\d\d)$/' ; $regexp_to3 = '"$1,$2,$3,$4"' ;
+  $regexp_from4 = '/(\d)(\d\d\d)\&/' ;                $regexp_to4 = '"$1,$2\&"' ;
+
+  my $html = <<__HTML_HEAD__ ;
+
+<!DOCTYPE FILE_HTML PUBLIC '-//W3C//DTD FILE_HTML 4.01 Transitional//EN' 'http://www.w3.org/TR/html4/loose.dtd'>
+<html lang='en'>
+
+<head>
+
+<title>TITLE</title>
+
+<meta http-equiv='Content-type' content='text/html; charset=iso-8859-1'>
+<meta name='robots' content='index,follow'>
+
+<style type='text/css'>
+<!--
+body {font-family:arial,sans-serif; font-size:12px }
+h2   {margin:0px 0px 3px 0px; font-size:18px}
+table {font-size:12px ;}
+td   {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:middle}
+th   {white-space:nowrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:top ; font-width:bold}
+th.small {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:11px ; vertical-align:top ; font-width:bold}
+td.hl {text-align:left;vertical-align:top;}
+td.hr {text-align:right;vertical-align:top;}
+td.hc {text-align:center;vertical-align:top;}
+td.r {text-align:right;  border: inset 1px #FFFFFF}
+td.c {text-align:center; border: inset 1px #FFFFFF}
+td.l {text-align:left;   border: inset 1px #FFFFFF}
+th.c {text-align:center; border: inset 1px #FFFFFF}
+th.l {text-align:left;   border: inset 1px #FFFFFF}
+th.r {text-align:right;  border: inset 1px #FFFFFF}
+th.lh3 {text-align:left;   border: inset 1px #FFFFFF ; font-size:14px}
+a:link { color:blue;text-decoration:none;}
+a:visited {color:#0000FF;text-decoration:none;}
+a:active  {color:#0000FF;text-decoration:none;}
+a:hover   {color:#FF00FF;text-decoration:underline}
+-->
+</style>
+
+<script>
+
+var calls = 0 ;
+
+var show_count_short = (getCookie ('show_count_short') == 'true') || (getCookie ('show_count_short') == '');
+var show_count_mode  = (getCookie ('select_period') || 0) ;
+var show_count_monthly_normalized = (show_count_mode == 0) ;
+var show_count_monthly_raw        = (show_count_mode == 1) ;
+var show_count_daily              = (show_count_mode == 2) ;
+
+var char_million  = 'M' ;
+var char_thousand = 'k' ;
+var nbsp = '&nbsp;' ;
+var checked = false;
+var element ;
+var index ;
+
+//qqq1
+
+window.onload =
+  function()
+  {
+    // alert ('window.onload') ;
+    // alert (document.cookie) ;
+    checked = getCookie ('show_count_short') ;
+    element = document.getElementById ('form_show_count_short');
+
+    if (checked == 'false')
+    { element.checked = false ; show_count_short = false ; }
+    else
+    { element.checked = true ; show_count_short = true ; }
+
+    index = getCookie ('select_period') || 0 ;
+    element = document.getElementById ('form_select_period');
+    element.selectedIndex = parseInt(index);
+  }
+
+function setCookie (name, value, expires, path, domain, secure)
+{
+  var curCookie = name + "=" + escape(value) + ((expires) ? "; expires=" + expires.toGMTString() : "") + ((path) ? "; path=" + path : "") + ((domain) ? "; domain=" + domain : "") + ((secure) ? "; secure" : "");
+  document.cookie = curCookie;
+}
+
+function getCookie (name)
+{
+  var prefix = name + "=" ;
+  var cookieStartIndex = document.cookie.indexOf (prefix);
+  if (cookieStartIndex == -1)
+  { return "" ; }
+  var cookieEndIndex = document.cookie.indexOf (";", cookieStartIndex + prefix.length);
+  if (cookieEndIndex == -1)
+  { cookieEndIndex = document.cookie.length ; }
+  result = document.cookie.substring (cookieStartIndex + prefix.length, cookieEndIndex);
+  return unescape (result) ;
+}
+
+
+function refreshPage ()
+{
+  // alert ('refreshPage') ;
+  var element = document.getElementById ('form_select_period');
+  setCookie ('select_period', element.selectedIndex) ;
+
+  var element = document.getElementById ('form_show_count_short');
+  if (element.checked)
+  { setCookie ('show_count_short', 'true') ; }
+  else
+  { setCookie ('show_count_short', 'false') ; }
+
+  // alert (document.cookie) ;
+  window.location.reload();
+}
+
+function showCount (count)
+{
+  //  if (++ calls == 1)
+  // { alert ('showCount() show_count_short '+show_count_short) ; }
+
+  if (count == 0)
+  { count = '-' ; }
+
+  else if (show_count_daily)
+  { ; }
+  else if (show_count_monthly_normalized)
+  { count *= 30 ; }
+  else if (show_count_monthly_raw)
+  { count *= $days_in_month ; }
+
+  if (show_count_short)
+  {
+    if (count >= 100000000)
+    { count = Math.round (count/1000000) + nbsp + char_million ; }
+    else if (count >= 1000000)
+    { count = (Math.round  (count/100000) / 10) + nbsp + char_million ; }
+    else if (count >= 10000)
+    { count = Math.round  (count/1000) + nbsp + char_thousand ; }
+    else if (count >= 1000)
+    { count = (Math.round  (count/100) / 10) + nbsp + char_thousand ; }
+    count += '' ; // make string
+    count = count.replace ($regexp_from4,$regexp_to4) ;
+  }
+  else
+  {
+    // add 1000 separators
+    count += '' ; // make string
+    count = count.replace ($regexp_from3,$regexp_to3) ;
+    count = count.replace ($regexp_from2,$regexp_to2) ;
+    count = count.replace ($regexp_from1,$regexp_to1) ;
+  }
+
+  document.write (count) ;
+}
+
+</script>
+
+__HTML_HEAD__
+  return ($html) ;
+}
+
+sub HtmlForm
+{
+  my $html = <<__HTML_FORM__ ;
+
+<table width=100%>
+<tr>
+<td class=hl>
+  <h2>HEADER</h2>
+  <b>DATE</b>
+</td>
+<td class=hr>
+<form name = 'form'>
+  <select name='period' id='form_select_period' size='1' onchange='refreshPage()'>
+    <option value='1'>Monthly requests, normalized</option>
+    <option value='2'>Monthly requests, raw</option>
+    <option value='3'>Average daily requests</option>
+  </select>
+
+  <input type='checkbox' id='form_show_count_short' onchange='refreshPage()' /><strike>000</strike> &rArr; k
+
+  <input type='button' value=' Archive ' onclick='window.location=\"http://stats.wikimedia.org/archive/squid_reports\"'>
+  <input type='button' value=' Wikimedia Statistics ' onclick='window.location=\"http://stats.wikimedia.org\"'>
+</form>
+  </td>
+  </tr>
+</table>
+
+__HTML_FORM__
+
+return ($html) ;
+
+}
+
 sub HtmlSortTable
 {
   my $html = <<__HTML_SORT_TABLE__ ;
@@ -6675,6 +6860,23 @@ function toggle_visibility_index()
 __HTML_INDEX__
 
 return ($html) ;
+}
+
+sub DaysInMonth
+{
+  my $year = shift ;
+  my $month = shift ;
+
+  my $month2 = $month+1 ;
+  my $year2  = $year ;
+  if ($month2 > 12)
+  { $month2 = 1 ; $year2++ }
+
+  my $timegm1 = timegm (0,0,0,1,$month-1,$year-1900) ;
+  my $timegm2 = timegm (0,0,0,1,$month2-1,$year2-1900) ;
+  $days = ($timegm2-$timegm1) / (24*60*60) ;
+
+  return ($days) ;
 }
 
 sub hsv_to_rgb {
