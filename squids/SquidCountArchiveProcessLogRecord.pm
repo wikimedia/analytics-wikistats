@@ -290,7 +290,7 @@ sub ProcessLine
 
   $os = ".." ;
 
-  if ($agent2 =~ /CFNetwork/io)     { $os = "iPhone" ; }
+  if ($agent2 =~ /CFNetwork/io)     { $os = "iOS" }
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
   elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
@@ -341,7 +341,7 @@ sub ProcessLine
   elsif ($agent2 =~ /Danger/io)         { $os = "Danger" ; }
   elsif ($agent2 =~ /J2ME\/MIDP/io)     { $os = "Java/ME" ; }
   elsif ($agent2 =~ /Kindle/io)         { $os = "Kindle" ; }
-  elsif ($agent2 =~ /Dalvik/io)         { $os = "Android" ; }
+  elsif ($agent2 =~ /Dalvik/io)         { $os = "Android" }
 
   if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
@@ -349,7 +349,7 @@ sub ProcessLine
     $mobile_other {$agent2} += $count_event ; 
   }
 
-  if ($version =~ /(?:iPod|iPhone|iPad)/io)
+  if ($version =~ /(?:iPod|iPhone)/io)
   {
     if ($os !~ /Iphone OS \d/io)
     { $os = "iPhone OS 1_X" ; }
@@ -407,6 +407,14 @@ sub ProcessLine
 
   elsif ($agent2 eq "-")
   {;}
+
+  # iOS APPLICATIONS
+  elsif ($agent2 =~ /CFNetwork/io)
+  { 
+    $agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io ;
+    if ($agent2 =~ /Wikipedia Mobile\//io) { $agent2 =~ s/$/ (WMF)/io ; } 
+    $version = $agent2 ;
+  }
 
   # KINDLE
   elsif ($agent2 =~ /Kindle/io)
@@ -474,11 +482,18 @@ sub ProcessLine
 
   # DALVIK (applications on Android)
   elsif ($agent2 =~ /Dalvik\/\d+/io)
-  { ($version = $agent2) =~ s/^.*?(Dalvik\/\d+\.?\d*).*$/$1/o ; }
+  { ($version = $agent2) =~ s/^.*?(Dalvik\/\d+\.?\d*).*$/Android: $1/o ; }
+
+  # WIKIPEDIA MOBILE
+  elsif ($agent2 =~ /WikipediaMobile(\/| )\d+/io)
+  { ($version = $agent2) =~ s/^.*(WikipediaMobile(\/| )(\d|\.)+).*$/Android: $1 (WMF)/o ; }
 
   # ANDROID
   elsif ($agent2 =~ /Android\/\d+/io)
-  { ($version = $agent2) =~ s/^.*?(Android\/\d+\.?\d*).*$/$1/o ; }
+  {
+    $agent2 =~ s/^.*?(Android\/\d+\.?\d*).*$/$1/o ;
+    $version = $agent2 ;
+  }
 
   # EXPLORER
   elsif ($agent2 =~ /Mozilla\/\d+\.\d+ \(compatible;.*MSIE/io)
@@ -570,6 +585,11 @@ sub ProcessLine
     }
 
     $agent2  = "*[$version] [$os] --- $agent2" ;
+  }
+
+  if ($version =~ /\d.*\([^\)]{10}/io)
+  {
+    $version =~ s/\([^\)]{10}.*$//io ;
   }
 
   if ((! $bot) && ($agent ne "-"))

@@ -625,9 +625,14 @@ sub WriteOutputSquidLogs
     ($mobile,$version,$mimecat) = split (',', $key) ;
     print OUT2 "\%CLIENTS: '$mobile','$version','$mimecat': " . $clients{$key} . "\n" ;
     $total_clients {$mimecat} += $clients{$key} ;
-    $version =~ s/ .*$// ;
-    $version =~ s/\/.*$// ;
+    my $wmf = ($version =~ /\(WMF\)/ ) ;
+    if ($version =~ /\//)
+    { $version =~ s/\/.*$// ;}
+    else
+    { $version =~ s/ .*$// ; }
     $version =~ s/,/&comma;/g ;
+    if ($wmf && ! ($version =~ /\(WMF\)/ ))
+    { $version =~ s/$/ (WMF)/ ; }
     $group = "$mobile,$version,$mimecat" ;
     $grouped_clients {$group} += $clients{$key} ;
   }
