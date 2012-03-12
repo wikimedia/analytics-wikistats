@@ -2836,9 +2836,9 @@ sub WriteReportMimeTypes
     if ($mimetype2 =~ /image\/(?:png|jpeg|gif)/)
     { $mimetype2 .= "<br><small>(img)</small> " ; }
     if ($columns == 1)
-    { $mimetype2 = "<font color=#008000>$mimetype2</font" ; }
+    { $mimetype2 = "<font color=#008000>$mimetype2</font>" ; }
     if (($columns >= 2) && ($columns <= 4))
-    { $mimetype2 = "<font color=#900000>$mimetype2</font" ; }
+    { $mimetype2 = "<font color=#900000>$mimetype2</font>" ; }
     ($mime1,$mime2) = split ('\/', $mimetype2, 2) ;
     $header2 .= "<th class=c>$mime1<br>$mime2</th>\n" ;
   }
@@ -2856,10 +2856,8 @@ sub WriteReportMimeTypes
     $total = &FormatCount ($total) ;
     $total_images = $images_domain {$domain} ;
     $total_images1 += $total_images ;
-    $total_images = &FormatCount ($total_images) ;
-    $total_images = "<font color=#900000>" . &FormatCount ($total_images) . "</font>" ;
 
-    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images) . "\n" ;
+    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images,"#900000") . "\n" ;
     $columns = 0 ;
     foreach $mimetype (@mimetypes_sorted)
     {
@@ -2869,12 +2867,11 @@ sub WriteReportMimeTypes
 
       $count = &FormatCount ($counts_dm {"$domain,$mimetype"}) ;
       if ($columns == 1)
-      { $count = "<font color=#008000>$count</font" ; }
-      if (($columns >= 2) && ($columns <= 4))
-      { $count = "<font color=#900000>$count</font" ; }
-      if ($count eq "")
-      { $count = "&nbsp;" ; }
-      $html .= &ShowCount ($count) . "\n" ;
+      { $html .= &ShowCount ($count,"#008000") . "\n" ; }
+      elsif (($columns >= 2) && ($columns <= 4))
+      { $html .= &ShowCount ($count,"#900000") . "\n" ; }
+      else
+      { $html .= &ShowCount ($count) . "\n" ; }
     }
     $html .= "</tr>\n" ;
     $rows++ ;
@@ -2888,8 +2885,7 @@ sub WriteReportMimeTypes
 
   $total_mimes1  = &FormatCount ($total_mimes) ;
   $total_images1 = &FormatCount ($total_images1) ;
-  $total_images1 = "<font color=#900000>" . &FormatCount ($total_images1) . "</font>" ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_mimes1) . &ShowCountBold ($total_images1) . "\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_mimes1) . &ShowCountBold ($total_images1,"#900000") . "\n" ;
   $columns = 0 ;
   foreach $mimetype (@mimetypes_sorted)
   {
@@ -2899,10 +2895,11 @@ sub WriteReportMimeTypes
 
     $count = &FormatCount ($mimetypes {$mimetype}) ;
     if ($columns == 1)
-    { $count = "<font color=#008000>$count</font" ; }
+    { $html .= &ShowCountBold ($count,"#008000") . "\n" ; }
     if (($columns >= 2) && ($columns <= 4))
-    { $count = "<font color=#900000>$count</font" ; }
-    $html .= &ShowCountBold ($count) . "\n" ;
+    { $html .= &ShowCountBold ($count,"#900000") . "\n" ; }
+    else
+    { $html .= &ShowCountBold ($count) . "\n" ; }
   }
   $html .= "</tr>\n" ;
 
@@ -2925,9 +2922,8 @@ sub WriteReportMimeTypes
     $html .= "<tr><td class=l>" . ucfirst($domain) . "</td><td class=l>$language</td>\n" ;
 
     $total = &FormatCount ($total) ;
-    $total_images = $images_project {$project} ;
-    $total_images = "<font color=#900000>" . &FormatCount ($total_images) . "</font>" ;
-    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images) . "\n" ;
+    $total_images = &FormatCount ($images_project {$project}) ;
+    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images,"#900000") . "\n" ;
 
     $columns = 0 ;
     foreach $mimetype (@mimetypes_sorted)
@@ -2938,12 +2934,11 @@ sub WriteReportMimeTypes
 
       $count = &FormatCount ($counts_pm {"$project,$mimetype"}) ;
       if ($columns == 1)
-      { $count = "<font color=#008000>$count</font" ; }
+      { $html .= &ShowCount ($count,"#008000") ; }
       if (($columns >= 2) && ($columns <= 4))
-      { $count = "<font color=#900000>$count</font" ; }
-#     if ($count eq "")
-#     { $count = "&nbsp;" ; }
-      $html .= &ShowCount ($count) . "\n" ;
+      { $html .= &ShowCount ($count,"#900000") ; }
+      else
+      { $html .= &ShowCount ($count) . "\n" ; }
     }
     $html .= "</tr>\n" ;
     $rows++ ;
@@ -4672,7 +4667,7 @@ sub WriteReportPerCountryOverview
 #  $html .= "<tr>" .
 #             # "<td class=hc><b>${MPVE}'s<br>Per<br>I U</b></td>" .
 #               "<td colspan=99 class=hc><b>Share in Global Monthly $views_edits</b><br><small><font color=#808080>red and blue bars have different scale</font></small></td></tr>\n" ;
-  $html .= "<tr><td class=hr><b>Country</b></td><td class=hc><b>Region</b><br><img src='http://stats.wikimedia.org/Location_of_Continents2.gif'></td><td class=hc><b>N/S</b></td><td class=hc colspan=2><small><font color=#404040>absolute count and edits per internet user</font></small></td><td class=hl colspan=2><small>share of global total<font color=#808080><p>note:blue and red bars have different scale</font></small></td></tr>\n" ;
+  $html .= "<tr><td class=hr><b>Country</b></td><td class=hc><b>Region</b><br><img src='http://stats.wikimedia.org/Location_of_Continents2.gif'></td><td class=hc><b>N/S</b></td><td class=hc colspan=2><small><font color=#404040>absolute count and monthly ${views_edits}s per internet user</font></small></td><td class=hl colspan=2><small>share of global total<font color=#808080><p>note:blue and red bars have different scale</font></small></td></tr>\n" ;
   $html .= "<tr><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th colspan=2>&nbsp;</th></tr>\n" ;
   $html .= "</thead><tbody>\nTOTAL\nREGIONS\n" ;
 
@@ -5563,7 +5558,7 @@ sub WriteReportPerCountryBreakdown
 
       $perc =~ s/(\.\d)0/$1/ ; # 0.10% -> 0.1%
       if ($show_logcount && ($requests_this_language < 5 * $months_recently)) # show in grey to discuss threshold on foundation-l
-      { $perc = "<font color=#800000>$perc</font" ; }
+      { $perc = "<font color=#800000>$perc</font>" ; }
 
       $html .= "<tr><th class=l class=small nowrap>$language</th>" .
                ($show_logcount ? "<td class=r>$requests_this_language</td>" : "") .
@@ -5777,7 +5772,7 @@ sub FormatCount
 {
   my $count = shift ;
   if ($count eq "")
-  { return ("&nbsp;") ; }
+  { return ("0") ; }
   if ($count < 1)
   { return ("1") ; }
   $count =~ s/^(\d{1,3})(\d\d\d)$/$1,$2/ ;
@@ -5788,26 +5783,31 @@ sub FormatCount
 
 sub ShowCount # qqq2
 {
-  my ($num) = @_ ;
+  my ($num,$color) = @_ ;
   $num =~ s/,//g ;
 
-  if ($num eq '&nbsp;') # to do: remove &nbsp;'s from perl code, send 0 instead, formatting in javascript
-  { $num = 0 ; }
+  if (($num eq '&nbsp;') || ($num == 0))# to do: remove &nbsp;'s from perl code, send 0 instead, formatting in javascript
+  { $num = '-' ; }
+  else
+  {
+    if ($num =~ /^[\d\.]+$/) # numeric string
+    { $num *= 1000 ; }
 
-  if ($num =~ /^[\d\.]+$/) # numeric string
-  { $num *= 1000 ; }
+    if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
+    { $num ="\"$num\"" ; }
 
-  if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
-  { $num ="\"$num\"" ; }
-
-  $num = "<script>showCount($num);</script>" ;
-  return ("<td class=r>$num</td>") ;
+    $num = "<script>showCount($num);</script>" ;
+  }
+  if ($color eq '')
+  { return ("<td class=r>$num</td>") ; }
+  else
+  { return ("<td class=r><font color=$color>$num</font></td>") ; }
 }
 
 sub ShowCountBold
 {
-  my ($num) = @_ ;
-  $num = &ShowCount ($num) ;
+  my ($num,$color) = @_ ;
+  $num = &ShowCount ($num,$color) ;
   $num =~ s/td/th/g ;
   return ($num) ;
 }
