@@ -369,6 +369,7 @@ sub SetLanguageInfo
   uz=>"http://uz.wikipedia.org Uzbek [23.5,AS]",
   ve=>"http://ve.wikipedia.org Venda [0.875,AF]",
   vec=>"http://vec.wikipedia.org Venetian [2.3,EU]",
+  vep=>"http://vep.wikipedia.org Vepsian [0.000006,EU]",
   vi=>"http://vi.wikipedia.org Vietnamese [80,AS]",
   vls=>"http://vls.wikipedia.org West Flemish [1.06,EU]",
   vo=>"http://vo.wikipedia.org Volap&uuml;k [0.000020,AL]",
