@@ -2295,7 +2295,7 @@ sub WriteReportClients
   $perc  = sprintf ("%.1f", $perc_total_mobile) ;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
-  $perc_html_only  = sprintf ("%.1f", (100 - $perc_total_html_only_mobile)) ;
+  $perc_html_only  = sprintf ("%.1f", ($perc_total_html_only_mobile)) ;
 
   $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
