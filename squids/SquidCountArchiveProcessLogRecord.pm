@@ -290,7 +290,7 @@ sub ProcessLine
 
   $os = ".." ;
 
-  if ($agent2 =~ /CFNetwork/io)     { $os = "iOS" }
+  if ($agent2 =~ /CFNetwork/io)         { $os = "iOS/OS X" } 
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
   elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
@@ -341,7 +341,7 @@ sub ProcessLine
   elsif ($agent2 =~ /Danger/io)         { $os = "Danger" ; }
   elsif ($agent2 =~ /J2ME\/MIDP/io)     { $os = "Java/ME" ; }
   elsif ($agent2 =~ /Kindle/io)         { $os = "Kindle" ; }
-  elsif ($agent2 =~ /Dalvik/io)         { $os = "Android" }
+  elsif ($agent2 =~ /Dalvik/io)         { $os = "Android" ; }
 
   if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
