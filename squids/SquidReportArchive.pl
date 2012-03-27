@@ -117,6 +117,7 @@
   $file_html_opsys_html   = "SquidReportOperatingSystemsHtmlOnly.htm" ;
   $file_html_scripts      = "SquidReportScripts.htm" ;
   $file_html_skins        = "SquidReportSkins.htm" ;
+  $file_html_user_agents  = "SquidReportUserAgents.htm" ;
   $file_html_requests     = "SquidReportRequests.htm" ;
   $file_html_google       = "SquidReportGoogle.htm" ;
   $file_html_clients      = "SquidReportClients.htm" ;
@@ -296,6 +297,7 @@
   &WriteReportScripts ;
   &WriteReportGoogle ;
   &WriteReportSkins ;
+  &WriteReportUserAgents ;
   &WriteCsvGoogleBots ;
   &WriteCsvBrowserLanguages ;
 
@@ -460,7 +462,7 @@ sub PrepHtml
 
   if ($reportcountries)
   {
-    $errata .= "<p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
+    $errata .= "<p><p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
                "&nbsp;Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world." ;
   }
   else
@@ -481,40 +483,58 @@ sub PrepHtml
   $out_author       = "Author" ;
   $out_mail         = "Mail" ;
   $out_site         = "Web site" ;
-  $out_myname = "Erik Zachte" ;
-  $out_mymail = "ezachte@### (no spam: ### = wikimedia.org)" ;
-  $out_mysite = "http://infodisiac.com/" ;
 
-  $colophon = "<p><a id='errata' name='errata'><b>Errata:</b><p>$errata<p>" .
+  $out_myname_ez = "Erik Zachte" ;
+  $out_myname_ae = "André Engels" ;
+  $out_mymail_ez = "ezachte@### (no spam: ### = wikimedia.org)" ;
+  $out_mymail_ae = "aengels@### (no spam: ### = wikimedia.org)" ;
+  $out_mysite_ez = "http://infodisiac.com/" ;
+
+  $colophon_ez = "<p><a id='errata' name='errata'><b>Errata:</b> $errata<p>" .
                $out_generated . date_time_english (time) . "\n<br>" .
-               $out_author . ":" . $out_myname .
-               " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
-               "$out_mail: $out_mymail<br>\n" .
-               "$out_license<br>" .
+               $out_author . ":" . $out_myname_ez . ' ' .
+               " (<a href='" . $out_mysite_ez . "'>" . $out_site . "</a>)<br>" .
+               "$out_mail: $out_mymail_ez<br>\n" .
+               "$out_license<p>" .
                "$out_explorer" .
                "</small>\n" .
                "</body>\n" .
                "</html>\n" ;
 
-  $dummy_requests  = "Requests <font color=#808080>by destination</font> or " ;
-  $dummy_origins   = "<font color=#000060>by origin</font>" ;
-  $dummy_methods   = "<font color=#000060>Methods</font>" ;
-  $dummy_scripts   = "<font color=#000060>Scripts</font>" ;
-  $dummy_skins     = "<font color=#000060>Skins</font>" ;
-  $dummy_crawlers  = "<font color=#000060>Crawlers</font>" ;
-  $dummy_opsys     = "<font color=#000060>Op.Sys.</font>" ;
-  $dummy_browsers  = "<font color=#000060>Browsers</font>" ;
-  $dummy_google    = "<font color=#000060>Google</font>" ;
 
-  $link_requests   = "Requests <a href='$file_html_requests'>by destination</a> or " ;
-  $link_origins    = "<a href='$file_html_origins'>by origin</a>" ;
-  $link_methods    = "<a href='$file_html_methods'>Methods</a>" ;
-  $link_scripts    = "<a href='$file_html_scripts'>Scripts</a>" ;
-  $link_skins      = "<a href='$file_html_skins'>Skins</a>" ;
-  $link_crawlers   = "<a href='$file_html_crawlers'>Crawlers</a>" ;
-  $link_opsys      = "<a href='$file_html_opsys'>Op.Sys.</a>" ;
-  $link_browsers   = "<a href='$file_html_clients'>Browsers</a>" ;
-  $link_google     = "<a href='$file_html_google'>Google</a>" ;
+  $errata = 'No data loss or anomalies reported' ; # remove when also applicable to André's report (all reports show same text about input anomalies)
+
+  $colophon_ae = "<p><a id='errata' name='errata'><b>Errata:</b> $errata<p>" .
+               $out_generated . date_time_english (time) . "\n<br>" .
+               $out_author . ":" . $out_myname_ae . '<br>' .
+               "$out_mail: $out_mymail_ae<br>\n" .
+               "$out_license<p>" .
+               "$out_explorer" .
+               "</small>\n" .
+               "</body>\n" .
+               "</html>\n" ;
+
+  $dummy_requests    = "Requests <font color=#808080>by destination</font> or " ;
+  $dummy_origins     = "<font color=#000060>by origin</font>" ;
+  $dummy_methods     = "<font color=#000060>Methods</font>" ;
+  $dummy_scripts     = "<font color=#000060>Scripts</font>" ;
+  $dummy_skins       = "<font color=#000060>Skins</font>" ;
+  $dummy_user_agents = "<font color=#000060>User Agents</font>" ;
+  $dummy_crawlers    = "<font color=#000060>Crawlers</font>" ;
+  $dummy_opsys       = "<font color=#000060>Op.Sys.</font>" ;
+  $dummy_browsers    = "<font color=#000060>Browsers</font>" ;
+  $dummy_google      = "<font color=#000060>Google</font>" ;
+
+  $link_requests    = "Requests <a href='$file_html_requests'>by destination</a> or " ;
+  $link_origins     = "<a href='$file_html_origins'>by origin</a>" ;
+  $link_methods     = "<a href='$file_html_methods'>Methods</a>" ;
+  $link_scripts     = "<a href='$file_html_scripts'>Scripts</a>" ;
+  $link_skins       = "<a href='$file_html_skins'>Skins</a>" ;
+  $link_user_agents = "<a href='$file_html_user_agents'>User Agents</a>" ;
+  $link_crawlers    = "<a href='$file_html_crawlers'>Crawlers</a>" ;
+  $link_opsys       = "<a href='$file_html_opsys'>Op.Sys.</a>" ;
+  $link_browsers    = "<a href='$file_html_clients'>Browsers</a>" ;
+  $link_google      = "<a href='$file_html_google'>Google</a>" ;
 }
 
 sub ReadCountryCodes
@@ -2076,24 +2096,24 @@ sub WriteReportClients
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
 # test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
 # thus scale these test figures in reverse direction first
-# $html .= &ShowCount (891234567890/1000) . "<br>" ;
-# $html .= &ShowCount (91234567890/1000) . "<br>" ;
-# $html .= &ShowCount (1234567890/1000) . "<br>" ;
-# $html .= &ShowCount (234567890/1000) . "<br>" ;
-# $html .= &ShowCount (34567890/1000) . "<br>" ;
-# $html .= &ShowCount (4567890/1000) . "<br>" ;
-# $html .= &ShowCount (567890/1000) . "<br>" ;
-# $html .= &ShowCount (67890/1000) . "<br>" ;
-# $html .= &ShowCount (7890/1000) . "<br>" ;
-# $html .= &ShowCount (890/1000) . "<br>" ;
-# $html .= &ShowCount (90/1000) . "<br>" ;
-# $html .= &ShowCount (1/1000) . "<br>" ;
-# $html .= &ShowCount (0)     . "<br>" ;
+# $html .= &ShowCountTd (891234567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (91234567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (1234567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (234567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (34567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (4567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (567890/1000) . "<br>" ;
+# $html .= &ShowCountTd (67890/1000) . "<br>" ;
+# $html .= &ShowCountTd (7890/1000) . "<br>" ;
+# $html .= &ShowCountTd (890/1000) . "<br>" ;
+# $html .= &ShowCountTd (90/1000) . "<br>" ;
+# $html .= &ShowCountTd (1/1000) . "<br>" ;
+# $html .= &ShowCountTd (0)     . "<br>" ;
 
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td class=l colspan=99 wrap>The following overview of page requests per client (~browser) application is based on the <a href='http://en.wikipedia.org/wiki/User_agent'>user agent</a> information that accompanies most server requests.<br>" .
@@ -2149,7 +2169,7 @@ sub WriteReportClients
     $perc_total_html_only_nonmobile += $perc_html_only ;
   }
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCount ($count) . "<td class=r>$perc\%</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
 
   $total = &FormatCount ($total_clientgroups {'-'}) ;
   $perc_total_nonmobile = sprintf ("%.1f", $perc_total_nonmobile) ;
@@ -2157,7 +2177,7 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'-'}) ;
   $perc_total_html_only_nonmobile = sprintf ("%.1f", $perc_total_html_only_nonmobile) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSERS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2176,7 +2196,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
     $perc_html_only =~ s/\%// ;
 
@@ -2200,8 +2220,8 @@ sub WriteReportClients
 
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCountBold ($count) . "<td class=r>$perc\%</td>" . &ShowCountBold ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_mobile\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTh ($count) . "<td class=r>$perc\%</td>" . &ShowCountTh ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_mobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSERS, WIKIMOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Mobile applications</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2221,7 +2241,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
     $perc_html_only =~ s/\%// ;
     $perc_total_wiki += $perc ;
@@ -2245,8 +2265,8 @@ sub WriteReportClients
 
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'W'}) ;
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCount ($count) . "<td class=r>$perc\%</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_wiki\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_wiki\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2263,7 +2283,7 @@ sub WriteReportClients
     $count_html_only = $clients_html_only {$key} ;
     $perc_html_only  = $clients_perc_html_only {$key} ;
 
-    $html .= "<tr><td class=l>$client</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
 
@@ -2271,7 +2291,7 @@ sub WriteReportClients
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2288,7 +2308,7 @@ sub WriteReportClients
     $count_html_only = $clients_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$client</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
 
   $total = &FormatCount ($total_clients_mobile) ;
@@ -2297,7 +2317,7 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
   $perc_html_only  = sprintf ("%.1f", ($perc_total_html_only_mobile)) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
   # CLIENTS SORTED BY FREQUENCY, BROWSER VERSIONS, WIKIMOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Mobile application versions</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2314,7 +2334,7 @@ sub WriteReportClients
     $count_html_only = $clients_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$client</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
 
   $total = &FormatCount ($total_clients_wiki_mobile) ;
@@ -2323,7 +2343,7 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clients_wiki_mobile_html_only) ;
   $perc_html_only  = sprintf ("%.1f", $perc_total_html_only_wiki) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
   $html .= "</table>\n" ;
 
@@ -2347,7 +2367,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
 
     $perc =~ s/\%// ;
     $perc_html_only =~ s/\%// ;
@@ -2365,8 +2385,8 @@ sub WriteReportClients
   if ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} > 0)
   { $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ; }
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCount ($count) . "<td class=r>$perc\%</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_nonmobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_nonmobile\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browsers, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2383,7 +2403,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
 
@@ -2395,8 +2415,8 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
   $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ;
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCount ($count) . "<td class=r>$perc\%</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_mobile\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_mobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSERS, WIKIMOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Mobile applications</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2413,7 +2433,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
     $perc =~ s/\%// ;
   }
 
@@ -2425,8 +2445,8 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'W'}) ;
   $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_clientgroups_html_only {'-'} + $total_clientgroups_html_only {'M'} + $total_clientgroups_html_only {'W'})) ;
 
-  $html .= "<tr><td class=l>Other</th>" . &ShowCount ($count) . "<td class=r>$perc\%</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc_total_wiki\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
+  $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_wiki\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSER VERSIONS, NON MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, non mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2444,7 +2464,7 @@ sub WriteReportClients
     $perc_html_only  = $clients_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$client</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_non_mobile) ;
   $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
@@ -2452,7 +2472,7 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
   $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
   # CLIENTS IN ALPHABETHICAL ORDER, BROWSER VERSIONS, MOBILE
   $html .= "<tr><th class=l>&nbsp;<br>Browser versions, mobile</th><th colspan=2 class=c>&nbsp;<br>All requests</th><th colspan=2 class=c>&nbsp;<br>Html pages</th></tr>\n" ;
@@ -2469,7 +2489,7 @@ sub WriteReportClients
     $perc_html_only  = $clients_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$client</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td>" . &ShowCount ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_mobile) ;
   $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
@@ -2477,7 +2497,7 @@ sub WriteReportClients
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
   $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
 
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total) . "<th class=r>$perc\%</th>" . &ShowCountBold ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br>Browser engines</th></tr>\n" ;
 
@@ -2496,16 +2516,16 @@ sub WriteReportClients
       $total_engine = $total_engines {$engine_prev} ;
       $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
       $total_engine = &FormatCount ($total_engine) ;
-      $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
+      $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
     }
     $engine_prev = $engine2 ;
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$engine</td>" . &ShowCount ($total) . "<td class=r>&nbsp;</td></tr>\n" ;
+    $html .= "<tr><td class=l>$engine</td>" . &ShowCountTd ($total) . "<td class=r>&nbsp;</td></tr>\n" ;
   }
   $total_engine = $total_engines {$engine_prev} ;
   $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
   $total_engine = &FormatCount ($total_engine) ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
 
   $engine_prev = "" ;
   foreach $engine (@engines_sorted_alpha)
@@ -2522,16 +2542,16 @@ sub WriteReportClients
       $total_engine = $total_engines {$engine_prev} ;
       $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
       $total_engine = &FormatCount ($total_engine) ;
-      $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
+      $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
     }
     $engine_prev = $engine2 ;
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$engine</td>" . &ShowCount ($total) . "<td class=r>&nbsp;</td></tr>\n" ;
+    $html .= "<tr><td class=l>$engine</td>" . &ShowCountTd ($total) . "<td class=r>&nbsp;</td></tr>\n" ;
   }
   $total_engine = $total_engines {$engine_prev} ;
   $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
   $total_engine = &FormatCount ($total_engine) ;
-  $html .= "<tr><th class=l>Total</th>" . &ShowCountBold ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
+  $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
 
   $html .= "</table>\n" ;
   $html .= "</td></tr>\n" ;
@@ -2543,7 +2563,7 @@ sub WriteReportClients
   $html .= "</table>\n" ;
 
 #  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_CLIENTS $html ;
   close FILE_HTML_CLIENTS ;
@@ -2559,7 +2579,7 @@ sub WriteReportCrawlers
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -2614,7 +2634,7 @@ sub WriteReportCrawlers
     next if $count <= 2 ;
 
     # $count = &FormatCount ($count) ;
-    # $html .= "<tr>" . &ShowCount ($count) . "<td class=l><a href='$site'>$secondary_domain</a></td><td class=l>$mime</td><td class=l>$agent</td></tr>\n" ;
+    # $html .= "<tr>" . &ShowCountTd ($count) . "<td class=l><a href='$site'>$secondary_domain</a></td><td class=l>$mime</td><td class=l>$agent</td></tr>\n" ;
     # $rows++ ;
   }
 
@@ -2639,7 +2659,7 @@ sub WriteReportCrawlers
 #
 #    $count = $secondary_domains {$secondary_domain} ;
 #    $count = &FormatCount ($count) ;
-#    $html .= "<tr>" . &ShowCount ($count) . "<td class=l colspan=2>$secondary_domain</td></tr>\n" ;
+#    $html .= "<tr>" . &ShowCountTd ($count) . "<td class=l colspan=2>$secondary_domain</td></tr>\n" ;
 #  }
 #  $html .= "</table>\n" ;
 
@@ -2655,7 +2675,7 @@ sub WriteReportCrawlers
     last if $total < 10 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr>" . &ShowCountBold ($total) . "<th class=l colspan=99>$secondary_domain</th></tr>\n" ;
+    $html .= "<tr>" . &ShowCountTh ($total) . "<th class=l colspan=99>$secondary_domain</th></tr>\n" ;
     foreach $mime_agent (sort {$crawlers_per_domain {$secondary_domain} {$b} <=> $crawlers_per_domain {$secondary_domain} {$a}} keys %{$crawlers_per_domain {$secondary_domain}})
     {
       ($mime, $agent) = split ('\|', $mime_agent,2) ;
@@ -2680,7 +2700,7 @@ sub WriteReportCrawlers
     # print "[$secondary_domain] [$mime_agent] : $count\n" ;
       $count = &FormatCount ($count) ;
       ($site2 = $site) =~ s/^http:\/\/// ;
-      $html .= "<tr>" . &ShowCount ($count) . "<td class=l>&nbsp;</td><td class=l><a href='$site' ref='nofollow'>$site2<\/a></td><td class=l>$mime</td><td class=l>$agent</td></tr>\n" ;
+      $html .= "<tr>" . &ShowCountTd ($count) . "<td class=l>&nbsp;</td><td class=l><a href='$site' ref='nofollow'>$site2<\/a></td><td class=l>$mime</td><td class=l>$agent</td></tr>\n" ;
       $rows++ ;
     }
   }
@@ -2701,7 +2721,7 @@ sub WriteReportCrawlers
     last if $total < 3 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr>" . &ShowCountBold ($total) . "<td class=l colspan=99>$agent</td></tr>\n" ;
+    $html .= "<tr>" . &ShowCountTh ($total) . "<td class=l colspan=99>$agent</td></tr>\n" ;
     foreach $mime (sort {$crawlers_no_url {$agent} {$b} <=> $crawlers_no_url {$agent} {$a}} keys %{$crawlers_no_url {$agent}})
     {
       $agent =~ s/([^,;\(\)\s]+?\@[^,;\(\)\s]+)/ <font color=#808080>mail address<\/font> /g ;
@@ -2709,7 +2729,7 @@ sub WriteReportCrawlers
       $count = $crawlers_no_url {$agent} {$mime} ;
       $count = &FormatCount ($count) ;
       ($site2 = $site) =~ s/^http:\/\/// ;
-      $html .= "<tr>" . &ShowCount ($count) . "<td>&nbsp;</td><td class=l colspan=99>$mime</td></tr>\n" ;
+      $html .= "<tr>" . &ShowCountTd ($count) . "<td>&nbsp;</td><td class=l colspan=99>$mime</td></tr>\n" ;
       $rows++ ;
     }
   }
@@ -2719,7 +2739,7 @@ sub WriteReportCrawlers
   $html .= "</table><p>\n" ;
 
   $html .= "<p>$google_ip_ranges" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_CRAWLERS $html ;
   close FILE_HTML_CRAWLERS ;
@@ -2735,7 +2755,7 @@ sub WriteReportMethods
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=0>\n" ;
@@ -2751,10 +2771,10 @@ sub WriteReportMethods
     $total = $methods {$method} ;
     $total_methods += $total ;
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
   $total_methods = &FormatCount ($total_methods) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_methods) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_methods) . "</tr>\n" ;
   $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><td class=l>Method</th><th class=l>Result</th><th class=r>Count<br><small>x 1000</small></th></tr>\n" ;
   $total_statusses = 0 ;
@@ -2765,11 +2785,11 @@ sub WriteReportMethods
     $total = &FormatCount ($total) ;
     ($method,$result) = split (',', $status, 2) ;
 
-    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     $rows++ ;
   }
   $total_statusses = &FormatCount ($total_statusses) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_statusses) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses) . "</tr>\n" ;
   $html .= "</table>\n" ;
 
   $html .= "</td><td>&nbsp;&nbsp;&nbsp;</td><td>" ;
@@ -2781,9 +2801,9 @@ sub WriteReportMethods
   foreach $method (@methods_sorted_method)
   {
     $total = &FormatCount ($methods {$method}) ;
-    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_methods) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_methods) . "</tr>\n" ;
   $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><th class=l>Method</th><th class=l>Result</th><th class=r>Count<br><small>x 1000</small></th></tr>\n" ;
   foreach $status (@statusses_sorted_method)
@@ -2791,17 +2811,17 @@ sub WriteReportMethods
     $total = &FormatCount ($statusses {$status}) ;
     ($method,$result) = split (',', $status, 2) ;
 
-    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     $rows++ ;
   }
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_statusses) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses) . "</tr>\n" ;
   $html .= "</table>\n" ;
 
   $html .= "</td></tr></table>\n" ;
   $html .= "&nbsp;<small>$rows rows written</small><p>" ;
 
 #  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_METHODS $html ;
   close FILE_HTML_METHODS ;
@@ -2818,7 +2838,7 @@ sub WriteReportMimeTypes
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by destination/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests are sent to. Report 'Requests by origin' shows where requests come from.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
-  $html =~ s/LINKS/$dummy_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$dummy_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
   $html .= "<table border=1>\n" ;
 
   $header1 = "<tr><th colspan=2 class=l><small>x 1000</small></th><th colspan=2 class=c>Totals</th><th class=c><font color=#008000>Pages</font></th><th colspan=3 class=c><font color=#900000>Images</font></th><th colspan=99 class=c>Other</th></tr>\n" ;
@@ -2857,7 +2877,7 @@ sub WriteReportMimeTypes
     $total_images = $images_domain {$domain} ;
     $total_images1 += $total_images ;
 
-    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images,"#900000") . "\n" ;
+    $html .= &ShowCountTh ($total) . &ShowCountTh ($total_images,"#900000") . "\n" ;
     $columns = 0 ;
     foreach $mimetype (@mimetypes_sorted)
     {
@@ -2867,11 +2887,11 @@ sub WriteReportMimeTypes
 
       $count = &FormatCount ($counts_dm {"$domain,$mimetype"}) ;
       if ($columns == 1)
-      { $html .= &ShowCount ($count,"#008000") . "\n" ; }
+      { $html .= &ShowCountTd ($count,"#008000") . "\n" ; }
       elsif (($columns >= 2) && ($columns <= 4))
-      { $html .= &ShowCount ($count,"#900000") . "\n" ; }
+      { $html .= &ShowCountTd ($count,"#900000") . "\n" ; }
       else
-      { $html .= &ShowCount ($count) . "\n" ; }
+      { $html .= &ShowCountTd ($count) . "\n" ; }
     }
     $html .= "</tr>\n" ;
     $rows++ ;
@@ -2885,7 +2905,7 @@ sub WriteReportMimeTypes
 
   $total_mimes1  = &FormatCount ($total_mimes) ;
   $total_images1 = &FormatCount ($total_images1) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_mimes1) . &ShowCountBold ($total_images1,"#900000") . "\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_mimes1) . &ShowCountTh ($total_images1,"#900000") . "\n" ;
   $columns = 0 ;
   foreach $mimetype (@mimetypes_sorted)
   {
@@ -2895,11 +2915,11 @@ sub WriteReportMimeTypes
 
     $count = &FormatCount ($mimetypes {$mimetype}) ;
     if ($columns == 1)
-    { $html .= &ShowCountBold ($count,"#008000") . "\n" ; }
+    { $html .= &ShowCountTh ($count,"#008000") . "\n" ; }
     if (($columns >= 2) && ($columns <= 4))
-    { $html .= &ShowCountBold ($count,"#900000") . "\n" ; }
+    { $html .= &ShowCountTh ($count,"#900000") . "\n" ; }
     else
-    { $html .= &ShowCountBold ($count) . "\n" ; }
+    { $html .= &ShowCountTh ($count) . "\n" ; }
   }
   $html .= "</tr>\n" ;
 
@@ -2923,7 +2943,7 @@ sub WriteReportMimeTypes
 
     $total = &FormatCount ($total) ;
     $total_images = &FormatCount ($images_project {$project}) ;
-    $html .= &ShowCountBold ($total) . &ShowCountBold ($total_images,"#900000") . "\n" ;
+    $html .= &ShowCountTh ($total) . &ShowCountTh ($total_images,"#900000") . "\n" ;
 
     $columns = 0 ;
     foreach $mimetype (@mimetypes_sorted)
@@ -2934,11 +2954,11 @@ sub WriteReportMimeTypes
 
       $count = &FormatCount ($counts_pm {"$project,$mimetype"}) ;
       if ($columns == 1)
-      { $html .= &ShowCount ($count,"#008000") ; }
+      { $html .= &ShowCountTd ($count,"#008000") ; }
       if (($columns >= 2) && ($columns <= 4))
-      { $html .= &ShowCount ($count,"#900000") ; }
+      { $html .= &ShowCountTd ($count,"#900000") ; }
       else
-      { $html .= &ShowCount ($count) . "\n" ; }
+      { $html .= &ShowCountTd ($count) . "\n" ; }
     }
     $html .= "</tr>\n" ;
     $rows++ ;
@@ -2968,7 +2988,7 @@ sub WriteReportMimeTypes
   }
 
 #  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_REQUESTS $html ;
   close FILE_HTML_REQUESTS ;
@@ -2984,7 +3004,7 @@ sub WriteReportOpSys
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
@@ -2992,9 +3012,9 @@ sub WriteReportOpSys
   $total_opsys_non_mobile2 = &FormatCount ($total_opsys_non_mobile) ;
   $total_perc_mobile = sprintf ("%.1f", 100 * $total_opsys_mobile / ($total_opsys_mobile + $total_opsys_non_mobile)) ;
   $total_perc_non_mobile = 100 - $total_perc_mobile ;
-  $line_total_all        = "<tr><th class=l>Total</th>" . &ShowCountBold ($total_all2) . "<th class=r>100\%</th></tr>\n" ;
-  $line_total_mobile     = "<tr><th class=l>Total</th>" . &ShowCountBold ($total_opsys_mobile2) . "<th class=r>$total_perc_mobile\%</th></tr>\n" ;
-  $line_total_non_mobile = "<tr><th class=l>Total</th>" . &ShowCountBold ($total_opsys_non_mobile2) . "<th class=r>$total_perc_non_mobile\%</th></tr>\n" ;
+  $line_total_all        = "<tr><th class=l>Total</th>" . &ShowCountTh ($total_all2) . "<th class=r>100\%</th></tr>\n" ;
+  $line_total_mobile     = "<tr><th class=l>Total</th>" . &ShowCountTh ($total_opsys_mobile2) . "<th class=r>$total_perc_mobile\%</th></tr>\n" ;
+  $line_total_non_mobile = "<tr><th class=l>Total</th>" . &ShowCountTh ($total_opsys_non_mobile2) . "<th class=r>$total_perc_non_mobile\%</th></tr>\n" ;
 
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td class=l colspan=99>The following overview of page requests by operating system is based on the <a href='http://en.wikipedia.org/wiki/User_agent'>user agent</a> information that accompanies most server requests.<br>" .
@@ -3023,7 +3043,7 @@ sub WriteReportOpSys
     next if $key     =~ / / ; # subgroup
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
   $html .= $line_total_all ;
@@ -3039,7 +3059,7 @@ sub WriteReportOpSys
     next if $key     !~ / / ; # subgroup
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
 
@@ -3056,7 +3076,7 @@ sub WriteReportOpSys
     next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
   $html .= $line_total_non_mobile ;
@@ -3074,7 +3094,7 @@ sub WriteReportOpSys
     next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
   $html .= $line_total_mobile ;
@@ -3097,7 +3117,7 @@ sub WriteReportOpSys
     next if $key     =~ / / ; # subgroup
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
   $html .= $line_total_all ;
@@ -3113,7 +3133,7 @@ sub WriteReportOpSys
     next if $key     !~ / / ; # subgroup
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
 
@@ -3130,7 +3150,7 @@ sub WriteReportOpSys
     next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
 
@@ -3148,7 +3168,7 @@ sub WriteReportOpSys
     next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
-    $html .= "<tr><td class=l>$os</a></td>" . &ShowCount ($count) . "<td class=r>$perc</td></tr>\n" ;
+    $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
     # $rows++ ;
   }
   $html .= $line_total_mobile ;
@@ -3180,11 +3200,11 @@ sub WriteReportOpSys
 #
 #    $count = $secondary_domains {$secondary_domain} ;
 #    $count = &FormatCount ($count) ;
-#    $html .= "<tr>" . &ShowCount ($count) . "<td class=l colspan=2>$secondary_domain</td></tr>\n" ;
+#    $html .= "<tr>" . &ShowCountTd ($count) . "<td class=l colspan=2>$secondary_domain</td></tr>\n" ;
 #  }
 #  $html .= "</table>\n" ;
 
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_OPSYS $html ;
   close FILE_HTML_OPSYS ;
@@ -3201,7 +3221,7 @@ sub WriteReportOrigins
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests come from. Report 'Requests by destination' shows where requests are serviced.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -3239,13 +3259,13 @@ sub WriteReportOrigins
     $page   = &FormatCount ($page) ;
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td colspan=2 class=l>" . ucfirst($project) . "</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>" . ucfirst($project) . "</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_total) . "" . &ShowCountBold ($total_page) . "" . &ShowCountBold ($total_image) . "" . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_total) . "" . &ShowCountTh ($total_page) . "" . &ShowCountTh ($total_image) . "" . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><td colspan=99 class=l><b>Per project language / subproject</b> (top 50)</td></tr>\n" ;
@@ -3254,6 +3274,7 @@ sub WriteReportOrigins
   $total_page  = 0 ;
   $total_image = 0 ;
   $total_rest  = 0 ;
+
   foreach $origin (@origin_int_top_sorted_count)
   {
     if (++$projects > 50)
@@ -3278,7 +3299,7 @@ sub WriteReportOrigins
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
     ($project,$subproject) = split (':', $origin) ;
-    $html .= "<tr><td class=l>" . ucfirst($project) . "</td><td class=l>$subproject</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>" . ucfirst($project) . "</td><td class=l>$subproject</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   }
   $total  = $origin_int_top_other {"all"} ;
@@ -3293,13 +3314,13 @@ sub WriteReportOrigins
   $page   = &FormatCount ($page) ;
   $image  = &FormatCount ($image) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td colspan=2 class=l>Other</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td colspan=2 class=l>Other</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   $grand_grand_total  = $total_total ;
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
   $html .= "</table>" ;
 
   # BY ALPHABET
@@ -3326,13 +3347,13 @@ sub WriteReportOrigins
     $page   = &FormatCount ($page) ;
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td colspan=2 class=l>$project</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>$project</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th colspan=2 class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><td colspan=99 class=l><b>Per project language / subproject</b> (top 50)</td></tr>\n" ;
@@ -3358,7 +3379,7 @@ sub WriteReportOrigins
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
     ($project,$subproject) = split (':', $origin) ;
-    $html .= "<tr><td class=l>$project</td><td class=l>$subproject</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$project</td><td class=l>$subproject</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   }
   $total  = $origin_int_top_other {"all"} ;
@@ -3373,12 +3394,12 @@ sub WriteReportOrigins
   $page   = &FormatCount ($page) ;
   $image  = &FormatCount ($image) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td colspan=2 class=l>other</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td colspan=2 class=l>other</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th colspan=2 class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
   $html .= "</table>" ;
 
   $html .= "</td></tr>" ;
@@ -3430,7 +3451,7 @@ sub WriteReportOrigins
     { $link_origin = "<a href='http://$origin' ref='nofollow'>$origin</a>" ; }
     else
     { $link_origin = $origin ; }
-    $html .= "<tr><td class=l>$link_origin</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$link_origin</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total  = $origin_ext_top_other {"all"} ;
   $page   = $origin_ext_top_other {"page"} ;
@@ -3440,13 +3461,13 @@ sub WriteReportOrigins
   $page   = &FormatCount ($page) ;
   $image  = &FormatCount ($image) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>other</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>other</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   $grand_grand_total  = $total_total ;
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
   $html .= "</table>" ;
 
   # BY ALPHABET
@@ -3479,7 +3500,7 @@ sub WriteReportOrigins
 
     next if $top100_internal_origins {$origin} == 0 ;
 
-    $html .= "<tr><td class=l>$origin</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$origin</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   }
   $total  = $origin_ext_top_other {"all"} ;
@@ -3490,13 +3511,13 @@ sub WriteReportOrigins
   $page   = &FormatCount ($page) ;
   $image  = &FormatCount ($image) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>other</td>" . &ShowCountBold ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>other</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
   $html .= "</table>" ;
 
   $html .= "</td></tr>" ;
@@ -3506,8 +3527,6 @@ sub WriteReportOrigins
   $html .= "</table>" ;
 
   # EXTERNAL ORIGINS
-if (0)
-{
   $html .= "<tr><td colspan=99 class=c>&nbsp;</td></tr>\n" ;
   $html .= "<tr><td colspan=99 class=c><h3>External origins</h3></td></tr>\n" ;
   $html .= "<tr><td width=50% valign=top>" ;
@@ -3532,7 +3551,7 @@ if (0)
     $google = &FormatCount ($google) ;
     $yahoo  = &FormatCount ($yahoo) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $grand_total  += $total_total ;
   $grand_google += $total_google ;
@@ -3542,7 +3561,7 @@ if (0)
   $total_google = &FormatCount ($total_google) ;
   $total_yahoo  = &FormatCount ($total_yahoo) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_google) . &ShowCountBold ($total_yahoo) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_google) . &ShowCountTh ($total_yahoo) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $total_total  = 0 ;
   $total_google = 0 ;
@@ -3565,7 +3584,7 @@ if (0)
     $google = &FormatCount ($google) ;
     $yahoo  = &FormatCount ($yahoo) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $grand_total  += $total_total ;
   $grand_google += $total_google ;
@@ -3575,7 +3594,7 @@ if (0)
   $total_google = &FormatCount ($total_google) ;
   $total_yahoo  = &FormatCount ($total_yahoo) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_google) . &ShowCountBold ($total_yahoo) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_google) . &ShowCountTh ($total_yahoo) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $total_total  = 0 ;
   $total_google = 0 ;
@@ -3594,7 +3613,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>localhost</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>localhost</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"address"} ;
   $google = $origin_ext_page_top_split {"google:address"} ;
@@ -3608,7 +3627,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>ip address</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>ip address</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"rest"} ;
   $google = $origin_ext_page_top_split {"google:rest"} ;
@@ -3622,7 +3641,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>other</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>other</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"unspecified"} ;
   $google = $origin_ext_page_top_split {"google:unspecified"} ;
@@ -3636,7 +3655,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>anonymous</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>anonymous</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $grand_total  += $total_total ;
   $grand_google += $total_google ;
@@ -3684,7 +3703,7 @@ if (0)
     $google = &FormatCount ($google) ;
     $yahoo  = &FormatCount ($yahoo) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_total  = &FormatCount ($total_total) ;
   $total_google = &FormatCount ($total_google) ;
@@ -3713,7 +3732,7 @@ if (0)
     $google = &FormatCount ($google) ;
     $yahoo  = &FormatCount ($yahoo) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$toplevel</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_total  = &FormatCount ($total_total) ;
   $total_google = &FormatCount ($total_google) ;
@@ -3738,7 +3757,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>localhost</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>localhost</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"address"} ;
   $google = $origin_ext_page_top_split {"google:address"} ;
@@ -3752,7 +3771,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>ip address</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>ip address</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"rest"} ;
   $google = $origin_ext_page_top_split {"google:rest"} ;
@@ -3766,7 +3785,7 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>other</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>other</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total  = $origin_ext_page_top {"unspecified"} ;
   $google = $origin_ext_page_top_split {"google:unspecified"} ;
@@ -3780,16 +3799,16 @@ if (0)
   $google = &FormatCount ($google) ;
   $yahoo  = &FormatCount ($yahoo) ;
   $rest   = &FormatCount ($rest) ;
-  $html .= "<tr><td class=l>anonymous</td>" . &ShowCountBold ($total) . &ShowCount ($google) . &ShowCount ($yahoo) . &ShowCount ($rest) . "</tr>\n" ;
+  $html .= "<tr><td class=l>anonymous</td>" . &ShowCountTh ($total) . &ShowCountTd ($google) . &ShowCountTd ($yahoo) . &ShowCountTd ($rest) . "</tr>\n" ;
 
   $total_total  = &FormatCount ($total_total) ;
   $total_google = &FormatCount ($total_google) ;
   $total_yahoo  = &FormatCount ($total_yahoo) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_google) . &ShowCountBold ($total_yahoo) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_google) . &ShowCountTh ($total_yahoo) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $html .= "<tr><td colspan=99 class=l>&nbsp;<br><b>Grand total external</th></tr>\n" ;
-  $html .= "<tr><th class=l>total</th>" . &ShowCountBold ($grand_total) . &ShowCountBold ($grand_google) . &ShowCountBold ($grand_yahoo) . &ShowCountBold ($grand_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total</th>" . &ShowCountTh ($grand_total) . &ShowCountTh ($grand_google) . &ShowCountTh ($grand_yahoo) . &ShowCountTh ($grand_rest) . "</tr>\n" ;
   $html .= "</table>" ;
 
   $html .= "</td></tr>" ;
@@ -3797,6 +3816,15 @@ if (0)
   $html .= "</td></tr>" ;
 
   $html .= "</table>\n" ;
+
+  $html .= "</td></tr></table>\n" ;
+# $html .= "&nbsp;<small>$rows rows written</small><p>" ;
+
+#  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
+  $html .= $colophon_ez ;
+
+  print FILE_HTML_ORIGINS $html ;
+  close FILE_HTML_ORIGINS ;
 }
 
 sub WriteReportScripts
@@ -3829,7 +3857,7 @@ sub WriteReportScripts
     next if $total < 3 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br><b>js</b></th></tr>\n" ;
   foreach $script (@scripts_js_sorted_count)
@@ -3839,7 +3867,7 @@ sub WriteReportScripts
     next if $total < 3 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br><b>php</b></th></tr>\n" ;
   $total_php = 0 ;
@@ -3851,16 +3879,16 @@ sub WriteReportScripts
 
     $total_php += $total ;
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     foreach $key (keys_sorted_by_value_num_desc %actions)
     {
       ($script2,$action) = split (',', $key) ;
       if (($script eq $script2) && ($actions {$key} < $scripts_php {$script}))
-      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCount (&FormatCount ($actions {$key})) . "</tr>\n" ; }
+      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCountTd (&FormatCount ($actions {$key})) . "</tr>\n" ; }
     }
   }
   $total_php = &FormatCount ($total_php) ;
-  $html .= "<tr><th class=l>total php</th>" . &ShowCountBold ($total_php) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total php</th>" . &ShowCountTh ($total_php) . "</tr>\n" ;
   $html .= "</table>" ;
 
   $html .= "</td><td width=50% valign=top>" ;
@@ -3876,7 +3904,7 @@ sub WriteReportScripts
     next if $total < 3 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br><b>js</b></th></tr>\n" ;
   foreach $script (@scripts_js_sorted_script)
@@ -3886,7 +3914,7 @@ sub WriteReportScripts
     next if $total < 3 ;
 
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
   }
   $html .= "<tr><th colspan=99 class=l>&nbsp;<br><b>php</b></th></tr>\n" ;
   foreach $script (@scripts_php_sorted_script)
@@ -3897,15 +3925,15 @@ sub WriteReportScripts
 
     $total_php += $total ;
     $total = &FormatCount ($total) ;
-    $html .= "<tr><td class=l>$script</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$script</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     foreach $key (sort keys %actions)
     {
       ($script2,$action) = split (',', $key) ;
       if (($script eq $script2) && ($actions {$key} < $scripts_php {$script}))
-      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCount (&FormatCount ($actions {$key})) . "</tr>\n" ; }
+      { $html .= "<tr><td class=l>&nbsp;&nbsp;&nbsp;- $action</td>" . &ShowCountTd (&FormatCount ($actions {$key})) . "</tr>\n" ; }
     }
   }
-  $html .= "<tr><th class=l>total php</th>" . &ShowCountBold ($total_php) . "</tr>\n" ;
+  $html .= "<tr><th class=l>total php</th>" . &ShowCountTh ($total_php) . "</tr>\n" ;
   $html .= "</table>" ;
 
   $html .= "</td></tr>" ;
@@ -3922,7 +3950,7 @@ sub WriteReportScripts
     ($name,$parms) = split (',', $parm) ;
     if ($parms eq "")
     { $parms = "-" ; }
-    $html .= "<tr><td class=l>$name</td><td class=l>$parms</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$name</td><td class=l>$parms</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     $rows++ ;
 
     last if $rows == 25 ;
@@ -3951,9 +3979,9 @@ sub WriteReportScripts
       if ($nameprev ne "")
       { $html .= "<tr><th colspan=99 class=l>&nbsp;</th></tr>\n" ; }
       if (($name eq "api.php") || ($name eq "index.php"))
-      { $html .= "<tr><td colspan=2 class=l><b>$name</b> <small>(&ge; 3)</small></td>" . &ShowCountBold ($total) . "</tr>\n" ; }
+      { $html .= "<tr><td colspan=2 class=l><b>$name</b> <small>(&ge; 3)</small></td>" . &ShowCountTh ($total) . "</tr>\n" ; }
       else
-      { $html .= "<tr><td colspan=2 class=l><b>$name</b></td>" . &ShowCountBold ($total) . "</tr>\n" ; }
+      { $html .= "<tr><td colspan=2 class=l><b>$name</b></td>" . &ShowCountTh ($total) . "</tr>\n" ; }
     }
     $total = $parms {$parm} ;
 
@@ -3962,7 +3990,7 @@ sub WriteReportScripts
     $total = &FormatCount ($total) ;
     if ($parms eq "")
     { $parms = "-" ; }
-    $html .= "<tr><td colspan=2 class=l>$parms</td>" . &ShowCount ($total) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>$parms</td>" . &ShowCountTd ($total) . "</tr>\n" ;
     $rows++ ;
     $nameprev = $name ;
   }
@@ -3972,7 +4000,7 @@ sub WriteReportScripts
   $html .= "&nbsp;<small>$rows rows written</small><p>" ;
 
 #  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_SCRIPTS $html ;
   close FILE_HTML_SCRIPTS ;
@@ -3988,7 +4016,7 @@ sub WriteReportGoogle
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $dummy_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $dummy_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=500 wrap>\n" ;
@@ -4036,7 +4064,7 @@ sub WriteReportGoogle
     $page   = &FormatCount ($page) ;
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_page_all = $total_page_direct ;
 
@@ -4053,7 +4081,7 @@ sub WriteReportGoogle
   $total_image_direct = &FormatCount ($total_image_direct) ;
   $total_rest_direct  = &FormatCount ($total_rest_direct) ;
 
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountBold ($total_total_direct) . &ShowCountBold ($total_page_direct) . &ShowCountBold ($total_image_direct) . &ShowCountBold ($total_rest_direct) . "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTh ($total_total_direct) . &ShowCountTh ($total_page_direct) . &ShowCountTh ($total_image_direct) . &ShowCountTh ($total_rest_direct) . "</tr>\n" ;
 
   my $total_total_indirect ;
   my $total_page_indirect ;
@@ -4080,7 +4108,7 @@ sub WriteReportGoogle
     $page   = &FormatCount ($page) ;
     $image  = &FormatCount ($image) ;
     $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_page_all += $total_page_indirect ;
 
@@ -4095,7 +4123,7 @@ sub WriteReportGoogle
   $total_image_indirect = &FormatCount ($total_image_indirect) ;
   $total_rest_indirect  = &FormatCount ($total_rest_indirect) ;
 
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCount ($total_total_indirect) . &ShowCount ($total_page_indirect) . &ShowCount ($total_image_indirect) . &ShowCount ($total_rest_indirect) . "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTd ($total_total_indirect) . &ShowCountTd ($total_page_indirect) . &ShowCountTd ($total_image_indirect) . &ShowCountTd ($total_rest_indirect) . "</tr>\n" ;
   $html .= "<tr><th class=l colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><th colspan=99 class=l><a href='http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains'>Top level domains</a></th></tr>\n" ;
 
@@ -4132,7 +4160,7 @@ sub WriteReportGoogle
 #   { $key =~ s/^[\.]// ; }
     if ($key =~ /^\_/)
     { $key = "<i>" . substr ($key,1) . "</i>" ; }
-    $html .= "<tr><td class=l>$key</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_no_tld = $searches_mimecat_tld_not_found {"total"}  ;
   $page_no_tld  = $searches_mimecat_tld_not_found {"page"}  ;
@@ -4148,13 +4176,13 @@ sub WriteReportGoogle
   $page_no_tld  = &FormatCount ($page_no_tld)  ;
   $image_no_tld = &FormatCount ($image_no_tld)  ;
   $other_no_tld = &FormatCount ($other_no_tld)  ;
-  $html .= "<tr><td class=l>undefined</a></td>" . &ShowCount ($total_no_tld) . &ShowCount ($page_no_tld) . &ShowCount ($image_no_tld) . &ShowCount ($other_no_tld) . "</tr>\n" ;
+  $html .= "<tr><td class=l>undefined</a></td>" . &ShowCountTd ($total_no_tld) . &ShowCountTd ($page_no_tld) . &ShowCountTd ($image_no_tld) . &ShowCountTd ($other_no_tld) . "</tr>\n" ;
 
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $html .= "</table>\n" ;
 
@@ -4183,9 +4211,9 @@ sub WriteReportGoogle
     { $key = ucfirst ($key) ; }
     else
     { $key = "<i>$key</i>" ; }
-    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountBold ($total_total_direct) . &ShowCountBold ($total_page_direct). &ShowCountBold ($total_image_direct). &ShowCountBold ($total_rest_direct). "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTh ($total_total_direct) . &ShowCountTh ($total_page_direct). &ShowCountTh ($total_image_direct). &ShowCountTh ($total_rest_direct). "</tr>\n" ;
 
   $html .= "<tr><th colspan=99 class=l>&nbsp;</th></tr>\n" ;
   $html .= "<tr><th colspan=99 class=l>Requests originating from elsewhere</th></tr>\n" ;
@@ -4207,9 +4235,9 @@ sub WriteReportGoogle
     { $key = ucfirst ($key) ; }
     else
     { $key = "<i>$key</i>" ; }
-    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key2</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountBold ($total_total_indirect) . &ShowCountBold ($total_page_indirect) . &ShowCountBold ($total_image_indirect) . &ShowCountBold ($total_rest_indirect) . "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTh ($total_total_indirect) . &ShowCountTh ($total_page_indirect) . &ShowCountTh ($total_image_indirect) . &ShowCountTh ($total_rest_indirect) . "</tr>\n" ;
   $html .= "<tr><th class=l colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><th colspan=99 class=l>Top level domains</th></tr>\n" ;
 
@@ -4235,7 +4263,7 @@ sub WriteReportGoogle
     { $key = ".$key" ; }
     if ($key =~ /^\_/)
     { $key = "<i>" . substr ($key,1) . "</i>" ; }
-    $html .= "<tr><td class=l>$key</a></td>" . &ShowCount ($total) . &ShowCount ($page) . &ShowCount ($image) . &ShowCount ($rest) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$key</a></td>" . &ShowCountTd ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_no_tld = $searches_mimecat_tld_not_found {"total"}  ;
   $page_no_tld  = $searches_mimecat_tld_not_found {"page"}  ;
@@ -4251,13 +4279,13 @@ sub WriteReportGoogle
   $page_no_tld  = &FormatCount ($page_no_tld)  ;
   $image_no_tld = &FormatCount ($image_no_tld)  ;
   $other_no_tld = &FormatCount ($other_no_tld)  ;
-  $html .= "<tr><td class=l>undefined</a></td>" . &ShowCount ($total_no_tld) . &ShowCount ($page_no_tld) . &ShowCount ($image_no_tld) . &ShowCount ($other_no_tld) . "</tr>\n" ;
+  $html .= "<tr><td class=l>undefined</a></td>" . &ShowCountTd ($total_no_tld) . &ShowCountTd ($page_no_tld) . &ShowCountTd ($image_no_tld) . &ShowCountTd ($other_no_tld) . "</tr>\n" ;
 
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
   $total_image  = &FormatCount ($total_image) ;
   $total_rest   = &FormatCount ($total_rest) ;
-  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountBold ($total_total) . &ShowCountBold ($total_page) . &ShowCountBold ($total_image) . &ShowCountBold ($total_rest) . "</tr>\n" ;
+  $html .= "<tr><th class=l>Total</a></th>" . &ShowCountTh ($total_total) . &ShowCountTh ($total_page) . &ShowCountTh ($total_image) . &ShowCountTh ($total_rest) . "</tr>\n" ;
 
   $html .= "</table>\n" ;
   $html .= "</td></tr>\n" ;
@@ -4276,7 +4304,7 @@ sub WriteReportGoogle
     if ($matches =~ /x/) { $x = 'Y' } else { $x = '-' } ;
     if ($matches =~ /y/) { $y = 'Y' } else { $y = '-' } ;
     if ($matches =~ /z/) { $z = 'Y' } else { $z = '-' } ;
-    $breakdown .= "<tr><td class=l>$service</td>" . &ShowCount ($count) . "<td class=c>$x</td><td class=c>$y</td><td class=c>$z</td></tr>" ;
+    $breakdown .= "<tr><td class=l>$service</td>" . &ShowCountTd ($count) . "<td class=c>$x</td><td class=c>$y</td><td class=c>$z</td></tr>" ;
   }
   $breakdown .= "</table><br.&bsp;<br>\n" ;
 
@@ -4295,7 +4323,7 @@ sub WriteReportGoogle
 
   $html .= "</table>\n" ;
 
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_SEARCH $html ;
   close FILE_HTML_SEARCH ;
@@ -4311,7 +4339,7 @@ sub WriteReportSkins
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Skins/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Skins/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $dummy_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4333,7 +4361,7 @@ sub WriteReportSkins
     if ($name ne $nameprev)
     { $html .= "<tr><th colspan=99 class=l>&nbsp;<br><b>" . ucfirst ($name) . "</b></th></tr>\n" ; }
     $nameprev = $name ;
-    $html .= "<tr><td class=l>$skin</td>" . &ShowCount ($count) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$skin</td>" . &ShowCountTd ($count) . "</tr>\n" ;
     $rows++ ;
   }
   $html .= "</table>\n" ;
@@ -4341,20 +4369,152 @@ sub WriteReportSkins
   $html .= "&nbsp;<small>$rows rows written</small><p>" ;
 
 #  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   print FILE_HTML_SKINS $html ;
   close FILE_HTML_SKINS ;
 }
 
-  $html .= "</td></tr></table>\n" ;
-# $html .= "&nbsp;<small>$rows rows written</small><p>" ;
+sub WriteReportUserAgents
+{
+  &Log ("WriteReportUserAgents\n") ;
 
-#  $html .= "<p><b>Explanation:</b><br>'osd' = opensearchdescription / 'php.ser' = vnd.php.serialized" ;
-  $html .= $colophon ;
+  $marker_color = '#8000FF' ;
 
-  print FILE_HTML_ORIGINS $html ;
-  close FILE_HTML_ORIGINS ;
+  open FILE_HTML_USER_AGENTS, '>', "$path_reports/$file_html_user_agents" ;
+
+  $html  = $header ;
+  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
+  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
+  $html .= "<table border=1 width=800>\n" ;
+  $html .= "<tr><td class=l colspan=99>Frequency of the Wikimedia iOS app is much under-estimated because its presence often can't be shown. ".
+           "The same might hold for other apps. To get a better estimate of the frequency of usage of the iOS app, " .
+           "the actual usage of the various mobile apps is also estimated based on the searchapi data. " .
+           "This is the last column. The last column has not been filled in for the non-mobile traffic, " .
+           "because the assumption is that the missing iOS traffic has been counted as mobile browser traffic, " .
+           "and thus the estimate for non-mobile traffic equals the actual html pagevalue.</td></tr>" ;
+
+  $html .= "<tr><th class=c>Category</th><th class=c colspan=2>All data</th><th class=c colspan=2>Html</th><th class=c>Images</th><th class=c>Other</th><th class=c colspan=2>Estimate</th></tr>\n" ;
+
+  $mobile_browsers_all           = &ShowCount (101) ;
+  $mobile_browsers_all_mobile    = &ShowCount (102) ;
+  $mobile_browsers_all_main      = &ShowCount (103) ;
+  $mobile_browsers_all_others    = &ShowCount (104) ;
+  $mobile_browsers_all_perc      = &ShowPerc  (10) ;
+
+  $mobile_browsers_html          = &ShowCount (201) ;
+  $mobile_browsers_html_mobile   = &ShowCount (202) ;
+  $mobile_browsers_html_main     = &ShowCount (203) ;
+  $mobile_browsers_html_others   = &ShowCount (204) ;
+  $mobile_browsers_html_perc     = &ShowPerc  (20) ;
+
+  $mobile_browsers_images        = &ShowCount (301) ;
+  $mobile_browsers_other         = &ShowCount (401) ;
+
+  $mobile_browsers_estimate      = &ShowCount (501) ;
+  $mobile_browsers_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Mobile browsers</b><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=rt>$mobile_browsers_all<br>$mobile_browsers_all_mobile<br>$mobile_browsers_all_main<br>$mobile_browsers_all_others</td>" .
+           "<td class=rt>$mobile_browsers_all_perc</td>\n" .
+           "<td class=rt>$mobile_browsers_html<br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_mobile</td></td><td class=rt>$mobile_browsers_html_perc</td>\n" .
+           "<td class=rt>$mobile_browsers_images</td>\n" .
+           "<td class=rt>$mobile_browsers_other</td>\n" .
+           "<td class=rt>$mobile_browsers_estimate</td><td class=rt>$mobile_browsers_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  $android_wikimedia_all           = &ShowCount (101) ;
+  $android_wikimedia_all_perc      = &ShowPerc  (10) ;
+
+  $android_wikimedia_html          = &ShowCount (201) ;
+  $android_wikimedia_html_perc     = &ShowPerc  (20) ;
+
+  $android_wikimedia_images        = &ShowCount (301) ;
+  $android_wikimedia_other         = &ShowCount (401) ;
+
+  $android_wikimedia_estimate      = &ShowCount (501) ;
+  $android_wikimedia_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Mobile browsers</b></td>\n" .
+           "<td class=rt>$android_wikimedia_all</td>" .
+           "<td class=rt>$android_wikimedia_all_perc</td>\n" .
+           "<td class=rt>$android_wikimedia_html</td>\n" .
+           "<td class=rt>$android_wikimedia_html_perc</td>\n" .
+           "<td class=rt>$android_wikimedia_images</td>\n" .
+           "<td class=rt>$android_wikimedia_other</td>\n" .
+           "<td class=rt>$android_wikimedia_estimate</td><td class=rt>$android_wikimedia_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  $total_mobile_apps_all           = &ShowCount (101,  $marker_color) ;
+  $total_mobile_apps_all_mobile    = &ShowCount (102) ;
+  $total_mobile_apps_all_main      = &ShowCount (103) ;
+  $total_mobile_apps_all_others    = &ShowCount (104) ;
+  $total_mobile_apps_all_perc      = &ShowPerc  (10) ;
+
+  $total_mobile_apps_html          = &ShowCount (201,  $marker_color) ;
+  $total_mobile_apps_html_mobile   = &ShowCount (202) ;
+  $total_mobile_apps_html_main     = &ShowCount (203) ;
+  $total_mobile_apps_html_others   = &ShowCount (204) ;
+  $total_mobile_apps_html_perc     = &ShowPerc  (20) ;
+
+  $total_mobile_apps_images        = &ShowCount (301, $marker_color) ;
+  $total_mobile_apps_other         = &ShowCount (401, $marker_color) ;
+
+  $total_mobile_apps_estimate      = &ShowCount (501, $marker_color) ;
+  $total_mobile_apps_estimate_perc = &ShowPerc  (50,  $marker_color) ;
+
+
+  $html .= "<tr>" .
+           "<td class=lt><font color=$marker_color><b>Total (mobile) apps</b></font><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_all</b></font><br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_main<br>$total_mobile_apps_all_others</td>" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_all_perc</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_html</b></font><br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_mobile</td></td><td class=rt>$total_mobile_apps_all_perc</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_images</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_other</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_estimate</b></font></td><td class=rt><b>$total_mobile_apps_estimate_perc</b></td>" .
+           "</tr>\n" ;
+
+  $total_mobile_traffic_all           = &ShowCount (101,  $marker_color) ;
+  $total_mobile_traffic_all_mobile    = &ShowCount (102) ;
+  $total_mobile_traffic_all_main      = &ShowCount (103) ;
+  $total_mobile_traffic_all_others    = &ShowCount (104) ;
+  $total_mobile_traffic_all_perc      = &ShowPerc  (10) ;
+
+  $total_mobile_traffic_html          = &ShowCount (201,  $marker_color) ;
+  $total_mobile_traffic_html_mobile   = &ShowCount (202) ;
+  $total_mobile_traffic_html_main     = &ShowCount (203) ;
+  $total_mobile_traffic_html_others   = &ShowCount (204) ;
+  $total_mobile_traffic_html_perc     = &ShowPerc  (20) ;
+
+  $total_mobile_traffic_images        = &ShowCount (301, $marker_color) ;
+  $total_mobile_traffic_other         = &ShowCount (401, $marker_color) ;
+
+  $total_mobile_traffic_estimate      = &ShowCount (501, $marker_color) ;
+  $total_mobile_traffic_estimate_perc = &ShowPerc  (50,  $marker_color) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><font color=$marker_color><b>Total (mobile) traffic</b></font><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_all</b></font><br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_main<br>$total_mobile_traffic_all_others</td>" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_all_perc</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_html</b></font><br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_mobile</td></td><td class=rt>$total_mobile_traffic_all_perc</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_images</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_other</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_estimate</b></font></td><td class=rt><b>$total_mobile_traffic_estimate_perc</b></td>" .
+           "</tr>\n" ;
+
+
+  $html .= "</table>\n" ;
+
+  $html .= $colophon_ae ;
+
+  print FILE_HTML_USER_AGENTS $html ;
+  close FILE_HTML_USER_AGENTS ;
 }
 
 sub WriteCsvGoogleBots
@@ -4618,7 +4778,7 @@ sub WriteReportPerLanguageBreakDown
   $html .= "<p>Countries are only included if the number of requests in the period exceeds 100,000 (100 matching records in 1:1000 sampled log)" ;
   $html .= "<br>Page requests by bots are not included. Also all ip addresses that occur more than once on a given day are discarded for that day." ;
   $html .= "<br> A few false negatives are taken for granted. " ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   $index = &HtmlIndex (join '/ ', sort (@index_languages)) ;
   $html =~ s/INDEX/$index/ ;
@@ -4907,7 +5067,7 @@ sub WriteReportPerCountryOverview
 # $html .= "<br>Monthly $views_edits_lc per person is calculated over total population, regardless of age and internet connectivity" ; # how come, misplaced here ?!
 
   $html .= &HtmlSortTableColumns; ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   $index = &HtmlIndex (join '/ ', sort (@index_countries)) ;
   $html =~ s/INDEX/$index/ ;
@@ -5605,7 +5765,7 @@ sub WriteReportPerCountryBreakdown
 # if ($anomaly_found)
 # { $html .= "<p><a id='anomaly' name='anomaly'>Probably anomaly caused by outdated <a href='http://en.wikipedia.org/wiki/Regional_Internet_Registry'>Regional Internet Registry</a> administration.\n" ; }
 
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   $index = &HtmlIndex (join '/ ', sort (@index_countries)) ;
   $html =~ s/INDEX/$index/ ;
@@ -5745,7 +5905,7 @@ sub WriteReportPerCountryTrends
   $html .= "<br> A few false negatives are taken for granted. " .
            "Country meta data collected from <a href='http://en.wikipedia.org/wiki/List_of_countries_by_population'>English Wikipedia</a>. " .
            "Portal = <a href='http://www.wikipedia.org'>www.wikipedia.org</a>" ;
-  $html .= $colophon ;
+  $html .= $colophon_ez ;
 
   $index = &HtmlIndex (join '/ ', sort (@index_countries)) ;
   $html =~ s/INDEX/$index/ ;
@@ -5781,7 +5941,19 @@ sub FormatCount
   return ($count) ;
 }
 
-sub ShowCount # qqq2
+sub ShowPerc
+{
+  my ($num,$color) = @_ ;
+  $num =~ s/,//g ;
+
+  if ($color eq '')
+  { return ("$num\%") ; }
+  else
+  { return ("<font color=$color>$num\%</font>") ; }
+}
+
+
+sub ShowCount
 {
   my ($num,$color) = @_ ;
   $num =~ s/,//g ;
@@ -5798,19 +5970,28 @@ sub ShowCount # qqq2
 
     $num = "<script>showCount($num);</script>" ;
   }
+
   if ($color eq '')
-  { return ("<td class=r>$num</td>") ; }
+  { return ($num) ; }
   else
-  { return ("<td class=r><font color=$color>$num</font></td>") ; }
+  { return ("<font color=$color>$num</font>") ; }
 }
 
-sub ShowCountBold
+sub ShowCountTd # qqq2
 {
   my ($num,$color) = @_ ;
-  $num = &ShowCount ($num,$color) ;
+
+  return ("<td class=r>" . &ShowCount ($num) . "</td>") ;
+}
+
+sub ShowCountTh
+{
+  my ($num,$color) = @_ ;
+  $num = &ShowCountTd ($num,$color) ;
   $num =~ s/td/th/g ;
   return ($num) ;
 }
+
 
 sub SortMime
 {
@@ -6546,22 +6727,27 @@ sub HtmlHead
 
 <style type='text/css'>
 <!--
-body {font-family:arial,sans-serif; font-size:12px }
-h2   {margin:0px 0px 3px 0px; font-size:18px}
+body  {font-family:arial,sans-serif; font-size:12px }
+h2    {margin:0px 0px 3px 0px; font-size:18px}
 table {font-size:12px ;}
-td   {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:middle}
-th   {white-space:nowrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:top ; font-width:bold}
+td    {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:middle}
+
+td.hl  {text-align:left;vertical-align:top;}
+td.hr  {text-align:right;vertical-align:top;}
+td.hc  {text-align:center;vertical-align:top;}
+td.r   {text-align:right;  border: inset 1px #FFFFFF}
+td.c   {text-align:center; border: inset 1px #FFFFFF}
+td.l   {text-align:left;   border: inset 1px #FFFFFF}
+td.lt  {text-align:left;   border: inset 1px #FFFFFF ; vertical-align:top}
+td.rt  {text-align:right;  border: inset 1px #FFFFFF ; vertical-align:top}
+
+th       {white-space:nowrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:12px ; vertical-align:top ; font-width:bold}
 th.small {white-space:wrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px ; font-size:11px ; vertical-align:top ; font-width:bold}
-td.hl {text-align:left;vertical-align:top;}
-td.hr {text-align:right;vertical-align:top;}
-td.hc {text-align:center;vertical-align:top;}
-td.r {text-align:right;  border: inset 1px #FFFFFF}
-td.c {text-align:center; border: inset 1px #FFFFFF}
-td.l {text-align:left;   border: inset 1px #FFFFFF}
-th.c {text-align:center; border: inset 1px #FFFFFF}
-th.l {text-align:left;   border: inset 1px #FFFFFF}
-th.r {text-align:right;  border: inset 1px #FFFFFF}
-th.lh3 {text-align:left;   border: inset 1px #FFFFFF ; font-size:14px}
+th.c     {text-align:center; border: inset 1px #FFFFFF}
+th.l     {text-align:left;   border: inset 1px #FFFFFF}
+th.r     {text-align:right;  border: inset 1px #FFFFFF}
+th.lh3   {text-align:left;   border: inset 1px #FFFFFF ; font-size:14px}
+
 a:link { color:blue;text-decoration:none;}
 a:visited {color:#0000FF;text-decoration:none;}
 a:active  {color:#0000FF;text-decoration:none;}
