@@ -4478,7 +4478,7 @@ sub WriteReportUserAgents
   $mobile_browsers_images        = &ShowCount ($countua {'M', '.', 'image', '.'}) ;
   $mobile_browsers_other         = &ShowCount ($countua {'M', '.', 'other', '.'})  ;
 
-  $mobile_browsers_estimate      = &ShowCount ($countua {'M', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $mobile_browsers_estimate      = &ShowCount (floor($countua {'M', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $mobile_browsers_estimate_perc = &ShowPerc  (100 * $countua {'M', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4500,7 +4500,7 @@ sub WriteReportUserAgents
   $android_wikimedia_images        = &ShowCount ($countua {'A', '.', 'image', '.'}) ;
   $android_wikimedia_other         = &ShowCount ($countua {'A', '.', 'other', '.'})  ;
 
-  $android_wikimedia_estimate      = &ShowCount ($countua {'A', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $android_wikimedia_estimate      = &ShowCount (floor($countua {'A', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $android_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'A', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4523,7 +4523,7 @@ sub WriteReportUserAgents
   $android_other_images        = &ShowCount ($countua {'a', '.', 'image', '.'}) ;
   $android_other_other         = &ShowCount ($countua {'a', '.', 'other', '.'})  ;
 
-  $android_other_estimate      = &ShowCount ($countua {'a', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $android_other_estimate      = &ShowCount (floor($countua {'a', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $android_other_estimate_perc = &ShowPerc  (100 * $countua {'a', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4546,7 +4546,7 @@ sub WriteReportUserAgents
   $ios_wikimedia_images        = &ShowCount ($countua {'I', '.', 'image', '.'}) ;
   $ios_wikimedia_other         = &ShowCount ($countua {'I', '.', 'other', '.'})  ;
 
-  $ios_wikimedia_estimate      = &ShowCount ($countua {'I', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $ios_wikimedia_estimate      = &ShowCount (floor($countua {'I', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $ios_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'I', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4569,7 +4569,7 @@ sub WriteReportUserAgents
   $ios_other_images        = &ShowCount ($countua {'i', '.', 'image', '.'}) ;
   $ios_other_other         = &ShowCount ($countua {'i', '.', 'other', '.'})  ;
 
-  $ios_other_estimate      = &ShowCount ($countua {'i', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $ios_other_estimate      = &ShowCount (floor ($countua {'i', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $ios_other_estimate_perc = &ShowPerc  (100 * $countua {'i', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4592,7 +4592,7 @@ sub WriteReportUserAgents
   $app_other_images        = &ShowCount ($countua {'W', '.', 'image', '.'}) ;
   $app_other_other         = &ShowCount ($countua {'W', '.', 'other', '.'})  ;
 
-  $app_other_estimate      = &ShowCount ($countua {'W', '.', '.', 'opensearch' } * $api_multiplier) ;
+  $app_other_estimate      = &ShowCount (floor($countua {'W', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
   $app_other_estimate_perc = &ShowPerc  (100 * $countua {'W', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
@@ -4622,7 +4622,7 @@ sub WriteReportUserAgents
   $total_mobile_apps_images        = &ShowCount ($countua {'P', '.', 'image', '.'},  $marker_color) ;
   $total_mobile_apps_other         = &ShowCount ($countua {'P', '.', 'other', '.'},  $marker_color)  ;
 
-  $total_mobile_apps_estimate      = &ShowCount ($countua {'P', '.', '.', 'opensearch' } * $api_multiplier,  $marker_color) ;
+  $total_mobile_apps_estimate      = &ShowCount (floor($countua {'P', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
   $total_mobile_apps_estimate_perc = &ShowPerc  (100 * $countua {'P', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
 
 
@@ -4651,14 +4651,14 @@ sub WriteReportUserAgents
   $total_mobile_traffic_images        = &ShowCount ($countua {'S', '.', 'image', '.'},  $marker_color) ;
   $total_mobile_traffic_other         = &ShowCount ($countua {'S', '.', 'other', '.'},  $marker_color)  ;
 
-  $total_mobile_traffic_estimate      = &ShowCount ($countua {'S', '.', '.', 'opensearch' } * $api_multiplier,  $marker_color) ;
+  $total_mobile_traffic_estimate      = &ShowCount (floor($countua {'S', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
   $total_mobile_traffic_estimate_perc = &ShowPerc  (100 * $countua {'S', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
 
   $html .= "<tr>" .
            "<td class=lt><font color=$marker_color><b>Total mobile traffic</b></font><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_all</b></font><br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_main<br>$total_mobile_traffic_all_others</td>" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_all_perc</b></font></td>\n" .
-           "<td class=rt><font color=008000><b>$total_mobile_traffic_html</b></font><br>$total_mobile_traffic_html_mobile<br>$total_mobile_traffic_html_main<br>$total_mobile_traffic_html_other</td></td><td class=rt><b>$total_mobile_traffic_html_perc</b></td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_html</b></font><br>$total_mobile_traffic_html_mobile<br>$total_mobile_traffic_html_main<br>$total_mobile_traffic_html_others</td></td><td class=rt><b>$total_mobile_traffic_html_perc</b></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_images</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_other</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_estimate</b></font></td><td class=rt><b>$total_mobile_traffic_estimate_perc</b></td>" .
