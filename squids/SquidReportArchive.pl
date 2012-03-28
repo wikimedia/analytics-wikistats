@@ -4398,8 +4398,9 @@ sub WriteReportUserAgents
            "because the assumption is that the missing iOS traffic has been counted as mobile browser traffic, " .
            "and thus the estimate for non-mobile traffic equals the actual html pagevalue.</td></tr>" ;
 
-  $html .= "<tr><th class=c>Category</th><th class=c colspan=2>All data</th><th class=c colspan=2>Html</th><th class=c>Images</th><th class=c>Other</th><th class=c colspan=2>Estimate</th></tr>\n" ;
+  $html .= "<tr><th class=l>Request issued from</th><th class=c colspan=2>All data</th><th class=c colspan=2>Html</th><th class=c>Images</th><th class=c>Other</th><th class=c colspan=2>Estimate</th></tr>\n" ;
 
+  # Mobile Browsers
   $mobile_browsers_all           = &ShowCount (101) ;
   $mobile_browsers_all_mobile    = &ShowCount (102) ;
   $mobile_browsers_all_main      = &ShowCount (103) ;
@@ -4419,7 +4420,7 @@ sub WriteReportUserAgents
   $mobile_browsers_estimate_perc = &ShowPerc  (50) ;
 
   $html .= "<tr>" .
-           "<td class=lt><b>Mobile browsers</b><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=lt><b>Mobile browsers</b><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
            "<td class=rt>$mobile_browsers_all<br>$mobile_browsers_all_mobile<br>$mobile_browsers_all_main<br>$mobile_browsers_all_others</td>" .
            "<td class=rt>$mobile_browsers_all_perc</td>\n" .
            "<td class=rt>$mobile_browsers_html<br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_mobile</td></td><td class=rt>$mobile_browsers_html_perc</td>\n" .
@@ -4428,6 +4429,7 @@ sub WriteReportUserAgents
            "<td class=rt>$mobile_browsers_estimate</td><td class=rt>$mobile_browsers_estimate_perc</td>" .
            "</tr>\n" ;
 
+  # Android Apps - Wikimedia
   $android_wikimedia_all           = &ShowCount (101) ;
   $android_wikimedia_all_perc      = &ShowPerc  (10) ;
 
@@ -4441,7 +4443,7 @@ sub WriteReportUserAgents
   $android_wikimedia_estimate_perc = &ShowPerc  (50) ;
 
   $html .= "<tr>" .
-           "<td class=lt><b>Mobile browsers</b></td>\n" .
+           "<td class=lt><b>Wikimedia Android apps</b></td>\n" .
            "<td class=rt>$android_wikimedia_all</td>" .
            "<td class=rt>$android_wikimedia_all_perc</td>\n" .
            "<td class=rt>$android_wikimedia_html</td>\n" .
@@ -4451,6 +4453,103 @@ sub WriteReportUserAgents
            "<td class=rt>$android_wikimedia_estimate</td><td class=rt>$android_wikimedia_estimate_perc</td>" .
            "</tr>\n" ;
 
+  # Android Apps - Other
+  $android_other_all           = &ShowCount (101) ;
+  $android_other_all_perc      = &ShowPerc  (10) ;
+
+  $android_other_html          = &ShowCount (201) ;
+  $android_other_html_perc     = &ShowPerc  (20) ;
+
+  $android_other_images        = &ShowCount (301) ;
+  $android_other_other         = &ShowCount (401) ;
+
+  $android_other_estimate      = &ShowCount (501) ;
+  $android_other_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Other Android apps</b></td>\n" .
+           "<td class=rt>$android_other_all</td>" .
+           "<td class=rt>$android_other_all_perc</td>\n" .
+           "<td class=rt>$android_other_html</td>\n" .
+           "<td class=rt>$android_other_html_perc</td>\n" .
+           "<td class=rt>$android_other_images</td>\n" .
+           "<td class=rt>$android_other_other</td>\n" .
+           "<td class=rt>$android_other_estimate</td><td class=rt>$android_other_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  # iOS Apps - Wikimedia
+  $iOS_wikimedia_all           = &ShowCount (101) ;
+  $iOS_wikimedia_all_perc      = &ShowPerc  (10) ;
+
+  $iOS_wikimedia_html          = &ShowCount (201) ;
+  $iOS_wikimedia_html_perc     = &ShowPerc  (20) ;
+
+  $iOS_wikimedia_images        = &ShowCount (301) ;
+  $iOS_wikimedia_other         = &ShowCount (401) ;
+
+  $iOS_wikimedia_estimate      = &ShowCount (501) ;
+  $iOS_wikimedia_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Wikimedia iOS apps</b></td>\n" .
+           "<td class=rt>$iOS_wikimedia_all</td>" .
+           "<td class=rt>$iOS_wikimedia_all_perc</td>\n" .
+           "<td class=rt>$iOS_wikimedia_html</td>\n" .
+           "<td class=rt>$iOS_wikimedia_html_perc</td>\n" .
+           "<td class=rt>$iOS_wikimedia_images</td>\n" .
+           "<td class=rt>$iOS_wikimedia_other</td>\n" .
+           "<td class=rt>$iOS_wikimedia_estimate</td><td class=rt>$iOS_wikimedia_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  # iOS Apps - Other
+  $iOS_other_all           = &ShowCount (101) ;
+  $iOS_other_all_perc      = &ShowPerc  (10) ;
+
+  $iOS_other_html          = &ShowCount (201) ;
+  $iOS_other_html_perc     = &ShowPerc  (20) ;
+
+  $iOS_other_images        = &ShowCount (301) ;
+  $iOS_other_other         = &ShowCount (401) ;
+
+  $iOS_other_estimate      = &ShowCount (501) ;
+  $iOS_other_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Other iOS apps</b></td>\n" .
+           "<td class=rt>$iOS_other_all</td>" .
+           "<td class=rt>$iOS_other_all_perc</td>\n" .
+           "<td class=rt>$iOS_other_html</td>\n" .
+           "<td class=rt>$iOS_other_html_perc</td>\n" .
+           "<td class=rt>$iOS_other_images</td>\n" .
+           "<td class=rt>$iOS_other_other</td>\n" .
+           "<td class=rt>$iOS_other_estimate</td><td class=rt>$iOS_other_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  # Unspecified Apps
+  $unspecified_apps_other_all           = &ShowCount (101) ;
+  $unspecified_apps_other_all_perc      = &ShowPerc  (10) ;
+
+  $unspecified_apps_other_html          = &ShowCount (201) ;
+  $unspecified_apps_other_html_perc     = &ShowPerc  (20) ;
+
+  $unspecified_apps_other_images        = &ShowCount (301) ;
+  $unspecified_apps_other_other         = &ShowCount (401) ;
+
+  $unspecified_apps_other_estimate      = &ShowCount (501) ;
+  $unspecified_apps_other_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Unspecified Apps</b></td>\n" .
+           "<td class=rt>$unspecified_apps_other_all</td>" .
+           "<td class=rt>$unspecified_apps_other_all_perc</td>\n" .
+           "<td class=rt>$unspecified_apps_other_html</td>\n" .
+           "<td class=rt>$unspecified_apps_other_html_perc</td>\n" .
+           "<td class=rt>$unspecified_apps_other_images</td>\n" .
+           "<td class=rt>$unspecified_apps_other_other</td>\n" .
+           "<td class=rt>$unspecified_apps_other_estimate</td><td class=rt>$unspecified_apps_other_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  # Total Mobile Apps
   $total_mobile_apps_all           = &ShowCount (101,  $marker_color) ;
   $total_mobile_apps_all_mobile    = &ShowCount (102) ;
   $total_mobile_apps_all_main      = &ShowCount (103) ;
@@ -4471,15 +4570,16 @@ sub WriteReportUserAgents
 
 
   $html .= "<tr>" .
-           "<td class=lt><font color=$marker_color><b>Total (mobile) apps</b></font><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=lt><font color=$marker_color><b>Total from mobile apps</b></font><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_apps_all</b></font><br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_main<br>$total_mobile_apps_all_others</td>" .
            "<td class=rt><font color=008000><b>$total_mobile_apps_all_perc</b></font></td>\n" .
-           "<td class=rt><font color=008000><b>$total_mobile_apps_html</b></font><br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_mobile<br>$total_mobile_apps_all_mobile</td></td><td class=rt>$total_mobile_apps_all_perc</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_apps_html</b></font><br>$total_mobile_apps_html_mobile<br>$total_mobile_apps_html_mobile<br>$total_mobile_apps_html_mobile</td></td><td class=rt>$total_mobile_apps_html_perc</td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_apps_images</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_apps_other</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_apps_estimate</b></font></td><td class=rt><b>$total_mobile_apps_estimate_perc</b></td>" .
            "</tr>\n" ;
 
+  # Total Mobile Traffic
   $total_mobile_traffic_all           = &ShowCount (101,  $marker_color) ;
   $total_mobile_traffic_all_mobile    = &ShowCount (102) ;
   $total_mobile_traffic_all_main      = &ShowCount (103) ;
@@ -4499,15 +4599,91 @@ sub WriteReportUserAgents
   $total_mobile_traffic_estimate_perc = &ShowPerc  (50,  $marker_color) ;
 
   $html .= "<tr>" .
-           "<td class=lt><font color=$marker_color><b>Total (mobile) traffic</b></font><br>&nbsp;&nbsp;(mobile site)<br>&nbsp;&nbsp;(main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=lt><font color=$marker_color><b>Total from mobile devices</b></font><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_all</b></font><br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_main<br>$total_mobile_traffic_all_others</td>" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_all_perc</b></font></td>\n" .
-           "<td class=rt><font color=008000><b>$total_mobile_traffic_html</b></font><br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_mobile<br>$total_mobile_traffic_all_mobile</td></td><td class=rt>$total_mobile_traffic_all_perc</td>\n" .
+           "<td class=rt><font color=008000><b>$total_mobile_traffic_html</b></font><br>$total_mobile_traffic_html_mobile<br>$total_mobile_traffic_html_mobile<br>$total_mobile_traffic_html_mobile</td></td><td class=rt>$total_mobile_traffic_html_perc</td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_images</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_other</b></font></td>\n" .
            "<td class=rt><font color=008000><b>$total_mobile_traffic_estimate</b></font></td><td class=rt><b>$total_mobile_traffic_estimate_perc</b></td>" .
            "</tr>\n" ;
 
+  # Total Non-Mobile Traffic
+  $total_non_mobile_traffic_all            = &ShowCount (101,  $marker_color) ;
+  $total_non_mobile_traffic_all_non_mobile = &ShowCount (102) ;
+  $total_non_mobile_traffic_all_main       = &ShowCount (103) ;
+  $total_non_mobile_traffic_all_others     = &ShowCount (104) ;
+  $total_non_mobile_traffic_all_perc       = &ShowPerc  (10) ;
+
+  $total_non_mobile_traffic_html            = &ShowCount (201,  $marker_color) ;
+  $total_non_mobile_traffic_html_non_mobile = &ShowCount (202) ;
+  $total_non_mobile_traffic_html_main       = &ShowCount (203) ;
+  $total_non_mobile_traffic_html_others     = &ShowCount (204) ;
+  $total_non_mobile_traffic_html_perc       = &ShowPerc  (20) ;
+
+  $total_non_mobile_traffic_images        = &ShowCount (301, $marker_color) ;
+  $total_non_mobile_traffic_other         = &ShowCount (401, $marker_color) ;
+
+  $total_non_mobile_traffic_estimate      = &ShowCount (501, $marker_color) ;
+  $total_non_mobile_traffic_estimate_perc = &ShowPerc  (50,  $marker_color) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><font color=$marker_color><b>Total from non mobile devices</b></font><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_all</b></font><br>$total_non_mobile_traffic_all_non_mobile<br>$total_non_mobile_traffic_all_main<br>$total_non_mobile_traffic_all_others</td>" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_all_perc</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_html</b></font><br>$total_non_mobile_traffic_html_non_mobile<br>$total_non_mobile_traffic_html_non_mobile<br>$total_non_mobile_traffic_html_non_mobile</td></td><td class=rt>$total_non_mobile_traffic_html_perc</td>\n" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_images</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_other</b></font></td>\n" .
+           "<td class=rt><font color=008000><b>$total_non_mobile_traffic_estimate</b></font></td><td class=rt><b>$total_non_mobile_traffic_estimate_perc</b></td>" .
+           "</tr>\n" ;
+
+  # Bots
+  $bots_all           = &ShowCount (101) ;
+  $bots_all_perc      = &ShowPerc  (10) ;
+
+  $bots_html          = &ShowCount (201) ;
+  $bots_html_perc     = &ShowPerc  (20) ;
+
+  $bots_images        = &ShowCount (301) ;
+  $bots_other         = &ShowCount (401) ;
+
+  $bots_estimate      = &ShowCount (501) ;
+  $bots_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>Bots</b></td>\n" .
+           "<td class=rt>$bots_all</td>" .
+           "<td class=rt>$bots_all_perc</td>\n" .
+           "<td class=rt>$bots_html</td>\n" .
+           "<td class=rt>$bots_html_perc</td>\n" .
+           "<td class=rt>$bots_images</td>\n" .
+           "<td class=rt>$bots_other</td>\n" .
+           "<td class=rt>$bots_estimate</td><td class=rt>$bots_estimate_perc</td>" .
+           "</tr>\n" ;
+
+  # No User Agent
+  $no_user_agent_all           = &ShowCount (101) ;
+  $no_user_agent_all_perc      = &ShowPerc  (10) ;
+
+  $no_user_agent_html          = &ShowCount (201) ;
+  $no_user_agent_html_perc     = &ShowPerc  (20) ;
+
+  $no_user_agent_images        = &ShowCount (301) ;
+  $no_user_agent_other         = &ShowCount (401) ;
+
+  $no_user_agent_estimate      = &ShowCount (501) ;
+  $no_user_agent_estimate_perc = &ShowPerc  (50) ;
+
+  $html .= "<tr>" .
+           "<td class=lt><b>No User Agent</b></td>\n" .
+           "<td class=rt>$no_user_agent_all</td>" .
+           "<td class=rt>$no_user_agent_all_perc</td>\n" .
+           "<td class=rt>$no_user_agent_html</td>\n" .
+           "<td class=rt>$no_user_agent_html_perc</td>\n" .
+           "<td class=rt>$no_user_agent_images</td>\n" .
+           "<td class=rt>$no_user_agent_other</td>\n" .
+           "<td class=rt>$no_user_agent_estimate</td><td class=rt>$no_user_agent_estimate_perc</td>" .
+           "</tr>\n" ;
 
   $html .= "</table>\n" ;
 
