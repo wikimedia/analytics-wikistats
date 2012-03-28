@@ -665,6 +665,34 @@ sub ProcessLine
     $domain = 'other' ;
   }
 
+  $api = "-" ;
+  if ($url =~ /api\.php?.*action=/io)
+  {
+      $api = $parm ;
+      $api =~ s/^.*action=([^\&]*)(\&.*)?$/$1/io ; 
+  }
+
+  #create useragents
+  $browsertype = $mobile ;
+  if ($browsertype eq "-")
+  { $browsertype = 'N' ; }
+  if ($agent eq "-")
+  { $browsertype = '-' ; }
+  elsif ($bot)
+  { $browsertype = 'B' ; }
+  elsif ($agent2 =~ /WikipediaMobile/io)
+  { $browsertype = 'A' ; }
+  elsif ($agent2 =~ /Dalvik/io)
+  { $browsertype = 'a' ; }
+  elsif ($agent2 =~ /^iOS: /io)
+  {
+    if ($agent2 =~ /\(WMF\)/io)
+    { $browsertype = 'I' ; }
+    else
+    { $browsertype = 'i' ; }
+  }
+  $useragents {"$browsertype,$domain,$mimecat,$api"} += $count_event;
+
   # if ($domain_mobile)
   # { print "Domain 2 $domain\n" ; }
 

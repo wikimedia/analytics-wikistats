@@ -223,6 +223,7 @@ sub WriteOutputSquidLogs
   open OUT_REFERERS,        '>', $file_out_referers ;
   open CSV_CLIENTS_BY_WIKI, '>', $file_csv_clients_by_wiki ;
   open CSV_AGENTS,          '>', $file_csv_agents ;
+  open CSV_USERAGENTS,      '>', $file_csv_useragents ;
 
   print CSV_METHODS         $comment ;
   print CSV_SKINS           $comment ;
@@ -248,6 +249,7 @@ sub WriteOutputSquidLogs
   print OUT_REFERERS        $comment ;
   print CSV_CLIENTS_BY_WIKI $comment ;
   print CSV_AGENTS          $comment ;
+  print CSV_USERAGENTS      $comment ;
 
   # CSV_METHODS
   print OUT "\nMETHODS:\n\n" ;
@@ -446,6 +448,13 @@ sub WriteOutputSquidLogs
     $iprange =~ s/^[^,]*,// ;
 
     print CSV_GOOGLEBOTS "$date,$iprange,${google_bot_hits{$key}}\n" ;
+  }
+
+  # CSV_USERAGENTS ;
+  foreach $key (%useragents)
+  {
+    print OUT sprintf ("%5d",$useragents{$key}) . " : " . $key . "\n" ; 
+    print CSV_USERAGENTS "$key,${useragents{$key}}\n" ;
   }
 
   #print OUT "\nUrls:\n" ;
