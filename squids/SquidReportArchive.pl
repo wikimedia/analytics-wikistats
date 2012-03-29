@@ -4463,32 +4463,32 @@ sub WriteReportUserAgents
   my $total_html                 = $countua {'T', '.', 'page', '.'} ;
   my $api_multiplier             = $countua {'S', '.', 'page', '.'} / $countua {'S', '.', '.', 'opensearch' } ; 
 
-  $mobile_browsers_all           = &ShowCount ($countua {'M', '.', '.', '.'}) ;
+  $mobile_browsers_all           = &ShowCount ($countua {'M', '.', '.', '.'},  $marker_color) ;
   $mobile_browsers_all_mobile    = &ShowCount ($countua {'M', 'M', '.', '.'}) ;
   $mobile_browsers_all_main      = &ShowCount ($countua {'M', 'W', '.', '.'}) ;
   $mobile_browsers_all_others    = &ShowCount ($countua {'M', 'X', '.', '.'}) ;
-  $mobile_browsers_all_perc      = &ShowPerc  (100 * $countua {'M', '.', '.', '.'} / $total_count ) ;
+  $mobile_browsers_all_perc      = &ShowPerc  (100 * $countua {'M', '.', '.', '.'} / $total_count,  $marker_color ) ;
 
-  $mobile_browsers_html          = &ShowCount ($countua {'M', '.', 'page', '.'}) ;
+  $mobile_browsers_html          = &ShowCount ($countua {'M', '.', 'page', '.'},  $marker_color) ;
   $mobile_browsers_html_mobile   = &ShowCount ($countua {'M', 'M', 'page', '.'}) ;
   $mobile_browsers_html_main     = &ShowCount ($countua {'M', 'W', 'page', '.'}) ;
   $mobile_browsers_html_others   = &ShowCount ($countua {'M', 'X', 'page', '.'}) ;
-  $mobile_browsers_html_perc     = &ShowPerc  (100 * $countua {'M', '.', 'page', '.'} / $total_html ) ;
+  $mobile_browsers_html_perc     = &ShowPerc  (100 * $countua {'M', '.', 'page', '.'} / $total_html,  $marker_color ) ;
 
-  $mobile_browsers_images        = &ShowCount ($countua {'M', '.', 'image', '.'}) ;
-  $mobile_browsers_other         = &ShowCount ($countua {'M', '.', 'other', '.'})  ;
+  $mobile_browsers_images        = &ShowCount ($countua {'M', '.', 'image', '.'},  $marker_color) ;
+  $mobile_browsers_other         = &ShowCount ($countua {'M', '.', 'other', '.'},  $marker_color)  ;
 
-  $mobile_browsers_estimate      = &ShowCount (floor($countua {'M', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $mobile_browsers_estimate_perc = &ShowPerc  (100 * $countua {'M', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $mobile_browsers_estimate      = &ShowCount (floor($countua {'M', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
+  $mobile_browsers_estimate_perc = &ShowPerc  (100 * $countua {'M', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Mobile browsers</b><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
-           "<td class=rt>$mobile_browsers_all<br>$mobile_browsers_all_mobile<br>$mobile_browsers_all_main<br>$mobile_browsers_all_others</td>" .
-           "<td class=rt>$mobile_browsers_all_perc</td>\n" .
-           "<td class=rt>$mobile_browsers_html<br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_main<br>$mobile_browsers_html_others</td></td><td class=rt>$mobile_browsers_html_perc</td>\n" .
-           "<td class=rt>$mobile_browsers_images</td>\n" .
-           "<td class=rt>$mobile_browsers_other</td>\n" .
-           "<td class=rt>$mobile_browsers_estimate</td><td class=rt>$mobile_browsers_estimate_perc</td>" .
+           "<td class=rt><b>$mobile_browsers_all</b><br>$mobile_browsers_all_mobile<br>$mobile_browsers_all_main<br>$mobile_browsers_all_others</td>" .
+           "<td class=rt><b>$mobile_browsers_all_perc</b></td>\n" .
+           "<td class=rt><b>$mobile_browsers_html</b><br>$mobile_browsers_html_mobile<br>$mobile_browsers_html_main<br>$mobile_browsers_html_others</td></td><td class=rt><b>$mobile_browsers_html_perc</b></td>\n" .
+           "<td class=rt><b>$mobile_browsers_images</b></td>\n" .
+           "<td class=rt><b>$mobile_browsers_other</b></td>\n" .
+           "<td class=rt><b>$mobile_browsers_estimate</b></td><td class=rt><b>$mobile_browsers_estimate_perc</b></td>" .
            "</tr>\n" ;
 
   $android_wikimedia_all           = &ShowCount ($countua {'A', '.', '.', '.'}) ;
