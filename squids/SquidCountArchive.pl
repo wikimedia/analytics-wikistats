@@ -55,7 +55,7 @@
   $time_start = time ;
 
   $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
-  $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator" ;
+  $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile" ;
 
   $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|Mobile|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC |HTC_|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Blazer|Sunrise|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|SonyDTV|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED" ;
   $tags_mobile_upd  = "March 2012" ;

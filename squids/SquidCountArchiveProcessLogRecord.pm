@@ -485,8 +485,8 @@ sub ProcessLine
   { ($version = $agent2) =~ s/^.*?(Dalvik\/\d+\.?\d*).*$/Android: $1/o ; }
 
   # WIKIPEDIA MOBILE
-  elsif ($agent2 =~ /WikipediaMobile(\/| )\d+/io)
-  { ($version = $agent2) =~ s/^.*(WikipediaMobile(\/| )(\d|\.)+).*$/Android: $1 (WMF)/o ; }
+  elsif ($agent2 =~ /(Wiktionary|Wikipedia)Mobile(\/| )\d+/io)
+  { ($version = $agent2) =~ s/^.*((Wiktionary|Wikipedia)Mobile(\/| )(\d|\.)+).*$/Android: $1 (WMF)/o ; }
 
   # ANDROID
   elsif ($agent2 =~ /Android\/\d+/io)
@@ -680,7 +680,7 @@ sub ProcessLine
   { $browsertype = '-' ; }
   elsif ($bot)
   { $browsertype = 'B' ; }
-  elsif ($agent2 =~ /WikipediaMobile/io)
+  elsif ($agent2 =~ /(Wikipedia|Wiktionary)Mobile/io)
   { $browsertype = 'A' ; }
   elsif ($agent2 =~ /Dalvik/io)
   { $browsertype = 'a' ; }
