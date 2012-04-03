@@ -1853,7 +1853,7 @@ sub ReadInputUseragents
       { $site = 'W' ; }
     else
       { $site = 'X' ; }
-    
+
     $countua {$agent, '.', '.', '.'} += $count ;
     $countua {$agent, '.', '.', $api} += $count ;
     $countua {$agent, $site, $page, '.'} += $count ;
@@ -2916,7 +2916,7 @@ sub WriteReportMimeTypes
     { $mimetype2 .= "<br><small>(img)</small> " ; }
     if ($columns == 1)
     { $mimetype2 = "<font color=#008000>$mimetype2</font>" ; }
-    if (($columns >= 2) && ($columns <= 4))
+    elsif (($columns >= 2) && ($columns <= 4))
     { $mimetype2 = "<font color=#900000>$mimetype2</font>" ; }
     ($mime1,$mime2) = split ('\/', $mimetype2, 2) ;
     $header2 .= "<th class=c>$mime1<br>$mime2</th>\n" ;
@@ -3014,7 +3014,7 @@ sub WriteReportMimeTypes
       $count = &FormatCount ($counts_pm {"$project,$mimetype"}) ;
       if ($columns == 1)
       { $html .= &ShowCountTd ($count,"#008000") ; }
-      if (($columns >= 2) && ($columns <= 4))
+      elsif (($columns >= 2) && ($columns <= 4))
       { $html .= &ShowCountTd ($count,"#900000") ; }
       else
       { $html .= &ShowCountTd ($count) . "\n" ; }
@@ -4461,7 +4461,7 @@ sub WriteReportUserAgents
 
   my $total_count                = $countua {'T', '.', '.', '.'} ;
   my $total_html                 = $countua {'T', '.', 'page', '.'} ;
-  my $api_multiplier             = $countua {'S', '.', 'page', '.'} / $countua {'S', '.', '.', 'opensearch' } ; 
+  my $api_multiplier             = $countua {'S', '.', 'page', '.'} / $countua {'S', '.', '.', 'opensearch' } ;
 
   $mobile_browsers_all           = &ShowCount ($countua {'M', '.', '.', '.'},  $marker_color) ;
   $mobile_browsers_all_mobile    = &ShowCount ($countua {'M', 'M', '.', '.'}) ;
@@ -6202,7 +6202,7 @@ sub ShowCountTd # qqq2
 {
   my ($num,$color) = @_ ;
 
-  return ("<td class=r>" . &ShowCount ($num) . "</td>") ;
+  return ("<td class=r>" . &ShowCount ($num,$color) . "</td>") ;
 }
 
 sub ShowCountTh

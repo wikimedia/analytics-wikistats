@@ -290,7 +290,7 @@ sub ProcessLine
 
   $os = ".." ;
 
-  if ($agent2 =~ /CFNetwork/io)         { $os = "iOS/OS X" } 
+  if ($agent2 =~ /CFNetwork/io)         { $os = "iOS/OS X" }
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
   elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
@@ -346,7 +346,7 @@ sub ProcessLine
   if (($os eq '..') && ($mobile eq 'M' || $mobile eq 'W'))
   {
     $os = "Mobile other" ;
-    $mobile_other {$agent2} += $count_event ; 
+    $mobile_other {$agent2} += $count_event ;
   }
 
   if ($version =~ /(?:iPod|iPhone)/io)
@@ -410,9 +410,9 @@ sub ProcessLine
 
   # iOS APPLICATIONS
   elsif ($agent2 =~ /CFNetwork/io)
-  { 
+  {
     $agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io ;
-    if ($agent2 =~ /Wikipedia Mobile\//io) { $agent2 =~ s/$/ (WMF)/io ; } 
+    if ($agent2 =~ /Wikipedia Mobile\//io) { $agent2 =~ s/$/ (WMF)/io ; }
     $version = $agent2 ;
   }
 
@@ -476,7 +476,7 @@ sub ProcessLine
 
   # CHROME MOBILE
   elsif ($agent2 =~ /CrMo\/\d+/io)
-  { ($version = $agent2) =~ s/^.*?(CrMo\/\d+\.\d+).*$/$1/o ; 
+  { ($version = $agent2) =~ s/^.*?(CrMo\/\d+\.\d+).*$/$1/o ;
     $version =~ s/CrMo/ChromeMobile/o ;
   }
 
@@ -610,7 +610,8 @@ sub ProcessLine
     $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
-    $operating_systems {"$mobile,$os"} += $count_event ; ;
+    ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+    $operating_systems {"$mobile2,$os"} += $count_event ; ;
   }
 
   if ($count_hits_per_ip_range)
@@ -669,7 +670,7 @@ sub ProcessLine
   if ($url =~ /api\.php?.*action=/io)
   {
       $api = $parm ;
-      $api =~ s/^.*action=([^\&]*)(\&.*)?$/$1/io ; 
+      $api =~ s/^.*action=([^\&]*)(\&.*)?$/$1/io ;
   }
 
   #create useragents
@@ -799,14 +800,16 @@ sub ProcessLine
     if (! $test)
     {
       $time2    = substr ($time,0,19) ; # omit msec
-      $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile,$os,$version,$mimecat\n" ;
+      ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+      $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile2,$os,$version,$mimecat\n" ;
       $gz_csv_views_viz->gzwrite($line) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
     }
   }
 
-  $records {"$mobile,$mimecat"} += $count_event ;
+  ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+  $records {"$mobile2,$mimecat"} += $count_event ;
   $records {"*,$mimecat"}       += $count_event ;
-  $records {"$mobile,*"}        += $count_event ;
+  $records {"$mobile2,*"}        += $count_event ;
   $records {"*,*"}              += $count_event ;
 }
 
