@@ -694,6 +694,18 @@ sub ProcessLine
   }
   $useragents {"$browsertype,$domain,$mimecat,$api"} += $count_event;
 
+  #create countryinfo
+  if ((! $bot) && ($agent ne "-"))
+  {
+    $browser = $version ;
+    $osshort = $os ;
+    $browser =~ s/(\w+).*/$1/io ;
+    $osshort =~ s/(\w+).*/$1/io ;
+    $country_info {"M,$country,$mobile"} += $count_event;
+    $country_info {"B,$country,$browser"} += $count_event;
+    $country_info {"O,$country,$osshort"} += $count_event;
+  }
+
   # if ($domain_mobile)
   # { print "Domain 2 $domain\n" ; }
 

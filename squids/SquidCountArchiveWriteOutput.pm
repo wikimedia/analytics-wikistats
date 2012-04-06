@@ -224,6 +224,7 @@ sub WriteOutputSquidLogs
   open CSV_CLIENTS_BY_WIKI, '>', $file_csv_clients_by_wiki ;
   open CSV_AGENTS,          '>', $file_csv_agents ;
   open CSV_USERAGENTS,      '>', $file_csv_useragents ;
+  open CSV_COUNTRIES_INFO,  '>', $file_csv_countries_info ;
 
   print CSV_METHODS         $comment ;
   print CSV_SKINS           $comment ;
@@ -250,6 +251,7 @@ sub WriteOutputSquidLogs
   print CSV_CLIENTS_BY_WIKI $comment ;
   print CSV_AGENTS          $comment ;
   print CSV_USERAGENTS      $comment ;
+  print CSV_COUNTRIES_INFO  $comment ;
 
   # CSV_METHODS
   print OUT "\nMETHODS:\n\n" ;
@@ -627,6 +629,7 @@ sub WriteOutputSquidLogs
 
 
   print OUT2 "\nCLIENTS:\n\n" ;
+
   print CSV_CLIENTS ":mobile,engine,client,mime-cat\n" ;
   $total_clients = 0 ;
   foreach $key (keys %clients)
@@ -662,6 +665,11 @@ sub WriteOutputSquidLogs
   {
     my $count = $engines {$key} ;
     print CSV_CLIENTS "E,$key,$count\n" ;
+  }
+  foreach $key (sort keys %country_info)
+  {
+    my $count = $country_info {$key} ;
+    print CSV_COUNTRY_INFO "$key,$count\n" ;
   }
   foreach $key (sort keys %grouped_clients)
   {
@@ -737,6 +745,16 @@ sub WriteOutputSquidLogs
    print CSV_AGENTS "$key,$count\n" ;
  }
 
+  print CSV_COUNTRIES_INFO "# pos 1: M = mobile/non-mobile status, O = opsys, B = browser/client" ;
+  print CSV_COUNTRIES_INFO ":type,country,value,count" ;
+
+ foreach $key (sort keys %country_info)
+ {
+   my $count = $country_info {$key} ;
+   print CSV_COUNTRIES_INFO "$key,$count\n" ;
+ }
+
+
   close CSV_METHODS ;
   close CSV_SKINS ;
   close CSV_SCRIPTS ;
@@ -758,6 +776,7 @@ sub WriteOutputSquidLogs
   close CSV_CLIENTS_BY_WIKI ;
   close OUT_REFERERS ;
   close CSV_AGENTS ;
+  close CSV_COUNTRY_INFO ;
 }
 
 sub WriteOutputEditsSavesFile

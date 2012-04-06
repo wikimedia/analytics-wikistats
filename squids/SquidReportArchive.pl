@@ -122,6 +122,7 @@
   $file_html_google       = "SquidReportGoogle.htm" ;
   $file_html_clients      = "SquidReportClients.htm" ;
   $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
+  $file_html_countries_info = "SquidReportCountryData.htm" ;
 
 # names till 2010-07-01
 #
@@ -153,6 +154,7 @@
   $file_csv_indexphp      = "public/SquidDataIndexPhp.csv" ;
   $file_csv_browser_languages = "public/SquidDataLanguages.csv" ;
   $file_csv_user_agents   = "public/SquidDataUserAgents.csv" ;
+  $file_csv_countries_info= "public/SquidDataCountriesInfo.csv" ;
 
   $file_csv_countries_languages_visited = "SquidDataCountriesViews.csv" ;
   $file_csv_countries_timed             = "SquidDataCountriesViewsTimed.csv" ;
@@ -222,10 +224,11 @@
     &ReadInputBrowserLanguages ;
     &ReadInputCountriesTimed ;
     &ReadInputUseragents ;
+    #&ReadInputCountriesInfo ;
   }
 
 #&ReadCountryCodes ;
-
+&
   if ($days_input_found > 0)
   {
     print "\nDays input = $days_input_found\n" ;
@@ -300,6 +303,7 @@
   &WriteReportGoogle ;
   &WriteReportSkins ;
   &WriteReportUserAgents ;
+  #&WriteReportCountriesInfo ;
   &WriteCsvGoogleBots ;
   &WriteCsvBrowserLanguages ;
 
@@ -556,6 +560,7 @@ sub PrepHtml
   $link_opsys       = "<a href='$file_html_opsys'>Op.Sys.</a>" ;
   $link_browsers    = "<a href='$file_html_clients'>Browsers</a>" ;
   $link_google      = "<a href='$file_html_google'>Google</a>" ;
+  $link_countries   = "<a href='$file_html_countries_info'>data by country</a>" ;
 }
 
 sub ReadCountryCodes
@@ -614,7 +619,6 @@ sub ReadInputClients
       }
 
       $engines {$engine} += $count ;
-
       $engine =~ s/\/.*$// ;
       $engine =~ s/ .*$// ;
       $total_engines {$engine} += $count ;
@@ -1861,6 +1865,7 @@ sub ReadInputBrowserLanguages
 sub ReadInputUseragents
 {
   &Log ("ReadInputUseragents\n") ;
+  %countua = { } ;
 
   my $file_csv = "$path_process/$file_csv_user_agents" ;
   if (! -e $file_csv)
@@ -1913,6 +1918,43 @@ sub ReadInputUseragents
   }
   close CSV_AGENTS ;
 
+}
+
+sub ReadInputCountriesInfo
+{
+  &Log ("ReadInputCountriesInfo\n") ;
+  my $file_csv = "$path_process/$file_csv_countries_info" ;
+  if (! -e $file_csv)
+  { abort ("Function ReadInputCountryInfo: file $file_csv not found!!!") ; }
+  open CSV_COUNTRIES_INFO, '<', $file_csv ;
+  while ($line = <CSV_COUNTRIES_INFO>)
+  {
+    next if $line =~ /^#/ ; # comments
+    next if $line =~ /^:/ ; # csv header (not a comment)
+
+    chomp ($line) ;
+
+    (my $type, my $country, my $value, my $count) = split (',', $line) ;
+
+    if ($type eq 'M')
+    {
+      $allcountrytotal += $count ;
+      $countrytotal { $country } += $count ;
+      if ($value ne '-')
+      {  $countrymobile { $country } += $count ; }
+    }
+    elsif ($type eq 'B')
+    {
+      $countrybrowser { $country, $value } += $count ;
+      $allcountrybrowser { $value } += $count ;
+    }
+    elsif ($type eq 'O')
+    {
+      $countryos { $country, $ value } += $count ;
+      $allcountryos { $value} += $count ;
+    }
+  }
+  close CSV_COUNTRIES_INFO ;
 }
 
 sub CalcPercentages
@@ -4488,27 +4530,27 @@ sub WriteReportUserAgents
 
   $html .= "<tr><th class=l>Request issued from</th><th class=c colspan=2>All data</th><th class=c colspan=2>Html</th><th class=c>Images</th><th class=c>Other</th><th class=c colspan=2>Estimate</th></tr>\n" ;
 
-  my $total_count                = $countua {'T', '.', '.', '.'} ;
-  my $total_html                 = $countua {'T', '.', 'page', '.'} ;
+  my $total_count                = $countua {'T', '.', '.', '.'} * $multiplier ;
+  my $total_html                 = $countua {'T', '.', 'page', '.'} * $multiplier ;
   my $api_multiplier             = $countua {'S', '.', 'page', '.'} / $countua {'S', '.', '.', 'opensearch' } ;
 
-  $mobile_browsers_all           = &ShowCount ($countua {'M', '.', '.', '.'},  $marker_color) ;
-  $mobile_browsers_all_mobile    = &ShowCount ($countua {'M', 'M', '.', '.'}) ;
-  $mobile_browsers_all_main      = &ShowCount ($countua {'M', 'W', '.', '.'}) ;
-  $mobile_browsers_all_others    = &ShowCount ($countua {'M', 'X', '.', '.'}) ;
-  $mobile_browsers_all_perc      = &ShowPerc  (100 * $countua {'M', '.', '.', '.'} / $total_count,  $marker_color ) ;
+  $mobile_browsers_all           = &ShowCount ($countua {'M', '.', '.', '.'} * $multiplier,  $marker_color) ;
+  $mobile_browsers_all_mobile    = &ShowCount ($countua {'M', 'M', '.', '.'} * $multiplier) ;
+  $mobile_browsers_all_main      = &ShowCount ($countua {'M', 'W', '.', '.'} * $multiplier) ;
+  $mobile_browsers_all_others    = &ShowCount ($countua {'M', 'X', '.', '.'} * $multiplier) ;
+  $mobile_browsers_all_perc      = &ShowPerc  (100 * $countua {'M', '.', '.', '.'} * $multiplier / $total_count,  $marker_color ) ;
 
-  $mobile_browsers_html          = &ShowCount ($countua {'M', '.', 'page', '.'},  $marker_color) ;
-  $mobile_browsers_html_mobile   = &ShowCount ($countua {'M', 'M', 'page', '.'}) ;
-  $mobile_browsers_html_main     = &ShowCount ($countua {'M', 'W', 'page', '.'}) ;
-  $mobile_browsers_html_others   = &ShowCount ($countua {'M', 'X', 'page', '.'}) ;
-  $mobile_browsers_html_perc     = &ShowPerc  (100 * $countua {'M', '.', 'page', '.'} / $total_html,  $marker_color ) ;
+  $mobile_browsers_html          = &ShowCount ($countua {'M', '.', 'page', '.'} * $multiplier,  $marker_color) ;
+  $mobile_browsers_html_mobile   = &ShowCount ($countua {'M', 'M', 'page', '.'} * $multiplier) ;
+  $mobile_browsers_html_main     = &ShowCount ($countua {'M', 'W', 'page', '.'} * $multiplier) ;
+  $mobile_browsers_html_others   = &ShowCount ($countua {'M', 'X', 'page', '.'} * $multiplier) ;
+  $mobile_browsers_html_perc     = &ShowPerc  (100 * $countua {'M', '.', 'page', '.'} * $multiplier / $total_html,  $marker_color ) ;
 
-  $mobile_browsers_images        = &ShowCount ($countua {'M', '.', 'image', '.'},  $marker_color) ;
-  $mobile_browsers_other         = &ShowCount ($countua {'M', '.', 'other', '.'},  $marker_color)  ;
+  $mobile_browsers_images        = &ShowCount ($countua {'M', '.', 'image', '.'} * $multiplier,  $marker_color) ;
+  $mobile_browsers_other         = &ShowCount ($countua {'M', '.', 'other', '.'} * $multiplier,  $marker_color)  ;
 
-  $mobile_browsers_estimate      = &ShowCount (floor($countua {'M', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
-  $mobile_browsers_estimate_perc = &ShowPerc  (100 * $countua {'M', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
+  $mobile_browsers_estimate      = &ShowCount (floor($countua {'M', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5),  $marker_color) ;
+  $mobile_browsers_estimate_perc = &ShowPerc  (100 * $countua {'M', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html,  $marker_color) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Mobile browsers</b><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
@@ -4520,17 +4562,17 @@ sub WriteReportUserAgents
            "<td class=rt><b>$mobile_browsers_estimate</b></td><td class=rt><b>$mobile_browsers_estimate_perc</b></td>" .
            "</tr>\n" ;
 
-  $android_wikimedia_all           = &ShowCount ($countua {'A', '.', '.', '.'}) ;
-  $android_wikimedia_all_perc      = &ShowPerc  (100 * $countua {'A', '.', '.', '.'} / $total_count ) ;
+  $android_wikimedia_all           = &ShowCount ($countua {'A', '.', '.', '.'} * $multiplier) ;
+  $android_wikimedia_all_perc      = &ShowPerc  (100 * $countua {'A', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $android_wikimedia_html          = &ShowCount ($countua {'A', '.', 'page', '.'}) ;
-  $android_wikimedia_html_perc     = &ShowPerc  (100 * $countua {'A', '.', 'page', '.'} / $total_html ) ;
+  $android_wikimedia_html          = &ShowCount ($countua {'A', '.', 'page', '.'} * $multiplier) ;
+  $android_wikimedia_html_perc     = &ShowPerc  (100 * $countua {'A', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $android_wikimedia_images        = &ShowCount ($countua {'A', '.', 'image', '.'}) ;
-  $android_wikimedia_other         = &ShowCount ($countua {'A', '.', 'other', '.'})  ;
+  $android_wikimedia_images        = &ShowCount ($countua {'A', '.', 'image', '.'} * $multiplier) ;
+  $android_wikimedia_other         = &ShowCount ($countua {'A', '.', 'other', '.'} * $multiplier)  ;
 
-  $android_wikimedia_estimate      = &ShowCount (floor($countua {'A', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $android_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'A', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $android_wikimedia_estimate      = &ShowCount (floor($countua {'A', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5)) ;
+  $android_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'A', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Wikimedia Android apps</b></td>\n" .
@@ -4543,17 +4585,17 @@ sub WriteReportUserAgents
            "<td class=rt>$android_wikimedia_estimate</td><td class=rt>$android_wikimedia_estimate_perc</td>" .
            "</tr>\n" ;
 
-  $android_other_all           = &ShowCount ($countua {'a', '.', '.', '.'}) ;
-  $android_other_all_perc      = &ShowPerc  (100 * $countua {'a', '.', '.', '.'} / $total_count ) ;
+  $android_other_all           = &ShowCount ($countua {'a', '.', '.', '.'} * $multiplier) ;
+  $android_other_all_perc      = &ShowPerc  (100 * $countua {'a', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $android_other_html          = &ShowCount ($countua {'a', '.', 'page', '.'}) ;
-  $android_other_html_perc     = &ShowPerc  (100 * $countua {'a', '.', 'page', '.'} / $total_html ) ;
+  $android_other_html          = &ShowCount ($countua {'a', '.', 'page', '.' * $multiplier}) ;
+  $android_other_html_perc     = &ShowPerc  (100 * $countua {'a', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $android_other_images        = &ShowCount ($countua {'a', '.', 'image', '.'}) ;
-  $android_other_other         = &ShowCount ($countua {'a', '.', 'other', '.'})  ;
+  $android_other_images        = &ShowCount ($countua {'a', '.', 'image', '.'} * $multiplier) ;
+  $android_other_other         = &ShowCount ($countua {'a', '.', 'other', '.'} * $multiplier)  ;
 
-  $android_other_estimate      = &ShowCount (floor($countua {'a', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $android_other_estimate_perc = &ShowPerc  (100 * $countua {'a', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $android_other_estimate      = &ShowCount (floor($countua {'a', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5)) ;
+  $android_other_estimate_perc = &ShowPerc  (100 * $countua {'a', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Other Android apps</b></td>\n" .
@@ -4566,17 +4608,17 @@ sub WriteReportUserAgents
            "<td class=rt>$android_other_estimate</td><td class=rt>$android_other_estimate_perc</td>" .
            "</tr>\n" ;
 
-  $ios_wikimedia_all           = &ShowCount ($countua {'I', '.', '.', '.'}) ;
-  $ios_wikimedia_all_perc      = &ShowPerc  (100 * $countua {'I', '.', '.', '.'} / $total_count ) ;
+  $ios_wikimedia_all           = &ShowCount ($countua {'I', '.', '.', '.'} * $multiplier) ;
+  $ios_wikimedia_all_perc      = &ShowPerc  (100 * $countua {'I', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $ios_wikimedia_html          = &ShowCount ($countua {'I', '.', 'page', '.'}) ;
-  $ios_wikimedia_html_perc     = &ShowPerc  (100 * $countua {'I', '.', 'page', '.'} / $total_html ) ;
+  $ios_wikimedia_html          = &ShowCount ($countua {'I', '.', 'page', '.'} * $multiplier) ;
+  $ios_wikimedia_html_perc     = &ShowPerc  (100 * $countua {'I', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $ios_wikimedia_images        = &ShowCount ($countua {'I', '.', 'image', '.'}) ;
-  $ios_wikimedia_other         = &ShowCount ($countua {'I', '.', 'other', '.'})  ;
+  $ios_wikimedia_images        = &ShowCount ($countua {'I', '.', 'image', '.'} * $multiplier) ;
+  $ios_wikimedia_other         = &ShowCount ($countua {'I', '.', 'other', '.'} * $multiplier)  ;
 
-  $ios_wikimedia_estimate      = &ShowCount (floor($countua {'I', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $ios_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'I', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $ios_wikimedia_estimate      = &ShowCount (floor($countua {'I', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5)) ;
+  $ios_wikimedia_estimate_perc = &ShowPerc  (100 * $countua {'I', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Wikimedia iOS apps</b></td>\n" .
@@ -4589,17 +4631,17 @@ sub WriteReportUserAgents
            "<td class=rt>$ios_wikimedia_estimate</td><td class=rt>$ios_wikimedia_estimate_perc</td>" .
            "</tr>\n" ;
 
-  $ios_other_all           = &ShowCount ($countua {'i', '.', '.', '.'}) ;
-  $ios_other_all_perc      = &ShowPerc  (100 * $countua {'i', '.', '.', '.'} / $total_count ) ;
+  $ios_other_all           = &ShowCount ($countua {'i', '.', '.', '.'} * $multiplier) ;
+  $ios_other_all_perc      = &ShowPerc  (100 * $countua {'i', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $ios_other_html          = &ShowCount ($countua {'i', '.', 'page', '.'}) ;
-  $ios_other_html_perc     = &ShowPerc  (100 * $countua {'i', '.', 'page', '.'} / $total_html ) ;
+  $ios_other_html          = &ShowCount ($countua {'i', '.', 'page', '.'} * $multiplier) ;
+  $ios_other_html_perc     = &ShowPerc  (100 * $countua {'i', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $ios_other_images        = &ShowCount ($countua {'i', '.', 'image', '.'}) ;
-  $ios_other_other         = &ShowCount ($countua {'i', '.', 'other', '.'})  ;
+  $ios_other_images        = &ShowCount ($countua {'i', '.', 'image', '.'} * $multiplier) ;
+  $ios_other_other         = &ShowCount ($countua {'i', '.', 'other', '.'} * $multiplier)  ;
 
-  $ios_other_estimate      = &ShowCount (floor ($countua {'i', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $ios_other_estimate_perc = &ShowPerc  (100 * $countua {'i', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $ios_other_estimate      = &ShowCount (floor ($countua {'i', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5)) ;
+  $ios_other_estimate_perc = &ShowPerc  (100 * $countua {'i', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Other iOS apps</b></td>\n" .
@@ -4612,17 +4654,17 @@ sub WriteReportUserAgents
            "<td class=rt>$ios_other_estimate</td><td class=rt>$ios_other_estimate_perc</td>" .
            "</tr>\n" ;
 
-  $app_other_all           = &ShowCount ($countua {'W', '.', '.', '.'}) ;
-  $app_other_all_perc      = &ShowPerc  (100 * $countua {'W', '.', '.', '.'} / $total_count ) ;
+  $app_other_all           = &ShowCount ($countua {'W', '.', '.', '.'} * $multiplier) ;
+  $app_other_all_perc      = &ShowPerc  (100 * $countua {'W', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $app_other_html          = &ShowCount ($countua {'W', '.', 'page', '.'}) ;
-  $app_other_html_perc     = &ShowPerc  (100 * $countua {'W', '.', 'page', '.'} / $total_html ) ;
+  $app_other_html          = &ShowCount ($countua {'W', '.', 'page', '.'} * $multiplier) ;
+  $app_other_html_perc     = &ShowPerc  (100 * $countua {'W', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $app_other_images        = &ShowCount ($countua {'W', '.', 'image', '.'}) ;
-  $app_other_other         = &ShowCount ($countua {'W', '.', 'other', '.'})  ;
+  $app_other_images        = &ShowCount ($countua {'W', '.', 'image', '.'} * $multiplier) ;
+  $app_other_other         = &ShowCount ($countua {'W', '.', 'other', '.'} * $multiplier)  ;
 
-  $app_other_estimate      = &ShowCount (floor($countua {'W', '.', '.', 'opensearch' } * $api_multiplier + 0.5)) ;
-  $app_other_estimate_perc = &ShowPerc  (100 * $countua {'W', '.', '.', 'opensearch' } * $api_multiplier / $total_html) ;
+  $app_other_estimate      = &ShowCount (floor($countua {'W', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5)) ;
+  $app_other_estimate_perc = &ShowPerc  (100 * $countua {'W', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html) ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Unspecified apps</b></td>\n" .
@@ -4636,23 +4678,23 @@ sub WriteReportUserAgents
            "</tr>\n" ;
 
 
-  $total_mobile_apps_all           = &ShowCount ($countua {'P', '.', '.', '.'},  $marker_color) ;
-  $total_mobile_apps_all_mobile    = &ShowCount ($countua {'P', 'M', '.', '.'}) ;
-  $total_mobile_apps_all_main      = &ShowCount ($countua {'P', 'W', '.', '.'}) ;
-  $total_mobile_apps_all_others    = &ShowCount ($countua {'P', 'X', '.', '.'}) ;
-  $total_mobile_apps_all_perc      = &ShowPerc  (100 * $countua {'P', '.', '.', '.'} / $total_count ,  $marker_color) ;
+  $total_mobile_apps_all           = &ShowCount ($countua {'P', '.', '.', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_apps_all_mobile    = &ShowCount ($countua {'P', 'M', '.', '.'} * $multiplier) ;
+  $total_mobile_apps_all_main      = &ShowCount ($countua {'P', 'W', '.', '.'} * $multiplier) ;
+  $total_mobile_apps_all_others    = &ShowCount ($countua {'P', 'X', '.', '.'} * $multiplier) ;
+  $total_mobile_apps_all_perc      = &ShowPerc  (100 * $countua {'P', '.', '.', '.'} * $multiplier / $total_count ,  $marker_color) ;
 
-  $total_mobile_apps_html          = &ShowCount ($countua {'P', '.', 'page', '.'},  $marker_color) ;
-  $total_mobile_apps_html_mobile   = &ShowCount ($countua {'P', 'M', 'page', '.'}) ;
-  $total_mobile_apps_html_main     = &ShowCount ($countua {'P', 'W', 'page', '.'}) ;
-  $total_mobile_apps_html_others        = &ShowCount ($countua {'P', 'X', 'page', '.'}) ;
-  $total_mobile_apps_html_perc          = &ShowPerc  (100 * $countua {'P', '.', 'page', '.'} / $total_html ,  $marker_color) ;
+  $total_mobile_apps_html          = &ShowCount ($countua {'P', '.', 'page', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_apps_html_mobile   = &ShowCount ($countua {'P', 'M', 'page', '.'} * $multiplier) ;
+  $total_mobile_apps_html_main     = &ShowCount ($countua {'P', 'W', 'page', '.'} * $multiplier) ;
+  $total_mobile_apps_html_others        = &ShowCount ($countua {'P', 'X', 'page', '.'} * $multiplier) ;
+  $total_mobile_apps_html_perc          = &ShowPerc  (100 * $countua {'P', '.', 'page', '.'} * $multiplier / $total_html ,  $marker_color) ;
 
-  $total_mobile_apps_images        = &ShowCount ($countua {'P', '.', 'image', '.'},  $marker_color) ;
-  $total_mobile_apps_other         = &ShowCount ($countua {'P', '.', 'other', '.'},  $marker_color)  ;
+  $total_mobile_apps_images        = &ShowCount ($countua {'P', '.', 'image', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_apps_other         = &ShowCount ($countua {'P', '.', 'other', '.'} * $multiplier,  $marker_color)  ;
 
-  $total_mobile_apps_estimate      = &ShowCount (floor($countua {'P', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
-  $total_mobile_apps_estimate_perc = &ShowPerc  (100 * $countua {'P', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
+  $total_mobile_apps_estimate      = &ShowCount (floor($countua {'P', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5),  $marker_color) ;
+  $total_mobile_apps_estimate_perc = &ShowPerc  (100 * $countua {'P', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html,  $marker_color) ;
 
 
   $html .= "<tr>" .
@@ -4665,23 +4707,23 @@ sub WriteReportUserAgents
            "<td class=rt><font color=008000><b>$total_mobile_apps_estimate</b></font></td><td class=rt><b>$total_mobile_apps_estimate_perc</b></td>" .
            "</tr>\n" ;
 
-  $total_mobile_traffic_all           = &ShowCount ($countua {'S', '.', '.', '.'},  $marker_color) ;
-  $total_mobile_traffic_all_mobile    = &ShowCount ($countua {'S', 'M', '.', '.'}) ;
-  $total_mobile_traffic_all_main      = &ShowCount ($countua {'S', 'W', '.', '.'}) ;
-  $total_mobile_traffic_all_others    = &ShowCount ($countua {'S', 'X', '.', '.'}) ;
-  $total_mobile_traffic_all_perc      = &ShowPerc  (100 * $countua {'S', '.', '.', '.'} / $total_count ,  $marker_color) ;
+  $total_mobile_traffic_all           = &ShowCount ($countua {'S', '.', '.', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_traffic_all_mobile    = &ShowCount ($countua {'S', 'M', '.', '.'} * $multiplier) ;
+  $total_mobile_traffic_all_main      = &ShowCount ($countua {'S', 'W', '.', '.'} * $multiplier) ;
+  $total_mobile_traffic_all_others    = &ShowCount ($countua {'S', 'X', '.', '.'} * $multiplier) ;
+  $total_mobile_traffic_all_perc      = &ShowPerc  (100 * $countua {'S', '.', '.', '.'} * $multiplier / $total_count ,  $marker_color) ;
 
-  $total_mobile_traffic_html          = &ShowCount ($countua {'S', '.', 'page', '.'},  $marker_color) ;
-  $total_mobile_traffic_html_mobile   = &ShowCount ($countua {'S', 'M', 'page', '.'}) ;
-  $total_mobile_traffic_html_main     = &ShowCount ($countua {'S', 'W', 'page', '.'}) ;
-  $total_mobile_traffic_html_others   = &ShowCount ($countua {'S', 'X', 'page', '.'}) ;
-  $total_mobile_traffic_html_perc     = &ShowPerc  (100 * $countua {'S', '.', 'page', '.'} / $total_html ,  $marker_color) ;
+  $total_mobile_traffic_html          = &ShowCount ($countua {'S', '.', 'page', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_traffic_html_mobile   = &ShowCount ($countua {'S', 'M', 'page', '.'} * $multiplier) ;
+  $total_mobile_traffic_html_main     = &ShowCount ($countua {'S', 'W', 'page', '.'} * $multiplier) ;
+  $total_mobile_traffic_html_others   = &ShowCount ($countua {'S', 'X', 'page', '.'} * $multiplier) ;
+  $total_mobile_traffic_html_perc     = &ShowPerc  (100 * $countua {'S', '.', 'page', '.'} * $multiplier / $total_html ,  $marker_color) ;
 
-  $total_mobile_traffic_images        = &ShowCount ($countua {'S', '.', 'image', '.'},  $marker_color) ;
-  $total_mobile_traffic_other         = &ShowCount ($countua {'S', '.', 'other', '.'},  $marker_color)  ;
+  $total_mobile_traffic_images        = &ShowCount ($countua {'S', '.', 'image', '.'} * $multiplier,  $marker_color) ;
+  $total_mobile_traffic_other         = &ShowCount ($countua {'S', '.', 'other', '.'} * $multiplier,  $marker_color)  ;
 
-  $total_mobile_traffic_estimate      = &ShowCount (floor($countua {'S', '.', '.', 'opensearch' } * $api_multiplier + 0.5),  $marker_color) ;
-  $total_mobile_traffic_estimate_perc = &ShowPerc  (100 * $countua {'S', '.', '.', 'opensearch' } * $api_multiplier / $total_html,  $marker_color) ;
+  $total_mobile_traffic_estimate      = &ShowCount (floor($countua {'S', '.', '.', 'opensearch' } * $multiplier * $api_multiplier + 0.5),  $marker_color) ;
+  $total_mobile_traffic_estimate_perc = &ShowPerc  (100 * $countua {'S', '.', '.', 'opensearch' } * $multiplier * $api_multiplier / $total_html,  $marker_color) ;
 
   $html .= "<tr>" .
            "<td class=lt><font color=$marker_color><b>Total mobile traffic</b></font><br>&nbsp;&nbsp;(to mobile site)<br>&nbsp;&nbsp;(to main site)<br>&nbsp;&nbsp;(others)</td>\n" .
@@ -4693,20 +4735,20 @@ sub WriteReportUserAgents
            "<td class=rt><font color=008000><b>$total_mobile_traffic_estimate</b></font></td><td class=rt><b>$total_mobile_traffic_estimate_perc</b></td>" .
            "</tr>\n" ;
 
-  $non_mobile_traffic_all           = &ShowCount ($countua {'N', '.', '.', '.'},  $marker_color) ;
-  $non_mobile_traffic_all_mobile    = &ShowCount ($countua {'N', 'M', '.', '.'}) ;
-  $non_mobile_traffic_all_main      = &ShowCount ($countua {'N', 'W', '.', '.'}) ;
-  $non_mobile_traffic_all_others    = &ShowCount ($countua {'N', 'X', '.', '.'}) ;
-  $non_mobile_traffic_all_perc      = &ShowPerc  (100 * $countua {'N', '.', '.', '.'} / $total_count ,  $marker_color) ;
+  $non_mobile_traffic_all           = &ShowCount ($countua {'N', '.', '.', '.'} * $multiplier,  $marker_color) ;
+  $non_mobile_traffic_all_mobile    = &ShowCount ($countua {'N', 'M', '.', '.'} * $multiplier) ;
+  $non_mobile_traffic_all_main      = &ShowCount ($countua {'N', 'W', '.', '.'} * $multiplier) ;
+  $non_mobile_traffic_all_others    = &ShowCount ($countua {'N', 'X', '.', '.'} * $multiplier) ;
+  $non_mobile_traffic_all_perc      = &ShowPerc  (100 * $countua {'N', '.', '.', '.'} * $multiplier / $total_count ,  $marker_color) ;
 
-  $non_mobile_traffic_html          = &ShowCount ($countua {'N', '.', 'page', '.'},  $marker_color) ;
-  $non_mobile_traffic_html_mobile   = &ShowCount ($countua {'N', 'M', 'page', '.'}) ;
-  $non_mobile_traffic_html_main     = &ShowCount ($countua {'N', 'W', 'page', '.'}) ;
-  $non_mobile_traffic_html_others   = &ShowCount ($countua {'N', 'X', 'page', '.'}) ;
-  $non_mobile_traffic_html_perc     = &ShowPerc  (100 * $countua {'N', '.', 'page', '.'} / $total_html ,  $marker_color) ;
+  $non_mobile_traffic_html          = &ShowCount ($countua {'N', '.', 'page', '.'} * $multiplier,  $marker_color) ;
+  $non_mobile_traffic_html_mobile   = &ShowCount ($countua {'N', 'M', 'page', '.'} * $multiplier) ;
+  $non_mobile_traffic_html_main     = &ShowCount ($countua {'N', 'W', 'page', '.'} * $multiplier) ;
+  $non_mobile_traffic_html_others   = &ShowCount ($countua {'N', 'X', 'page', '.'} * $multiplier) ;
+  $non_mobile_traffic_html_perc     = &ShowPerc  (100 * $countua {'N', '.', 'page', '.'} * $multiplier / $total_html ,  $marker_color) ;
 
-  $non_mobile_traffic_images        = &ShowCount ($countua {'N', '.', 'image', '.'},  $marker_color) ;
-  $non_mobile_traffic_other         = &ShowCount ($countua {'N', '.', 'other', '.'},  $marker_color)  ;
+  $non_mobile_traffic_images        = &ShowCount ($countua {'N', '.', 'image', '.'} * $multiplier,  $marker_color) ;
+  $non_mobile_traffic_other         = &ShowCount ($countua {'N', '.', 'other', '.'} * $multiplier,  $marker_color)  ;
 
 
   $html .= "<tr>" .
@@ -4719,12 +4761,12 @@ sub WriteReportUserAgents
            "<td class=rt>&nbsp;</td><td class=rt>&nbsp;</td>" .
            "</tr>\n" ;
 
-  $bots_traffic_all           = &ShowCount ($countua {'B', '.', '.', '.'}) ;
+  $bots_traffic_all           = &ShowCount ($countua {'B', '.', '.', '.'} * $multiplier) ;
 
-  $bots_traffic_html          = &ShowCount ($countua {'B', '.', 'page', '.'}) ;
+  $bots_traffic_html          = &ShowCount ($countua {'B', '.', 'page', '.'} * $multiplier) ;
 
-  $bots_traffic_images        = &ShowCount ($countua {'B', '.', 'image', '.'}) ;
-  $bots_traffic_other         = &ShowCount ($countua {'B', '.', 'other', '.'})  ;
+  $bots_traffic_images        = &ShowCount ($countua {'B', '.', 'image', '.'} * $multiplier) ;
+  $bots_traffic_other         = &ShowCount ($countua {'B', '.', 'other', '.'} * $multiplier)  ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Traffic from bots</b></td>\n" .
@@ -4737,14 +4779,14 @@ sub WriteReportUserAgents
            "<td class=rt>&nbsp;</td><td class=rt>&nbsp;</td>" .
            "</tr>\n" ;
 
-  $without_ua_all           = &ShowCount ($countua {'-', '.', '.', '.'}) ;
-  $without_ua_all_perc      = &ShowPerc  (100 * $countua {'-', '.', '.', '.'} / $total_count ) ;
+  $without_ua_all           = &ShowCount ($countua {'-', '.', '.', '.'} * $multiplier) ;
+  $without_ua_all_perc      = &ShowPerc  (100 * $countua {'-', '.', '.', '.'} * $multiplier / $total_count ) ;
 
-  $without_ua_html          = &ShowCount ($countua {'-', '.', 'page', '.'}) ;
-  $without_ua_html_perc     = &ShowPerc  (100 * $countua {'-', '.', 'page', '.'} / $total_html ) ;
+  $without_ua_html          = &ShowCount ($countua {'-', '.', 'page', '.'} * $multiplier) ;
+  $without_ua_html_perc     = &ShowPerc  (100 * $countua {'-', '.', 'page', '.'} * $multiplier / $total_html ) ;
 
-  $without_ua_images        = &ShowCount ($countua {'-', '.', 'image', '.'}) ;
-  $without_ua_other         = &ShowCount ($countua {'-', '.', 'other', '.'})  ;
+  $without_ua_images        = &ShowCount ($countua {'-', '.', 'image', '.'} * $multiplier) ;
+  $without_ua_other         = &ShowCount ($countua {'-', '.', 'other', '.'} * $multiplier)  ;
 
   $html .= "<tr>" .
            "<td class=lt><b>Without user agent</b></td>\n" .
@@ -4764,6 +4806,75 @@ sub WriteReportUserAgents
 
   print FILE_HTML_USER_AGENTS $html ;
   close FILE_HTML_USER_AGENTS ;
+}
+
+
+sub WriteReportCountriesInfo
+{
+  &Log ("WriteReportCountriesInfo\n") ;
+  open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
+
+  $html  = $header ;
+  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Data per Country/ ;
+  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Data per Country/ ;
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
+  $html .= "<table border=1 width=800>\n" ;
+  my $boundary = $allcountrytotal / 1000 ;
+  $html .= "<tr><th class=c>Operating systems</th><th class=c colspan='2'>" ;
+  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
+  {
+     next if (( $countrytotal { $country } lt $boundary ) || ( $country == '--')) ;
+     $html .= "<th class=c colspan='2'>$country_codes {$code}</th>" ;
+  }
+  $html .= "<th class=c>Other countries</th></tr> " ;
+  $showvalue = &ShowCount ($allcountrytotal) ;
+  $showperc = &ShowPerc (100.0) ;
+  $html .= "<tr><td class=lt>Total requests</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
+  $othertotal = 0 ;
+  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
+  {
+    if (( $countrytotal { $country } lt $boundary ) || ( $country == '--'))
+    {
+      $othertotal += $countrytotal { $country } ;
+      next ;
+    }
+    $showvalue = &ShowCount ($countrytotal { $country } ) ;
+    $showperc = &ShowPerc (100 * $countrytotal { $country } / $allcountrytotal) ;
+    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
+  }
+  $showvalue = &ShowCount ($othertotal) ;
+  $showperc = &ShowPerc (100 * $othertotal / $allcountrytotal) ;
+  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
+  foreach $os (keys_sorted_by_value_num_desc %allcountryos)
+  {
+    $showvalue = &ShowCount ($allcountryos {$os}) ;
+    $showperc = &ShowPerc (100 * $allcountryos {$os} / $allcountrytotal) ;
+    $html .= "<tr><td class=lt>$os</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
+    $otherostotal = 0 ;
+    foreach $country (keys_sorted_by_value_num_desc %countrytotal)
+    {
+      if (( $countrytotal { $country } lt $boundary ) || ( $country == '--'))
+      {
+        $othertotal += $countrytotal { $country } ;
+        next ;
+      }
+      $showvalue = &ShowCount ($countryos { $country, $value } ) ;
+      $showperc = &ShowPerc (100 * $countryos { $country, $value } / $countrytotal { $country } ) ;
+      $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
+    }
+  $showvalue = &ShowCount ($othertotal) ;
+  $showperc = &ShowPerc (100 * $otherostotal / $othertotal) ;
+  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
+  }
+  $html .= "</table>" ;
+
+  $html .= $colophon_ae ;
+
+  print FILE_HTML_COUNTRIES_INFO $html ;
+  close FILE_HTML_COUNTRIES_INFO ;
 }
 
 sub WriteCsvGoogleBots

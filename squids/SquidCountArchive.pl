@@ -319,6 +319,7 @@ sub SetFileNames
   $file_csv_search           = "public/SquidDataSearch.csv" ;
   $file_csv_skins            = "public/SquidDataSkins.csv" ;
   $file_csv_useragents       = "public/SquidDataUserAgents.csv" ;
+  $file_csv_countries_info   = "public/SquidDataCountriesInfo.csv" ;
 
   $file_seqno_per_squidhour  = "SquidDataSequenceNumbersPerSquidHour.csv" ;
   $file_seqno_all_squids     = "SquidDataSequenceNumbersAllSquids.csv" ;
