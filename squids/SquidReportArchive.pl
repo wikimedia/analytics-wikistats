@@ -228,7 +228,7 @@
   }
 
 #&ReadCountryCodes ;
-&
+
   if ($days_input_found > 0)
   {
     print "\nDays input = $days_input_found\n" ;
@@ -4836,6 +4836,8 @@ sub WriteReportCountriesInfo
   $othertotal = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    $thiscountrytotal = $countrytotal { $country} ;
+    &Log ("Country: $country, total: $thiscountrytotal, boundary: $boundary") ;
     if (( $countrytotal { $country } lt $boundary ) || ( $country == '--'))
     {
       $othertotal += $countrytotal { $country } ;
