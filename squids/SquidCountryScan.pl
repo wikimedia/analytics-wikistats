@@ -451,7 +451,10 @@ sub ProcessRawData
     ($ratio, $line) = split ('\|', $line) ;
     $text .= $line ;
   }
-  $ratio = sprintf ("%5.1f", $count_edits / $count_submits) ;
+
+  $ratio = 'n.a.' ;
+  if ($count_submits > 0)
+  { $ratio = sprintf ("%5.1f", $count_edits / $count_submits) ; }
   $text .= sprintf ("%-14s",'total') . "edits " . sprintf ("%6d", $count_edits) . ", submits ".  sprintf ("%6d", $count_submits) . ", ratio $ratio\n" ;
   $text .= "\n\n" ;
   print $count

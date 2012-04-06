@@ -351,16 +351,21 @@ sub ReportCountries
   &ReadInputCountriesMonthly ($project_mode) ;
   &ReadInputCountriesDaily   ($project_mode) ;
 
-# foreach $week (sort {$a <=> $b} keys %changes_per_week_per_country_code)
-# { &WriteCsvSvgFilePerCountryOverview ($views_edits, $week, \%changes_per_week_per_country_code, 200, "Wikipedia " . lc $views_edits . ", weekly trend") } ;
+  if ($render_svg_input) # undefined = false
+  {
+    foreach $week (sort {$a <=> $b} keys %changes_per_week_per_country_code)
+    { &WriteCsvSvgFilePerCountryOverview ($views_edits, $week, \%changes_per_week_per_country_code, 200, "Wikipedia " . lc $views_edits . ", weekly trend") } ;
 
-# foreach $week (sort {$a <=> $b} keys %requests_per_week_per_country_code)
-# { &WriteCsvSvgFilePerCountryOverview ($views_edits, $week, \%requests_per_week_per_country_code, $max_requests_per_connected_us_week, "Wikipedia " . lc $views_edits . " per person") } ;
-# foreach $yyyymm (sort keys %yyyymm_)
-# { &WriteCsvSvgFilePerCountryOverview ($views_edits, $yyyymm, \%requests_per_month_per_country_code, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") } ;
+    foreach $week (sort {$a <=> $b} keys %requests_per_week_per_country_code)
+    { &WriteCsvSvgFilePerCountryOverview ($views_edits, $week, \%requests_per_week_per_country_code, $max_requests_per_connected_us_week, "Wikipedia " . lc $views_edits . " per person") } ;
+    foreach $yyyymm (sort keys %yyyymm_)
+    { &WriteCsvSvgFilePerCountryOverview ($views_edits, $yyyymm, \%requests_per_month_per_country_code, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") } ;
+  }
+
   &WriteCsvFilePerCountryDensity ($views_edits, '2011 Q4', \%requests_per_quarter_per_country, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") ;
 
   &PrepHtml ;
+  &SetPeriod ;
 
 # $comment = "<p>&nbsp;See also: <a href='SquidReportTrafficPerCountry.htm'>Wikipedia $views_edits per Country</a> / <a href='SquidReportLanguagesVisitedDetailed.htm'>Breakdown per Country of Wikipedia's Visited (detailed)</a> / <a href='SquidReportTrafficPerWikipediaOverview.htm'>Breakdown per Wikipedia of Requesting Countries</a>" ;
 
@@ -396,6 +401,8 @@ sub ReportCountries
 sub ReadDate
 {
   &Log ("ReadDate\n") ;
+
+  &Log ("Read from $path_process/$file_csv_crawlers") ;
 
   open  CSV_CRAWLERS, '<', "$path_process/$file_csv_crawlers" ;
   $line = <CSV_CRAWLERS> ;
@@ -440,6 +447,11 @@ sub SetPeriod
   $month_last  = substr ($date_last,5,2) ;
   $day_last    = substr ($date_last,8,2) ;
 
+  if ($day_first eq '')
+  { $day_first = 1 ; }
+  if ($day_last eq '')
+  { $day_last = &DaysInMonth ($year_last, $month_last) ; }
+
   $timefrom  = timegm (0,0,0,$day_first,$month_first-1,$year_first-1900) ;
   $timetill  = timegm (0,0,0,$day_last,$month_last-1,$year_last-1900) + 86400 ; # date_last + 1 day (in seconds)
 
@@ -447,8 +459,15 @@ sub SetPeriod
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
 
   $period = sprintf ("%d %s %d - %d %s %d", $day_first, month_english_short ($month_first-1), $year_first, $day_last, month_english_short ($month_last-1), $year_last) ;
+  if ($quarter_only ne '')
+  { $period .= " ($quarter_only) " ; }
+  else
+  { $period .= " (last 12 months) " ; }
+
+
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
-  &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n") ;
+
+  &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n\n") ;
 }
 
 sub PrepHtml
@@ -1503,6 +1522,10 @@ sub ReadInputCountriesMonthly
   $report_month ++ ;
 
   &Log ("Only process data for project $project_mode (wp=Wikipedia, etc)\n") ;
+  &Log ("Read data from $path_csv_squid_counts_monthly\n") ;
+
+  $date_first = '9999-99' ;
+  $date_last  = '0000-00' ;
 
   open CSV_SQUID_COUNTS_MONTHLY, '<', $path_csv_squid_counts_monthly ;
   while ($line = <CSV_SQUID_COUNTS_MONTHLY>)
@@ -1573,6 +1596,11 @@ sub ReadInputCountriesMonthly
       $requests_recently_per_country_per_language            {$country}  {$language} += $count ;
       $requests_recently_per_language_per_country            {$language} {$country}  += $count ;
       $requests_recently_per_language                        {$language}             += $count ;
+
+      if ($yyyymm lt $date_first)
+      { $date_first = $yyyymm ; }
+      if ($yyyymm gt $date_last)
+      { $date_last = $yyyymm ; }
     }
   }
   &Log ("$lines lines read from $path_csv_squid_counts_monthly\n") ;
@@ -1649,6 +1677,7 @@ sub ReadInputCountriesDaily
   $report_month ++ ;
 
   &Log ("Process project $project_mode\n\n") ;
+  &Log ("Read data from $path_csv_squid_counts_daily\n") ;
 
   $yyyymmdd_prev = "" ;
   open CSV_SQUID_COUNTS_DAILY, '<', $path_csv_squid_counts_daily ;
@@ -2203,7 +2232,7 @@ sub WriteReportClients
     $perc_html_only  = $clientgroups_perc_html_only {$key} ;
     $count_html_only = &FormatCount ($count_html_only) ;
 
-    $html .= "<tr><td class=l>$group</a></td>" . &ShowCount($count) . "<td class=r>$perc</td>" . &ShowCount($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
+    $html .= "<tr><td class=l>$group</a></td>" . &ShowCountTd($count) . "<td class=r>$perc</td>" . &ShowCountTd($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
 
     $perc =~ s/\%// ;
     $perc_html_only =~ s/\%// ;
@@ -6014,6 +6043,8 @@ sub WriteReportPerCountryTrends
   $html =~ s/X1000/.&nbsp;Period <b>$requests_start - $requests_stop<\/b>/ ;
   $html =~ s/DATE// ;
 
+  $html =~ s/\(last 12 months\)// ; # only report for all known months
+
   if ($views_edits eq 'Page Views')
   {
     $html .= "<p><font color=#800000>Nov 2011: For some countries the share of page views on the English Wikipedia was significantly higher in 2010 than in 2009 and 2011,<br>" .
@@ -6198,7 +6229,7 @@ sub ShowCount
   { return ("<font color=$color>$num</font>") ; }
 }
 
-sub ShowCountTd # qqq2
+sub ShowCountTd
 {
   my ($num,$color) = @_ ;
 
@@ -6992,8 +7023,6 @@ var nbsp = '&nbsp;' ;
 var checked = false;
 var element ;
 var index ;
-
-//qqq1
 
 window.onload =
   function()
