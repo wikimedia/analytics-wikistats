@@ -57,7 +57,8 @@
   $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
   $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile" ;
 
-  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|Mobile|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC |HTC_|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Blazer|Sunrise|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|SonyDTV|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED" ;
+  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech" ;
+  $tags_tablet       = "iPad|Android 3|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|Tablet|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
   $tags_mobile_upd  = "March 2012" ;
 
   $pattern_url_pre  = "(?:^|[a-zA-Z0-9-]+\\.)*?" ;

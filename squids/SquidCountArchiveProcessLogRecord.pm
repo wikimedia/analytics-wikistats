@@ -17,7 +17,7 @@ sub ProcessLine
     if (($url =~ /\.m\..*?\/wiki\//) || ($url =~ /\.m\..*?\/w\/index.php/))
     { $mime = "text/html" ; }
   }
-
+  
   $count_event = 1 ;
   # from Oct 16, 2011 00:00 hrs till Nov 29, 2011 20:00 hrs one of the two servers which process requests to the mobile site did not send log lines
   # since the two servers are load-balanced, selected stats (e.g. breakdown browser, OS) can be repaired by counting requests to mobile site twice in this period
@@ -219,59 +219,75 @@ sub ProcessLine
     @bots {"$mime,$agent2"} += $count_event ;
   }
 
-  # GECKO
-  $gecko = "" ;
-  if ($agent2 =~ /Gecko\/\d{4,}/io)
-  { ($gecko = $agent2) =~ s/^.*?Gecko\/(\d{4}).*$/Gecko\/$1/io ; }
+  # BROWSER ENGINES
+  $browserengine = "" ;
+  if ($agent2 =~ /AppleWebKit[\/ ]?\d/io)
+  { ($browserengine = $agent2) =~ s/^.*?AppleWebKit[\/ ]?(\d+).*$/AppleWebKit $1/io ; }
+  elsif ($agent2 =~ /Gecko[\/ ]?\d/io)
+  { ($browserengine = $agent2) =~ s/^.*?Gecko[\/ ]?(\d{1,4}).*$/Gecko $1/io ; }
+  elsif ($agent2 =~ /Trident[\/ ]?\d/io)
+  { ($browserengine = $agent2) =~ s/^.*?Trident[\/ ]?(\d+\.?\d*).*$/Trident $1/io ; }
+  elsif ($agent2 =~ /Presto[\/ ]?\d/io)
+  { ($browserengine = $agent2) =~ s/^.*?Presto[\/ ]?(\d+\.?\d*).*$/Presto $1/io ; }  
+  elsif ($agent2 =~ /AppleWebKit/io)
+  { $browserengine = "AppleWebKit" ; }
+  elsif ($agent2 =~ /Trident/io)
+  { $browserengine = "Trident" ; }
+  elsif ($agent2 =~ /Presto/io)
+  { $browserengine = "Presto" ; }
+  elsif ($agent2 =~ /KHTML/io)
+  { $browserengine = "KHTML" ; }
+  elsif ($agent2 =~ /Gecko/io)
+  { $browserengine = "Gecko" ; }
 
   # APPLEWEBKIT
-  $applewebkit = "" ;
-  if ($agent2 =~ /AppleWebKit/io)
-  {
-    ($applewebkit = $agent2) =~ s/^.*?AppleWebKit\/(\d+\.\d+).*$/AppleWebKit\/$1/io ;
-    $applewebkit =~ s/^.*?AppleWebKit\/(\d+).*$/AppleWebKit\/$1/io ;
-    $applewebkit =~ s/\/(\d\d)$/\/0$1/o ;
+  #$applewebkit = "" ;
+  #if ($agent2 =~ /AppleWebKit/io)
+  #{
+  #  ($applewebkit = $agent2) =~ s/^.*?AppleWebKit\/(\d+\.\d+).*$/AppleWebKit\/$1/io ;
+  #  $applewebkit =~ s/^.*?AppleWebKit\/(\d+).*$/AppleWebKit\/$1/io ;
+  #  $applewebkit =~ s/\/(\d\d)$/\/0$1/o ;
+  #
+  #  if ($agent2 =~ /Mozilla.{1,8}\(/io)
+  #  {
+  #    $agent3 = $agent2 ;
+  #    $agent3 =~ s/^[^\(]*\(//o ;
+  #    $agent3 =~ s/;.*$//o ;
+  #    $agent3 =~ s/\).*$//o ;
+  #    $agent3 =~ s/^\s+//o ;
+  #    $agent3 =~ s/\s+$//o ;
+  #    $agent3 = substr ($agent3,0,20) ;
+  #
+  #    $platform = '' ;
+  #    if ($agent2 =~ /Chrome/io)
+  #    { ($platform = $agent2) =~ s/^.*?(Chrome\/?\s*\d+\.?\d*).*$/$1/io ; }
+  #    elsif ($agent2 =~ /Android/io)
+  #    { ($platform = $agent2) =~ s/^.*?(Android\/?\s*\d+\.?\d*).*$/$1/io ; }
+  #    elsif ($agent2 =~ /(?:iPad|iPod|iPhone)/io)
+  #    {
+  #      ($platform = $agent2) =~ s/^.*?(OS\s*\d\_?\d?).*$/$1/io ;
+  #      $platform =~ s/_/./go ;
+  #    }
+  #    elsif ($agent2 =~ /Kindle/io)
+  #    { ($platform = $agent2) =~ s/^.*?(Kindle\/?\s*\d+\.?\d*).*$/$1/io ; }
+  #    elsif ($agent2 =~ /Safari/io)
+  #    { ($platform = $agent2) =~ s/^.*?(Safari\/\d+).*$/$1/io ; }
+  #
+  #    if (($agent2 =~ /Symbian/i) && ($agent3 !~ /Symbian/io))
+  #    { ($platform = $agent2) =~ s/^.*?(Symbian[\w\d\.\/]+).*$/$1/io ; }
+  #
+  #    if ($platform ne '')
+  #    {
+  #      $platform =~ s/^\s+//o ;
+  #      $platform =~ s/\s+$//o ;
+  #      $platform = " $platform" ;
+  #    }
+  #
+  #    #$applewebkit .= " ($agent3$platform)" ;
+  #  }
 
-    if ($agent2 =~ /Mozilla.{1,8}\(/io)
-    {
-      $agent3 = $agent2 ;
-      $agent3 =~ s/^[^\(]*\(//o ;
-      $agent3 =~ s/;.*$//o ;
-      $agent3 =~ s/\).*$//o ;
-      $agent3 =~ s/^\s+//o ;
-      $agent3 =~ s/\s+$//o ;
-      $agent3 = substr ($agent3,0,20) ;
-
-      $platform = '' ;
-      if ($agent2 =~ /Chrome/io)
-      { ($platform = $agent2) =~ s/^.*?(Chrome\/?\s*\d+\.?\d*).*$/$1/io ; }
-      elsif ($agent2 =~ /Android/io)
-      { ($platform = $agent2) =~ s/^.*?(Android\/?\s*\d+\.?\d*).*$/$1/io ; }
-      elsif ($agent2 =~ /(?:iPad|iPod|iPhone)/io)
-      {
-        ($platform = $agent2) =~ s/^.*?(OS\s*\d\_?\d?).*$/$1/io ;
-        $platform =~ s/_/./go ;
-      }
-      elsif ($agent2 =~ /Kindle/io)
-      { ($platform = $agent2) =~ s/^.*?(Kindle\/?\s*\d+\.?\d*).*$/$1/io ; }
-      elsif ($agent2 =~ /Safari/io)
-      { ($platform = $agent2) =~ s/^.*?(Safari\/\d+).*$/$1/io ; }
-
-      if (($agent2 =~ /Symbian/i) && ($agent3 !~ /Symbian/io))
-      { ($platform = $agent2) =~ s/^.*?(Symbian[\w\d\.\/]+).*$/$1/io ; }
-
-      if ($platform ne '')
-      {
-        $platform =~ s/^\s+//o ;
-        $platform =~ s/\s+$//o ;
-        $platform = " $platform" ;
-      }
-
-      $applewebkit .= " ($agent3$platform)" ;
-    }
-
-    if (($agent2 =~ /Nokia/io) && ($applewebkit !~ /Nokia/io))
-    { $applewebkit .= " (Nokia)" ; }
+    #if (($agent2 =~ /Nokia/io) && ($applewebkit !~ /Nokia/io))
+    #{ $applewebkit .= " (Nokia)" ; }
 
     #    if ($agent2 =~ /\(iPad/i)      { $applewebkit .= " (iPad)" ; }
     # elsif ($agent2 =~ /\(iPod/i)      { $applewebkit .= " (iPod)" ; }
@@ -279,12 +295,16 @@ sub ProcessLine
     # elsif ($agent2 =~ /\(Windows/i)   { $applewebkit .= " (Win)" ; }
     # elsif ($agent2 =~ /\(Macintosh/i) { $applewebkit .= " (Mac)" ; }
     # else                              { $applewebkit .= " (--)" ; }
-  }
+  #}
 
   # MOBILE
   $mobile = '-' ;
-  if ($agent2 =~ /(?:$tags_wiki_mobile)/io)
+  if (($url =~ /\?seg=/) or ($url =~ /&seg=/))
+  { $mobile = 'P' ; }
+  elsif ($agent2 =~ /(?:$tags_wiki_mobile)/io)
   { $mobile = 'W' ; }
+  elsif ($agent2 =~ /(?:$tags_tablet)/io)
+  { $mobile = 'T' ; }
   elsif ($agent2 =~ /(?:$tags_mobile)/io)
   { $mobile = 'M' ; }
 
@@ -595,13 +615,13 @@ sub ProcessLine
   if ((! $bot) && ($agent ne "-"))
   {
     $engine  =~ s/,/&comma;/go ;
-    if ($gecko ne "")
-    { $engines {$gecko} += $count_event ; }
-    elsif ($applewebkit ne "")
-    {
-      $applewebkit =~ s/AppleWebKit\//AppleWebKit /o ;
-      $engines {$applewebkit} += $count_event ; ;
-    }
+    #if ($applewebkit ne "")
+    #{
+    #  $applewebkit =~ s/AppleWebKit\//AppleWebKit /o ;
+    #  $engines {$applewebkit} += $count_event ; ;
+    #}
+    if ($browserengine ne "")
+    { $engines {$browserengine} += $count_event ; }
 
     $version =~ s/,/&comma;/go ;
     if ($os =~ /playstation/io)
@@ -675,12 +695,12 @@ sub ProcessLine
 
   #create useragents
   $browsertype = $mobile ;
-  if ($browsertype eq "-")
-  { $browsertype = 'N' ; }
-  if ($agent eq "-")
-  { $browsertype = '-' ; }
-  elsif ($bot)
+  if ($bot)
   { $browsertype = 'B' ; }
+  elsif ($browsertype eq "-")
+  { $browsertype = 'N' ; }
+  elsif ($agent eq "-")
+  { $browsertype = '-' ; }
   elsif ($agent2 =~ /(Wikipedia|Wiktionary)Mobile/io)
   { $browsertype = 'A' ; }
   elsif ($agent2 =~ /Dalvik/io)

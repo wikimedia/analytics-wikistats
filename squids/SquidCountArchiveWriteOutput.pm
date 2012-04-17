@@ -455,8 +455,8 @@ sub WriteOutputSquidLogs
   # CSV_USERAGENTS ;
   foreach $key (%useragents)
   {
-    print OUT sprintf ("%5d",$useragents{$key}) . " : " . $key . "\n" ; 
-    print CSV_USERAGENTS "$key,${useragents{$key}}\n" ;
+    my $count = $useragents{$key} ;
+    print CSV_USERAGENTS "$key, $count\n" ;
   }
 
   #print OUT "\nUrls:\n" ;

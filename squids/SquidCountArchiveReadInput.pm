@@ -70,12 +70,12 @@ sub CollectFilesToProcess
       # assuming only one file is archived per day !
       if ($head_found && $tail_found)
       {
-        $full_range_found = $true ;
+        $full_range_found = $true ;     
         last ;
       }
     }
   }
-
+  
   if (! $some_files_found)
   { print "Not any file was found which contains log records for $days_ago days ago. Skip processing for $date_collect_files.\n\n" ; return $false ; }
   if (! $full_range_found)
@@ -130,6 +130,9 @@ sub ReadIpFrequencies
 sub ReadSquidLogFiles
 {
   trace ReadSquidLogFiles ;
+
+  %useragents = {} ;  # Hack: No idea why these count on when Erik's data doesn't - AE
+  %countryinfo = {} ;
 
   my $data_read = $false ;
 
