@@ -5208,11 +5208,15 @@ sub UserAgentFields
 
 sub UserAgentLine
 {
-  my ($title, $code, $ismobile, $ismarked) = @_ ;
+  my ($title, $code, $ismobile, $ismarked, $depth) = @_ ;
+  $result = "<tr>";
+  for($i = 0 ; $i < $depth ; $i++)
+  { $result .= "<td>&gt;</td>" }
+  my $colspan = 4 - $depth;
   if ($ismarked)
-  { $result = "<tr><td class=lt><b>$title</b></td>" ; }
+  { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
   else
-  { $result = "<tr><td class=lt>$title</td>" ; }
+  { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
   $result .= UserAgentFields($countua {$code, '.', 'page', '.'} * $multiplier, $total_html, $mobile_html, $ismobile, $ismarked) ;
   $result .= UserAgentFields($countua {$code, '.', '.', '.'} * $multiplier, $total_count, $mobile_count, $ismobile, $ismarked) ;
   $result .= UserAgentFields($countua {$code, '.', '.', 'opensearch'} * $multiplier, $total_opensearch, $mobile_opensearch, $ismobile, $ismarked) ;
@@ -5233,12 +5237,15 @@ sub UserAgentLine
 
 sub UserAgentLineNoPerc
 {
-  my ($title, $code, $ismarked) = @_ ;
-  my $result = "" ;
+  my ($title, $code, $ismarked, $depth) = @_ ;
+  $result = "<tr>";
+  for($i = 0 ; $i < $depth ; $i++)
+  { $result .= "<td>&gt;</td>" }
+  my $colspan = 4 - $depth;
   if ($ismarked)
-  { $result = "<tr><td class=lt><b>$title</b></td>" ; }
+  { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
   else
-  { $result = "<tr><td class=lt>$title</td>" ; }
+  { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
   if ($ismarked)
   {
     $result .= "<td class=rt>" . &ShowCount ($countua {$code, '.', 'page', '.'} * $multiplier, $marker_color) . "</td><td>&nbsp;</td><td>&nbsp;</td>\n" ;
@@ -5280,7 +5287,7 @@ sub WriteReportUserAgents
 
   $html .= "<table border=1>\n" ;
  
-  $html .= "<tr><th class=l valign='top' rowspan=3>Request issued from</th><th class=c colspan=9>Total traffic</th><th class=c colspan=6>Mobile site</th><th class=c colspan=6>Main site</th><th class=c colspan=2>Other<a href='#explain_other'>[2]</a></th></tr>" .
+  $html .= "<tr><th class=l valign='top' rowspan=3 colspan=4>Request issued from</th><th class=c colspan=9>Total traffic</th><th class=c colspan=6>Mobile site</th><th class=c colspan=6>Main site</th><th class=c colspan=2>Other<a href='#explain_other'>[2]</a></th></tr>" .
            "<tr><th class=c colspan='3'>Page views</th><th class=c colspan='3'>All requests</th><th class=c colspan='3'>Opensearch<a href='#explain_extim'>[1]</a></th>" .
            "<th class=c colspan='3'>Page views</th><th class=c colspan='3'>All requests</th><th class=c colspan='3'>Page views</th><th class=c colspan='3'>All requests</th>" .
            "<th class=c>Page views</th><th>All requests</th></tr>" ;
@@ -5301,21 +5308,20 @@ sub WriteReportUserAgents
   $mobile_nonmobile              = $countua {'S', 'W', '.', '.'} * $multiplier ;
   $mobile_nonmobile_html         = $countua {'S', 'W', 'page', '.'} * $multiplier ;
 
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Tablet browsers", 'T', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Other mobile browsers", 'M', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Wap access", 'P', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;Total mobile browsers", 'M', $true, $true) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia Android apps", 'A', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Other Android apps", 'a', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Wikimedia iOS apps", 'I', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Other iOS apps", 'i', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;&nbsp;&nbsp;Unspecified apps", 'W', $true, $false) ;
-  $html .= &UserAgentLine("&nbsp;&nbsp;Total (mobile) apps", 'Q', $true, $true) ;
-  $html .= &UserAgentLine("Total mobile traffic", 'S', $true, $true) ;
-  $html .= &UserAgentLine("Non-mobile traffic", 'N', $false, $true) ;
-  $html .= &UserAgentLineNoPerc("Bot traffic", 'B', $false) ;
-  $html .= &UserAgentLineNoPerc("No user agent", '-', $false) ;
-  $html .= &UserAgentLineNoPerc("Full total", '.', $true) ;
+  $html .= &UserAgentLineNoPerc("Total traffic", '.', $true, 0) ;
+  $html .= &UserAgentLine("Mobile traffic", 'S', $true, $true, 1) ;
+  $html .= &UserAgentLine("Mobile browsers", 'M', $true, $true, 2) ;
+  $html .= &UserAgentLine("Tablet browsers", 'T', $true, $false, 3) ;
+  $html .= &UserAgentLine("Other mobile browsers", 'M', $true, $false, 3) ;
+  $html .= &UserAgentLine("WAP access", 'P', $true, $false, 3) ;
+  $html .= &UserAgentLine("(Mobile) apps", 'Q', $true, $true, 2) ;
+  $html .= &UserAgentLine("Wikimedia Android apps", 'A', $true, $false, 3) ;
+  $html .= &UserAgentLine("Other Android apps", 'a', $true, $false, 3) ;
+  $html .= &UserAgentLine("Wikimedia iOS apps", 'I', $true, $false, 3) ;
+  $html .= &UserAgentLine("Other iOS apps", 'i', $true, $false, 3) ;
+  $html .= &UserAgentLine("Unspecified apps", 'W', $true, $false, 3) ;
+  $html .= &UserAgentLine("Non-mobile traffic", 'N', $false, $true, 1) ;
+  $html .= &UserAgentLineNoPerc("Bot traffic", 'B', $false, 1) ;
   $html .= "</table>\n" ;
   $html .= "<p><a name='explain_estim'>[1]: Many apps, in particular our own iOS app upto April 2012, do not show up " .
            "on the logs with all requests. Reason for this is, that requests often go through the browser, and some " .
