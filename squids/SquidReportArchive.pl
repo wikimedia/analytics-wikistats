@@ -5310,7 +5310,7 @@ sub WriteReportUserAgents
 
   $html .= &UserAgentLineNoPerc("Total traffic", '.', $true, 0) ;
   $html .= &UserAgentLine("Mobile traffic", 'S', $true, $true, 1) ;
-  $html .= &UserAgentLine("Mobile browsers", 'M', $true, $true, 2) ;
+  $html .= &UserAgentLine("Mobile browsers", 'C', $true, $true, 2) ;
   $html .= &UserAgentLine("Tablet browsers", 'T', $true, $false, 3) ;
   $html .= &UserAgentLine("Other mobile browsers", 'M', $true, $false, 3) ;
   $html .= &UserAgentLine("WAP access", 'P', $true, $false, 3) ;
