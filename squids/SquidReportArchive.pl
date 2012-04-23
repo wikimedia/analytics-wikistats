@@ -4793,10 +4793,10 @@ sub UserAgentFieldPerc
 
 sub UserAgentLine
 {
-  my ($title, $code, $showperc, $ismarked, $depth) = @_ ;
+  my ($title, $code, $showperc, $ismarked, $depth, $sharecol) = @_ ;
   my $result = "<tr>";
-  for($i = 0 ; $i < $depth ; $i++)
-  { $result .= "<td>&gt;</td>" }
+  if ($sharecol > 0)
+  { $ result .= "<td rowspan=$sharecol>&nbsp;&nbsp;</td>" ; }
   my $colspan = 4 - $depth;
   if ($ismarked)
   { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
@@ -4813,6 +4813,24 @@ sub UserAgentLine
   $result .= UserAgentField($countua {$code, 'M', '.', '.'}, $ismarked) ;
   $result .= UserAgentField($countua {$code, 'W', '.', '.'}, $ismarked) ;
   $result .= UserAgentField($countua {$code, 'X', '.', '.'}, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $total_opensearch, $showperc, $ismarked) ;
+  return $result ;
+}
+
+sub UserAgentMobileLine
+{
+  my ($title, $code, $ismarked, $depth, $sharecol) = @_ ;
+  my $result = "<tr>";
+  if ($sharecol > 0)
+  { $ result .= "<td rowspan=$sharecol>&nbsp;&nbsp;</td>" ; }
+  my $colspan = 2 - $depth;
+  if ($ismarked)
+  { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
+  else
+  { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
+  $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $total_mobile_html, $true, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, '.', '.', '.'}, $total_mobile, $true, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $mobile_opensearch, $true, $ismarked) ;
   return $result ;
 }
 
@@ -4834,42 +4852,48 @@ sub WriteReportUserAgents
 
   $html .= "<table border=1>\n" ;
  
-  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=4>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th></tr>\n" ;
+  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=4>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th><th rowspan=16>&nbsp;</th><th>Opensearch<a href='#explain_search'>[1]</a></th></tr>\n" ;
   $html .= "<tr><th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th>" ;
-  $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[1]</a></th></tr>\n" ;
+  $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th><th class=c>Percentage</th></tr>\n" ;
 
   $total_count                   = $countua {'Z', '.', '.', '.'} * $multiplier ;
   $total_html                    = ($countua {'Z', 'M', 'page', '.'} + $countua {'Z', 'W', 'page', '.'}) * $multiplier ;
-  #$total_opensearch              = $countua {'Z', '.', '.', 'opensearch'} * $multiplier ;
-  #$total_mobile                  = $countua {'Z', 'M', '.', '.'} * $multiplier ;
-  #$total_mobile_html             = $countua {'Z', 'M', 'page', '.'} * $multiplier ;
-  #$total_nonmobile               = $countua {'Z', 'W', '.', '.'} * $multiplier ;
-  #$total_nonmobile_html          = $countua {'Z', 'W', 'page', '.'} * $multiplier ;
-  #$mobile_count                  = $countua {'S', '.', '.', '.'} * $multiplier ;
-  #$mobile_html                   = $countua {'S', '.', 'page', '.'} * $multiplier ;
-  #$mobile_opensearch             = $countua {'S', '.', '.', 'opensearch'} * $multiplier ;
-  #$mobile_mobile                 = $countua {'S', 'M', '.', '.'} * $multiplier ;
-  #$mobile_mobile_html            = $countua {'S', 'M', 'page', '.'} * $multiplier ;
-  #$mobile_nonmobile              = $countua {'S', 'W', '.', '.'} * $multiplier ;
-  #$mobile_nonmobile_html         = $countua {'S', 'W', 'page', '.'} * $multiplier ;
+  $total_opensearch              = $countua {'Z', '.', '.', 'opensearch'} * $multiplier ;
+  $total_mobile                  = $countua {'S', '.', '.', '.'} * $multiplier ;
+  $total_mobile_html             = ($countua {'S', 'M', 'page', '.'} + $countua {'S', 'W', 'page', '.'}) * $multiplier ;
+  $mobile_opensearch             = $countua {'S', '.', '.', 'opensearch'} * $multiplier ;
 
-  $html .= &UserAgentLine("From all sources", '.', $false, $true, 0) ;
-  $html .= &UserAgentLine("From mobile devices", 'S', $true, $true, 1) ;
-  $html .= &UserAgentLine("From mobile browsers", 'C', $true, $true, 2) ;
-  $html .= &UserAgentLine("From tablet browsers", 'T', $true, $false, 3) ;
-  $html .= &UserAgentLine("From other mobile browsers", 'M', $true, $false, 3) ;
-  $html .= &UserAgentLine("Through WAP access", 'P', $true, $false, 3) ;
-  $html .= &UserAgentLine("From mobile apps", 'Q', $true, $true, 2) ;
-  $html .= &UserAgentLine("Wikimedia Android apps", 'A', $true, $false, 3) ;
-  $html .= &UserAgentLine("Other Android apps", 'a', $true, $false, 3) ;
-  $html .= &UserAgentLine("Wikimedia iOS apps", 'I', $true, $false, 3) ;
-  $html .= &UserAgentLine("Other iOS apps", 'i', $true, $false, 3) ;
-  $html .= &UserAgentLine("Unspecified apps", 'W', $true, $false, 3) ;
-  $html .= &UserAgentLine("From non-mobile devices", 'N', $true, $true, 1) ;
-  $html .= &UserAgentLine("From bots", 'B', $false, $false, 1) ;
+  $html .= &UserAgentLine("From all sources", '.', $false, $true, 0, 0) ;
+  $html .= &UserAgentLine("From mobile devices", 'S', $true, $true, 1, 13) ;
+  $html .= &UserAgentLine("From mobile browsers", 'C', $true, $true, 2, 10) ;
+  $html .= &UserAgentLine("From tablet browsers", 'T', $true, $false, 3, 3) ;
+  $html .= &UserAgentLine("From other mobile browsers", 'M', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("Through WAP access", 'P', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("From mobile apps", 'Q', $true, $true, 2, 0) ;
+  $html .= &UserAgentLine("Wikimedia Android apps", 'A', $true, $false, 3, 5) ;
+  $html .= &UserAgentLine("Other Android apps", 'a', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("Wikimedia iOS apps", 'I', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("Other iOS apps", 'i', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("Unspecified apps", 'W', $true, $false, 3, 0) ;
+  $html .= &UserAgentLine("From non-mobile devices", 'N', $true, $true, 1, 0) ;
+  $html .= &UserAgentLine("From bots", 'B', $false, $false, 1, 0) ;
   $html .= "</table>\n" ;
-  $html .= "<p><a name='explain_other'>[1]: The great majority of the traffic to 'other' sites is images from upload.wikimedia.org.</a></p>\n" ;
-
+  $html .= "<p>&nbsp;</p>\n" ;
+  $html .= "<table border=1>\n" ;
+  $html .= "<tr><th class=l colspan=2>Partition of traffic from mobile devices</th><th>Page views</th><th>Total requests</th><th>Opensearch<a href='#explain_search'>[1]</a></th></tr>\n" ;
+  $html .= &UserAgentMobileLine("From mobile browsers", 'C', $true, 0, 0) ;
+  $html .= &UserAgentMobileLine("From tablet browsers", 'T', $false, 1, 3) ;
+  $html .= &UserAgentMobileLine("From other mobile browsers", 'M', $false, 1, 0) ;
+  $html .= &UserAgentMobileLine("Through WAP access", 'P', $false, 1, 0) ;
+  $html .= &UserAgentMobileLine("From mobile apps", 'Q', $true, 0, 0) ;
+  $html .= &UserAgentMobileLine("Wikimedia Android apps", 'A', $false, 1, 5) ;
+  $html .= &UserAgentMobileLine("Other Android apps", 'a', $false, 1, 0) ;
+  $html .= &UserAgentMobileLine("Wikimedia iOS apps", 'I', $false, 1, 0) ;
+  $html .= &UserAgentMobileLine("Other iOS apps", 'i', $false, 1, 0) ;
+  $html .= &UserAgentMobileLine("Unspecified apps", 'W', $false, 1, 0) ;
+  $html .= "</table>\n" ;
+  $html .= "<p><a name='explain_search'>[1]: Various mobile apps use the user's browser to show most Wikipedia pages. This includes Wikimedia's own iOS app upto early April 2012. These are thus not seen on the logs themselves, and are not included in these data. Thus, the actual use of these apps is higher than these data show. To give a reasonable estimate of their usage, this column gives percentages based on a segment that is shown for at least some of these apps, namely the usage of JavaScript to show suggestions when people are searching - these are the so-called 'opensearch' api calls. Only percentages are shown here, because the data are not interesting out of themselves, but serve as an estimate for the 'true' partition of the total data.</a></p>" ;
+  $html .= "<p><a name='explain_other'>[2]: The great majority of the traffic to 'other' servers is images from upload.wikimedia.org.</a></p>\n" ;
   $html .= $colophon_ae ;
 
   print FILE_HTML_USER_AGENTS $html ;
