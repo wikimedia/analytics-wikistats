@@ -465,6 +465,8 @@ sub InitGlobals # qqq
   undef $tot_referers_external ;
   undef $tot_referers_internal ;
   undef $unrecognized_domains ;
+  undef $useragents ;
+  undef $country_info ;
 
   undef %google_bot_hits ;
   undef %ip_bot_no_google ;
