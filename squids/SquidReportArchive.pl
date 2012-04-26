@@ -4766,7 +4766,7 @@ sub UserAgentField
    my ($value, $ismarked) = @_;
    if ($ismarked)
    {
-     $shownumber = &ShowCount ($value * $multiplier, $marker_color) ;
+     $shownumber = &ShowCount ($value * $multiplier, $ismarked) ;
    }
    else
    {
@@ -4780,9 +4780,11 @@ sub UserAgentFieldPerc
    my ($value, $compare, $showperc, $ismarked) = @_;
    if (!$showperc)
    { return "<td>&nbsp;</td>" ; }
-   if ($ismarked)
+   if ($value < 1)
+   { $shownumber = '-' }
+   elsif ($ismarked)
    {
-     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $marker_color) ;
+     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $ismarked) ;
    }
    else
    {
@@ -4799,21 +4801,23 @@ sub UserAgentLine
   { $ result .= "<td rowspan=$sharecol>&nbsp;&nbsp;</td>" ; }
   my $colspan = 4 - $depth;
   if ($ismarked)
+  { $ismarked = $marker_color ; }
+  if ($ismarked)
   { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
   else
   { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
   #$result .= "<td>&nbsp;</td>" ;
   $result .= UserAgentField($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $ismarked) ;
   $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $total_html, $showperc, $ismarked) ;
-  $result .= UserAgentField($countua {$code, 'M', 'page', '.'}, $ismarked) ;
-  $result .= UserAgentField($countua {$code, 'W', 'page', '.'}, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'}, $total_html, $showperc, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, 'W', 'page', '.'}, $total_html, $showperc, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $total_opensearch, $showperc, '#808080') ;
   #$result .= "<td>&nbsp;</td>" ;
   $result .= UserAgentField($countua {$code, '.', '.', '.'}, $ismarked) ;
   $result .= UserAgentFieldPerc($countua {$code, '.', '.', '.'}, $total_count, $showperc, $ismarked) ;
-  $result .= UserAgentField($countua {$code, 'M', '.', '.'}, $ismarked) ;
-  $result .= UserAgentField($countua {$code, 'W', '.', '.'}, $ismarked) ;
-  $result .= UserAgentField($countua {$code, 'X', '.', '.'}, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $total_opensearch, $showperc, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, 'M', '.', '.'}, $total_count, $showperc, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, 'W', '.', '.'}, $total_count, $showperc, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, 'X', '.', '.'}, $total_count, $showperc, $ismarked) ;
   return $result ;
 }
 
@@ -4825,12 +4829,14 @@ sub UserAgentMobileLine
   { $ result .= "<td rowspan=$sharecol>&nbsp;&nbsp;</td>" ; }
   my $colspan = 2 - $depth;
   if ($ismarked)
+  { $ismarked = $marker_color ; }
+  if ($ismarked)
   { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
   else
   { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
   $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $total_mobile_html, $true, $ismarked) ;
   $result .= UserAgentFieldPerc($countua {$code, '.', '.', '.'}, $total_mobile, $true, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $mobile_opensearch, $true, $ismarked) ;
+  $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $mobile_opensearch, $true, '#808080') ;
   return $result ;
 }
 
@@ -4852,9 +4858,9 @@ sub WriteReportUserAgents
 
   $html .= "<table border=1>\n" ;
  
-  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=4>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th><th rowspan=16>&nbsp;</th><th>Opensearch<a href='#explain_search'>[1]</a></th></tr>\n" ;
-  $html .= "<tr><th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th>" ;
-  $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th><th class=c>Percentage</th></tr>\n" ;
+  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th><th rowspan=16>&nbsp;</th></tr>\n" ;
+  $html .= "<tr><th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>Search-based estimate<a href='#explain_search'>[1]</a></th>" ;
+  $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ;
 
   $total_count                   = $countua {'Z', '.', '.', '.'} * $multiplier ;
   $total_html                    = ($countua {'Z', 'M', 'page', '.'} + $countua {'Z', 'W', 'page', '.'}) * $multiplier ;
@@ -4880,7 +4886,7 @@ sub WriteReportUserAgents
   $html .= "</table>\n" ;
   $html .= "<p>&nbsp;</p>\n" ;
   $html .= "<table border=1>\n" ;
-  $html .= "<tr><th class=l colspan=2>Partition of traffic from mobile devices</th><th>Page views</th><th>Total requests</th><th>Opensearch<a href='#explain_search'>[1]</a></th></tr>\n" ;
+  $html .= "<tr><th class=l colspan=2>Breakdown of traffic from mobile devices</th><th>Page views</th><th>Total requests</th><th>Search-based estimate<a href='#explain_search'>[1]</a></th></tr>\n" ;
   $html .= &UserAgentMobileLine("From mobile browsers", 'C', $true, 0, 0) ;
   $html .= &UserAgentMobileLine("From tablet browsers", 'T', $false, 1, 3) ;
   $html .= &UserAgentMobileLine("From other mobile browsers", 'M', $false, 1, 0) ;
@@ -4892,7 +4898,7 @@ sub WriteReportUserAgents
   $html .= &UserAgentMobileLine("Other iOS apps", 'i', $false, 1, 0) ;
   $html .= &UserAgentMobileLine("Unspecified apps", 'W', $false, 1, 0) ;
   $html .= "</table>\n" ;
-  $html .= "<p><a name='explain_search'>[1]: Various mobile apps use the user's browser to show most Wikipedia pages. This includes Wikimedia's own iOS app upto early April 2012. These are thus not seen on the logs themselves, and are not included in these data. Thus, the actual use of these apps is higher than these data show. To give a reasonable estimate of their usage, this column gives percentages based on a segment that is shown for at least some of these apps, namely the usage of JavaScript to show suggestions when people are searching - these are the so-called 'opensearch' api calls. Only percentages are shown here, because the data are not interesting out of themselves, but serve as an estimate for the 'true' partition of the total data.</a></p>" ;
+  $html .= "<p><a name='explain_search'>[1]: Various mobile apps use the user's browser to show most Wikipedia pages. This includes Wikimedia's own iOS app upto early April 2012. Thus, in the data here they are underrepresented. The percentages in the 'estimate' column are based on the search-related api which <i>is</i> visible, at least for the iOS app. Thus they give a more reliable estimate of the actual use of applications on Wikipedia.</a></p>" ;
   $html .= "<p><a name='explain_other'>[2]: The great majority of the traffic to 'other' servers is images from upload.wikimedia.org.</a></p>\n" ;
   $html .= $colophon_ae ;
 
