@@ -745,8 +745,8 @@ sub WriteOutputSquidLogs
    print CSV_AGENTS "$key,$count\n" ;
  }
 
-  print CSV_COUNTRIES_INFO "# pos 1: M = mobile/non-mobile status, O = opsys, B = browser/client" ;
-  print CSV_COUNTRIES_INFO ":type,country,value,count" ;
+  print CSV_COUNTRIES_INFO "# pos 1: M = mobile/non-mobile status, O = opsys, B = browser/client\n" ;
+  print CSV_COUNTRIES_INFO ":type,country,value,count\n" ;
 
  foreach $key (sort keys %country_info)
  {

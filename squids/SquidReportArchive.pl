@@ -4923,6 +4923,7 @@ sub WriteReportCountriesInfo
   $counter = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+     next if ($country eq 'other') ;
      next if ($counter >= 50 or $country eq '--') ;
      $countryname = $country_codes {$country} ;
      if (not $countryname)
@@ -4937,6 +4938,7 @@ sub WriteReportCountriesInfo
   $counter = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    next if ($country eq 'other') ;
     if ($counter >= 50 or $country eq '--')
     {
       $countrytotal { 'other' } += $countrytotal { $country } ;
@@ -4969,6 +4971,7 @@ sub WriteReportCountriesInfo
     $counter = 0 ;
     foreach $country (keys_sorted_by_value_num_desc %countrytotal)
     {
+      next if ( $country eq 'other' ) ;
       if ( $counter >= 50 or $country eq '--')
       {
         $countryos { 'other', $os } += $countryos {$country, $os} ;
@@ -4984,13 +4987,16 @@ sub WriteReportCountriesInfo
     $showperc = &ShowPerc (100 * $countryos { $country, $os } / $countrytotal { $country } ) ;
     $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
   }
+  $os = 'other' ;
   $otheros = 0 ;
   $counter = 0 ;
+  $html .= "<tr><td class=rt>Other OS</td>" ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    next if ( $country eq 'other') ;
     if ( $counter >= 50 or $country eq '--')
     {
-      $otheros += $countryos { $country, $os } ;
+      $countryos { 'other', $os } += $countryos { $country, $os } ;
       next ;
     }
     $showvalue = &ShowCount ($countryos { $country, $os } * $multiplier ) ;
@@ -5011,10 +5017,11 @@ sub WriteReportCountriesInfo
   $counter = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+     next if ($country eq 'other') ;
      next if ($counter >= 50 or $country eq '--') ;
      $countryname = $country_codes {$country} ;
      if (not $countryname)
-     { $countryname = $country }
+     { $countryname = $country ; }
      $html .= "<th class=c colspan='2'>$countryname</th>" ;
      $counter += 1 ;
   }
@@ -5024,8 +5031,10 @@ sub WriteReportCountriesInfo
   $html .= "<tr><td class=lt>Total requests</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
   $othertotal = 0 ;
   $counter = 0 ;
+  $countrytotal { 'other' } = 0;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    next if ( $country eq 'other') ;
     if ($counter >= 50 or $country eq '--')
     {
       $countrytotal { 'other' } += $countrytotal { $country } ;
@@ -5044,6 +5053,7 @@ sub WriteReportCountriesInfo
   $counter = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    next if ($country eq 'other') ;
     if ($counter >= 50 or $country eq '--')
     {
       $countrymobile { 'other' } += $countrymobile { $country } ;
@@ -5075,6 +5085,7 @@ sub WriteReportCountriesInfo
     $counter = 0 ;
     foreach $country (keys_sorted_by_value_num_desc %countrytotal)
     {
+      next if ($country eq 'other' ) ;
       if ( $counter >= 50 or $country eq '--')
       {
         $countrybrowser { 'other', $browser } += $countrybrowser { $country, $browser } ;
@@ -5086,17 +5097,18 @@ sub WriteReportCountriesInfo
       $counter += 1 ;
     }
     $country = 'other' ;
-    $showvalue = &ShowCount ($countrybrowser { $country, $browser } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countrybrowser { $country, $browser } / $countrytotal { $country } ) ;
+    $showvalue = &ShowCount ($allcountrybrowser { $browser } * $multiplier ) ;
+    $showperc = &ShowPerc (100 * $allcountrybrowser { $browser } / $countrytotal { $country } ) ;
     $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
   }
   $browser = 'other' ;
-  $showvalue = &ShowCount ($countrybrowser {$browser} * $multiplier) ;
-  $showperc = &ShowPerc (100 * $countrybrowser {$browser} / $allcountrytotal) ;
+  $showvalue = &ShowCount ($allcountrybrowser {$browser} * $multiplier) ;
+  $showperc = &ShowPerc (100 * $allcountrybrowser {$browser} / $allcountrytotal) ;
   $html .= "<tr><td class=lt>$browser</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
   $counter = 0 ;
   foreach $country (keys_sorted_by_value_num_desc %countrytotal)
   {
+    next if ($country eq 'other') ;
     if ( $counter >= 50 or $country eq '--')
     {
       $countrybrowser { 'other', $browser } += $countrybrowser { $country, $browser } ;
