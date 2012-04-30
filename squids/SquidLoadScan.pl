@@ -104,6 +104,7 @@ sub WriteHourlyAveragedDeltaSequenceNumbers
   {
     $avg_delta_all_regular_squids = sprintf ("%.0f", $all_regular_squids_delta_hour  {$date_hour} / $all_regular_squids_active {$date_hour}) ;
     print CSV "$date_hour,$avg_delta_all_regular_squids\n" ;
+    print     "$date_hour,$avg_delta_all_regular_squids\n" ;
   }
   close CSV ;
 }

@@ -1,3 +1,4 @@
+
 #!/usr/bin/perl
 ## Collect page views stats by country on Locke
 ## sub CollectRawData -> SquidDataCountries.csv
@@ -23,21 +24,25 @@
   # exit ;
   }
 
-  $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
+  $path_csv = $job_runs_on_production_server ? $cfg_path_csv : $cfg_path_csv_test ;
+  $path_log = $job_runs_on_production_server ? $cfg_path_log : $cfg_path_log_test ;
+  $file_log = "SquidCountryScan.log" ;
 
-  $file_raw_data_monthly_visits  = "$path_root/SquidDataVisitsPerCountryMonthly.csv" ;
-  $file_raw_data_daily_visits    = "$path_root/SquidDataVisitsPerCountryDaily.csv" ;
+  $file_raw_data_monthly_visits  = "$path_csv/SquidDataVisitsPerCountryMonthly.csv" ;
+  $file_raw_data_daily_visits    = "$path_csv/SquidDataVisitsPerCountryDaily.csv" ;
   $file_per_country_visits       = "public/SquidDataCountriesViews.csv" ;
   $file_per_country_visits_old   = "SquidDataCountries2.csv" ;
 
-  $file_raw_data_monthly_saves   = "$path_root/SquidDataSavesPerCountryMonthly.csv" ;
-  $file_raw_data_daily_saves     = "$path_root/SquidDataSavesPerCountryDaily.csv" ;
+  $file_raw_data_monthly_saves   = "$path_csv/SquidDataSavesPerCountryMonthly.csv" ;
+  $file_raw_data_daily_saves     = "$path_csv/SquidDataSavesPerCountryDaily.csv" ;
   $file_per_country_saves        = "public/SquidDataCountriesSaves.csv" ;
   $file_per_country_saves_old    = "SquidDataCountriesSaves.csv" ;
 
   &CollectRawData ('visits', $file_per_country_visits, $file_per_country_visits_old, $file_raw_data_monthly_visits, $file_raw_data_daily_visits) ;
   &CollectRawData ('saves',  $file_per_country_saves,  $file_per_country_saves_old,  $file_raw_data_monthly_saves,  $file_raw_data_daily_saves) ;
-  &ProcessRawData ;
+# &ProcessRawData ;
+
+  print "\n\nReady\n\n" ;
 
   exit ;
 
@@ -60,7 +65,7 @@ sub CollectRawData
 
   while ($true)
   {
-    $dir  = "$path_root/" . sprintf ("%04d-%02d", $year, $month) ;
+    $dir  = "$path_csv/" . sprintf ("%04d-%02d", $year, $month) ;
     $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
     if (-d $dir)
     {
@@ -243,6 +248,7 @@ sub CollectRawData
   }
 }
 
+# not operational, obsolete? Q&D code?
 sub ProcessRawData
 {
   print "\nProcessRawData\n\n" ;
@@ -457,7 +463,6 @@ sub ProcessRawData
   { $ratio = sprintf ("%5.1f", $count_edits / $count_submits) ; }
   $text .= sprintf ("%-14s",'total') . "edits " . sprintf ("%6d", $count_edits) . ", submits ".  sprintf ("%6d", $count_submits) . ", ratio $ratio\n" ;
   $text .= "\n\n" ;
-  print $count
 
   $text .= "Count per relevant status with redlink:\n" ;
   foreach $key (sort keys %counts_per_relevant_status_with_redlink)
@@ -469,7 +474,7 @@ sub ProcessRawData
   }
   $text .= "\n\n" ;
 
-  open SUMMARY, '>', $file_txt_summary ;
+  open SUMMARY, '>', "$path_log/$file_log" ;
   print SUMMARY $text ;
   close SUMMARY ;
 
@@ -489,3 +494,10 @@ sub DaysInMonth
   my $days = ($timegm2-$timegm1) / (24*60*60) ;
   return ($days) ;
 }
+
+sub Log
+{
+  my $msg = shift ;
+  print $msg ;
+}
+

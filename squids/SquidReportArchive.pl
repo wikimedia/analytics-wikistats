@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+  $| = 1; # Flush output
+
   use SquidReportArchiveConfig ;
   use lib $cfg_liblocation ;
 
@@ -32,18 +34,20 @@
 
   undef %country_code_not_specified_reported ;
 
-  $path_in  = $job_runs_on_production_server ? $cfg_path_in_production  : $cfg_path_in_test ;
-  $path_out = $job_runs_on_production_server ? $cfg_path_out_production : $cfg_path_out_test ;
+  $path_csv     = $job_runs_on_production_server ? $cfg_path_csv     : $cfg_path_csv_test ;
+  $path_reports = $job_runs_on_production_server ? $cfg_path_reports : $cfg_path_reports_test ;
+  $path_log     = $job_runs_on_production_server ? $cfg_path_log     : $cfg_path_log_test ;
 
-  &Log ("Path in  = $path_in\n") ;
-  &Log ("Path out = $path_out\n") ;
+  &Log ("Path csv     = $path_csv\n") ;
+  &Log ("Path reports = $path_reports\n") ;
+  &Log ("Path log     = $path_log\n") ;
 
 # following test needs to change -> remove server name dependency (new run argument ?)
 # elsif ($hostname eq 'bayes')
 # {
 #   &Log ("\n\nJob runs on server $hostname\n\n") ;
-#   $path_in  = "/home/ezachte/wikistats/animation" ;
-#   $path_out = "/home/ezachte/wikistats/animation" ;
+#   $path_csv  = "/home/ezachte/wikistats/animation" ;
+#   $path_reports = "/home/ezachte/wikistats/animation" ;
 # }
 
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
@@ -52,27 +56,65 @@
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_population'
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'
   if (defined ($options {"w"}))
-  { &ReadWikipedia ; &Log ("Ready\n") ; exit ; }
-
-  if (defined ($options {"c"}))
-  { $reportcountries = $true ; }
-
-  if (defined ($options {"q"}))
   {
-    $quarter_only = $options {"q"} ;  # process for this quarter only
-    if ($quarter_only !~ /^2\d\d\dQ\d$/)
-    { abort ("Specify run for one single quarter as -q yyyyQ[1-4], e.g. -q 2011Q3, not '$quarter_only'\n") ; }
-    $quarter_only =~ s/^(\d\d\d\d)(Q\d)$/$1 $2/ ;
-    &Log ("QUARTER ONLY  $quarter_only\n") ;
+    &ReadWikipedia ;
+    &Log ("\n\nReady\n\n") ;
+    exit ;
   }
+  elsif (defined ($options {"c"}))
+  {
+    $reportcountries = $true ;
+    &Log ("\nGenerate report per country\n\n") ;
+
+    if (defined ($options {"q"}))
+    {
+      $quarter_only = $options {"q"} ;  # process for this quarter only
+      if ($quarter_only !~ /^2\d\d\dQ\d$/)
+      { abort ("Specify run for one single quarter as -q yyyyQ[1-4], e.g. -q 2011Q3, not '$quarter_only'\n") ; }
+      $quarter_only =~ s/^(\d\d\d\d)(Q\d)$/$1 $2/ ;
+      &Log ("\nRun for one quarter only: $quarter_only\n\n") ;
+    }
+  }
+  elsif (defined ($options {"m"}) || defined ($options {"d"}))
+  {
+    if (($options {"m"} !~ /^\d\d\d\d-\d\d$/) && ($options {"d"} !~ /^-\d+$/))
+    { &Log ("Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)") ; exit ; }
+
+    $reportdaysback  = $options {"d"} ;
+    $reportmonth     = $options {"m"} ;
+
+    if ($reportdaysback =~ /^-\d+$/)
+    {
+      ($sec,$min,$hour,$day,$month,$year) = localtime (time+$reportdaysback*86400) ;
+      $reportmonth = sprintf ("%04d-%02d",$year+1900,$month+1) ;
+    }
+
+    &Log ("Report month = $reportmonth\n") ;
+  }
+  else { &Log ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
+
 
   # date range used to be read from csv file with ReadDate, now there are daily csv files
   # if earlier methods still is useful it needs to be tweaked
 # if (($reportmonth ne "") && ($reportmonth !~ /^\d{6}$/))
 
-  &InitProjectNames ;
+  if ($quarter_only ne '')
+  { $path_reports = "$path_reports/$quarter_only" ; }
+  elsif ($reportmonth ne '')
+  { $path_reports = "$path_reports/$reportmonth" ; }
+  elsif ($reportcountries)
+  { $path_reports = "$path_reports/countries" ; }
 
-  $file_csv_country_codes = "CountryCodes.csv" ;
+  print "Write report to $path_reports\n" ;
+
+  $path_reports =~ s/ /-/g ;
+  if (! -d $path_reports)
+  {
+  #  print "mkdir $path_reports\n" ;
+    mkdir ($path_reports) || die "Unable to create directory $path_reports\n" ;
+  }
+
+  &InitProjectNames ;
 
   &ReadInputCountriesNames ;
 
@@ -90,25 +132,12 @@
     exit ;
   }
 
-  $reportdaysback  = $options {"d"} ;
-  $reportmonth     = $options {"m"} ;
-
-  if (($reportmonth !~ /^\d\d\d\d-\d\d$/) && ($reportdaysback !~ /^-\d+$/))
-  { &Log ("Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)") ; exit ; }
-
-  if ($reportdaysback =~ /^-\d+$/)
-  {
-    ($sec,$min,$hour,$day,$month,$year) = localtime (time+$reportdaysback*86400) ;
-    $reportmonth = sprintf ("%04d-%02d",$year+1900,$month+1) ;
-  }
-  &Log ("Report month = $reportmonth\n") ;
-
   $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
 
   $threshold_mime    = 0 ;
   $threshold_project = 10 ;
 
-  $file_log               = "WikiReportsSampledVisitorsLog.log" ;
+  $file_log               = "SquidReportArchive.log" ;
 
   $file_html_crawlers     = "SquidReportCrawlers.htm" ;
   $file_html_methods      = "SquidReportMethods.htm" ;
@@ -124,6 +153,7 @@
   $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
   $file_html_countries_info = "SquidReportCountryData.htm" ;
 
+  $file_csv_user_agents   = "SquidReportUserAgents.csv" ;
 # names till 2010-07-01
 #
 #  $file_csv_crawlers      = "SquidDataCrawlers.csv" ;
@@ -161,8 +191,8 @@
 
   print "\n\nJob SquidReportArchive.pl\n\n" ;
 
-  if (! -d "$path_in/$reportmonth")
-  { print "Directory not found: $path_in\/$reportmonth\n" ; exit ; }
+  if (! -d "$path_csv/$reportmonth")
+  { print "Directory not found: $path_csv\/$reportmonth\n" ; exit ; }
 
 # for ($month = 4 ; $month <= 10 ; $month ++)
 # {
@@ -173,7 +203,7 @@
 #     last if ($month == 10) && ($day > 24) # temp code stay with DST summer time zone for SV
 
       $date = $reportmonth . "-".  sprintf ("%02d", $day) ;
-      $dir  = "$path_in/$reportmonth/$date" ;
+      $dir  = "$path_csv/$reportmonth/$date" ;
 
       if (-d $dir)
       {
@@ -195,9 +225,6 @@
   if ($#dirs_process < 0)
   { print "No valid data to process.\n" ; exit ; }
 
-  $path_reports = "$path_in/$reportmonth" ;
-  print "Write report to $path_reports\n" ;
-
   $google_ip_ranges = "<b>IP ranges:</b> known ip ranges for Google are 64.233.[160.0-191.255], 66.249.[64.0-95.255], 66.102.[0.0-15.255], 72.14.[192.0-255.255], <br>74.125.[0.0-255.255], " .
   "209.085.[128.0-255.255], 216.239.[32.0-63.255] and a few minor other subranges</small><p>\n" ;
 
@@ -211,6 +238,7 @@
   {
     $days_input_found ++ ;
 
+    print "\nRead input from $path_process\n" ;
     &ReadInputClients ;
     &ReadInputCrawlers ;
     &ReadInputMethods ;
@@ -347,9 +375,9 @@ sub ReportCountries
   $file_csv_per_country_overview        = "SquidReport${selection}PerCountryOverview.csv" ;
   $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;
 
-  $path_csv_squid_counts_monthly  = "$path_in/$file_csv_squid_counts_monthly" ;
+  $path_csv_squid_counts_monthly  = "$path_csv/$file_csv_squid_counts_monthly" ;
   if (! -e $path_csv_squid_counts_monthly)  { abort ("Input file $path_csv_squid_counts_monthly not found!") ; }
-  $path_csv_squid_counts_daily  = "$path_in/$file_csv_squid_counts_daily" ;
+  $path_csv_squid_counts_daily  = "$path_csv/$file_csv_squid_counts_daily" ;
   if (! -e $path_csv_squid_counts_daily)  { abort ("Input file $path_csv_squid_counts_daily not found!") ; }
 
   &ReadInputCountriesMonthly ($project_mode) ;
@@ -567,7 +595,7 @@ sub ReadCountryCodes
 {
   &Log ("ReadCountryCodes\n") ;
 
-  open CODES, '<', "$path_in/$file_csv_country_codes" ;
+  open CODES, '<', "$path_csv/$file_csv_country_codes" ;
   while ($line = <CODES>)
   {
     if ($line =~ /^[A-Z]/)
@@ -1364,7 +1392,8 @@ sub ReadInputCountriesNames
 {
   &Log ("ReadInputCountriesNames\n") ;
 
-  $path_csv_country_codes = "$path_in/$file_csv_country_codes" ;
+  $file_csv_country_codes = "CountryCodes.csv" ;
+  $path_csv_country_codes = "$path_csv/$file_csv_country_codes" ;
   if (! -e $path_csv_country_codes) { abort ("Input file $path_csv_country_codes not found!") ; }
 
   open    CSV_COUNTRY_CODES, '<', $path_csv_country_codes ;
@@ -1409,13 +1438,12 @@ sub ReadInputCountriesMeta
 
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
-  &Log ("Read $path_in/$file_csv_country_meta_info\n") ;
-  open    COUNTRY_META_INFO, '<', "$path_in/$file_csv_country_meta_info" ;
+  &Log ("Read $path_csv/$file_csv_country_meta_info\n") ;
+  open    COUNTRY_META_INFO, '<', "$path_csv/$file_csv_country_meta_info" ;
   binmode COUNTRY_META_INFO ;
   while ($line = <COUNTRY_META_INFO>)
   {
     chomp $line ;
-
     $line =~ s/[\x00-\x1f]//g ;
 
     ($country,$link,$population,$connected,$icon) = split ',', $line ;
@@ -1447,6 +1475,7 @@ sub ReadInputCountriesMeta
 
     if ($connected eq 'connected')
     { &Log ("connected unknown: $country\n") ; }
+
     $connected =~ s/connected/../g ;
     $country_meta_info {$country} = "$link,$population,$connected,$icon" ;
 
@@ -1466,6 +1495,7 @@ sub CollectRegionCounts
   {
     $country_name = $country_names {$country_code} ;
     $country_meta = $country_meta_info {$country_name} ;
+
     my ($link,$population,$connected,$icon) = split (',', $country_meta) ;
 
     $region_code      = $region_codes      {$country_code} ;
@@ -1948,6 +1978,22 @@ sub ReadInputCountriesInfo
   my $file_csv = "$path_process/$file_csv_countries_info" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputCountryInfo: file $file_csv not found!!!") ; }
+  #$allcountrytotal = 0 ;
+  #$countrytotal = { } ;
+  #$allcountrybrowser = { } ;
+  #$countrybrowser = { } ;
+  #$allcountryos = { } ;
+  #$countryos = { } ;
+  #$allcountrymobile = 0 ;
+  #$countrymobile = { } ;
+  undef $allcountrytotal ;
+  undef %countrytotal ;
+  undef %allcountrybrowser ;
+  undef %countrybrowser ;
+  undef %allcountryos ;
+  undef %countryos ;
+  undef $allcountrymobile ;
+  undef %countrymobile ;
   open CSV_COUNTRIES_INFO, '<', $file_csv ;
   while ($line = <CSV_COUNTRIES_INFO>)
   {
@@ -4848,7 +4894,10 @@ sub WriteReportUserAgents
   $altbgcolor = '#DDFFDD' ;
 
   open FILE_HTML_USER_AGENTS, '>', "$path_reports/$file_html_user_agents" ;
+  open FILE_CSV_USER_AGENTS, '>', "$path_reports/$file_csv_user_agents" ;
 
+  $csv_out = "# user agents lay-out\n" ;
+  $csv_out = "# pageviews total, pageviews mobile, pageviews main, opensearch, all total, all mobile, all main, all other\n" ;
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
@@ -4857,7 +4906,7 @@ sub WriteReportUserAgents
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
- 
+
   $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th><th rowspan=16>&nbsp;</th></tr>\n" ;
   $html .= "<tr><th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>Search-based estimate<a href='#explain_search'>[1]</a></th>" ;
   $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ;
@@ -4915,7 +4964,7 @@ sub WriteReportCountriesInfo
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Data per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Data per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=800>\n" ;
@@ -5175,10 +5224,10 @@ sub WriteCsvBrowserLanguages
 
 sub WriteCsvCountriesTimed
 {
-  &Log ("WriteCsvCountriesTimed: $path_out/$file_csv_countries_timed\n") ;
+  &Log ("WriteCsvCountriesTimed: $path_csv/$file_csv_countries_timed\n") ;
 
   $multiplier_1000 = 1000 * $multiplier ;
-  open CSV_COUNTRIES_TIMED, '>', "$path_out/$file_csv_countries_timed" ;
+  open CSV_COUNTRIES_TIMED, '>', "$path_csv/$file_csv_countries_timed" ;
 
   foreach $target (sort keys %targets)
   {
@@ -5230,9 +5279,9 @@ sub WriteCsvCountriesTimed
 # http://www.maxmind.com/app/iso3166 country codes
 sub WriteCsvCountriesGoTo
 {
-  &Log ("WriteCsvCountriesGoTo: $path_out/$file_csv_countries_languages_visited\n") ;
+  &Log ("WriteCsvCountriesGoTo: $path_csv/$file_csv_countries_languages_visited\n") ;
 
-  open CSV_COUNTRIES_LANGUAGES_VISITED, '>', "$path_out/$file_csv_countries_languages_visited" ;
+  open CSV_COUNTRIES_LANGUAGES_VISITED, '>', "$path_csv/$file_csv_countries_languages_visited" ;
 
   foreach $country (sort keys %countries)
   {
@@ -5398,7 +5447,7 @@ sub WriteReportPerLanguageBreakDown
   $index = &HtmlIndex (join '/ ', sort (@index_languages)) ;
   $html =~ s/INDEX/$index/ ;
 
-  &PrintHtml ($html, "$path_out/$file_html_per_language_breakdown") ;
+  &PrintHtml ($html, "$path_reports/$file_html_per_language_breakdown") ;
 }
 
 sub WriteReportPerCountryOverview
@@ -5689,7 +5738,7 @@ sub WriteReportPerCountryOverview
   $html =~ s/TOTAL/$html_total/ ;
   $html =~ s/REGIONS/$html_regions/ ;
 
-  &PrintHtml ($html, "$path_out/$file_html_per_country_overview") ;
+  &PrintHtml ($html, "$path_reports/$file_html_per_country_overview") ;
 }
 
 #sub WriteReportPerCountryOverviewLine
@@ -5845,7 +5894,7 @@ sub WriteCsvFilePerCountryDensity
 
 # $file_csv_per_country_overview2 =  $file_csv_per_country_overview ;
 # $file_csv_per_country_overview2 =~ s/\.csv/-$postfix.csv/ ;
-  &PrintCsv  ($header_csv_countries . join ('', sort @csv_countries), "$path_out/$file_csv_per_country_density") ;
+  &PrintCsv  ($header_csv_countries . join ('', sort @csv_countries), "$path_csv/$file_csv_per_country_density") ;
 }
 
 sub WriteCsvSvgFilePerCountryOverview
@@ -6022,7 +6071,7 @@ next ;
 
   $file_csv_per_country_overview2 =  $file_csv_per_country_overview ;
   $file_csv_per_country_overview2 =~ s/\.csv/-$postfix.csv/ ;
-  &PrintCsv  ($header_csv_countries . join ('', sort @csv_countries), "$path_out/svg/$file_csv_per_country_overview2") ;
+  &PrintCsv  ($header_csv_countries . join ('', sort @csv_countries), "$path_csv/svg/$file_csv_per_country_overview2") ;
 
 #  $perc_tot = 0 ;
 #  foreach $code (keys_sorted_by_value_num_desc %requests_per_connected_persons)
@@ -6386,9 +6435,9 @@ sub WriteReportPerCountryBreakdown
   $html =~ s/INDEX/$index/ ;
 
   if (! $show_logcount)
-  { &PrintHtml ($html, "$path_out/$file_html_per_country_breakdown") ; }
+  { &PrintHtml ($html, "$path_reports/$file_html_per_country_breakdown") ; }
   else
-  { &PrintHtml ($html, "$path_out/$file_html_per_country_breakdown_huge") ; }
+  { &PrintHtml ($html, "$path_reports/$file_html_per_country_breakdown_huge") ; }
 }
 
 sub WriteReportPerCountryTrends
@@ -6527,7 +6576,7 @@ sub WriteReportPerCountryTrends
   $index = &HtmlIndex (join '/ ', sort (@index_countries)) ;
   $html =~ s/INDEX/$index/ ;
 
-  &PrintHtml ($html, "$path_out/$file_html_per_country_trends") ;
+  &PrintHtml ($html, "$path_reports/$file_html_per_country_trends") ;
 }
 
 sub CorrectForMissingDays
@@ -6681,7 +6730,7 @@ sub OpenLog
 #   close "FILE_LOG" ;
 # }
 # open "FILE_LOG", ">>", "$path_reports/$file_log" || abort ("Log file '$file_log' could not be opened.") ;
-  open "FILE_LOG", ">>", "$path_reports/$file_log" || abort ("Log file '$file_log' could not be opened.") ;
+  open "FILE_LOG", ">>", "$path_log/$file_log" || abort ("Log file '$file_log' could not be opened.") ;
   &Log ("\n\n===== Wikimedia Sampled Visitors Log Report / " . date_time_english (time) . " =====\n\n") ;
 }
 
@@ -7200,8 +7249,8 @@ sub ReadWikipedia
     { &Log ("$country\n") ; }
   }
 
-  &Log ("Write $path_in/$file_csv_country_meta_info\n\n") ; # use $path_in, not $path_out  so that next step picks up proper file
-  open COUNTRY_META_INFO, '>', "$path_in/$file_csv_country_meta_info" ;
+  &Log ("Write $path_csv/$file_csv_country_meta_info\n\n") ;
+  open COUNTRY_META_INFO, '>', "$path_csv/$file_csv_country_meta_info" ;
   foreach $country (sort keys %countries)
   { print COUNTRY_META_INFO $countries {$country} ; }
   close COUNTRY_META_INFO ;
