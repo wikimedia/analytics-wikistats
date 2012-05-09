@@ -130,6 +130,8 @@ sub ProcessLine
     $country = $fields [14] ;
     if (($country eq "") || ($country =~ /null/))
     { $country = "--" ; }
+    if (&isInternal($client_ip))
+    { $country = "-X" ; }
   }
   else
   {
@@ -505,12 +507,12 @@ sub ProcessLine
   { ($version = $agent2) =~ s/^.*?(Dalvik\/\d+\.?\d*).*$/Android: $1/o ; }
 
   # WIKIPEDIA MOBILE
-  elsif ($agent2 =~ /(Wiktionary|Wikipedia)Mobile(\/| )\d+/io)
+  elsif ($agent2 =~ /(Wiktionary|Wikipedia) ?Mobile(\/| )\d+/io)
   {
     if ($agent2 =~ /Android/io)
-    { ($version = $agent2) =~ s/^.*((Wiktionary|Wikipedia)Mobile(\/| )(\d|\.)+).*$/Android: $1 (WMF)/o ; }
+    { ($version = $agent2) =~ s/^.*((Wiktionary|Wikipedia) ?Mobile(\/| )(\d|\.)+).*$/Android: $1 (WMF)/o ; }
     else
-    { ($version = $agent2) =~ s/^.*((Wiktionary|Wikipedia)Mobile(\/| )(\d|\.)+).*$/iOS: $1 (WMF)/o ; }
+    { ($version = $agent2) =~ s/^.*((Wiktionary|Wikipedia) ?Mobile(\/| )(\d|\.)+).*$/iOS: $1 (WMF)/o ; }
   }
 
   # ANDROID
@@ -698,8 +700,32 @@ sub ProcessLine
       $api =~ s/^.*action=([^\&]*)(\&.*)?$/$1/io ;
   }
 
+  #create device info
+
+  if ($mobile =~ /[MWT]/ )
+  {
+    $device = "Unknown" ;
+    $devcat = "Other" ;
+    ($originalagent2 = $agent) =~ s/\%20/ /g ;
+    foreach $compared_device (@mobile_devices)
+    {
+      ( $devrecognition, $devtype, $devcategory ) = split( ',', $compared_device ) ;
+      if ( $originalagent2 =~ /$devrecognition/ )
+      {
+        ($device = $devtype) =~ s/^\s+// ;
+        ($devcat = $devcategory) =~ s/\s+$// ;
+        last ;
+      }
+    }
+    if ($device eq "Unknown")
+    { print "Device $originalagent2 unknown.\n" ; }
+    $devices { "$device,$devcat" } += $count_event ;
+  }
+
   #create useragents
   $browsertype = $mobile ;
+  $maindomain = $domain ;
+  $maindomain =~ s/:.*//io ;
   if ($bot)
   { $browsertype = 'B' ; }
   elsif ($browsertype eq "-")
@@ -722,7 +748,7 @@ sub ProcessLine
     else
     { $browsertype = 'i' ; }
   }
-  $useragents {"$browsertype,$domain,$mimecat,$api"} += $count_event;
+  $useragents {"$browsertype,$maindomain,$mimecat,$api"} += $count_event;
 
   #create countryinfo
   if ((! $bot) && ($agent ne "-"))
@@ -734,6 +760,11 @@ sub ProcessLine
     $country_info {"M,$country,$mobile"} += $count_event;
     $country_info {"B,$country,$browser"} += $count_event;
     $country_info {"O,$country,$osshort"} += $count_event;
+    if ($mobile =~ /[MWT]/ )
+    {
+      $country_info {"D,$country,$devtype"} += $count_event;
+    }
+    $country_info {"C,$country,$browsertype;$maindomain;$mimecat;$api"} += $count_event;
   }
 
   # if ($domain_mobile)
@@ -1221,6 +1252,17 @@ sub MatchAgent
   return ($service, $agent) ;
 }
 
+sub IsInternal
+{
+  # True iff the ip is from Wikimedia itself
+  my $address = shift ;
+  if ( $address =~ /^208\.80\.15[2345]/ )
+  { return $true ; }
+  if ( $address =~ /^91.198.174/ )
+  { return $true ; }
+  return $false ;
+}
+
 sub MatchIpRange
 {
   my $address = shift ;
@@ -1350,6 +1392,25 @@ sub ProcessUploadPath
     else
     { $imagesizes {"???"} += $count_event ; }
   }
+}
+
+sub ReadMobileDeviceInfo
+{
+  @mobile_devices = () ;
+  my $mobile_device_csv = 'MobileDeviceTypes.csv' ;
+  if (! -e $mobile_device_csv)
+  {
+    print "No mobile devices file found; all mobile devices will be counted as unknown\n" ;
+    return
+  }
+  open CSV_MOBILE_DEVICES, '<', $mobile_device_csv ;
+  while ($line = <CSV_MOBILE_DEVICES>)
+  {
+    chomp $line ;
+    push( @mobile_devices, $line ) ;
+    print "Found mobile device $line\n" ;
+  }
+  close CSV_MOBILE_DEVICES ;
 }
 
 1;

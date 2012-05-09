@@ -223,6 +223,7 @@ sub WriteOutputSquidLogs
   open OUT_REFERERS,        '>', $file_out_referers ;
   open CSV_CLIENTS_BY_WIKI, '>', $file_csv_clients_by_wiki ;
   open CSV_AGENTS,          '>', $file_csv_agents ;
+  open CSV_DEVICES,         '>', $file_csv_devices ;
   open CSV_USERAGENTS,      '>', $file_csv_useragents ;
   open CSV_COUNTRIES_INFO,  '>', $file_csv_countries_info ;
 
@@ -250,6 +251,7 @@ sub WriteOutputSquidLogs
   print OUT_REFERERS        $comment ;
   print CSV_CLIENTS_BY_WIKI $comment ;
   print CSV_AGENTS          $comment ;
+  print CSV_DEVICES         $comment ;
   print CSV_USERAGENTS      $comment ;
   print CSV_COUNTRIES_INFO  $comment ;
 
@@ -452,8 +454,15 @@ sub WriteOutputSquidLogs
     print CSV_GOOGLEBOTS "$date,$iprange,${google_bot_hits{$key}}\n" ;
   }
 
+  # CSV_DEVICES ;
+  foreach $key (keys %devices)
+  {
+    my $count = $devices{$key} ;
+    print CSV_DEVICES "$key,$count\n" ;
+  }
+
   # CSV_USERAGENTS ;
-  foreach $key (%useragents)
+  foreach $key (keys %useragents)
   {
     my $count = $useragents{$key} ;
     print CSV_USERAGENTS "$key, $count\n" ;
@@ -745,7 +754,7 @@ sub WriteOutputSquidLogs
    print CSV_AGENTS "$key,$count\n" ;
  }
 
-  print CSV_COUNTRIES_INFO "# pos 1: M = mobile/non-mobile status, O = opsys, B = browser/client\n" ;
+  print CSV_COUNTRIES_INFO "# pos 1: M = mobile/non-mobile status, O = opsys, B = browser/client, C = user agent category\n" ;
   print CSV_COUNTRIES_INFO ":type,country,value,count\n" ;
 
  foreach $key (sort keys %country_info)
@@ -897,8 +906,8 @@ sub WriteOutputLineToCsvSharePerOs
     {
       if ($key !~ /$criterion/)
       {
-        if (($trace_count++ < 20) && ($criteria =~ /Linux/))
-        { print "key $key criterion $criterion FALSE\n" ; }
+        #if (($trace_count++ < 20) && ($criteria =~ /Linux/))
+        #{ print "key $key criterion $criterion FALSE\n" ; }
         $match = $false ;
         last ;
       }

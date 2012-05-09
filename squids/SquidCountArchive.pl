@@ -55,11 +55,12 @@
   $time_start = time ;
 
   $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
-  $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile" ;
+  $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile|Wikipedia Mobile" ;
 
-  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|SymbianOS|UP\.Browser|Vodafone|WAP|webOS|HTC|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech" ;
+  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|Symbian|UP\.Browser|Vodafone|WAP|webOS|HTC[^P]|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise XP|Sunrise/|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech|MeeGo|Tizen" ;
   $tags_tablet       = "iPad|Android 3|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|Tablet|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
   $tags_mobile_upd  = "March 2012" ;
+  &ReadMobileDeviceInfo ;
 
   $pattern_url_pre  = "(?:^|[a-zA-Z0-9-]+\\.)*?" ;
   $pattern_url_post = "\\.(?:biz|com|info|name|net|org|pro|aero|asia|cat|coop|edu|gov|int|jobs|mil|mobi|museum|tel|travel|arpa|[a-zA-Z0-9-]{2}|(?:com?|ne)\\.[a-zA-Z0-9-]{2})\$" ;
@@ -304,6 +305,7 @@ sub SetFileNames
   $file_csv_countries_timed  = "public/SquidDataCountriesViewsTimed.csv" ; # was SquidDataCountriesTimed2.csv
   $file_csv_countries_saves  = "public/SquidDataCountriesSaves.csv" ;
   $file_csv_bots             = "public/SquidDataCrawlers.csv" ;
+  $file_csv_devices          = "public/SquidDataDevices.csv" ;
   $file_csv_extensions       = "public/SquidDataExtensions.csv" ;
   $file_csv_googlebots       = "public/SquidDataGoogleBots.csv" ;
   $file_csv_images           = "public/SquidDataImages.csv" ;
@@ -480,6 +482,8 @@ sub InitGlobals # qqq
   undef %countries_saves ;
   undef %countries_timed ;
   undef %countries_views ;
+  undef %country_info ;
+  undef %devices ;
   undef %edit_submit_filtered ;
   undef %engines ;
   undef %exts ;
@@ -513,9 +517,8 @@ sub InitGlobals # qqq
   undef %statusses ;
   undef %total_clients ;
   undef %unrecognized_domains ;
-  undef %wikis ;
   undef %useragents ;
-  undef %country_info ;
+  undef %wikis ;
 # undef @files ;
 };
 

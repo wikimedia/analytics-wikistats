@@ -147,12 +147,13 @@
   $file_html_scripts      = "SquidReportScripts.htm" ;
   $file_html_skins        = "SquidReportSkins.htm" ;
   $file_html_user_agents  = "SquidReportUserAgents.htm" ;
+  $file_html_devices      = "SquidReportDevices.htm" ;
+  $file_csv_user_agents_out = "SquidReportUserAgents.csv" ;
   $file_html_requests     = "SquidReportRequests.htm" ;
   $file_html_google       = "SquidReportGoogle.htm" ;
   $file_html_clients      = "SquidReportClients.htm" ;
   $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
   $file_html_countries_info = "SquidReportCountryData.htm" ;
-
   $file_csv_user_agents   = "SquidReportUserAgents.csv" ;
 # names till 2010-07-01
 #
@@ -184,6 +185,7 @@
   $file_csv_indexphp      = "public/SquidDataIndexPhp.csv" ;
   $file_csv_browser_languages = "public/SquidDataLanguages.csv" ;
   $file_csv_user_agents   = "public/SquidDataUserAgents.csv" ;
+  $file_csv_devices       = "public/SquidDataDevices.csv" ;
   $file_csv_countries_info= "public/SquidDataCountriesInfo.csv" ;
 
   $file_csv_countries_languages_visited = "SquidDataCountriesViews.csv" ;
@@ -244,6 +246,7 @@
     &ReadInputMethods ;
     &ReadInputMimeTypes ;
     &ReadInputOpSys ;
+    &ReadInputDevices ;
     &ReadInputOrigins ;
     &ReadInputScripts ;
     &ReadInputGoogle ;
@@ -326,6 +329,7 @@
   &WriteReportMethods ;
   &WriteReportMimeTypes ;
   &WriteReportOpSys ;
+  &WriteReportDevices ;
   &WriteReportOrigins ;
   &WriteReportScripts ;
   &WriteReportGoogle ;
@@ -576,7 +580,9 @@ sub PrepHtml
   $dummy_crawlers    = "<font color=#000060>Crawlers</font>" ;
   $dummy_opsys       = "<font color=#000060>Op.Sys.</font>" ;
   $dummy_browsers    = "<font color=#000060>Browsers</font>" ;
+  $dummy_devices     = "<font color=#000060>Devices</font>" ;
   $dummy_google      = "<font color=#000060>Google</font>" ;
+  $dummy_countries   = "<font color=#000060>Country data</font>" ;
 
   $link_requests    = "Requests <a href='$file_html_requests'>by destination</a> or " ;
   $link_origins     = "<a href='$file_html_origins'>by origin</a>" ;
@@ -587,8 +593,9 @@ sub PrepHtml
   $link_crawlers    = "<a href='$file_html_crawlers'>Crawlers</a>" ;
   $link_opsys       = "<a href='$file_html_opsys'>Op.Sys.</a>" ;
   $link_browsers    = "<a href='$file_html_clients'>Browsers</a>" ;
+  $link_devices     = "<a href='$file_html_devices'>Mobile devices</a>" ;
   $link_google      = "<a href='$file_html_google'>Google</a>" ;
-  $link_countries   = "<a href='$file_html_countries_info'>data by country</a>" ;
+  $link_countries   = "<a href='$file_html_countries_info'>Country data</a>" ;
 }
 
 sub ReadCountryCodes
@@ -1430,6 +1437,7 @@ sub ReadInputCountriesNames
     $country_names     {$country_code} = $country_name ;
     $country_codes_all {"$country_name|$country_code"} ++ ;
   }
+
 }
 
 sub ReadInputCountriesMeta
@@ -1972,28 +1980,36 @@ sub ReadInputUseragents
 
 }
 
+sub ReadInputDevices
+{
+  &Log ("ReadInputDevices\n") ;
+
+  my $file_csv = "$path_process/$file_csv_devices" ;
+  if (! -e $file_csv)
+  { abort ("Function ReadInputDevices: file $file_csv not found!!!") ; }
+  open CSV_DEVICES, '<', $file_csv ;
+
+  while ($line = <CSV_DEVICES>)
+  {
+    next if $line =~ /^#/ ; # comments
+    next if $line =~ /^:/ ; # csv header (not a comment)
+
+    chomp ($line) ;
+
+    (my $device, my $category, my $count) = split (',', $line) ;
+    $devices { $device } += $count ;
+    $catfordevice { $device } = $category ;
+    $devicecats { $category } += $count ;
+    $alldevices += $count ;
+  }
+}
+
 sub ReadInputCountriesInfo
 {
   &Log ("ReadInputCountriesInfo\n") ;
   my $file_csv = "$path_process/$file_csv_countries_info" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputCountryInfo: file $file_csv not found!!!") ; }
-  #$allcountrytotal = 0 ;
-  #$countrytotal = { } ;
-  #$allcountrybrowser = { } ;
-  #$countrybrowser = { } ;
-  #$allcountryos = { } ;
-  #$countryos = { } ;
-  #$allcountrymobile = 0 ;
-  #$countrymobile = { } ;
-  undef $allcountrytotal ;
-  undef %countrytotal ;
-  undef %allcountrybrowser ;
-  undef %countrybrowser ;
-  undef %allcountryos ;
-  undef %countryos ;
-  undef $allcountrymobile ;
-  undef %countrymobile ;
   open CSV_COUNTRIES_INFO, '<', $file_csv ;
   while ($line = <CSV_COUNTRIES_INFO>)
   {
@@ -2023,6 +2039,41 @@ sub ReadInputCountriesInfo
     {
       $countryos { $country, $value } += $count ;
       $allcountryos { $value } += $count ;
+    }
+    elsif ($type eq 'D')
+    {
+      $countrydevice { $country, $value } += $count ;
+      $countryalldevice { $country } += $count ;
+      $countrydevice { '.', $value } += $count ;
+      $countryalldevice { '.' } += $count ;
+    }
+    elsif ($type eq 'C')
+    {
+      print "Reporting $value\n" ;
+      my ($client, $domain, $mimecat, $api) = split (';', $value) ;
+      if ($domain =~ /^%/)
+      { $domain = 'M' ; }
+      elsif (substr($domain, 1, 1) eq 'w')
+      { $domain = 'W' ; }
+      else
+      { $domain = 'X' ; }
+      if ($client eq 'a' || $client eq 'i')
+      {
+        $client = 'W' ;
+      }
+      if ($mimecat eq 'page' && $domain ne 'X')
+      {
+        print "Counting it.\n" ;
+        $countrycount { $country } += $count ;
+        $countryua { '.', '.', '.' } += $count ;
+        $countryua { $country, '.', '.' } += $count ;
+        $countryua { '.', $client, '.' } += $count ;
+        $countryua { $country, $client, '.' } += $count ;
+        $countryua { '.', '.', $domain } += $count ;
+        $countryua { $country, '.', $domain } += $count ;
+        $countryua { '.', $client, $domain } += $count ;
+        $countryua { $country, $client, $domain } += $count ;
+      }
     }
   }
   close CSV_COUNTRIES_INFO ;
@@ -2304,7 +2355,7 @@ sub WriteReportClients
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
 # test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
@@ -2987,7 +3038,7 @@ sub WriteReportCrawlers
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $link_devices \/ $dummy_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -3163,7 +3214,7 @@ sub WriteReportMethods
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=0>\n" ;
@@ -3246,7 +3297,7 @@ sub WriteReportMimeTypes
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by destination/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests are sent to. Report 'Requests by origin' shows where requests come from.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
-  $html =~ s/LINKS/$dummy_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$dummy_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html .= "<table border=1>\n" ;
 
   $header1 = "<tr><th colspan=2 class=l><small>x 1000</small></th><th colspan=2 class=c>Totals</th><th class=c><font color=#008000>Pages</font></th><th colspan=3 class=c><font color=#900000>Images</font></th><th colspan=99 class=c>Other</th></tr>\n" ;
@@ -3412,7 +3463,7 @@ sub WriteReportOpSys
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
@@ -3629,7 +3680,7 @@ sub WriteReportOrigins
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests come from. Report 'Requests by destination' shows where requests are serviced.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4245,7 +4296,7 @@ sub WriteReportScripts
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Scripts/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Scripts/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $dummy_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $dummy_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4424,7 +4475,7 @@ sub WriteReportGoogle
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $dummy_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $dummy_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=500 wrap>\n" ;
@@ -4747,7 +4798,7 @@ sub WriteReportSkins
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Skins/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Skins/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $dummy_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $dummy_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4886,6 +4937,58 @@ sub UserAgentMobileLine
   return $result ;
 }
 
+sub UserAgentCsvLine
+{
+  my ($title, $code, $showperc) = @_ ;
+  my $result = $title,
+  $value = 1000 * ($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}) * $multiplier ;
+  $writevalue = sprintf("%.0f", $value) ;
+  $result .= ",$writevalue" ;
+  if ($showperc)
+  {
+    $perc = 0.1 * $value / $total_html ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, 'M', 'page', '.'} * $multiplier / $total_html ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, 'W', 'page', '.'} * $multiplier / $total_html ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, '.', '.', 'opensearch'} * $multiplier / $total_opensearch ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+  }
+  else
+  {
+    $result .= ",,,," ;
+  }
+  $value = 1000 * $countua {$code, '.', '.', '.'} * $multiplier ;
+  $writevalue = sprintf("%.0f", $value) ;
+  $result .= ",$writevalue" ;
+  if ($showperc)
+  {
+    $perc = 0.1 * $value / $total_count ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, 'M', '.', '.'} * $multiplier / $total_count ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, 'W', '.', '.'} * $multiplier / $total_count ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+    $perc = 100 * $countua {$code, 'X', '.', '.'} * $multiplier / $total_count ;
+    $perc = sprintf("%.2f", $perc) ;
+    $result .= ",$perc" ;
+  }
+  else
+  {
+    $result .= ",,,," ;
+  }
+  $result .= "\n" ;
+  return $result ;
+}
+
 sub WriteReportUserAgents
 {
   &Log ("WriteReportUserAgents\n") ;
@@ -4894,15 +4997,14 @@ sub WriteReportUserAgents
   $altbgcolor = '#DDFFDD' ;
 
   open FILE_HTML_USER_AGENTS, '>', "$path_reports/$file_html_user_agents" ;
-  open FILE_CSV_USER_AGENTS, '>', "$path_reports/$file_csv_user_agents" ;
+  open FILE_CSV_USER_AGENTS, '>', "$path_reports/$file_csv_user_agents_out" ;
 
-  $csv_out = "# user agents lay-out\n" ;
-  $csv_out = "# pageviews total, pageviews mobile, pageviews main, opensearch, all total, all mobile, all main, all other\n" ;
+  $csv_out = "# category, pageviews total, pageviews percentage, mobile, main, search_estimate, all total, percentage, mobile, main, other\n" ;
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4918,20 +5020,34 @@ sub WriteReportUserAgents
   $total_mobile_html             = ($countua {'S', 'M', 'page', '.'} + $countua {'S', 'W', 'page', '.'}) * $multiplier ;
   $mobile_opensearch             = $countua {'S', '.', '.', 'opensearch'} * $multiplier ;
 
-  $html .= &UserAgentLine("From all sources", '.', $false, $true, 0, 0) ;
+  $html .= &UserAgentLine("From all sources", 'Z', $false, $true, 0, 0) ;
+  $csv_out .= &UserAgentCsvLine("From all sources", '.', $false) ;
   $html .= &UserAgentLine("From mobile devices", 'S', $true, $true, 1, 13) ;
+  $csv_out .= &UserAgentCsvLine("From mobile devices", 'S', $true) ;
   $html .= &UserAgentLine("From mobile browsers", 'C', $true, $true, 2, 10) ;
+  $csv_out .= &UserAgentCsvLine("From mobile sources", 'C', $true) ;
   $html .= &UserAgentLine("From tablet browsers", 'T', $true, $false, 3, 3) ;
+  $csv_out .= &UserAgentCsvLine("From tablet sources", 'T', $true) ;
   $html .= &UserAgentLine("From other mobile browsers", 'M', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("From other mobile browsers", 'M', $true) ;
   $html .= &UserAgentLine("Through WAP access", 'P', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("Through WAP access", 'P', $true) ;
   $html .= &UserAgentLine("From mobile apps", 'Q', $true, $true, 2, 0) ;
+  $csv_out .= &UserAgentCsvLine("From mobile apps", 'Q', $true) ;
   $html .= &UserAgentLine("Wikimedia Android apps", 'A', $true, $false, 3, 5) ;
+  $csv_out .= &UserAgentCsvLine("Wikimedia Android apps", 'A', $true) ;
   $html .= &UserAgentLine("Other Android apps", 'a', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("Other Android apps", 'a', $true) ;
   $html .= &UserAgentLine("Wikimedia iOS apps", 'I', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("Wikimedia iOS apps", 'I', $true) ;
   $html .= &UserAgentLine("Other iOS apps", 'i', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("Other iOS apps", 'i', $true) ;
   $html .= &UserAgentLine("Unspecified apps", 'W', $true, $false, 3, 0) ;
+  $csv_out .= &UserAgentCsvLine("Unspecified apps", 'W', $true) ;
   $html .= &UserAgentLine("From non-mobile devices", 'N', $true, $true, 1, 0) ;
+  $csv_out .= &UserAgentCsvLine("From non-mobile devices", 'N', $true) ;
   $html .= &UserAgentLine("From bots", 'B', $false, $false, 1, 0) ;
+  $csv_out .= &UserAgentCsvLine("From bots", 'B', $false) ;
   $html .= "</table>\n" ;
   $html .= "<p>&nbsp;</p>\n" ;
   $html .= "<table border=1>\n" ;
@@ -4952,10 +5068,63 @@ sub WriteReportUserAgents
   $html .= $colophon_ae ;
 
   print FILE_HTML_USER_AGENTS $html ;
+  print FILE_CSV_USER_AGENTS $csv_out ;
   close FILE_HTML_USER_AGENTS ;
+  close FILE_CSV_USER_AGENTS ;
 }
 
-sub WriteReportCountriesInfo
+sub SectionReportDevices
+{
+  my ($section, $section_name) = @_ ;
+  $value = &ShowCount ( $devicecats { $section } * $multiplier ) ;
+  $perc = &ShowPerc ( 100 * $devicecats { $section } / $alldevices ) ;
+  my $result = "<tr><td class=lt rowspan=@@>$section_name</td><td class=rt rowspan=@@>$value</td><td class=rt rowspan=@@>$perc</td>\n" ;
+  $devcounter = 0 ;
+  foreach $device (keys_sorted_by_value_num_desc %devices)
+  {
+    next if ( $catfordevice { $device } ne $section ) ;
+    $value = &ShowCount ( $devices { $device } * $multiplier ) ;
+    $perc = &ShowPerc ( 100 * $devices { $device } / $alldevices ) ;
+    if ($devcounter ne 0)
+    { $result .= "<tr>"; }
+    $result .= "<td class=lt>$device</td><td class=rt>$value</td><td class=rt>$perc</td></tr>\n" ;
+    $devcounter++ ;
+  }
+  $result =~ s/@@/$devcounter/g ;
+  return $result ;
+}
+
+sub WriteReportDevices
+{
+  &Log ("WriteReportDevices\n") ;
+  $marker_color = '#8000FF' ;
+
+  open FILE_HTML_DEVICES, '>', "$path_reports/$file_html_devices" ;
+
+  $html  = $header ;
+  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Mobile Device Types/ ;
+  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Mobile Device Types/ ;
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_devices \/ $link_browsers \/ $link_google \/ $link_countries/ ;
+  $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+  $html .= "<table border=1>\n" ;
+  $html .= "<tr><th class=l>Device class</th><th class=c>Count</th><th class=c>Percentage</th><th class=l>Device</th><th class=c>Count</th><th class=c>Percentage</th></tr>" ;
+  $html .= &SectionReportDevices ( "iOS", "iOS" ) ;
+  $html .= &SectionReportDevices ( "Android", "Android" ) ;
+  $html .= &SectionReportDevices ( "Blackberry", "BlackBerry" ) ;
+  $html .= &SectionReportDevices ( "Windows", "Windows Mobile" ) ;
+  $html .= &SectionReportDevices ( "Symbian", "Symbian/other Nokia" ) ;
+  $html .= &SectionReportDevices ( "Bada", "Bada/other Samsung" ) ;
+  $html .= &SectionReportDevices ( "Playstation", "Playstation" ) ;
+  $html .= &SectionReportDevices ( "Nintendo", "Nintendo" ) ;
+  $html .= &SectionReportDevices ( "Other", "Other/Unknown" ) ;
+  $html .= "</table>\n" ;
+  $html .= $colophon_ae ;
+  print FILE_HTML_DEVICES $html ;
+  close FILE_HTML_DEVICES ;
+}
+
+sub WriteReportCountriesInfoOld
 {
   &Log ("WriteReportCountriesInfo\n") ;
   open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
@@ -4964,7 +5133,7 @@ sub WriteReportCountriesInfo
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Data per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Data per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_browsers \/ $link_google/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $dummy_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=800>\n" ;
@@ -5179,6 +5348,173 @@ sub WriteReportCountriesInfo
 
   print FILE_HTML_COUNTRIES_INFO $html ;
   close FILE_HTML_COUNTRIES_INFO ;
+}
+
+sub ReportLineCountriesInfoGlobal
+{
+  my ($country, $countryshow) = @_ ;
+  my $result = "<tr><th class=l>$countryshow</th>" ;
+  $result .= &UserAgentField( $countryua { $country, '.', '.' } , $false ) ;
+  $rowvalue = $countryua { $country, '.', '.' } * $multiplier ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'I', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'A', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'W', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'T', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'M', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'P', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'N', '.' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'I', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'A', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'W', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'T', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'M', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'P', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= &UserAgentFieldPerc( $countryua { $country, 'N', 'M' }, $rowvalue, $true, $false ) ;
+  $result .= "</tr>\n" ;
+  return $result ;
+}
+
+sub ReportLineCountriesInfoDevice
+{
+  my ($country, $countryshow) = @_ ;
+  my $result = "<tr><th class=l>$countryshow</th>" ;
+  foreach $category (@devicecategories)
+  {    
+    $result .= &UserAgentFieldPerc( $countrydevice { $country, $category }, $countryalldevice { $country }, $true, $false ) ;
+  }
+  $result .= "</tr>\n" ;
+  return $result ;
+}
+
+sub WriteReportCountriesInfo
+{
+  &Log ("WriteReportCountriesInfo\n") ;
+  open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
+
+  my $html  = $header ;
+  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
+  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $dummy_countries/ ;
+  $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
+  $html .= "<table border=1 width=800>\n" ;
+  $html .= "<tr><th class=c>Page views by country</th><th class=c colspan='8'>All pageviews</th><th class=c colspan='7'>To Mobile site</th></tr>\n" ;
+  $html .= "<tr><th class=c rowspan='2'>Country</th><th class=c rowspan='2'>Total views</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c rowspan='2'>Non-mobile</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c rowspan='2'>Non-mobile</th></tr>\n" ;
+  $html .= "<tr><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th></tr>\n" ;
+  $html .= &ReportLineCountriesInfoGlobal( '.', '<b>All countries</b>' ) ;
+  foreach $country (keys_sorted_by_value_num_desc %countrycount)
+  {
+    my $region = $region_codes { $country} ;
+    $countryua {"reg" . $region, '.', '.' } += $countryua {$country, '.', '.' } ;
+    $countryua {"reg" . $region, '.', '.' } += $countryua {$country, '.', '.' } ;
+    $countryua {"reg" . $region, 'I', '.' } += $countryua {$country, 'I', '.' } ;
+    $countryua {"reg" . $region, 'A', '.' } += $countryua {$country, 'A', '.' } ;
+    $countryua {"reg" . $region, 'W', '.' } += $countryua {$country, 'W', '.' } ;
+    $countryua {"reg" . $region, 'T', '.' } += $countryua {$country, 'T', '.' } ;
+    $countryua {"reg" . $region, 'M', '.' } += $countryua {$country, 'M', '.' } ;
+    $countryua {"reg" . $region, 'P', '.' } += $countryua {$country, 'P', '.' } ;
+    $countryua {"reg" . $region, 'N', '.' } += $countryua {$country, 'N', '.' } ;
+    $countryua {"reg" . $region, '.', 'M' } += $countryua {$country, '.', 'M' } ;
+    $countryua {"reg" . $region, 'I', 'M' } += $countryua {$country, 'I', 'M' } ;
+    $countryua {"reg" . $region, 'A', 'M' } += $countryua {$country, 'A', 'M' } ;
+    $countryua {"reg" . $region, 'W', 'M' } += $countryua {$country, 'W', 'M' } ;
+    $countryua {"reg" . $region, 'T', 'M' } += $countryua {$country, 'T', 'M' } ;
+    $countryua {"reg" . $region, 'M', 'M' } += $countryua {$country, 'M', 'M' } ;
+    $countryua {"reg" . $region, 'P', 'M' } += $countryua {$country, 'P', 'M' } ;
+    $countryua {"reg" . $region, 'N', 'M' } += $countryua {$country, 'N', 'M' } ;
+  }
+  $html .= &ReportLineCountriesInfoGlobal( 'regAF', '<b>Africa</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regAS', '<b>Asia</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regAU', '<b>Australia</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regEU', '<b>Europe</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regCA', '<b>Central America</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regNA', '<b>North America</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regSA', '<b>South America</b>' ) ;
+  $html .= &ReportLineCountriesInfoGlobal( 'regOC', '<b>Oceania</b>' ) ;
+  $html .= "<tr><td colspan='16'>&nbsp;</td></tr>\n" ;
+  $countrycounter = 0 ;
+  foreach $country (keys_sorted_by_value_num_desc %countrycount)
+  {
+    next if ($country =~ /reg/ ) ;
+    if ($country eq '--' || $countrycounter eq 100)
+    {
+      $countryua {'other', '.', '.' } += $countryua {$country, '.', '.' } ;
+      $countryua {'other', '.', '.' } += $countryua {$country, '.', '.' } ;
+      $countryua {'other', 'I', '.' } += $countryua {$country, 'I', '.' } ;
+      $countryua {'other', 'A', '.' } += $countryua {$country, 'A', '.' } ;
+      $countryua {'other', 'W', '.' } += $countryua {$country, 'W', '.' } ;
+      $countryua {'other', 'T', '.' } += $countryua {$country, 'T', '.' } ;
+      $countryua {'other', 'M', '.' } += $countryua {$country, 'M', '.' } ;
+      $countryua {'other', 'P', '.' } += $countryua {$country, 'P', '.' } ;
+      $countryua {'other', 'N', '.' } += $countryua {$country, 'N', '.' } ;
+      $countryua {'other', '.', 'M' } += $countryua {$country, '.', 'M' } ;
+      $countryua {'other', 'I', 'M' } += $countryua {$country, 'I', 'M' } ;
+      $countryua {'other', 'A', 'M' } += $countryua {$country, 'A', 'M' } ;
+      $countryua {'other', 'W', 'M' } += $countryua {$country, 'W', 'M' } ;
+      $countryua {'other', 'T', 'M' } += $countryua {$country, 'T', 'M' } ;
+      $countryua {'other', 'M', 'M' } += $countryua {$country, 'M', 'M' } ;
+      $countryua {'other', 'P', 'M' } += $countryua {$country, 'P', 'M' } ;
+      $countryua {'other', 'N', 'M' } += $countryua {$country, 'N', 'M' } ;
+    }
+    else
+    {
+      $countrycounter += 1;
+      $html .= &ReportLineCountriesInfoGlobal( $country, $country_codes {$country} ) ;
+    }
+  }
+  $html .= &ReportLineCountriesInfoGlobal( 'other', 'Other/Unknown') ;
+  $html .= "</table>\n" ;
+  $html .= $colophon_ae ;
+  print FILE_HTML_COUNTRIES_INFO $html ;
+  close FILE_HTML_COUNTRIES_INFO ;
+}
+
+sub AddLater
+{
+  @devicecategories = ( "iOS", "Android", "Blackberry", "Windows", "Symbian", "Bada", "Playstation", "Nintendo" ) ;
+
+  $html .= "<table border=1>\n" ;
+  $html .= "<tr><th class=c>Mobile devices by country</th><th class=c>Android</th><th class=c>iOS</th><th class=c>BlackBerry</th><th class=c>Windows<br/>Mobile</th><th class=c>Symbian<br/>Nokia</th><th class=c>Bada<br/>Samsung</th><th class=c>Playstation<br/>Nintendo</th><th class=c>Other<br/>Unknown<th></tr>\n" ;
+  foreach $country (keys_sorted_by_value_num_desc %countryalldevice)
+  {
+    my $region = "reg" . $region_codes { $country} ;
+    foreach $category (@devicecategories)
+    { $countrydevice { $region, $category } += $countrydevice { $country, $category } ; }
+    $countryalldevice { $region } += $countryalldevice { $country } ;
+  }
+  $html .= &ReportLineCountriesInfoDevice( '.', '<b>All countries</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regAF', '<b>Africa</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regAS', '<b>Asia</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regAU', '<b>Australia</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regEU', '<b>Europe</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regCA', '<b>Central America</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regNA', '<b>North America</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regSA', '<b>South America</b>' ) ;
+  $html .= &ReportLineCountriesInfoDevice( 'regOC', '<b>Oceania</b>' ) ;
+  $html .= "<tr><td colspan='" . (scalar(@devicecategories) + 1) . "'>&nbsp;</td></tr>\n" ;
+  $countrycounter = 0 ;
+
+  foreach $country (keys_sorted_by_value_num_desc %countryalldevice)
+  {
+    next if ($country =~ /reg/ ) ;
+    next if ($country eq '.') ;
+    if ($country eq '--' || $countrycounter eq 50)
+    {
+      foreach $category (@devicecategories)
+      { $countrydevice { 'other', $category } += $countrydevice { $country, $category } ; }
+      $countryalldevice { 'other' } += $countryalldevice { $country } ;
+     }
+    else
+    {
+      $countrycounter += 1;
+      $html .= &ReportLineCountriesInfoDevice( $country, $country_codes {$country} ) ;
+    }
+  }
+
+  $html .= &ReportLineCountriesInfoDevice( 'other', 'Other/Unknown') ;
+  $html .= "</table>\n" ;
+
 }
 
 sub WriteCsvGoogleBots
@@ -6630,7 +6966,7 @@ sub ShowCount
   else
   {
     if ($num =~ /^[\d\.]+$/) # numeric string
-    { $num *= 1000 ; }
+    { $num = ceil( 1000 * $num - 0.5) ; }
 
     if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
     { $num ="\"$num\"" ; }
@@ -7516,8 +7852,10 @@ function showCount (count)
     { count = (Math.round  (count/100000) / 10) + nbsp + char_million ; }
     else if (count >= 10000)
     { count = Math.round  (count/1000) + nbsp + char_thousand ; }
-    else if (count >= 1000)
+    else if (count >= 999)
     { count = (Math.round  (count/100) / 10) + nbsp + char_thousand ; }
+    else
+    { count = Math.round (count) ; }
     count += '' ; // make string
     count = count.replace ($regexp_from4,$regexp_to4) ;
   }

@@ -201,7 +201,7 @@ sub ReadSquidLogFiles
       if ($test)
       { $line .= ' XX' ; }
 
-      $line =~ s/x-www-form-urlencoded; charset=UTF-8/x-www-form-urlencoded;%20charset=UTF-8/ ; # log lines are space delimited, other spaces should be encoded
+      $line =~ s/; charset/;%20charset/ ; # log lines are space delimited, other spaces should be encoded
 
       @fields = split (' ', $line) ;
 # next if $line =~ /upload/ ;
@@ -240,6 +240,7 @@ if (! $scan_ip_frequencies)
         $fields_too_few  ++ ;
         print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
+        &Log ("Short line: $line\n") ;
         next ;
       }
 
@@ -249,6 +250,7 @@ if (! $scan_ip_frequencies)
         $fields_too_many ++ ;
         print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
+        &Log ("Long line: $line\n") ;
         next ;
       }
 
