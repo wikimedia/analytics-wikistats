@@ -6,8 +6,6 @@
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 use SquidCountArchiveConfig ;
 
-open "FILE_LOG", ">>", "$cfg_logdir/countproblems.log" || abort ("Log file '$file_log' could not be opened.") ;
-
 sub CollectFilesToProcess
 {
   trace CollectFilesToProcess ;
@@ -152,6 +150,7 @@ sub ReadSquidLogFiles
     my $file_csv_views_viz2 = $file_csv_views_viz ;
     my $date = substr ($time_to_start,0,4) . substr ($time_to_start,5,2) . substr ($time_to_start,8,2) ;
     $file_csv_views_viz2 =~ s/date/$date/ ;
+    print $file_csv_views_viz2 ;
     $gz_csv_views_viz = gzopen ($file_csv_views_viz2, "wb") || die "Unable to write $file_csv_views_viz2 $!\n" ;
 
     $comment = "# Data from $time_to_start till $time_to_stop (yyyy-mm-ddThh:mm:ss) - all counts in thousands due to sample rate of log (1 = 1000)\n" ;
@@ -242,7 +241,6 @@ if (! $scan_ip_frequencies)
         $fields_too_few  ++ ;
         print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
-        &Log ("Short line: $line\n") ;
         next ;
       }
 
@@ -252,7 +250,6 @@ if (! $scan_ip_frequencies)
         $fields_too_many ++ ;
         print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
-        &Log ("Long line: $line\n") ;
         next ;
       }
 
@@ -455,10 +452,4 @@ sub GetTimeIso8601
   return ($time) ;
 }
 
-sub Log
-{
-  $msg = shift ;
-  print $msg ;
-  print FILE_LOG $msg ;
-}
 1;

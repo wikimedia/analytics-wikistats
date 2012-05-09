@@ -130,7 +130,7 @@ sub ProcessLine
     $country = $fields [14] ;
     if (($country eq "") || ($country =~ /null/))
     { $country = "--" ; }
-    if (&isInternal($client_ip))
+    if (&IsInternal($client_ip))
     { $country = "-X" ; }
   }
   else
@@ -1408,7 +1408,6 @@ sub ReadMobileDeviceInfo
   {
     chomp $line ;
     push( @mobile_devices, $line ) ;
-    print "Found mobile device $line\n" ;
   }
   close CSV_MOBILE_DEVICES ;
 }
