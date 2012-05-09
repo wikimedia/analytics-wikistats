@@ -717,8 +717,6 @@ sub ProcessLine
         last ;
       }
     }
-    if ($device eq "Unknown")
-    { print "Device $originalagent2 unknown.\n" ; }
     $devices { "$device,$devcat" } += $count_event ;
   }
 
