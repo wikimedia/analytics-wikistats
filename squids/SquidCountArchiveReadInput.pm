@@ -6,6 +6,8 @@
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 use SquidCountArchiveConfig ;
 
+open "FILE_LOG", ">>", "$cfg_logdir/countproblems.log" || abort ("Log file '$file_log' could not be opened.") ;
+
 sub CollectFilesToProcess
 {
   trace CollectFilesToProcess ;
@@ -453,4 +455,10 @@ sub GetTimeIso8601
   return ($time) ;
 }
 
+sub Log
+{
+  $msg = shift ;
+  print $msg ;
+  print FILE_LOG $msg ;
+}
 1;

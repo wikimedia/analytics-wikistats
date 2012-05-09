@@ -2,6 +2,7 @@
 
   $developer = "engels" ;
   $cfg_liblocation = "/a/squid/stats/dev_$developer/scripts" ;
+  $cfg_logdir = "/a/squid/stats/dev_$developer/scripts" ;
 
   $cfg_path_root_production = "/a/squid/stats/dev_$developer/csv" ; 
   $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
