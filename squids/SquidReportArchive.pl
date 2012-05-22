@@ -11,7 +11,6 @@
 
   default_argv ($cfg_default_argv) ;
 
-# to do: add text from http://wiki.squid-cache.org/SquidFaq/SquidLogs
 # ReportOrigin how to handle '!error <-> other
 # SquidReportOrigins.htm  total count<->alpha are not the same (+ skip total for "google (total)")
 # SquidReportOrigins.htm  totals google don't match ReportMimeTypes
@@ -131,6 +130,8 @@
 
     exit ;
   }
+
+  &ReadInputCountriesMeta ; # also necessary for countriesdata report
 
   $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
 
@@ -469,6 +470,7 @@ sub ReadDate
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
   &Log ("Multiplier = $multiplier\n") ;
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
+  $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
 }
 
 sub SetPeriod
@@ -502,6 +504,7 @@ sub SetPeriod
 
 
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
+  $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
 
   &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n\n") ;
 }
@@ -512,8 +515,13 @@ sub PrepHtml
 
   $language = "en" ;
   $header = &HtmlHead ;
+  $headerwithperc = $header ;
   $form   = &HtmlForm ;
+  $formwithperc = &HtmlFormWithPerc ;
   $header.=  "<body bgcolor='\#FFFFDD'>\n$form\n<hr>" .
+          # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
+            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids)<p>\nALSO, and <a href='#errata'><b>notes about reliability of these data<\/b><\/a><br><br>" ;
+  $headerwithperc.=  "<body bgcolor='\#FFFFDD'>\n$formwithperc\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
             "&nbsp;This analysis is based on a 1:1000 sampled server log (squids)<p>\nALSO, and <a href='#errata'><b>notes about reliability of these data<\/b><\/a><br><br>" ;
 
@@ -613,6 +621,7 @@ sub ReadCountryCodes
       # print "$code => $name\n" ;
     }
   }
+  $country_codes {'--'} = 'Unknown' ;
   close CODES ;
 }
 
@@ -1485,11 +1494,13 @@ sub ReadInputCountriesMeta
     { &Log ("connected unknown: $country\n") ; }
 
     $connected =~ s/connected/../g ;
+
     $country_meta_info {$country} = "$link,$population,$connected,$icon" ;
 
-     if ($country eq "United States")
+    if ($country eq "United States")
     { ($connected_us = $connected) =~ s/_//g  ; }
   }
+
   close COUNTRY_META_INFO ;
 }
 
@@ -2049,7 +2060,6 @@ sub ReadInputCountriesInfo
     }
     elsif ($type eq 'C')
     {
-      print "Reporting $value\n" ;
       my ($client, $domain, $mimecat, $api) = split (';', $value) ;
       if ($domain =~ /^%/)
       { $domain = 'M' ; }
@@ -2063,7 +2073,6 @@ sub ReadInputCountriesInfo
       }
       if ($mimecat eq 'page' && $domain ne 'X')
       {
-        print "Counting it.\n" ;
         $countrycount { $country } += $count ;
         $countryua { '.', '.', '.' } += $count ;
         $countryua { $country, '.', '.' } += $count ;
@@ -3210,7 +3219,7 @@ sub WriteReportMethods
 
   open FILE_HTML_METHODS, '>', "$path_reports/$file_html_methods" ;
 
-  $html  = $header ;
+  $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
@@ -3244,11 +3253,11 @@ sub WriteReportMethods
     $total = &FormatCount ($total) ;
     ($method,$result) = split (',', $status, 2) ;
 
-    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total,'',$total_statusses) . "</tr>\n" ;
     $rows++ ;
   }
   $total_statusses = &FormatCount ($total_statusses) ;
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses,'',$total_statusses) . "</tr>\n" ;
   $html .= "</table>\n" ;
 
   $html .= "</td><td>&nbsp;&nbsp;&nbsp;</td><td>" ;
@@ -3260,9 +3269,9 @@ sub WriteReportMethods
   foreach $method (@methods_sorted_method)
   {
     $total = &FormatCount ($methods {$method}) ;
-    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCountTd ($total) . "</tr>\n" ;
+    $html .= "<tr><td colspan=2 class=l>$method</td>" . &ShowCountTd ($total,'',$total_statusses) . "</tr>\n" ;
   }
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_methods) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_methods,'',$total_statusses) . "</tr>\n" ;
   $html .= "<tr><td colspan=99>&nbsp;</td></tr>\n" ;
   $html .= "<tr><th class=l>Method</th><th class=l>Result</th><th class=r>Count<br><small>x 1000</small></th></tr>\n" ;
   foreach $status (@statusses_sorted_method)
@@ -3270,10 +3279,10 @@ sub WriteReportMethods
     $total = &FormatCount ($statusses {$status}) ;
     ($method,$result) = split (',', $status, 2) ;
 
-    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total) . "</tr>\n" ;
+    $html .= "<tr><td class=l>$method</td><td class=l>$result</td>" . &ShowCountTd ($total,'',$total_statusses) . "</tr>\n" ;
     $rows++ ;
   }
-  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses) . "</tr>\n" ;
+  $html .= "<tr><th colspan=2 class=l>Total</th>" . &ShowCountTh ($total_statusses,'',$total_statusses) . "</tr>\n" ;
   $html .= "</table>\n" ;
 
   $html .= "</td></tr></table>\n" ;
@@ -4858,6 +4867,30 @@ sub ShowCount
   { return ("<font color=$color>$num</font>") ; }
 }
 
+sub ShowCount
+{
+  my ($num,$color,$percbase) = @_ ;
+  $num =~ s/,//g ;
+
+  if (($num eq '&nbsp;') || ($num == 0))# to do: remove &nbsp;'s from perl code, send 0 instead, formatting in javascript
+  { $num = '-' ; }
+  else
+  {
+    if ($num =~ /^[\d\.]+$/) # numeric string
+    { $num *= 1000 ; }
+
+    if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
+    { $num ="\"$num\"" ; }
+
+    $num = "<script>showCount($num, $percbase);</script>" ;
+  }
+
+  if ($color eq '')
+  { return ($num) ; }
+  else
+  { return ("<font color=$color>$num</font>") ; }
+}
+
 sub UserAgentField
 {
    my ($value, $ismarked) = @_;
@@ -4890,6 +4923,20 @@ sub UserAgentFieldPerc
    return "<td class=rt>$shownumber</td>" ;
 }
 
+sub UserAgentFieldNew
+{
+   my ($value, $ismarked, $percbase) = @_;
+   if ($ismarked)
+   {
+     $shownumber = &ShowCount ($value * $multiplier, $ismarked, $percbase) ;
+   }
+   else
+   {
+     $shownumber = &ShowCount ($value * $multiplier, '', $percbase) ;
+   }
+   return "<td class=rt>$shownumber</td>" ;
+}
+
 sub UserAgentLine
 {
   my ($title, $code, $showperc, $ismarked, $depth, $sharecol) = @_ ;
@@ -4903,18 +4950,14 @@ sub UserAgentLine
   { $result .= "<td class=lt colspan=$colspan><b>$title</b></td>" ; }
   else
   { $result .= "<td class=lt colspan=$colspan>$title</td>" ; }
-  #$result .= "<td>&nbsp;</td>" ;
-  $result .= UserAgentField($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $total_html, $showperc, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'M', 'page', '.'}, $total_html, $showperc, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'W', 'page', '.'}, $total_html, $showperc, $ismarked) ;
+  $result .= UserAgentFieldNew($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}, $ismarked, $total_html) ;
+  $result .= UserAgentFieldNew($countua {$code, 'M', 'page', '.'}, $ismarked, $total_html) ;
+  $result .= UserAgentFieldNew($countua {$code, 'W', 'page', '.'}, $ismarked, $total_html) ;
   $result .= UserAgentFieldPerc($countua {$code, '.', '.', 'opensearch'}, $total_opensearch, $showperc, '#808080') ;
-  #$result .= "<td>&nbsp;</td>" ;
-  $result .= UserAgentField($countua {$code, '.', '.', '.'}, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, '.', '.', '.'}, $total_count, $showperc, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'M', '.', '.'}, $total_count, $showperc, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'W', '.', '.'}, $total_count, $showperc, $ismarked) ;
-  $result .= UserAgentFieldPerc($countua {$code, 'X', '.', '.'}, $total_count, $showperc, $ismarked) ;
+  $result .= UserAgentFieldNew($countua {$code, '.', '.', '.'}, $ismarked, $total_count) ;
+  $result .= UserAgentFieldNew($countua {$code, 'M', '.', '.'}, $ismarked, $total_count) ;
+  $result .= UserAgentFieldNew($countua {$code, 'W', '.', '.'}, $ismarked, $total_count) ;
+  $result .= UserAgentFieldNew($countua {$code, 'X', '.', '.'}, $ismarked, $total_count) ;
   return $result ;
 }
 
@@ -5000,7 +5043,7 @@ sub WriteReportUserAgents
   open FILE_CSV_USER_AGENTS, '>', "$path_reports/$file_csv_user_agents_out" ;
 
   $csv_out = "# category, pageviews total, pageviews percentage, mobile, main, search_estimate, all total, percentage, mobile, main, other\n" ;
-  $html  = $header ;
+  $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
@@ -5009,9 +5052,9 @@ sub WriteReportUserAgents
 
   $html .= "<table border=1>\n" ;
 
-  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>Page views</th><th rowspan=16>&nbsp;</th><th class=c colspan=5>All requests</th><th rowspan=16>&nbsp;</th></tr>\n" ;
-  $html .= "<tr><th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>Search-based estimate<a href='#explain_search'>[1]</a></th>" ;
-  $html .= "<th class=c>Total</th><th class=c>Percentage</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ;
+  $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=15>&nbsp;</th><th class=c colspan=4>Page views</th><th rowspan=15>&nbsp;</th><th class=c colspan=4>All requests</th></tr>\n" ;
+  $html .= "<tr><th class=c>Total</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>Search-based estimate<a href='#explain_search'>[1]</a></th>" ;
+  $html .= "<th class=c>Total</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ;
 
   $total_count                   = $countua {'Z', '.', '.', '.'} * $multiplier ;
   $total_html                    = ($countua {'Z', 'M', 'page', '.'} + $countua {'Z', 'W', 'page', '.'}) * $multiplier ;
@@ -5046,8 +5089,6 @@ sub WriteReportUserAgents
   $csv_out .= &UserAgentCsvLine("Unspecified apps", 'W', $true) ;
   $html .= &UserAgentLine("From non-mobile devices", 'N', $true, $true, 1, 0) ;
   $csv_out .= &UserAgentCsvLine("From non-mobile devices", 'N', $true) ;
-  $html .= &UserAgentLine("From bots", 'B', $false, $false, 1, 0) ;
-  $csv_out .= &UserAgentCsvLine("From bots", 'B', $false) ;
   $html .= "</table>\n" ;
   $html .= "<p>&nbsp;</p>\n" ;
   $html .= "<table border=1>\n" ;
@@ -5124,397 +5165,285 @@ sub WriteReportDevices
   close FILE_HTML_DEVICES ;
 }
 
-sub WriteReportCountriesInfoOld
+sub ReportLineCountriesInfoTypes
 {
-  &Log ("WriteReportCountriesInfo\n") ;
-  open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
-
-  $html  = $header ;
-  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Data per Country/ ;
-  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Data per Country/ ;
-  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $dummy_countries/ ;
-  $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
-
-  $html .= "<table border=1 width=800>\n" ;
-  $html .= "<tr><th class=c>Operating systems</th><th class=c colspan='2'>Total</th>" ;
-  $counter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-     next if ($country eq 'other') ;
-     next if ($counter >= 50 or $country eq '--') ;
-     $countryname = $country_codes {$country} ;
-     if (not $countryname)
-     { $countryname = $country }
-     $html .= "<th class=c colspan='2'>$countryname</th>" ;
-     $counter += 1 ;
-  }
-  $html .= "<th class=c colspan='2'>Other countries</th></tr> " ;
-  $showvalue = &ShowCount ($allcountrytotal * $multiplier) ;
-  $showperc = &ShowPerc (100.0) ;
-  $html .= "<tr><td class=lt>Total requests</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-  $counter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-    next if ($country eq 'other') ;
-    if ($counter >= 50 or $country eq '--')
-    {
-      $countrytotal { 'other' } += $countrytotal { $country } ;
-      next ;
-    }
-    $showvalue = &ShowCount ($countrytotal { $country } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countrytotal { $country } / $allcountrytotal) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter += 1 ;
-  }
-  $country = 'other' ;
-  $showvalue = &ShowCount ($countrytotal { $country } * $multiplier ) ;
-  $showperc = &ShowPerc (100 * $countrytotal { $country } / $allcountrytotal) ;
-  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  $oscounter = 0 ;
-  foreach $os (keys_sorted_by_value_num_desc %allcountryos)
-  {
-    if ($oscounter >= 20 or $os eq '..')
-    {
-      $allcountryos {'other'} += $allcountryos {$os} ;
-      foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-      { $countryos {$country, 'other'} += $countryos {$country, $os} ; }
-      next
-    }
-    $oscounter += 1 ;
-    $showvalue = &ShowCount ($allcountryos {$os} * $multiplier) ;
-    $showperc = &ShowPerc (100 * $allcountryos {$os} / $allcountrytotal) ;
-    $html .= "<tr><td class=lt>$os</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $otherostotal = 0 ;
-    $counter = 0 ;
-    foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-    {
-      next if ( $country eq 'other' ) ;
-      if ( $counter >= 50 or $country eq '--')
-      {
-        $countryos { 'other', $os } += $countryos {$country, $os} ;
-        next ;
-      }
-      $showvalue = &ShowCount ($countryos { $country, $os } * $multiplier ) ;
-      $showperc = &ShowPerc (100 * $countryos { $country, $os } / $countrytotal { $country } ) ;
-      $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-      $counter += 1 ;
-    }
-    $country = 'other' ;
-    $showvalue = &ShowCount ($countryos { $country, $os } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countryos { $country, $os } / $countrytotal { $country } ) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  }
-  $os = 'other' ;
-  $otheros = 0 ;
-  $counter = 0 ;
-  $html .= "<tr><td class=rt>Other OS</td>" ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-    next if ( $country eq 'other') ;
-    if ( $counter >= 50 or $country eq '--')
-    {
-      $countryos { 'other', $os } += $countryos { $country, $os } ;
-      next ;
-    }
-    $showvalue = &ShowCount ($countryos { $country, $os } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countryos { $country, $os } / $countrytotal { $country } ) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter += 1 ;
-  }
-  $country = 'other' ;
-  $showvalue = &ShowCount ($countryos { $country, $os } * $multiplier ) ;
-  $showperc = &ShowPerc (100 * $countryos { $country, $os } / $countrytotal { $country } ) ;
-  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  #$html .= "</table>" ;
-
-  $html .= "<tr><td colspan=105>&nbsp;</td></tr>" ;
-
-  #$html .= "<table border=1 width=800>\n" ;
-  $html .= "<tr><th class=c>Browsers</th><th class=c colspan='2'>Total</th>" ;
-  $counter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-     next if ($country eq 'other') ;
-     next if ($counter >= 50 or $country eq '--') ;
-     $countryname = $country_codes {$country} ;
-     if (not $countryname)
-     { $countryname = $country ; }
-     $html .= "<th class=c colspan='2'>$countryname</th>" ;
-     $counter += 1 ;
-  }
-  $html .= "<th class=c colspan='2'>Other countries</th></tr> " ;
-  $showvalue = &ShowCount ($allcountrytotal * $multiplier) ;
-  $showperc = &ShowPerc (100.0) ;
-  $html .= "<tr><td class=lt>Total requests</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-  $othertotal = 0 ;
-  $counter = 0 ;
-  $countrytotal { 'other' } = 0;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-    next if ( $country eq 'other') ;
-    if ($counter >= 50 or $country eq '--')
-    {
-      $countrytotal { 'other' } += $countrytotal { $country } ;
-      next ;
-    }
-    $showvalue = &ShowCount ($countrytotal { $country } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countrytotal { $country } / $allcountrytotal) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter += 1 ;
-  }
-  $country = 'other' ;
-  $showvalue = &ShowCount ($countrytotal { $country } * $multiplier ) ;
-  $showperc = &ShowPerc (100 * $countrytotal { $country } / $allcountrytotal) ;
-  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  $html .= "<tr><td class=lt>Mobile percentage</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-  $counter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-    next if ($country eq 'other') ;
-    if ($counter >= 50 or $country eq '--')
-    {
-      $countrymobile { 'other' } += $countrymobile { $country } ;
-      next ;
-    }
-    $showvalue = &ShowCount ($countrymobile { $country } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countrymobile { $country } / $countrytotal { $country }) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter += 1 ;
-  }
-  $country = 'other' ;
-  $showvalue = &ShowCount ($countrymobile { $country } * $multiplier ) ;
-  $showperc = &ShowPerc (100 * $countrymobile { $country } / $countrytotal { $country }) ;
-  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  $browsercounter = 0 ;
-  foreach $browser (keys_sorted_by_value_num_desc %allcountrybrowser)
-  {
-    if ($browsercounter >= 20)
-    {
-      $allcountrybrowser {'other'} += $allcountrybrowser {$browser} ;
-      foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-      { $countrybrowser {$country, 'other'} += $countrybrowser {$country, $browser} ; }
-      next
-    }
-    $browsercounter += 1 ;
-    $showvalue = &ShowCount ($allcountrybrowser {$browser} * $multiplier) ;
-    $showperc = &ShowPerc (100 * $allcountrybrowser {$browser} / $allcountrytotal) ;
-    $html .= "<tr><td class=lt>$browser</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter = 0 ;
-    foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-    {
-      next if ($country eq 'other' ) ;
-      if ( $counter >= 50 or $country eq '--')
-      {
-        $countrybrowser { 'other', $browser } += $countrybrowser { $country, $browser } ;
-        next ;
-      }
-      $showvalue = &ShowCount ($countrybrowser { $country, $browser } * $multiplier ) ;
-      $showperc = &ShowPerc (100 * $countrybrowser { $country, $browser } / $countrytotal { $country } ) ;
-      $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-      $counter += 1 ;
-    }
-    $country = 'other' ;
-    $showvalue = &ShowCount ($allcountrybrowser { $browser } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $allcountrybrowser { $browser } / $countrytotal { $country } ) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  }
-  $browser = 'other' ;
-  $showvalue = &ShowCount ($allcountrybrowser {$browser} * $multiplier) ;
-  $showperc = &ShowPerc (100 * $allcountrybrowser {$browser} / $allcountrytotal) ;
-  $html .= "<tr><td class=lt>$browser</td><td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-  $counter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrytotal)
-  {
-    next if ($country eq 'other') ;
-    if ( $counter >= 50 or $country eq '--')
-    {
-      $countrybrowser { 'other', $browser } += $countrybrowser { $country, $browser } ;
-      next ;
-    }
-    $showvalue = &ShowCount ($countrybrowser { $country, $browser } * $multiplier ) ;
-    $showperc = &ShowPerc (100 * $countrybrowser { $country, $browser } / $countrytotal { $country } ) ;
-    $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td>" ;
-    $counter += 1 ;
-  }
-  $country = 'other' ;
-  $showvalue = &ShowCount ($countrybrowser { $country, $browser } * $multiplier ) ;
-  $showperc = &ShowPerc (100 * $countrybrowser { $country, $browser } / $countrytotal { $country } ) ;
-  $html .= "<td class=rt>$showvalue</td><td class=rt>$showperc</td></tr>" ;
-  $html .= "</table>" ;
-
-
-  $html .= $colophon_ae ;
-
-  print FILE_HTML_COUNTRIES_INFO $html ;
-  close FILE_HTML_COUNTRIES_INFO ;
-}
-
-sub ReportLineCountriesInfoGlobal
-{
-  my ($country, $countryshow) = @_ ;
-  my $result = "<tr><th class=l>$countryshow</th>" ;
-  $result .= &UserAgentField( $countryua { $country, '.', '.' } , $false ) ;
-  $rowvalue = $countryua { $country, '.', '.' } * $multiplier ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'I', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'A', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'W', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'T', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'M', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'P', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'N', '.' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'I', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'A', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'W', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'T', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'M', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'P', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= &UserAgentFieldPerc( $countryua { $country, 'N', 'M' }, $rowvalue, $true, $false ) ;
-  $result .= "</tr>\n" ;
-  return $result ;
-}
-
-sub ReportLineCountriesInfoDevice
-{
-  my ($country, $countryshow) = @_ ;
-  my $result = "<tr><th class=l>$countryshow</th>" ;
-  foreach $category (@devicecategories)
-  {    
-    $result .= &UserAgentFieldPerc( $countrydevice { $country, $category }, $countryalldevice { $country }, $true, $false ) ;
-  }
-  $result .= "</tr>\n" ;
-  return $result ;
+    my $country = shift ;
+    $rowvalue = $countryua { $country, '.', '.'} * $multiplier ;
+    $rowvaluemobile = $countryua { $country, '.', 'M'} * $multiplier ;
+    $result = &UserAgentField( $countryua { $country, '.', '.' }, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'I', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'A', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'W', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'T', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'M', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'P', '.'}, $false, $rowvalue) ;
+    $result .= &UserAgentField( $countryua { $country, '.', '.'} - $countryua { $country, 'N', '.'}, $false) ;
+    $result .= &UserAgentFieldPerc( $countryua { $country, '.', '.'} - $countryua { $country, 'N', '.'}, $countryua { $country, '.', '.'} * $multiplier, $true, $false) ;
+    $result .= &UserAgentField( $countryua { $country, 'N', '.'}, $false) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, '.', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'I', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'A', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'W', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'T', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'M', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'P', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, '.', 'M'} - $countryua { $country, 'N', 'M'}, $false, $rowvalue) ;
+    $result .= &UserAgentFieldNew( $countryua { $country, 'N', 'M'}, $false, $rowvalue) ;
+    return $result ;
 }
 
 sub WriteReportCountriesInfo
 {
   &Log ("WriteReportCountriesInfo\n") ;
+
   open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
 
-  my $html  = $header ;
+  my $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $dummy_countries/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
-  $html .= "<table border=1 width=800>\n" ;
-  $html .= "<tr><th class=c>Page views by country</th><th class=c colspan='8'>All pageviews</th><th class=c colspan='7'>To Mobile site</th></tr>\n" ;
-  $html .= "<tr><th class=c rowspan='2'>Country</th><th class=c rowspan='2'>Total views</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c rowspan='2'>Non-mobile</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c rowspan='2'>Non-mobile</th></tr>\n" ;
-  $html .= "<tr><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th></tr>\n" ;
-  $html .= &ReportLineCountriesInfoGlobal( '.', '<b>All countries</b>' ) ;
-  foreach $country (keys_sorted_by_value_num_desc %countrycount)
+  $html .= "<p>Some remarks on these data\n" .
+           "<ul><li>All data from the Wikimedia servers themselves is counted as 'unknown'. This includes much of the Wikimedia app data, which is often received, then resent with slight modification</li>" .
+           "<li>Wikimedia iOS app is not recognized for versions older than 3.0</li>" .
+           "</ul>" ;
+
+  $html .= &HtmlSortTable ;
+
+  $html .= "<p><table border=1 width=800 class=tablesorter id=table1>\n" ;
+  $html .= "<thead>\n" ;
+ 
+  #$html .= &HtmlWorldMaps ;
+
+  $html .= "<tr><td class=hr colspan=3 rowspan=1><b>Location</b></td>" .
+               "<td class=hc rowspan=3><b>Population</b></td>" .
+               "<td class=hc colspan=2 rowspan=3><b>Internet<br>Users</b><br><small><font color=#404040>absolute count and percentage of country population</font></small></td>" .
+               "<td rowspan=3>&nbsp;</td>" .
+               "<td class=hc colspan=10><b>All pageviews</b></td>" .
+               "<td rowspan=3>&nbsp;</td>" .
+               "<td class=hc colspan=9><b>To mobile site</b></td></tr>\n" ;
+  $html .= "<tr><td class=hr rowspan=2><b>Country</b></td><td class=hc rowspan=2><b>Region</b><br><img src='http://stats.wikimedia.org/Location_of_Continents2.gif'></td><td class=hc rowspan=2><b>N/S</b></td>" .
+               "<th class=c rowspan='2'>Total</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c colspan='2'>Total mobile</th><th class=c rowspan='2'>Non-mobile</th><th class=c rowspan='2'>Total</th><th class=c colspan='2'>Wikimedia apps</colspan><th class=c rowspan='2'>Other apps</th><th class=c colspan=3>mobile browsers</c><th class=c rowspan='2'>Total mobile</th><th class=c rowspan='2'>Non-mobile</th></tr>\n" ;
+  $html .= "<tr><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th><th class=c>Count</th><th class=c>Perc.</th><th class=c>iOS</th><th class=c>Android</th><th class=c>Tablets</th><th class=c>Other</th><th class=c>WAP</th></tr>\n" ;
+  $html .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n" ;
+  $html .= "</thead><tbody>\n" ;
+  $html .= "<tr><td colspan=6>&nbsp;</td><td rowspan=999>&nbsp;</td><td colspan=10>&nbsp;</td><td rowspan=999>&nbsp;</td><td colspan=9>&nbsp;</td></tr>\n" ;
+  $html .= "\nTOTAL\nREGIONS\n" ;
+
+  undef $population_tot ;
+  undef $connected_tot ;
+  undef $population_region ;
+  undef $connected_region ;
+
+  $countryua {'--', '.', '.' } += $countryua {'-X', '.', '.' } ;
+  $countryua {'--', 'I', '.' } += $countryua {'-X', 'I', '.' } ;
+  $countryua {'--', 'A', '.' } += $countryua {'-X', 'A', '.' } ;
+  $countryua {'--', 'W', '.' } += $countryua {'-X', 'W', '.' } ;
+  $countryua {'--', 'T', '.' } += $countryua {'-X', 'T', '.' } ;
+  $countryua {'--', 'M', '.' } += $countryua {'-X', 'M', '.' } ;
+  $countryua {'--', 'P', '.' } += $countryua {'-X', 'P', '.' } ;
+  $countryua {'--', 'N', '.' } += $countryua {'-X', 'N', '.' } ;
+  $countryua {'--', '.', 'M' } += $countryua {'-X', '.', 'M' } ;
+  $countryua {'--', 'I', 'M' } += $countryua {'-X', 'I', 'M' } ;
+  $countryua {'--', 'A', 'M' } += $countryua {'-X', 'A', 'M' } ;
+  $countryua {'--', 'W', 'M' } += $countryua {'-X', 'W', 'M' } ;
+  $countryua {'--', 'T', 'M' } += $countryua {'-X', 'T', 'M' } ;
+  $countryua {'--', 'M', 'M' } += $countryua {'-X', 'M', 'M' } ;
+  $countryua {'--', 'P', 'M' } += $countryua {'-X', 'P', 'M' } ;
+  $countryua {'--', 'N', 'M' } += $countryua {'-X', 'N', 'M' } ;
+
+  foreach $code (keys_sorted_by_value_num_desc %countrycount)
   {
-    my $region = $region_codes { $country} ;
-    $countryua {"reg" . $region, '.', '.' } += $countryua {$country, '.', '.' } ;
-    $countryua {"reg" . $region, '.', '.' } += $countryua {$country, '.', '.' } ;
-    $countryua {"reg" . $region, 'I', '.' } += $countryua {$country, 'I', '.' } ;
-    $countryua {"reg" . $region, 'A', '.' } += $countryua {$country, 'A', '.' } ;
-    $countryua {"reg" . $region, 'W', '.' } += $countryua {$country, 'W', '.' } ;
-    $countryua {"reg" . $region, 'T', '.' } += $countryua {$country, 'T', '.' } ;
-    $countryua {"reg" . $region, 'M', '.' } += $countryua {$country, 'M', '.' } ;
-    $countryua {"reg" . $region, 'P', '.' } += $countryua {$country, 'P', '.' } ;
-    $countryua {"reg" . $region, 'N', '.' } += $countryua {$country, 'N', '.' } ;
-    $countryua {"reg" . $region, '.', 'M' } += $countryua {$country, '.', 'M' } ;
-    $countryua {"reg" . $region, 'I', 'M' } += $countryua {$country, 'I', 'M' } ;
-    $countryua {"reg" . $region, 'A', 'M' } += $countryua {$country, 'A', 'M' } ;
-    $countryua {"reg" . $region, 'W', 'M' } += $countryua {$country, 'W', 'M' } ;
-    $countryua {"reg" . $region, 'T', 'M' } += $countryua {$country, 'T', 'M' } ;
-    $countryua {"reg" . $region, 'M', 'M' } += $countryua {$country, 'M', 'M' } ;
-    $countryua {"reg" . $region, 'P', 'M' } += $countryua {$country, 'P', 'M' } ;
-    $countryua {"reg" . $region, 'N', 'M' } += $countryua {$country, 'N', 'M' } ;
-  }
-  $html .= &ReportLineCountriesInfoGlobal( 'regAF', '<b>Africa</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regAS', '<b>Asia</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regAU', '<b>Australia</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regEU', '<b>Europe</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regCA', '<b>Central America</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regNA', '<b>North America</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regSA', '<b>South America</b>' ) ;
-  $html .= &ReportLineCountriesInfoGlobal( 'regOC', '<b>Oceania</b>' ) ;
-  $html .= "<tr><td colspan='16'>&nbsp;</td></tr>\n" ;
-  $countrycounter = 0 ;
-  foreach $country (keys_sorted_by_value_num_desc %countrycount)
-  {
-    next if ($country =~ /reg/ ) ;
-    if ($country eq '--' || $countrycounter eq 100)
-    {
-      $countryua {'other', '.', '.' } += $countryua {$country, '.', '.' } ;
-      $countryua {'other', '.', '.' } += $countryua {$country, '.', '.' } ;
-      $countryua {'other', 'I', '.' } += $countryua {$country, 'I', '.' } ;
-      $countryua {'other', 'A', '.' } += $countryua {$country, 'A', '.' } ;
-      $countryua {'other', 'W', '.' } += $countryua {$country, 'W', '.' } ;
-      $countryua {'other', 'T', '.' } += $countryua {$country, 'T', '.' } ;
-      $countryua {'other', 'M', '.' } += $countryua {$country, 'M', '.' } ;
-      $countryua {'other', 'P', '.' } += $countryua {$country, 'P', '.' } ;
-      $countryua {'other', 'N', '.' } += $countryua {$country, 'N', '.' } ;
-      $countryua {'other', '.', 'M' } += $countryua {$country, '.', 'M' } ;
-      $countryua {'other', 'I', 'M' } += $countryua {$country, 'I', 'M' } ;
-      $countryua {'other', 'A', 'M' } += $countryua {$country, 'A', 'M' } ;
-      $countryua {'other', 'W', 'M' } += $countryua {$country, 'W', 'M' } ;
-      $countryua {'other', 'T', 'M' } += $countryua {$country, 'T', 'M' } ;
-      $countryua {'other', 'M', 'M' } += $countryua {$country, 'M', 'M' } ;
-      $countryua {'other', 'P', 'M' } += $countryua {$country, 'P', 'M' } ;
-      $countryua {'other', 'N', 'M' } += $countryua {$country, 'N', 'M' } ;
-    }
+    next if ($code eq '-X') ;
+    my $country = $country_codes {$code} ;
+
+    $country =~ s/\"//g ;
+    $country =~ s/Korea, Republic of/South Korea/ ;
+    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
+    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
+    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+    $country =~ s/Reunion/Réunion/ ;
+    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
+    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
+    $country =~ s/\(Malvinas\)// ;
+    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
+    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
+    $country =~ s/^\s+// ;
+    $country =~ s/\s+$// ;
+
+    my $region_code      = $region_codes {$code} ;
+    my $north_south_code = $north_south_codes {$code} ;
+
+    $region_name = $region_code ;
+    $region_name =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
+    $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
+    $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
+    $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
+    $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
+    $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
+    $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
+
+    $north_south_name = $north_south_code ;
+    $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
+    $north_south_name =~ s/^S$/<font color=#FE0B0D><b>S<\/b><\/font>/ ;
+
+    $countryua {'reg_'.$region_code, '.', '.' } += $countryua {$code, '.', '.' } ;
+    $countryua {'reg_'.$region_code, 'I', '.' } += $countryua {$code, 'I', '.' } ;
+    $countryua {'reg_'.$region_code, 'A', '.' } += $countryua {$code, 'A', '.' } ;
+    $countryua {'reg_'.$region_code, 'W', '.' } += $countryua {$code, 'W', '.' } ;
+    $countryua {'reg_'.$region_code, 'T', '.' } += $countryua {$code, 'T', '.' } ;
+    $countryua {'reg_'.$region_code, 'M', '.' } += $countryua {$code, 'M', '.' } ;
+    $countryua {'reg_'.$region_code, 'P', '.' } += $countryua {$code, 'P', '.' } ;
+    $countryua {'reg_'.$region_code, 'N', '.' } += $countryua {$code, 'N', '.' } ;
+    $countryua {'reg_'.$region_code, '.', 'M' } += $countryua {$code, '.', 'M' } ;
+    $countryua {'reg_'.$region_code, 'I', 'M' } += $countryua {$code, 'I', 'M' } ;
+    $countryua {'reg_'.$region_code, 'A', 'M' } += $countryua {$code, 'A', 'M' } ;
+    $countryua {'reg_'.$region_code, 'W', 'M' } += $countryua {$code, 'W', 'M' } ;
+    $countryua {'reg_'.$region_code, 'T', 'M' } += $countryua {$code, 'T', 'M' } ;
+    $countryua {'reg_'.$region_code, 'M', 'M' } += $countryua {$code, 'M', 'M' } ;
+    $countryua {'reg_'.$region_code, 'P', 'M' } += $countryua {$code, 'P', 'M' } ;
+    $countryua {'reg_'.$region_code, 'N', 'M' } += $countryua {$code, 'N', 'M' } ;
+
+    $countryua {'reg_'.$north_south_code, '.', '.' } += $countryua {$code, '.', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'I', '.' } += $countryua {$code, 'I', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'A', '.' } += $countryua {$code, 'A', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'W', '.' } += $countryua {$code, 'W', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'T', '.' } += $countryua {$code, 'T', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'M', '.' } += $countryua {$code, 'M', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'P', '.' } += $countryua {$code, 'P', '.' } ;
+    $countryua {'reg_'.$north_south_code, 'N', '.' } += $countryua {$code, 'N', '.' } ;
+    $countryua {'reg_'.$north_south_code, '.', 'M' } += $countryua {$code, '.', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'I', 'M' } += $countryua {$code, 'I', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'A', 'M' } += $countryua {$code, 'A', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'W', 'M' } += $countryua {$code, 'W', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'T', 'M' } += $countryua {$code, 'T', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'M', 'M' } += $countryua {$code, 'M', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'P', 'M' } += $countryua {$code, 'P', 'M' } ;
+    $countryua {'reg_'.$north_south_code, 'N', 'M' } += $countryua {$code, 'N', 'M' } ;
+
+    ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
+    $icon =~ s/\"\/\/upload/\"http:\/\/upload/ ;
+    $population_tot += $population ;
+    $connected_tot += $connected ;
+    $population_region {$region_code} += $population ;
+    $connected_region {$region_code } += $connected ;
+    $population_region {$north_south_code} += $population ;
+    $connected_region {$north_south_code } += $connected ;
+    $perc_connected = ".." ;
+    
+    $regionpopulation = $population_region {$region_code} ;
+
+    $population2 = &i2KM2 ($population) ;
+    $connected2  = &i2KM2 ($connected) ;
+    if ( $connected > 0 )
+    { $penetration = sprintf ("%.0f", 100 * $connected / $population) .'%' ; }
     else
+    { $penetration = '..' ; }
+
+    if ($region_code ne 'XX')
     {
-      $countrycounter += 1;
-      $html .= &ReportLineCountriesInfoGlobal( $country, $country_codes {$country} ) ;
+      $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
+                 "<td>$region_name</td>" .
+                 "<td>$north_south_name</td>" .
+                 "<td>$population2</td>" .
+                 "<td>$connected2</td>" . 
+                 "<td>$penetration</td>" .
+                 &ReportLineCountriesInfoTypes($code) .
+                 "</tr>\n" ;
     }
+    
   }
-  $html .= &ReportLineCountriesInfoGlobal( 'other', 'Other/Unknown') ;
+
+  $population_tot2 = &i2KM2 ($population_tot) ;
+  $connected_tot2  = &i2KM2 ($connected_tot) ;
+
+  if ( $connected_tot > 0 )
+  { $penetration = sprintf ("%.0f", 100 * $connected_tot / $population_tot) .'%' ; }
+  else
+  { $penetration = '..' ; }
+
+  $html_total = "<tr><th class=rh3>All countries in</td>" .
+                    "<td><b>World</b></td>" .
+                    "<td>&nbsp;</td>" .
+                    "<td>$population_tot2</td>" .
+                    "<td>$connected_tot2</td>" .
+                    "<td>$penetration</td>" .
+                    &ReportLineCountriesInfoTypes('.') .
+                    "</tr>\n" ;
+  $html_total .= "<tr><td colspan=6>&nbsp;</td><td colspan=10>&nbsp;</td><td colspan=9>&nbsp;</td></tr>" ;
+
+  $html_regions = '' ;
+
+  foreach $key (qw (N S XX AF AS AU EU CA NA SA OC))
+  {
+    $region = $key ;
+
+    $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
+    $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
+    $region =~ s/^XX$/<b>Unknown<\/b>/ ;
+
+    $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
+    $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
+    $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
+    $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
+    $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
+    $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
+    $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
+
+    $population_region  = $population_region {$key} ;
+    $connected_region   = $connected_region  {$key} ;
+    if ($connected_region > 0 )
+    { $penetration = sprintf ("%.0f", 100 * $connected_region / $population_region) .'%' ; }
+    else
+    { $penetration = '..' ; }
+
+    $population_region2 = &i2KM2 ($population_region) ;
+    $connected_region2  = &i2KM2 ($connected_region) ;
+
+    $html_regions .= "<tr><th>All countries in</th>" .
+                     "</td><td>$region</td>" .
+                     "<td>&nbsp;</td>" .
+                     "<td>$population_region2</td>" .
+                     "<td>$connected_region2</td>" .
+                     "<td>$penetration</td>" .
+                     &ReportLineCountriesInfoTypes('reg_' . $key) .
+                     "</tr>\n" ;
+
+    if (($key eq 'XX') || (($key eq 'OC')))
+    {   $html_regions .= "<tr><td colspan=6>&nbsp;</td><td colspan=10>&nbsp;</td><td colspan=9>&nbsp;</td></tr>" ; }
+  }
+
+
+  $html .= "</tbody>\n</table>" ;
+  $html .= "<script type='text/javascript'>\n" .
+           "\$('#table1').tablesorter({\n" .
+           "// debug:true,\n" .
+           "headers:{0:{sorter:'nohtml'},1:{sorter:'nohtml'},2:{sorter:'nohtml'},4:{sorter:'millions'},5:{sorter:'millions'},6:{sorter:'digitsonly'},8:{sorter:'millions'},9:{sorter:'millions'},10:{sorter:'millions'},11:{sorter:'millions'},12:{sorter:'millions'},13:{sorter:'millions'},14:{sorter:'millions'},15:{sorter:'millions'},16:{sorter:'digitsonly'},17:{sorter:'millions'},19:{sorter:'millions'},20:{sorter:'millions'},21:{sorter:'millions'},22:{sorter:'millions'},23:{sorter:'millions'},24:{sorter:'millions'},25:{sorter:'millions'},26:{sorter:'millions'},27:{sorter:'millions'}});\n" .
+           "</script>\n" ;
+
+  $html .= "<p>Edits by bots are not included." ;
+  $html .= "Country meta data collected from English Wikipedia (<a href='http://en.wikipedia.org/wiki/List_of_countries_by_population'>population</a>, <a href='http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'>internet users</a>)). " ;
+
+  $html .= &HtmlSortTableColumns; ;
+  $html .= $colophon_ez ;
+
+  $index = &HtmlIndex (join '/ ', sort (@index_countries)) ;
+
+  $html =~ s/TOTAL/$html_total/ ;
+  $html =~ s/REGIONS/$html_regions/ ;
+
+  # &PrintHtml ($html, "$path_reports/$file_html_per_country_overview") ;
+
   $html .= "</table>\n" ;
   $html .= $colophon_ae ;
   print FILE_HTML_COUNTRIES_INFO $html ;
   close FILE_HTML_COUNTRIES_INFO ;
-}
-
-sub AddLater
-{
-  @devicecategories = ( "iOS", "Android", "Blackberry", "Windows", "Symbian", "Bada", "Playstation", "Nintendo" ) ;
-
-  $html .= "<table border=1>\n" ;
-  $html .= "<tr><th class=c>Mobile devices by country</th><th class=c>Android</th><th class=c>iOS</th><th class=c>BlackBerry</th><th class=c>Windows<br/>Mobile</th><th class=c>Symbian<br/>Nokia</th><th class=c>Bada<br/>Samsung</th><th class=c>Playstation<br/>Nintendo</th><th class=c>Other<br/>Unknown<th></tr>\n" ;
-  foreach $country (keys_sorted_by_value_num_desc %countryalldevice)
-  {
-    my $region = "reg" . $region_codes { $country} ;
-    foreach $category (@devicecategories)
-    { $countrydevice { $region, $category } += $countrydevice { $country, $category } ; }
-    $countryalldevice { $region } += $countryalldevice { $country } ;
-  }
-  $html .= &ReportLineCountriesInfoDevice( '.', '<b>All countries</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regAF', '<b>Africa</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regAS', '<b>Asia</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regAU', '<b>Australia</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regEU', '<b>Europe</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regCA', '<b>Central America</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regNA', '<b>North America</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regSA', '<b>South America</b>' ) ;
-  $html .= &ReportLineCountriesInfoDevice( 'regOC', '<b>Oceania</b>' ) ;
-  $html .= "<tr><td colspan='" . (scalar(@devicecategories) + 1) . "'>&nbsp;</td></tr>\n" ;
-  $countrycounter = 0 ;
-
-  foreach $country (keys_sorted_by_value_num_desc %countryalldevice)
-  {
-    next if ($country =~ /reg/ ) ;
-    next if ($country eq '.') ;
-    if ($country eq '--' || $countrycounter eq 50)
-    {
-      foreach $category (@devicecategories)
-      { $countrydevice { 'other', $category } += $countrydevice { $country, $category } ; }
-      $countryalldevice { 'other' } += $countryalldevice { $country } ;
-     }
-    else
-    {
-      $countrycounter += 1;
-      $html .= &ReportLineCountriesInfoDevice( $country, $country_codes {$country} ) ;
-    }
-  }
-
-  $html .= &ReportLineCountriesInfoDevice( 'other', 'Other/Unknown') ;
-  $html .= "</table>\n" ;
-
 }
 
 sub WriteCsvGoogleBots
@@ -5717,7 +5646,11 @@ sub WriteReportPerLanguageBreakDown
     if ($requests_recently_all > 0)
     { $perc_global = &Percentage ($requests_this_language / $requests_recently_all) ; }
 
-    $html .= "<tr><th colspan=99 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th></tr>\n" ;
+  $html_total .= "<tr><td colspan=6>&nbsp;</td><td colspan=8>&nbsp;</td><td colspan=8>&nbsp;</td></tr>" ;
+
+    $html .= "<tr><th colspan=5 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th>" ;
+    $html .= "<tr><th colspan=8 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th>" ;
+    $html .= "<tr><th colspan=8 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th></tr>" ;
 
     if ($languages_reported % 2 == 0)
     { $gif = "bluebar_hor2.gif" ; }
@@ -5829,7 +5762,8 @@ sub WriteReportPerCountryOverview
 #               "<td colspan=99 class=hc><b>Share in Global Monthly $views_edits</b><br><small><font color=#808080>red and blue bars have different scale</font></small></td></tr>\n" ;
   $html .= "<tr><td class=hr><b>Country</b></td><td class=hc><b>Region</b><br><img src='http://stats.wikimedia.org/Location_of_Continents2.gif'></td><td class=hc><b>N/S</b></td><td class=hc colspan=2><small><font color=#404040>absolute count and monthly ${views_edits}s per internet user</font></small></td><td class=hl colspan=2><small>share of global total<font color=#808080><p>note:blue and red bars have different scale</font></small></td></tr>\n" ;
   $html .= "<tr><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th>&nbsp;</th><th colspan=2>&nbsp;</th></tr>\n" ;
-  $html .= "</thead><tbody>\nTOTAL\nREGIONS\n" ;
+  $html .= "</thead><tbody>\n" ;
+  $html .= "TOTAL\nREGIONS\n" ;
 
   push @csv_countries, "# Wikimedia Traffic Analysis Report - Wikipedia $views_edits Per Country - Overview\n" .
                        "# Report based on data from $requests_recently_start - $requests_recently_stop\n" .
@@ -6547,7 +6481,7 @@ sub WriteWorldMapSvg
   close SVG_OUT ;
 
   &Log ("Convert world_map_$period.svg to png\n") ;
- `svg/convert.exe svg/world_map_$period.svg png:svg/world_map_$period.png` ;
+  `svg/convert.exe svg/world_map_$period.svg png:svg/world_map_$period.png` ;
 # print "Convert world_map_$period.svg to jpg\n" ;
 # `svg/convert.exe svg/world_map_$period.svg jpg:svg/world_map_$period.jpg` ;
 # print "Convert world_map_$period.svg to gif\n" ;
@@ -6958,20 +6892,24 @@ sub ShowPerc
 
 sub ShowCount
 {
-  my ($num,$color) = @_ ;
+  my ($num,$color,$percbase) = @_ ;
   $num =~ s/,//g ;
 
   if (($num eq '&nbsp;') || ($num == 0))# to do: remove &nbsp;'s from perl code, send 0 instead, formatting in javascript
   { $num = '-' ; }
   else
   {
+    my $percentage = '' ;
+    if ($percbase ne '')
+    { $percentage = &ShowPerc(100 * $num / $percbase) ; }
+
     if ($num =~ /^[\d\.]+$/) # numeric string
     { $num = ceil( 1000 * $num - 0.5) ; }
 
     if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
     { $num ="\"$num\"" ; }
-
-    $num = "<script>showCount($num);</script>" ;
+    
+    $num = "<script>showCount($num, '$percentage');</script>" ;
   }
 
   if ($color eq '')
@@ -7610,7 +7548,7 @@ sub CountryMetaInfo
   if ($country_meta_info {$country}  eq "")
   {
     if ($country_meta_info_not_found_reported {$country} ++ == 0)
-    { &Log ("Meta info not found for country '$country'\n") ; }
+    { &Log ("Meta info not found for country $country\n") ; }
     $link_country = $country ;
     return ($country,'','..','..') ;
   }
@@ -7762,11 +7700,12 @@ a:hover   {color:#FF00FF;text-decoration:underline}
 
 var calls = 0 ;
 
-var show_count_short = (getCookie ('show_count_short') == 'true') || (getCookie ('show_count_short') == '');
-var show_count_mode  = (getCookie ('select_period') || 0) ;
+var show_count_short              = (getCookie ('show_count_short') == 'true') || (getCookie ('show_count_short') == '') ;
+var show_count_mode               = (getCookie ('select_period') || 0) ;
 var show_count_monthly_normalized = (show_count_mode == 0) ;
 var show_count_monthly_raw        = (show_count_mode == 1) ;
 var show_count_daily              = (show_count_mode == 2) ;
+var show_percentage               = (getCookie ('show_perc') == 'true') ;
 
 var char_million  = 'M' ;
 var char_thousand = 'k' ;
@@ -7787,6 +7726,15 @@ window.onload =
     { element.checked = false ; show_count_short = false ; }
     else
     { element.checked = true ; show_count_short = true ; }
+
+    checked = getCookie('show_perc') ;
+
+    element = document.getElementById ('form_show_perc');
+
+    if (checked == 'true')
+    { element.checked = true ; show_percentage = true ; }
+    else
+    { element.checked = false ; show_percentage = false ; }
 
     index = getCookie ('select_period') || 0 ;
     element = document.getElementById ('form_select_period');
@@ -7817,7 +7765,15 @@ function refreshPage ()
 {
   // alert ('refreshPage') ;
   var element = document.getElementById ('form_select_period');
+  
+  if (element.selectedIndex == 3)
+  {
+  setCookie ('select_period', (getCookie ('select_period') || 0) + 10) ;
+  }
+  else
+  {
   setCookie ('select_period', element.selectedIndex) ;
+  }
 
   var element = document.getElementById ('form_show_count_short');
   if (element.checked)
@@ -7825,11 +7781,17 @@ function refreshPage ()
   else
   { setCookie ('show_count_short', 'false') ; }
 
+  var element = document.getElementById ('form_show_perc');
+  if (element.checked)
+  { setCookie ('show_perc', 'true') ; }
+  else
+  { setCookie ('show_perc', 'false') ; }
+
   // alert (document.cookie) ;
   window.location.reload();
 }
 
-function showCount (count)
+function showCount (count, percentage)
 {
   //  if (++ calls == 1)
   // { alert ('showCount() show_count_short '+show_count_short) ; }
@@ -7868,6 +7830,11 @@ function showCount (count)
     count = count.replace ($regexp_from1,$regexp_to1) ;
   }
 
+  if (show_percentage && percentage != '' && count != '-')
+  {
+    count = percentage ;
+  }
+
   document.write (count) ;
 }
 
@@ -7877,7 +7844,7 @@ __HTML_HEAD__
   return ($html) ;
 }
 
-sub HtmlForm
+sub HtmlFormBase
 {
   my $html = <<__HTML_FORM__ ;
 
@@ -7889,6 +7856,8 @@ sub HtmlForm
 </td>
 <td class=hr>
 <form name = 'form'>
+<table>
+<tr><td class=hl>
   <select name='period' id='form_select_period' size='1' onchange='refreshPage()'>
     <option value='1'>Monthly requests, normalized</option>
     <option value='2'>Monthly requests, raw</option>
@@ -7899,6 +7868,8 @@ sub HtmlForm
 
   <input type='button' value=' Archive ' onclick='window.location=\"http://stats.wikimedia.org/archive/squid_reports\"'>
   <input type='button' value=' Wikimedia Statistics ' onclick='window.location=\"http://stats.wikimedia.org\"'>
+</td></tr>
+<tr><td class=hl>PERCOPT</td></tr></table>
 </form>
   </td>
   </tr>
@@ -7907,6 +7878,21 @@ sub HtmlForm
 __HTML_FORM__
 
 return ($html) ;
+
+}
+
+sub HtmlForm
+{
+   my $html = &HtmlFormBase ;
+   $html =~ s/PERCOPT/<!--<input type='checkbox' id='form_show_perc'\/>-->&nbsp;/ ;
+   return $html ;
+}
+
+sub HtmlFormWithPerc
+{
+   my $html = &HtmlFormBase ;
+   $html =~ s/PERCOPT/<input type='checkbox' id='form_show_perc' onchange='refreshPage()' \/> Show percentages/ ;
+   return $html ;
 
 }
 
