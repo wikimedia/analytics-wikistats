@@ -61,6 +61,7 @@ sub ReadBots
   }
   close "USERS" ;
   &LogT ("$lines lines read from users file\n") ;
+  &LogT ("$users_sounding_like_bot user names out of $user_names_tested sound like bot\n") ;
 
   my @bots2 = (sort {$a cmp $b} keys %bots) ;
   $registered_bots = $#bots2 + 1 ;
@@ -85,7 +86,7 @@ sub ReadBots
   $list_previous_bots =~ s/,\s*$// ;
 
   if ($#bots2 > -1)
-  { &LogT ("\n$registered_bots registered bots:\n\n$list_previous_bots\n") ; }
+  { &LogT ("\n$registered_bots registered bots:\n$list_previous_bots\n") ; }
   else
   { &LogT ("\nNo registered bots found\n") ; }
 
@@ -165,10 +166,36 @@ sub ReadStoredBots
   { &LogT ("\nNo previously registered bots found\n") ; }
 }
 
+sub ReadBotNames
+{
+  &LogT ("ReadBotNames\n") ;
+  undef (%bots_mentioned) ;
+
+  # read all bots names (explicitly defined by 'bot bit', and implicity by bot name)
+  my $languages = 0 ;
+  print "\nRead file $file_csv_bots_all\n" ;
+  &ReadFileCsv ($file_csv_bots_all) ;
+  foreach $line (@csv)
+  {
+    chomp $line ;
+    next if $line !~ /,/ ;
+    ($lang, $bot_list) = split (',', $line) ;
+    $languages++ ;
+    @bot_list = split ('\|', $bot_list) ;
+    foreach $bot (@bot_list)
+    {
+      $bot =~ s/\&comma;/,/g ;
+      $bots_mentioned {$bot} ++ ;
+    }
+  }
+  @bot_names = keys %bots_mentioned ;
+  print $#bot_names . "\n unique bot names found for $languages languages\n\n" ;
+}
+
 # when a user is registered as bot on 10+ wikis it is probably a bot here as well
 sub AssumeBots
 {
-  &Log ("AssumeBots\n") ;
+  &LogT ("AssumeBots\n") ;
 
   my (%bots3, @botnames) ;
 
@@ -190,19 +217,29 @@ sub AssumeBots
     my ($wp,$bots) = split (',', $line, 2) ;
     my @bots2 = split ('\|', $bots) ;
     foreach $bot (@bots2)
-    { $bots3 {$bot} ++ ; }
+    {
+      $bots3 {$bot} ++ ;
+      if ($bots3 {$bot} == 1)
+      { $bot_names_all_wikis_cached ++ ; }
+    }
   }
+  &LogT ("$bot_names_all_wikis_cached total bot names cached for all wikis\n") ;
 
   @botnames = (sort {$bots3 {$b} <=> $bots3 {$a}} keys %bots3) ;
   $line = "" ;
   $list_assumed_bots = " \n" ;
+  $threshold_bots = 10 ;
   if ($#botnames > -1)
   {
     &Log2 ("\n\nPreviously registered bots on all projects:\n") ;
     foreach $name (@botnames)
     {
-      if ($bots3 {$name} < 10) { last ; } # occurs on 10 or more wikis ?
+      if ($bots3 {$name} < $threshold_bots) { last ; } # occurs on 10 or more wikis ?
+
+      $bot_names_all_wikis_occur_above_threshold ++ ;
+
       if ($bots  {$name} > 0)  { next ; } # already found for this wiki ?
+
       $bots {$name} = 1 ;
       $list_entry = "$name [" . $bots3 {$name} . "], " ;
       if (length ($line . $list_entry) > 90)
@@ -214,10 +251,10 @@ sub AssumeBots
       $line              .= $list_entry ;
       $assumed_bots++ ;
     }
-
+    &LogT ("$bot_names_all_wikis_occur_above_threshold total bot names cached for all wikis occur on $threshold_bots+ wikis\n") ;
   }
   $list_assumed_bots =~ s/,\s*$// ;
-  &LogT ("\n$assumed_bots previously stored bots for all projects are registered on 10 or more wikis -> treat as bot here as well:\n\n$list_assumed_bots\n\n") ;
+  &LogT ("\n$assumed_bots previously stored bots for all projects are registered on $threshold_bots+ wikis and occur here as user name -> treat as bot here as well:\n$list_assumed_bots\n") ;
 
   #---
 
@@ -240,19 +277,27 @@ sub AssumeBots
     }
   }
   $list_assumed_bots =~ s/,\s*$// ;
-  &LogT ("\n$assumed_bots2 user names added to bot list because they sounded like one -> treat as bot here as well:\n\n$list_assumed_bots\n\n") ;
+  &LogT ("\n$assumed_bots2 user names added to bot list because they sounded like one -> treat as bot here as well:\n$list_assumed_bots\n") ;
 }
 
 sub TestBot
 {
   my $index = shift ;
   my $name  = shift ;
+  $user_names_tested ++ ;
   $name =~ s/\|/&pipe;/g ;
+
+
   if ($botsndx {$index} > 0)
   { $bots {$name} = 1 ; }
-  if (($name =~ /bot\b/) && ($name !~ /(?:Paucabot|Niabot|Marbot)\b/i)) # name(part) ends on bot, Paucabot is verified real user
+
+  if (($name =~ /bot\b/i) || ($name =~ /_bot_/i)) # name(part) ends on bot,
   {
-    $sounds_like_bot {$name} = 1 ;
+    if ($name !~ /(?:Paucabot|Niabot|Marbot)\b/i) # verified real users
+    {
+      $sounds_like_bot {$name} = 1 ;
+      $users_sounding_like_bot ++ ;
+    }
     # &Log ("Sounds like bot: $name\n") ;
   }
 }

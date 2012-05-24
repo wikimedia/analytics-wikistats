@@ -39,8 +39,62 @@ __SCRIPT_EMBEDDED2__
 
 sub SetScripts
 {
+$out_script_plot_go = <<__SCRIPT_PLOT_GO__ ;
+box()
+dev.off()
+__SCRIPT_PLOT_GO__
 
-$out_script_multititle = <<__SCRIPT_MULTI_TITLE__ ;
+$out_script_plot_credits = <<__SCRIPT_PLOT_CREDITS__ ;
+mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
+__SCRIPT_PLOT_CREDITS__
+
+$out_script_plot_cairo_640_240 = <<__SCRIPT_PLOT_CAIRO__ ;
+#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
+ library(Cairo)
+ Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
+__SCRIPT_PLOT_CAIRO__
+
+$out_script_plot_data = <<__SCRIPT_PLOT_DATA__ ;
+plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[COL_DATA]
+counts   <- plotdata[COL_COUNTS]
+dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
+plotdata = data.frame(date=dates,counts)
+plotdata
+attach (plotdata)
+r <- as.POSIXct(round(range(dates), "days"))
+__SCRIPT_PLOT_DATA__
+
+$out_script_plot_top_month = <<__SCRIPT_PLOT_TOP_MONTH__ ;
+mtext("max MAX_METRIC ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("MAX_MONTH: MAX_VALUE ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+__SCRIPT_PLOT_TOP_MONTH__
+
+$out_script_plot_grid = <<__SCRIPT_PLOT_GRID__ ;
+axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1,     col="gray80") # vertical monthly bars light grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year"),  format="%Y ", tck=1,     col="gray80") # year numbers below x axis
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1,     col="gray20") # vertical yearly bar dark grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20") # extending slightly below x asix (as tick marks)
+__SCRIPT_PLOT_GRID__
+
+$out_script_plot_axis_summary = <<__SCRIPT_PLOT_AXIS_SUMMARY__ ;
+#axis(2, at=100000000*c(0:10),labels=100000000*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
+axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
+__SCRIPT_PLOT_AXIS_SUMMARY__
+
+$out_script_title = "title(\" TITLE \", cex.main=1.2, font.main=3, col.main= \"black\")" ;
+
+$out_script_plot_period = "mtext(paste (\"PERIOD \"), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col=\"#000000\")" ;
+
+$out_script_options_summary = <<__SCRIPT_PLOT_OPTIONS_SUMMARY__ ;
+options("scipen"=20)
+par(mar=c(3.5,4,2.5,1.5))
+par(oma=c(0,0,0,0))
+__SCRIPT_PLOT_OPTIONS_SUMMARY__
+
+$out_plot_months_normalized = "mtext(\"metrics have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")" ;
+
+$out_script_plot_multititle = <<__SCRIPT_PLOT_MULTI_TITLE__ ;
 #multiTitle <- function(...){
 ###
 ### multi-coloured title
@@ -90,13 +144,13 @@ $out_script_multititle = <<__SCRIPT_MULTI_TITLE__ ;
 #  } # next color
 #  return()
 #}
-__SCRIPT_MULTI_TITLE__
+__SCRIPT_PLOT_MULTI_TITLE__
 
 #----------------------------------------------------------
 
 # PE = Plot Edits
 $out_script_plot_edits = <<__SCRIPT_EDIT_PLOT_EDITS__ ;
-$out_script_multititle
+$out_script_plot_multititle
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:6]
@@ -138,9 +192,7 @@ mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="
 mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#808080")
 mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
 mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
-
-box()
-dev.off()
+$out_script_plot_go
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:6]
@@ -204,16 +256,14 @@ mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, si
 mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
 mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 
-box()
-dev.off()
-
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_EDITS__
 
 #----------------------------------------------------------
 
 # PR = Plot Reverts
 $out_script_plot_reverts = <<__SCRIPT_EDIT_PLOT_REVERTS__ ;
-$out_script_multititle
+$out_script_plot_multititle
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:21]
@@ -262,8 +312,7 @@ mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3,
 #text("Script: Erik Zachte. Renderer: R.    Ratio is 'reverting edits/other edits', not 'reverted edits/other edits", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 mtext("Script: Erik Zachte. Renderer: R.    Ratio is 'reverts per editor class/all edits by editor class'", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 
-box()
-dev.off()
+$out_script_plot_go
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:21]
@@ -322,9 +371,7 @@ mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3,
 #mtext("Script: Erik Zachte. Renderer: R.    Ratio is 'reverting edits/other edits', not 'reverted edits/other edits", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 mtext("Script: Erik Zachte. Renderer: R.    Ratio is 'reverts per editor class/all edits by editor class'", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 
-box()
-dev.off()
-
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_REVERTS__
 
 
@@ -332,7 +379,7 @@ __SCRIPT_EDIT_PLOT_REVERTS__
 
 # PA = Plot Anons
 $out_script_plot_anons = <<__SCRIPT_EDIT_PLOT_ANONS__ ;
-$out_script_multititle
+$out_script_plot_multititle
 
 plotdata  <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:26]
 counts    <- plotdata[2:25]
@@ -372,9 +419,7 @@ mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, si
 mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
 mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 
-box()
-dev.off()
-
+$out_script_plot_go
 
 plotdata  <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:26]
 counts    <- plotdata[2:25]
@@ -438,46 +483,23 @@ mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, si
 mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
 mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 
-box()
-dev.off()
-
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_ANONS__
 
 # PB = Plot Binaries
 $out_script_plot_binaries = <<__SCRIPT_EDIT_PLOT_BINARIES__ ;
-$out_script_multititle
-
-plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:7]
-counts   <- plotdata[2:6]
-dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
-dates
-
-plotdata = data.frame(date=dates,counts)
-plotdata
-attach (plotdata)
-
-#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
- library(Cairo)
- Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
-
-options("scipen"=20)
-r <- as.POSIXct(round(range(dates), "days"))
-r
-
-par(mar=c(2.5,4,2.5,1.5))
-par(oma=c(0,0,0,0))
+$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
 
 #plot (dates,plotdata\$count_1,type="l", log="y", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0.001,YLIM_MAX))
  plot (dates,plotdata\$count_1,type="l",          col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
 axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
 
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
-
-title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+$out_script_plot_grid
+$out_script_title
 
 lines(dates,plotdata\$count_1,col="COLOR_1", lty="solid", lwd=1.8)
 lines(dates,plotdata\$count_2,col="COLOR_2", lty="solid", lwd=1.8)
@@ -487,51 +509,24 @@ lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
 
 legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.04, bg="#E0E0E0")
 
-mtext("MAX_VALUE", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext("MAX_MONTH: BINARIES ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
-
-box()
-dev.off()
-
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_BINARIES__
 
 # PE = Plot Editors
 $out_script_plot_editors = <<__SCRIPT_EDIT_PLOT_EDITORS__ ;
-$out_script_multititle
-
-plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:5]
-counts   <- plotdata[2:4]
-dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
-dates
-
-plotdata = data.frame(date=dates,counts)
-plotdata
-attach (plotdata)
-
-#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
- library(Cairo)
- Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
-
-options("scipen"=20)
-r <- as.POSIXct(round(range(dates), "days"))
-r
-
-par(mar=c(2.5,4,2.5,1.5))
-par(oma=c(0,0,0,0))
+$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
 
 plot (dates,plotdata\$count_5,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
-axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
-
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
-
-title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
 
 lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
 lines(dates,plotdata\$count_25,col="COLOR_25", lty="solid", lwd=1.8)
@@ -540,64 +535,141 @@ lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=1.8)
 #legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits ", "(reg edits only)"), lty=1, lwd=2, col=c("COLOR_5","COLOR_25", "COLOR_100", "#F0F0F0"), inset=0.05, bg="#E0E0E0")
 legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.04, bg="#E0E0E0")
 
-mtext("MAX_VALUE", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext("MAX_MONTH: EDITORS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
-
-box()
-dev.off()
-
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_EDITORS__
 
 # PE = Plot Page Views
 $out_script_plot_pageviews = <<__SCRIPT_EDIT_PLOT_PAGEVIEWS__ ;
-$out_script_multititle
-
-plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:3]
-counts   <- plotdata[2:2]
-dates    <-strptime(as.character(plotdata\$month), "%m/%d/%Y")
-
-plotdata = data.frame(date=dates,counts)
-plotdata
-attach (plotdata)
-
-#install.packages(c("Cairo"), repos="http://cran.r-project.org" )
- library(Cairo)
- Cairo(width=640, height=240, file="FILE_PNG_RAW", type="png", pointsize=10, bg="#F0F0F0", canvas = "white", units = "px", dpi = "auto", title="Test")
-
-options("scipen"=20)
-r <- as.POSIXct(round(range(dates), "days"))
-
-par(mar=c(3.5,4,2.5,1.5))
-par(oma=c(0,0,0,0))
+$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
 
 plot (dates,plotdata\$count_normalized,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
-#axis(2, at=100000000*c(0:10),labels=100000000*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
-
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1, col="gray80")      # vertical monthly bars light grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%Y ", tck=1, col="gray80")       # year numbers below x axis
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1, col="gray20")      # vertical yearly bar dark grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20")  # extending slightly below x asix (as tick marks)
-
-title(" TITLE ", cex.main=1.2,   font.main=3, col.main= "black")
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
 
 lines(dates,plotdata\$count_normalized,col="green4", lty="solid", lwd=1.8)
 
-mtext("max page views in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext("MAX_MONTH: VIEWS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
-mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("PERIOD "), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#000000")
-mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
-mtext("page views have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)", cex=0.85, line=2.2, side=1, outer=FALSE, col="#808080")
-
-box()
-dev.off()
-
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+$out_plot_months_normalized
+$out_script_plot_go
 __SCRIPT_EDIT_PLOT_PAGEVIEWS__
+
+# Plot Uploads
+$out_script_plot_uploads = <<__SCRIPT_EDIT_PLOT_UPLOADS__ ;
+#$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
+
+# total:
+# plot (dates,plotdata\$uploads_tot,type="l", col="gray50", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+plot (dates,plotdata\$uploads_bot,type="l", col="green4", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
+
+#lines(dates,plotdata\$uploads_tot,col="grey50", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploads_bot,col="green4", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploads_manual,col="blue", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploads_wizard,col="red", lty="solid", lwd=1.8)
+
+legend("topleft",c("Bot uploads ", "All manual uploads ", "Manual uploads via wizard "), lty=1, lwd=2, col=c("green4","blue", "red"), inset=0.05, bg="#E0E0E0")
+
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+#$out_plot_months_normalized
+$out_script_plot_go
+__SCRIPT_EDIT_PLOT_UPLOADS__
+
+# Plot Uploaders
+$out_script_plot_uploaders = <<__SCRIPT_EDIT_PLOT_UPLOADERS__ ;
+#$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
+
+plot (dates,plotdata\$uploaders_ge_1,type="l", col="gray10", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
+
+lines(dates,plotdata\$uploaders_ge_1,col="COLOR_1", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploaders_ge_5,col="COLOR_5", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploaders_ge_25,col="COLOR_25", lty="solid", lwd=1.8)
+lines(dates,plotdata\$uploaders_wizard_ge_1,col="COLOR_W1", lty="solid", lwd=1.8)
+
+legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+#(not yet) $out_plot_months_normalized
+$out_script_plot_go
+__SCRIPT_EDIT_PLOT_UPLOADERS__
+
+# Plot [Total|New] Articles
+$out_script_plot_articles = <<__SCRIPT_EDIT_PLOT_ARTICLES__ ;
+#$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
+
+plot (dates,plotdata\$articles,type="l", col="gray10", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
+
+lines(dates,plotdata\$articles,col="orange3", lty="solid", lwd=1.8)
+
+#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+#$out_plot_months_normalized
+$out_script_plot_go
+__SCRIPT_EDIT_PLOT_ARTICLES__
+
+# Plot [Total|New] Articles
+$out_script_plot_articles2 = <<__SCRIPT_EDIT_PLOT_ARTICLES2__ ;
+#$out_script_plot_multititle
+$out_script_plot_data
+$out_script_plot_cairo_640_240
+$out_script_options_summary
+
+plot (dates,plotdata\$articles_reg,type="l", col="gray10", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+$out_script_plot_axis_summary
+$out_script_plot_grid
+$out_script_title
+
+lines(dates,plotdata\$articles_reg, col="green4", lty="solid", lwd=1.8)
+lines(dates,plotdata\$articles_anon,col="red", lty="solid", lwd=1.8)
+lines(dates,plotdata\$articles_bot, col="blue", lty="solid", lwd=1.8)
+
+#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+
+$out_script_plot_top_month
+$out_script_plot_period
+$out_script_plot_credits
+#$out_plot_months_normalized
+$out_script_plot_go
+__SCRIPT_EDIT_PLOT_ARTICLES2__
+
+
 
 
 

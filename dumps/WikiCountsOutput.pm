@@ -129,6 +129,7 @@ sub UpdateMonthlyStats
         foreach $line (@csv_prev)
         {
           ($language_prev,$date_prev) = split (',', $line) ;
+
           if ($date_prev eq &ddmmyy2mmddyyyy ($date_show))
           {
              chomp ($line) ;
@@ -139,7 +140,7 @@ sub UpdateMonthlyStats
              $over_size1, $over_size2,
              $dummy8,
              $tot_bytes, $tot_words, $tot_links,
-             $tot_links_wiki, $tot_links_images, $tot_links_external, $tot_redirects, $tot_categorized,
+             $tot_links_wiki, $tot_links_images, $tot_links_external, $dummy9, $tot_categorized,
              $pages_without_internal_link) = split (',', $line) ;
 
              if ($articles_alt_prev > $articles_alt)
@@ -171,7 +172,13 @@ sub UpdateMonthlyStats
               &csv ($tot_links_external).
               &csv ($tot_redirects).
               &csv ($tot_categorized).
-              &csv ($pages_without_internal_link);
+              &csv ($pages_without_internal_link) .
+              &csv ($edits_per_month_reg    {$yymm}).
+              &csv ($edits_per_month_anon   {$yymm}).
+              &csv ($edits_per_month_bot    {$yymm}).
+              &csv ($created_per_month_reg  {$yymm}).
+              &csv ($created_per_month_anon {$yymm}).
+              &csv ($created_per_month_bot  {$yymm}) ;
 
       $line =~ s/.$// ;
       push @csv, $line ;
@@ -204,6 +211,16 @@ sub UpdateMonthlyStats
         $line =~ s/(?:,0)+$// ;
         push @csv3, $line ;
       }
+
+      # collect activity levels, per language, per month, per user type R(egistered users)/B(ots), per page type A(rticles)/T(alk pages)/O(ther), per level
+      # write below to $file_csv_users_activity_spread (= StatisticsUserActivitySpread.csv)
+      # example
+      # en,11/30/2011,B,A,227,127,115,105,92,87,80,71,60,56,48,32,23,20,13,7,2,2
+      # en,11/30/2011,B,T,101,73,67,59,53,52,47,42,34,32,28,23,14,11,7,3,1,1
+      # en,11/30/2011,B,O,185,140,133,122,111,104,97,88,69,64,57,36,16,16,14,6,1,1,1
+      # en,11/30/2011,R,A,117423,52222,34373,19636,9755,8039,5745,3352,1448,1118,645,233,54,38,12,4,1,1
+      # en,11/30/2011,R,T,30187,12816,8685,5406,2939,2509,1846,1085,402,305,143,50,10,6,2
+      # en,11/30/2011,R,O,34118,12542,8747,5504,2906,2410,1637,812,234,167,86,32,7,3,2,1
 
       for ($u = 0 ; $u <= 1 ; $u++)
       {
@@ -258,6 +275,9 @@ sub UpdateMonthlyStats
   $dummy = pop @user_stats_reg_10_edits ;
 # @csv = sort {&csvkey_lang_date ($a) cmp &csvkey_lang_date ($b)} @csv ;
   @csv = sort {($x=$a,$x=~s/$qr_csvkey_lang_date/$1$4$2$3/o,$x) cmp ($y=$b,$y=~s/$qr_csvkey_lang_date/$1$4$2$3/o,$y)} @csv ;
+
+print "Print monthly stats to $file_csv_monthly_stats\n" ;
+
   &WriteFileCsv ($file_csv_monthly_stats) ;
 
 # @csv = sort {&csvkey_lang_date ($a) cmp &csvkey_lang_date ($b)} @csv2 ;
@@ -496,7 +516,11 @@ sub UpdateAccessLevels
 
 sub UpdateUsersAnonymous
 {
-  &LogPhase ("UpdateUsersAnonymous") ;
+  if ($filesizelarge)
+  { &LogPhase ("UpdateUsersAnonymous (huge sort on largest dumps)") ; }
+  else
+  { &LogPhase ("UpdateUsersAnonymous") ; }
+
   &TraceMem ;
 
   my @csv2 ;
@@ -540,6 +564,9 @@ sub UpdateUsersAnonymous
   &TraceRelease ("Release table \%edits_per_user_ip_namespace_..") ;
   undef (%edits_per_user_ip_namespace_a) ;
   undef (%edits_per_user_ip_namespace_x) ;
+
+  if ($filesizelarge)
+  { &LogT ("Sort complete\n") ; }
 }
 
 sub UpdateActiveUsers
@@ -689,7 +716,11 @@ sub UpdateEditsPerArticle
 {
   if ($edits_only)   { return ; }
 
+
   &LogPhase ("UpdateEditsPerArticle") ;
+  &LogPhase ("Process broken, in memory sort for all edits on wp:en or wx:commons, better not!\n") ;
+  return ; # process broken
+
   &TraceMem ;
 
   &ReadFileCsvAll ($file_csv_edits_per_article2) ;
@@ -807,9 +838,25 @@ sub UpdateBots
   @bots2 = (sort {$a cmp $b} keys %bots) ;
   if ($#bots2 > -1)
   { push @csv, "$language," . join ('|', @bots2) ; }
-  @csv = sort {$a cmp $b} #csv ;
+  @csv = sort {$a cmp $b} @csv ;
 
   &WriteFileCsv ($file_csv_bots) ;
+}
+
+sub UpdateBotsAll
+{
+  &LogPhase ("UpdateBotsAll -> $file_csv_bots_all") ;
+  &ReadFileCsv ($file_csv_bots_all) ;
+
+  @bots2 = (sort {$a cmp $b} keys %bots) ;
+  if ($#bots2 > -1)
+  { push @csv, "$language," . join ('|', @bots2) ; }
+  @csv = sort {$a cmp $b} @csv ;
+
+  &LogT (($#bots2 + 1) . " bots found (implicit (by name) and explicit (bot flag)\n") ;
+
+
+  &WriteFileCsv ($file_csv_bots_all) ;
 }
 
 sub UpdateTimelines
@@ -1011,6 +1058,7 @@ sub WriteWikibooksInfo
 sub WriteFileCsv
 {
   my $file_csv = shift ;
+
   my $lines = 0 ;
   open "FILE_OUT", ">", $file_csv ;
   foreach $line (@csv)

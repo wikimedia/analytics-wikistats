@@ -31,8 +31,8 @@
 
   # by default process up to and including last completed month,
   # to recreate older stats, set following variables which will be used instead of system time
-  # $assume_current_year  = 2012 ;
-  # $assume_current_month = 1 ;
+  $assume_current_year  = 2012 ;
+  $assume_current_month = 4 ;
   # (to do: make this scripts parameters)
 
   $| = 1; # flush screen output
@@ -108,6 +108,17 @@
       # $totals_project_month_split {$project2} {$date} += $count ;
       # if ($totals_project_month_split {$project2} {$date} > $totals_project_month_split_max {$project2})
       # { $totals_project_month_split_max {$project2} = $totals_project_month_split {$project2} {$date} ; }
+
+      if ($lang =~ /\.m/)
+      {
+        $totals_project_month_mobile {"$project3"} {$date} += $count ;
+        $totals_project_month_mobile {"all"}       {$date} += $count ;
+      }
+      else
+      {
+        $totals_project_month_non_mobile {"$project3"} {$date} += $count ;
+        $totals_project_month_non_mobile {"all"}       {$date} += $count ;
+      }
 
       $totals_project_month_combined {"$project3"} {$date} += $count ;
       if ($totals_project_month_combined {$project3} {$date} > $totals_project_month_combined_max {$project3})
@@ -457,6 +468,7 @@ sub ScanTarFiles
       next if $file ge "projectcounts-20100627-000000" and $file lt "projectcounts-20100628-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20110908-000000" and $file lt "projectcounts-20110915-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20111223-010000" and $file lt "projectcounts-20111226-160000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20120413-000000" and $file lt "projectcounts-20120417-000000" ; # bad measurements on these dates
 
       push @files, $file ;
       $file_in_tar {$file} = $file_in ;
@@ -727,7 +739,13 @@ sub CountPageViews
       $wikis_processed {"$project,$language"}++ ;
 
       $totals {"month"}   {$project} {"$language,$year/$month"} += $count ;
-# print "$project $language $year/$month: " . $totals {"month"} {$project}{"$language,$year/$month"} . "\n" ;
+
+      if ($language =~ /\.m/)
+      { $totals_mobile {"month"} {$project} {"$language,$year/$month"} += $count ; }
+      else
+      { $totals_non_mobile {"month"} {$project} {"$language,$year/$month"} += $count ; }
+
+      # print "$project $language $year/$month: " . $totals {"month"} {$project}{"$language,$year/$month"} . "\n" ;
       $totals {"week"}    {$project} {"$language,$year,$week"} += $count ;
       $totals {"day"}     {$project} {"$language,$year/$month/$day"} += $count ;
       $totals {"hour"}    {$project} {"$language,$year/$month/$day,$hour"} = $count ; # huge file, reactivate when really used
@@ -883,6 +901,67 @@ sub WriteCsvFilesPerPeriod
                 "\n";
     }
     close CSV ;
+
+    # read data back and summarize per project
+    open CSV_IN, "<", $file_csv ;
+    $file_csv =~ s/analytics_in_page_views.csv/analytics_chk_page_views_totals_normalized.csv/ ;
+    open CSV_OUT, ">", $file_csv ;
+    binmode CSV_IN ;  # enforce UNIX style linebreaks \012
+    binmode CSV_OUT ; # enforce UNIX style linebreaks \012
+    while ($line = <CSV_IN>)
+    {
+      chomp $line ;
+      $csv_analytics_chk_months   {$month}++ ;
+      $csv_analytics_chk_projects {$project}++ ;
+      ($project,$lang,$month,$non_normalized_non_mobile,$non_normalized_mobile,$normalized_non_mobile,$normalized_mobile) = split (',', $line) ;
+      $csv_analytics_chk_page_views_non_normalized_non_mobile {"$month,$project"} += $non_normalized_non_mobile ;
+      $csv_analytics_chk_page_views_non_normalized_mobile     {"$month,$project"} += $non_normalized_mobile ;
+      $csv_analytics_chk_page_views_normalized_non_mobile     {"$month,$project"} += $normalized_non_mobile ;
+      $csv_analytics_chk_page_views_normalized_mobile         {"$month,$project"} += $normalized_mobile ;
+    }
+
+
+    print CSV_OUT "month," ;
+    foreach $project (sort {$a cmp $b} keys %csv_analytics_chk_projects)
+    {
+      next if $project !~ /^w/ ;
+      print CSV_OUT "$project,,," ;
+    }
+    print CSV_OUT "overall\n" ;
+
+    print CSV_OUT "," ;
+    foreach $project (sort {$a cmp $b} keys %csv_analytics_chk_projects)
+    {
+      next if $project !~ /^w/ ;
+      print CSV_OUT "non-mobile,mobile,total," ;
+    }
+    print CSV_OUT "non-mobile,mobile,total\n" ;
+
+    foreach $month (sort {$b cmp $a} keys %csv_analytics_chk_months)
+    {
+      print CSV_OUT "$month," ;
+      $csv_analytics_normalized_non_mobile = 0 ;
+      $csv_analytics_normalized_mobile    = 0 ;
+
+      foreach $project (sort {$a cmp $b} keys %csv_analytics_chk_projects)
+      {
+        next if $project !~ /^w/ ;
+        print CSV_OUT
+                    # $csv_analytics_chk_page_views_non_normalized_non_mobile {"$month,$project"} . ',' .
+                    # $csv_analytics_chk_page_views_non_normalized_mobile     {"$month,$project"} . ',' .
+                      $csv_analytics_chk_page_views_normalized_non_mobile     {"$month,$project"} . ',' .
+                      $csv_analytics_chk_page_views_normalized_mobile         {"$month,$project"} . ',' .
+                     ($csv_analytics_chk_page_views_normalized_non_mobile     {"$month,$project"} +
+                      $csv_analytics_chk_page_views_normalized_mobile         {"$month,$project"}) . ',' ;
+        $csv_analytics_normalized_non_mobile += $csv_analytics_chk_page_views_normalized_non_mobile  {"$month,$project"} ;
+        $csv_analytics_normalized_mobile     += $csv_analytics_chk_page_views_normalized_mobile      {"$month,$project"} ;
+      }
+      print CSV_OUT
+                    $csv_analytics_normalized_non_mobile . ',' .
+                    $csv_analytics_normalized_mobile     . ',' .
+                   ($csv_analytics_normalized_non_mobile +
+                    $csv_analytics_normalized_mobile)    . "\n" ;
+    }
   }
 }
 
@@ -1185,6 +1264,50 @@ sub WriteCsvHtmlFilesPopularWikis
     {
       print CSV $totals_project_month_combined {$project3} {"${recent_months [$m]}"} . "," ;
       print     $totals_project_month_combined {$project3} {"${recent_months [$m]}"} . "," ;
+    }
+    print CSV &GetProjectName2 ($project3) . "\n" ;
+    print     &GetProjectName2 ($project3) . "\n" ;
+  }
+
+  print CSV "\n=== Page view totals per project - non-mobile ===\n" ;
+  print     "\n=== Page view totals per project - non-mobile ===\n" ;
+
+  print CSV "\n,,,,,,,,$csv_recent_months" ;
+  print     "\n$csv_recent_months" ;
+
+  # write per project recent months of page view totals - non mobile
+  $lines = 0 ;
+  foreach $project3 (sort { $totals_project_month_combined_max {$b} <=>  $totals_project_month_combined_max {$a}} keys %projects3)
+  {
+    print CSV ",,,,,,,," . &GetProjectName2 ($project3) . "," ;
+    print                  &GetProjectName2 ($project3) . "," ;
+
+    for ($m = 0 ; $m < $months_recent ; $m++)
+    {
+      print CSV $totals_project_month_non_mobile {$project3} {"${recent_months [$m]}"} . "," ;
+      print     $totals_project_month_non_mobile {$project3} {"${recent_months [$m]}"} . "," ;
+    }
+    print CSV &GetProjectName2 ($project3) . "\n" ;
+    print     &GetProjectName2 ($project3) . "\n" ;
+  }
+
+  print CSV "\n=== Page view totals per project - mobile ===\n" ;
+  print     "\n=== Page view totals per project - mobile ===\n" ;
+
+  print CSV "\n,,,,,,,,$csv_recent_months" ;
+  print     "\n$csv_recent_months" ;
+
+  # write per project recent months of page view totals - non mobile
+  $lines = 0 ;
+  foreach $project3 (sort { $totals_project_month_combined_max {$b} <=>  $totals_project_month_combined_max {$a}} keys %projects3)
+  {
+    print CSV ",,,,,,,," . &GetProjectName2 ($project3) . "," ;
+    print                  &GetProjectName2 ($project3) . "," ;
+
+    for ($m = 0 ; $m < $months_recent ; $m++)
+    {
+      print CSV $totals_project_month_mobile {$project3} {"${recent_months [$m]}"} . "," ;
+      print     $totals_project_month_mobile {$project3} {"${recent_months [$m]}"} . "," ;
     }
     print CSV &GetProjectName2 ($project3) . "\n" ;
     print     &GetProjectName2 ($project3) . "\n" ;

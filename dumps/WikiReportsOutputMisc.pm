@@ -1441,6 +1441,12 @@ sub GenerateHtmlStart
                $out_page_header2 . $out_msg . "<hr class=b>$out_special_msg\n" ;
   if (($language eq "ja") || ($language eq "zh"))
   { $out_html =~ s/<\/?b>//g ; }
+
+  if (! $pageviews)
+  {
+  #  $out_html .= "<font color=#C00000><h3>Feb 30, 2012: Reports are broken, and need to be regenerated, due date &plusmn; April 7</h3></font>" .
+  #               "<font color=#C00000>After recent dump format change redirect pages were no longer recognized, as a result article count and new articles per day are much too high. Effect on other metrics is negligible.</font><p>"   ;
+  }
 }
 
 sub GenerateColophon
@@ -1496,13 +1502,16 @@ sub GenerateColophon
   if ($out_delay ne "")
   { $out_delay = "$out_delay<p>" ; }
 
+  ($sec,$min,$hour) = gmtime(time);
+  $out_generated_at = &GetDate (time) . ' ' . sprintf ("%02d:%02d",$hour,$min) ;
+
   $out_html .= "<p><small>\n" .
 #              ($wikimedia ? $out_sort_order3 : "") .
                $out_history . "\n" .
                $out_sort_order3 .
                (($sitemap_new_layout) ? $participation {"intro"} : "") .
                $out_comparison2 .
-               $out_generated . &GetDate (time) . " " .
+               $out_generated . $out_generated_at . " " .
                ($pageviews ? $out_pageviewfiles : $out_sqlfiles) .
                &GetDate ($dumpdate2) . "\n<br>" .
                (! $pageviews ? $out_delay : "") .

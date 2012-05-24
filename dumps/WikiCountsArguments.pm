@@ -8,7 +8,7 @@ sub ParseArguments
   &LogT ("ParseArguments\n") ;
   my $options ;
   my ($year, $month) , ;
-  getopt ("dilmopsu", \%options) ;
+  getopt ("dilmopsuyz", \%options) ;
 
   foreach $key (keys %options)
   {
@@ -22,18 +22,18 @@ sub ParseArguments
   abort ("Specify input folder for xml dump files as: -i path") if (! defined ($options {"i"})) ;
   abort ("Specify output folder as: -o path") if (! defined ($options {"o"})) ;
 
-  $path_perl      = $options {"p"} ;
-  $path_php       = $options {"s"} ; # s for scripts
-  $path_in        = $options {"i"} ;
-  $path_out       = $options {"o"} ;
+  $path_perl        = $options {"p"} ;
+  $path_php         = $options {"s"} ; # s for scripts
+  $path_in          = $options {"i"} ;
+  $path_out         = $options {"o"} ;
 
-  $webalizer_only = $options {"w"} ;
-  $mode           = $options {"m"} ;
-# $input_xml      = $options {"x"} ; # obsolete: only xml allowed now (sql mode removed)
+  $webalizer_only   = $options {"w"} ;
+  $mode             = $options {"m"} ;
+# $input_xml        = $options {"x"} ; # obsolete: only xml allowed now (sql mode removed)
 
-  $project        = $options {"l"} ; # l for language project
-  $dumpdate       = $options {"d"} ;
-  $dump2csv       = $options {"c"} ;
+  $project          = $options {"l"} ; # l for language project
+  $dumpdate         = $options {"d"} ;
+  $dump2csv         = $options {"c"} ;
 
   if (defined ($options {"e"}))
   { $edits_only = $true ; }
@@ -45,6 +45,18 @@ sub ParseArguments
     $reverts_sampling = $options {"u"} ;
     if ($reverts_sampling < 2)  # sample every nth article
     { $reverts_sampling = 1 ; } # 1 means no sampling
+  }
+
+  @keys = keys %options ;
+  if (defined ($options {"y"})) # 'y' as join symbol = merge
+  {
+    $merge_user_edits_one_project = $true ;
+    return ;
+  }
+  if (defined ($options {"z"}))
+  {
+    $merge_user_edits_all_projects = $true ;
+    return ;
   }
 
   if (defined ($options {"b"}))
@@ -60,6 +72,7 @@ sub ParseArguments
   else
   { $traceresources = $false ; }
 
+
   abort ("Specify language code as: -l xx") if (! defined ($options {"l"})) ;
   abort ("Specify xml dump date as: -d yyyymmdd") if (! defined ($options {"d"})) ;
 
@@ -71,6 +84,9 @@ sub ParseArguments
   { $mode = "wp" ; }
   if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wx|wv)$/)
   { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wx|wv]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wx=wikispecial, wv=wikiversity)") ; }
+
+  $job_code = "c:$mode:$language" ;
+  $job_code_uc = uc $job_code ;
 
   abort ("Project $project is skipped: 'mania' and/or 'team' in the name") if ($project =~ /(?:mania|team)/i) ;
 
@@ -88,8 +104,8 @@ sub ParseArguments
   }
   $language =~ s/wiki$// ;
 
-# if (($mode eq "wp") && (($language eq "en")))
-# { $edits_only = $true ; }
+  if (($mode eq "wx") && (($language eq "commons"))) # need full dump for upload stats (e.g. category [[Category:Uploaded with UploadWizard]] )
+  { $edits_only = $false ; }
 
   &LogT ("Project '$project' -> language '$language'\n\n") ;
   &LogC ("\n" . &GetDateTimeEnglishShort(time) . " $mode" . ": '$project' ") ;
@@ -111,6 +127,17 @@ sub SetEnvironment
   { $path_in  =~ s/[\\]*$/\\/ ; } # make sure there is one trailing (back)slash
   else
   { $path_in  =~ s/[\/]*$/\// ; }
+
+  if ($merge_user_edits_one_project || $merge_user_edits_all_projects) # we know enough
+  {
+    $file_csv_user_month_all_wikis      = $path_out . "/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
+    $file_csv_user_month_all_projects   = $path_out . "/EditsBreakdownPerUserPerMonthAllProjects.csv" ;
+    $file_csv_users_activity_spread     = $path_out . "/StatisticsUserActivitySpread.csv" ;
+    $file_csv_users_activity_spread_all = $path_out . "/StatisticsUserActivitySpreadAllProjects.csv" ;
+    $file_csv_monthly_stats             = $path_out . "/StatisticsMonthly.csv" ;
+    $file_csv_bots_all                  = $path_out . "/BotsAll.csv" ;
+    return ;
+  }
 
   if ($path_out =~ /\\/)
   { $path_out =~ s/[\\]*$/\\/ ; }
@@ -179,9 +206,11 @@ sub SetEnvironment
         $edits_only = $true ;
       }
 
-      if ($edits_only && ($language =~ /^(?:id|jv|sv)$/))
+#     if ($edits_only && ($language =~ /^(?:id|jv|sv|ar|pt)$/))
+      if ($edits_only && ($language =~ /^(?:id|jv|sv|ar)$/))
       {
         &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV, 2011-05: special request on SV\n") ;
+        &LogT ("Overrule edits only mode for selected wikis, 2012-04: outreach programs: special request by Annie Lin\n") ;
         $edits_only = $false ;
       }
     }
@@ -406,6 +435,7 @@ sub SetEnvironment
 #   $file_csv_user                  = $path_out . "StatisticsUsers.csv" ;
     $file_csv_user                  = $path_out . "EditsPerUser" . uc($language) . ".csv" ;
     $file_csv_user_month            = $path_out . "EditsBreakdownPerUserPerMonth" . uc($language) . ".csv" ;
+    $file_csv_user_month_all_wikis  = $path_out . "EditsBreakdownPerUserPerMonthAllWikis.csv" ;
     $file_csv_user_month_article    = $path_temp . "EditsPerUserPerMonthPerArticle" . uc($language) . ".csv" ;
     $file_csv_user_month_article_s  = $path_temp . "EditsPerUserPerMonthPerArticleSorted" . uc($language) . ".csv" ;
     $file_csv_anonymous_users       = $path_out . "StatisticsAnonymousUsers.csv" ;
@@ -419,7 +449,8 @@ sub SetEnvironment
     $file_csv_zeitgeist             = $path_out . "ZeitGeist.csv" ;
     $file_csv_binaries_stats        = $path_out . "StatisticsPerBinariesExtension.csv" ;
     $file_csv_namespaces            = $path_out . "Namespaces.csv" ;
-    $file_csv_bots                  = $path_out . "Bots.csv" ;
+    $file_csv_bots                  = $path_out . "Bots.csv" ;  # explicity defined bots
+    $file_csv_bots_all              = $path_out . "BotsAll.csv" ;
     $file_csv_bot_actions           = $path_out . "StatisticsBots.csv" ;
     $file_csv_access_levels         = $path_out . "StatisticsAccessLevels.csv" ;
     $file_csv_run_stats             = $path_out . "StatisticsLogRunTime.csv" ;
@@ -463,12 +494,31 @@ sub SetEnvironment
     $days += days_in_month ($year, $month) ;
   }
 
+  # determine date of previous run
   &ReadFileCsvOnly ($file_csv_log) ;
-
-  if (@csv > 0)
+  if ($#csv > -1)
   {
     ($language_log, $date, $time, $runtime, $conversions, $fraction_5, $fraction_100, $recently_active_users,
      $edits_total_namespace_a, $edits_total_ip_namespace_a, $edits_total_namespace_x, $edits_total_ip_namespace_x) = split (',', $csv [0]) ;
+  }
+
+  # if data for last month are not available, rerun counts anyway
+  &ReadFileCsvOnly ($file_csv_monthly_stats) ;
+  if ($#csv > -1)
+  {
+    $date_hi = '' ;
+    foreach $line (@csv)
+    {
+      ($lang,$date2,@dummy) = split (',', $line) ;
+      $date3 = substr ($date2,6,4) . substr ($date2,0,2) . substr ($date2,3,2) ;
+      if ($date3 gt $date_hi)
+      { $date_hi = $date3 ; }
+    }
+    if ($date_hi lt $date)
+    {
+      &LogT ("\nDump already processed till $date, but not all data found in monthly csv file. Reset last processing date to $date_hi\n") ;
+      $date = $date_hi ;
+    }
   }
 
   $edits_total_previous_run = $edits_total_namespace_a + $edits_total_namespace_x ;

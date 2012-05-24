@@ -5,6 +5,8 @@ sub GenerateChartsPerWikipedia
   my $wp = shift ;
   my ($m, $year, $date) ;
 
+  &LogT ("\nGenerateChartsPerWikipedia $wp") ;
+
   $factor_5   = $factors_5   {$wp} ;
   $factor_100 = $factors_100 {$wp} ;
 

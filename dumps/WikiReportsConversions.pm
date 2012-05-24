@@ -161,6 +161,8 @@ sub mmddyyyy2mmddyy
 sub m2mmddyyyy
 {
   my $month = shift ;
+  abort ("m2mmddyyyy: \$m == 0") if $month == 0 ;
+
   my $year  = 2000 ;
   while ($month > 12)
   { $month -= 12 ; $year ++ ; }
@@ -168,6 +170,17 @@ sub m2mmddyyyy
   { return (sprintf ("%02d/%02d/%04d", $month, days_in_month ($year, $month), $year)) ; }
   else
   { return (sprintf ("%02d/%02d/%04d", $dumpmonth, $dumpday, $dumpyear)) ; }
+}
+
+sub m2mmdimyyyy #mm dim yyyy (dim = days in month)
+{
+  my $m = shift ;
+  my $date = &m2mmddyyyy ($m) ;
+  my $yyyy = substr ($date,6,4) ;
+  my $mm   = substr ($date,0,2) ;
+  my $days = &days_in_month ($yyyy, $mm) ;
+  $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/$days\/$2/ ;
+  return ($date) ;
 }
 
 # code year,month as monthes since 1 january 2000 (1 byte)

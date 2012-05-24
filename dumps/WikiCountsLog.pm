@@ -35,7 +35,8 @@ sub OpenLog
   }
   open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
   $log_enabled = $true ;
-  &LogT ("\n\n===== $job / " . &GetDateTime(time) . " / $target / project C:" . uc($mode) . ":" . uc ($language) . " =====\n\n") ;
+
+  &LogT ("\n\n===== $job / " . &GetDateTime(time) . " / $target / project $job_code_uc =====\n\n") ;
 
   if ($edits_total_previous_run > 100000)
   { &LogT ("Previous run took $runtime_previous_run for " . i2KM ($edits_total_previous_run) . " edits\n\n") ; }
@@ -149,6 +150,8 @@ sub SpoolPreviousErrors
 
 sub WriteJobRunStats
 {
+  &LogT ("WriteJobRunStats\n") ;
+
   my $time_total  = time - $timestart ;
   my $time = time ;
   my $time_en = &GetDateTimeEnglishShorter($time) ;
@@ -425,7 +428,7 @@ sub WriteDiskStatus
   if (($path_in !~ /\\/) && (-d $path_temp)) # Windows ?
   {
     $text = `df -h $path_temp` ;
-    &Log ("\nDisk free: \n$text\n") ;
+    &Log ("\nDisk free: \n$text") ;
     $text = `du -h $path_temp | grep tmp` ;
     &Log ("\nDisk used: \n$text\n") ;
 
@@ -436,8 +439,8 @@ sub WriteDiskStatus
     }
   }
   $text = `ls -l $path_temp2` ;
-  &Log ("List $path_temp2 =>" . $text . "\n") ;
-  &Log ("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n") ;
+  &Log ("List $path_temp2 =>" . $text) ;
+  &Log ("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n") ;
 }
 
 1;

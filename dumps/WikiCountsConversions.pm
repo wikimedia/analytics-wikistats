@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+  #!/usr/bin/perl
 my $timegm_2001_01_01 = timegm (0,0,0,1, 1-1, 2001-1900) ;
 
 # unicode issues
@@ -9,6 +9,13 @@ my $timegm_2001_01_01 = timegm (0,0,0,1, 1-1, 2001-1900) ;
 # when some byte sequences happened to be valid high order utf-8 sequences
 # tried :raw :bytes etc but for some reason could not get it right
 # so finally dedided to pack data using hex 7F and lower so no character sequences can be confused with unicode
+
+sub Beep
+{
+  return if $job_runs_on_production_server ;
+# print chr(7) ; # system sound
+  `w:/honk.exe honk.wav` ;
+}
 
 sub dmy
 {

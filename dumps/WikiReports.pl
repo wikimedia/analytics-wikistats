@@ -9,13 +9,26 @@
 # See the GNU General Public License for more details, at
 # http://www.fsf.org/licenses/gpl.html                                                                                         =
 
-  print "WikiReports.pl\n" ;
+# good to know:
+# most used variable is $wp, which is wiki code (e.g. 'en' for English, 'de' for German) + some codes for aggregated data
+# ($wp is short for 'wiki (language) project', rather than 'wikipedia')
+# extra codes for aggregated data:
+# zz = all languages within a project, e.g. all Wikipedias, or all Wikibooks
+# zzz = all languages minus English (relevant in those years when English language data are completely lagging behind)
+#       normally totals for all languages are not shown until counts for all major languages are available, this became unacceptable
+# zz28 = like zz but for first 28 days of each month only (to allow fair comparison of consecutive months)
+# zz* = all languages for all projects
+# $language is different, this is about the language in which the data should be presented
+
+  print "WikiReportsTest.pl\n" ;
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
 # $trace_on_exit = $true ;
   $trace_on_exit_concise = $true ;
   ez_lib_version (14) ;
+
+  $show_all_months_special = $false ; # for commons budget analysis include all months, for C&P to sprreadsheet
 
 # build argument list for test run in OptiPerl IDE (Erik's home test env)
 # arguments are parsed in WikiReportsInput:ParseArguments
@@ -64,10 +77,15 @@
     elsif ($mode eq 'ws') { $folder = 'wikisource' ; }
     elsif ($mode eq 'wv') { $folder = 'wikiversity' ; }
     elsif ($mode eq 'wx') { $folder = 'wikispecial' ; }
+    elsif ($mode eq 'wm') { ; }
 
     push @arguments, '-l en' ;    # output language (ISO codes), see WikiReportsLiterals for acceptable codes
 
-    push @arguments, "-i 'W:\\# Out Bayes\\csv_$mode'" ;           # input directory: csv files
+    if ($mode eq 'wm')
+    { push @arguments, "-i 'W:\\# Out Bayes\\csv_wp'" ; }       # input directory: csv files
+    else
+    { push @arguments, "-i 'W:\\# Out Bayes\\csv_$mode'" ; }       # input directory: csv files
+
     if (join ('|', @arguments) =~ /-a/)
     { push @arguments, "-o 'W:\\\@ Main Page Gallery'" ; }         # output directory: batch files for capturing all Wikimedia main pages
     else
@@ -180,6 +198,15 @@
     exit ;
   }
 
+  if ($mode_wm)
+  {
+    &LogT ("\nWrite Report For All Wikimedia Projects\n") ;
+    &GenerateTablesAllProjects ;
+    &LogT ("Ready\n") ;
+    close "FILE_LOG" ;
+    exit ;
+  }
+
   if (! $wikimedia)
   { &SettingsNoWikimedia ; }
 
@@ -198,6 +225,19 @@
 
   &LogT ("\nRead Monthly Statistics") ;
   &ReadMonthlyStats ;
+
+  if (! $job_runs_on_production_server)
+  {
+    &LogT ("\nExecute temporary test code!") ;
+    &LogT ("\nExecute temporary test code!") ;
+    &LogT ("\nExecute temporary test code!") ;
+    # $MonthlyStatsWpStart {'commons'} = 58 ; # 2004, 10 #  &yyyymm2b (2004,10) ;
+    # &GenerateTablesPerWiki ('commons') ;
+    # &GenerateSummariesPerWiki ('ja') ;
+    &LogT ("\nExecute temporary test code!") ;
+    &GenerateChartsPerWikipedia ('de') ;
+    exit ;
+  }
 
   if ($dump_gallery)
   {
@@ -223,7 +263,7 @@
     &GenerateSummariesPerWiki ;
   }
 
-# &GenerateTablesPerWiki ("zz") ;
+# &GenerateTablesPerWiki ("pt") ;
 # &GenerateComparisonTables ;
 
 #  if ($language eq "en")

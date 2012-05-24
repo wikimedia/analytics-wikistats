@@ -268,13 +268,13 @@ sub GetDateShort2
   my $month          = shift ;
   my $ignore_dumpday = shift ;
   my $year  = 2000 ;
-  if (! defined ($month))
-  { return ("?") ; }
+
+  abort ("GetDateShort2: \$m == 0") if $month == 0 ;
+
   while ($month > 12)
   { $month -= 12 ; $year ++ ; }
 
   my $date ;
-
   if (($year != $dumpyear) || ($month != $dumpmonth) || $ignore_dumpday)
   { $date = sprintf ("%02d/%02d/%04d", $month, days_in_month ($year, $month), $year) ; }
   else

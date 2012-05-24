@@ -1426,6 +1426,8 @@ sub GenerateTablesPerWiki
   $total_months = $dumpmonth_ord - $MonthlyStatsWpStart {$wp} + 1 ;
   if (($total_months <= 24) || ($wp =~ /^zz+$/) || ($wp ne 'commons'))
   { $show_all_months = $true ; }
+  if ($show_all_months_special)
+  { $show_all_months = $true ; }
 
   &ReadLog ($wp) ;
 
@@ -1433,7 +1435,13 @@ sub GenerateTablesPerWiki
   if ($wp !~ /^zzz?$/)
   {
     $out_toc  = "Monthly counts & Quarterly rankings" ;
-    $out_toc .= " / " . blank_text_after ("15/10/2009", "<font color=#008000>". &b(ucfirst($out_new). ": ") . "</font>") . " <a href='#activitylevels'>Editor activity levels</a>" ;
+    $out_toc .= " / " . blank_text_after ("15/10/2009", "<font color=#008000>". &b(ucfirst($out_new). ": ") . "</font>") . " <a href='#editor_activity_levels'>Editor activity levels</a>" ;
+    if ($wp eq 'commons')
+    {
+      $out_toc .= " / <a href='#uploader_activity_levels'>Uploader activity levels</a>" ;
+      $out_toc .= " / <a href='#top_uploaders'>Top uploaders</a>" ;
+      $out_toc .= " / <a href='#uploads_uploadwizard'>Uploads via uploadwizard</a>" ;
+    }
     $out_toc .= " / <a href='#editdistribution'>Distribution of article edits</a>" ;
     $out_toc .= " / Most prolific <a href='#wikipedians'>active</a> and " ;
     $out_toc .= "<a href='#sleeping'>inactive</a> registered contributors, " ;
@@ -1498,8 +1506,19 @@ sub GenerateTablesPerWiki
   if ($mode_wp) { $t0 = time ; }
   &GenerateTableMonthlyStats ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableMonthlyStats"} += $t1 - $t0 ; $t0 = $t1 ; }
-  &GenerateTableDistributionUsers ($wp) ;
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableDistributionUsers"} += $t1 - $t0 ; $t0 = $t1 ; }
+  &GenerateTableEditActivityLevels ($wp) ;
+
+  if ($mode_wx)
+  {
+    $t1 = time ; $TimesGenerateTables {"GenerateTableBinariesUploads"} += $t1 - $t0 ; $t0 = $t1 ;
+    &GenerateTableUploadActivityLevels ($wp) ;
+    $t1 = time ; $TimesGenerateTables {"GenerateTableUploadsByUploadWizard"} += $t1 - $t0 ; $t0 = $t1 ;
+    &GenerateTableUploadsByUploadWizard ($wp) ;
+    $t1 = time ; $TimesGenerateTables {"GenerateTableTopUploaders"} += $t1 - $t0 ; $t0 = $t1 ;
+    &GenerateTableTopUploaders ($wp) ;
+  }
+
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditActivityLevels"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableDistributionActiveUsers ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableDistributionActiveUsers"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableMostActiveUsers ($wp) ;
@@ -1514,8 +1533,8 @@ sub GenerateTablesPerWiki
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableSizeDistribution"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableNamespaces ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableNamespaces"} += $t1 - $t0 ; $t0 = $t1 ; }
-  &GenerateTableEditsPerTable ($wp) ;
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerTable"} += $t1 - $t0 ; $t0 = $t1 ; }
+  &GenerateTableEditsPerArticle ($wp) ;
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerArticle"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableZeitGeist ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableZeitGeist"} += $t1 - $t0 ; $t0 = $t1 ; }
   # &GenerateTableVisitorStats ($wp) ;
@@ -1527,11 +1546,55 @@ sub GenerateTablesPerWiki
   $out_html =~ s/zh_min_nan/zh-min-nan/g ;
   $out_html =~ s/fiu_vro/fiu-vro/g ;
 
+  if ($show_all_months_special)
+  { $file_html =~ s/.htm/_AllMonths.htm/ ; }
+
+  print "\nWrite $file_html\n" ;
+
   open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
   print FILE_OUT &AlignPerLanguage ($out_html) ;
   close "FILE_OUT" ;
-
 }
+
+sub GenerateTablesAllProjects
+{
+  $show_all_months = $true ;
+
+  &GenerateHtmlStart ('Wikimedia Editors',  '',  $out_options,
+                      'Wikimedia Editors',  $out_page_subtitle, $out_explanation,
+                      $out_button_prev, $out_button_next,   $out_button_switch,
+                      $out_crossref,    $out_msg) ;
+
+  $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpreadAllProjects.csv" ;
+
+  # use file also to find most recent month with data
+  $m_max = 0 ;
+  &ReadFileCsv ($file_csv_users_activity_spread) ;
+  foreach $line (@csv)
+  {
+    ($lang,$date) = split (',', $line) ;
+    next if $date !~ /^\d\d\/\d\d\/\d\d\d\d$/ ;
+    $m = &yyyymm2b (substr ($date,6,4),substr ($date,0,2)) ;
+    if ($m gt $m_max)
+    { $m_max = $m ; }
+  }
+
+  $MonthlyStatsWpStart {'zz*'} = 13 ;
+  $MonthlyStatsWpStop  {'zz*'} = ord ($m_max) - 1 ;
+  $MonthlyStatsWpStart {'zz'}  = $MonthlyStatsWpStart {'zz*'} ;
+  $MonthlyStatsWpStop  {'zz'}  = $MonthlyStatsWpStop  {'zz*'} ;
+
+  &GenerateTableEditActivityLevels ('zz*') ;
+
+  &GenerateColophon ($false, $false) ;
+  $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
+  $file_html = $path_out . "TablesWikimediaAllProjects.htm" ;
+
+  open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
+  print FILE_OUT &AlignPerLanguage ($out_html) ;
+  close "FILE_OUT" ;
+}
+
 
 sub GenerateTableMonthlyStats
 {
@@ -1653,8 +1716,8 @@ sub GenerateTableMonthlyStats
   else
   { $m1 = $MonthlyStatsWpStop {$wp} ; }
 
-  $lines_html_1 = "" ;
-  $lines_html_2 = "" ;
+  $lines_html_monthly_counts = "" ;
+  $lines_html_quarterly_counts = "" ;
   my $months = 0 ;
 
   for (my $m = $m1 ; $m >= $MonthlyStatsWpStart {$wp} ; $m--)
@@ -1669,23 +1732,29 @@ sub GenerateTableMonthlyStats
       if (($mode_wp) ||
           (($f != 5) && ($f != 9) && ($f != 10)))
       {
-        $value = &format($MonthlyStats {$wp.$m.$c[$f]},$c[$f]) ;
-        if (($f == 16) && $imagelinks_incomplete)
-        { $value = "($value)" ; }
-        $line_html .= &tdrb ($value) ;
+        #if (($wp =~ /^zz/) && ($f == 3))
+        #{ $line_html .= &tdc ('-') ; }
+        #else
+        #{
+          $value = &format($MonthlyStats {$wp.$m.$c[$f]},$c[$f]) ;
+
+          if (($f == 16) && $imagelinks_incomplete)
+          { $value = "($value)" ; }
+          $line_html .= &tdrb ($value) ;
+        #}
       }
     }
 
     if ($show_all_months)
-    { $lines_html_1 .= &tr ($line_html) ; }
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
     else
     {
       if ($months++ < 12)
-      { $lines_html_1 .= &tr ($line_html) ; }
+      { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
       next if $m % 3 != 1 ;
 
-      { $lines_html_2 .= &tr ($line_html) ; }
+      { $lines_html_quarterly_counts .= &tr ($line_html) ; }
     }
 
     # $out_html .= &tr ($line_html) ;
@@ -1713,11 +1782,11 @@ sub GenerateTableMonthlyStats
     }
   }
 
-  $out_html .= $lines_html_1 ;
+  $out_html .= $lines_html_monthly_counts ;
   if (! $show_all_months)
   {
     $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
-    $out_html .= $lines_html_2 ;
+    $out_html .= $lines_html_quarterly_counts ;
   }
 
   $header1b =~ s/<\/?a[^>]*>//g ;
@@ -1993,16 +2062,27 @@ sub TableMonthlyStatsForecast
   { $out_html .= &tr ($line_html) ; }
 }
 
-sub GenerateTableDistributionUsers
+# Count users with over x edits
+sub GenerateTableEditActivityLevels
 {
-  # count user with over x edits
-  # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
-  @thresholds = (5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
   my $wp = shift ;
+  my $all_projects = $false ;
+  if ($wp eq 'zz*')
+  { $all_projects = $true ; }
+
+  &LogT ("\nGenerateTableEditActivityLevels $wp") ;
+
+  &ReadEditActivityLevels ($wp) ;
+
+  # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+  @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
+
   my %namespaces ;
   my %usertypes ;
-  my %users ;
-  my %threshold_max ;
+
+  $show_all_months = $false ; # test only
+  if ($show_all_months_special)
+  { $show_all_months = $true ; }
 
   $namespaces {'A'} = "&nbsp;Articles&nbsp;" ;
   $namespaces {'T'} = "&nbsp;Talk&nbsp;" ;
@@ -2010,56 +2090,46 @@ sub GenerateTableDistributionUsers
   $usertypes  {'R'} = "&nbsp;Users&nbsp;" ;
   $usertypes  {'B'} = "&nbsp;Bots&nbsp;" ;
 
-# if ($wp =~ /^zzz?$/)
-# { return ; }
-
-  if ($wp =~ /^zzz?$/)
-  { &ReadFileCsv ($file_csv_users_activity_spread) ; }
+  if ($wp =~ /^zz/)
+  { $out_header = "Edit activity levels of registered users" ; }
   else
-  { &ReadFileCsv ($file_csv_users_activity_spread, $wp) ; }
+  { $out_header = "Edit activity levels of registered users and bots per group of namespaces" ; }
+# $out_explanation  = "Namespaces: Articles = 0&nbsp;&nbsp;&nbsp;Talk = 1,3,5,7,9,..&nbsp;&nbsp;&nbsp;Other = 2,4,6,8,..<br>10, 10&radic;10, 100, 100&radic;10, 1000, 1000&radic;10,.. &rArr; 10, 32, 100, 316, 1000, 3162, .. ( 316 : 1000 ~ 10000 : 316 )" ;
 
-  foreach $line (@csv)
+ if ($wp =~ /^zz/)
   {
-    chomp ($line) ;
-    ($lang,$date,$usertype,$nscat,$count1,$count3,@counts) = split (',', $line) ;
+    # updated when changes in WikiReportsOutputTables function 'NameSpaceArticle'
+    if ($mode_ws)
+    { $out_explanation = "Articles = namespace 0,102,104,106 only.\n" ; }
+    elsif ($mode_wx)
+    { $out_explanation = "Articles = namespace 0 only 6 and 14, strategy also 106.\n" ; }
+    else
+    { $out_explanation = "Articles = namespace 0 only.\n" ; }
+  }
+  else
+  { $out_explanation = "Articles = namespace 0 - Talk pages = namespaces 1 3 5 7 etc - Other pages = namespaces 2 4 6 8 etc.\n" ; }
 
-    next if ! $mode_wx and $lang =~ /commons/i ; # occurs (still) also in wikipedia csv files (commons was on wikipedia input queue shortly, in start 2010, by error)
-
-    $month = substr ($date,0,2) ;
-    $year  = substr ($date,6,4) ;
-    $m = &yyyymm2b ("$year$month") ;
-    for ($c = 0 ; $c <= $#counts ; $c ++)
-    { $users {$date} {$usertype} {$nscat} {$c} += $counts [$c] ; }
-
-#    if ($m % 3 < 999) # do only for visible months
-    {
-      if ($#counts > $threshold_max {$usertype} {$nscat})
-      { $threshold_max {$usertype} {$nscat} = $#counts ; }
-    }
+  if ($wp =~ /^zz/)
+  {
+    $out_explanation .=  "<br>YoY = Year over Year change\n" ;
+    $out_explanation .=  "<br>MoM = Month over Month change, <b>for first 28 days of each month</b>, to allow fair comparison between consecutive months\n" ;
+    $out_explanation .=  "<br>PoM = Percentage of Maximum, (= highest value ever in that column), <b>again for first 28 days of each month</b><br>\n" .
+                         "<font color=#FFFFDD>PoM = </font>Note how because of this normalization a short month can have PoM 100% even when the absolute editor count in the left section doesn't show the highest (full month) value for that column\n" ;
+    if (! $all_projects)
+    { $out_explanation .=  "<br>EaM = Editors <b>after</b> Merging, as percentage of Editors <b>before</b> Merging\n" .
+                           "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note how number of editors which qualify for some activity level can actually be larger after than before merging." .
+                           "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each editor name will be counted only once. Some editors now reach an edit threshold which they did not reach on any singular wiki." ; }
   }
 
-  $out_header       = "Edit activity levels of registered users and bots per group of namespaces" ;
-# $out_explanation  = "Namespaces: Articles = 0&nbsp;&nbsp;&nbsp;Talk = 1,3,5,7,9,..&nbsp;&nbsp;&nbsp;Other = 2,4,6,8,..<br>10, 10&radic;10, 100, 100&radic;10, 1000, 1000&radic;10,.. &rArr; 10, 32, 100, 316, 1000, 3162, .. ( 316 : 1000 ~ 10000 : 316 )" ;
-  $out_explanation  = "Namespaces: Articles = 0&nbsp;&nbsp;&nbsp;Talk = 1,3,5,7,9,..&nbsp;&nbsp;&nbsp;Other = 2,4,6,8,.." ;
-
-  $out_explanation2 = "Note: users that edit on more than one wiki are counted double." ;
-  $out_html .= "<br><a id='activitylevels' name='activitylevels'>&nbsp;</a><hr><p>" .  blank_text_after ("15/10/2009", "<font color=#008000>". &b(ucfirst($out_new).": ") . "</font>") .
+  $out_html .= "<br><a id='editor_activity_levels' name='editor_activity_levels'>&nbsp;</a><hr><p>" .  blank_text_after ("15/10/2009", "<font color=#008000>". &b(ucfirst($out_new).": ") . "</font>") .
                "<b>$out_header</b><p>$out_explanation<p>"  ;
-
-  if ($wikimedia && $mode_wp && ($wp =~ /^zzz?$/))
-  { $out_html .= "$out_explanation2<p>" ; }
-
-# debug: $out_html .= "<p>RA: ${threshold_max {'R'}{'A'}}, BA: ${threshold_max {'B'}{'A'}}, RT: ${threshold_max {'R'}{'T'}}, BT: ${threshold_max {'B'}{'T'}}, RO: ${threshold_max {'R'}{'O'}}, BO: ${threshold_max {'B'}{'O'}}" ;
 
   $out_html .= "<table border=1 cellspacing=0 id='table4' style='' summary='Size distribution'>\n" ;
 
-  $file_csv = $file_csv_user_activity_trends ;
-  $file_csv =~ s/\.csv/uc($wp).".csv"/e ;
-
   my ($line_csv, $line_csv1, $line_csv2, $line_csv3, @csv_users, @csv_users_head, $wiki, $lang) ;
 
-  $lines_html_1 = "" ;
-  $lines_html_2 = "" ;
+  $lines_html_monthly_counts = "" ;
+  $lines_html_quarterly_counts = "" ;
   my $months = 0 ;
 
   if ($mode_wb) { $wiki = $out_wikibooks ; }
@@ -2070,12 +2140,14 @@ sub GenerateTableDistributionUsers
   if ($mode_ws) { $wiki = $out_wikisources ; }
   if ($mode_wv) { $wiki = $out_wikiversity ; }
   if ($mode_wx) { $wiki = $out_wikispecial ; }
+
   $lang = $out_languages {$wp} ;
   $lang =~ s/\&nbsp\;/ /g ;
 
-  push @csv_users_head, "$wiki - $lang - User Activity Trends\n" ;
-  push @csv_users_head, "Articles = namespace 0 - Talk pages = namespaces 1 3 5 7 etc - Other pages = namespaces 2 4 6 8 etc\n" ;
-# push @csv_users_head, "3  32  316  3162  31623 = square root 10 times largest lower power of 10 e.g. 316 : 1000 ~ 10000 : 316\n" ;
+  $out_explanation =~ s/<[^>]*>//g ; # remove html codes
+  $out_explanation =~ s/\&nbsp;//g ;
+  push @csv_users_head, "#$wiki - $lang - User Activity Trends\n#$out_explanation\n" ;
+# push @csv_users_head, "#3  32  316  3162  31623 = square root 10 times largest lower power of 10 e.g. 316 : 1000 ~ 10000 : 316\n" ;
 
   $line_html1 = &thcb ("&nbsp;") ;
   $line_html2 = &thcb ("&nbsp;") ;
@@ -2086,20 +2158,22 @@ sub GenerateTableDistributionUsers
     $nscat = substr ("ATO",$n,1) ; # article, talk, other
     $columns1 = 0 ;
 
+    if (($wp =~ /^zz/) && ($nscat ne 'A'))
+    { last ; }
+
     for ($u = 0 ; $u <= 1 ; $u++)
     {
       $usertype = substr ("RB",$u,1) ; # bot, registered (non bot) ; no stats for anonymous written here
 
-      if (($wp =~ /^zzz?$/) && ($usertype eq "B")) # most bots run on many wikis so totals would be meaningless, through double counts
+      if (($wp =~ /^zz/) && (($nscat ne 'A') || ($usertype ne 'R'))) # most bots run on many wikis so totals would be meaningless, through double counts
       { next ; }
 
-      if ($line_csv3 ne "")
-      {
-        $line_csv1 .= "," ;
-        $line_csv2 .= "," ;
-        $line_csv3 .= "," ;
-      }
-      $line_csv3 .= "Date" ;
+#      if ($line_csv3 ne "")
+#      {
+#        $line_csv1 .= "," ;
+#        $line_csv2 .= "," ;
+#        $line_csv3 .= "," ;
+#      }
 
       if ($nscat    eq "A") { $line_csv1 .= "Articles" ; }
       if ($nscat    eq "T") { $line_csv1 .= "Talk pages" ; }
@@ -2111,142 +2185,257 @@ sub GenerateTableDistributionUsers
       $columns2 = 0 ;
       for ($c = 0 ; $c <= $#thresholds ; $c++)
       {
-        if (($c > 0) && ($c > $threshold_max {$usertype} {$nscat}))
-        {
-          last ;
-        }
-      # print "NSCAT $nscat US $usertype C $c TH ${thresholds [$c]} MAX ${threshold_max {$usertype} {$nscat}}\n" ;
-      # if (($threshold_max {'R'} {$nscat} < $c) && ($threshold_max {'B'} {$nscat} < $c))
-      # { last ; }
+        last if ($c > 0) && ($c > $activity_level_max {$usertype} {$nscat}) ;
 
-      # if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:5|10|32|100|316|1000|3162|10000|31623|100000|316228|1000000|3162278|10000000|31622777|100000000)$/)) ||
-        if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:5|10|25|100|250|1000|2500|10000|25000|100000|250000|1000000|2500000|10000000|25000000|100000000)$/)) ||
+        if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:1|3|5|10|25|100|250|1000|2500|10000|25000|100000|250000|1000000|2500000|10000000|25000000|100000000)$/)) ||
             (($usertype eq 'B') && ($thresholds [$c] =~ /^(?:5|10|100|1000|10000|100000|1000000|10000000|100000000)$/)))
         {
-        # $line_html .= &thcb ("${thresholds [$c]}:$nscat:$usertype") ;
           $columns1++ ;
           $columns2++ ;
           $line_html3 .= &thcnb ("&nbsp;".$thresholds [$c]."&nbsp;") ;
         }
-        if ($thresholds [$c] !~ /^(?:1|3)$/)
-        {
+        # if ($thresholds [$c] !~ /^(?:1|3)$/)
+        # {
           $line_csv1 .= "," ;
           $line_csv2 .= "," ;
-          $line_csv3 .= "," . $thresholds [$c] ;
-        }
+          $line_csv3 .= $thresholds [$c] . ',' ;
+        # }
       }
-      # $line_html3 .= &thcnb ("&nbsp;") ;
-      # $line_html2 .= &thcxb ($columns2+1, &w ($usertypes {$usertype})) ;
-      if ($columns2 == 0) { $columns2++ ; }
-      $line_html2 .= &thcxb ($columns2, &w ($usertypes {$usertype})) ;
-      $line_html2 .= &tdlbrx (999,'');
-    }
-    # $line_html1 .= &thcxb ($columns1+2, &w ($namespaces {$nscat})) ;
 
-    if ($wp !~ /^zzz?$/)
+      if ($columns2 == 0) { $columns2++ ; }
+
+      $line_html2 .= &thcxb ($columns2, &w ($usertypes {$usertype})) ;
+      if ($wp =~ /^zz/)
+      { $line_html2 .= &tde . &thcxb (11, &w ('Trends')) ; }
+
+      if ($wp !~ /^zz/)
+      { $line_html2 .= &tdlbrx (999,''); }
+    }
+
+    if ($wp !~ /^zz/)
     { $line_html1 .= &thcxb ($columns1+2, &w ($namespaces {$nscat})) ; }
     else
-    { $line_html1 .= &thcxb ($columns1+1, &w ($namespaces {$nscat})) ; }
+    { $line_html1 .= &thcxb ($columns1+12, &w ($namespaces {$nscat})) ; }
+
+    if ($wp =~ /^zz/)
+    {
+       $line_html3 .=  &tde .
+                       &thcb ("5 YoY") . &thcb ("100 YoY") . &tde .
+                       &thcb ("5 MoM") . &thcb ("100 MoM") . &tde .
+                       &thcb ("<font color=#808080>5 PoM</font>") . &thcb ("<font color=#808080>100 PoM</font>") ;
+       if (! $all_projects)
+       { $line_html3 .= &tde . &thcb ("<font color=#808080>5 EaM</font>") . &thcb ("<font color=#808080>100 EaM</font>") ; }
+    }
   }
 
-  push @csv_users_head, "$line_csv1\n" ;
-  push @csv_users_head, "$line_csv2\n" ;
-  push @csv_users_head, "$line_csv3\n" ;
+  if (! $all_projects)
+  {
+    push @csv_users_head, "$line_csv1\n" ;
+    push @csv_users_head, "$line_csv2\n" ;
+  }
+  push @csv_users_head, "Date,YoY-5,YoY-100,MoM-5,MoM-100,PoM-5,PoM-100,$line_csv3\n" ;
 
   $line_csv = "" ;
 
-  $out_html .= &trhb ($line_html1) ;
+  if ($wp !~ /^zz/)
+  { $out_html .= &trhb ($line_html1) ; }
   $out_html .= &trh2b ($line_html2) ;
   $out_html .= &trh2b ($line_html3) ;
 
   $months = 0 ;
-  for (my $m = $m1 ; $m >= $MonthlyStatsWpStart {$wp} ; $m--)
+  $wp =~ s/\*// ;  # treat zz* as zz
+  ($wp2 = $wp) =~ s/28$// ; # in case of normalized counts, for first 28 days of month only
+
+  # show monthly counts for last 2 full years, switch subsequently to quarterly counts on next start of year
+  $mq = ($MonthlyStatsWpStop {$wp2} - 24) ;
+  $mq -= $mq % 12 - 1 ;
+
+  $m1 = $MonthlyStatsWpStop {"zz"} ;
+
+  abort ("\$MonthlyStatsWpStart \{$wp2\} is 0!") if $MonthlyStatsWpStart {$wp2} == 0 ;
+
+  for (my $m = $m1 ; $m >= $MonthlyStatsWpStart {$wp2} ; $m--)
   {
-    if ($m == $MonthlyStatsWpStop {$wp})
-    { $line_html = &tdrb (&GetDateShort($MonthlyStatsWpDate {$wp}, $false)) ; }
+    $linepart_html_YoY = '' ;
+    $linepart_html_MoM = '' ;
+    $linepart_html_PoM = '' ;
+    $linepart_html_EaM = '' ;
+    $linepart_html_28  = '' ;
+
+    $linepart_csv_YoY  = '' ;
+    $linepart_csv_MoM  = '' ;
+    $linepart_csv_PoM  = '' ;
+    $linepart_csv_EaM  = '' ;
+    $linepart_csv_28   = '' ;
+
+    if ($false) # $m == $MonthlyStatsWpStop {$wp}) # doesn't work yields '?'
+    {
+      my $m2 = $MonthlyStatsWpDate {$wp2} ;
+      my $dateshort = &GetDateShort($MonthlyStatsWpDate {$wp2}, $false) ;
+      $line_html = &tdrb (&GetDateShort($MonthlyStatsWpDate {$wp2}, $false)) ;
+    }
     else
     { $line_html = &tdrb (&GetDateShort2 ($m)) ; }
-    $date = &m2mmddyyyy ($m) ;
+
+    $date           = &m2mmddyyyy ($m) ;
+    $date_year_ago  = &m2mmddyyyy ($m-12) ;
+    $date_month_ago = &m2mmddyyyy ($m-1) ;
 
     for ($n = 0 ; $n <= 2 ; $n++)
     {
-      $nscat = substr ("ATO",$n,1) ; # article, talk, other
+      $nscat = substr ("ATO",$n,1) ; # namespace category: article, talk, other
 
       for ($u = 0 ; $u <= 1 ; $u++)
       {
         $usertype = substr ("RB",$u,1) ; # bot, registered (non bot) ; no stats for anonymous written here
 
-        if (($wp =~ /^zzz?$/) && ($usertype eq "B")) # most bots run on many wikis so totals would be meaningless, through double counts
+        if (($wp =~ /^zz/) && (($nscat ne 'A') || ($usertype ne 'R'))) # most bots run on many wikis so totals would be meaningless, through double counts
         { next ; }
-
-        if ($line_csv ne "")
-        { $line_csv .= "," ; }
-        $line_csv .= $date ;
 
         $linepart_csv  = "" ;
         $linepart_html = "" ;
+
         for ($c = 0 ; $c <= $#thresholds ; $c++)
         {
-          if (($c > 0) && ($c > $threshold_max {$usertype} {$nscat}))
+          if (($c > 0) && ($c > $activity_level_max {$usertype} {$nscat}))
           { last ; }
 
-        # if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:5|10|32|100|316|1000|3162|10000|31623|100000|316228|1000000|3162278|10000000|31622777|100000000)$/)) ||
-          if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:5|10|25|100|250|1000|2500|10000|25000|100000|250000|1000000|2500000|10000000|25000000|100000000)$/)) ||
+          if ((($usertype eq 'R') && ($thresholds [$c] =~ /^(?:1|3|5|10|25|100|250|1000|2500|10000|25000|100000|250000|1000000|2500000|10000000|25000000|100000000)$/)) ||
               (($usertype eq 'B') && ($thresholds [$c] =~ /^(?:5|10|100|1000|10000|100000|1000000|10000000|100000000)$/)))
           {
-         # $count_R = $users {$date} {'R'} {$nscat} {$c} ;
-         #  $count_B = $users {$date} {'B'} {$nscat} {$c} ;
-         #  $line_html .= &tdrb ($count_R) ;
-         # $line_html .= &tdlb ($count_B) ;
-            $count = $users {$date} {$usertype} {$nscat} {$c} ;
-            $linepart_html .= &tdrb ($count) ;
+          # $count_R = $user_activity_levels {$wp} {$date} {'R'} {$nscat} {$c} ;
+          # $count_B = $user_activity_levels {$wp} {$date} {'B'} {$nscat} {$c} ;
+          # $line_html .= &tdrb ($count_R) ;
+          # $line_html .= &tdlb ($count_B) ;
+
+            $count = $user_activity_levels {$wp} {$date} {$usertype} {$nscat} {$c} ;
+
+            if ($count == 0)
+            {
+              $linepart_html .= &tdrb ('&nbsp;') ;
+              next ;
+            }
+
+            if (($n == 0) && ($u == 0) && ($thresholds [$c] =~ /^(?:5|100)$/)) # only for article namespace and registered users
+            {
+              $linepart_html .= &tdrb ("<font color=#0000A0><b>$count</b></font>") ;
+
+              $count = $user_activity_levels {$wp} {$date} {$usertype} {$nscat} {$c} ;
+              $count_year_ago  = $user_activity_levels {$wp} {$date_year_ago}  {$usertype} {$nscat} {$c} ;
+              $perc_YoY = '-' ;
+              if ($count_year_ago > 0)
+              { $perc_YoY = sprintf ("%.1f", 100 * ($count / $count_year_ago) - 100). '%' ; }
+              if ($perc_YoY =~ /-/)
+              { $linepart_html_YoY .= &tdrb ("<font color=800000>$perc_YoY</font>") ; }
+              else
+              { $linepart_html_YoY .= &tdrb ("<font color=008000>$perc_YoY</font>") ; }
+
+              $count           = $user_activity_levels {'zz28'} {$date}           {$usertype} {$nscat} {$c} ;
+              $count_month_ago = $user_activity_levels {'zz28'} {$date_month_ago} {$usertype} {$nscat} {$c} ;
+              $perc_MoM = '-' ;
+              if ($count_month_ago > 0)
+              { $perc_MoM = sprintf ("%.1f", 100 * ($count / $count_month_ago) - 100). '%' ; }
+              if ($perc_MoM =~ /-/)
+              { $linepart_html_MoM .= &tdrb ("<font color=800000>$perc_MoM</font>") ; }
+              else
+              { $linepart_html_MoM .= &tdrb ("<font color=008000>$perc_MoM</font>") ; }
+
+              $perc_PoM = '-' ;
+              $count     = $user_activity_levels     {'zz28'} {$date} {$usertype} {$nscat} {$c} ;
+              $count_max = $user_activity_levels_max {'zz28'}         {$usertype} {$nscat} {$c} ;
+              if ($count_max > 0)
+              { $perc_PoM = sprintf ("%.1f", 100 * ($count / $count_max)). '%' ; }
+
+              if ($perc_PoM eq '100.0%')
+              { $perc_PoM = "<font color=#000000><b>$perc_PoM</b></font>" ; }
+              $linepart_html_PoM .= &tdrb ("<font color=808080>$perc_PoM</font>") ;
+
+              $perc_EaM = '-' ;
+              $count          = $user_activity_levels {$wp} {$date} {$usertype} {$nscat} {$c} ;
+              $count_unmerged = $user_activity_levels {'!zz'} {$date} {$usertype} {$nscat} {$c} ;
+
+              if ($count_unmerged > 0)
+              { $perc_EaM = sprintf ("%.1f", 100 * ($count / $count_unmerged)). '%' ; }
+              $linepart_html_EaM .= &tdrb ("<font color=808080>$perc_EaM</font>") ;
+
+              $linepart_csv_YoY .= "$perc_YoY," ;
+              $linepart_csv_MoM .= "$perc_MoM," ;
+              $linepart_csv_PoM .= "$perc_PoM," ;
+
+            # rather techical: see how much lower data for 28 days (possibly use: rescaling to 30 days)
+            #
+            # $perc_28 = '-' ;
+            # $count_28  = $user_activity_levels {'zz28'} {$date} {$usertype} {$nscat} {$c} ;
+            # $count     = $user_activity_levels {'zz'}   {$date} {$usertype} {$nscat} {$c} ;
+            # if ($count > 0)
+            # { $perc_28 = sprintf ("%.1f", 100 * ($count_28 / $count)). '%' ; }
+            # $linepart_html_28 .= &tdrb ("<font color=808080>$perc_28</font>") ;
+            }
+            else
+            {
+              $linepart_html .= &tdrb ($count) ;
+            }
           }
-          if ($thresholds [$c] !~ /^(?:1|3)$/)
-          {
-            $count = $users {$date} {$usertype} {$nscat} {$c} ;
-            $linepart_csv .= ",$count" ;
-          }
-        # $line_html .= &tdcb("<img src=../black.gif width=2 height=10>") ;
+          $count = $user_activity_levels {$wp} {$date} {$usertype} {$nscat} {$c} ;
+          $linepart_csv .= ",$count" ;
         }
-        if ($linepart_csv eq "")
-        { $linepart_csv  = "," ; }
+
         if ($linepart_html eq "")
         { $linepart_html = &tdrb ("&nbsp;") ; }
-        $line_csv  .= $linepart_csv ;
+        $line_csv  .= "$linepart_csv" ;
         $line_html .= $linepart_html ;
       }
     }
 
-    push @csv_users, "$line_csv\n" ;
+    if ($wp =~ /^zz/)
+    {
+      $line_html .=  &tde . $linepart_html_YoY . &tde . $linepart_html_MoM . &tde . $linepart_html_PoM ; # . &tde . $linepart_html_28}
+
+      if (! $all_projects)
+      { $line_html .=  &tde . $linepart_html_EaM ; }
+    }
+
+    $line_csv =~ s/,$// ;
+    $line_csv = "$date,$linepart_csv_YoY$linepart_csv_MoM$linepart_csv_PoM,$line_csv\n" ;
+    $line_csv =~ s/<[^>]*>//g ;
+    $line_csv =~ s/,,+/,/ ; # Q&D remove empty cells
+    push @csv_users, $line_csv ;
     $line_csv = "" ;
 
     if ($show_all_months)
-    { $lines_html_1 .= &tr ($line_html) ; }
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
     else
     {
-      if ($months++ < 12)
-      { $lines_html_1 .= &tr ($line_html) ; }
+      if ($m >= $mq)
+      { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
       next if $m % 3 != 1 ;
-
-      $lines_html_2 .= &tr ($line_html) ;
+      $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
+
   }
 
   if ($langcode eq "EN")
   {
-    open (FILE_CSV_USERS, ">", $file_csv) ;
+    # reordered counts, output only, not used in these reports
+    $file_csv = $file_csv_user_activity_trends ;
+    $file_csv =~ s/\.csv/uc($wp).".csv"/e ;
+
+    if ($all_projects)
+    { $file_csv =~ s/Trends/TrendsAllProjects/ ; }
+
+    open (FILE_CSV_USER_ACTIVITY_LEVELS, ">", $file_csv) ;
     @csv_users = reverse @csv_users ;
-    print FILE_CSV_USERS @csv_users_head ;
-    print FILE_CSV_USERS @csv_users ;
-    close FILE_CSV_USERS ;
+    print FILE_CSV_USER_ACTIVITY_LEVELS @csv_users_head ;
+    print FILE_CSV_USER_ACTIVITY_LEVELS @csv_users ;
+    close FILE_CSV_USER_ACTIVITY_LEVELS ;
   }
 
-  $out_html .= $lines_html_1 ;
+  $out_html .= $lines_html_monthly_counts ;
   if (! $show_all_months)
   {
     $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
-    $out_html .= $lines_html_2 ;
+    $out_html .= $lines_html_quarterly_counts ;
   }
   $out_html .= "</table>\n" ;
 }
@@ -2278,11 +2467,17 @@ sub GenerateTableDistributionActiveUsers
                      &tdc2b    (&b($out_tbl8_hdr2)) .
                      &tdc2b    (&b($out_tbl8_hdr3))) ;
 
+
   foreach $line (sort {$a <=> $b} @csv)
   {
     my ($lang,$index,$edits_min,$users,$users_perc,$edits,$edits_perc) = split (',', $line) ;
 
     if ($users == 0) { last ; }
+
+    $users =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $users =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $edits =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
 
     $out_html .= &tr (&tdrb (sprintf ("%.0f", $edits_min)).
                       &tdrb ($users).
@@ -2376,6 +2571,278 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
 }
 
+# qqqq
+sub GenerateTableUploadActivityLevels
+{
+  my $wp = shift ;
+
+  my @thresholds = split (',', "1,3,5,10,25,100,250,1000,2500,10000,25000,100000,250000,1000000,2500000,10000000,25000000,100000000") ;
+
+  &LogT ("\nGenerateTableUploadActivityLevels $wp") ;
+
+  return if $wp ne 'commons' ;
+  return if ! $mode_wx ;
+
+  $language = 'commons' ;
+
+  &ReadFileCsvOnly ($file_csv_uploaders, $wp) ;
+
+  $out_header = "Upload activity levels of registered users and bots" ;
+  $out_explanation = '' ;
+  $out_html .= "<br><a id='uploader_activity_levels' name='uploader_activity_levels'>&nbsp;</a><hr><p>" .  blank_text_after ("15/09/2012", " <font color=#008000>". &b(ucfirst($out_new).":") . "&nbsp;</font>") .
+               "<b>$out_header</b><p>$out_explanation<p>"  ;
+
+  $cell_cnt_max = 0 ;
+  foreach $line (@csv)
+  {
+    chomp $line ;
+    ($lang,$data) = split (',', $line,2) ;
+    ($date) = split (',', $data) ;
+    next if $date !~ /^\d\d\/\d\d\/\d\d\d\d$/ ;
+
+    $yyyy = substr ($date,6,4) ;
+    $mm   = substr ($date,0,2) ;
+    $m = ord (&yyyymm2b ($yyyy, $mm)) ;
+
+    $upload_data {$m} = $data ;
+
+    $last_data = $data ;
+  }
+
+  # count columns with numbers per group
+  $group_ndx = 0 ;
+  @data = split (',', "$last_data\$") ;
+  $#data-- ;
+  %columns = {} ;
+  foreach $cell (@data)
+  {
+    if ($cell =~ /\//)
+    { $group_ndx++ ; }
+    else
+    { $columns {$group_ndx}++ ; }
+  }
+  # correct for empty column, used as separator
+  $columns {1}-- ;
+  $columns {2}-- ;
+  $columns {3}-- ;
+
+  $show_all_months = $false ;
+  if ($show_all_months_special)
+  { $show_all_months = $true ; }
+
+  $lines_html_monthly_counts = "" ;
+  $lines_html_quarterly_counts = "" ;
+  $months = 0 ;
+
+  $m1 = $MonthlyStatsWpStop {"commons"} ;
+  $m2 = ord (&yyyymm2b (2004, 10)) ;
+
+  # show monthly counts for last 2 full years, switch subsequently to quarterly counts on next start of year
+  if ($show_all_months_special)
+  { $mq = 0 ; }
+  else
+  {
+    $mq = $m1 - 24 ;
+    $mq -= $mq % 12 - 1 ;
+  }
+
+  $out_html .= "<table border=1 cellspacing=0 id='table5' style='' summary='Uploader activity'>\n" ;
+
+  # write titles per section (add one column for date field)
+  $line_html = &thcxb ($columns {1}+2, "Users, counting all uploads") . &tdlbrx (999,'') . &thcxb ($columns {2}+2, "Users, counting only uploads via uploadwizard") . &tdlbrx (999,'') . &thcxb ($columns {3}+3, "Bots");
+# $line_html = &tde . &thcxb ($columns {1}+1, "Users, counting all uploads") . &thcxb ($columns {2}+1, "Users, counting only uploadwizard uploads") . &thcxb ($columns {3}+1, "Bots");
+  $out_html .= &trhb ($line_html) ;
+
+  $line_html = &thcb ("Uploads &ge;") ;
+# for ($c = 0 ; $c <= $columns {1} - 1 ; $c++) { $line_html .= &thcb ($thresholds [$c]) ; } $line_html .=  &tdlbrx (999,'') ;
+# for ($c = 0 ; $c <= $columns {2} - 1 ; $c++) { $line_html .= &thcb ($thresholds [$c]) ; } $line_html .=  &tdlbrx (999,'') ;
+  for ($c = 0 ; $c <= $columns {1} ; $c++) { $line_html .= &thcb ($thresholds [$c]) ; } $line_html .= &tde ;
+  for ($c = 0 ; $c <= $columns {2} ; $c++) { $line_html .= &thcb ($thresholds [$c]) ; } $line_html .= &tde ;
+  for ($c = 0 ; $c <= $columns {3} ; $c++) { $line_html .= &thcb ($thresholds [$c]) ; }
+  $out_html .= &trhb ($line_html) ;
+
+  for (my $m = $m1 ; $m >= $m2 ; $m--)
+  {
+    $line_html = '' ;
+    $yyyymm = &GetDateShort2 ($m) ;
+
+    $data = $upload_data {$m} ;
+    @cells = split (',', "$data\$") ; # keep meaningful trailing commas
+    $#cells-- ;
+
+    foreach $cell (@cells)
+    {
+      if ($cell =~ /\//)
+      { $cell = $yyyymm ; $subcol = 0 ; }
+      if ($cell eq '')
+      { $cell = '' ; }
+      if (($subcol == 3) || ($subcol == 6))
+      { $cell = "<font color=#0000A0><b>$cell</b></font>" ; }
+      $line_html .= &tdrb ($cell) ;
+      $subcol ++ ;
+    }
+
+    if ($m >= $mq)
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
+
+    next if $m % 3 != 1 ;
+    $lines_html_quarterly_counts .= &tr ($line_html) ;
+  }
+
+  $out_html .= $lines_html_monthly_counts ;
+  if (! $show_all_months)
+  {
+    $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
+    $out_html .= $lines_html_quarterly_counts ;
+  }
+
+  $out_html .= "</table>\n" ;
+}
+
+sub GenerateTableUploadsByUploadWizard
+{
+  my $wp = shift ;
+
+  &LogT ("\nGenerateTableUploadsByUploadWizard $wp") ;
+
+  return if $wp ne 'commons' ;
+  return if ! $mode_wx ;
+
+  $language = 'commons' ;
+
+  $out_header = "Breakdown of uploads" ;
+  $out_explanation = '' ;
+  $out_html .= "<br><a id='uploads_uploadwizard' name='uploads_uploadwizard'>&nbsp;</a><hr><p>" .  blank_text_after ("15/09/2012", " <font color=#008000>". &b(ucfirst($out_new).":") . "&nbsp;</font>") .
+               "<b>$out_header</b><p>$out_explanation<p>"  ;
+
+  $out_html .= "<table border=1 cellspacing=0 id='table6' style='' summary='UploadWizard'>\n" ;
+
+  $file_trends_upload_wizard = $path_in . "UserActivityTrendsUploadWizardCOMMONS.csv" ;
+  open CSV_UPLOAD_WIZARD, '<', $file_trends_upload_wizard ;
+
+
+  $out_html .= &trhb (&the . &thcbr2 ('&nbsp;Total&nbsp;'). &thcbr2 ('&nbsp;By bot&nbsp;'). &thcxb (3,'&nbsp;By registered user&nbsp;')) ;
+  $out_html .= &trhb (&thcb ('Date') . &thcb ('&nbsp;Total&nbsp;'). &thcb ('&nbsp;Via wizard&nbsp;'). &thcb ('&nbsp;Perc. via wizard&nbsp;')) ;
+
+  undef %upload_data ;
+  undef $lines_html_monthly_counts ;
+  undef $lines_html_quarterly_counts ;
+
+  $m1 = $MonthlyStatsWpStop {"commons"} ;
+  $m2 = ord (&yyyymm2b (2004, 10)) ;
+
+  # show monthly counts for last 2 full years, switch subsequently to quarterly counts on next start of year
+  if ($show_all_months_special)
+  { $mq = 0 ; }
+  else
+  {
+    $mq = $m1 - 24 ;
+    $mq -= $mq % 12 - 1 ;
+  }
+
+  while ($line = <CSV_UPLOAD_WIZARD>)
+  {
+    next if $line =~ /^#/ ;
+    next if $line =~ /^month/ ;
+    chomp $line ;
+    ($date,$uploads,$uploads_bot,$uploads_user,$uploads_user_wizard,$uploads_user_wizard_perc) = split (',', $line) ;
+
+    $yyyy = substr ($date,0,4) ;
+    $mm   = substr ($date,5,2) ;
+    $m = ord (&yyyymm2b ($yyyy, $mm)) ;
+
+    $date = &GetDateShort2 ($m,$true) ;
+
+    $uploads             =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $uploads             =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $uploads_bot         =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $uploads_bot         =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $uploads_user        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $uploads_user        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $uploads_user_wizard =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $uploads_user_wizard =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+
+    if ($uploads_user_wizard == 0)
+    { $uploads_user_wizard_perc = '' ; }
+
+    $line_html = &tdrb ($date) . &tdrb ($uploads) . &tdrb ($uploads_bot)  . &tdrb ($uploads_user) . &tdrb ($uploads_user_wizard) . &tdrb ($uploads_user_wizard_perc) ;
+  # $out_html .= &tr ($line_html) ;
+
+    $upload_data {$m} = $line_html ;
+  }
+
+  for (my $m = $m1 ; $m >= $m2 ; $m--)
+  {
+    $line_html = '' ;
+    $yyyymm = &GetDateShort2 ($m) ;
+
+    $line_html = $upload_data {$m} ;
+
+    if ($m >= $mq)
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
+
+    next if $m % 3 != 1 ;
+    $lines_html_quarterly_counts .= &tr ($line_html) ;
+  }
+
+  $out_html .= $lines_html_monthly_counts ;
+  if (! $show_all_months)
+  {
+    $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
+    $out_html .= $lines_html_quarterly_counts ;
+  }
+
+  $out_html .= "</table>\n" ;
+}
+
+sub GenerateTableTopUploaders
+{
+  my $wp = shift ;
+
+  &LogT ("\nGenerateTableTopUploaders $wp") ;
+
+  return if $wp ne 'commons' ;
+  return if ! $mode_wx ;
+
+  $language = 'commons' ;
+
+  $out_header = "Top uploaders" ;
+  $out_explanation = '' ;
+  $out_html .= "<br><a id='top_uploaders' name='top_uploaders'>&nbsp;</a><hr><p>" .  blank_text_after ("15/09/2012", " <font color=#008000>". &b(ucfirst($out_new).":") . "&nbsp;</font>") .
+               "<b>$out_header</b><p>$out_explanation<p>"  ;
+
+  $out_html .= "<table border=1 cellspacing=0 id='table7' style='' summary='Top uploaders'>\n" ;
+
+  $file_top_uploaders = $path_in . "UserActivityTrendsTopUploadersCOMMONS.csv" ;
+  open CSV_TOP_UPLOADERS, '<', $file_top_uploaders ;
+
+  $out_html .= &trhb (&thcb ('&nbsp;Rank&nbsp;'). &thcb ('&nbsp;User/Bot&nbsp;'). &thcb ('&nbsp;Name&nbsp;'). &thcb ('&nbsp;Uploads&nbsp;')) ;
+
+  undef %upload_data ;
+
+  my $lines = 0 ;
+  while ($line = <CSV_TOP_UPLOADERS>)
+  {
+   $lines++ ;
+    next if $line =~ /^#/ ;
+
+    chomp $line ;
+    ($usertype,$name,$uploads) = split (',', $line) ;
+    ($name2 = $name) =~ s/_/ /g ;
+    $name2 = &convert_unicode($name2) ;
+
+    $uploads =~  s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $uploads =~  s/(\d+?)(\d\d\d)$/$1,$2/ ;
+
+    $line_html = &tdlb ($lines) . &tdlb ($usertype) . &tdlb ("<a href='http://commons.wikimedia.org/wiki/User:$name'>$name2</a>")  . &tdrb ($uploads) ;
+    $out_html .= &tr ($line_html) ;
+
+    last if $lines >= 50 ;
+  }
+
+  $out_html .= "</table>\n" ;
+}
+
 sub GenerateTableMostActiveUsers
 {
   my $wp = shift ;
@@ -2394,6 +2861,7 @@ sub GenerateTableMostActiveUsers
   { $out_html .= "<br><small>" . $out_tbl1_hdr9 . ": " . $out_tbl1_intro2 . "</small>" ; }
   if (defined ($out_tbl1_intro3))
   { $out_html .= "<br><small>" . $out_tbl1_intro3 . "</small>" ; }
+
 
   $out_html .= blank_text_after ("15/06/2009", "<small><b><p><font color=#800000>Note May 21, 2009: some names have nog been recognized as bot names on last run and may be listed here. Will be fixed on next run.</font></b></small>") ;
 
@@ -2459,8 +2927,27 @@ sub GenerateTableMostActiveUsers
     }
     $active_users ++ ;
     $recently_active_users ++ ;
+    ($user2 = $user) =~ s/_/ /g ;
 
-    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
+    $edits_0        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_0        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $edits_recent_0 =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_recent_0 =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $edits_x        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_x        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $edits_recent_x =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_recent_x =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_0        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_0        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_recent_0 =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_recent_0 =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_x        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_x        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_recent_x =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_recent_x =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+
+
+    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user2</a>").
                       &tdlb ("<a href='$url_rc$user'>UC</a>").
                       &tdrb  ($rank_now).
                       &tdrb  ($delta).
@@ -2537,11 +3024,18 @@ sub GenerateTableMostActiveBots
     else
     { ($dummy, $user, $edits_0, $edits_x, $creates_0, $creates_x, $rank_now, $rank_prev, $first, $days_first, $last, $days_last) = split (",", $line) ; }
 
-    $user =~ s/ /_/g ;
+    ($user2 = $user) =~ s/_/ /g ;
 
     $bots ++ ;
 
-    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
+    $edits_0   =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_0   =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_0 =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_0 =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+    $creates_x =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $creates_x =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+
+    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user2</a>").
                       &tdlb ("<a href='$url_rc$user'>UC</a>").
                       &tdrb ($rank_now).
                       &tdrb (&d ($edits_0)).
@@ -2607,11 +3101,15 @@ sub GenerateTableSleepingUsers
   {
     my ($dummy, $user, $edits_0, $edits_x, $rank_now, $rank_prev,
         $first, $days_first, $last, $days_last) = split (",", $line) ;
-    $user =~ s/ /_/g ;
+
+    ($user2 = $user) =~ s/_/ /g ;
 
     $memorable_absent_users ++ ;
 
-    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user</a>").
+    $edits_0        =~ s/(\d+?)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+    $edits_0        =~ s/(\d+?)(\d\d\d)$/$1,$2/ ;
+
+    $out_html .= &tr (&tdlb ("<a href='$url:$user'>$user2</a>").
                       &tdlb ("<a href='$url_rc$user'>UC</a>").
                       &tdrb ($rank_now).
                       &tdrb ($edits_0).
@@ -2728,8 +3226,8 @@ sub GenerateTableSizeDistribution
   }
   $out_html .= &trh2 ($line_html) ;
 
-  $lines_html_1 = "" ;
-  $lines_html_2 = "" ;
+  $lines_html_monthly_counts = "" ;
+  $lines_html_quarterly_counts = "" ;
   my $months = 0 ;
 
   @csv = reverse @csv ;
@@ -2751,22 +3249,22 @@ sub GenerateTableSizeDistribution
     }
 
     if ($show_all_months)
-    { $lines_html_1 .= &tr ($line_html) ; }
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
     else
     {
       if ($months++ < 6)
-      { $lines_html_1 .= &tr ($line_html) ; }
+      { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
       next if $m % 3 != 1 ;
 
-      $lines_html_2 .= &tr ($line_html) ;
+      $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
   }
-  $out_html .= $lines_html_1 ;
+  $out_html .= $lines_html_monthly_counts ;
   if ($show_all_months)
   {
     $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
-    $out_html .= $lines_html_2 ;
+    $out_html .= $lines_html_quarterly_counts ;
   }
   $out_html .= "</table>\n" ;
 }
@@ -2870,8 +3368,8 @@ sub GenerateTableNamespaces
 
   $out_html .= &trh2 ($line_html) ;
 
-  $lines_html_1 = "" ;
-  $lines_html_2 = "" ;
+  $lines_html_monthly_counts = "" ;
+  $lines_html_quarterly_counts = "" ;
   my $months = 0 ;
 
   @csv = reverse @csv ;
@@ -2936,23 +3434,23 @@ sub GenerateTableNamespaces
     }
 
     if ($show_all_months)
-    { $lines_html_1 .= &tr ($line_html) ; }
+    { $lines_html_monthly_counts .= &tr ($line_html) ; }
     else
     {
       if ($months++ < 6)
-      { $lines_html_1 .= &tr ($line_html) ; }
+      { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
       next if $m % 3 != 1 ;
 
-      $lines_html_2 .= &tr ($line_html) ;
+      $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
   }
 
-  $out_html .= $lines_html_1 ;
+  $out_html .= $lines_html_monthly_counts ;
   if (! $show_all_months)
   {
     $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
-    $out_html .= $lines_html_2 ;
+    $out_html .= $lines_html_quarterly_counts ;
   }
   $out_html .= "</table>\n" ;
 
@@ -3043,7 +3541,8 @@ sub GenerateTableActiveUsers
       if ($edits_25)
       { $out_html  .= $line_html . "\n" ; }
 
-      $line_html = "<br><a href='" . $out_urls {$wp} . $out_wikipage . "user:$name'>$name</a> " ;
+      ($name2 = $name) =~ s/_/ /g ;
+      $line_html = "<br><a href='" . $out_urls {$wp} . $out_wikipage . "user:$name'>$name2</a> " ;
       $edits_25 = $false ;
       if ($edits >= 25)
       { $edits_25 = $true ; }
@@ -3071,8 +3570,28 @@ sub GenerateTableActiveUsers
   close "FILE_OUT" ;
 }
 
-sub GenerateTableEditsPerTable
+sub GenerateTableEditsPerArticle
 {
+  # skip processing, data collection is broken, see WikiCountsOutput.pl sub UpdateEditsPerArticlee
+  $out_html .= "<br><a id='mostedited' name='mostedited'>&nbsp;</a><hr><p><b>Most edited articles</b>" .
+               "<p>Table out of order. Data collection needs to be revised." .
+               "<p>For some projects up to date and much more extensive database reports are published from the toolserver, e.g. for " .
+               "<a href='http://en.wikipedia.org/wiki/Wikipedia:DBR'>English Wikipedia</a> and <a href='https://commons.wikimedia.org/wiki/Commons:Database_reports/Pages_with_the_most_revisions'>Wikimedia Commons</a>" ;
+
+  my $file_html = $path_out . "TablesWikipediaArticleEdits" . uc($wp) . ".htm" ;
+
+  $out_html2 = "<html><body><b>Most edited articles</b>" .
+               "<p>Report out of order. Data collection needs to be revised." .
+               "<p>For some projects up to date and much more extensive database reports are published from the toolserver, e.g. for ." .
+               "<a href='http://en.wikipedia.org/wiki/Wikipedia:DBR'>English Wikipedia</a> and <a href='https://commons.wikimedia.org/wiki/Commons:Database_reports/Pages_with_the_most_revisions'>Wikimedia Commons</a>" .
+               "</body></html>" ;
+
+  open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
+  print FILE_OUT &AlignPerLanguage ($out_html2) ;
+  close "FILE_OUT" ;
+
+  return ;
+
   my $wp = shift ;
   my $file_html = $path_out . "TablesWikipediaArticleEdits" . uc($wp) . ".htm" ;
 
@@ -3084,13 +3603,13 @@ sub GenerateTableEditsPerTable
   my ($t0,$t1) ;
   if ($mode_wp) { $t0 = time ; }
   &ReadFileCsv ($file_csv_webalizer, $wp) ;
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerTable 1"} += $t1 - $t0 ; $t0 = $t1 ; }
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerArticle 1"} += $t1 - $t0 ; $t0 = $t1 ; }
 
   $file_csv_edits_per_article2 = $file_csv_edits_per_article ;
   $file_csv_edits_per_article2 =~ s/\.csv/uc($wp).".csv"/e ;
   &ReadFileCsv ($file_csv_edits_per_article2, $wp, 5000) ;
 
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerTable 2"} += $t1 - $t0 ; $t0 = $t1 ; }
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerArticle 2"} += $t1 - $t0 ; $t0 = $t1 ; }
   if ($#csv < 0) { return ; }
 
   $out_html .= "<br><a id='mostedited' name='mostedited'>&nbsp;</a><hr><p>" . &b($out_tbl9_intro) ;
@@ -3157,7 +3676,7 @@ sub GenerateTableEditsPerTable
 
     if (++$most_edited_articles >= 50) { last ; }
   }
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerTable 3"} += $t1 - $t0 ; $t0 = $t1 ; }
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableEditsPerArticle 3"} += $t1 - $t0 ; $t0 = $t1 ; }
 
   $out_html .= "</table>\n" ;
 
@@ -4011,7 +4530,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     }
   }
 
-  # print "\n\$month_hi_pageviews $month_hi_pageviews\n" ; # qqq
+  # print "\n\$month_hi_pageviews $month_hi_pageviews\n" ;
   # print "\$month_lo_pageviews $month_lo_pageviews\n" ;
 
   $out_html .= "<p>\n\n<table border=1>\n" ;
@@ -4990,7 +5509,7 @@ sub GenerateComparisonTableMonthlyData
         }
       }
 
-# print "$wp $m $value $total\n" ; # qqq
+# print "$wp $m $value $total\n" ;
 
       if (($m < $MonthlyStatsWpStop {"zz"}) &&
           (($m == $MonthlyStatsWpStop {$wp}) && $MonthlyStatsWpIncomplete {$wp}))

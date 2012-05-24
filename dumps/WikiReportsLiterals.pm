@@ -230,9 +230,9 @@ sub SetLanguageInfo
   ky=>"http://ky.wikipedia.org Kirghiz [5,AS]",
   la=>"http://la.wikipedia.org Latin [,W]",
   lad=>"http://lad.wikipedia.org Ladino [0.109,AS]",
-  ltg=>"http://ltg.wikipedia.org Latgalian [0.15,EU]",
   lb=>"http://lb.wikipedia.org Luxembourgish [0.39,EU]", # was Letzeburgesch
   lbe=>"http://lbe.wikipedia.org Lak [0.12,AS]",
+  lez=>"http://lez.wikipedia.org Lezgian [0.784,EU]",
   lg=>"http://lg.wikipedia.org Ganda [10,AF]",
   li=>"http://li.wikipedia.org Limburgish [1.6,EU]",
   lij=>"http://lij.wikipedia.org Ligurian [1.9,EU]",
@@ -241,6 +241,7 @@ sub SetLanguageInfo
   lo=>"http://lo.wikipedia.org Laotian [5.2,AS]",
   ls=>"http://ls.wikipedia.org Latino Sine Flexione",
   lt=>"http://lt.wikipedia.org Lithuanian [3.5,EU]",
+  ltg=>"http://ltg.wikipedia.org Latgalian [0.15,EU]",
   lv=>"http://lv.wikipedia.org Latvian [1.6,EU]",
   mad=>"http://mad.wikipedia.org Madurese [14]",
   mak=>"http://mak.wikipedia.org Makasar [2]",

@@ -42,8 +42,13 @@
   ez_lib_version (10) ;
 
   # set defaults mainly for tests on local machine
-  default_argv "-e|-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
-# default_argv    "-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+# default_argv "-e|-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+#default_argv    "-e|-f|-x|-m wx|-t|-l commons|-d 20120331|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wx'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+#default_argv    "-e|-f|-x|-m wp|-t|-l hi|-d 20120430|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+ default_argv    "-f|-x|-m wp|-t|-l hi|-d 20120430|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+
+  $wpx = 'wp';
+# default_argv "-i 'D:/\@Wikimedia/# Out Bayes/csv_$wpx'|-o 'D:/\@Wikimedia/# Out Bayes/csv_$wpx'|-y" ;
 
 # todo WikiCountsOutput update UpdateEditsPerArticle, one file per language
 #      WikiCountsInput  make 25 language dependent: if ($tot_revisions >= 25)
@@ -119,16 +124,35 @@
   $useritem_edit_reg_namespace_x = 6 ;           # reg user, all other namespaces
   $useritem_edit_reg_recent_namespace_a = 7 ;    # reg user, article namespace, if in last 30 days
   $useritem_edit_reg_recent_namespace_x = 8 ;    # reg user, other namespace namespace, if in last 30 days
-  $useritem_create_reg_namespace_a = 9 ;        # reg user, article namespace
+  $useritem_create_reg_namespace_a = 9 ;         # reg user, article namespace
   $useritem_create_reg_namespace_x = 10 ;        # reg user, all other namespaces
   $useritem_create_reg_recent_namespace_a = 11 ; # reg user, article namespace, if in last 30 days
   $useritem_create_reg_recent_namespace_x = 12 ; # reg user, other namespace namespace, if in last 30 days
-  $useritem_edits_10 = 13 ;                       # count if user made 10 or more edits
+  $useritem_edits_10 = 13 ;                      # count if user made 10 or more edits
 
   $file_log_concise = "./WikiCountsLogConcise.txt" ;
 
   &ParseArguments ;
   &SetEnvironment ;
+
+  if ($merge_user_edits_one_project) # option -y
+  {
+    # print "\nunlink $path_out/EditsBreakdownPerUserPerMonthAllWikis.csv\n" ;
+    # unlink "$path_out/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
+    &ReadBotNames ;
+    &CollectActiveUsersPerMonthsAllWikis ;
+    exit ;
+  }
+
+  if ($merge_user_edits_all_projects) # option -z
+  {
+    # print "\nunlink $path_out/EditsBreakdownPerUserPerMonthAllProjects.csv\n" ;
+    # unlink "$path_out/EditsBreakdownPerUserPerMonthAllProjects.csv" ;
+    &ReadBotNames ;
+    &CollectActiveUsersPerMonthsAllProjects ;
+    exit ;
+  }
+
   &OpenLog ;
   &SpoolPreviousErrors ;
   open (STDERR, ">>", $file_errors) ;
@@ -136,19 +160,13 @@
   if (defined ($path_perl))
   { &CheckForNonAscii ; }
 
-#>>>>>> temp
-#&ReadFileCsvAll ($file_language_codes) ;
-#foreach $line (@csv)
-#{
-#  if ($line =~ /^$language,/)
+  # partial excution for tests only
+#  if (! $job_runs_on_production_server)
 #  {
-#    ($language_, $encoding_, $category_, $image_, $user_, $redirtag_) = split (',', $line) ;
-#   if ($redirtag_ =~ /\#redirect/i)
-#   { &abort ("Already redirect tag") ; }
-#    last ;
+#    $language = 'commons' ;
+#    &CollectUploaders ;
+#    exit ;
 #  }
-#}
-#<<<<<<< temp
 
   &TraceMem ;
   if ((! defined ($webalizer_only)) && (! $skip_on_dumpdate))
@@ -156,6 +174,7 @@
     &ReadBots ;
     &UpdateBots ;
     &AssumeBots ;
+    &UpdateBotsAll ;
 
     if (! $testmode)
     {
@@ -242,6 +261,9 @@
     if (($mode eq "wb") || ($mode eq "wv"))
     { &WriteWikibooksInfo ; }
 
+    if ($mode_wx and $language eq 'commons')
+    { &CollectUploaders ; }
+
     &WriteJobRunStats ;
     &UpdateUsersAnonymous ; # last: huge sort
 
@@ -270,7 +292,7 @@
   rmdir $path_temp ; # remove if empty
   if (-d $path_temp)
   {
-    &LogT ("Temp $path_temp/\@Ready written\n") ;
+  # &LogT ("Temp ${path_temp}\@Ready written\n") ;
     open READY, '>', "$path_temp/\@Ready" ;
     print READY "Ready" ;
     close READY ;
@@ -278,6 +300,19 @@
   else
   { &LogT ("Temp $path_temp removed\n") ; }
 
+  if ($min_run > 1)
+  {
+    &Log ("\n************************************\n") ;
+    &Log (  "*** Job $job_code_uc completed succesfully ***\n") ; # uc helps search log
+    &Log (  "************************************\n") ;
+    &Log ('') ; # Q&D do not repeat last log line in exit report
+  }
+  else
+  { &Log ("\n*** Job $job_code completed succesfully ***\n") ; }
+
+  &Log ('') ; # do not repeat last log line in exit routine
+
+  &Beep ;
   exit ;
 
 #======================

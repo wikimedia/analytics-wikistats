@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+    #!/usr/bin/perl
 
 no warnings 'uninitialized';
 
@@ -38,8 +38,8 @@ sub ParseArguments
 
   if ($mode eq "")
   { $mode = "wp" ; }
-  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx)$/)
-  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial)") ; }
+  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx|wm)$/)
+  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial, , wm=wikimedia)") ; }
 
   if ($mode eq "wb") { $mode_wb = $true ; }
   if ($mode eq "wk") { $mode_wk = $true ; }
@@ -49,6 +49,7 @@ sub ParseArguments
   if ($mode eq "ws") { $mode_ws = $true ; }
   if ($mode eq "wv") { $mode_wv = $true ; }
   if ($mode eq "wx") { $mode_wx = $true ; }
+  if ($mode eq "wm") { $mode_wm = $true ; } # all projects
 
   # Indian languages
 # as Assamese (http://as.wikipedia.org)
@@ -299,58 +300,60 @@ if ($false)
 else
 { $path_out_plots = $path_out ; }
 
-  $file_csv_stats_ploticus        = $path_in . "StatisticsPlotInput.csv" ;
-  $file_csv_monthly_stats         = $path_in . "StatisticsMonthly.csv" ;
-  $file_csv_namespace_stats       = $path_in . "StatisticsPerNamespace.csv" ;
-  $file_csv_weekly_stats          = $path_in . "StatisticsWeekly.csv" ;
-  $file_csv_users                 = $path_in . "StatisticsUsers.csv" ;
-  $file_csv_active_users          = $path_in . "StatisticsActiveUsers.csv" ;
-  $file_csv_bot_actions           = $path_in . "StatisticsBots.csv" ;
-  $file_csv_bots                  = $path_in . "Bots.csv" ;
-  $file_csv_access_levels         = $path_in . "StatisticsAccessLevels.csv" ;
-  $file_csv_sleeping_users        = $path_in . "StatisticsSleepingUsers.csv" ;
-  $file_csv_size_distribution     = $path_in . "StatisticsSizeDistribution.csv" ;
-  $file_csv_edit_distribution     = $path_in . "StatisticsEditDistribution.csv" ;
-  $file_csv_edits_per_day         = $path_in . "StatisticsEditsPerDay.csv" ;
-  $file_csv_anonymous_users       = $path_in . "StatisticsAnonymousUsers.csv" ;
-  $file_csv_webalizer_monthly     = $path_in . "StatisticsWebalizerMonthly.csv" ;
-  $file_csv_web_requests_daily    = $path_in . "StatisticsWebRequestsDaily.csv" ;
-  $file_csv_web_visits_daily      = $path_in . "StatisticsWebVisitsDaily.csv" ;
-  $file_csv_timelines             = $path_in . "StatisticsTimelines.csv" ;
-  $file_csv_log                   = $path_in . "StatisticsLog.csv" ;
-  $file_csv_binaries_stats        = $path_in . "StatisticsPerBinariesExtension.csv" ;
-  $file_csv_language_codes        = $path_in . "LanguageCodes.csv" ;
-  $file_csv_zeitgeist             = $path_in . "ZeitGeist.csv" ;
-  $file_csv_pageviewsmonthly      = $path_in . "PageViewsPerMonthAll.csv" ;
-  $file_csv_edits_per_article     = $path_in . "EditsPerArticle.csv" ;
-  $file_csv_users_activity_spread = $path_in . "StatisticsUserActivitySpread.csv" ;
-  $file_csv_views_yearly_growth   = $path_in . "PageViewsGrowthLastYear.csv" ;
-  $file_csv_views_log_forecast    = $path_in . "PageViewsLogForecast.csv" ;
-  $file_csv_growth                = $path_in . "WikimediaGrowthStats.csv" ;
-  $file_txt_growth                = $path_in . "WikimediaGrowthStats.txt" ;
+  $file_csv_stats_ploticus          = $path_in . "StatisticsPlotInput.csv" ;
+  $file_csv_monthly_stats           = $path_in . "StatisticsMonthly.csv" ;
+  $file_csv_namespace_stats         = $path_in . "StatisticsPerNamespace.csv" ;
+  $file_csv_weekly_stats            = $path_in . "StatisticsWeekly.csv" ;
+  $file_csv_users                   = $path_in . "StatisticsUsers.csv" ;
+  $file_csv_active_users            = $path_in . "StatisticsActiveUsers.csv" ;
+  $file_csv_bot_actions             = $path_in . "StatisticsBots.csv" ;
+  $file_csv_bots                    = $path_in . "Bots.csv" ;
+  $file_csv_access_levels           = $path_in . "StatisticsAccessLevels.csv" ;
+  $file_csv_sleeping_users          = $path_in . "StatisticsSleepingUsers.csv" ;
+  $file_csv_size_distribution       = $path_in . "StatisticsSizeDistribution.csv" ;
+  $file_csv_edit_distribution       = $path_in . "StatisticsEditDistribution.csv" ;
+  $file_csv_edits_per_day           = $path_in . "StatisticsEditsPerDay.csv" ;
+  $file_csv_anonymous_users         = $path_in . "StatisticsAnonymousUsers.csv" ;
+  $file_csv_webalizer_monthly       = $path_in . "StatisticsWebalizerMonthly.csv" ;
+  $file_csv_web_requests_daily      = $path_in . "StatisticsWebRequestsDaily.csv" ;
+  $file_csv_web_visits_daily        = $path_in . "StatisticsWebVisitsDaily.csv" ;
+  $file_csv_timelines               = $path_in . "StatisticsTimelines.csv" ;
+  $file_csv_log                     = $path_in . "StatisticsLog.csv" ;
+  $file_csv_binaries_stats          = $path_in . "StatisticsPerBinariesExtension.csv" ;
+  $file_csv_language_codes          = $path_in . "LanguageCodes.csv" ;
+  $file_csv_zeitgeist               = $path_in . "ZeitGeist.csv" ;
+  $file_csv_pageviewsmonthly        = $path_in . "PageViewsPerMonthAll.csv" ;
+  $file_csv_pageviewsmonthly_totals = $path_in . "PageViewsPerMonthAllTotalled.csv" ;
+  $file_csv_edits_per_article       = $path_in . "EditsPerArticle.csv" ;
+  $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpread.csv" ;
+  $file_csv_views_yearly_growth     = $path_in . "PageViewsGrowthLastYear.csv" ;
+  $file_csv_views_log_forecast      = $path_in . "PageViewsLogForecast.csv" ;
+  $file_csv_growth                  = $path_in . "WikimediaGrowthStats.csv" ;
+  $file_txt_growth                  = $path_in . "WikimediaGrowthStats.txt" ;
 
-  $file_csv_user_activity_trends  = $path_in . "UserActivityTrends.csv" ;
-  $file_csv_namespaces            = $path_in . "Namespaces.csv" ;
-  $file_edits_per_namespace       = $path_in . "StatisticsEditsPerNamespace.csv" ;
-  $file_edits_per_usertype        = $path_in . "StatisticsEditsPerUsertype.csv" ;
-  $file_pageviews_per_wiki        = $path_in . "StatisticsPageviewsPerWiki.csv" ;
-  $file_editors_per_wiki          = $path_in . "StatisticsEditorsPerWiki.csv" ;
-  $file_binaries_per_wiki         = $path_in . "StatisticsPlotBinariesPerWiki.csv" ;
+  $file_csv_user_activity_trends    = $path_in . "UserActivityTrends.csv" ;
+  $file_csv_namespaces              = $path_in . "Namespaces.csv" ;
+  $file_edits_per_namespace         = $path_in . "StatisticsEditsPerNamespace.csv" ;
+  $file_edits_per_usertype          = $path_in . "StatisticsEditsPerUsertype.csv" ;
+  $file_pageviews_per_wiki          = $path_in . "StatisticsPageviewsPerWiki.csv" ;
+  $file_editors_per_wiki            = $path_in . "StatisticsEditorsPerWiki.csv" ;
+  $file_binaries_per_wiki           = $path_in . "StatisticsPlotBinariesPerWiki.csv" ;
+  $file_csv_uploaders               = $path_in . "UserActivityTrendsNewBinariesCOMMONS.csv" ;
 
-  $file_log                       = $path_in . "WikiReportsLog.txt" ;
-  $file_errors                    = $path_in . "WikiReportsErrors.txt" ;
+  $file_log                         = $path_in . "WikiReportsLog.txt" ;
+  $file_errors                      = $path_in . "WikiReportsErrors.txt" ;
 
-  $file_csv_participation         = $path_in . "Participation.csv" ;
-  $file_csv_language_names_php    = $path_in . "LanguageNamesViaPhp.csv" ;
-  $file_csv_language_names_wp     = $path_in . "LanguageNamesViaWpEn.csv" ;
-  $file_csv_language_names_wp_cl  = $path_in . "LanguageNamesViaWpEnEdited.csv" ;
-  $file_csv_language_names_diff   = $path_in . "LanguageNamesViaPhpAndWpCompared.csv" ;
-  $file_csv_translatewiki         = $path_in . "TranslateWiki.csv" ;
+  $file_csv_participation           = $path_in . "Participation.csv" ;
+  $file_csv_language_names_php      = $path_in . "LanguageNamesViaPhp.csv" ;
+  $file_csv_language_names_wp       = $path_in . "LanguageNamesViaWpEn.csv" ;
+  $file_csv_language_names_wp_cl    = $path_in . "LanguageNamesViaWpEnEdited.csv" ;
+  $file_csv_language_names_diff     = $path_in . "LanguageNamesViaPhpAndWpCompared.csv" ;
+  $file_csv_translatewiki           = $path_in . "TranslateWiki.csv" ;
 
-  $file_csv_pageviewsmonthly_html = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
+  $file_csv_pageviewsmonthly_html   = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
 
-  $file_csv_whitelist_wikis       = $path_in . "WhiteListWikis.csv" ;
-  $file_publish                   = $path_out . "#publish.txt" ;
+  $file_csv_whitelist_wikis         = $path_in . "WhiteListWikis.csv" ;
+  $file_publish                     = $path_out . "#publish.txt" ;
 
   if ($testmode)
   { unlink $file_log ; }
@@ -721,7 +724,7 @@ sub WhiteListLanguages
     if (! $mode_wx and ($wp eq "commons"))
     { $wp_ignore_wrong_list {$wp}++ ; next ; }
 
-    if ($wp =~ /^zz+/i) # blast!, zz and zzz are used for totals (zz=all, zzz=minus English), now language code appeared ??!!
+    if ($wp =~ /^zz+/i) # blast!, zz and zzz are used for totals (zz=all, zzz=minus English), now language code zz[z] appeared ??!!
     { $wp_ignore_keyword_reserved {$wp}++ ; next ; }
 
     if ($some_languages_only and ! $include_language {$wp})
@@ -855,12 +858,17 @@ sub WhiteListLanguages
 sub ReadMonthlyStats
 {
   my ($wp, $day, $month, $year, $days, $m, $prev, $curr, $forecast, @fc) ;
+
+  &LogT ("\nReadMonthlyStats $wp\n") ;
+
   my $md = $dumpmonth_ord ;
   my @oldest_month ;
   undef (@languages) ;
   undef (@max_links) ;
 
   # file is sorted by WikiCounts as {&csvkey_lang_date ($a) cmp &csvkey_lang_date ($b)}
+
+  &ReadEditActivityLevels ('zz') ;
 
   $MonthlyStatsWpStart {"zz"} = 9999 ;
 
@@ -896,8 +904,6 @@ sub ReadMonthlyStats
       $editors_25   {$wp.$m} = $count_25 ;
       $editors_100  {$wp.$m} = $count_100 ;
 
-# if ($wp eq 'de')
-# { print "\$wp=de, $m='$', count_5 = '$count_5', \$editors_max_5 \{\$wp\}=" . $editors_max_5 {$wp} . "\n" ; }
       if ($count_5 > $editors_max_5 {$wp})
       {
         $editors_max_5       {$wp} = $count_5 ;
@@ -914,14 +920,16 @@ sub ReadMonthlyStats
 
   # find oldest month (to be skipped, probably incomplete)
   # $oldest_month_pageviews  = "9999/99/99" ;
+  &Log ("\nRead page views from $file_csv_pageviewsmonthly\n") ;
   open "FILE_IN", "<", $file_csv_pageviewsmonthly ;
+  $m_min = 999 ;
+  $m_max = 0 ;
   while ($line = <FILE_IN>)
   {
     chomp $line ;
     ($wp, $date, $count) = split (",", $line) ;
 
     next if $wp_whitelist {$wp} == 0 ;
-  #  if ((! $mode_wp) && ($date eq '2008/05/31')) { next ; }  # skip incomplete first month
 
     if (($oldest_month_pageviews {$wp} eq "") || ($date lt $oldest_month_pageviews {$wp}))
     { $oldest_month_pageviews {$wp} = $date ; }
@@ -934,27 +942,40 @@ sub ReadMonthlyStats
     next if $wp eq "ar" and $year < 2003 ; # clearly erroneous record for arwiki pollutes TablesWikipediaGrowthSummaryContributors.htm
 
     $m = ord (&yyyymm2b ($year, $month)) ;
+    if ($m < $m_min) { $m_min = $m ; }
+    if ($m > $m_max) { $m_max = $m ; }
 
     next if $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
 
-
     # figures for current month are ignored when month has just begun
-
 
     $days_in_month = days_in_month ($year, $month) ;
     $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
-    $pageviews {$wp.$m} = $count_normalized ;
-    if ($count_normalized > $pageviews_max {$wp})
-    {
-      $pageviews_max       {$wp} = $count_normalized ;
-      $pageviews_month_max {$wp} = $m ;
-    }
+    $pageviews     {$wp.$m} = $count_normalized ;
+    $pageviews_raw {$wp.$m} = $count ;
+
+    $pageviews_monthly_totals_raw        {"$year-$month"} += $count ;
+    $pageviews_monthly_totals_normalized {"$year-$month"} += $count_normalized ;
+
+#   do this below, and remove code in next version
+#   if ($count_normalized > $pageviews_max {$wp})
+#   {
+#     $pageviews_max       {$wp} = $count_normalized ;
+#     $pageviews_month_max {$wp} = $m ;
+#   }
+
     if (($pageviews_month_lo {$wp} == 0) || ($pageviews_month_lo {$wp} > $m))
     { $pageviews_month_lo {$wp} = $m ; }
     if ($pageviews_month_hi {$wp} < $m)
     { $pageviews_month_hi {$wp} = $m ; }
   }
   close "FILE_IN" ;
+
+  open "FILE_TOTALS", ">", $file_csv_pageviewsmonthly_totals ;
+  print FILE_TOTALS "date,page views raw,page views normalized\n" ;
+  foreach $yyyymm (sort keys %pageviews_monthly_totals_raw)
+  { print FILE_TOTALS "$yyyymm," . $pageviews_monthly_totals_raw {$yyyymm} . ',' . $pageviews_monthly_totals_normalized {$yyyymm} . "\n" ; }
+  close "FILE_TOTALS" ;
 
   if ($pageviews)
   { open "FILE_IN", "<", $file_csv_pageviewsmonthly ; }
@@ -1170,6 +1191,40 @@ sub ReadMonthlyStats
   { $sort_languages {$wp} = chr ($language_ndx ++) ; }
   $sort_languages {"zz"} = chr (0) ;
 
+
+  for $wp (@languages)
+  {
+    ($wp2 = $wp) =~ s/\.m// ;
+
+    for ($m = $m_min ; $m <= $m_max ; $m++ )
+    {
+      if ($pageviews_non_mobile)
+      {
+        $count_normalized = $pageviews     {$wp.$m} ;
+        $count_raw        = $pageviews_raw {$wp.$m} ;
+      }
+      elsif ($pageviews_mobile)
+      {
+        $count_normalized = $pageviews     {"$wp.m".$m} ;
+        $count_raw        = $pageviews_raw {"$wp.m".$m} ;
+      }
+      else # $pageviews_combined
+      {
+        $count_normalized = $pageviews     {$wp.$m} + $pageviews     {"$wp.m".$m} ;
+        $count_raw        = $pageviews_raw {$wp.$m} + $pageviews_raw {"$wp.m".$m} ;
+      }
+
+      if ($count_normalized > $pageviews_max {$wp})
+      {
+        $pageviews_max       {$wp} = $count_normalized ;
+        $pageviews_month_max {$wp} = $m ;
+
+        $MonthlyStatsHigh {$wp.$c[0]} = $count_raw ;
+        $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
+      }
+    }
+  }
+
 if ($false)
 {
   open "FILE_IN", "<", $file_csv_webalizer_monthly ;
@@ -1227,6 +1282,7 @@ if ($false)
     if ($mode_wq) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
     if ($mode_ws) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
     if ($mode_wx) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
+    if ($mode_wm) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
   }
 
   foreach $wp (@languages)
@@ -1350,13 +1406,30 @@ if ($false)
       # stats for en may be missing, this would effect totals too much
       # if ($wikimedia && ($MonthlyStats {$wp_1st.$m.$c[$f]} == 0))
       # { $zz = 0 ; }
-#qqq #########################################################################################################
+
       if ((! $LargeWikiDataMissing3) ||
          (($f < 5) || ($f == 6) || ($f == 7) || ($f == 11) || ($f == 18)))
       {
-        $MonthlyStats {"zz".$m.$c[$f]} = $zz ;
-        if ($mode_wp)
-        { $MonthlyStats {"zzz".$m.$c[$f]} = $zzz ; }
+        if (($f < 2) || ($f > 3))
+        {
+          $MonthlyStats {"zz".$m.$c[$f]} = $zz ;
+          if ($mode_wp)
+          { $MonthlyStats {"zzz".$m.$c[$f]} = $zzz ; }
+        }
+        else
+        {
+        # totalling all editors for zz and zzz is not done in WikiCountsProcess sub CollectActiveUsersPerMonthsAllWikis
+          if ($f == 2)
+          {
+            $MonthlyStats {"zz". $m.$c[$f]} = $editors_5 {'zz'.$m} ;
+            $MonthlyStats {"zzz".$m.$c[$f]} = $editors_5 {'zzz'.$m} ;
+          }
+          else
+          {
+            $MonthlyStats {"zz". $m.$c[$f]} = $editors_100 {'zz'.$m} ;
+            $MonthlyStats {"zzz".$m.$c[$f]} = $editors_100 {'zzz'.$m} ;
+          }
+        }
 
         if ($zz > $MonthlyStatsHigh {$wp.$c[$f]})
         {
@@ -1848,6 +1921,58 @@ sub GetPercPageViewsMobile
     $msg_perc_non_mobile = "$month $year: non-mobile traffic represents ${perc_non_mobile {$maxdate}}% of total traffic" ;
     print "$msg_perc_mobile\n" ;
     print "$msg_perc_non_mobile\n" ;
+  }
+}
+
+sub ReadEditActivityLevels
+{
+# @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
+
+  my ($wp) = @_ ;
+
+&LogT ("\nReadEditActivityLevels $wp from $file_csv_users_activity_spread\n") ;
+
+  undef %user_activity_levels ;
+  undef %user_activity_levels_max ;
+  undef %activity_level_max ;
+
+  if ($wp =~ /^zz\*/)                                       # all projects
+  { &ReadFileCsv ($file_csv_users_activity_spread) ; }      # no language code specified => data for all languages will be imported
+  elsif ($wp =~ /^zz/)
+  { &ReadFileCsv ($file_csv_users_activity_spread) ; }      # no language code specified => data for all languages will be imported
+  else
+  { &ReadFileCsv ($file_csv_users_activity_spread, $wp) ; } # language code specified => data for that language only will be imported
+
+  foreach $line (@csv)
+  {
+    chomp ($line) ;
+    ($lang,$date,$usertype,$nscat,@counts) = split (',', $line) ;
+
+    next if ! $mode_wx and $lang =~ /commons/i ; # occurs (still) also in wikipedia csv files (commons was on wikipedia input queue shortly, in start 2010, by error)
+
+    $lang2 = $lang ;
+    if (($wp =~ /^zz/) && ($lang !~ /^zz/)) # accumulate counts from all wikis (except from codes for totals zz/zzz/zz28) for legacy reporting
+    { $lang2 = '!zz' ; }                      # so only counts left are for one language,or for 'zz', 'zz28' and remainder '!zz+'
+
+  # next if $date ne '11/30/2011' ; # test only
+
+    $month = substr ($date,0,2) ;
+    $year  = substr ($date,6,4) ;
+    $m = &yyyymm2b ("$year$month") ;
+
+    for ($c = 0 ; $c <= $#counts ; $c ++)
+    {
+      $user_activity_levels {$lang2} {$date} {$usertype} {$nscat} {$c} += $counts [$c] ;
+
+      if ($user_activity_levels {$lang2} {$date} {$usertype} {$nscat} {$c} > $user_activity_levels_max {$lang2} {$usertype} {$nscat} {$c})
+      { $user_activity_levels_max {$lang2} {$usertype} {$nscat} {$c} = $user_activity_levels {$lang2} {$date} {$usertype} {$nscat} {$c} ; }
+    }
+
+  # if ($m % 3 < 999) # do only for visible months
+    {
+      if ($#counts > $activity_level_max {$usertype} {$nscat})
+      { $activity_level_max {$usertype} {$nscat} = $#counts ; }
+    }
   }
 }
 

@@ -12,7 +12,7 @@ sub ReadLanguageSettings
   else
   {
     if (! -e $path_php)
-    { &LogT ("\n\nPath for language specific php scripts not found:\n'$path_php'\n") ; }
+    { &LogT ("\n\nPath for language specific php scripts not found: '$path_php'\n") ; }
     else
     {
       $path_php =~ s/[\\\/]*$/\// ;                 # was $language_ (underscore) upd OK ?
@@ -47,7 +47,7 @@ sub ReadLanguageSettings
          "Category $prt_categorytag\n" .
          "Image    $prt_imagetag\n" .
          "User     $prt_usertag\n" .
-         "Redirect $prt_redirtag\n") ;
+         "Redirect $prt_redirtag\n\n") ;
 
   &LogT (&OptimizeRegExpKeyword ('image',    $imagetag)) ;
   &LogT (&OptimizeRegExpKeyword ('redirect', $redirtag)) ;
@@ -81,7 +81,7 @@ sub OptimizeRegExpKeyword
       $tags =~ s/\|\#/\|/g ;
       $tags = "\\#$tags" ;
     }
-    $log = "\nUse for $desc regexp '$tags'\n" ;
+    $log = "Use for $desc regexp '$tags'\n" ;
   }
   return ($log) ;
 }

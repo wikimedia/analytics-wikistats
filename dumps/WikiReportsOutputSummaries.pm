@@ -5,6 +5,11 @@
 # StatisticsUserActivitySpread.csv
 sub GenerateSummariesPerWiki
 {
+  print "Remove obsolete R plot files\n" ;
+  $cmd = "rm $path_in" . "R-Plot*" ;
+  print "$cmd\n" ;
+  `$cmd` ;
+
   my @months_en   = qw (January February March April May June July August September October November December);
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
   $summaries_published = "$mday ${months_en [$mon]} " . ($year+1900) ;
@@ -53,15 +58,27 @@ sub GenerateSummariesPerWiki
     }
 
     $out_html = &GetSummaryPerWiki ($wp, $summaries_progress) ;
-
     if ($wp eq 'commons')
     {
-      &GeneratePlotBinaries ($wp,1) ;
-      &GeneratePlotBinaries ($wp,2) ;
+      &GeneratePlotBinaries  ($wp,1) ;
+      &GeneratePlotBinaries  ($wp,2) ;
+      &GeneratePlotUploads   ($wp) ;
+      &GeneratePlotUploaders ($wp) ;
+    }
+    else
+    {
+      &GeneratePlotArticles ($wp, 'Total') ;
+      &GeneratePlotArticles ($wp, 'New') ;
     }
 
     &GeneratePlotEditors   ($wp) ;
+
     &GeneratePlotPageviews ($wp) ;
+
+    print "Move R plot output logs\n" ;
+    $cmd = "mv *.Rout $path_in\n" ;
+    print "$cmd\n" ;
+    `$cmd` ;
 
     my $file_html = $path_out . "Summary" . uc ($wp) . ".htm" ;
 
@@ -132,7 +149,6 @@ sub GenerateSummariesPerWiki
   open "FILE_OUT", ">", $file_html_all ;
   print FILE_OUT &AlignPerLanguage ($out_html_report_card) ;
   close "FILE_OUT" ;
-
 }
 
 sub GetSummaryPerWiki
@@ -272,10 +288,14 @@ sub GetSummaryPerWiki
   $out_style2 =~ s/td   {white-space:nowrap;/td   {font-size:12px; white-space:nowrap;/ ;
   $out_style2 =~ s/body\s*\{.*?\}/body {font-family:arial,sans-serif;background-color:#C0C0C0}/ ;
 
-  $plot_binaries1 = 'PlotBinaries'  . uc ($wp) . '1.png' ;
-  $plot_binaries2 = 'PlotBinaries'  . uc ($wp) . '2.png' ;
-  $plot_editors   = 'PlotEditors'   . uc ($wp) . '.png' ;
-  $plot_pageviews = 'PlotPageviews' . uc ($wp) . '.png' ;
+  $plot_binaries1      = 'PlotBinaries'      . uc ($wp) . '1.png' ;
+  $plot_binaries2      = 'PlotBinaries'      . uc ($wp) . '2.png' ;
+  $plot_editors        = 'PlotEditors'       . uc ($wp) . '.png' ;
+  $plot_pageviews      = 'PlotPageviews'     . uc ($wp) . '.png' ;
+  $plot_uploads        = 'PlotUploads'       . uc ($wp) . '.png' ;
+  $plot_uploaders      = 'PlotUploaders'     . uc ($wp) . '.png' ;
+  $plot_total_articles = 'PlotTotalArticles' . uc ($wp) . '.png' ;
+  $plot_new_articles   = 'PlotNewArticles'   . uc ($wp) . '.png' ;
 
   if ($mode_wx)
   { $wiki = $out_language_name ; }
@@ -406,7 +426,11 @@ $html = <<__HTML_SUMMARY__ ;
     </tr>
 
     PLOT_BINARIES
+    PLOT_UPLOADS
+    PLOT_TOTAL_ARTICLES
+    PLOT_NEW_ARTICLES
     PLOT_EDITORS
+    PLOT_UPLOADERS
     PLOT_PAGEVIEWS
 
     EXPLANATION
@@ -472,24 +496,68 @@ $html_plot_pageviews = <<__HTML_SUMMARY_PLOT_PAGEVIEWS__ ;
     </tr>
 __HTML_SUMMARY_PLOT_PAGEVIEWS__
 
+$html_plot_uploads = <<__HTML_SUMMARY_PLOT_UPLOADS__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_uploads'>
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_UPLOADS__
+# <br><small><font color=#808080>uploads: $uploads_per_unit</font></small> # before </td>
+
+$html_plot_uploaders = <<__HTML_SUMMARY_PLOT_UPLOADERS__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_uploaders'>
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_UPLOADERS__
+# <br><small><font color=#808080>uploaders: $uploaders_per_unit</font></small> # before </td>
+
+$html_plot_total_articles = <<__HTML_SUMMARY_PLOT_TOTAL_ARTICLES__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_total_articles'>
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_TOTAL_ARTICLES__
+# <br><small><font color=#808080>total articles: $total_articles_per_unit</font></small> # before </td>
+
+$html_plot_new_articles = <<__HTML_SUMMARY_PLOT_NEW_ARTICLES__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_new_articles'>
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_NEW_ARTICLES__
+# <br><small><font color=#808080>new articles: $new_articles_per_unit</font></small> # before </td>
+
   if ($mode_wx)
   {
     if ($wp eq 'commons')
     {
+      $html =~ s/PLOT_TOTAL_ARTICLES// ;
+      $html =~ s/PLOT_NEW_ARTICLES// ;
       $html =~ s/BINARIES/&ReadStatisticsBinariesCommons/e ;
       $html =~ s/SPEAKERS// ;
       $html =~ s/PARTICIPATION// ;
       $html =~ s/PLOT_BINARIES/$html_plot_binaries/ ;
       $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
       $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ;
+      $html =~ s/PLOT_UPLOADS/$html_plot_uploads/ ;
+      $html =~ s/PLOT_UPLOADERS/$html_plot_uploaders/ ;
     }
     else
     {
+      $html =~ s/PLOT_TOTAL_ARTICLES/$html_plot_total_articles/ ;
+      $html =~ s/PLOT_NEW_ARTICLES/$html_plot_new_articles/ ;
       $html =~ s/BINARIES// ;
       $html =~ s/SPEAKERS// ;
       $html =~ s/PARTICIPATION// ;
       $html =~ s/PLOT_BINARIES// ;
       $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
+      $html =~ s/PLOT_UPLOADS// ;
+      $html =~ s/PLOT_UPLOADERS// ;
 
       if ($pageviews_max {$wp} == 0)
     # { $html =~ s/PLOT_PAGEVIEWS/<tr><td class=c><p><font color=#800000><small>Page views unknown<\/small><\/font><\/td><\/tr>/ ; }
@@ -514,6 +582,11 @@ __HTML_SUMMARY_PLOT_PAGEVIEWS__
     { $html =~ s/PLOT_PAGEVIEWS// ; }
     else
     { $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ; }
+
+    $html =~ s/PLOT_UPLOADS// ;
+    $html =~ s/PLOT_UPLOADERS// ;
+    $html =~ s/PLOT_TOTAL_ARTICLES/$html_plot_total_articles/ ;
+    $html =~ s/PLOT_NEW_ARTICLES/$html_plot_new_articles/ ;
   }
 
   if ($region eq '')
@@ -685,7 +758,7 @@ sub GeneratePlotBinaries
 {
   my ($wp,$pass) = @_ ;
 
-  my @months_en = qw (Jan Feby Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
   my @factors   = qw (0.11 0.12 0.13 0.14 0.15 0.16 0.17 0.18 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9);
 
   my $wp = shift ;
@@ -694,7 +767,8 @@ sub GeneratePlotBinaries
 
 # &LogT ("GeneratePlotBinaries $wp\n") ;
 
-  my $file_csv_input    = $file_binaries_per_wiki ;
+  my $file_csv_data_R   = $path_in . "R_PlotData_Binaries.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_Binaries.R-in" ;
   my $path_png_raw      = "$path_out_plots\/PlotBinaries" . uc($wp) . "$pass.png" ;
   my $path_png_trends   = "$path_out_plots\/PlotBinariesTrends" . uc($wp) . "$pass.png" ;
   my $path_svg          = "$path_out_plots\/PlotBinaries" . uc($wp) . "$pass.svg" ;
@@ -703,7 +777,7 @@ sub GeneratePlotBinaries
   my $out_script_plot   = $out_script_plot_binaries ;
 
   my $out_language_name = $out_languages {$wp} ;
-  my $month_max         = $editors_month_hi_5 {$wp} ;
+  my $month_plot_max    = $editors_month_hi_5 {$wp} ;
 
   $m = $editors_month_hi_5 {$wp} ;
 
@@ -723,13 +797,13 @@ sub GeneratePlotBinaries
 
   my $code              = uc ($wp) ;
 
-  $file_csv_input       =~ s/\\/\//g ;
+  $file_csv_data_R      =~ s/\\/\//g ;
   $path_png_raw         =~ s/\\/\//g ;
   $path_png_trends      =~ s/\\/\//g ;
   $path_svg             =~ s/\\/\//g ;
   $out_language_name    =~ s/&nbsp;/ /g ;
 
-  open BINARIES_OUT, '>', $file_csv_input || &Abort ("Could not open file $file_csv_input") ;
+  open BINARIES_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
 
   print BINARIES_OUT "language,month,count_1,count_2,count_3,count_4,count_5\n" ;
 
@@ -775,8 +849,6 @@ sub GeneratePlotBinaries
   }
   close BINARIES_OUT ;
 
-  # calc plot parameters
-
   if ($binaries_max > 0)
   {
     # get nice rounded upper boundary for chart y axis
@@ -820,27 +892,31 @@ sub GeneratePlotBinaries
   if ($pass == 2)
   {
     $out_script_plot =~ s/Images/Other Binaries/g;
-    $out_script_plot =~ s/1,000,000/x 1000/g;
+    $out_script_plot =~ s/1,000,000/1000/g;
   }
 
-  $mmddyyyy = &m2mmddyyyy ($month_max) ;
-  $month_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
 
   $out_script_plot =~ s/Wikipedia/$out_publication/g ;
 
-  $out_script_plot =~ s/FILE_CSV/$file_csv_input/g ;
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
   $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
   $out_script_plot =~ s/CODE/$code/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:7/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:6/g ;
 
   if ($pass == 1)
   { $out_script_plot =~ s/MAX_VALUE/max images/ ; }
   else
   { $out_script_plot =~ s/MAX_VALUE/max other binaries/ ; }
 
-  $out_script_plot =~ s/MAX_MONTH/$month_max/g ;
-  $out_script_plot =~ s/BINARIES/$binaries_max/g ;
+  $out_script_plot =~ s/MAX_METRIC/binaries/g ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$binaries_max/g ;
   $out_script_plot =~ s/YLIM_MAX/$binaries_max_rounded/g ;
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
@@ -880,22 +956,12 @@ sub GeneratePlotBinaries
     $out_script_plot =~ s/COLOR_5/#E0E0E0/g ;
   }
 
-  my $file_script = $path_in . "R-PlotBinaries.txt" ;
-  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
-
-  $cmd = "R CMD BATCH \"$file_script\"" ;
-
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd\n" ; }
-
-  @result = `$cmd` ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 sub GeneratePlotEditors
 {
-  my @months_en = qw (Jan Feby Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   my $wp = shift ;
 
@@ -903,25 +969,26 @@ sub GeneratePlotEditors
 
 # &LogT ("GeneratePlotEditors $wp\n") ;
 
-  my $file_csv_input    = $file_editors_per_wiki ;
+  my $file_csv_data_R   = $path_in . "R_PlotData_Editors.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_Editors.R-in" ;
   my $path_png_raw      = "$path_out_plots\/PlotEditors" . uc($wp) . ".png" ;
   my $path_png_trends   = "$path_out_plots\/PlotEditorsTrends" . uc($wp) . ".png" ;
   my $path_svg          = "$path_out_plots\/PlotEditors" . uc($wp) . ".svg" ;
   my $out_script_plot   = $out_script_plot_editors ;
   my $out_language_name = $out_languages {$wp} ;
   my $editors_max       = $editors_max_5 {$wp} ;
-  my $month_max         = $editors_month_max_5 {$wp} ;
+  my $month_plot_max    = $editors_month_max_5 {$wp} ;
   my $code              = uc ($wp) ;
 
-  if ($month_max == 0)
+  if ($month_plot_max == 0)
   { print "$wp: \$month_max = \$editors_month_max_5 \{\$wp\} <- == 0\n" ; return ; }
-  $file_csv_input       =~ s/\\/\//g ;
+  $file_csv_data_R      =~ s/\\/\//g ;
   $path_png_raw         =~ s/\\/\//g ;
   $path_png_trends      =~ s/\\/\//g ;
   $path_svg             =~ s/\\/\//g ;
   $out_language_name    =~ s/&nbsp;/ /g ;
 
-  open EDITORS_OUT, '>', $file_csv_input || &Abort ("Could not open file $file_csv_input") ;
+  open EDITORS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
   print EDITORS_OUT "language,month,count_5,count_25,count_100\n" ;
 
   # start in year where value exceeds 1/100 of max value
@@ -953,8 +1020,6 @@ sub GeneratePlotEditors
     print EDITORS_OUT "$wp,$date,$count_5,$count_25,$count_100\n" ;
   }
   close EDITORS_OUT ;
-
-  # calc plot parameters
 
   if ($editors_max > 0)
   {
@@ -990,19 +1055,23 @@ sub GeneratePlotEditors
     $out_script_plot =~ s/CODE/$code/g ;
   }
 
-  $mmddyyyy = &m2mmddyyyy ($month_max) ;
-  $month_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
 
   $out_script_plot =~ s/Wikipedia/$out_publication/g ;
 
-  $out_script_plot =~ s/FILE_CSV/$file_csv_input/g ;
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
   $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:5/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:4/g ;
+
   $out_script_plot =~ s/CODE/$code/g ;
-  $out_script_plot =~ s/MAX_VALUE/max editors (5+ edits) in/ ;
-  $out_script_plot =~ s/MAX_MONTH/$month_max/g ;
-  $out_script_plot =~ s/EDITORS/$editors_max/g ;
+  $out_script_plot =~ s/MAX_METRIC/editors (5+ edits) in/ ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$editors_max/g ;
   $out_script_plot =~ s/YLIM_MAX/$editors_max_rounded/g ;
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
@@ -1011,22 +1080,12 @@ sub GeneratePlotEditors
   $out_script_plot =~ s/COLOR_25/purple2/g ;
   $out_script_plot =~ s/COLOR_100/dodgerblue2/g ;
 
-  my $file_script = $path_in . "R-PlotEditors.txt" ;
-  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
-
-  $cmd = "R CMD BATCH \"$file_script\"" ;
-
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd\n" ; }
-
-  @result = `$cmd` ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 sub GeneratePlotPageviews
 {
-  my @months_en = qw (Jan Feby Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   my $wp = shift ;
 
@@ -1037,43 +1096,29 @@ sub GeneratePlotPageviews
 
 # &LogT ("GeneratePlotPageviews $wp\n") ;
 
-  my $file_csv_input    = $file_pageviews_per_wiki ;
+  my $file_csv_data_R   = $path_in . "R_PlotData_PageViews.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_Pageviews.R-in" ;
   my $path_png_raw      = "$path_out_plots\/PlotPageviews" . uc($wp) . ".png" ;
   my $path_png_trends   = "$path_out_plots\/PlotPageviewsTrends" . uc($wp) . ".png" ;
   my $path_svg          = "$path_out_plots\/PlotPageviews" . uc($wp) . ".svg" ;
   my $out_script_plot   = $out_script_plot_pageviews ;
   my $out_language_name = $out_languages {$wp} ;
   my $pageviews_max     = $pageviews_max {$wp} ;
-  my $month_max         = $pageviews_month_max {$wp} ;
+  my $month_plot_max    = $pageviews_month_max {$wp} ;
 
-  return if $month_max == 0 ; # Q&D temp fix
+  return if $month_plot_max == 0 ; # Q&D temp fix
 
   my $code              = uc ($wp) ;
-  $file_csv_input       =~ s/\\/\//g ;
+  $file_csv_data_R      =~ s/\\/\//g ;
   $path_png_raw         =~ s/\\/\//g ;
   $path_png_trends      =~ s/\\/\//g ;
   $path_svg             =~ s/\\/\//g ;
   $out_language_name    =~ s/&nbsp;/ /g ;
 
-  open PAGEVIEWS_OUT, '>', $file_csv_input || &Abort ("Could not open file $file_csv_input") ;
+  open PAGEVIEWS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
   print PAGEVIEWS_OUT "language,month,count_normalized\n" ;
 
-  $pageviews_unit = 1 ;
-  $pageviews_unit_text = "" ;
-  $pageviews_unit_text2 = "" ;
-  if ($pageviews_max >= 1000000)
-  {
-    $pageviews_unit = 1000 ;
-    $pageviews_unit_text = " (x 1000)" ;
-    $pageviews_unit_text2 = ",000" ;
-  }
-  if ($pageviews_max >= 1000000000)
-  {
-    $pageviews_unit = 1000000 ;
-    $pageviews_unit_text = " (in millions)" ;
-    $pageviews_unit_text2 = " million" ;
-  }
-  $pageviews_max = sprintf ("%.0f", $pageviews_max / $pageviews_unit) ;
+  ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($pageviews_max) ;
 
   $period = month_year_english_short ($pageviews_month_lo {$wp}) . ' ' . month_year_english_short ($pageviews_month_hi {$wp}-1) ;
 
@@ -1084,7 +1129,7 @@ sub GeneratePlotPageviews
     if ($m < $pageviews_month_lo {$wp})
     { $count_normalized = "" ; }
     else
-    { $count_normalized = sprintf ("%.0f", $pageviews {$wp.$m} / $pageviews_unit) ; }
+    { $count_normalized = sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit) ; }
 
     # $days_in_month =  days_in_month (substr($date,6,4),substr($date,0,2)) ;
     # $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
@@ -1107,63 +1152,456 @@ sub GeneratePlotPageviews
   }
   close PAGEVIEWS_OUT ;
 
-  # calc plot parameters
-
-  $pageviews_max_rounded = 10000000000000 ;
-  while ($pageviews_max_rounded / 10 > $pageviews_max)  { $pageviews_max_rounded /= 10 ; }
-
-     if ($pageviews_max_rounded * 0.15 > $pageviews_max) { $pageviews_max_rounded *= 0.15 ; }
-  elsif ($pageviews_max_rounded * 0.2 > $pageviews_max) { $pageviews_max_rounded *= 0.2 ; }
-  elsif ($pageviews_max_rounded * 0.4 > $pageviews_max) { $pageviews_max_rounded *= 0.4 ; }
-  elsif ($pageviews_max_rounded * 0.6 > $pageviews_max) { $pageviews_max_rounded *= 0.6 ; }
-  elsif ($pageviews_max_rounded * 0.8 > $pageviews_max) { $pageviews_max_rounded *= 0.8 ; }
-
-  $pageviews_max =~ s/(\d)(\d\d\d)$/$1,$2/ ;
-  $pageviews_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
-  $pageviews_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
-  $pageviews_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
-
   # edit plot parameters
 
   if ($wp eq 'zz')
-  { $out_script_plot =~ s/TITLE/Page Views on all $out_publications$pageviews_unit_text/g ; }
+  { $out_script_plot =~ s/TITLE/Page Views on all $out_publications$metric_unit_text1/g ; }
   elsif ($mode_wx)
-  { $out_script_plot =~ s/TITLE/Page Views on $out_language_name wiki$pageviews_unit_text/g ; }
+  { $out_script_plot =~ s/TITLE/Page Views on $out_language_name wiki$metric_unit_text1/g ; }
   else
   {
-    $out_script_plot =~ s/TITLE/Page Views on LANGUAGE $out_publication$pageviews_unit_text/g ;
+    $out_script_plot =~ s/TITLE/Page Views on LANGUAGE $out_publication$metric_unit_text1/g ;
     $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
     $out_script_plot =~ s/CODE/$code/g ;
   }
 
-  $mmddyyyy = &m2mmddyyyy ($month_max) ;
-  $month_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
 
   $out_script_plot =~ s/Wikipedia/$out_publication/g ;
 
-  $out_script_plot =~ s/FILE_CSV/$file_csv_input/g ;
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
   $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:3/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:2/g ;
+
   $out_script_plot =~ s/CODE/$code/g ;
-  $out_script_plot =~ s/MAX_MONTH/$month_max/g ;
-  $out_script_plot =~ s/VIEWS/$pageviews_max$pageviews_unit_text2/g ;
-  $out_script_plot =~ s/YLIM_MAX/$pageviews_max_rounded/g ;
+
+  $out_script_plot =~ s/MAX_METRIC/page views/g ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$metric_max$metric_unit_text2/g ;
+  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded/g ;
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
-  $out_script_plot =~ s/UNIT/$pageviews_unit_text/g ;
+  $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
 
-  my $file_script = $path_in . "R-PlotPageviews.txt" ;
-  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+}
 
-  $cmd = "R CMD BATCH \"$file_script\"" ;
+sub GeneratePlotUploads
+{
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd\n" ; }
+  my $wp = shift ;
 
-  @result = `$cmd` ;
+  return if $wp =~ /^z+$/ ;
+
+  &LogT ("GeneratePlotUploads $wp\n") ;
+
+  my $file_csv_data_R   = $path_in . "R_PlotData_Uploads.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_Uploads.R-in" ;
+  my $file_csv_data_in  = $path_in . "UserActivityTrendsUploadWizardCOMMONS.csv" ;
+  my $path_png_raw      = "$path_out_plots\/PlotUploads" . uc($wp) . ".png" ;
+  my $path_png_trends   = "$path_out_plots\/PlotUploadsTrends" . uc($wp) . ".png" ;
+  my $path_svg          = "$path_out_plots\/PlotUploads" . uc($wp) . ".svg" ;
+  my $out_script_plot   = $out_script_plot_uploads ;
+  my $out_language_name = $out_languages {$wp} ;
+
+# return if $month_plot_max == 0 ; # Q&D temp fix
+
+  my $code              = uc ($wp) ;
+  $file_csv_data_R      =~ s/\\/\//g ;
+  $path_png_raw         =~ s/\\/\//g ;
+  $path_png_trends      =~ s/\\/\//g ;
+  $path_svg             =~ s/\\/\//g ;
+  $out_language_name    =~ s/&nbsp;/ /g ;
+
+  $m_stop = $MonthlyStatsWpStop {$wp} ;
+  if ($m_stop == 147) { $m_stop = 148 ; } # Q&D workaround for missing data in some csv files in StatisticsMonthly.csv
+  &Log ("Ignore input beyond month $m_stop: " . &month_year_english_short ($m_stop) . "\n") ;
+
+  $uploads_max = 0 ;
+  $month_plot_max = 1 ;
+  $m_lo = 999 ;
+  $m_hi = 0 ;
+  open UPLOADS_IN,  '<', $file_csv_data_in || &Abort ("Could not open file $file_csv_data_R") ;
+  while ($line = <UPLOADS_IN>)
+  {
+    next if $line !~ /^\d\d\d\d-\d\d,/ ;
+    chomp $line ;
+    ($date,$uploads,$uploads_bot,$uploads_manual,$upload_wizards) = split (',', $line) ;
+
+    $m = ord (&yyyymm2b (substr ($date,0,4),substr ($date,5,2))) ;
+    next if $m > $m_stop ;
+
+    if ($m_lo  > $m) { $m_lo = $m ; }
+    if ($m_hi  < $m) { $m_hi = $m ; }
+
+    if ($uploads > $uploads_max)
+    {
+      $uploads_max = $uploads ;
+      $month_plot_max = $m ;
+    }
+  }
+  close UPLOADS_OUT ;
+
+  ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($uploads_max) ;
+
+  open UPLOADS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
+  print UPLOADS_OUT "language,month,uploads_tot,uploads_bot,uploads_manual,uploads_wizard\n" ;
+
+
+  for ($m = $m_lo - ($m_lo % 12), $m < $m_lo, $m++)
+  {
+    $date = &m2mmddyyyy ($m) ;
+    $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+    print UPLOADS_OUT "$wp,$date,0,0,0\n" ;
+  }
+
+  $period = month_year_english_short ($m_lo - ($m_lo % 12 - 1)) . ' ' . month_year_english_short ($m_hi) ; # always start in January
+
+  open UPLOADS_IN,  '<', $file_csv_data_in || &Abort ("Could not open file $file_csv_data_in") ;
+  while ($line = <UPLOADS_IN>)
+  {
+    next if $line !~ /^\d\d\d\d-\d\d,/ ;
+    chomp $line ;
+    ($date,$uploads,$uploads_bot,$uploads_manual,$uploads_wizard) = split (',', $line) ;
+
+    $m = ord (&yyyymm2b (substr ($date,0,4),substr ($date,5,2))) ;
+    next if $m > $m_stop ;
+
+    $date = &m2mmdimyyyy ($m) ;
+    print UPLOADS_OUT "$wp,$date," . sprintf ("%.0f", $uploads/$metric_unit) . "," . sprintf ("%.0f", ($uploads-$uploads_manual)/$metric_unit) . "," . sprintf ("%.0f", $uploads_manual/$metric_unit) . "," . sprintf ("%.0f", $uploads_wizard/$metric_unit) . "\n" ;
+  }
+  close UPLOADS_OUT ;
+  # edit plot parameters
+
+  $out_script_plot =~ s/TITLE/File uploads on $out_language_name wiki$metric_unit_text1/g ;
+
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+
+  $out_script_plot =~ s/Wikipedia/$out_publication/g ;
+
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
+  $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
+  $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
+  $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:6/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:5/g ;
+
+  $out_script_plot =~ s/CODE/$code/g ;
+  $out_script_plot =~ s/MAX_METRIC/uploads/g ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$metric_max$metric_unit_text2/g ;
+  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded/g ;
+  $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+  $out_script_plot =~ s/UNIT/$metric/g ;
+  $out_script_plot =~ s/PERIOD/$period/g ;
+
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+}
+
+sub GeneratePlotUploaders
+{
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+
+  my $wp = shift ;
+
+  return if $wp =~ /^z+$/ ;
+
+  &LogT ("GeneratePlotUploaders $wp\n") ;
+
+  my $file_csv_data_R   = $path_in . "R_PlotData_Uploaders.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_Uploaders.R-in" ;
+  my $file_csv_data_in  = $file_csv_uploaders ;
+  my $path_png_raw      = "$path_out_plots\/PlotUploaders" . uc($wp) . ".png" ;
+  my $path_png_trends   = "$path_out_plots\/PlotUploadersTrends" . uc($wp) . ".png" ;
+  my $path_svg          = "$path_out_plots\/PlotUploaders" . uc($wp) . ".svg" ;
+  my $out_script_plot   = $out_script_plot_uploaders ;
+  my $out_language_name = $out_languages {$wp} ;
+
+# return if $month_plot_max == 0 ; # Q&D temp fix
+
+  my $code              = uc ($wp) ;
+
+  $file_csv_data_R       =~ s/\\/\//g ;
+  $path_png_raw         =~ s/\\/\//g ;
+  $path_png_trends      =~ s/\\/\//g ;
+  $path_svg             =~ s/\\/\//g ;
+  $out_language_name    =~ s/&nbsp;/ /g ;
+
+  $uploaders_max = 0 ;
+  $month_plot_max = 1 ;
+  $m_lo = 999 ;
+  $m_hi = 0 ;
+
+  $m_stop = $MonthlyStatsWpStop {$wp} ;
+  if ($m_stop == 147) { $m_stop = 148 ; } # Q&D workaround for missing data in some csv files in StatisticsMonthly.csv
+  &Log ("Ignore input beyond month $m_stop: " . &month_year_english_short ($m_stop) . "\n") ;
+
+  open UPLOADERS_IN,  '<', $file_csv_data_in || &Abort ("Could not open file $file_csv_data_in") ;
+  while ($line = <UPLOADERS_IN>)
+  {
+    next if $line !~ /^$wp/ ;
+    chomp $line ;
+    ($lang,$date,$uploaders_ge_1) = split (',', $line) ;
+
+    $m = ord (&yyyymm2b (substr ($date,6,4),substr ($date,0,2))) ;
+    next if $m > $m_stop ;
+
+    if ($m_lo  > $m) { $m_lo = $m ; }
+    if ($m_hi  < $m) { $m_hi = $m ; }
+
+    if ($uploaders_ge_1 > $uploaders_max)
+    {
+      $uploaders_max = $uploaders_ge_1 ;
+      $month_plot_max = $m ;
+    }
+  }
+  close UPLOADERS_IN ;
+
+  open  UPLOADERS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
+  print UPLOADERS_OUT "language,month,uploaders_ge_1,uploaders_ge_5,uploaders_ge_25,uploaders_ge_100,uploaders_wizard_ge_1\n" ;
+
+  ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($uploaders_max) ;
+
+  for ($m = $m_lo - ($m_lo % 12), $m < $m_lo, $m++)
+  {
+    $date = &m2mmddyyyy ($m) ;
+    $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+    print UPLOADERS_OUT "$wp,$date,0,0,0,0,0\n" ;
+  }
+
+  $period = month_year_english_short ($m_lo - ($m_lo % 12 - 1)) . ' ' . month_year_english_short ($m_hi) ; # always start in January
+
+  open UPLOADERS_IN,  '<', $file_csv_data_in || &Abort ("Could not open file $file_csv_data_R") ;
+  while ($line = <UPLOADERS_IN>)
+  {
+    next if $line !~ /^commons/ ;
+    chomp $line ;
+    ($lang,$date,$uploaders_ge_1,$uploaders_ge_3,$uploaders_ge_5,$uploaders_ge_10,$uploaders_ge_25,$uploaders_ge_100,$rest) = split (',', $line,9) ;
+    $rest =~ s/^.*?\d\d\/\d\d\/\d\d\d\d,// ;
+    ($uploaders_wizard_ge_1) = split (',', $rest,9) ;
+
+    $m = ord (&yyyymm2b (substr ($date,6,4),substr ($date,0,2))) ;
+    next if $m > $m_stop ;
+
+    $date = &m2mmdimyyyy ($m) ;
+    print UPLOADERS_OUT "$wp,$date," . sprintf ("%.0f", $uploaders_ge_1/$metric_unit) . "," . sprintf ("%.0f", $uploaders_ge_5/$metric_unit) . "," . sprintf ("%.0f", $uploaders_ge_25/$metric_unit) . "," . sprintf ("%.0f", $uploaders_ge_100/$metric_unit) .  "," . sprintf ("%.0f", $uploaders_wizard_ge_1/$metric_unit) . "\n" ;
+  }
+  close UPLOADERS_IN ;
+
+  # edit plot parameters
+
+  $out_script_plot =~ s/TITLE/File uploaders on $out_language_name wiki$metric_unit_text1/g ;
+
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+
+  $out_script_plot =~ s/Wikipedia/$out_publication/g ;
+
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
+  $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
+  $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
+  $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:7/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:6/g ;
+
+  $out_script_plot =~ s/CODE/$code/g ;
+  $out_script_plot =~ s/MAX_METRIC/uploaders/g ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$metric_max$metric_unit_text2/g ;
+  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded/g ;
+  $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+  $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
+  $out_script_plot =~ s/PERIOD/$period/g ;
+
+  $out_script_plot =~ s/COLOR_100/dodgerblue2/g ;
+  $out_script_plot =~ s/COLOR_W1/orange/g ;
+  $out_script_plot =~ s/COLOR_1/green4/g ;
+  $out_script_plot =~ s/COLOR_5/violetred2/g ;
+  $out_script_plot =~ s/COLOR_25/purple2/g ;
+
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+}
+
+sub GeneratePlotArticles
+{
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+
+  my ($wp,$tot_or_new) = @_ ;
+  $tot_or_new_lc = lc $tot_or_new ;
+
+  return if $wp =~ /^z+$/ ;
+
+  &LogT ("GeneratePlotArticles $wp $tot_or_new\n") ;
+
+  my $file_csv_data_R   = $path_in . "R_PlotData_"   . $tot_or_new . "Articles.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_" . $tot_or_new . "Articles.R-in" ;
+  my $file_csv_data_in  = $file_csv_monthly_stats ;
+
+  my $path_png_raw      = "$path_out_plots\/Plot" . $tot_or_new . "Articles"       . uc($wp) . ".png" ;
+  my $path_png_trends   = "$path_out_plots\/Plot" . $tot_or_new . "ArticlesTrends" . uc($wp) . ".png" ;
+  my $path_svg          = "$path_out_plots\/Plot" . $tot_or_new . "Articles"       . uc($wp) . ".svg" ;
+
+  my $out_script_plot   = $out_script_plot_articles ;
+  my $out_language_name = $out_languages {$wp} ;
+
+  # return if $month_plot_max == 0 ; # Q&D temp fix
+
+  my $code              = uc ($wp) ;
+
+  $file_csv_data_R      =~ s/\\/\//g ;
+  $path_png_raw         =~ s/\\/\//g ;
+  $path_png_trends      =~ s/\\/\//g ;
+  $path_svg             =~ s/\\/\//g ;
+  $out_language_name    =~ s/&nbsp;/ /g ;
+
+  $articles_max = 0 ;
+  $month_plot_max = 1 ;
+  $m_lo = 999 ;
+  $m_hi = 0 ;
+
+  $m_stop = $MonthlyStatsWpStop {$wp} ;
+  if ($m_stop == 147) { $m_stop = 148 ; } # Q&D workaround for missing data in some csv files in StatisticsMonthly.csv
+  &Log ("Ignore input beyond month $m_stop: " . &month_year_english_short ($m_stop) . "\n") ;
+
+  $articles = 0 ;
+  $articles_per_usertype = 0 ;
+  $tot_articles_prev = 0 ;
+  &ReadFileCsv ($file_csv_monthly_stats, $wp) ;
+  foreach $line (@csv)
+  {
+    chomp $line ;
+    ($lang,$date,$tot_contributors,$new_contributors,$editors_ge5,$editors_ge100,$tot_articles,$alt_articles,$new_articles_per_day,
+     $mean_versions,$mean_bytes,$over_size1,$over_size2,$edits_per_month,
+     $tot_bytes,$tot_words,$tot_links,$tot_links_wiki,$tot_links_images,$tot_links_external,$tot_redirects,$tot_categorized,$pages_without_internal_link,
+     $edits_per_month_reg,$edits_per_month_anon,$edits_per_month_bot,
+     $new_articles_per_month_reg,$new_articles_per_month_anon,$new_articles_per_month_bot) = split (',', $line) ;
+
+#   print "$pages_without_internal_link,$edits_per_month_reg,$edits_per_month_anon,$edits_per_month_bot,$new_articles_per_month_reg,$new_articles_per_month_anon,$new_articles_per_month_bot\n" ;
+
+    $new_articles_per_usertype += $new_articles_per_month_reg + $new_articles_per_month_anon + $new_articles_per_month_bot ;
+
+    $m = ord (&yyyymm2b (substr ($date,6,4),substr ($date,0,2))) ;
+    next if $m > $m_stop ;
+
+    if ($m_lo  > $m) { $m_lo = $m ; }
+    if ($m_hi  < $m) { $m_hi = $m ; }
+
+    if ($tot_or_new eq 'New')
+    { $articles = $tot_articles - $tot_articles_prev ; }
+    else
+    { $articles = $tot_articles ; }
+
+    if ($articles > $articles_max)
+    {
+      $articles_max = $articles ;
+      $month_plot_max = $m ;
+    }
+
+# print "new articles $articles, articles max $articles_max, reg $new_articles_per_month_reg,anon $new_articles_per_month_anon,bot $new_articles_per_month_bot\n" ;
+
+    $tot_articles_prev = $tot_articles ;
+  }
+  close ARTICLES_IN ;
+
+  open  ARTICLES_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
+
+  if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
+  { print ARTICLES_OUT "language,month,articles_reg,articles_anon,articles_bot\n" ; }
+  else
+  { print ARTICLES_OUT "language,month,articles\n" ; }
+
+  ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($articles_max) ;
+  for ($m = $m_lo - ($m_lo % 12) + 1 ; $m < $m_lo; $m++)
+  {
+    $date = &m2mmddyyyy ($m) ;
+    $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+    if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
+    { print ARTICLES_OUT "$wp,$date,0,0,0\n" ; }
+    else
+    { print ARTICLES_OUT "$wp,$date,0\n" ; }
+  }
+
+  $period = month_year_english_short ($m_lo - ($m_lo % 12 - 1)) . ' ' . month_year_english_short ($m_hi) ; # always start in January
+
+  $tot_articles_prev = 0 ;
+  foreach $line (@csv)
+  {
+    next if $line !~ /^$wp/ ;
+    chomp $line ;
+    ($lang,$date,$tot_contributors,$new_contributors,$editors_ge5,$editors_ge100,$tot_articles,$alt_articles,$new_articles_per_day,
+     $mean_versions,$mean_bytes,$over_size1,$over_size2,$edits_per_month,
+     $tot_bytes,$tot_words,$tot_links,$tot_links_wiki,$tot_links_images,$tot_links_external,$tot_redirects,$tot_categorized,$pages_without_internal_link,
+     $edits_per_month_reg,$edits_per_month_anon,$edits_per_month_bot,
+     $new_articles_per_month_reg,$new_articles_per_month_anon,$new_articles_per_month_bot) = split (',', $line) ;
+
+    $m = ord (&yyyymm2b (substr ($date,6,4),substr ($date,0,2))) ;
+    next if $m > $m_stop ;
+
+    if ($tot_or_new eq 'New')
+    { $articles = $tot_articles - $tot_articles_prev ; }
+    else
+    { $articles = $tot_articles ; }
+
+    $date = &m2mmdimyyyy ($m) ;
+    if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
+    { print ARTICLES_OUT "$wp,$date," . sprintf ("%.1f", $new_articles_per_month_reg/$metric_unit) . ',' . sprintf ("%.1f", $new_articles_per_month_anon/$metric_unit) . ',' . sprintf ("%.1f", $new_articles_per_month_bot/$metric_unit) . "\n" ; }
+    else
+    { print ARTICLES_OUT "$wp,$date," . sprintf ("%.1f", $articles/$metric_unit) . "\n" ; }
+
+    $tot_articles_prev = $tot_articles ;
+  }
+  close ARTICLES_IN ;
+
+  # edit plot parameters
+
+  if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
+  {
+    $out_script_plot   = $out_script_plot_articles2 ;
+    $out_script_plot =~ s/TITLE/New articles per month on $out_language_name wiki$metric_unit_text1/g ;
+  }
+  else
+  { $out_script_plot =~ s/TITLE/Total articles on $out_language_name wiki$metric_unit_text1/g ; }
+
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+
+  $out_script_plot =~ s/Wikipedia/$out_publication/g ;
+
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
+  $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
+  $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
+  $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
+  {
+    $out_script_plot =~ s/COL_DATA/2:5/g ;
+    $out_script_plot =~ s/COL_COUNTS/2:4/g ;
+  }
+  else
+  {
+    $out_script_plot =~ s/COL_DATA/2:3/g ;
+    $out_script_plot =~ s/COL_COUNTS/2:2/g ;
+  }
+
+  $out_script_plot =~ s/CODE/$code/g ;
+  $out_script_plot =~ s/MAX_METRIC/$tot_or_new_lc articles/g ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$metric_max$metric_unit_text2/g ;
+  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded/g ;
+  $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+  $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
+  $out_script_plot =~ s/PERIOD/$period/g ;
+
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 sub SummaryAddIndexes
@@ -1207,6 +1645,52 @@ sub SummaryAddIndexes
                  "</td></tr>\n\n\n" ;
   return ($index_html) ;
 }
+
+sub SummaryUnitAndScale
+{
+  my $metric_max = shift ;
+  my $metric_unit = 1 ;
+  my $metric_unit_text1 = "" ;
+  my $metric_unit_text2 = "" ;
+  if ($metric_max >= 10000)
+  {
+    $metric_unit = 1000 ;
+    $metric_unit_text1 = " (x 1000)" ;
+    $metric_unit_text2 = ",000" ;
+  }
+  if ($metric_max >= 10000000)
+  {
+    $metric_unit = 1000000 ;
+    $metric_unit_text1 = " (x 1000,000)" ;
+    $metric_unit_text2 = " million" ;
+  }
+  $metric_max = sprintf ("%.0f", $metric_max / $metric_unit) ;
+
+  my $metric_max_rounded = 10000000000000 ;
+  while ($metric_max_rounded / 10 > $metric_max)  { $metric_max_rounded /= 10 ; }
+
+# to be made into smarter routine
+     if ($metric_max_rounded * 0.12 > $metric_max) { $metric_max_rounded *= 0.12 ; }
+  elsif ($metric_max_rounded * 0.14 > $metric_max) { $metric_max_rounded *= 0.14 ; }
+  elsif ($metric_max_rounded * 0.16 > $metric_max) { $metric_max_rounded *= 0.16 ; }
+  elsif ($metric_max_rounded * 0.18 > $metric_max) { $metric_max_rounded *= 0.18 ; }
+  elsif ($metric_max_rounded * 0.2  > $metric_max) { $metric_max_rounded *= 0.2 ; }
+  elsif ($metric_max_rounded * 0.25 > $metric_max) { $metric_max_rounded *= 0.25 ; }
+  elsif ($metric_max_rounded * 0.3  > $metric_max) { $metric_max_rounded *= 0.3 ; }
+  elsif ($metric_max_rounded * 0.4  > $metric_max) { $metric_max_rounded *= 0.4 ; }
+  elsif ($metric_max_rounded * 0.5  > $metric_max) { $metric_max_rounded *= 0.5 ; }
+  elsif ($metric_max_rounded * 0.6  > $metric_max) { $metric_max_rounded *= 0.6 ; }
+  elsif ($metric_max_rounded * 0.7  > $metric_max) { $metric_max_rounded *= 0.7 ; }
+  elsif ($metric_max_rounded * 0.8  > $metric_max) { $metric_max_rounded *= 0.8 ; }
+
+  $metric_max =~ s/(\d)(\d\d\d)$/$1,$2/ ;
+  $metric_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+  $metric_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+  $metric_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+
+  return ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) ;
+}
+
 
 sub SummaryTrendChange
 {
@@ -1266,7 +1750,7 @@ sub HtmlSummaryExplanation
   my $explanation_new_editors         = "<dt><b><a href='../EN/TablesWikipediansNew.htm'>New Editors</a></b><dd>Registered (and signed in) users who completed their all time 10th edit in this month\n" ;
   my $explanation_speakers            = "<dt><b>Speakers <sup>1</sup></b><dd>Includes secondary language speakers. ARTICLE_LANGUAGE\n" ;
   my $explanation_editors_per_million = "<dt><b>Editors per Million Speakers <sup>1</sup></b><dd> aka Participation Rate.\n" ;
-  my $explanation_comparison          = "<sup>1</sup> For comparison see also <a href='$page_sitemap'>$out_publication sitemap</a>.\n" ;
+  my $explanation_comparison          = "<sup>1</sup> For language/project comparisons see also <a href='$page_sitemap'>$out_publication sitemap</a> and new WMF <a href='http://reportcard.wmflabs.org/'>Report Card</a> (beta).\n" ;
 
   my $html = <<__HTML_SUMMARY_EXPLANATION__ ;
       <td class=l colspan=99 width=100%>
@@ -1546,6 +2030,24 @@ __HTML_SUMMARY_BINARIES__
   $html =~ s/METRIC_MONTHLY/$metric_monthly/ ;
 
   return ($html) ;
+}
+
+sub GeneratePlotCallR
+{
+  my ($script, $file_script) = @_ ;
+
+  ($file_script_out = $file_script) =~ s/R-in/R-out/ ;
+
+  open R_SCRIPT, '>', $file_script or die ("file $file_script could not be opened") ;
+  print R_SCRIPT $script ;
+  close R_SCRIPT ;
+
+  $cmd = "R CMD BATCH \"$file_script $file_script_out\"" ;
+
+  if ($generate_edit_plots++ < 10)
+  { print "$cmd\n\n" ; }
+
+  @result = `$cmd` ;
 }
 
 1;

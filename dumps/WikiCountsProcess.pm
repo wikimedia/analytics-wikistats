@@ -1,6 +1,11 @@
 #!/usr/bin/perl
 
-$qr_csvkey_lang_date = qr/([^,]*,)(\d\d).(\d\d).(\d\d\d\d).*$/ ;
+  $qr_csvkey_lang_date = qr/([^,]*,)(\d\d).(\d\d).(\d\d\d\d).*$/ ;
+
+  # count user with over x edits
+  # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+  @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
+  @thresholds_sparse = (1,3,5,10,25,100,250,1000,2500,10000,25000,100000,250000,1000000,2500000,10000000,25000000,100000000) ;
 
 # debugging: code needed to restart aborted SortArticleHistoryOnDateTime
 
@@ -73,13 +78,13 @@ sub SortAndCompactEditsUserMonth
   $filesize_in = &i2KbMb (-s $file_csv_user_month_article) ;
   $cmd = "sort $file_csv_user_month_article -o $file_csv_user_month_article_s -T $path_temp" ;
   $result = `$cmd` ;
-  &Log ("Cmd $cmd -> $result\n") ;
-  &LogT ("\nSort took " . ddhhmmss (time - $timestartsort). ".\n") ;
+  &LogT ("Cmd $cmd -> result '$result'\n") ;
+  &LogT ("Sort took " . ddhhmmss (time - $timestartsort). ".\n") ;
 # unlink $file_csv_user_month_article ;
 
   &TraceMem ;
 
-  &Log ("Compact into $file_csv_user_month\n") ;
+  &LogT ("Compact into $file_csv_user_month\n") ;
   open    EDITS_USER_MONTH_ARTICLE, "<", $file_csv_user_month_article_s ;
   open    EDITS_USER_MONTH,         ">", $file_csv_user_month ;
   binmode EDITS_USER_MONTH_ARTICLE ;
@@ -113,7 +118,7 @@ sub SortAndCompactEditsUserMonth
   close EDITS_USER_MONTH_ARTICLE ;
 
   $filesize_out = &i2KbMb (-s $file_csv_user_month) ;
-  &Log ("\nFile '$file_csv_user_month' ($filesize_in -> $filesize_out))\n") ;
+  &LogT ("File '$file_csv_user_month' ($filesize_in -> $filesize_out))\n") ;
 
   &TraceMem ;
 # unlink $file_csv_user_month_article_s ;
@@ -285,7 +290,7 @@ sub SortArticleHistoryOnArticleDateTime
   close "FILE_EVENTS_ALL" ;
   undef @events ;
   &TraceMem ;
-  &LogT ("\nSort took " . ddhhmmss (time - $timestartsort). ".\n") ;
+  &LogT ("Sort took " . ddhhmmss (time - $timestartsort). ".\n") ;
 }
 
 sub CountUsersPerWeek
@@ -558,7 +563,7 @@ sub CountArticlesPerFewDays
   @csv = sort {($x=$a,$x=~s/$qr_csvkey_lang_date/$1$4$2$3/o,$x) cmp ($y=$b,$y=~s/$qr_csvkey_lang_date/$1$4$2$3/o,$y)} @csv ;
   &WriteFileCsv ($file_csv_stats_ploticus) ;
 
-  &LogT ("\nCounting ready\n") ;
+  &LogT ("\nCountArticlesPerFewDays ready\n") ;
 }
 
 sub CountArticlesPerMonth
@@ -575,7 +580,7 @@ sub CountArticlesPerMonth
   binmode FILE_EVENTS_CONCISE ;
 
   $filesize = -s $file_events ;
-  &LogT ("\nReading $file_events: " . &i2KbMb ($filesize) . ".\n\n") ;
+  &LogT ("Reading $file_events: " . &i2KbMb ($filesize) . ".\n") ;
 
   $ndx_article_prev = "" ;
   $month_event_prev = "" ;
@@ -615,9 +620,9 @@ sub CountArticlesPerMonth
   close "FILE_EVENTS" ;
 
   $filesize = -s $file_events_concise ;
-  &LogT ("\nWritten $file_events_concise: " . &i2KbMb ($filesize) . ".\n\n") ;
+  &LogT ("Written $file_events_concise: " . &i2KbMb ($filesize) . ".\n") ;
   if ($events_in > 0)
-  { &LogT ("\n$events_out out of $events_in events copied to new file (" . sprintf ("%.1f", 100*$events_out/$events_in ) . "%)\n\n") ; }
+  { &LogT ("$events_out out of $events_in events copied to new file (" . sprintf ("%.1f", 100*$events_out/$events_in ) . "%)\n") ; }
 
   # determine month, year of first edit
   # (in human format -> 1 <= month <= 12 )
@@ -626,23 +631,28 @@ sub CountArticlesPerMonth
   $year  += 1900 ;
 
   &TraceMem ;
-  &LogT ("\nYear " . $year . ", month $month\n\n") ;
+  &LogT ("First edit in year " . $year . ", month $month\n") ;
 
   ($month_dump,$year_dump) = (localtime $dumpdate_gm) [4,5] ;
   $month_dump += 1 ;
   $year_dump  += 1900 ;
 
-  &LogT ("-----: 1:real_articles, 2:mean_versions, 3:mean_articlesize, 4:articles_over_size1, 5:articles_over_size2\n" .
-         "-----: 6:all_size, 7:tot_links, 8:tot_wiki_links, 9:tot_image_links, 10:tot_ext_links\n" .
-         "-----: 11:tot_redirects, 12:alternate_articles, 13:tot_words, 14:tot_categorized, 15:not articles\n") ;
+  if ($log_progress_verbose)
+  {
+    &LogT ("-----: 1:real_articles, 2:mean_versions, 3:mean_articlesize, 4:articles_over_size1, 5:articles_over_size2\n" .
+           "-----: 6:all_size, 7:tot_links, 8:tot_wiki_links, 9:tot_image_links, 10:tot_ext_links\n" .
+           "-----: 11:tot_redirects, 12:alternate_articles, 13:tot_words, 14:tot_categorized, 15:not articles\n") ;
+  }
+
 
   while (($year <  $year_dump) ||
          (($year == $year_dump) && ($month <= $month_dump)))
   {
+print "year $year year_dump $year_dump month $month month_dump $month_dump\n" ;
     $yymm = sprintf ("%02d%02d", $year-2000, $month) ;
     $total_all_edits  += $all_edits_per_month  {$yymm} ;
     $total_real_edits += $real_edits_per_month {$yymm} ;
-  # print "$yymm TE $total_edits TRE $total_real_edits E ${edits_per_month {$yymm}} RE YYMM ${real_edits_per_month {$yymm}} \n" ;
+print "$yymm TE $total_edits TRE $total_real_edits E ${edits_per_month {$yymm}} RE YYMM ${real_edits_per_month {$yymm}} \n" ;
 
     $articles_per_month {$yymm} = &CountArticlesUpTo ($year, $month, $total_all_edits, $total_real_edits) ;
 
@@ -650,7 +660,10 @@ sub CountArticlesPerMonth
     my $f = 0 ;
     foreach $field (@fields)
     { $f++ ; $field = " $f:$field" ; }
-    &LogT ("$yymm: " . join (',', @fields) . "\n") ;
+
+    if ($log_progress_verbose)
+    { &LogT ("$yymm: " . join (',', @fields) . "\n") ; }
+&LogT ("$yymm: " . join (',', @fields) . "\n") ;
 
     # &Log (" " . $month) ;
     $month ++ ;
@@ -659,11 +672,13 @@ sub CountArticlesPerMonth
       $month = 1 ;
       $year ++ ;
       &TraceMem ($nohashes) ;
-      # &Log ("\nYear " . $year . ", month") ;
+
+      # if ($log_progress_verbose)
+      # { &Log ("\nYear " . $year . ", month") ; }
     }
   }
 
-  &LogT ("\nCounting ready\n") ;
+  &LogT ("CountArticlesPerMonth ready\n") ;
 }
 
 
@@ -709,9 +724,10 @@ sub CountArticlesUpTo
   $filesize = -s $file_events_concise ;
   # &LogT ("\nReading back intermediate file EventsSortByArticleTime (". &i2KbMb ($filesize) . ").\n") ;
 
-  if ($countarticlesupto++ == 0)
+  if ($log_progress_verbose && ($countarticlesupto++ == 0))
 # { &LogT ("\nReading $file_events ($filesize bytes)).\n") ; }
-  { &LogT ("\nReading $file_events_concise: " . &i2KbMb ($filesize) . ".\n\n") ; }
+  { &LogT ("Reading $file_events_concise: " . &i2KbMb ($filesize) . ".\n\n") ; }
+  &LogT ("Reading $file_events_concise: " . &i2KbMb ($filesize) . ".\n\n") ;
 
   $bytes_read = 0 ;
   $mb_read = 0 ;
@@ -744,6 +760,7 @@ sub CountArticlesUpTo
   close "FILE_EVENTS_CONCISE" ;
 
   &CountPrev ($event_prev) ;
+  &LogT ("Reading ready\n\n") ;
 
   if ($real_articles != 0)
   {
@@ -1006,6 +1023,380 @@ sub CollectActiveUsersPerMonth
   &LogPhase ("CollectActiveUsersPerMonth") ;
   &TraceMem ;
 
+  my ($edits, $yymm) ;
+
+  if (! $filesizelarge)
+  {
+    foreach $yymm_user_nscat (keys %edits_per_user_per_month)
+    {
+      $edits = $edits_per_user_per_month {$yymm_user_nscat} ;
+      ($yymm,$user,$usertype,$nscat) = split (',', $yymm_user_nscat) ;
+#     if ($nscat ne "A") { next ; } # for now count only nscat 'A' = namespace a (0 and other 'article' namespaces, depends on wiki)
+
+      for ($t = 0 ; $t < $#thresholds ; $t++)
+      {
+        $threshold = $thresholds [$t] ;
+        if ($edits < $threshold) { last ; }
+        $active_users_per_month {"$usertype,$nscat,$threshold,$yymm"} ++ ;
+      }
+    }
+    undef (%edits_per_user_per_month) ;
+
+#   if ($forecast_partial_month)
+#   {
+#     foreach $key (keys %edits_per_user_per_partial_month)
+#     {
+#       $edits = $edits_per_user_per_partial_month {$key} ;
+#      if ($edits < 5) { next ; }
+#       $yymm = substr ($key,0,4) ;
+#       @active_users_per_partial_month {"A,5,$yymm"} ++ ;
+#       if ($edits < 100) { next ; }
+#       @active_users_per_partial_month {"A,100,$yymm"} ++ ;
+#     }
+#     undef (%edits_per_user_per_partial_month) ;
+#   }
+  }
+  else
+  {
+    $timestartsort = time ;
+    &LogT ("Counting user edits\n") ;
+    &TraceMem ;
+
+    foreach $file (sort keys %files_events_user_month)
+    {
+      ($year, $month) = $file =~ /^.*?(\d\d)-(\d\d)$/ ;
+      $yymm = sprintf ("%02d%02d", $year, $month) ;
+
+      open "FILE_USEREDITS", "<", $file ;
+      binmode FILE_USEREDITS ;
+      while ($user_type_nscat = <FILE_USEREDITS>)
+      {
+        chomp ($user_type_nscat) ;
+        $edits_per_user {$user_type_nscat} ++ ;
+      }
+      close FILE_USEREDITS ;
+
+      foreach $user_type_nscat (keys %edits_per_user)
+      {
+        $edits = $edits_per_user {$user_type_nscat} ;
+
+        ($user,$usertype,$nscat) = split (',', $user_type_nscat) ;
+
+        for ($t = 0 ; $t < $#thresholds ; $t++)
+        {
+          $threshold = $thresholds [$t] ;
+          if ($edits < $threshold) { last ; }
+          $active_users_per_month {"$usertype,$nscat,$threshold,$yymm"} ++ ;
+        }
+      }
+      undef %edits_per_user ;
+
+      if (&TraceJob)
+      {
+  #     unlink $file ;
+        $file =~ s/^.*[\\\/]// ;
+        &LogT ("Count $yymm $file\n") ;
+      }
+      &TraceMem ($nohashes) ;
+    }
+
+#   if ($forecast_partial_month)
+#   {
+#     foreach $file (sort keys %files_events_user_month_partial)
+#     {
+#       ($year, $month) = $file =~ /^.*?(\d\d)-(\d\d)$/ ;
+#       $yymm = sprintf ("%02d%02d", $year, $month) ;
+
+#       open "FILE_USEREDITS", "<", $file ;
+#       binmode FILE_USEREDITS ;
+#       while ($user = <FILE_USEREDITS>)
+#       {
+#         chomp ($user) ;
+#         @edits_per_user {$user} ++ ;
+#       }
+#       close FILE_USEREDITS ;
+
+#       foreach $key (keys %edits_per_user)
+#       {
+#         $edits = $edits_per_user {$key} ;
+#         if ($edits < 5) { next ; }
+#         @active_users_per_partial_month {"A,5,$yymm"} ++ ;
+#         if ($edits < 100) { next ; }
+#         @active_users_per_partial_month {"A,100,$yymm"} ++ ;
+#       }
+#       undef %edits_per_user ;
+
+#       if (&TraceJob)
+#       {
+#       # unlink $file ;
+#         $file =~ s/^.*[\\\/]// ;
+#         &LogT ("Count $yymm $file\n") ;
+#       }
+#       &TraceMem ($nohashes) ;
+#     }
+#   }
+  }
+}
+
+# qqq1
+# merge wiki specific files with per user/month/namespace specific edit counts
+sub CollectActiveUsersPerMonthsAllWikis
+{
+  my (@files,  %file_sizes, %file_names, %file_ages, $file_csv_add, $file_csv_from, $file_csv_to, $time_start_step, $time_start_job) ;
+
+  &LogPhase ("CollectActiveUsersPerMonthAllWikis") ;
+  &TraceMem ;
+
+  print "Input folder is $path_in\n" ;
+  print "Output folder is $path_out\n" ;
+  chdir $path_in ;
+
+  # collect basic data for relevant input files, names EditsBreakdownPerUserPerMonthXX.csv (XX language code)
+  # cleanup temp files
+  @files = <*>;
+  foreach $file (@files)
+  {
+    next if $file !~ /^EditsBreakdownPerUserPerMonth.*?[A-Z]\.csv/ ;
+    if ($file =~ /^EditsBreakdownPerUserPerMonth.*?Temp.*?.csv/)
+    { unlink $file ; next ; }
+
+   ($wp = $file) =~ s/^EditsBreakdownPerUserPerMonth(.*?)\.csv$/$1/ ;
+    $wp = lc $wp ;
+
+    next if $wp eq 'xx' ; # some code for aggregates from earlier
+
+    $file_sizes {$wp} = -s $file ;
+    $file_names {$wp} = $file ;
+    $file_ages  {$wp} = -M $file ;
+  }
+
+  # check if 25 largest files are more recent than merged data
+  # if not defer merge to later
+  if (-e $file_csv_user_month_all_wikis)
+  {
+    my $file_age_merged_data = -M $file_csv_user_month_all_wikis ;
+    my $file_cnt = 0 ;
+    foreach $wp (sort { $file_sizes {$b} <=> $file_sizes {$a} } keys %file_sizes)
+    {
+      if ($file_ages {$wp} > $file_age_merged_data)
+      { $file_ages_older .= "$wp (" . sprintf ("%.0f", $file_ages {$wp}). "), " ; }
+      last if ++$file_cnt >= 25 ;
+    }
+    if ($file_ages_older ne '')
+    {
+      print "\nFor the following 25 largest data files with edits per user/month/namespace are older\n" .
+            "than merged file $file_csv_user_month_all_wikis ($file_age_merged_data):\n" . $file_ages_older . ".\nFiles are not ready for merging\n\n" ;
+      return ;
+    }
+  }
+
+  # ok, we will continue to merge
+  print "\nAll 25 largest per wiki data files are more recent than merged data file => time to update merged file.\n" ;
+  print "Determine last month of data available for these wikis in StatisticsMonthly.csv.\n\n" ;
+  &ReadFileCsv ($file_csv_monthly_stats) ;
+  foreach $line (@csv)
+  {
+    ($wp,$date) = split (',', $line) ;
+    $yyyymm = substr ($date,6,4) . '-' . substr ($date,0,2) ;
+    $lastmonth {$wp} = $yyyymm ;
+  }
+  $month_last = '9999-99' ;
+  $file_cnt = 0 ;
+  foreach $wp (sort { $file_sizes {$b} <=> $file_sizes {$a} } keys %file_sizes)
+  {
+    next if $lastmonth {$wp} !~ /^\d\d\d\d-\d\d$/ ;
+    if ($lastmonth {$wp} lt $month_last)
+    { $month_last = $lastmonth {$wp} ; }
+    print $lastmonth {$wp} . " $wp\n" ;
+    last if ++$file_cnt >= 25 ;
+  }
+  print "\nDiscard data beyond month $month_last (not all top 25 wikis are up to date).\n\n" ;
+
+  # sort files by size, then from smallest to largest merge one at a time
+  # in merge routine prep each file
+  $time_start_job = time ;
+  unlink $file_csv_user_month_all_wikis ;
+  my $files_merged = 0 ;
+  $file_csv_from = 'none' ;
+
+  # merge all language specific files, starting with the smallest
+  # resulting file contains edit counts per user per month for all relevant ~'article' namespaces (usually 0 only)
+  # two counts: one for full month, one for first 28 days (for fair comparison of consecutive months)
+  # example
+  # Amirobot,2011-06,14,14
+  # Amirobot,2011-07,6,6
+  # Amirobot,2011-08,4,4
+  # Amirobot,2011-09,3,1
+
+  print "\n" ;
+  foreach $wp (sort { $file_sizes {$a} <=> $file_sizes {$b} } keys %file_sizes)
+  {
+    next if $wp eq 'commons' ; # do not merge in yet
+
+    # qqq3
+    # next if $wp !~ /^(?:ab|ak)$/ ; # test only, use few files for speed
+    # next if $wp !~ /^a/ ; # test only, use few files for speed
+
+    $file_csv_add = $file_names {$wp} ;
+    $file_csv_to  = $file_csv_user_month_all_wikis ;
+    $file_csv_to  =~ s/\.csv/"Temp_" . ($files_merged++). uc ("_$wp") . ".csv"/e ;
+
+    $time_start_step = time ;
+    print "Merge\n$file_csv_add \&\n$file_csv_from=>\n$file_csv_to\n\n" ;
+
+    &MergeActiveUsersPerMonthsAllWikisOrProjects ($wp, $file_csv_add, $file_csv_from, $file_csv_to, ($merge_namespaces = $true), $month_last) ;
+
+    $file_size_add  = sprintf ("%.1f", (-s $file_csv_add)  / 1000000) . 'Mb' ;
+    $file_size_from = sprintf ("%.1f", (-s $file_csv_from) / 1000000) . 'Mb' ;
+    $file_size_to   = sprintf ("%.1f", (-s $file_csv_to)   / 1000000) . 'Mb' ;
+
+    print "Merge in " .  ddhhmmss (time - $time_start_job) . " / " .ddhhmmss (time - $time_start_step) . ": $file_size_add \& $file_size_from => $file_size_to\n\n" ;
+
+    $file_csv_from = $file_csv_to ;
+  }
+
+  # rename resulting file to EditsBreakdownPerUserPerMonthAllWikis.csv
+  print "Rename $file_csv_to to $file_csv_user_month_all_wikis\n" ;
+  print "All files merged\n\n" ;
+
+# rename $file_csv_to, $file_csv_user_month_all_wikis ;
+# for tests copy rather than rename
+  open IN,  '<', $file_csv_to ;
+  open OUT, '>', $file_csv_user_month_all_wikis ;
+  binmode IN ;
+  binmode OUT ;
+  while ($line = <IN>)
+  { print OUT $line ; }
+  close IN ;
+  close OUT ;
+
+  # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+  @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
+
+  # now read back EditsBreakdownPerUserPerMonthAllWikis.csv
+  # aggregate edits per user/month to hash files: editors per month with x+ edits (x = many levels)
+  # (again full month and first 28 days)
+  open FILE_CSV_ALL, '<', $file_csv_user_month_all_wikis ;
+  $line = <FILE_CSV_ALL> ; # skip comment line
+  $line = <FILE_CSV_ALL> ; # skip comment line
+  while ($line = <FILE_CSV_ALL>)
+  {
+    chomp $line ;
+    next while $line =~ /^\s*$/ ;
+
+    ($user,$month,$edits,$edits_28) = split (',', $line) ;
+
+    $yyyy = substr ($month,0,4) ;
+    $mm   = substr ($month,5,2) ;
+    if (($yyyy !~ /20\d\d$/) || ($mm !~ /^\d\d$/) || ($mm < 1 ) || ($mm > 12))
+    { print "\nSkip invalid month '$yyyy $mm' <- '$month'\n" ; next ; }
+
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+
+      # if ($bots {$user} == 0)
+      # counts bots separately (again test for implicit bot names, as $file_csv_bots_all is not fully built yet)
+      if (($bots {$user} == 0) && ($user !~ /bot\b/i) && ($user !~ /_bot_/i)) # name(part) ends on bot,
+      {
+        if ($edits >= $threshold)
+        { $active_users_per_month_all_wikis {$month} {$threshold} ++ ; }
+        if ($edits_28 >= $threshold)
+        { $active_users_per_month_all_wikis_28 {$month} {$threshold} ++ ; }
+      }
+      else
+      {
+        if ($edits >= $threshold)
+        { $active_bots_per_month_all_wikis {$month} {$threshold} ++ ; }
+        if ($edits_28 >= $threshold)
+        { $active_bots_per_month_all_wikis_28 {$month} {$threshold} ++ ; }
+      }
+
+      if ($edits < $threshold) { last ; } # edits_28 always <= $edits
+    }
+  }
+
+  # now store these activity levels, per month for all languages,
+  # to existing file StatisticsUserActivitySpread.csv with activity levels per language (written in UpdateMonthlyStats)
+  # like always use code 'zz' for overall totals
+  # add counts for registered users edting articles only (only 'R,A,' = registered 'users,articles')
+  # (language specific counts also for 'B,..,' for bots, '..,T,' for talk pages, '..,O,' for other pages)
+  # example
+  # zz,09/30/2011,R,A,49,26,21,15,6,5,2
+  # zz,06/30/2011,R,A,45,31,20,13,8,7,3,1
+  print "\nUpdate file $file_csv_users_activity_spread, code 'zz'\n" ;
+  $language = 'zz' ;
+  &ReadFileCsv ($file_csv_users_activity_spread) ;
+
+  foreach $month (sort keys %active_users_per_month_all_wikis_28) # active_users_per_month_all_wikis_28 is more inclusive than active_users_per_month_all_wikis
+  {
+    $yyyy     = substr ($month,0,4) ;
+    $mm       = substr ($month,5,2) ;
+
+    if ("$yyyy-$mm" gt $month_last)
+    {
+      print "zz discard data for $yyyy-$mm\n" ;
+      next ;
+    }
+
+    if (($yyyy !~ /20\d\d$/) || ($mm !~ /^\d\d$/) || ($mm < 1 ) || ($mm > 12))
+    {
+      print "\ninvalid month '$yyyy $mm' <- '$month'\n" ;
+      next ;
+    }
+
+
+    $dd       = days_in_month ($yyyy, $mm) ;
+    $ddmmyyyy = sprintf ("%02d/%02d/%04d", $mm, $dd, $yyyy) ;
+
+    $line  = "$language,$ddmmyyyy,R,A," ; # R=registered users, A=article namespaces
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+      last if $active_users_per_month_all_wikis {$month} {$threshold} == 0 ;
+      $line .= $active_users_per_month_all_wikis {$month} {$threshold} . ',' ;
+    }
+    $line =~ s/,$// ;
+    push @csv, $line ;
+  }
+  &WriteFileCsv ($file_csv_users_activity_spread) ;
+
+  # now repeat the process, but only consider edits in first 28 days of month
+  # use new code 'zz28'
+  print "\nUpdate file $file_csv_users_activity_spread, code 'zz28' (edits for first 28 days of each month)\n" ;
+  $language = 'zz28' ;
+  &ReadFileCsv ($file_csv_users_activity_spread) ;
+  foreach $month (sort keys %active_users_per_month_all_wikis_28)
+  {
+    $yyyy     = substr ($month,0,4) ;
+    $mm       = substr ($month,5,2) ;
+    $dd       = days_in_month ($yyyy, $mm) ;
+    $ddmmyyyy = sprintf ("%02d/%02d/%04d", $mm, $dd, $yyyy) ;
+
+    if ("$yyyy-$mm" gt $month_last)
+    {
+      print "zz28 discard data for $yyyy-$mm\n" ;
+      next ;
+    }
+
+    $line  = "$language,$ddmmyyyy,R,A," ; # R=registered users, A=article namespaces
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+      last if $active_users_per_month_all_wikis_28 {$month} {$threshold} == 0 ;
+      $line .= $active_users_per_month_all_wikis_28 {$month} {$threshold} . ',' ;
+    }
+    $line =~ s/,$// ;
+    push @csv, $line ;
+  }
+  &WriteFileCsv ($file_csv_users_activity_spread) ;
+}
+
+sub CollectActiveUsersPerMonth
+{
+  &LogPhase ("CollectActiveUsersPerMonth") ;
+  &TraceMem ;
+
   # count user with over x edits
   # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
   @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
@@ -1087,7 +1478,6 @@ sub CollectActiveUsersPerMonth
       &TraceMem ($nohashes) ;
     }
 
-
 #   if ($forecast_partial_month)
 #   {
 #     foreach $file (sort keys %files_events_user_month_partial)
@@ -1126,10 +1516,497 @@ sub CollectActiveUsersPerMonth
   }
 }
 
+# qqq1
+# merge files generated in CollectActiveUsersPerMonthsAllWikis for al projects
+# based on CollectActiveUsersPerMonthsAllWikis (some more common code to be split off)
+sub CollectActiveUsersPerMonthsAllProjects
+{
+  my (@files, %file_sizes, %file_names, %file_ages, $file_csv_add, $file_csv_from, $file_csv_to, $time_start_step, $time_start_job) ;
+
+  &LogPhase ("CollectActiveUsersPerMonthAllProjects") ;
+  &TraceMem ;
+
+  chdir $path_in ;
+  chdir ".." ;
+  print "Input folder is " . cwd () . "\n" ;
+  print "Output folder is " . cwd () . "/csv_wp\n" ;
+
+  foreach $wp (qw (wb wk wn wp wq ws wv wx))
+  {
+    $file = "csv_$wp/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
+    $file_sizes {$wp} = -s $file ;
+    $file_names {$wp} = $file ;
+    $file_ages  {$wp} = -M $file ;
+  }
+
+  # check if any input file is more recent than merged data
+  # if not defer merge to later
+  $file_age_low = 9999 ;
+  if (-e $file_csv_user_month_all_projects)
+  {
+    foreach $wp (keys %file_sizes)
+    {
+      if (-e $file_names {$wp} && ($file_ages {$wp} < $file_age_low))
+      { $file_age_low = $file_ages {$wp} ; }
+    }
+
+    my $file_age_merged_data = -M $file_csv_user_month_all_projects ;
+    if ($file_age_low > $file_age_merged_data)
+    {
+      print "\nMerged project counts is more recent than any csv_../EditsBreakdownPerUserPerMonthAllWikis.csv. No need to merge.\n" ;
+      return ;
+    }
+  }
+
+  # ok, we will continue to merge
+  print "\nOne or more ..AllWikis.csv is newer, merge all into ..AllProjects.csv.\n\n" ;
+
+  # sort files by size, then from smallest to largest merge one at a time
+  # in merge routine prep each file
+  $time_start_job = time ;
+  unlink $file_csv_user_month_all_projects ;
+  my $files_merged = 0 ;
+  $file_csv_from = 'none' ;
+
+  # merge all language specific files, starting with the smallest
+  # resulting file contains edit counts per user per month for all relevant ~'article' namespaces (usually 0 only)
+  # two counts: one for full month, one for first 28 days (for fair comparison of consecutive months)
+  # example
+  # Amirobot,2011-06,14,14
+  # Amirobot,2011-07,6,6
+  # Amirobot,2011-08,4,4
+  # Amirobot,2011-09,3,1
+
+  print "\n" ;
+  foreach $wp (sort { $file_sizes {$a} <=> $file_sizes {$b} } keys %file_sizes)
+  {
+    if (! -e $file_names {$wp})
+    {
+      print "File not found " . $file_names {$wp} . "\n" ;
+      next ;
+    }
+
+    $file_csv_add = $file_names {$wp} ;
+    $file_csv_to  = $file_csv_user_month_all_projects ;
+    $file_csv_to  =~ s/\.csv/"Temp_" . ($files_merged++). uc ("_$wp") . ".csv"/e ;
+
+    $time_start_step = time ;
+    print "Merge\n$file_csv_add \&\n$file_csv_from=>\n$file_csv_to\n\n" ;
+
+    &MergeActiveUsersPerMonthsAllWikisOrProjects ($wp, $file_csv_add, $file_csv_from, $file_csv_to, ($merge_namespaces = $false)) ;
+
+    $file_size_add  = sprintf ("%.1f", (-s $file_csv_add)  / 1000000) . 'Mb' ;
+    $file_size_from = sprintf ("%.1f", (-s $file_csv_from) / 1000000) . 'Mb' ;
+    $file_size_to   = sprintf ("%.1f", (-s $file_csv_to)   / 1000000) . 'Mb' ;
+
+    print "Merge in " .  ddhhmmss (time - $time_start_job) . " / " .ddhhmmss (time - $time_start_step) . ": $file_size_add \& $file_size_from => $file_size_to\n\n" ;
+
+    $file_csv_from = $file_csv_to ;
+  }
+
+  # rename resulting file to EditsBreakdownPerUserPerMonthAllProjects.csv
+  print "Rename $file_csv_to to $file_csv_user_month_all_projects\n" ;
+  print "All files merged\n\n" ;
+  rename $file_csv_to, $file_csv_user_month_all_projects ;
+
+  undef %active_users_per_month_all_wikis ;
+  undef %active_users_per_month_all_wikis_28 ;
+  undef %active_bots_per_month_all_wikis ;
+  undef %active_bots_per_month_all_wikis_28 ;
+
+  # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+  @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
+
+  # now read back EditsBreakdownPerUserPerMonthAllProjects.csv
+  # aggregate edits per user/month to hash files: editors per month with x+ edits (x = many levels)
+  # (again full month and first 28 days)
+  open FILE_CSV_ALL, '<', $file_csv_user_month_all_projects ;
+  $line = <FILE_CSV_ALL> ; # skip comment line
+  $line = <FILE_CSV_ALL> ; # skip comment line
+  while ($line = <FILE_CSV_ALL>)
+  {
+    chomp $line ;
+    next while $line =~ /^\s*$/ ;
+
+    ($user,$month,$edits,$edits_28) = split (',', $line) ;
+
+    $yyyy = substr ($month,0,4) ;
+    $mm   = substr ($month,5,2) ;
+    if (($yyyy !~ /20\d\d$/) || ($mm !~ /^\d\d$/) || ($mm < 1 ) || ($mm > 12))
+    { print "\nSkip invalid month '$yyyy $mm' <- '$month'\n" ; next ; }
+
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+      # if ($bots {$user} == 0)
+      # counts bots separately (again test for implicit bot names, as $file_csv_bots_all is not fully built yet)
+      if (($bots {$user} == 0) && ($user !~ /bot\b/i) && ($user !~ /_bot_/i)) # name(part) ends on bot,
+      {
+        if ($edits >= $threshold)
+        { $active_users_per_month_all_wikis {$month} {$threshold} ++ ; }
+        if ($edits_28 >= $threshold)
+        { $active_users_per_month_all_wikis_28 {$month} {$threshold} ++ ; }
+      }
+      else
+      {
+        if ($edits >= $threshold)
+        { $active_bots_per_month_all_wikis {$month} {$threshold} ++ ; }
+        if ($edits_28 >= $threshold)
+        { $active_bots_per_month_all_wikis_28 {$month} {$threshold} ++ ; }
+      }
+
+      if ($edits < $threshold) { last ; } # edits_28 always <= $edits
+    }
+  }
+
+  # now store these activity levels, per month for all languages,
+  # to existing file StatisticsUserActivitySpread.csv with activity levels per language (written in UpdateMonthlyStats)
+  # like always use code 'zz' for overall totals
+  # add counts for to  (only 'R,A,' = registered 'users,articles')
+  # language specific counts also for 'B,..,' for bots, '..,T,' for talk pages, '..,O,' for other pages)
+  # example
+  # zz,09/30/2011,R,A,49,26,21,15,6,5,2
+  # zz,06/30/2011,R,A,45,31,20,13,8,7,3,1
+  print "\nUpdate file $file_csv_users_activity_spread_all, code 'zz'\n" ;
+  $language = 'zz' ;
+  &ReadFileCsv ($file_csv_users_activity_spread_all) ;
+
+  foreach $month (sort keys %active_users_per_month_all_wikis_28) # active_users_per_month_all_wikis_28 is more inclusive than active_users_per_month_all_wikis
+  {
+    $yyyy     = substr ($month,0,4) ;
+    $mm       = substr ($month,5,2) ;
+
+    if (($yyyy !~ /20\d\d$/) || ($mm !~ /^\d\d$/) || ($mm < 1 ) || ($mm > 12))
+    {
+      print "\ninvalid month '$yyyy $mm' <- '$month'\n" ;
+      next ;
+    }
+
+
+    $dd       = days_in_month ($yyyy, $mm) ;
+    $ddmmyyyy = sprintf ("%02d/%02d/%04d", $mm, $dd, $yyyy) ;
+
+    $line  = "$language,$ddmmyyyy,R,A," ; # R=registered users, A=article namespaces
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+      last if $active_users_per_month_all_wikis {$month} {$threshold} == 0 ;
+      $line .= $active_users_per_month_all_wikis {$month} {$threshold} . ',' ;
+    }
+    $line =~ s/,$// ;
+    push @csv, $line ;
+  }
+  &WriteFileCsv ($file_csv_users_activity_spread_all) ;
+
+  # now store these activity levels, per month for all languages, to existing file with activity levels per language   # qqq2
+  # use new code 'zz28' for totals for first 28 days of each month
+  # add counts to StatisticsUserActivitySpread.csv
+  # example
+  # zz28,09/30/2011,R,A,49,25,21,15,6,5,2
+  # zz28,06/30/2011,R,A,39,27,18,11,7,7,3,1
+  print "\nUpdate file $file_csv_users_activity_spread_all, code 'zz28' (edits for first 28 days of each month)\n" ;
+  $language = 'zz28' ;
+  &ReadFileCsv ($file_csv_users_activity_spread_all) ;
+  foreach $month (sort keys %active_users_per_month_all_wikis_28)
+  {
+    $yyyy     = substr ($month,0,4) ;
+    $mm       = substr ($month,5,2) ;
+    $dd       = days_in_month ($yyyy, $mm) ;
+    $ddmmyyyy = sprintf ("%02d/%02d/%04d", $mm, $dd, $yyyy) ;
+
+    $line  = "$language,$ddmmyyyy,R,A," ; # R=registered users, A=article namespaces
+    for ($t = 0 ; $t < $#thresholds ; $t++)
+    {
+      $threshold = $thresholds [$t] ;
+      last if $active_users_per_month_all_wikis_28 {$month} {$threshold} == 0 ;
+      $line .= $active_users_per_month_all_wikis_28 {$month} {$threshold} . ',' ;
+    }
+    $line =~ s/,$// ;
+    push @csv, $line ;
+  }
+  &WriteFileCsv ($file_csv_users_activity_spread_all) ;
+    }
+
+
+# merge all language specific files, starting with the smallest, add one file on each call
+# resulting file contains edit counts per user per month for all relevant ~'article' namespaces (usually 0 only)
+# two counts: one for full month, one for first 28 days (for fair comparison of consecutive months)
+# example
+# Amirobot,2011-06,14,14
+# Amirobot,2011-07,6,6
+# Amirobot,2011-08,4,4
+# Amirobot,2011-09,3,1
+sub MergeActiveUsersPerMonthsAllWikisOrProjects
+{
+  my ($wp, $file_csv_add, $file_csv_from, $file_csv_to, $merge_namespaces, $month_last) = @_ ;
+  my $language = '?' ;
+
+  if ($merge_namespaces) # already done when merging projects
+  {
+    $file_csv_add2 = $file_csv_add ;
+    $file_csv_add2 =~ s/\.csv/Temp.csv/ ;
+
+$trace = ($file_csv_add =~ /ZH.csv/) ;
+
+    # step 1: preprocess new file before merging with already merged content
+    # discard all non-article namespaces (on most wikis all non zero namespaces), acculumulate per user per month what for remaining namespaces
+    open FILE_CSV_ADD,  '<', $file_csv_add ;
+    open FILE_CSV_ADD2, '>', $file_csv_add2 ;
+    binmode FILE_CSV_ADD ;
+    binmode FILE_CSV_ADD2 ;
+
+    undef @lines_add ;
+
+    my $lines_written = 0 ;
+    $prev_user_add  = '' ;
+    $prev_month_add = '' ;
+
+    while ($line_add = <FILE_CSV_ADD>)
+    {
+      if ($line_add =~ /^#/) # skip duplicate comments
+      {
+        $line_add =~ s/ per namespace// ;
+        $line_add =~ s/ namespace,// ;
+
+        print FILE_CSV_ADD2 $line_add ;
+        next ;
+      }
+
+      chomp $line_add ;
+      $line_add =~ s/,\s+(\d)/,$1/g ;
+
+      ($user_add, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+
+print "IN  $user_add, $month_add, $namespace_add, $edits_add\n" if $trace ;
+      if (&IpAddress ($user_add))
+      { $user_add = 'an.on.ym.ous' ; }
+      next if $user_add eq 'an.on.ym.ous' ;
+
+      next if ($user_add =~ /bot\b/i) || ($user_add =~ /_bot_/i) ; # name(part) ends on bot,
+      next while (! &NameSpaceArticle ($wp, $namespace_add)) ;
+
+      if (($user_add ne $prev_user_add) || ($month_add ne $prev_month_add))
+      {
+        if ($prev_user_add ne '') # not first record ?
+        {
+print "OUT $prev_user_add, $prev_month_add,$edits_add_tot\n" if $trace ;
+          print FILE_CSV_ADD2 "$prev_user_add,$prev_month_add,$edits_add_tot, $edits_add_tot_28\n" ;
+        }
+
+        $edits_add_tot    = $edits_add ;
+        $edits_add_tot_28 = $edits_add_28 ;
+      }
+      else
+      {
+        $edits_add_tot    += $edits_add ;
+        $edits_add_tot_28 += $edits_add_28 ;
+      }
+
+      $prev_user_add  = $user_add ;
+      $prev_month_add = $month_add ;
+    }
+
+    print FILE_CSV_ADD2 "$prev_user_add,$prev_month_add,$edits_add_tot, $edits_add_tot_28\n" ;
+print "OUT $prev_user_add, $prev_month_add\n" if $trace ;
+
+    close FILE_CSV_ADD ;
+    close FILE_CSV_ADD2 ;
+
+# exit if $trace ;
+
+  }
+  else
+  { $file_csv_add2 = $file_csv_add ; }
+
+
+  # step 1 ready
+  # step 2: merged 'condensed' file with already merged data
+
+  if ($file_csv_from eq 'none')
+  {
+    # first file to 'merge', just copy
+    open FILE_CSV_ADD2, '<', $file_csv_add2 ;
+    open FILE_CSV_TO,   '>', $file_csv_to ;
+    binmode FILE_CSV_ADD2 ;
+    binmode FILE_CSV_TO ;
+
+    while ($line = <FILE_CSV_ADD2>)
+    { print FILE_CSV_TO $line ; }
+    close FILE_CSV_ADD2 ;
+    close FILE_CSV_TO ;
+  }
+  else
+  {
+    # add new file to already merged content
+    open FILE_CSV_ADD2, '<', $file_csv_add2 ;
+    open FILE_CSV_FROM, '<', $file_csv_from ;
+    open FILE_CSV_TO,   '>', $file_csv_to ;
+
+    binmode FILE_CSV_ADD2 ;
+    binmode FILE_CSV_FROM ;
+    binmode FILE_CSV_TO ;
+
+    if ($month_last ne '')
+    { print FILE_CSV_TO "# Counts are complete, at least for top 25 wikis, up to and including $month_last (do not report incomplete counts for a later date)\n" ; }
+
+    $line_add  = <FILE_CSV_ADD2> ;
+    while ($line_add =~ /^#/) # skip duplicate comments
+    {
+      print FILE_CSV_TO $line_add ;
+      $line_add = <FILE_CSV_ADD2> ;
+    }
+
+    $line_from = <FILE_CSV_FROM> ;
+    while ($line_from =~ /^#/) # skip duplicate comments
+    {
+      $line_from = <FILE_CSV_FROM> ;
+    }
+
+    chomp $line_add ;
+    chomp $line_from ;
+
+    ($user_add, $month_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+    ($user_from,$month_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+# print "add $line_add\n" ;
+# print "from $line_from\n" ;
+
+    # combine counts per user,month  but only for article namespace(s)
+    # article namespaces is usually only namespace 0 but there are exceptions
+    while (($line_add ne '') || ($line_from ne ''))
+    {
+      $copy_add  = $false ;
+      $copy_from = $false ;
+      $copy_none = $false ;
+      if ($line_add eq '')
+      { $copy_from = $true ; }
+      elsif ($line_from eq '')
+      { $copy_add = $true ; }
+      else
+      {
+        if ("$user_add," lt "$user_from,")      # add comma to comparison as csv file is sorted alphabetically over all fields
+        { $copy_add = $true ; }                 # so "John Doe" comes before "John"  but "John Doe," after "John,"
+        elsif ("$user_from," lt "$user_add,")
+        { $copy_from = $true ; }
+        else
+        {
+          if ($month_add lt $month_from)
+          { $copy_add = $true ; }
+          elsif ($month_from lt $month_add)
+          { $copy_from = $true ; }
+          else
+          {
+            $copy_none = $true ;
+
+#if ($user_from eq '')
+#{ print "user_from empty / abort\n" ; exit ; }
+
+            $line_new = "$user_from,$month_from," . ($edits_add+$edits_from) . ',' . ($edits_add_28+$edits_from_28) . "\n" ;
+#print "merge $line_new" if $line_new =~ /^Erik(?: Zachte)?,/ ;
+
+            print FILE_CSV_TO $line_new ;
+
+          # print "merge\n" ;
+            $line_add = <FILE_CSV_ADD2> ;
+            chomp $line_add ;
+            ($user_add, $month_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+
+            $line_from = <FILE_CSV_FROM> ;
+            chomp $line_from ;
+            ($user_from,$month_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+          }
+        }
+      }
+
+      if ($copy_add)
+      {
+        print FILE_CSV_TO "$line_add\n" ;
+#print "copy add [$user_add/$user_from] [$month_add/$month_from] $line_add\n" if $line_add =~ /^Erik(?: Zachte)?,/ ;
+        $line_add = <FILE_CSV_ADD2> ;
+        chomp $line_add ;
+        ($user_add, $month_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+      }
+      elsif ($copy_from)
+      {
+        print FILE_CSV_TO "$line_from\n" ;
+#print "1 copy from [$user_add/$user_from] [$month_add/$month_from] $line_from\n" if $line_from =~ /^Erik/ ;
+#print "2 copy from [$user_add/$user_from] [$month_add/$month_from] $line_from\n" if $line_from =~ /^Erik(?: Zachte),/ ;
+        $line_from = <FILE_CSV_FROM> ;
+        chomp $line_from ;
+        ($user_from,$month_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+      }
+      else
+      {
+#if ($copy_none)
+#{
+## print "copy_none, not copy_add nor copy_from <- [$user_add/$user_from] [$month_add/$month_from]\n$line_add\n$line_from\n \n" ;
+# }
+#else
+#{ print "not copy_none, not copy_add nor copy_from <- [$user_add/$user_from] [$month_add/$month_from] \n" ; }
+      }
+    }
+
+    close FILE_CSV_ADD2 ;
+    close FILE_CSV_FROM ;
+    close FILE_CSV_TO ;
+
+#    open FILE_CSV_TO, '<', $file_csv_to ;
+#    binmode FILE_CSV_TO ;
+
+#    $line = <FILE_CSV_TO> ;
+#    while ($line =~ /^#/) # skip duplicate comments
+#    {
+#      $line = <FILE_CSV_TO> ;
+#    }
+
+#    $prev_user = '' ;
+#    while ($line = <FILE_CSV_TO>)
+#    {
+#      ($user,$month,@dummy) = split (',', $line) ;
+#      if ($line =~ /^\s*$/)
+#      {
+#        $lines_skipped1++ ;
+#        next ;
+#      } ;
+#      if ($prev_user eq '')
+#      {
+#        print "user '$user' lt prev user '$prev_user'\n" ;
+#        print "prev line $prev_line" ;
+#        print "line $line" ;
+#        $lines_skipped2++ ;
+#        $prev_user = $user ;
+#        next ;
+#      } ;
+#      if ("$user," lt "$prev_user,")
+#      {
+#        print "user '$user' lt prev user '$prev_user'\n" ;
+#        print "prev line $prev_line" ;
+#        print "line $line" ;
+#        exit ;
+#      }
+#      $prev_user = $user ;
+#      $prev_line = $line ;
+#    }
+#    close FILE_CSV_TO ;
+#    print "Lines skipped1: $lines_skipped1\n" ;
+#    print "Lines skipped2: $lines_skipped2\n" ;
+
+    if ($merge_namespaces) # only relevant when merging wikis, not projects
+    {
+    # unlink $file_csv_add2 ; # temporary file
+    # unlink $file_csv_from ; # temporary file
+    }
+    else
+    {
+    # unlink $file_csv_from ; # temporary file
+    }
+  }
+}
+
 sub CollectUserStats
 {
   &LogPhase ("CollectUserStats") ;
   &TraceMem ;
+
 
   $secsinday = 24 * 60 * 60 ;
   foreach $user (keys %userdata)
@@ -1346,4 +2223,504 @@ sub IncUserData
 # &Log ("IncUserData $user : $ndx\n") ;
 }
 
+sub CollectUploaders
+{
+  &LogT ("CollectUploaders $language\n") ;
+
+  my $file_csv_creates                  = $path_out . "Creates"                        . uc ($language)  . ".csv" ;
+  my $file_csv_creates_binaries         = $path_out . "CreatesBinaries"                . uc ($language)  . ".csv" ;
+  my $file_csv_creates_binaries_sorted  = $path_out . "CreatesBinariesSorted"          . uc ($language)  . ".csv" ;
+  my $file_csv_activity_trends_binaries = $path_out . "UserActivityTrendsNewBinaries"  . uc ($language)  . ".csv" ;
+  my $file_csv_top_uploaders            = $path_out . "UserActivityTrendsTopUploaders" . uc ($language)  . ".csv" ;
+  my $file_csv_uploadwizard             = $path_out . "UserActivityTrendsUploadWizard" . uc ($language)  . ".csv" ;
+
+  return if ! -e $file_csv_creates ;
+
+# for tests on Windows skip this very time consuming step, (rely on 'once per session only' manual workaround)
+if ($job_runs_on_production_server)
+{
+  # reorder fields in input
+  open FILE_CREATES,          '<', $file_csv_creates ;
+  open FILE_CREATES_BINARIES, '>', $file_csv_creates_binaries ;
+
+  binmode FILE_CREATES ;
+  binmode FILE_CREATES_BINARIES ;
+
+   while ($line = <FILE_CREATES>)
+  {
+    next if $line =~ /^#/ ;
+    chomp $line ;
+
+    ($count_flag,$yyyymmddhhnn,$namespace,$usertype,$user,$title,$cat_uploadwizard) = split (',', $line) ;
+
+    next if $namespace != 6 ;
+
+if ($usertype eq 'R')
+{ $not_bots {$user}++ ; } # temp code to fix few users that have some uploads attributed to bot due to 'bot' in comment (temp fix)
+
+    $yyyy_mm = substr ($yyyymmddhhnn,0,7) ;
+    $line = "$yyyy_mm,$user,$usertype,$count_flag,$cat_uploadwizard" ;
+    print FILE_CREATES_BINARIES "$line\n" ;
+  }
+  close FILE_CREATES ;
+  close FILE_CREATES_BINARIES ;
+
+  $filesize_in = -s $file_csv_creates_binaries ;
+  return if $filesize_in == 0 ;
+  $filesize_in = &i2KbMb ($filesize_in) ;
+
+  $timestartsort = time ;
+  &LogT ("Sort $file_csv_creates_binaries\nInto $file_csv_creates_binaries_sorted\nUsing folder $path_temp\n") ;
+  $cmd = "sort $file_csv_creates_binaries -o $file_csv_creates_binaries_sorted -T $path_temp" ;
+  $result = `$cmd` ;
+  if ($result ne '')
+  { &LogT ("Cmd $cmd -> results '$result'\n") ; }
+  &LogT ("Sort took " . ddhhmmss (time - $timestartsort). ".\n") ;
+# unlink $file_csv_creates_binaries ;
+}
+
+  &LogT ("\nCollect uploads per user per month\n") ;
+
+  undef %yyyy_mm ;
+  undef %t_max ; # max threshold level for which a non zero value is found
+
+  $yyyy_mm_prev  = '' ;
+  $user_prev     = '' ;
+  $usertype_prev = '' ;
+  $flag_uploadwizard = '' ;
+  $uploads_this_user_this_month_wizard = 0 ;
+
+  open FILE_CREATES_BINARIES,             '<', $file_csv_creates_binaries_sorted ;
+  open FILE_ACTIVITY_TRENDS_NEW_BINARIES, '>', $file_csv_activity_trends_binaries ;
+
+  binmode FILE_CREATES_BINARIES ;
+  binmode FILE_ACTIVITY_TRENDS_NEW_BINARIES ;
+
+  $level_max_R = 0 ;
+  $level_max_B = 0 ;
+
+  my $lines = 0 ;
+  while ($line = <FILE_CREATES_BINARIES>)
+  {
+    $lines++ ;
+
+    #if ($lines % 1000000 == 0)
+    #{ print "$lines\n" ; }
+
+    chomp $line ;
+    ($yyyy_mm,$user,$usertype,$count_flag,$cat_uploadwizard) = split (',', $line) ;
+    $cat_uploadwizard =~ s/[\x00-\x1F]//g ;
+
+    if ($usertype eq 'B' and $cat_uploadwizard ne '')
+    { &Log2 ("Bot upload via uploadwizard: $line\n") ; }
+    if ($usertype eq 'R' and $cat_uploadwizard ne '')
+    {
+      if (yyyy_mm lt '2011-01')
+      { &Log ("\n\nEarly reference to uploadwizard: $line\n\n") ; }
+    }
+
+    if ($cat_uploadwizard ne '')
+    { $flag_uploadwizard = 'Y' ; }
+    else
+    { $flag_uploadwizard = 'N' ; }
+
+    $uploads_per_month_per_method          {"$yyyy_mm $usertype $flag_uploadwizard"} ++ ;
+    $uploads_per_month_per_method_per_user {"$yyyy_mm $user $flag_uploadwizard"} ++ ;
+
+if ($not_bots {$user} > 0) # temp code to fix few users that have some uploads attributed to bot due to 'bot' in comment (temp fix)
+{ $usertype = 'R' ; }
+if ($user =~ /robot/i) # temp code to fix few users, should migrate to counts job
+{ $usertype = 'B' ; }
+
+    if ($usertype eq 'B')
+    {
+      $all_uploads1 {$user} ++ ;
+      $bot_uploads1 {$user} ++ ;
+      $all_uploads_month {"$user,$yyyy_mm"}++ ;
+    }
+    else
+    {
+      $all_uploads1 {$user} ++ ;
+      $reg_uploads1 {$user} ++ ;
+      $all_uploads_month {"$user,$yyyy_mm"}++ ;
+    }
+
+
+    # if ($cat_uploadwizard ne '')
+    # { $cat_uploadwizard = 'X' ; }
+
+    if ($user_prev eq '') # first record ?
+    {
+      $yyyy_mm_prev  = $yyyy_mm ;
+      $user_prev     = $user ;
+      $usertype_prev = $usertype ;
+      $uploads_this_user_this_month = 1 ;
+      next ;
+    }
+
+    if ($yyyy_mm ne $yyyy_mm_prev)
+    {
+      $yyyy_mm {$yyyy_mm} ++ ;
+
+      if ($user_prev ne '')
+      {
+        $active_uploads_per_month   {"$user_prev,$usertype_prev"} = $uploads_this_user_this_month ;
+        if (($usertype_prev eq 'R') && ($uploads_this_user_this_month_wizard > 0))
+        { $active_uploads_per_month {"$user_prev,W"} = $uploads_this_user_this_month_wizard ; }
+      }
+
+      if ($yyyy_mm_prev ne '')
+      {
+      # print "\n$yyyy_mm_prev\n" ;
+        &CollectUploadersPerMonth ($yyyy_mm_prev) ;
+      }
+
+      %active_uploads_per_month        = {} ;
+      %active_uploads_per_month_wizard = {} ;
+      $yyyy_mm_prev  = $yyyy_mm ;
+      $user_prev     = $user ;
+      $usertype_prev = $usertype ;
+
+      $uploads_this_user_this_month = 1 ;
+      if (($cat_uploadwizard ne '') && ($usertype eq 'R'))
+      { $uploads_this_user_this_month_wizard = 1 ; }
+      else
+      { $uploads_this_user_this_month_wizard = 0 ; }
+    }
+    elsif ($user ne $user_prev)
+    {
+      if ($user_prev ne '')
+      {
+        $active_uploads_per_month {"$user_prev,$usertype_prev"} = $uploads_this_user_this_month ;
+        $active_uploads_per_month {"$user_prev,W"}              = $uploads_this_user_this_month_wizard ;
+      }
+      $user_prev     = $user ;
+      $usertype_prev = $usertype ;
+
+      $uploads_this_user_this_month = 1 ;
+      if (($cat_uploadwizard ne '') && ($usertype eq 'R'))
+      { $uploads_this_user_this_month_wizard = 1 ; }
+      else
+      { $uploads_this_user_this_month_wizard = 0 ; }
+    }
+    else
+    {
+      $uploads_this_user_this_month ++ ;
+      if (($cat_uploadwizard ne '') && ($usertype eq 'R'))
+      { $uploads_this_user_this_month_wizard ++ ; }
+    }
+  }
+
+  $active_uploads_per_month {"$user_prev,$usertype_prev"} = $uploads_this_user_this_month ;
+  if (($usertype_prev eq 'R') && ($uploads_this_user_this_month_wizard > 0))
+  { $active_uploads_per_month {"$user_prev,W"} = $uploads_this_user_this_month_wizard ; }
+
+  &CollectUploadersPerMonth ($yyyy_mm_prev) ;
+
+# print "t_max R " . $t_max {'R'} . "\n" ;
+# print "t_max B " . $t_max {'B'} . "\n" ;
+# print "t_max W " . $t_max {'W'} . "\n" ;
+
+  # write uploaders per month per activity level (for reg users and bots)
+  $intro  = "#Binaries Uploaders - User Activity Trends (namespace 6 only)\n" ;
+  $intro .= "#Language,Date," ;
+  for ($t = 0 ; $t < $t_max {'R'} ; $t++)
+  { $intro .= $thresholds_sparse [$t] . ',' ; }
+  $intro .= "Date," ;
+  for ($t = 0 ; $t < $t_max {'W'} ; $t++)
+  { $intro .= $thresholds_sparse [$t] . ',' ; }
+  $intro .= "Date," ;
+  for ($t = 0 ; $t < $t_max {'B'} ; $t++)
+  { $intro .= $thresholds_sparse [$t] . ',' ; }
+  $intro =~ s/,$// ;
+  print FILE_ACTIVITY_TRENDS_NEW_BINARIES "$intro\n" ;
+  &Log ("\n$intro\n") ;
+
+  $t_max {'R'}-- ;
+  $t_max {'W'}-- ;
+  $t_max {'B'}-- ;
+
+  foreach $yyyy_mm (sort keys %yyyy_mm)
+  {
+    $yyyy = substr ($yyyy_mm,0,4) ;
+    $mm   = substr ($yyyy_mm,5,2) ;
+    $dd   = days_in_month ($yyyy, $mm) ;
+    $mmddyyyy = sprintf ("%02d/%02d/%04d", $mm, $dd, $yyyy) ;
+
+    $line_csv = "commons,$mmddyyyy," ;
+
+    for ($t = 0 ; $t <= $t_max {'R'} ; $t++)
+    {
+      $threshold = $thresholds_sparse [$t] ;
+      $uploaders = $active_uploaders_per_month {$yyyy_mm} {'R'} {$threshold};
+      if ($uploaders == 0)
+      { $uploaders = '' ; }
+      $line_csv .= "$uploaders," ;
+    }
+
+    $line_csv .= "$mmddyyyy," ;
+    for ($t = 0 ; $t <= $t_max {'W'} ; $t++)
+    {
+      $threshold = $thresholds_sparse [$t] ;
+      $uploaders = $active_uploaders_per_month {$yyyy_mm} {'W'} {$threshold};
+      if ($uploaders == 0)
+      { $uploaders = '' ; }
+      $line_csv .= "$uploaders," ;
+    }
+
+    $line_csv .= "$mmddyyyy," ;
+    for ($t = 0 ; $t <= $t_max {'B'} ; $t++)
+    {
+      $threshold = $thresholds_sparse [$t] ;
+      $uploaders = $active_uploaders_per_month {$yyyy_mm} {'B'} {$threshold};
+      if ($uploaders == 0)
+      { $uploaders = '' ; }
+      $line_csv .= "$uploaders," ;
+    }
+    print FILE_ACTIVITY_TRENDS_NEW_BINARIES "$line_csv\n" ;
+    print "$line_csv\n" ;
+  }
+
+  close FILE_ACTIVITY_TRENDS_NEW_BINARIES ;
+
+  &LogT ("\nWrite top uploaders\n") ;
+
+  $top_uploaders = 0 ;
+
+  open FILE_ACTIVITY_TRENDS_TOP_UPLOADERS, '>', $file_csv_top_uploaders ;
+
+  foreach $user (sort {$all_uploads1 {$b} <=> $all_uploads1 {$a}} keys %all_uploads1)
+  {
+  # for verification only:
+  # if ($bot_uploads1 {$user} != $bot_uploads2 {$user})
+  # {
+  #   print $bot_uploads1 {$user} . " != " .  $bot_uploads2 {$user} . ": $user\n" ;
+  #  print $reg_uploads1 {$user} . " != " .  $reg_uploads2 {$user} . ": $user\n" ;
+  # }
+    if (++ $top_uploaders <= 10)
+    { push @top_uploaders, $user ; }
+
+    last if $all_uploads1 {$user} < 1000 ;
+
+    if ($bot_uploads1 {$user} > 0)
+    { $usertype = 'bot' ; }
+    else
+    { $usertype = 'user' ; }
+
+    print FILE_ACTIVITY_TRENDS_TOP_UPLOADERS "$usertype,$user," .$all_uploads1 {$user} . "\n" ;
+  }
+
+  print FILE_ACTIVITY_TRENDS_TOP_UPLOADERS "\n\nTop Uploaders\n\n" ;
+
+  $line = "Month" ;
+  foreach $user (@top_uploaders)
+  { $line .= ",$user" ; }
+  print FILE_ACTIVITY_TRENDS_TOP_UPLOADERS "$line\n" ;
+
+  foreach $yyyy_mm (sort keys %yyyy_mm)
+  {
+    $line = $yyyy_mm ;
+    foreach $user (@top_uploaders)
+    { $line .= ',' . $all_uploads_month {"$user,$yyyy_mm"} ; }
+    print FILE_ACTIVITY_TRENDS_TOP_UPLOADERS "$line\n" ;
+  }
+
+  close FILE_ACTIVITY_TRENDS_TOP_UPLOADERS ;
+
+  print "\n\n\n" ;
+  open FILE_UPLOADWIZARD, '>', $file_csv_uploadwizard ;
+  print FILE_UPLOADWIZARD "month,total uploads,uploads by bot,uploads by reg. user, uploads by reg. user via uploadwizard, perc uploads by reg. user via uploadwizard\n" ;
+  foreach $yyyy_mm (sort {$a cmp $b} keys %yyyy_mm)
+  {
+    $cat_r_y   = $uploads_per_month_per_method {"$yyyy_mm R Y"} ;
+    $cat_r_n   = $uploads_per_month_per_method {"$yyyy_mm R N"} ;
+    $cat_b_y   = $uploads_per_month_per_method {"$yyyy_mm B Y"} ;
+    $cat_b_n   = $uploads_per_month_per_method {"$yyyy_mm B N"} ;
+    $cat_r_tot = $cat_r_n + $cat_r_y ;
+    $cat_b_tot = $cat_b_n + $cat_b_y ;
+    $cat_tot   = $cat_r_tot + $cat_b_tot ;
+    next if $cat_tot == 0 ;
+
+    $perc_r_y = '-' ;
+    if ($cat_r_tot > 0)
+    { $perc_r_y = sprintf ("%.1f", 100 * $cat_r_y / $cat_r_tot) ; }
+
+    $line = "$yyyy_mm,$cat_tot,$cat_b_tot,$cat_r_tot,$cat_r_y,$perc_r_y\%\n" ;
+    print FILE_UPLOADWIZARD $line ;
+    print "$line" ;
+  }
+}
+
+sub CollectUploadersPerMonth
+{
+  my ($yyyy_mm) = @_ ;
+
+  foreach $user_usertype (keys %active_uploads_per_month)
+  {
+    my $uploads = $active_uploads_per_month {$user_usertype} ;
+    my ($user,$usertype) = split (',', $user_usertype) ;
+
+    if ($usertype ne 'W') # uploads via wizard by registered user
+    {
+      if ($usertype eq 'B')
+      { $bot_uploads2 {$user} += $uploads ; }
+      else
+      { $reg_uploads2 {$user} += $uploads ; }
+    }
+
+    for ($t = 0 ; $t <= $#thresholds_sparse ; $t++)
+    {
+      $threshold = $thresholds_sparse [$t] ;
+      if ($uploads < $threshold) { last ; }
+      if ($t > $t_max {$usertype})
+      { $t_max {$usertype} = $t ; }
+      $active_uploaders_per_month {$yyyy_mm} {$usertype} {$threshold} ++ ;
+    }
+  }
+
+  my $line = 'R' ;
+  for ($t = 0 ; $t <= $#thresholds_sparse ; $t++)
+  {
+    $threshold = $thresholds_sparse [$t] ;
+    next if $active_uploaders_per_month {$yyyy_mm} {'R'} {$threshold} == 0 ;
+    $line .= "," . $active_uploaders_per_month {$yyyy_mm} {'R'} {$threshold} ;
+  }
+  &Log ("$yyyy_mm $line\n") ;
+
+  my $line = 'W' ;
+  for ($t = 0 ; $t <= $#thresholds_sparse ; $t++)
+  {
+    $threshold = $thresholds_sparse [$t] ;
+    next if $active_uploaders_per_month {$yyyy_mm} {'W'} {$threshold} == 0 ;
+    $line .= "," . $active_uploaders_per_month {$yyyy_mm} {'W'} {$threshold} ;
+  }
+  &Log ("$yyyy_mm $line\n") ;
+
+  my $line = 'B' ;
+  for ($t = 0 ; $t < $#thresholds_sparse ; $t++)
+  {
+    $threshold = $thresholds_sparse [$t] ;
+    next if $active_uploaders_per_month {$yyyy_mm} {'B'} {$threshold} == 0 ;
+    $line .= "," . $active_uploaders_per_month {$yyyy_mm} {'B'} {$threshold} ;
+  }
+  &Log ("$yyyy_mm $line\n") ;
+}
+
 1;
+
+#sub MergeActiveUsersPerMonthsAllWikisOrProjectsOldVersion
+#{
+#  my ($file_csv_add, $file_csv_from, $file_csv_to) = @_ ;
+
+#  if ($file_csv_from eq 'none')
+#  {
+#    # first file to 'merge', just copy
+#    open FILE_CSV_ADD, '<', $file_csv_add ;
+#    open FILE_CSV_TO,  '>', $file_csv_to ;
+#    binmode FILE_CSV_ADD ;
+#    binmode FILE_CSV_TO ;
+#    while ($line = <FILE_CSV_ADD>)
+#    {
+#      print FILE_CSV_TO $line ;
+#    }
+#    close FILE_CSV_ADD ;
+#    close FILE_CSV_TO ;
+#  }
+#  else
+#  {
+#    open FILE_CSV_ADD,  '<', $file_csv_add ;
+#    open FILE_CSV_FROM, '<', $file_csv_from ;
+#    open FILE_CSV_TO,   '>', $file_csv_to ;
+
+#    binmode FILE_CSV_ADD ;
+#    binmode FILE_CSV_FROM ;
+#    binmode FILE_CSV_TO ;
+
+#    $line_add  = <FILE_CSV_ADD> ;
+#    while ($line_add =~ /^#/) # skip duplicate comments
+#    {
+#      print FILE_CSV_TO $line_add ;
+#      $line_add = <FILE_CSV_ADD> ;
+#    }
+
+#    $line_from = <FILE_CSV_FROM> ;
+#    while ($line_from =~ /^#/) # skip duplicate comments
+#    {
+#      $line_from = <FILE_CSV_FROM> ;
+#    }
+
+#    chomp $line_add ;
+#    chomp $line_from ;
+
+#    ($user_add, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+#    ($user_from,$month_from,$namespace_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+
+#    # combine counts per user,month  but only for article namespace(s)
+#    # article namespaces is usually only namespace 0 but there are exceptions
+
+#    while (($line_add ne '') || ($line_from ne ''))
+#    {
+#      $copy_add  = $false ;
+#      $copy_from = $false ;
+
+#      if ($line_add eq '')
+#      { $copy_from = $true ; }
+#      elsif ($line_from eq '')
+#      { $copy_add = $true ; }
+#      else
+#      {
+#        if ($user_add lt $user_from)
+#        { $copy_add = $true ; }
+#        elsif ($user_from lt $user_add)
+#        { $copy_from = $true ; }
+#        else
+#        {
+#          if ($month_add lt $month_from)
+#          { $copy_add = $true ; }
+#          elsif ($month_from lt $month_add)
+#          { $copy_from = $true ; }
+#          else
+#          {
+#            if ($namespace_add < $namespace_from)
+#            { $copy_add = $true ; }
+#            elsif ($namespace_from < $namespace_add)
+#            { $copy_from = $true ; }
+#            else
+#            {
+#              print FILE_CSV_TO "$user_from,$month_from,$namespace_from," . ($edits_add+$edits_from) . ',' . ($edits_add_28+$edits_from_28) . "\n" ;
+
+#              $line_add = <FILE_CSV_ADD> ;
+#              chomp $line_add ;
+#              ($user_add, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+
+#              $line_from = <FILE_CSV_FROM> ;
+#              chomp $line_from ;
+#              ($user_from,$month_from,$namespace_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+#            }
+#          }
+
+#        }
+#      }
+
+#      if ($copy_add)
+#      {
+#        print FILE_CSV_TO "$line_add\n" ;
+#        $line_add = <FILE_CSV_ADD> ;
+#        chomp $line_add ;
+#        ($user_add, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+#      }
+#      elsif ($copy_from)
+#      {
+#        print FILE_CSV_TO "$line_from\n" ;
+#        $line_from = <FILE_CSV_FROM> ;
+#        chomp $line_from ;
+#        ($user_from,$month_from,$namespace_from,$edits_from,$edits_from_28) = split (',', $line_from) ;
+#      }
+#    }
+
+#    close FILE_CSV_ADD ;
+#    close FILE_CSV_FROM ;
+#    close FILE_CSV_TO ;
+#  }
+#}
+
