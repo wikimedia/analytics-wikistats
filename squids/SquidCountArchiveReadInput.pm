@@ -24,7 +24,7 @@ sub CollectFilesToProcess
 
   my ($date_archived) ;
 
-  $dir_in = $job_runs_on_production_server ? $cfg_dir_in_production : $cfg_dir_in_test ; 
+  $dir_in = $job_runs_on_production_server ? $cfg_dir_in_production : $cfg_dir_in_test ;
 
   $some_files_found = $false ;
   $full_range_found = $false ;
@@ -70,12 +70,12 @@ sub CollectFilesToProcess
       # assuming only one file is archived per day !
       if ($head_found && $tail_found)
       {
-        $full_range_found = $true ;     
+        $full_range_found = $true ;
         last ;
       }
     }
   }
-  
+
   if (! $some_files_found)
   { print "Not any file was found which contains log records for $days_ago days ago. Skip processing for $date_collect_files.\n\n" ; return $false ; }
   if (! $full_range_found)
@@ -150,7 +150,6 @@ sub ReadSquidLogFiles
     my $file_csv_views_viz2 = $file_csv_views_viz ;
     my $date = substr ($time_to_start,0,4) . substr ($time_to_start,5,2) . substr ($time_to_start,8,2) ;
     $file_csv_views_viz2 =~ s/date/$date/ ;
-    print $file_csv_views_viz2 ;
     $gz_csv_views_viz = gzopen ($file_csv_views_viz2, "wb") || die "Unable to write $file_csv_views_viz2 $!\n" ;
 
     $comment = "# Data from $time_to_start till $time_to_stop (yyyy-mm-ddThh:mm:ss) - all counts in thousands due to sample rate of log (1 = 1000)\n" ;
@@ -186,7 +185,7 @@ sub ReadSquidLogFiles
     $line = "" ;
     while ($line = <IN>)
     {
-      $lines_in_file ++ ;
+      $lines_to_process ++ ;
 
     # if ($line =~ /fy\.wikipedia\.org/o) # test/debug
     # {
@@ -236,10 +235,19 @@ if (! $scan_ip_frequencies)
 }
       }
 
+      if (! $scan_ip_frequencies) # phase 2
+      {
+        if ($lines_to_process % 1000000 == 0)
+        { print "Field count: " .
+          sprintf ("%.5f\%", 100 * $fields_too_few / $lines_to_process) . " of " . ($lines_to_process/1000000) . " M lines have too few fields, " .
+          sprintf ("%.5f\%", 100 * $fields_too_many / $lines_to_process) . " have too many fields, " .
+          sprintf ("%.5f\%", 100 * $parms_invalid / $lines_to_process) . " have invalid parms\n" ; }
+      }
+
       if ($#fields < $fields_expected)
       {
         $fields_too_few  ++ ;
-        print "invalid field count " . $#fields . "\n" ;
+      # print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
@@ -248,12 +256,16 @@ if (! $scan_ip_frequencies)
       {
         @a = @fields ;
         $fields_too_many ++ ;
-        print "invalid field count " . $#fields . "\n" ;
+      # print "invalid field count " . $#fields . "\n" ;
         print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
 
+      $fields_just_enough ++ ;
+
       $time = $fields [2] ;
+      if ($time !~ /\.\d\d\d/) # for column alignment
+      { $time .= ".000" ; }
 
       if (($oldest_time_read eq "") || ($time lt $oldest_time_read))
       { $oldest_time_read = $time ; }
@@ -267,6 +279,8 @@ if (! $scan_ip_frequencies)
       {
         if (++ $times % 1000000 == 0)
         { print "[$time]\n" ; }
+        $lines_to_process = 0 ;
+        $lines_processed  = 0 ;
         next ;
       }
 
@@ -301,7 +315,7 @@ if (! $scan_ip_frequencies)
 #next if $line !~ /http:\/\/\w+\.m\./ ;
 #print "$line\n" ;
       &ProcessLine ($line) ;
-      if (++ $lines_processed % 50000 == 0)
+      if (++ $lines_processed % 1000000 == 0)
       {
         if (! $scan_ip_frequencies) # phase 2
         {
@@ -315,9 +329,9 @@ if (! $scan_ip_frequencies)
         }
 
         if ($banner_requests_ignored == 0)
-        { print "$time $lines_processed$perc_mobile\n" ; }
+        { print "$time " . ($lines_processed / 1000000). " M lines$perc_mobile\n" ; }
         else
-        { print "$time $lines_processed$perc_mobile ($banner_requests_ignored banner requests ignored)\n" ; }
+        { print "$time " . ($lines_processed / 1000000). " M lines$perc_mobile ($banner_requests_ignored banner requests ignored)\n" ; }
       }
       if ($test and $lines_processed >= $test_maxlines)
       { last ; }
@@ -342,7 +356,7 @@ if (! $scan_ip_frequencies)
     print "No data found for $time_to_start - $time_to_stop\n" ;
   }
   else
-  { print "$lines_this_day out $lines_in_file processed\n" ; }
+  { print "$lines_this_day out $lines_to_process examined\n" ; }
 
   if ($url_wikipedia_mobile > 0)
   {

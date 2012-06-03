@@ -5,6 +5,8 @@ sub ProcessLine
   my $line = shift ;
 
   $time = $fields [2] ;
+  if ($time !~ /\.\d\d\d/) # for column alignment
+  { $time .= ".000" ; }
   $date = substr ($time,0,10) ;
 
   $client_ip  = $fields [4] ;
@@ -17,7 +19,7 @@ sub ProcessLine
     if (($url =~ /\.m\..*?\/wiki\//) || ($url =~ /\.m\..*?\/w\/index.php/))
     { $mime = "text/html" ; }
   }
-  
+
   $count_event = 1 ;
   # from Oct 16, 2011 00:00 hrs till Nov 29, 2011 20:00 hrs one of the two servers which process requests to the mobile site did not send log lines
   # since the two servers are load-balanced, selected stats (e.g. breakdown browser, OS) can be repaired by counting requests to mobile site twice in this period
@@ -230,7 +232,7 @@ sub ProcessLine
   elsif ($agent2 =~ /Trident[\/ ]?\d/io)
   { ($browserengine = $agent2) =~ s/^.*?Trident[\/ ]?(\d+\.?\d*).*$/Trident $1/io ; }
   elsif ($agent2 =~ /Presto[\/ ]?\d/io)
-  { ($browserengine = $agent2) =~ s/^.*?Presto[\/ ]?(\d+\.?\d*).*$/Presto $1/io ; }  
+  { ($browserengine = $agent2) =~ s/^.*?Presto[\/ ]?(\d+\.?\d*).*$/Presto $1/io ; }
   elsif ($agent2 =~ /AppleWebKit/io)
   { $browserengine = "AppleWebKit" ; }
   elsif ($agent2 =~ /Trident/io)
@@ -301,7 +303,7 @@ sub ProcessLine
 
   # MOBILE
   $mobile = '-' ;
-  if (($url =~ /\?seg=/) or ($url =~ /&seg=/))
+  if (($url =~ /\?seg=/) or ($url =~ /&seg=/)) # Andre, tweede is al in eerste gevat en seg= is wel erg generiek kan ook pageseg= of zoiets zijn  if (($url =~ /\?seg=/) or ($url =~ /&seg=/))
   { $mobile = 'P' ; }
   elsif ($agent2 =~ /(?:$tags_wiki_mobile)/io)
   { $mobile = 'W' ; }
@@ -637,7 +639,7 @@ sub ProcessLine
     $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
-    ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+    ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
     $operating_systems {"$mobile2,$os"} += $count_event ; ;
   }
 
@@ -871,13 +873,13 @@ sub ProcessLine
     if (! $test)
     {
       $time2    = substr ($time,0,19) ; # omit msec
-      ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+      ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
       $line = "$time2,$client_ip,$domain,$ind_bot2,$mobile2,$os,$version,$mimecat\n" ;
       $gz_csv_views_viz->gzwrite($line) || die "Zlib error writing to $file_csv_views_viz: $gz_csv_views_viz->gzerror\n" ;
     }
   }
 
-  ($mobile2 = $mobile) =~ s/W/M/; # code 'W' was introduced for SquidReportClients only
+ ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
   $records {"$mobile2,$mimecat"} += $count_event ;
   $records {"*,$mimecat"}       += $count_event ;
   $records {"$mobile2,*"}        += $count_event ;
@@ -973,7 +975,7 @@ sub NormalizeParms
     next if $parm eq '*' ;
 
     if (($parm !~ /=/) && ($parm !~ /^[\w\d\-\_]+$/o))
-    { $error = "parm probably invalid: '$parm' in '$url' -> skip\n" ; $invalid = $true ; last }
+    { $error = "parm probably invalid: '$parm' in '$url' -> skip\n" ; $invalid = $true ; $parms_invalid ++ ; last }
 
     ($keyword,$data) = split ('\=', $parm) ;
     if ($keyword eq "")
@@ -987,7 +989,7 @@ sub NormalizeParms
 
   if ($invalid)
   {
-    print $error ;
+    # print $error ;
     print ERR $error ;
     return ("?","?") ;
   }

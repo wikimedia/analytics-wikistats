@@ -98,6 +98,7 @@
     if ($do_phase1) # Collect IP frequencies
     { &ProcessPhase1 ($days_ago, $date_collect_files, $time_to_start, $time_to_stop,  $path_out, @files) ; }
 
+    $lines_processed = 0 ;
     if ($do_phase2) # collect other data
     { &ProcessPhase2 ($days_ago, $date_collect_files, $time_to_start, $time_to_stop,  $path_out, $path_out_month, @files) ; }
 
