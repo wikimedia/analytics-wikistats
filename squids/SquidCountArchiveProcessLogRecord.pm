@@ -719,6 +719,8 @@ sub ProcessLine
         last ;
       }
     }
+    if ($originalagent2 =~ /^(Wikipedia|Wiktionary) ?Mobile/)
+    { $device = "Wikimedia app ($devcat)" ; }
     $devices { "$device,$devcat" } += $count_event ;
   }
 
@@ -726,12 +728,13 @@ sub ProcessLine
   $browsertype = $mobile ;
   $maindomain = $domain ;
   $maindomain =~ s/:.*//io ;
+
   if ($bot)
   { $browsertype = 'B' ; }
-  elsif ($browsertype eq "-")
-  { $browsertype = 'N' ; }
   elsif ($agent eq "-")
   { $browsertype = '-' ; }
+  elsif ($browsertype eq "-")
+  { $browsertype = 'N' ; }
   elsif ($agent2 =~ /(Wikipedia|Wiktionary)Mobile/io)
   {
     if ($agent2 =~ /Android/io)
@@ -762,7 +765,7 @@ sub ProcessLine
     $country_info {"O,$country,$osshort"} += $count_event;
     if ($mobile =~ /[MWT]/ )
     {
-      $country_info {"D,$country,$devtype"} += $count_event;
+      $country_info {"D,$country,$devcat"} += $count_event;
     }
     $country_info {"C,$country,$browsertype;$maindomain;$mimecat;$api"} += $count_event;
   }
