@@ -1,0 +1,14 @@
+USE `analytics` ;
+
+SHOW TABLES ;
+
+SELECT project_code, SUM(editors_ge_5) AS editors FROM wikistats 
+WHERE date >= '2011-04' AND date < '2011-05'
+GROUP BY project_code ;
+
+SELECT date, SUM(editors_ge_5) AS editors FROM wikistats 
+WHERE date >= '2011-03' AND date < '2011-05' 
+AND language_code <> 'commons'
+GROUP BY date ;
+
+

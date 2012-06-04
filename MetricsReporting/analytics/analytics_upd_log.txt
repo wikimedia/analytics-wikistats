@@ -1,0 +1,903 @@
+[H[2J[H[2JInput  folder: /a/wikistats/
+Output folder: /a/analytics/
+
+Write file '/a/analytics//analytics_in_binaries.csv'
+Read '/a/wikistats//csv_wb/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wk/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wn/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wp/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wq/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_ws/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wv/StatisticsPerBinariesExtension.csv'
+Read '/a/wikistats//csv_wx/StatisticsPerBinariesExtension.csv'
+
+
+Ready
+
+Mode is replace (specify '-r' for replace)
+
+Directories:
+Input (new comScore data): '/a/analytics/comscore'
+Master files (full history): '/a/analytics'
+Output (database feed): '/a/analytics'
+
+ReadMasterComscoreDataReachPerRegion
+
+Regions found: Europe,North America,Latin America,World-Wide,Middle East - Africa,India,Asia Pacific,China
+UpdateMasterFileFromRecentComscoreData
+
+White list: Europe,North America,Latin America,World-Wide,Middle East - Africa,India,Asia Pacific,China
+
+Latest comscore master file is 25 days old: 'history_comscore_reach_regions.csv'
+Latest comscore update file is 0 days old: 'Multi-Country Media Trend, % reach by region_(Jun 10 - Aug 11).csv'
+Data found: 2010-06,LA = 41.8
+Data found: 2010-07,LA = 35.9
+Data found: 2010-08,LA = 39.9
+Data found: 2010-09,LA = 42.2
+Data found: 2010-10,LA = 41.6
+Data found: 2010-11,LA = 42.4
+Data found: 2010-12,LA = 34.8
+Data found: 2011-01,LA = 35
+Data found: 2011-02,LA = 36.3
+Data found: 2011-03,LA = 41.3
+Data found: 2011-04,LA = 38.7
+Data found: 2011-05,LA = 41.6
+Data found: 2011-06,LA = 39.6
+Data found: 2011-07,LA = 35.4
+Data found: 2011-08,LA = 43
+Data found: 2010-06,NA = 38.9
+Data found: 2010-07,NA = 39
+Data found: 2010-08,NA = 39.7
+Data found: 2010-09,NA = 41.9
+Data found: 2010-10,NA = 42.7
+Data found: 2010-11,NA = 42
+Data found: 2010-12,NA = 42.7
+Data found: 2011-01,NA = 43.2
+Data found: 2011-02,NA = 39.4
+Data found: 2011-03,NA = 40.1
+Data found: 2011-04,NA = 38
+Data found: 2011-05,NA = 39.5
+Data found: 2011-06,NA = 39.1
+Data found: 2011-07,NA = 40.5
+Data found: 2011-08,NA = 42.4
+Data found: 2010-06,EU = 43
+Data found: 2010-07,EU = 39.3
+Data found: 2010-08,EU = 39.6
+Data found: 2010-09,EU = 43.5
+Data found: 2010-10,EU = 44.4
+Data found: 2010-11,EU = 45.8
+Data found: 2010-12,EU = 43.6
+Data found: 2011-01,EU = 46.4
+Data found: 2011-02,EU = 41.6
+Data found: 2011-03,EU = 43.1
+Data found: 2011-04,EU = 40.8
+Data found: 2011-05,EU = 44
+Data found: 2011-06,EU = 41.7
+Data found: 2011-07,EU = 39.6
+Data found: 2011-08,EU = 40.9
+Data found: 2010-06,I = 31.6
+Data found: 2010-07,I = 32.4
+Data found: 2010-08,I = 33
+Data found: 2010-09,I = 33.3
+Data found: 2010-10,I = 33.5
+Data found: 2010-11,I = 33.1
+Data found: 2010-12,I = 33.7
+Data found: 2011-01,I = 35.9
+Data found: 2011-02,I = 30.6
+Data found: 2011-03,I = 30.4
+Data found: 2011-04,I = 29.6
+Data found: 2011-05,I = 31.4
+Data found: 2011-06,I = 32.1
+Data found: 2011-07,I = 33.6
+Data found: 2011-08,I = 35.4
+Data found: 2010-06,W = 30.2
+Data found: 2010-07,W = 28.5
+Data found: 2010-08,W = 29
+Data found: 2010-09,W = 30.8
+Data found: 2010-10,W = 31.3
+Data found: 2010-11,W = 31.3
+Data found: 2010-12,W = 29.9
+Data found: 2011-01,W = 31
+Data found: 2011-02,W = 28.3
+Data found: 2011-03,W = 29.6
+Data found: 2011-04,W = 27.9
+Data found: 2011-05,W = 29.9
+Data found: 2011-06,W = 28.9
+Data found: 2011-07,W = 28.2
+Data found: 2011-08,W = 30
+Data found: 2010-06,MA = 25.6
+Data found: 2010-07,MA = 24.4
+Data found: 2010-08,MA = 24.4
+Data found: 2010-09,MA = 26.5
+Data found: 2010-10,MA = 30.1
+Data found: 2010-11,MA = 27.6
+Data found: 2010-12,MA = 27.4
+Data found: 2011-01,MA = 28.2
+Data found: 2011-02,MA = 25.8
+Data found: 2011-03,MA = 28
+Data found: 2011-04,MA = 25.7
+Data found: 2011-05,MA = 28.5
+Data found: 2011-06,MA = 25.8
+Data found: 2011-07,MA = 24.6
+Data found: 2011-08,MA = 25.9
+Data found: 2010-06,AS = 16.1
+Data found: 2010-07,AS = 15.9
+Data found: 2010-08,AS = 16.2
+Data found: 2010-09,AS = 16.1
+Data found: 2010-10,AS = 16
+Data found: 2010-11,AS = 15.7
+Data found: 2010-12,AS = 15.2
+Data found: 2011-01,AS = 15.9
+Data found: 2011-02,AS = 14.2
+Data found: 2011-03,AS = 14.7
+Data found: 2011-04,AS = 14
+Data found: 2011-05,AS = 15.1
+Data found: 2011-06,AS = 15.2
+Data found: 2011-07,AS = 15.7
+Data found: 2011-08,AS = 16.7
+Data found: 2010-06,C = 1
+Data found: 2010-07,C = 0.9
+Data found: 2010-08,C = 1
+Data found: 2010-09,C = 1.1
+Data found: 2010-10,C = 1.1
+Data found: 2010-11,C = 1.1
+Data found: 2010-12,C = 1.2
+Data found: 2011-01,C = 1
+Data found: 2011-02,C = 0.9
+Data found: 2011-03,C = 0.9
+Data found: 2011-04,C = 0.9
+Data found: 2011-05,C = 1.1
+Data found: 2011-06,C = 1.2
+Data found: 2011-07,C = 1.5
+Data found: 2011-08,C = 1.6
+
+Updates found, rewrite master file 'history_comscore_reach_regions.csv'
+
+ReadMasterComscoreDataVisitorsPerRegion
+
+Regions found: World-Wide,Europe,Asia Pacific,North America,Latin America,Middle East - Africa,India,China
+UpdateMasterFileFromRecentComscoreData
+
+White list: World-Wide,Europe,Asia Pacific,North America,Latin America,Middle East - Africa,India,China
+
+Latest comscore master file is 25 days old: 'history_comscore_UV_regions.csv'
+Latest comscore update file is 0 days old: 'Multi-Country Media Trend, UVs by region_(Jun 10 - Aug 11).csv'
+Data found: 2010-06,W = 379112000
+Data found: 2010-07,W = 360225000
+Data found: 2010-08,W = 373392000
+Data found: 2010-09,W = 398178000
+Data found: 2010-10,W = 408350000
+Data found: 2010-11,W = 410816000
+Data found: 2010-12,W = 395472000
+Data found: 2011-01,W = 413957000
+Data found: 2011-02,W = 379415000
+Data found: 2011-03,W = 400011000
+Data found: 2011-04,W = 380716000
+Data found: 2011-05,W = 411061000
+Data found: 2011-06,W = 399362000
+Data found: 2011-07,W = 393543000
+Data found: 2011-08,W = 422779000
+Data found: 2010-06,EU = 151013000
+Data found: 2010-07,EU = 138975000
+Data found: 2010-08,EU = 140560000
+Data found: 2010-09,EU = 155438000
+Data found: 2010-10,EU = 159384000
+Data found: 2010-11,EU = 165020000
+Data found: 2010-12,EU = 157837000
+Data found: 2011-01,EU = 168571000
+Data found: 2011-02,EU = 150775000
+Data found: 2011-03,EU = 156913000
+Data found: 2011-04,EU = 149211000
+Data found: 2011-05,EU = 161311000
+Data found: 2011-06,EU = 153883000
+Data found: 2011-07,EU = 146724000
+Data found: 2011-08,EU = 152109000
+Data found: 2010-06,AS = 80269000
+Data found: 2010-07,AS = 80260000
+Data found: 2010-08,AS = 83015000
+Data found: 2010-09,AS = 83119000
+Data found: 2010-10,AS = 83406000
+Data found: 2010-11,AS = 82736000
+Data found: 2010-12,AS = 80958000
+Data found: 2011-01,AS = 85593000
+Data found: 2011-02,AS = 77468000
+Data found: 2011-03,AS = 80997000
+Data found: 2011-04,AS = 77891000
+Data found: 2011-05,AS = 84666000
+Data found: 2011-06,AS = 86539000
+Data found: 2011-07,AS = 90378000
+Data found: 2011-08,AS = 97661000
+Data found: 2010-06,NA = 80393000
+Data found: 2010-07,NA = 79888000
+Data found: 2010-08,NA = 81295000
+Data found: 2010-09,NA = 85606000
+Data found: 2010-10,NA = 87359000
+Data found: 2010-11,NA = 85732000
+Data found: 2010-12,NA = 87087000
+Data found: 2011-01,NA = 88233000
+Data found: 2011-02,NA = 80038000
+Data found: 2011-03,NA = 81918000
+Data found: 2011-04,NA = 78234000
+Data found: 2011-05,NA = 82081000
+Data found: 2011-06,NA = 80753000
+Data found: 2011-07,NA = 83859000
+Data found: 2011-08,NA = 88277000
+Data found: 2010-06,LA = 43826000
+Data found: 2010-07,LA = 38111000
+Data found: 2010-08,LA = 42303000
+Data found: 2010-09,LA = 45265000
+Data found: 2010-10,LA = 45152000
+Data found: 2010-11,LA = 46617000
+Data found: 2010-12,LA = 38738000
+Data found: 2011-01,LA = 39446000
+Data found: 2011-02,LA = 41411000
+Data found: 2011-03,LA = 47583000
+Data found: 2011-04,LA = 45108000
+Data found: 2011-05,LA = 49095000
+Data found: 2011-06,LA = 47203000
+Data found: 2011-07,LA = 42700000
+Data found: 2011-08,LA = 52983000
+Data found: 2010-06,MA = 23611000
+Data found: 2010-07,MA = 22991000
+Data found: 2010-08,MA = 26220000
+Data found: 2010-09,MA = 28749000
+Data found: 2010-10,MA = 33049000
+Data found: 2010-11,MA = 30711000
+Data found: 2010-12,MA = 30852000
+Data found: 2011-01,MA = 32113000
+Data found: 2011-02,MA = 29722000
+Data found: 2011-03,MA = 32599000
+Data found: 2011-04,MA = 30272000
+Data found: 2011-05,MA = 33908000
+Data found: 2011-06,MA = 30985000
+Data found: 2011-07,MA = 29882000
+Data found: 2011-08,MA = 31749000
+Data found: 2010-06,I = 12373000
+Data found: 2010-07,I = 12828000
+Data found: 2010-08,I = 13187000
+Data found: 2010-09,I = 13433000
+Data found: 2010-10,I = 13674000
+Data found: 2010-11,I = 13614000
+Data found: 2010-12,I = 14004000
+Data found: 2011-01,I = 15067000
+Data found: 2011-02,I = 12960000
+Data found: 2011-03,I = 13011000
+Data found: 2011-04,I = 12801000
+Data found: 2011-05,I = 13701000
+Data found: 2011-06,I = 14163000
+Data found: 2011-07,I = 14979000
+Data found: 2011-08,I = 15944000
+Data found: 2010-06,C = 2613000
+Data found: 2010-07,C = 2536000
+Data found: 2010-08,C = 2829000
+Data found: 2010-09,C = 3181000
+Data found: 2010-10,C = 3156000
+Data found: 2010-11,C = 3108000
+Data found: 2010-12,C = 3372000
+Data found: 2011-01,C = 3048000
+Data found: 2011-02,C = 2664000
+Data found: 2011-03,C = 2854000
+Data found: 2011-04,C = 2866000
+Data found: 2011-05,C = 3492000
+Data found: 2011-06,C = 3960000
+Data found: 2011-07,C = 4814000
+Data found: 2011-08,C = 5163000
+
+Entities ignored:
+United States
+
+
+Updates found, rewrite master file 'history_comscore_UV_regions.csv'
+
+ReadMasterComscoreDataVisitorsPerProperty
+
+UpdateMasterFileFromRecentComscoreData
+
+White list: Total Internet,Google,Microsoft,Facebook,Wikimedia,Yahoo!,Amazon,Apple,AOL,Ask Network,eBay,CBS,Tencent,Glam Media,Baidu
+
+Latest comscore master file is 25 days old: 'history_comscore_UV_properties.csv'
+Latest comscore update file is 34 days old: 'Top 1000 poperties, UV trend_(May 10 - Jul 11).csv'
+Data found: 2010-05,Total Internet = 1244104000
+Data found: 2010-06,Total Internet = 1253406000
+Data found: 2010-07,Total Internet = 1261762000
+Data found: 2010-08,Total Internet = 1285378000
+Data found: 2010-09,Total Internet = 1294784000
+Data found: 2010-10,Total Internet = 1304632000
+Data found: 2010-11,Total Internet = 1313926000
+Data found: 2010-12,Total Internet = 1323535000
+Data found: 2011-01,Total Internet = 1333403000
+Data found: 2011-02,Total Internet = 1339496000
+Data found: 2011-03,Total Internet = 1350539000
+Data found: 2011-04,Total Internet = 1362369000
+Data found: 2011-05,Total Internet = 1373976000
+Data found: 2011-06,Total Internet = 1383098000
+Data found: 2011-07,Total Internet = 1394031000
+Data found: 2010-05,Google = 931583000
+Data found: 2010-06,Google = 942199000
+Data found: 2010-07,Google = 952484000
+Data found: 2010-08,Google = 971045000
+Data found: 2010-09,Google = 976431000
+Data found: 2010-10,Google = 976693000
+Data found: 2010-11,Google = 970109000
+Data found: 2010-12,Google = 972486000
+Data found: 2011-01,Google = 985289000
+Data found: 2011-02,Google = 976374000
+Data found: 2011-03,Google = 996706000
+Data found: 2011-04,Google = 990970000
+Data found: 2011-05,Google = 1009699000
+Data found: 2011-06,Google = 1023643000
+Data found: 2011-07,Google = 1031584000
+Data found: 2010-05,Microsoft = 789035000
+Data found: 2010-06,Microsoft = 799898000
+Data found: 2010-07,Microsoft = 800636000
+Data found: 2010-08,Microsoft = 814562000
+Data found: 2010-09,Microsoft = 827496000
+Data found: 2010-10,Microsoft = 840677000
+Data found: 2010-11,Microsoft = 869373000
+Data found: 2010-12,Microsoft = 867914000
+Data found: 2011-01,Microsoft = 889163000
+Data found: 2011-02,Microsoft = 837039000
+Data found: 2011-03,Microsoft = 895813000
+Data found: 2011-04,Microsoft = 892893000
+Data found: 2011-05,Microsoft = 905454000
+Data found: 2011-06,Microsoft = 882818000
+Data found: 2011-07,Microsoft = 898728000
+Data found: 2010-05,Facebook = 548134000
+Data found: 2010-06,Facebook = 550939000
+Data found: 2010-07,Facebook = 571480000
+Data found: 2010-08,Facebook = 598084000
+Data found: 2010-09,Facebook = 620269000
+Data found: 2010-10,Facebook = 633548000
+Data found: 2010-11,Facebook = 647482000
+Data found: 2010-12,Facebook = 662420000
+Data found: 2011-01,Facebook = 675361000
+Data found: 2011-02,Facebook = 676733000
+Data found: 2011-03,Facebook = 692998000
+Data found: 2011-04,Facebook = 697970000
+Data found: 2011-05,Facebook = 713647000
+Data found: 2011-06,Facebook = 734240000
+Data found: 2011-07,Facebook = 736465000
+Data found: 2010-05,Wikimedia = 388932000
+Data found: 2010-06,Wikimedia = 379112000
+Data found: 2010-07,Wikimedia = 360225000
+Data found: 2010-08,Wikimedia = 373392000
+Data found: 2010-09,Wikimedia = 398178000
+Data found: 2010-10,Wikimedia = 408350000
+Data found: 2010-11,Wikimedia = 410816000
+Data found: 2010-12,Wikimedia = 395472000
+Data found: 2011-01,Wikimedia = 413957000
+Data found: 2011-02,Wikimedia = 379415000
+Data found: 2011-03,Wikimedia = 400011000
+Data found: 2011-04,Wikimedia = 380716000
+Data found: 2011-05,Wikimedia = 411061000
+Data found: 2011-06,Wikimedia = 399362000
+Data found: 2011-07,Wikimedia = 393543000
+Data found: 2010-05,Amazon = 228083000
+Data found: 2010-06,Amazon = 221785000
+Data found: 2010-07,Amazon = 230554000
+Data found: 2010-08,Amazon = 237156000
+Data found: 2010-09,Amazon = 234334000
+Data found: 2010-10,Amazon = 245082000
+Data found: 2010-11,Amazon = 252698000
+Data found: 2010-12,Amazon = 263450000
+Data found: 2011-01,Amazon = 258169000
+Data found: 2011-02,Amazon = 233765000
+Data found: 2011-03,Amazon = 271264000
+Data found: 2011-04,Amazon = 268611000
+Data found: 2011-05,Amazon = 284321000
+Data found: 2011-06,Amazon = 282233000
+Data found: 2011-07,Amazon = 288766000
+Data found: 2010-05,Apple = 213166000
+Data found: 2010-06,Apple = 213671000
+Data found: 2010-07,Apple = 212905000
+Data found: 2010-08,Apple = 219498000
+Data found: 2010-09,Apple = 226129000
+Data found: 2010-10,Apple = 227768000
+Data found: 2010-11,Apple = 228285000
+Data found: 2010-12,Apple = 240557000
+Data found: 2011-01,Apple = 236347000
+Data found: 2011-02,Apple = 221271000
+Data found: 2011-03,Apple = 234944000
+Data found: 2011-04,Apple = 228366000
+Data found: 2011-05,Apple = 244182000
+Data found: 2011-06,Apple = 246889000
+Data found: 2011-07,Apple = 256743000
+Data found: 2010-05,Tencent = 175771000
+Data found: 2010-06,Tencent = 177789000
+Data found: 2010-07,Tencent = 182572000
+Data found: 2010-08,Tencent = 191021000
+Data found: 2010-09,Tencent = 197617000
+Data found: 2010-10,Tencent = 204266000
+Data found: 2010-11,Tencent = 211656000
+Data found: 2010-12,Tencent = 215211000
+Data found: 2011-01,Tencent = 208512000
+Data found: 2011-02,Tencent = 207793000
+Data found: 2011-03,Tencent = 214254000
+Data found: 2011-04,Tencent = 216190000
+Data found: 2011-05,Tencent = 220707000
+Data found: 2011-06,Tencent = 229175000
+Data found: 2011-07,Tencent = 237849000
+Data found: 2010-05,AOL = 266787000
+Data found: 2010-06,AOL = 255895000
+Data found: 2010-07,AOL = 248233000
+Data found: 2010-08,AOL = 221158000
+Data found: 2010-09,AOL = 218426000
+Data found: 2010-10,AOL = 232439000
+Data found: 2010-11,AOL = 239205000
+Data found: 2010-12,AOL = 239550000
+Data found: 2011-01,AOL = 243275000
+Data found: 2011-02,AOL = 229394000
+Data found: 2011-03,AOL = 247697000
+Data found: 2011-04,AOL = 237258000
+Data found: 2011-05,AOL = 238860000
+Data found: 2011-06,AOL = 231564000
+Data found: 2011-07,AOL = 227626000
+Data found: 2010-05,Baidu = 180965000
+Data found: 2010-06,Baidu = 174672000
+Data found: 2010-07,Baidu = 179920000
+Data found: 2010-08,Baidu = 181984000
+Data found: 2010-09,Baidu = 184728000
+Data found: 2010-10,Baidu = 185318000
+Data found: 2010-11,Baidu = 184703000
+Data found: 2010-12,Baidu = 185005000
+Data found: 2011-01,Baidu = 190956000
+Data found: 2011-02,Baidu = 192845000
+Data found: 2011-03,Baidu = 202995000
+Data found: 2011-04,Baidu = 201227000
+Data found: 2011-05,Baidu = 211060000
+Data found: 2011-06,Baidu = 215086000
+Data found: 2011-07,Baidu = 225898000
+Data found: 2010-05,eBay = 252803000
+Data found: 2010-06,eBay = 217671000
+Data found: 2010-07,eBay = 217586000
+Data found: 2010-08,eBay = 222435000
+Data found: 2010-09,eBay = 221574000
+Data found: 2010-10,eBay = 222283000
+Data found: 2010-11,eBay = 229915000
+Data found: 2010-12,eBay = 225280000
+Data found: 2011-01,eBay = 226079000
+Data found: 2011-02,eBay = 211945000
+Data found: 2011-03,eBay = 218809000
+Data found: 2011-04,eBay = 215085000
+Data found: 2011-05,eBay = 225893000
+Data found: 2011-06,eBay = 223520000
+Data found: 2011-07,eBay = 224511000
+Data found: 2010-05,CBS = 211496000
+Data found: 2010-06,CBS = 204162000
+Data found: 2010-07,CBS = 209288000
+Data found: 2010-08,CBS = 214875000
+Data found: 2010-09,CBS = 223388000
+Data found: 2010-10,CBS = 222329000
+Data found: 2010-11,CBS = 229265000
+Data found: 2010-12,CBS = 221362000
+Data found: 2011-01,CBS = 226135000
+Data found: 2011-02,CBS = 210949000
+Data found: 2011-03,CBS = 234656000
+Data found: 2011-04,CBS = 217686000
+Data found: 2011-05,CBS = 220230000
+Data found: 2011-06,CBS = 214019000
+Data found: 2011-07,CBS = 217962000
+Data found: 2010-05,Ask Network = 215039000
+Data found: 2010-06,Ask Network = 208313000
+Data found: 2010-07,Ask Network = 211622000
+Data found: 2010-08,Ask Network = 216371000
+Data found: 2010-09,Ask Network = 221821000
+Data found: 2010-10,Ask Network = 225397000
+Data found: 2010-11,Ask Network = 233155000
+Data found: 2010-12,Ask Network = 233444000
+Data found: 2011-01,Ask Network = 234884000
+Data found: 2011-02,Ask Network = 220019000
+Data found: 2011-03,Ask Network = 236956000
+Data found: 2011-04,Ask Network = 220341000
+Data found: 2011-05,Ask Network = 224060000
+Data found: 2011-06,Ask Network = 212548000
+Data found: 2011-07,Ask Network = 217771000
+Data found: 2010-05,Glam Media = 164189000
+Data found: 2010-06,Glam Media = 167420000
+Data found: 2010-07,Glam Media = 173248000
+Data found: 2010-08,Glam Media = 186414000
+Data found: 2010-09,Glam Media = 179892000
+Data found: 2010-10,Glam Media = 181888000
+Data found: 2010-11,Glam Media = 197937000
+Data found: 2010-12,Glam Media = 196886000
+Data found: 2011-01,Glam Media = 202299000
+Data found: 2011-02,Glam Media = 194173000
+Data found: 2011-03,Glam Media = 204134000
+Data found: 2011-04,Glam Media = 200186000
+Data found: 2011-05,Glam Media = 213528000
+Data found: 2011-06,Glam Media = 203630000
+Data found: 2011-07,Glam Media = 200757000
+
+Entities ignored:
+114LA.COM, 120ASK.COM, 123GREETINGS.COM, 1616.NET, 21CN Corporation Limited, 2345.COM, 24H.COM.VN, 265.COM, 2CH.NET, 2DPLAY.COM, 2SHARED.COM, 39.NET, 4SHARED.COM, 51.COM, 51JOB.COM, 51MOLE.COM, 52PK.COM, 56.COM, 58.COM, 6.CN, 6ARAB.COM, 6RB.COM, 6RBTOP.COM, 7K7K.COM, 8684.CN, 8D.CN, ABCNEWS DIGITAL, ABOUTUS.ORG, AL-WLID.COM, ALTOOLS.COM, ARABSEYES.COM, ARCHIVE.ORG, ARD Sites, ARTISTdirect Network, AT&T Inc., AT&T Interactive Network, AVAST.COM, AVG Technologies, AVS4YOU.COM, Accor, AccuWeather Sites, Acer Inc., Activision Blizzard, Adobe Sites, Adoos Classifieds S.L., Advance Internet, Agricultural Bank of China, Air France-KLM Group, Alibaba.com Corporation, Aljazeera, Allesklar.com AG Sites, AlloCine Sites, Alloy Digital Network, Altice, Amadeus Global Travel Distribution, American Airlines, American Express, AmericanGreetings Property, Ancestry.com Inc., Answers.com Sites, Arcandor AG, Art.com Sites, ArticlesBase.com Sites, Asahi Shimbun, Atrinsic Inc., Avon Products Inc., Axel Springer AG, B5Media, BAAMBOO.COM, BABYLON.COM, BADONGO.COM, BADOO.COM, BAIXING.COM, BBC Sites, BBVOD.NET, BEEMP3.COM, BIGMIR.NET, BITCOMET.COM, BLOGBUS.COM, BLOGGUM.COM, BMW, BNP Paribas, BOOSJ.COM, BRG8.COM, BTJUNKIE.ORG, BUECHER.DE, BUZZMEDIA, BabyCenter Network, Bank of America, Barclays Bank, Barnes & Noble, Batanga, Bauer Consumer Media, BearShare (App), Belgacom Group, Belo, Benesse Corporation, Berkshire Hathaway Inc., Best Buy Sites, Bestofmedia Group, Betawave Media, Big Fish Games Sites, Big Lead Sports By FSV, Bigpoint, BitComet (App), BitTorrent Network, Blockbuster Inc., Bokee Sites, Bravenet Web Services, Break Media, British Telecommunications, BuscaPe.com Inc., CA.GOV, CANALBLOG.COM*, CBC-Radio Canada Sites, CCLEANER.COM, CCM-Benchmark, CDC Corporation Sites, CDUNIVERSE.COM, CENTERBLOG.NET, CHINA.COM.CN, CITY-DATA.COM, CJ Group, CLASSESINTERNATIONAL.COM, CONDUIT.COM, COOKPAD.COM, COOKS.COM, COOLCHASER.COM, COOLS4U.COM, COOLSAVINGS.COM, CQVIP.COM, CRI Online Sites, CRSKY.COM, CSDN.NET Sites, CT10000.COM, CYBERLINK.COM, Cablevision, CafeMom Network, CafePress, Camfrog (App), Canoe Network, Canon Inc., Capital One, CareerBuilder LLC, Carrefour Group, Channel4, China Central Television Sites, China Construction Bank, China Economic Net, China Mobile Sites, China Telecom Sites, Chinabyte Technology Co., Chosun Ilbo, Cisco Systems Inc., Citigroup, Citrix Systems Inc., CityGrid Media, Classified Ventures, Clear Channel Online, Clearspring Technologies, Coca-Cola Company, CollegeHumor Media, Comcast Corporation, Compare Infobase Limited, Conde Nast Digital, Connexus, Corel Corporation, Costco Wholesale Corporation, Coupons Inc., Cox Enterprises Inc., CraveOnline (Evolve Media Corp.), Credit Agricole, Ctrip.com International, CyberAgent, Cyworld, DAILYMOTION.COM, DANGDANG.COM, DEEZER.COM, DEPOSITFILES.COM, DEVIANTART.COM, DIPAN.COM, DIRECT.GOV.UK, DIVSHARE.COM, DLTK Network Sites, DMGT (exc Mail Online), DOMAINTOOLS.COM, DOUBAN.COM, DOWNLOAD3000.COM, DUOTE.COM, DUOTEGAME.COM, DUOWAN.COM, DeNA Co. Ltd., Dell, Delta Airlines, Demand Media, Department of Commerce, Deutsche Bahn, Deutsche Post AG Sites, Deutsche Telekom, Directv Sites, Discover Financial Services, Discovery Digital Media Sites, Disney Online, Dogan Online, Dominion Enterprises, Domino's Pizza Inc., Dong-A Ilbo, Dow Jones & Company, Dwango Co. Ltd., E.W. Scripps, EA Online, EASY-SHARE.COM, ED.GOV, ELAANA.COM, EMP3WORLD.COM, ESNIPS.COM, ESPN, EUROPA.EU, EVA.VN, EVERSAVE.COM, EZINEARTICLES.COM, Earthlink, Eastman Kodak, EasyGroup, Ekspress Grupp, Encyclopaedia Britannica, Eniro Sites, Estee Lauder Sites, Eutelia, Everyday Health, Excite Japan Sites, Expedia Inc, Experian Interactive, FANBOX.COM, FC2 inc., FILEHIPPO.COM, FILESTUBE.COM, FLASHGAMES247.COM, FRIENDSTER.COM, FUNSHION.COM, Fairfax Media, FedEx, Federated Media Publishing, First Choice Holidays PLC, Forbes Digital, Ford Motor Company, FortuneCity Global Community, ForumCommunity, Fotosearch LLC, Fotovista Group, Fox Interactive Media, France Televisions Interactive, Freechal INC., FrostWire, Fuji Television Network, GAME2.CN, GAMEBTO.COM, GAMES2GIRLS.COM, GAMETOP.COM, GAMEZER.COM, GANJI.COM, GARENA.COM, GGL Media, GMO Internet Group, GN Multicultural (Evolve Media Corp.), GRAAAM.COM, GSN Games, GYYX.CN, GameDuell, GameStop, Gameforge Sites, Gannett Sites, Ganz, Gap Inc., Gawker Media, Geeknet, General Mills, General Motors, Getty Images Inc, GiantRealm, Globe7, Globo, GoNamic GmbH, Gorilla Nation (Evolve Media Corp), Gretech Corp., Groupe Amaury, Groupe Auchan, Groupe Casino, Groupe Figaro, Groupe LDLC.com, Groupe Lagardere, Groupe M6, Groupe PPR, Groupe Pages Jaunes, Groupe SNCF, Groupe Spir Communication, Groupe TF1, Gruner+Jahr Sites, Grupo Abril, Grupo Carso, Grupo Clarin, Grupo Intercom, Grupo Planeta Sites, Grupo Santander, Gruppo Editoriale Espresso, Gruppo Fiat, Gruppo Mediaset, Guardian Media Group, Gurunavi, H&R Block, HAWAAWORLD.COM, HC International Inc., HENHAOJI.COM, HEXUN.COM, HI5.COM, HMV, HONGXIU.COM, HSBC, Habbo Network, Hallmark, Hankook Ilbo, Hankyoreh Newspaper, Hatena, HealthCentral, HealthGrades, Healthline, Hearst Corporation, Hearst Digital Media, Hewlett Packard, Hi-Media Group, Hilton Hotels, Hispavista Sites, Hollywood.com Sites, Home Retail Group, HomeAway, Honda, HotChalk, Hubert Burda Media, Hulu, Hutchison Whampoa, Hyundai Motors Inc., Hyves, IBM, IDG Network, IDT Corporation, IKEA, IKM Internet Kaufmarkt, IMAGEVENUE.COM, INFO.COM*, ING Group, IP138.COM, IRS.GOV, IT&IS Siglo XXI, ITV Sites, Iliad - Free.fr Sites, Imaginova Network, Impress Group, IncrediMail Ltd, Indeed, Independent News & Media, Indian Railways, Infospace Network, InnoGames GmbH, Intel, Intelius, InterContinental Hotels Group, Interactive One, Interdots International, Internet Brands Inc., Internet Initiative Japan, Interpark, Intuit, JCPenney Sites, JEDDAHBIKERS.COM, JEERAN.COM, JMnet (JoongAng Media Network), JPMorgan Chase Property, JSOFTJ.COM, Jabbar Internet Group, Japan Post Group, Job.com Sites, KAIXIN001.COM, KAPOOK.COM, KBB.COM, KBS (Korean Broadcasting System), KDDI Corporation, KEENFINDER.COM, KIEV.UA, KINO.TO, KONGREGATE.COM, KOOORA.COM, KOOWO.COM, KPN, KT Group, KUWAITUP.COM, KaiserGames GmbH, Kakaku.com Inc., Kayak.com Network, Kiabi, Kingfisher, Kingsoft Corp, Kipubli, Kohls Corporation, Korea Economic Daily, Kraft Foods, KuGou Inc., Kuaiche.com Sites, L'Oreal Sites, LEGACY.COM*, LEO.ORG, LETITBIT.NET, LG Group, LIMEWIRE.COM, LINKEDIN.COM, LIVEINTERNET.RU, LIVESCORE.COM, LOCALBILLING.COM, LOWES.COM, LVMH Sites, La Poste, Le Monde Sites, LeGuide.com Sites, Lee Enterprises Incorporated, Liberty Media Holding Corporation, Limitedbrands, Live Nation Network, Lloyds Banking Group plc, Lojas Americanas, Lotte Group, Lycos Global Search And Media, M5ZN.COM, MADE-IN-CHINA.COM, MANTA.COM, MAPBAR.COM, MBC (Munhwa Broadcasting Corp.), MEDIAFIRE.COM, MEGAUPLOAD.COM, MEGAVIDEO.COM, MERCHANTCIRCLE.COM, METEOFRANCE.COM, METRO Group, MEXAT.COM, MIH Limited, MINICLIP.COM, MINIJUEGOS.COM, MININOVA.ORG, MIXI Inc., MONOGRAFIAS.COM, MOZOOK.COM, MSGPLUSLIVE.NET, MTHAI.COM, MULTIPLY.COM, MUSICA.COM, MYHOTCOMMENTS.COM, Macy's Inc., Maeil Business Newspaper, Mainichi Shimbun, Mapsolute, Marriott, Match.com Sites, Mattel Sites, McAfee.com Sites, McClatchy Corporation, McDonald's, Media General Sites, MediaNews Group, Meebo Messenger IM, MeetIC - Match, MercadoLibre, Meredith Women's Network, Metacafe, Miarroba Networks, Michelin Group, Midasplayer.com Ltd., Mio.tv Network, Moneysupermarket.com Financial Group, Monster Inc., Move Inc. Real Estate Sites, MyLife.com Sites, NAMIPAN.COM, NASA.GOV, NASZA-KLASA.PL, NBC Universal, NEC Corporation, NERO.COM, NETFLIX.COM, NFL Internet Group, NHACCUATUI.COM, NHK Group, NHL Network, NHN Corporation, NIC.IN, NIH, NIKKEI, NING.COM, NOWCOM, NTT Group, National Geographic Sites, National Lampoon Humor Network, Naukri, Nestle, NetEase.com Inc., NetShelter Technology Media, Network 18, New York Times Digital, NewIPs, News Interactive Pty Limited, News International, News World Communications Inc., Nexon Corporation, NextRadio TV, Nextag.com Sites, Nifty Corporation, Nike, Nintendo Co., Nippon Television Network, Nissan, Nokia, Notrefamille.com Sites, OHMYNEWS.COM, OLX Inc., OPENDNS.COM, OPENV.COM*, ORBITDOWNLOADER.COM, OSCAR.COM, OVH Sites, OWNSKIN.COM, OYUNLAR1.COM, OZQ8.COM, Oak Pacific Interactive Sites, Oberon Media Inc, Office Depot, Onlinedown Sites, Opera Software, Oracle Corporation, Orange Sites, Orbitz Worldwide, Oricon, Otto Gruppe, Oversee.net Network, PANDORA.COM, PANDORA.TV, PANET.CO.IL, PBASE.COM, PBS, PCPOP Sites, PChome Online, PConline.cn Sites, PHOTOFUNIA.COM, PHPNUKE.ORG, PICNIK.COM, PIPI.CN, PLAYLIST.COM, PLENTYOFFISH.COM, POMOHO.COM, PPLive Inc., PPStream Inc., PSA Peugeot Citroën, PSICOFXP.COM, PYZAM.COM, PalTalk, Panasonic Group, Pangea Media, PartyGaming, Pearson Education, People's Daily online, Pepsi Co., Photobucket.com LLC, PlasmaNet Sites, Play.com Sites, PokerStars, Populis, Portugal Telecom, Postmedia Network, PriceGrabber, Priceline.com Incorporated, Prisa, ProSiebenSat1 Sites, Procter & Gamble, Proto Corporation, Publieke Omroep, QIANQIAN.COM, QIDIAN.COM, QQ163.COM, QVOD.COM, Qihoo.com Sites, RAPIDLIBRARY.COM, RARLAB.COM, RAYFILE.COM, RAYLI.COM.CN, RBC Financial Group, RCS Media Group, READNOVEL.COM, REGNOW.COM, RH Donnelley, ROGERS, RORO44.COM, RTL Group Sites, Rakuten Inc, Rambler Media, RapidShare AG, Reader's Digest Digital Network, Real.com Network, Recruit Co. Ltd., Rediff.com India Ltd, Reed Business Information, Reed Elsevier Group, Research In Motion Limited, Reuters Sites, Rising Corp. Limited, RosBusinessConsulting, Roularta Media Group, Rue du Commerce, Ryanair, SBS (Seoul Broadcasting System), SCRIBD.COM, SEDO Sites, SENDSPACE.COM, SH.CN, SHERV.NET, SHOPLOCAL.COM, SHOUTMIX.COM, SHVOONG.COM, SINA Corporation, SK Group, SLIDESHARE.NET, SNDA Sites, SOFTBANK Group, SOFTPEDIA.COM, SONGS.PK, SPB.RU, SPLINDER.COM, SPRINGERLINK.COM, STARTIMES2.COM, STARTVG.COM, SUMOTORRENT.COM, SWEETIM.COM, Sakura Internet, Samsung Group, Samurai Factory Inc., Sankei Shimbun, Sanoma Group, Schibsted (Anuntis-Infojobs-20minutos), Scripps Networks Interactive Inc., SeaRainbow Holding Corp, Sears Sites, Seat Pagine Gialle, Seesaa, Seiko Epson Corp, Seoul Newspaper, Sheknows (Evolve Media Corp.), Shopzilla.com Sites, Sky Sites, SkyCN, Skyrock, Slide Sites, Societe Generale, Softissimo, Sohu.com Inc., Sonic Solutions, Sonico Inc., Sony Online, SouFun.com Limited, Source Interlink Companies, Southwest Airlines Co., Sparkassen-Finanzgruppe, Spiegel Verlag, Spil Games, Sprint Nextel Corporation, Stage6 by DivX, Staples.com Sites, Stateless Systems, Steam (App), Sugar Inc - PopSugar Network, Sun Microsystems Inc., Superpages.com Network, Symantec, Systemax Inc., TAGSTORY.COM, TALEO.NET, TARINGA.NET, TBS Group, TD Bank Financial Group, TE3P.COM, TGBUS.COM, THEPIRATEBAY.ORG, TIEXUE.NET, TIMEANDDATE.COM, TIMNHANH.COM, TOGGLE.COM, TOM.COM Limited, TOPSHAREWARE.COM, TORRENTPORTAL.COM, TORRENTREACTOR.NET, TORRENTS.RU, TORRENTZ.COM, TPI Paginas Amarillas, TQ Digital Entertainment, TUI Group, TV Guide Online Network, TWITTER.COM, Take 2 Interactive, Target Corporation, TaxACT, Tchibo, Technorati Media, Tele2 Sites, Telecom Italia, Telegraaf Media Groep, Telegraph Media Group, Televisa Interactive Media, Telstra Corporation Limited, Terra - Telefonica, Tesco Stores, The Home Depot Inc., The Mozilla Organization, The Royal Bank Of Scotland, The Washington Post Company, The Weather Network Meteomedia, Thomson Reuters, Ticketmaster, Time Warner (Excl. Turner/WB), Times Internet Limited, Tiscali Sites, Toshiba Corp, Toyota, Toysrus Sites, Trader Media Group, Transcontinental Digital, Travelocity, Travian Games, Trend Micro Inc., Tribune Interactive, Trinity Mirror Group, Trovit Sites, Tudou Sites, Turner Digital, Twenga, UGO Entertainment, UOL, UPLOADED.TO, UPS Sites, UPTODOWN.COM, URBANDICTIONARY.COM, USAFIS.ORG, USEN Group, USPS.COM, UUSEE.COM, UUU9.COM, Ubisoft Entertainment, Unilever, Unister GmbH, United Business Media, United Online Inc, United-Internet Sites, Universia, VATGIA.COM, VEOH.COM, VUI.VN, ValueClick Sites, Valve Corporation, Vector Inc., Veoh (App), Verizon Communications Corporation, Verlagsgruppe Georg von Holtzbrinck, VeryCD, Viacom Digital, Virgin Group, Virgin Media, VistaPrint Sites, Viva street Classifieds, Vivendi, Vkontakte, Vocento, Vodafone Group, Volkswagen, Vuze Sites, WANMEI.COM, WARESEEKER.COM, WEBHATTI.COM, WIKIHOW.COM, WIKIMAPIA.ORG, WILEY.COM, WIND Telecomunicazioni, WORDREFERENCE.COM, WOYO.COM, Wal-Mart, Walgreen Co., Weather Channel The, WeatherBug Property, WebMD Health, WebMediaBrands Inc., Weblogs SL Sites, Weight Watchers International, Wells Fargo, WetterOnline GmbH, WhitePages, Wikia Sites, Wikio Group, WildTangent Media, WordPress, World of Warcraft (App), WorldNow Sites, XANGA.COM, XAT.COM, XE.COM, XICI.NET, Xacti Corporation, Xinhua News Agency, Xunlei Networking, Y8.COM, YAM.COM, YAMAHA, YE-SOFT.NET, YELP.COM, YOKA.COM, YOURFILEHOST.COM, Yahoo, Yandex Sites, Yellow Pages Group, YellowBook Network, Yomiuri Group, Youku Inc., Youthology Kids (Evolve Media Corp.), Yum! Brands Inc., ZHAOPIN.COM, ZHCW.COM, ZSHARE.NET, ZVue Networks, Zazzle, Ziff Davis, craigslist inc., eBuddy Sites, eMule (App), eNet, edaily, freenet AG, iEUROP Sites, iG Sites, iVillage.com: The Womens Network, imeem, mIRC, spreadshirt
+
+
+Updates found, rewrite master file 'history_comscore_UV_properties.csv'
+
+WriteDataAnalytics
+
+2008-01,-,AS,-,-,19.4,59964000
+2008-01,-,C,-,-,0.6,581000
+2008-01,-,EU,-,-,39.1,91036000
+2008-01,-,I,-,-,19.2,5138000
+2008-01,-,LA,-,-,31.1,18341000
+2008-01,-,MA,-,-,28.9,11549000
+2008-01,-,NA,-,-,33.5,61664000
+2008-01,-,W,-,-,29.4,242554000
+2008-02,-,AS,-,-,19.5,59948000
+2008-02,-,C,-,-,0.7,695000
+2008-02,-,EU,-,-,37.9,87975000
+2008-02,-,I,-,-,18.8,5065000
+2008-02,-,LA,-,-,34.2,20286000
+2008-02,-,MA,-,-,28.3,11327000
+2008-02,-,NA,-,-,33.2,61218000
+2008-02,-,W,-,-,29.3,240754000
+2008-03,-,AS,-,-,19.8,62380000
+2008-03,-,C,-,-,0.7,669000
+2008-03,-,EU,-,-,39.1,92283000
+2008-03,-,I,-,-,18.7,5200000
+2008-03,-,LA,-,-,40.4,24542000
+2008-03,-,MA,-,-,32.2,13337000
+2008-03,-,NA,-,-,34.0,63518000
+2008-03,-,W,-,-,30.5,256061000
+2008-04,-,AS,-,-,20.1,63963000
+2008-04,-,C,-,-,2.2,2288000
+2008-04,-,EU,-,-,39.3,93642000
+2008-04,-,I,-,-,17.9,5079000
+2008-04,-,LA,-,-,42.8,26347000
+2008-04,-,MA,-,-,32.3,13634000
+2008-04,-,NA,-,-,33.8,63827000
+2008-04,-,W,-,-,30.8,261414000
+2008-05,-,AS,-,-,19.7,63560000
+2008-05,-,C,-,-,0.9,994000
+2008-05,-,EU,-,-,39.7,95234000
+2008-05,-,I,-,-,18.2,5264000
+2008-05,-,LA,-,-,43.2,27002000
+2008-05,-,MA,-,-,32.9,14139000
+2008-05,-,NA,-,-,34.1,63186000
+2008-05,-,W,-,-,30.8,263120000
+2008-06,-,AS,-,-,20.1,65764000
+2008-06,-,C,-,-,0.9,958000
+2008-06,-,EU,-,-,37.0,89427000
+2008-06,-,I,-,-,20.4,5979000
+2008-06,-,LA,-,-,41.2,26099000
+2008-06,-,MA,-,-,27.3,11941000
+2008-06,-,NA,-,-,31.5,58272000
+2008-06,-,W,-,-,29.2,251502000
+2008-07,-,AS,-,-,17.2,65838000
+2008-07,-,C,-,-,0.1,232000
+2008-07,-,EU,-,-,32.4,86905000
+2008-07,-,I,-,-,19.2,5720000
+2008-07,-,LA,-,-,33.6,23220000
+2008-07,-,MA,-,-,24.7,11016000
+2008-07,-,NA,-,-,31.1,57347000
+2008-07,-,W,-,-,25.7,244326000
+2008-08,-,AS,-,-,17.2,66895000
+2008-08,-,C,-,-,0.8,1382000
+2008-08,-,EU,-,-,31.0,83931000
+2008-08,-,I,-,-,20.5,6217000
+2008-08,-,LA,-,-,38.2,26847000
+2008-08,-,MA,-,-,25.1,11371000
+2008-08,-,NA,-,-,32.4,59494000
+2008-08,-,W,-,-,25.9,248539000
+2008-09,-,AS,-,-,17.2,68291000
+2008-09,-,C,-,-,1.6,2735000
+2008-09,-,EU,-,-,35.9,98304000
+2008-09,-,I,-,-,19.6,6025000
+2008-09,-,LA,-,-,40.4,28886000
+2008-09,-,MA,-,-,27.2,12553000
+2008-09,-,NA,-,-,34.7,64075000
+2008-09,-,W,-,-,28.0,272109000
+2008-10,-,AS,-,-,16.3,65703000
+2008-10,-,C,-,-,1.2,2037000
+2008-10,-,EU,-,-,37.2,102955000
+2008-10,-,I,-,-,18.6,5799000
+2008-10,-,LA,-,-,38.6,27974000
+2008-10,-,MA,-,-,29.3,13790000
+2008-10,-,NA,-,-,36.0,66785000
+2008-10,-,W,-,-,28.2,277208000
+2008-11,-,AS,-,-,16.7,68371000
+2008-11,-,C,-,-,1.2,2185000
+2008-11,-,EU,-,-,38.0,106199000
+2008-11,-,I,-,-,19.9,6286000
+2008-11,-,LA,-,-,37.2,27416000
+2008-11,-,MA,-,-,28.9,13850000
+2008-11,-,NA,-,-,35.1,65133000
+2008-11,-,W,-,-,28.2,280969000
+2008-12,-,AS,-,-,15.9,66026000
+2008-12,-,C,-,-,1.3,2286000
+2008-12,-,EU,-,-,37.3,105318000
+2008-12,-,I,-,-,20.0,6421000
+2008-12,-,LA,-,-,30.4,22769000
+2008-12,-,MA,-,-,31.0,15103000
+2008-12,-,NA,-,-,34.5,63782000
+2008-12,-,W,-,-,27.1,272998000
+2009-01,-,AS,-,-,16.8,71203000
+2009-01,-,C,-,-,1.0,1825000
+2009-01,-,EU,-,-,39.4,112449000
+2009-01,-,I,-,-,20.8,6764000
+2009-01,-,LA,-,-,29.6,22558000
+2009-01,-,MA,-,-,31.5,15630000
+2009-01,-,NA,-,-,36.6,67971000
+2009-01,-,W,-,-,28.4,289811000
+2009-02,-,AS,-,-,16.4,70862000
+2009-02,-,C,-,-,1.1,2002000
+2009-02,-,EU,-,-,38.5,117828000
+2009-02,-,I,-,-,20.0,6587000
+2009-02,-,LA,-,-,33.9,27440000
+2009-02,-,MA,-,-,24.8,18765000
+2009-02,-,NA,-,-,35.5,65855000
+2009-02,-,W,-,-,27.9,300751000
+2009-03,-,AS,-,-,17.8,78009000
+2009-03,-,C,-,-,1.4,2752000
+2009-03,-,EU,-,-,40.9,126474000
+2009-03,-,I,-,-,21.0,7014000
+2009-03,-,LA,-,-,41.5,34229000
+2009-03,-,MA,-,-,28.2,21558000
+2009-03,-,NA,-,-,36.0,66878000
+2009-03,-,W,-,-,29.9,327148000
+2009-04,-,AS,-,-,17.0,76024000
+2009-04,-,C,-,-,1.6,3115000
+2009-04,-,EU,-,-,38.3,119578000
+2009-04,-,I,-,-,20.2,6807000
+2009-04,-,LA,-,-,39.8,33400000
+2009-04,-,MA,-,-,26.0,20133000
+2009-04,-,NA,-,-,37.8,70908000
+2009-04,-,W,-,-,28.9,320043000
+2009-05,-,AS,-,-,16.6,75595000
+2009-05,-,C,-,-,1.5,2936000
+2009-05,-,EU,-,-,37.6,118874000
+2009-05,-,I,-,-,21.0,7168000
+2009-05,-,LA,-,-,39.6,33870000
+2009-05,-,MA,-,-,24.9,19529000
+2009-05,-,NA,-,-,36.8,69387000
+2009-05,-,W,-,-,28.3,317255000
+2009-06,-,AS,-,-,16.5,76239000
+2009-06,-,C,-,-,2.2,4566000
+2009-06,-,EU,-,-,35.2,112270000
+2009-06,-,I,-,-,21.7,7522000
+2009-06,-,LA,-,-,38.3,33263000
+2009-06,-,MA,-,-,20.8,16489000
+2009-06,-,NA,-,-,34.4,64678000
+2009-06,-,W,-,-,26.7,302940000
+2009-07,-,AS,-,-,15.9,74990000
+2009-07,-,C,-,-,1.8,3839000
+2009-07,-,EU,-,-,33.7,108552000
+2009-07,-,I,-,-,22.6,7908000
+2009-07,-,LA,-,-,33.1,29298000
+2009-07,-,MA,-,-,20.6,16502000
+2009-07,-,NA,-,-,34.9,66142000
+2009-07,-,W,-,-,25.7,295484000
+2009-08,-,AS,-,-,16.2,77365000
+2009-08,-,C,-,-,1.6,3547000
+2009-08,-,EU,-,-,34.2,111190000
+2009-08,-,I,-,-,23.7,8398000
+2009-08,-,LA,-,-,36.8,33186000
+2009-08,-,MA,-,-,21.9,17816000
+2009-08,-,NA,-,-,35.6,68084000
+2009-08,-,W,-,-,26.4,307641000
+2009-09,-,AS,-,-,16.1,77948000
+2009-09,-,C,-,-,1.3,2882000
+2009-09,-,EU,-,-,37.4,123062000
+2009-09,-,I,-,-,23.7,8480000
+2009-09,-,LA,-,-,38.4,35264000
+2009-09,-,MA,-,-,22.0,18063000
+2009-09,-,NA,-,-,37.3,71661000
+2009-09,-,W,-,-,27.6,325998000
+2009-10,-,AS,-,-,17.0,83671000
+2009-10,-,C,-,-,1.6,3702000
+2009-10,-,EU,-,-,39.0,128647000
+2009-10,-,I,-,-,25.7,9287000
+2009-10,-,LA,-,-,39.0,36440000
+2009-10,-,MA,-,-,26.9,22353000
+2009-10,-,NA,-,-,38.2,73452000
+2009-10,-,W,-,-,29.0,344563000
+2009-11,-,AS,-,-,16.5,82379000
+2009-11,-,C,-,-,1.6,3718000
+2009-11,-,EU,-,-,39.0,129798000
+2009-11,-,I,-,-,25.8,9437000
+2009-11,-,LA,-,-,38.4,36495000
+2009-11,-,MA,-,-,26.2,22083000
+2009-11,-,NA,-,-,38.5,75050000
+2009-11,-,W,-,-,28.7,345805000
+2009-12,-,AS,-,-,16.7,84201000
+2009-12,-,C,-,-,1.5,3657000
+2009-12,-,EU,-,-,38.6,129763000
+2009-12,-,I,-,-,26.3,9696000
+2009-12,-,LA,-,-,32.5,31391000
+2009-12,-,MA,-,-,28.3,24058000
+2009-12,-,NA,-,-,39.1,77607000
+2009-12,-,W,-,-,28.4,347020000
+2010-01,-,AS,-,-,17.4,89049000
+2010-01,-,C,-,-,1.4,3351000
+2010-01,-,EU,-,-,40.3,136935000
+2010-01,-,I,-,-,27.4,10216000
+2010-01,-,LA,-,-,33.5,32834000
+2010-01,-,MA,-,-,27.2,23411000
+2010-01,-,NA,-,-,41.1,82489000
+2010-01,-,W,-,-,29.5,364719000
+2010-02,-,AS,-,-,15.3,72378000
+2010-02,-,C,-,-,1.2,2935000
+2010-02,-,EU,-,-,39.2,133807000
+2010-02,-,I,-,-,26.4,9865000
+2010-02,-,LA,-,-,36.7,36414000
+2010-02,-,MA,-,-,24.9,21680000
+2010-02,-,NA,-,-,39.9,80940000
+2010-02,-,W,-,-,28.7,345218000
+2010-03,-,AS,-,-,16.2,77678000
+2010-03,-,C,-,-,1.4,3443000
+2010-03,-,EU,-,-,40.8,140834000
+2010-03,-,I,-,-,27.7,10516000
+2010-03,-,LA,-,-,43.1,43574000
+2010-03,-,MA,-,-,28.3,24962000
+2010-03,-,NA,-,-,41.0,83696000
+2010-03,-,W,-,-,30.4,370744000
+2010-04,-,AS,-,-,15.9,77535000
+2010-04,-,C,-,-,1.6,4081000
+2010-04,-,EU,-,-,41.4,144087000
+2010-04,-,I,-,-,28.4,10923000
+2010-04,-,LA,-,-,43.2,44286000
+2010-04,-,MA,-,-,28.1,25146000
+2010-04,-,NA,-,-,40.9,83792000
+2010-04,-,W,-,-,30.4,374846000
+2010-05,-,AS,-,-,16.3,80502000
+2010-05,-,C,-,-,1.0,2700000
+2010-05,-,EU,-,-,43.0,150313000
+2010-05,-,I,-,-,30.1,11675000
+2010-05,-,LA,-,-,44.1,45790000
+2010-05,-,MA,-,-,29.2,26399000
+2010-05,-,NA,-,-,41.5,85929000
+2010-05,-,W,-,-,31.3,388932000
+2010-06,-,AS,-,-,16.1,80269000
+2010-06,-,C,-,-,1,2613000
+2010-06,-,EU,-,-,43,151013000
+2010-06,-,I,-,-,31.6,12373000
+2010-06,-,LA,-,-,41.8,43826000
+2010-06,-,MA,-,-,25.6,23611000
+2010-06,-,NA,-,-,38.9,80393000
+2010-06,-,W,-,-,30.2,379112000
+2010-07,-,AS,-,-,15.9,80260000
+2010-07,-,C,-,-,0.9,2536000
+2010-07,-,EU,-,-,39.3,138975000
+2010-07,-,I,-,-,32.4,12828000
+2010-07,-,LA,-,-,35.9,38111000
+2010-07,-,MA,-,-,24.4,22991000
+2010-07,-,NA,-,-,39,79888000
+2010-07,-,W,-,-,28.5,360225000
+2010-08,-,AS,-,-,16.2,83015000
+2010-08,-,C,-,-,1,2829000
+2010-08,-,EU,-,-,39.6,140560000
+2010-08,-,I,-,-,33,13187000
+2010-08,-,LA,-,-,39.9,42303000
+2010-08,-,MA,-,-,24.4,26220000
+2010-08,-,NA,-,-,39.7,81295000
+2010-08,-,W,-,-,29,373392000
+2010-09,-,AS,-,-,16.1,83119000
+2010-09,-,C,-,-,1.1,3181000
+2010-09,-,EU,-,-,43.5,155438000
+2010-09,-,I,-,-,33.3,13433000
+2010-09,-,LA,-,-,42.2,45265000
+2010-09,-,MA,-,-,26.5,28749000
+2010-09,-,NA,-,-,41.9,85606000
+2010-09,-,W,-,-,30.8,398178000
+2010-10,-,AS,-,-,16,83406000
+2010-10,-,C,-,-,1.1,3156000
+2010-10,-,EU,-,-,44.4,159384000
+2010-10,-,I,-,-,33.5,13674000
+2010-10,-,LA,-,-,41.6,45152000
+2010-10,-,MA,-,-,30.1,33049000
+2010-10,-,NA,-,-,42.7,87359000
+2010-10,-,W,-,-,31.3,408350000
+2010-11,-,AS,-,-,15.7,82736000
+2010-11,-,C,-,-,1.1,3108000
+2010-11,-,EU,-,-,45.8,165020000
+2010-11,-,I,-,-,33.1,13614000
+2010-11,-,LA,-,-,42.4,46617000
+2010-11,-,MA,-,-,27.6,30711000
+2010-11,-,NA,-,-,42,85732000
+2010-11,-,W,-,-,31.3,410816000
+2010-12,-,AS,-,-,15.2,80958000
+2010-12,-,C,-,-,1.2,3372000
+2010-12,-,EU,-,-,43.6,157837000
+2010-12,-,I,-,-,33.7,14004000
+2010-12,-,LA,-,-,34.8,38738000
+2010-12,-,MA,-,-,27.4,30852000
+2010-12,-,NA,-,-,42.7,87087000
+2010-12,-,W,-,-,29.9,395472000
+2011-01,-,AS,-,-,15.9,85593000
+2011-01,-,C,-,-,1,3048000
+2011-01,-,EU,-,-,46.4,168571000
+2011-01,-,I,-,-,35.9,15067000
+2011-01,-,LA,-,-,35,39446000
+2011-01,-,MA,-,-,28.2,32113000
+2011-01,-,NA,-,-,43.2,88233000
+2011-01,-,W,-,-,31,413957000
+2011-02,-,AS,-,-,14.2,77468000
+2011-02,-,C,-,-,0.9,2664000
+2011-02,-,EU,-,-,41.6,150775000
+2011-02,-,I,-,-,30.6,12960000
+2011-02,-,LA,-,-,36.3,41411000
+2011-02,-,MA,-,-,25.8,29722000
+2011-02,-,NA,-,-,39.4,80038000
+2011-02,-,W,-,-,28.3,379415000
+2011-03,-,AS,-,-,14.7,80997000
+2011-03,-,C,-,-,0.9,2854000
+2011-03,-,EU,-,-,43.1,156913000
+2011-03,-,I,-,-,30.4,13011000
+2011-03,-,LA,-,-,41.3,47583000
+2011-03,-,MA,-,-,28,32599000
+2011-03,-,NA,-,-,40.1,81918000
+2011-03,-,W,-,-,29.6,400011000
+2011-04,-,AS,-,-,14,77891000
+2011-04,-,C,-,-,0.9,2866000
+2011-04,-,EU,-,-,40.8,149211000
+2011-04,-,I,-,-,29.6,12801000
+2011-04,-,LA,-,-,38.7,45108000
+2011-04,-,MA,-,-,25.7,30272000
+2011-04,-,NA,-,-,38,78234000
+2011-04,-,W,-,-,27.9,380716000
+2011-05,-,AS,-,-,15.1,84666000
+2011-05,-,C,-,-,1.1,3492000
+2011-05,-,EU,-,-,44,161311000
+2011-05,-,I,-,-,31.4,13701000
+2011-05,-,LA,-,-,41.6,49095000
+2011-05,-,MA,-,-,28.5,33908000
+2011-05,-,NA,-,-,39.5,82081000
+2011-05,-,W,-,-,29.9,411061000
+2011-06,-,AS,-,-,15.2,86539000
+2011-06,-,C,-,-,1.2,3960000
+2011-06,-,EU,-,-,41.7,153883000
+2011-06,-,I,-,-,32.1,14163000
+2011-06,-,LA,-,-,39.6,47203000
+2011-06,-,MA,-,-,25.8,30985000
+2011-06,-,NA,-,-,39.1,80753000
+2011-06,-,W,-,-,28.9,399362000
+2011-07,-,AS,-,-,15.7,90378000
+2011-07,-,C,-,-,1.5,4814000
+2011-07,-,EU,-,-,39.6,146724000
+2011-07,-,I,-,-,33.6,14979000
+2011-07,-,LA,-,-,35.4,42700000
+2011-07,-,MA,-,-,24.6,29882000
+2011-07,-,NA,-,-,40.5,83859000
+2011-07,-,W,-,-,28.2,393543000
+
+Ready
+
+
+Arguments
+ -i /a/wikistats/
+ -o /a/analytics
+
+Input  folder: /a/wikistats/
+Output folder: /a/analytics
+
+Read '/a/wikistats//csv_wb/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wb/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wk/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wk/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wn/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wn/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wp/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wp/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wq/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wq/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_ws/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_ws/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wv/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wv/StatisticsUserActivitySpread.csv'
+Read '/a/wikistats//csv_wx/StatisticsMonthly.csv'
+Read '/a/wikistats//csv_wx/StatisticsUserActivitySpread.csv'
+Largest projects (most accumulated very active editors):
+wp,en,wp,de,wp,fr,wx,commons,wp,es,wp,ru,wp,ja,wp,it,wp,pl,wp,nl,wp,zh,
+
+No data yet for large wiki wp,ru for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,fr for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,nl for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,ja for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,zh for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,pl for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,it for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,es for 2011-09-> skip month 2011-09
+No data yet for large wiki wx,commons for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,en for 2011-09-> skip month 2011-09
+No data yet for large wiki wp,de for 2011-09-> skip month 2011-09
