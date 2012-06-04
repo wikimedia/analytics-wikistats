@@ -5,11 +5,10 @@
   $trace_on_exit = $true ;
   ez_lib_version (2) ;
 
-  $month_last = "12" ;
-  $year_last  = 2010 ;
-
-  $month_start = "1" ;
-  $year_start  = 2008 ;
+  $month_last  = "4" ;
+  $year_last   = 2012 ;
+  $month_start = $month_last ;
+  $year_start  = $year_last - 3 ;
 
   $m_start    = &months_since_2000_01 ($year_start, $month_start) ;
   $m_last     = &months_since_2000_01 ($year_last,  $month_last) ;
@@ -49,19 +48,19 @@ sub LogArguments
 
 sub ParseArguments
 {
-#  my @options ;
-#  getopt ("io", \%options) ;
+  my @options ;
+  getopt ("io", \%options) ;
 
-#  die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
-#  die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
+  die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
+  die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
 
-#  $path_in  = $options {"i"} ;
-#  $path_out = $options {"o"} ;
+  $path_in  = $options {"i"} ;
+  $path_out = $options {"o"} ;
 
-#  die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
-#  die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
+  die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
+  die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
 
-  $path_in  = "w:/# out bayes" ;
+  $path_in  = "w:/# out bayes/csv_report_card" ;
   $path_out = "w:/@ report card/data" ;
 
   print "Input  folder: $path_in\n" ;
@@ -108,7 +107,7 @@ sub ReadStatisticsMonthlyForProject
   while ($line = <CSV_IN>)
   {
     ($language,$date,$counts) = split (',', $line, 3) ;
-
+    next if $language =~ /^zz/ ;
     next if $language eq 'commons' and $project ne 'wx' ;
     next if $language eq 'sr'      and $project eq 'wn' ; # ignore insane bot spam on
 
@@ -144,6 +143,7 @@ sub ReadStatisticsMonthlyForProject
           $totals           {"$f,$m"}                        += $fields [$f] ;
 
           $totals_project   {"$f,$m"} {$project}             += $fields [$f] ;
+
           $totals_project   {"$f,$m"} {$all_projects}        += $fields [$f] ;
 
         #  print "TOTALS $f $m = . " . $totals {"$f,$m"} . "\n" ;
@@ -199,6 +199,7 @@ sub ReadStatisticsMonthlyForProject
   {
     chomp $line ;
     ($language,$date,$reguser_bot,$group,$counts) = split (',', $line, 5) ;
+    next if $language =~ /^zz/ ;
 
     next if $language eq 'commons' and $project ne 'wx' ; # commons also in wikipedia csv files (bug, hard to cleanup, just skip)
   # next if $language eq 'commons' ; # ignore editor count on commons alltogether, most are already counted for other project
@@ -272,7 +273,6 @@ sub ReadStatisticsPerBinariesExtensionCommons
     ($language,$date,$counts) = split (',', $line, 3) ;
 
     if ($language ne "commons") { next ; }
-
     if ($date eq "00/0000")
     {
       @fields = split (',', $counts) ;
@@ -330,6 +330,7 @@ sub WriteMonthlyData
   print "Write file '$file_csv_out'\n" ;
   open CSV_OUT, '>', $file_csv_out ;
   $output = "" ;
+
   foreach $f (1,2,3,4,6,11) # new editors, editors_gt_5, editors_gt_100, articles, new articles, edits
   {
 
@@ -338,7 +339,12 @@ sub WriteMonthlyData
 
     $line = ",Total," ;
     for ($m = $m_start ; $m <= $m_last ; $m++)
-    { $line .= $totals {"$f,$m"} . ","  ; }
+    {
+      if ($f <= 3) # new editors, editors_gt_5, editors_gt_100,
+      { $line .= $totals_project {"$f,$m"} {$all_projects} . ","  ; }
+      else
+      { $line .= $totals {"$f,$m"} . ","  ; }
+    }
 
     # growth in one year
     if ($totals {"$f,$m_last_12"} != 0)
@@ -390,6 +396,7 @@ sub WriteMonthlyData
     if ($f <= 3)  # 0 = Contributors, 1 = New Wikimedians, 2 = Active Editors (5+ edits), 3 = Very Active Editors (100+ edits),
     { $output .= ",Note: All projects does not include Commons\n" ; }
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
+
     foreach $project (sort {$totals_project {"$f,$m_last"} {$b} <=> $totals_project {"$f,$m_last"} {$a}} @projects)
     {
 #     next if $project eq 'commons' and ($f ==2 or $f == 3) ; # (very) active editors no longer counted for commons
@@ -426,6 +433,8 @@ sub WriteMonthlyData
       # print "$index $f: $key -> ${values_f_12 {$key}}\n" ;
 
       ($project,$language) = split (",", $key) ;
+if ($f == 2)
+{ print "project $project $language\n" ; }
       $language_name = $out_languages {$language} ;
       if (($project ne "wp") && ($project ne "wx"))
       { $line = "$index,$language_name " . &GetProjectName ($project) . "," ; }
@@ -465,6 +474,7 @@ sub WriteMonthlyData
 
     $output .= "\n,${out_report_descriptions [$f]} - Indexed - Per Project\n" ;
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
+
     foreach $project (sort {$totals_project {"$f,$m_last"} {$b} <=> $totals_project {"$f,$m_last"} {$a}} @projects)
     {
 #     next if $project eq 'commons' and ($f ==2 or $f == 3) ; # (very) active editors no longer counted for commons

@@ -15,10 +15,10 @@
   my $do_normalize = $true ;
   my $no_normalize = $false ;
 
-  $file_csv_ref  = "Reference sites UV_(Oct 09 - Dec 10).csv" ;
-  $file_csv_top  = "Top 1000 poperties, UV trend_(Oct 09 - Dec 10).csv" ;
-  $file_html_ref = "ComScoreReferenceSites-2010-12.htm" ;
-  $file_html_top = "ComScoreTop1000Properties-2010-12.htm" ;
+  $file_csv_ref  = "Reference sites UV_(Dec 10 - Feb 12).csv" ;
+  $file_csv_top  = "Top 1000 poperties, UV trend_(Dec 10 - Feb 12).csv" ;
+  $file_html_ref = "ComScoreReferenceSites-2012-02.htm" ;
+  $file_html_top = "ComScoreTop1000Properties-2012-02.htm" ;
 
 # note normalization needs overhaul: * 30/actual days in month does not work for UV's
 
@@ -59,6 +59,7 @@ sub ReadCsv
   while ($line = <CSV>)
   {
     chomp $line ;
+
     $line =~ s/"(\d+),(\d+),(\d+)"/$1$2$3/g ;
     $line =~ s/"(\d+),(\d+)"/$1$2/g ;
     $line =~ s/"([^"]*)"/$1/g ;
@@ -199,8 +200,8 @@ sub WriteData
                "$out_license" .
                "</small>\n" ;
 
-  $delta_rank_year  = "&Delta Year = Rank ${months [$#months-12]} &rArr; ${months [$#months]}" ;
-  $delta_rank_month = "&Delta Month = Rank ${months [$#months-1]} &rArr; ${months [$#months]}" ;
+  $delta_rank_year  = "&Delta; Year = Rank ${months [$#months-12]} &rArr; ${months [$#months]}" ;
+  $delta_rank_month = "&Delta; Month = Rank ${months [$#months-1]} &rArr; ${months [$#months]}" ;
   $delta_perc_year  = "% Year = Growth ${months [$#months-12]} &rArr; ${months [$#months]}" ;
   $delta_perc_month = "% Month = Growth ${months [$#months-1]} &rArr; ${months [$#months]}" ;
 
@@ -249,7 +250,7 @@ sub WriteData
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td colspan=99 align=left class=l><h2><font color=#C00000>Complete list</font></h2></td></tr>" ;
   $html .= "<tr><th class=l colspan=2>Property</th><th class=c colspan=3>Rank</th><th class=c colspan=2>Growth</th><th class=c>Rel. pop.</th><th class=c colspan=99>Monthly data: Unique Visitors (count x 1000) <small><small>+ Rank + Rang change + Growth percentage</small></small></th></tr>" ;
-  $html .= "<tr><th class=l>Site (*)</th><th class=c>Type</th><th class=c>Rank</th><th class=c>&Delta Year</th><th class=c>&Delta Month</th><th class=c>% Year</th><th class=c>% Month</th><th>WM=100</small></th>" ;
+  $html .= "<tr><th class=l>Site (*)</th><th class=c>Type</th><th class=c>Rank</th><th class=c>&Delta; Year</th><th class=c>&Delta; Month</th><th class=c>% Year</th><th class=c>% Month</th><th>WM=100</small></th>" ;
   for ($i = $#months; $i >= 0 ; $i--)
   { $html .= "<th class=c>${months[$i]}</th>" ; }
   $html .= "</tr>" ;
@@ -423,7 +424,7 @@ sub WriteData
   $html .= "</tr><tr><td colspan=99>&nbsp;</td></tr>" ;
   $html .= "<tr><td colspan=99 align=left class=l><a id='fast' name='fast'></a><h2><font color=#C00000>Fastest risers</font>&nbsp;&nbsp;<small>$threshold_filter+ rise in ranks in a year</small></h2></td></tr>" ;
   $html .= "<tr><th class=l colspan=2>Property</th><th class=c colspan=3>Rank</th><th class=c colspan=2>Growth</th><th class=c>Rel. pop.</th><th class=c colspan=99>Monthly data: Unique Visitors (count x 1000) <small><small>+ Rank + Rang change + Growth percentage</small></small></th></tr>" ;
-  $html .= "<tr><th class=l>Site</th><th class=c>Type</th><th class=c>Rank</th><th class=c>&Delta Year</th><th class=c>&Delta Month</th><th class=c>% Year</th><th class=c>% Month</th><th>WM=100</small></th>" ;
+  $html .= "<tr><th class=l>Site</th><th class=c>Type</th><th class=c>Rank</th><th class=c>&Delta; Year</th><th class=c>&Delta; Month</th><th class=c>% Year</th><th class=c>% Month</th><th>WM=100</small></th>" ;
   for ($i = $#months; $i >= 0 ; $i--)
   { $html .= "<th class=c>${months[$i]}</th>" ; }
   $html .= $html_fast_risers ;
