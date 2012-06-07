@@ -13,6 +13,7 @@ sub ProcessLine
   $mime       = $fields [10] ;
   $url        = lc ($fields [8]) ;
 
+  $mime =~ s/;// ;  # May 2012: mimetype "text/html;" instead of "text/html" from mobile site
   if ($mime eq '-')
   {
     # no mime type on log records from varnish, assume 'page request' on most, until that stream had been fixed
