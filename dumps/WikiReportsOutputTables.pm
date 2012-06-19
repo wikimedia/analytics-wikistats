@@ -1455,7 +1455,6 @@ sub GenerateTablesPerWiki
   }
 
   &GenerateHtmlStartWikipediaReport ($wp, "Tables", $out_zoom_buttons, $out_toc) ;
-
 # if ($wikimedia && ($wp eq "en") && $mode_wp)
 # { $out_html .= "<br><font color=#C00000>Note: for the English Wikipedia data for months after Sep 2006 are based on a partial database dump (only event meta data, no article contents).<br>" .
 #                 "Therefore some information for those months can not yet be shown.</font><br>" ; }
@@ -1501,6 +1500,15 @@ sub GenerateTablesPerWiki
   if ($wikimedia && ($wp eq "en") && $mode_wp)
   { $out_html .= blank_text_after ("9/08/2009", "<p><font color=#008000>" .
                  "The English Wikipedia uses this new scheme, other wikis will follow.</font><br>" ) ; }
+
+  if ($parsedate {$wp} lt '20120617')
+  { $out_html .= "<font color=#A00000><h3>Jun 17 2012: Reports on this page are broken, please ignore.</h3><br>" .
+                 "A data collection error resulted in significant undercount for article and editors, for all historic months.<br>" .
+                 "The problem surfaced a week ago. It has been analyzed and fixed on June 15.<br>" .
+                 "It will take another 10 days or so till all input (dumps) has been reprocessed.</br>" .
+                 "My sincere apologies for confusion and inconvenience caused. Erik Zachte</font><p>" ; }
+  else
+  { $out_html .= blank_text_after ("5/07/2012", "<h3><font color=#008000><b>This report has been regenerated after recovery from recent major data collection bug. Thanks for patience.</b></font></h3><br>") ; }
 
   my ($t0,$t1) ;
   if ($mode_wp) { $t0 = time ; }
@@ -1549,7 +1557,7 @@ sub GenerateTablesPerWiki
   if ($show_all_months_special)
   { $file_html =~ s/.htm/_AllMonths.htm/ ; }
 
-  print "\nWrite $file_html\n" ;
+# print "\nWrite $file_html\n" ;
 
   open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
   print FILE_OUT &AlignPerLanguage ($out_html) ;
@@ -1609,7 +1617,7 @@ sub GenerateTableMonthlyStats
   { $imagelinks_incomplete = $true ; }
 
   if ($wp !~ /^zzz?$/)
-  { $out_html .= "\n\n<a id='monthlycounts' name='monthlycounts'>&nbsp;</a><br>" . &b("Monthly counts & Quarterly rankings") . "<br>&nbsp;\n" ; }
+  { $out_html .= "\n\n<a id='monthlycounts' name='monthlycounts'>&nbsp;</a><br>" . &b("Monthly counts & Quarterly rankings") . ": " .  &b ("<font color=#0000FF>" . $lastdump_long {$wp}) . "</font><br>&nbsp;\n" ; }
 
   if ($mode_wp)
   {

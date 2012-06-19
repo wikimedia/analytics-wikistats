@@ -31,8 +31,8 @@
 
   # by default process up to and including last completed month,
   # to recreate older stats, set following variables which will be used instead of system time
-  $assume_current_year  = 2012 ;
-  $assume_current_month = 4 ;
+  # $assume_current_year  = 2012 ;
+  # $assume_current_month = 4 ;
   # (to do: make this scripts parameters)
 
   $| = 1; # flush screen output
@@ -136,7 +136,7 @@
   &LogT ("\nReady\n") ;
   exit ;
 
-#  open OUT, ">", "$path_out/viewcounts.csv" ;
+#  open OUT, ">", "$path_csv/viewcounts.csv" ;
 #  $out = "date," ;
 #  foreach $project (sort  {$total {$b} <=> $total {$a}} keys %projects)
 #  {
@@ -169,7 +169,7 @@
 #  # should be 0-23 and 0 is actually 23.00-00.00 hrs   1 = 00.00-01.00 hrs
 #  # 2nd dip on nl: at 18 - 19 is actually period 1600-1800
 
-#  open OUT, ">", "$path_out/viewcountsperhour.csv" ;
+#  open OUT, ">", "$path_csv/viewcountsperhour.csv" ;
 #  $out = "hour," ;
 #  foreach $project (sort  {$total {$b} <=> $total {$a}} keys %projects)
 #  {
@@ -199,7 +199,7 @@
 
 #  close OUT ;
 
-#  open OUT, ">", "$path_out/viewcountsperweekday.csv" ;
+#  open OUT, ">", "$path_csv/viewcountsperweekday.csv" ;
 #  $out = "weekday," ;
 #  foreach $project (sort  {$total {$b} <=> $total {$a}} keys %projects)
 #  {
@@ -243,7 +243,7 @@
 sub LogArguments
 {
   my $arguments ;
-  getopt ("iolpft", \%options) ;
+  getopt ("iolpftw", \%options) ;
   foreach $arg (sort keys %options)
   { $arguments .= " -$arg " . $options {$arg} . "\n" ; }
   print ("\nArguments\n$arguments\n") ;
@@ -259,16 +259,18 @@ sub ParseArguments
     $options {$key} =~ s/\@/\\@/g ;
   }
 
-  getopt ("ioalpft", \%options) ;
+  getopt ("ioalpftw", \%options) ;
 
   die ("Specify input folder for projectcounts files as: -i path") if (! defined ($options {"i"})) ;
   die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
 
-  $path_in        = $options {"i"} ;
-  $path_out       = $options {"o"} ;
+  $path_in    = $options {"i"} ;
+  $path_csv   = $options {"o"} ;
+  $path_white = $options {"w"} ;
 
-  die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
-  die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
+  die "Input folder '$path_in' does not exist"         if (! -d $path_in) ;
+  die "Output folder '$path_csv' does not exist"       if (! -d $path_csv) ;
+  die "White list folder '$path_white' does not exist" if (! -d $path_white) ;
 
   die "Always specify project (-p) when you specify language (-l)" if ((! defined ($options {"p"})) && (defined ($options {"l"})));
 
@@ -286,6 +288,7 @@ sub ParseArguments
 
   print "Input  folder: $path_in\n" ;
   print "Output folder: $path_out\n" ;
+  print "White list in: $path_white\n" ;
   print "Select project: $select_project\n" ;
   print "Select language: $select_language\n" ;
   print "Suffix: $suffix_out\n\n" ;
@@ -427,8 +430,8 @@ sub SetComparisonPeriods
 
 sub ScanWhiteList
 {
-  print "$path_in/WhiteListWikis.csv\n" ;
-  open CSV_WHITE_LIST, '<', "$path_in/WhiteListWikis.csv" || die "Could not open $path_in/WhiteListWikis.csv" ;
+  print "$path_white/WhiteListWikis.csv\n" ;
+  open CSV_WHITE_LIST, '<', "$path_white/WhiteListWikis.csv" || die "Could not open $path_white/WhiteListWikis.csv" ;
   while ($line = <CSV_WHITE_LIST>)
   {
     chomp $line ;
@@ -820,7 +823,7 @@ sub WriteCsvFilesPerPeriod
     {
       &Log ("$project ") ;
 
-      $dir_out = "$path_out/csv_$project" ;
+      $dir_out = "$path_csv/csv_$project" ;
       if (! -d $dir_out)
       { mkdir $dir_out, 0777 ; }
 
@@ -887,7 +890,7 @@ sub WriteCsvFilesPerPeriod
   if ($normalize)
   {
     &LogT ("\nWrite totals per month for analytics database\n") ;
-    $file_csv = "$path_out/csv_wp/analytics_in_page_views.csv" ;
+    $file_csv = "$path_csv/csv_wp/analytics_in_page_views.csv" ;
     &Log ("\n\nFile out for analytics database: $file_csv\n\n") ;
     open CSV, ">", $file_csv ;
     binmode CSV ; # enforce UNIX style linebreaks \012
@@ -977,7 +980,7 @@ sub WriteCsvHtmlFilesPopularWikis
 
   @totals_lastmonth = sort {$totals_lastmonth {$b} <=> $totals_lastmonth {$a}} keys %totals_lastmonth ;
 
-  $dir_out  = "$path_out/csv_wp" ;
+  $dir_out  = "$path_csv/csv_wp" ;
   $file_csv = "$dir_out/PageViewsPerMonthPopularWikis_$month_0_file.csv" ;
   $msg_normalized = "Page view data are not normalized to 30 day months" ;
   if ($normalize)
@@ -1405,8 +1408,18 @@ sub WriteCsvHtmlFilesPopularWikis
   }
   close HTML ;
 
-  &Log ("\nFile csv: $file_csv\n") ;
+  &Log ("\nFile csv: $file_csv + copy to wikilytics_in_pageviews.csv\n") ;
   &Log ("File html: $file_html\n") ;
+
+  if ($normalize)
+  {
+    open CSV_IN,  '<', $file_csv ;
+    open CSV_OUT, '>', "$dir_out/wikilytics_in_pageviews.csv" ;
+    while ($line = <CSV_IN>)
+    { print CSV_OUT $line ; }
+    close CSV_IN ;
+    close CSV_OUT ;
+  }
 }
 
 # rather than using already stored data make this step as islated as possible: it could migrate to another job later

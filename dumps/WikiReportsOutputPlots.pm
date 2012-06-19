@@ -3,6 +3,8 @@
 # lijnen bij y = 0 beginnen
 # database size tr loop uit grafiek
 
+$generate_ploticus_plots = 1 ; # no longer update old line charts, refer to newer solutions in hml file
+
 sub GetWp
 {
   my $wp = shift ;
@@ -46,7 +48,10 @@ sub PloticusDummyRun2
   { &Log ("\nFormat not supported: $format") ; }
 }
 
-sub GeneratePlotFiles {
+sub GeneratePlotFiles
+{
+  return if ! $generate_ploticus_plots ;
+
   @plot_colors = ("rgb(1,0.2,0.2)",
                   "rgb(0.7,0.5,1)",
                   "rgb(0,0.7,0.9)",
@@ -119,76 +124,78 @@ sub GeneratePlotFiles {
   undef (%stats_Y) ;
 }
 
-sub GeneratePlotFiles2 {
-  my $f = shift ;
-  my (@languages2, $out_links) ;
-  undef @languages3 ;
-  foreach $wp (@languages)
-  { if ($wp ne "zz") { push @languages2, $wp ; }}
-  $l = 1 ;
-  foreach $wp (@languages2)
-  { push @languages3, $wp . "|" . ++$l ; }
+sub GeneratePlotFiles2
+{
+    my $f = shift ;
+    my (@languages2, $out_links) ;
+    undef @languages3 ;
+    foreach $wp (@languages)
+    { if ($wp ne "zz") { push @languages2, $wp ; }}
+    $l = 1 ;
+    foreach $wp (@languages2)
+    { push @languages3, $wp . "|" . ++$l ; }
 
-#  if (($f != 11) && ($f != 19) && ($f != 20))
-#  { @languages3 = sort {@stats_X {&GetWp($b)} <=> @stats_X {&GetWp($a)}} @languages3 ; }
-#  else
-#  { @languages3 = sort {@stats_Y {&GetWp($b)} <=> @stats_Y {&GetWp($a)}} @languages3 ; }
-  @languages3 = sort {@stats_X {&GetWp($b)} <=> @stats_X {&GetWp($a)}} @languages3 ;
+  #  if (($f != 11) && ($f != 19) && ($f != 20))
+  #  { @languages3 = sort {@stats_X {&GetWp($b)} <=> @stats_X {&GetWp($a)}} @languages3 ; }
+  #  else
+  #  { @languages3 = sort {@stats_Y {&GetWp($b)} <=> @stats_Y {&GetWp($a)}} @languages3 ; }
+    @languages3 = sort {@stats_X {&GetWp($b)} <=> @stats_X {&GetWp($a)}} @languages3 ;
 
-  if ($debug)
-  {
-    if ($f == 11)
+    if ($debug)
     {
-      foreach $line (@languages3)
+      if ($f == 11)
       {
-        $wp2 = &GetWp ($line) ;
-        &Log ("\n" . $wp2 . ": max=" . $stats_Lmax {$wp2} . ", avg=" . sprintf ("%.2f", $stats_Lavg {$wp2})) ;
+        foreach $line (@languages3)
+        {
+          $wp2 = &GetWp ($line) ;
+          &Log ("\n" . $wp2 . ": max=" . $stats_Lmax {$wp2} . ", avg=" . sprintf ("%.2f", $stats_Lavg {$wp2})) ;
+        }
+      }
+      if ($f == 20)
+      {
+        foreach $line (@languages3)
+        {
+          $wp2 = &GetWp ($line) ;
+          &Log ("\n" . $wp2 . ": max=" . $stats_Umax {$wp2} . ", avg=" . sprintf ("%.2f", $stats_Uavg {$wp2})) ;
+        }
       }
     }
-    if ($f == 20)
+
+    undef (@links) ;
+
+    $colmax = 8 ;
+    if (($f == 2) || ($f == 3))
+    { $colmax = 4 ; }
+    if (($f == 11) || ($f == 20))
+    { $colmax = 3 ; }
+
+    $c   = 0 ;
+    $p   = 1 ; # plot seq no -> e.g. PlotWikipediansContributors3.svg
+
+    if (($mode_wp) || ($mode_wk))
     {
-      foreach $line (@languages3)
-      {
-        $wp2 = &GetWp ($line) ;
-        &Log ("\n" . $wp2 . ": max=" . $stats_Umax {$wp2} . ", avg=" . sprintf ("%.2f", $stats_Uavg {$wp2})) ;
-      }
+      $pmax = 7 ; # show no more than pmax plots on this page
+    #  if ($f == 2)
+    #  { $pmax = 5 ; }
+      if ($f == 3)
+      { $pmax = 5 ; }
+      if (($f == 2) || ($f == 20))
+      { $pmax = 10 ; }
     }
-  }
+    else
+    { $pmax = 4 ; }
 
-  undef (@links) ;
+    if (! $mode_wp) # wiktionary: limit plots per page on first months
+    {
+      if ($pmax > $dumpmonth_ord - 51)
+      { $pmax = $dumpmonth_ord - 51 ; }
+    }
 
-  $colmax = 8 ;
-  if (($f == 2) || ($f == 3))
-  { $colmax = 4 ; }
-  if (($f == 11) || ($f == 20))
-  { $colmax = 3 ; }
+    while (($c > -1) && ($p <= $pmax))
+    { $c = &GeneratePlot ($f, $c, $p++, 3, $colmax) ; }
+    if ($c < -1) { $p-- ; } # last call to GeneratePlot returned immediately
 
-  $c   = 0 ;
-  $p   = 1 ; # plot seq no -> e.g. PlotWikipediansContributors3.svg
-
-  if (($mode_wp) || ($mode_wk))
-  {
-    $pmax = 7 ; # show no more than pmax plots on this page
-  #  if ($f == 2)
-  #  { $pmax = 5 ; }
-    if ($f == 3)
-    { $pmax = 5 ; }
-    if (($f == 2) || ($f == 20))
-    { $pmax = 10 ; }
-  }
-  else
-  { $pmax = 4 ; }
-
-  if (! $mode_wp) # wiktionary: limit plots per page on first months
-  {
-    if ($pmax > $dumpmonth_ord - 51)
-    { $pmax = $dumpmonth_ord - 51 ; }
-  }
-
-  while (($c > -1) && ($p <= $pmax))
-  { $c = &GeneratePlot ($f, $c, $p++, 3, $colmax) ; }
-  if ($c < -1) { $p-- ; } # last call to GeneratePlot returned immediately
-
+  # generate html file
   $file_html_bitmap_alt = "PlotsPng" . $report_names [$f] . ".htm" ;
   $file_html_vector_alt = "PlotsSvg" . $report_names [$f] . ".htm" ;
   $file_html_bitmap = $path_out . $file_html_bitmap_alt ;
@@ -198,6 +205,23 @@ sub GeneratePlotFiles2 {
 
   &GenerateHtmlStartComparisonPlots ($format_bitmap, $format_vector,
                                      $file_html_vector_alt, $f) ;
+
+  $out_html .= "<center><b><font color=#800000>These charts are no longer updated and are only kept for historic reference.</font></b>\n" ;
+  $out_html .= "<p>Since 2011 there is a summary page for every wiki, where core metrics are plotted.\n" .
+               "<br>For individual summaries follow links from project <b>sitemap</b>." .
+               "<br>There are also <b>collections</b> of summaries per project.\n" .
+               "<p>For comparison between several languages see the <b><a href='http://reportcard.wmflabs.org'>new report card</a></b>.\n" ;
+
+  $out_html .= "<table border='1'>" ;
+  $out_html .= "<tr><th class=l>Wikipedia</a></th><td class=l><a href='http://stats.wikimedia.org/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wikibooks</a></th><td class=l><a href='http://stats.wikimedia.org/wikibooks/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikibooks/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wiktionary</a></th><td class=l><a href='http://stats.wikimedia.org/wiktionary/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wiktionary/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wikinews</a></th><td class=l><a href='http://stats.wikimedia.org/wikinews/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikinews/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wikiquote</a></th><td class=l><a href='http://stats.wikimedia.org/wikiquote/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikiquote/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wikisource</a></th><td class=l><a href='http://stats.wikimedia.org/wikisource/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikisource/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Wikiversity</a></th><td class=l><a href='http://stats.wikimedia.org/wikiversity/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikiversity/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "<tr><th class=l>Other projects</a></th><td class=l><a href='http://stats.wikimedia.org/wikispecial/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/wikispecial/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
+  $out_html .= "</table></center>" ;
 
 # $out_html =~ s/FFFFDD/FFFFFF/g ;
   if (($mode_wp) && ($f == 20) && ($out_webalizer_note ne ""))
@@ -791,20 +815,28 @@ sub GeneratePlot2 {
   return ($yrange) ;
 }
 
-sub InvokePloticus {
+sub InvokePloticus
+{
+  return if ! $generate_ploticus_plots ; # Q&D catch this flag here, doing this earlier in the code needs some extra care
+
   my $f     = shift ;
   my $p     = shift ;
   my $fmt   = shift ;
   my $file_script = shift ;
+  my $executable = 'ploticus' ;
 
   if (($fmt eq "png") && defined ($gif2png))
   { $fmt = "gif" ; }
 
+  if (! $job_runs_on_production_server)
+  { $executable = 'pl' ; }
+
   my $file_plot   = "Plot" . $report_names [$f] . $p . "." . $fmt ;
   my $path_plot = "$path_out_plots$file_plot" ;
 
-  # my $cmd = $path_pl . "pl -" . $fmt . " -o '$path_out_plots$file_plot' '$file_script' -tightcrop" ;
-  my $cmd = $path_pl . "pl -" . $fmt . " -o \"$path_plot\" \"$file_script\" -tightcrop" ;
+  # my $cmd = $path_pl . "$executable -" . $fmt . " -o '$path_out_plots$file_plot' '$file_script' -tightcrop" ;
+
+  my $cmd = $path_pl . "$executable -" . $fmt . " -o \"$path_plot\" \"$file_script\" -tightcrop" ;
 
   if (($p == 1) && (($fmt eq "gif") || ($fmt eq "png")))
   { &Log ("\nPlot " . $report_names [$f] . "...\n") ; }
@@ -828,7 +860,10 @@ sub InvokePloticus {
 }
 
 
-sub GeneratePlotDataFiles {
+
+
+sub GeneratePlotDataFiles
+{
   my $dumpdate = sprintf ("%2d/%2d/%4d", $dumpmonth, $dumpday, $dumpyear) ;
   $dumpdate = &mmddyyyyDec ($dumpdate) ;
 

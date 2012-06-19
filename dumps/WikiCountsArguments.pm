@@ -249,6 +249,7 @@ sub SetEnvironment
   $dumpdate_gm    = timegm ( 0, 0, 0,$day, $month-1, $year-1900) ;
   $dumpdate_gm_hi = timegm (59,59,23,$day, $month-1, $year-1900) ;
   $dumpmonth_ord  = &bb2i (&yyyymm2bb ($year, $month)) ;
+  &LogT ("Ignore revisions beyond $year $month, timestamp $dumpdate_gm_hi\n") ;
 
   if ($forecast_partial_month)
   {

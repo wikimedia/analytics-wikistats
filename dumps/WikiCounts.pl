@@ -44,8 +44,8 @@
   # set defaults mainly for tests on local machine
 # default_argv "-e|-f|-x|-m wk|-t|-l su|-d 20111130|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wk'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
 #default_argv    "-e|-f|-x|-m wx|-t|-l commons|-d 20120331|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wx'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
-#default_argv    "-e|-f|-x|-m wp|-t|-l hi|-d 20120430|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
- default_argv    "-f|-x|-m wp|-t|-l hi|-d 20120430|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+ default_argv    "-e|-f|-x|-m wp|-t|-l co|-d 20120531|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
+#default_argv    "-f|-x|-m wp|-t|-l hi|-d 20120430|-i 'D:/\@Wikimedia/# In Dumps'|-o 'D:/\@Wikimedia/# Out Test/csv_wp'|-s 'D:/\@Wikimedia/# Out Zwinger/mnt/languages'" ;
 
   $wpx = 'wp';
 # default_argv "-i 'D:/\@Wikimedia/# Out Bayes/csv_$wpx'|-o 'D:/\@Wikimedia/# Out Bayes/csv_$wpx'|-y" ;
@@ -130,7 +130,10 @@
   $useritem_create_reg_recent_namespace_x = 12 ; # reg user, other namespace namespace, if in last 30 days
   $useritem_edits_10 = 13 ;                      # count if user made 10 or more edits
 
-  $file_log_concise = "./WikiCountsLogConcise.txt" ;
+  if ($job_runs_on_production_server)
+  { $file_log_concise = "/a/wikistats/logs/log_wikistats_concise.txt" ; }
+  else
+  { $file_log_concise = "./log_wikistats_concise.txt" ; }
 
   &ParseArguments ;
   &SetEnvironment ;

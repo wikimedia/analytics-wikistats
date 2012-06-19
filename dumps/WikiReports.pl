@@ -226,18 +226,20 @@
   &LogT ("\nRead Monthly Statistics") ;
   &ReadMonthlyStats ;
 
-  if (! $job_runs_on_production_server)
-  {
-    &LogT ("\nExecute temporary test code!") ;
-    &LogT ("\nExecute temporary test code!") ;
-    &LogT ("\nExecute temporary test code!") ;
-    # $MonthlyStatsWpStart {'commons'} = 58 ; # 2004, 10 #  &yyyymm2b (2004,10) ;
-    # &GenerateTablesPerWiki ('commons') ;
-    # &GenerateSummariesPerWiki ('ja') ;
-    &LogT ("\nExecute temporary test code!") ;
-    &GenerateChartsPerWikipedia ('de') ;
-    exit ;
-  }
+#  if (! $job_runs_on_production_server)
+#  {
+#    &LogT ("\nExecute temporary test code!") ;
+#    &LogT ("\nExecute temporary test code!") ;
+#    &LogT ("\nExecute temporary test code!") ;
+#    # $MonthlyStatsWpStart {'commons'} = 58 ; # 2004, 10 #  &yyyymm2b (2004,10) ;
+#    # &GenerateTablesPerWiki ('commons') ;
+#    # &GenerateSummariesPerWiki ('ja') ;
+#    &LogT ("\nExecute temporary test code!") ;
+
+#    &GenerateSiteMapNew ;
+#    &GenerateTablesPerWiki ("pt") ;
+#    exit ;
+#  }
 
   if ($dump_gallery)
   {
@@ -263,7 +265,6 @@
     &GenerateSummariesPerWiki ;
   }
 
-# &GenerateTablesPerWiki ("pt") ;
 # &GenerateComparisonTables ;
 
 #  if ($language eq "en")

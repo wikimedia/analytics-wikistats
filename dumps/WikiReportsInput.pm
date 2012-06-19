@@ -599,7 +599,7 @@ sub ReadDumpDateAndForecastFactors
 
   foreach $line (@csv)
   {
-    my ($wp,$dumpdate,$dummy3,$dummy4,$dummy5, $factor_5, $factor_100, $active_users) = split (",", $line) ;
+    my ($wp,$dumpdate,$parsedate,$dummy4,$dummy5, $factor_5, $factor_100, $active_users) = split (",", $line) ;
     if (($factor_5 > 0) && ($factor_100 > 0))
     {
       $tot_active_users_counted += $active_users ;
@@ -613,8 +613,11 @@ sub ReadDumpDateAndForecastFactors
     $dumpdate2 = substr ($dumpdate,4,2) . "/" . 99                     . "/". substr ($dumpdate,0,4) ;
     $lastdump       {$wp} = $dumpdate ;
     $lastdump_short {$wp} = &GetDateShort ($dumpdate2, $false) ;
+    $lastdump_long  {$wp} = &GetMonthLong (substr ($dumpdate,4,2)) . ' ' . substr ($dumpdate,0,4) ;
+    $lastdump_short_month {$wp} = &GetMonthShort (substr ($dumpdate,4,2)) ;
     if ($dumpdate > $lastdump {"zz"})
     { $lastdump {"zz"} = $dumpdate ; }
+    $parsedate {$wp} = substr ($parsedate,6,4) . substr ($parsedate,0,2) . substr ($parsedate,3,2) ;
   }
 
   my $year  = substr ($lastdump {"zz"},0,4) ;
@@ -1930,7 +1933,7 @@ sub ReadEditActivityLevels
 
   my ($wp) = @_ ;
 
-&LogT ("\nReadEditActivityLevels $wp from $file_csv_users_activity_spread\n") ;
+# &LogT ("\nReadEditActivityLevels $wp from $file_csv_users_activity_spread\n") ;
 
   undef %user_activity_levels ;
   undef %user_activity_levels_max ;

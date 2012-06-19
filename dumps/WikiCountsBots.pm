@@ -123,7 +123,8 @@ sub ReadStoredBots
   &LogT ("ReadStoredBots\n") ;
   undef (%bots) ;
 
-  &ReadFileCsvOnly ($file_csv_bots) ;
+# &ReadFileCsvOnly ($file_csv_bots) ;
+  &ReadFileCsvOnly ($file_csv_bots_all) ;
 
   my ($wp,$botlist) = split (',', $csv [0], 2) ;
 

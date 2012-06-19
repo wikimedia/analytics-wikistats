@@ -1,5 +1,18 @@
 #!/usr/bin/perl
 
+# About redirects:
+# 1) namespace
+# Only pages for certain namepaces are counted as proper 'articles'. Mostly namespace 0 but on some projects other namespaces qualify. (See sub NameSpaceArticle)
+# 2) internal link
+# Also pages without internal links do not qualify (on most projects).
+# For stub dumps this can not be established: no raw text available, hence different page totals are found
+# 3) redirect
+# Also pages which are redirects do not qualify for article counts.
+# For stub dumps this can not be established per revisions (and thus different page totals are found)
+# For full archive dumps (with all page content) the article content is scanned for #REDIRECT, or a localized version, like so
+# $revision_is_redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ;
+# For stub dumps the page xml can contain the following tag <redirect title="[some title]" />, but once per page, not per revision
+
 $start = time ;
 
 use CGI::Carp qw(fatalsToBrowser);
@@ -54,9 +67,9 @@ sub ReadInputXml
   { open "FILE_DUMP_CSV", ">", $file_dump_csv || abort ("Perl file '$file_dump_csv' could not be opened.") ; }
 
   open "FILE_CREATES", ">", $file_csv_creates || abort ("Perl file '$file_csv_creates' could not be opened.") ;
-  print FILE_CREATES "# fields: count_flag,yyyymmddhhnn,namespace,usertype,user,title,uploadwizard\n" ;
+  print FILE_CREATES "# fields: article type,yyyymmddhhnn,namespace,usertype,user,title,uploadwizard\n" ;
   print FILE_CREATES "# usertype  = [A:anonymous|B:bot|R:registered user]\n" ;
-  print FILE_CREATES "# countflag = [-:page contains no internal link|R:page is redirect|S:(link list, deprecated)|S:stub|+:normal article]\n" ;
+  print FILE_CREATES "# article type = [-:page contains no internal link|R:page is redirect|S:(link list, deprecated)|S:stub|+:normal article]\n" ;
   print FILE_CREATES "# when processing full archive dump: count article only when it contains an internal link (official article definition), and is not a redirect\n" ;
   print FILE_CREATES "# when processing full archive dump: only difference for stubs is : those are not counted for alternate article count \n" ;
   print FILE_CREATES "# when processing stub dump: article content is unavailable (no test for redirect or stub threshold) -> article count will be higher\n" ;
@@ -196,6 +209,7 @@ sub ReadFileXml
 {
   $file_in  = shift ;
 
+  # open DEBUG_EVENTS, '>', $path_temp . "events.log" ;
   if (! -e $file_in)
   { abort ("ReadFileXml \$file_in '$file_in' not found.\n") ; }
 
@@ -363,15 +377,13 @@ sub XmlReadUntil
 
   while ($line = <FILE_IN>)
   {
-    if ($edits_only)
-    {
-      # only when full archive dump is processed check each revision for being a redirect
-      # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
-      # note that very last revision in dump could be beyond last date which should be processed, could cause small (negligible) discrepancies
-      # when article changed from redirect to normal or vice versa very recently
-      if ($line =~ /<redirect /)
-      { $last_revision_is_redirect = $true ; }
-    }
+    # only when full archive dump is processed check each revision for being a redirect
+    # in stub dump there can be a <redirect [some article title]> attribute, determined by #REDIRECT (or other language equivalent) (used to be for last revision?)
+    # note that very last revision in dump could be beyond last date which should be processed, could cause small (negligible) discrepancies
+    # when article changed from redirect to normal or vice versa very recently
+    if ($edits_only && ($line =~ /<redirect /))
+    { $edits_only_page_is_redirect = $true ; }
+
 
     $bytes_read += length ($line) ;
     if ($lines_read_xml_read_until++ % 1000 == 0)
@@ -414,7 +426,8 @@ sub XmlReadProgress
 
           $mb_delta = $mb_read - $mb_read_prev ;
           $mb_read_prev = $mb_read ;
-          $mb_per_hour = sprintf ("%.0f", (60 * $mb_delta) / $deltaLogC) ;
+          if ($deltaLogC > 0)
+          { $mb_per_hour = sprintf ("%.0f", (60 * $mb_delta) / $deltaLogC) ; }
           if ($time > $timestart_parse)
           { $pages_per_min = sprintf ("%.0f", $pages_read / ((time - $timestart_parse)/60)) ; }
 
@@ -574,6 +587,7 @@ sub ReadInputXmlPage
   undef @revisions ;
   undef %edits_user_month_article ;
   undef %edits_user_month_article_28 ;
+  $edits_only_page_is_redirect = $false ;
 
   if ($use_tie)
   {
@@ -583,6 +597,7 @@ sub ReadInputXmlPage
   my $ndx_revisions = 0 ;
 
   my $namespace  = 0 ;
+  my $article_type = '-' ;
   my $edits ;
 
   &XmlReadUntil ('<title>') ;
@@ -622,8 +637,7 @@ sub ReadInputXmlPage
 
   # only when full archive dump is processed check each revision for being a redirect
   # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
-  $revision_is_redirect = $false ; # will be relevant for stub dumps only
-  $revision_count_flag  = '-' ;    # will be relevant for full archive dumps only, see comment at UpdateMonthlyStats
+  $revision_is_redirect   = $false ; # will be relevant for stub dumps only
 
   &XmlReadUntil ('<id>.*<\/id>') ; # zzz
   $pageid = $line ;
@@ -653,9 +667,16 @@ sub ReadInputXmlPage
   $md5_list = "" ;
   undef @edit_history ;
   $revision_cnt = 0 ;
+
+  $data_page_created = '' ;
+
   while ($line =~ /<revision>/)
   {
     ($article, $time, $user, $usertype, $comment, $md5) = &ReadInputXmlRevision ;
+
+
+    my $date = substr ($time,0,8) ;
+    last if $date > $dumpdate ;
 
     if ($first_revision)
     {
@@ -704,10 +725,6 @@ sub ReadInputXmlPage
 
     if ($dump2csv)
     { print FILE_DUMP_CSV &csv($namespace).&csv($time).&csv3($title_full).&csv3($user).&csv3($article)."\n" ; }
-
-    my $date = substr ($time,0,8) ;
-    if ($date > $dumpdate)
-    { last ; }
 
   # if (($language eq "en") && (($mb_read >= 474000) && ($mb_read <= 475000)))
   #  {
@@ -857,9 +874,8 @@ sub ReadInputXmlPage
 
 # while ($#revisions > -1)
 
-  # process revsions backwards in time, from latest to earliest
-  # this way only latest revison for any given day is analyzed
-  $last_revision = $true ;
+  # process revsions backwards in time, from latest to earliest, this way only latest revison for any given day is analyzed
+  $most_recent_revision = $true ; # first revision to get from stack (last revision added to table) is most recent, remember article type to classify creator
   while ($ndx_revisions > 0)
   {
   # $text = pop @revisions ;
@@ -886,12 +902,13 @@ sub ReadInputXmlPage
 
 my $start_process_revision = code_started() if $record_time_process_revision_main ;
 
-    &ProcessRevision ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $time, $usertype) ;
+    $article_type = &ProcessRevision ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $time, $usertype) ;
 
-    if ($last_revision)
+    if ($most_recent_revision)
     {
-      $last_revision = $false ;
-      $last_revision_count_flag = $revision_count_flag ;
+    # print DEBUG_EVENTS "EVENT 4 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+      $most_recent_revision = $false ;
+      $most_recent_article_type_for_this_page = $article_type ;
     }
 
 code_complete ("ProcessRevision", $start_process_revision) if $record_time_process_revision_main ;
@@ -902,8 +919,10 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
     $current_revision = $false ;
   }
 
-  # only when processing full archive dump article do_count flag can be redirect (R) or without internal link (-)
-  if ((! $last_revision_is_redirect) && ($last_revision_count_flag !~ /-|R/))
+  return if $article_type =~ /^\!/ or $data_page_created eq '' ; # ignore record, e.g. incomplete current month
+
+  # only when processing full archive dump article article type can be redirect (R) or without internal link (-)
+  if ((! $edits_only_page_is_redirect) && ($most_recent_article_type_for_this_page !~ /-|R/))
   {
     if (&NameSpaceArticle ($language, $namespace))
     { &IncUserData ($user_page_creator, $useritem_create_reg_namespace_a) ; }
@@ -932,7 +951,8 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
     }
   }
 
-  print FILE_CREATES "$last_revision_count_flag,$data_page_created\n" ;
+  print FILE_CREATES "$most_recent_article_type_for_this_page,$data_page_created\n" ;
+  # print DEBUG_EVENTS "EVENT 5 $title $time (pageid $pageid) [$article_type]\n" ;
 
   if (&NameSpaceArticle ($language, $namespace) && (! $prescan)) # strategy
   {
@@ -1184,7 +1204,7 @@ sub ReadInputXmlRevision
   { $article = "" ; }
 
   # not interested in content, only in when and by whom it was edited
-  if ($edits_only)
+  if (! $edits_only)
   {
     if ($article =~ /#REDIRECT/i)
     { $article = "#REDIRECT[[X]]" }
@@ -1421,6 +1441,7 @@ sub WriteRevertsSample
 sub ProcessRevision
 {
   my ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $time, $usertype) = @_ ;
+  # print DEBUG_EVENTS "EVENT 0 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
 
   $booktitle = "" ;
 
@@ -1433,21 +1454,25 @@ sub ProcessRevision
   }
 
   if ($prescan)
-  { return ; }
+  { return ('!1') ; }
 
-  if ($time == 0) { return ; } # found invalid revision in ja:
+  if ($time == 0) { return ('!2') ; } # found invalid revision in ja:
 
   ($year,$month,$day,$hour,$min,$sec) = $time =~ m/(\d\d\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/ ;
 
   if (($month < 1) || ($month > 12))
   {
     &Log ("\nInvalid month '$month' on article '$title', ns $namespace, page id $pageid, user $user, time $time -> skip revision\n") ;
-    return ;
+    return ('!3')  ;
   }
 
-  $time_gm    = timegm ($sec, $min, $hour, $day, $month-1, $year-1900) ;
+  $time_gm = timegm ($sec, $min, $hour, $day, $month-1, $year-1900) ;
 
-  if ($time_gm > $dumpdate_gm_hi) { return ; }
+  if ($time_gm > $dumpdate_gm_hi)
+  {
+    print "Ignore $year, $month, $user\n" ;
+    return ('!4') ;
+  }
 
 my $start_process_revision1 = code_started() if $record_time_process_revision_main ;
 
@@ -1466,15 +1491,13 @@ my $start_process_revision2 = code_started() if $record_time_process_revision_ma
 
   $userid = &GetUserData ($user, $useritem_id) ; # may invoke PutUserData first to create new user record
 
-  $redirect = $false ;
+  $revision_is_redirect = $false ;
+  $article_type = '-' ;
   if (&NameSpaceArticle ($language, $namespace)) # strategy
-  { $redirect = &CollectArticleCounts ($current_revision, $namespace, $pageid, $article) ; }
-
-  if ($last_revision)
-  { $last_revision_is_redirect = $redirect ; }
-
-  if (&NameSpaceArticle ($language, $namespace))
   {
+    ($revision_is_redirect, $article_type) = &CollectArticleCounts ($current_revision, $namespace, $pageid, $article, $user, $userid) ;
+
+
     $yymm  = sprintf ("%02d%02d", $year - 2000, $month, ) ;
     $edits_per_month {$yymm} ++ ;
 
@@ -1520,14 +1543,16 @@ code_complete ("ProcessRevision3", $start_process_revision3) if $record_time_pro
 my $start_process_revision4 = code_started() if $record_time_process_revision_main ;
 
   if (! $prescan)
-  { &CollectUserCounts ($namespace, $user, $title, $redirect, $time_gm, $usertype) ; }
+  { &CollectUserCounts ($namespace, $user, $title, $revision_is_redirect, $time_gm, $usertype) ; }
 
 code_complete ("ProcessRevision4", $start_process_revision4) if $record_time_process_revision_main ;
+
+  return ($article_type) ;
 }
 
 sub CollectUserCounts
 {
-  my ($namespace, $user, $title, $redirect, $time, $usertype) = @_ ;
+  my ($namespace, $user, $title, $revision_is_redirect, $time, $usertype) = @_ ;
   my ($namespace2, $user2) ;
 
   my ($day,$month, $year) = (localtime ($time))[3,4,5] ;
@@ -1596,7 +1621,7 @@ sub CollectUserCounts
 
   # remember edits per user per month
   ($user2 = $user) =~ s/,/&#44;/g ;
-  if (! $redirect)
+  if (! $revision_is_redirect)
   {
     if ($filesizelarge) # zzz
     {
@@ -1645,7 +1670,7 @@ sub CollectUserCounts
   if (! &NameSpaceArticle ($language, $namespace))
   { return ; }
 
-  if ($redirect)
+  if ($revision_is_redirect)
   { return ; }
 
   # remember first and last update for this user
@@ -1674,7 +1699,7 @@ sub CollectUserCounts
     { print "\nTIME '$time' for user '$user' should not be 0\n" ; }
     # ignore redirect pages for this purpose
     # a database bug files moved pages under false date
-#   if (! $redirect)
+#   if (! $revision_is_redirect)
 #   {
       if ($record eq "")
       {
@@ -1694,7 +1719,7 @@ sub CollectUserCounts
     {
       # ignore redirect pages for this purpose
       # a database bug files moved pages under false date
-#     if (! $redirect)
+#     if (! $revision_is_redirect)
 #     {
         $fields [$useritem_edit_first] = $time ;
         $userdata_dirty = $true ;
@@ -1742,13 +1767,16 @@ sub CollectArticleCounts
   my $namespace = shift ;
   my $pageid    = shift ;
   my $article   = shift ;
+  my $user      = shift ;
+  my $userid    = shift ;
   my $time      = $time_gm ;
-  my $redirect  = $false ;
+  my $revision_is_redirect = $false ;
   my $event ;
   my $size      = 0 ;
   my $size2     = 0 ;
   my $words     = 0 ;
 
+  my $article_type = '-' ;
   my $skip_counts = $false ;
   if ($article eq "#@")
   { $skip_counts = $true ; }
@@ -1757,20 +1785,20 @@ sub CollectArticleCounts
   # in stub dump there can be a <redirect /> attribute, determined by #REDIRECT (or other language equivalent) in last revision
   if ($edits_only)
   {
-    $redirect = $last_revision_is_redirect ;
-    if ($redirect)
-    { $do_count = "R" ; }
+    # stub dump -> global flag in page xml for all revisions
+    if ($edits_only_page_is_redirect)
+    { $article_type = "R" ; }
     else
-    { $do_count = "+" ; }
+    { $article_type = "+" ; }
 
-    $revision_count_flag = $do_count ;
-
-    $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $do_count . &i2bbbb (0) . &i2bbbb (0) .
+    $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb (0) . &i2bbbb (0) .
              &i2bb (0) . &i2b (0) . &i2b (0) . &i2b (0) . &i2b (0) .
              &i2bbb (0) . &i2bbbb ($userid) . "\n" ;
+    # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) $article_type $user $userid\n" ;
     &WriteEvent ($event, $pageid, $time) ;
     $length_line_event = length ($event) ;
-    return ($redirect) ;
+
+    return ($edits_only_page_is_redirect, $article_type) ;
   }
 
   # restore quotes
@@ -1782,15 +1810,13 @@ sub CollectArticleCounts
   $article =~ s/\\"/"/go ;
   $size = length ($article) ;
 
-  $do_count      = "-" ;
-  $revision_count_flag = $do_count ;
-
   $links         = 0 ;
   $wikilinks     = 0 ;
   $imagelinks    = 0 ;
   $categorylinks = 0 ;
   $externallinks = 0 ;
 
+  # print DEBUG_EVENTS "EVENT 1 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
   if (! $skip_counts)
   {
     # see http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Title.php?view=markup
@@ -1801,24 +1827,20 @@ sub CollectArticleCounts
 
 my $start_collect_articlecounts1 = code_started() if $record_time_collect_article_counts ;
 
-    $redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ;
+    $revision_is_redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ;
 
-    if ($redirect)
-    {
-      $do_count = "R" ;
-      $revision_count_flag = $do_count ;
-    }
+    if ($revision_is_redirect)
+    { $article_type = "R" ; }
 code_complete ("CollectArticleCounts1", $start_collect_articlecounts1) if $record_time_collect_article_counts ;
 
-    if (! $redirect)
+    if (! $revision_is_redirect)
     {
 
 my $start_collect_articlecounts2 = code_started() if $record_time_collect_article_counts_main ;
 
       if ($article =~ m/\[\[/)
       {
-        $do_count = "+" ;
-        $revision_count_flag = $do_count ;
+        $article_type = "+" ;
 
         #  strip headers, wiki formatting, html
         $article2 = $article;
@@ -1877,9 +1899,8 @@ my $start_collect_articlecounts2e = code_started() if $record_time_collect_artic
         $size2 = $length2 ;
 
         if ($article eq "")
-        { $do_count = "S" ; }
-        elsif ($length2 < $length_stub) { $do_count = "S" ; } # stub
-        $revision_count_flag = $do_count ;
+        { $article_type = "S" ; }
+        elsif ($length2 < $length_stub) { $article_type = "S" ; } # stub
 
         $words = 0 ;
         $unicodes = 0 ;
@@ -2045,7 +2066,7 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
 
 #  &i2bbbb ($pageid) .         0,4
 #  &t2bbbbb ($time) .          4,5
-#  $do_count .                 9,1
+#  $article_type .             9,1
 #  &i2bbbb ($size) .          10,4
 #  &i2bbbb ($size2) .         14,4
 #  &i2bb ($links) .           18,2
@@ -2089,25 +2110,27 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
 
   my $start_collect_articlecounts4 = code_started() if $record_time_collect_article_counts ;
 
-  $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $do_count . &i2bbbb ($size) . &i2bbbb ($size2) .
+  $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb ($size) . &i2bbbb ($size2) .
            &i2bb ($links) . &i2b ($wikilinks) . &i2b ($imagelinks) . &i2b ($categorylinks) . &i2b ($externallinks) .
            &i2bbb ($words) . &i2bbbb ($userid2) . "\n" ;
   $length_line_event = length ($event) ;
 
+  # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+
   if ($skip_counts)
   {
-    $redirect = $redirect_prev ;
+    $revision_is_redirect = $revision_is_redirect_prev ;
     $event    = $event_prev ;
     substr ($event, 4,5) = &t2bbbbb ($time) ;
     substr ($event,27,4) = &i2bbbb ($userid2) ;
   }
-  $redirect_prev = $redirect ;
+  $revision_is_redirect_prev = $revision_is_redirect ;
   $event_prev    = $event ;
 
   &WriteEvent ($event, $pageid, $time) ;
   code_complete ("CollectArticleCounts4", $start_collect_articlecounts4) if $record_time_collect_article_counts ;
 
-  return ($redirect) ;
+  return ($revision_is_redirect, $article_type) ;
 }
 
 sub WriteEvent

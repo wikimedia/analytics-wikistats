@@ -5,6 +5,8 @@
   $trace_on_exit = $true ;
   ez_lib_version (4) ;
 
+  $| = 1 ; # flush screen output
+
 # add: counts jobs per day
 # run Wikinews
 # schedule progress report
@@ -35,8 +37,7 @@
   $out_mymail = "ezachte@###.org (no spam: ### = wikimedia)" ;
   $out_mysite = "http://infodisiac.com/" ;
 
-# hard coded paths, yes I know :)
-  $dir_in      = "W:/# Out Bayes" ;
+# hard coded paths, yes I know :) to be parametrized
   $dir_html    = "W:/# Out Test/htdocs/EN" ;
   $dir_csv     = "W:/# Out Bayes/" ;
   $dir_lists   = "W:/# Out Bayes/dblists" ;
@@ -45,22 +46,37 @@
   $file_html_r = "$dir_html/WikiCountsJobRunTimes.html" ;
   $file_log    = "WikiCountsLogConcise.txt" ;
 
-  if (-d "/mnt/htdocs")
+  if ($job_runs_on_production_server)
   {
-    print "Job runs on bayes\n" ;
-    $dir_in            = "/a/wikistats" ;
-    $dir_html          = "/mnt/htdocs" ;
-    $dir_csv           = "/a/wikistats/" ;
-    $dir_lists         = "/home/ezachte/wikistats/dblists" ;
-    $dir_projectcounts = "/a/dammit.lt/projectcounts" ;
-    $dir_pagecounts    = "/a/dammit.lt/pagecounts" ;
-    $file_html         = "/mnt/htdocs/WikiCountsJobProgress.html" ;
-    $file_html_c       = "/mnt/htdocs/WikiCountsJobProgressCurrent.html" ;
-    $file_html_r       = "/mnt/htdocs/WikiCountsJobRunTimes.html" ;
-    $file_log          = "/home/ezachte/wikistats/WikiCountsLogConcise.txt" ;
+    print "Job runs on $hostname\n" ;
 
+    if (-d "/a/wikistats/csv") # new folders at stat1
+    {
+      $dir_csv           = "/a/wikistats/csv/" ;
+      $dir_lists         = "/a/wikistats/dblists" ;
+      $dir_projectcounts = "/a/dammit.lt/projectcounts" ;
+      $dir_pagecounts    = "/a/dammit.lt/pagecounts" ;
+      $file_log          = "/a/wikistats/logs/log_wikistats_concise.txt" ;
+
+      $dir_html          = "/mnt/htdocs" ;
+      $file_html         = "/mnt/htdocs/WikiCountsJobProgress.html" ;
+      $file_html_c       = "/mnt/htdocs/WikiCountsJobProgressCurrent.html" ;
+      $file_html_r       = "/mnt/htdocs/WikiCountsJobRunTimes.html" ;
+    }
+    else # old folders at bayes
+    {
+      $dir_csv           = "/a/wikistats" ;
+      $dir_lists         = "/home/ezachte/wikistats/dblists" ;
+      $dir_projectcounts = "/a/dammit.lt/projectcounts" ;
+      $dir_pagecounts    = "/a/dammit.lt/pagecounts" ;
+      $dir_html          = "/mnt/htdocs" ;
+      $file_html         = "/mnt/htdocs/WikiCountsJobProgress.html" ;
+      $file_html_c       = "/mnt/htdocs/WikiCountsJobProgressCurrent.html" ;
+      $file_html_r       = "/mnt/htdocs/WikiCountsJobRunTimes.html" ;
+      $file_log          = "/home/ezachte/wikistats/WikiCountsLogConcise.txt" ;
+    }
     &ReadWikiCountsThresholdEditsOnly ;
-    &ReadDammitStats ;
+  # &ReadDammitStats ; # process to process dammit files is no longer in use, new version not yet live
   }
 
   ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time);
@@ -124,7 +140,7 @@
   &ReadStatsCsv ("wv") ;
   &ReadStatsCsv ("wx") ;
 
-  &ReadStatsHtml ($dir_html,"") ;
+  &ReadStatsHtml ($dir_html,"wikipedia") ;
   &ReadStatsHtml ($dir_html,"wikibooks") ;
   &ReadStatsHtml ($dir_html,"wiktionary") ;
   &ReadStatsHtml ($dir_html,"wikinews") ;
@@ -164,10 +180,10 @@
 
 sub ReadJobHistory
 {
-  my $dir_in  = shift ;
+  my $dir_csv  = shift ;
   my $project = shift ;
 
-  my $file = "$dir_in/csv_$project/StatisticsLogRunTime.csv" ;
+  my $file = $dir_csv . "csv_$project/StatisticsLogRunTime.csv" ;
   print "$file\n" ;
   open IN, '<', $file || die ("File not found: $file\n") ;
 
@@ -243,7 +259,7 @@ sub ReadDammitStats
 sub ReadStatsCsv
 {
   my $project = shift ;
-  my $file = "$dir_in/csv_$project/StatisticsLog.csv" ;
+  my $file = $dir_csv . "csv_$project/StatisticsLog.csv" ;
   open IN, '<', $file ;
 
   ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time);
@@ -314,7 +330,11 @@ sub ReadStatsHtml
   my $dir     = shift ;
   my $project = shift ;
 
-  $dir = "$dir/$project" ;
+  if ($project ne "wikipedia")
+  { $dir = "$dir/$project" ; }
+
+  my @languages ;
+
   my $lastdir = getcwd();
   chdir ($dir) || die "Cannot chdir to $dir\n";
   local (*DIR);
@@ -324,30 +344,80 @@ sub ReadStatsHtml
   {
     if (! -d $file)
     { next ; }
-    if ($file !~ /^[A-Z]+$/)
+    if ($file !~ /^[A-Z]+(?:_[A-Z][a-z]+)?$/)
     { next ; }
     push @languages, $file ;
   }
   closedir DIR;
 
+  $project2 = ucfirst ($project) ;
+
+  $reports      {$project} = "<p><b>$project2</b> <small>[count]</small> " ;
+  $reports_cnt = 0 ;
+
   foreach $language (sort @languages)
   {
-    $file_age  = int (-M "$dir/$language/index.html") ;
-    $file_date = time - int (24*60*60*(-M "$dir/$language/index.html")) ;
-    if ($language eq "EN")
-    {
+    $language_lc = lc ($language) ;
+
+    $file_age      = -M "$dir/$language/index.html" ;
+    $file_age_days = int ($file_age) ;
+    $file_age_min  = int (24*60   *$file_age) ;
+    $file_age_secs = int (24*60*60*$file_age) ;
+    $file_date     = time - $file_age_secs ;
+    # if ($language eq "EN")
+    # {
+      $project_folder = $project ;
+      if ($project_folder =~ /Wikipedia/i)
+      { $project_folder = '' ; }
+
+      $language_uc = uc $language ;
+
       if ($project eq "")
       { $project = "wikipedia" ; }
-      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=gmtime($file_date);
-      my $now_gm = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
-      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime($file_date);
-      my $now = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
-      $project2 = ucfirst ($project) ;
-      $reports      {$project} = "<tr><td><small>$project2</small></td><td><small>$now EST</small></td><td><small>=</small></td><td><small>$now_gm GMT</small></td></tr>" ;
-      $report_dates {$project} = $file_date ;
-      $reports_total ++ ;
-    }
+
+      ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime ($file_date);
+
+      $file_ago = $file_age_days ;
+      if ($file_ago == 0)
+    # { $file_ago = " <u>0 days, $file_age_min min</u>" ; }
+      { $file_ago = " <u>$file_age_min min</u>" ; }
+
+      $color = "green" ;
+      if ($language =~ /_/) # regional report
+      {
+        $language_lc = "<i>$language_lc</i>" ; # color = "#004000" ;
+        ($region = $language) =~ s/^[^_]+_// ; # en_india -> EN_India
+        $language_uc = "EN_" . ucfirst $region ;
+      }
+
+      if ($file_ago > 30)
+      { $color = "darkred" ; }
+
+      if ($language_lc eq 'en') # make English report more prominent, this one is more often refreshed
+      { $language_lc = "<b>[[en]]</b>" ; }
+
+      $reports {$project} .= "<a href='http://stats.wikimedia.org/$project_folder/$language_uc/Sitemap.htm'><small><font color=$color>$language_lc<sup>$file_ago</sup></font></small></a>, " ;
+
+      if ($language_lc =~ /\[\[en\]\]/) # make English report more prominent, this one is more often refreshed
+      { $reports_english {$project} = "<a href='http://stats.wikimedia.org/$project_folder/$language_uc/Sitemap.htm'><small><font color=$color>$project<sup>$file_ago</sup></font></small></a>" }
+
+    # if ($project !~ /_/)
+    # { $reports {$project} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ; }
+    # else
+    # { $reports {"$project regional"} .= "<small><font color=$color>$language_lc<sup>$file_ago</sup></font></small>, " ; }
+
+      $reports_cnt ++ ;
+
+      if ($language eq "EN")
+      {
+        $report_dates {$project} = $file_date ;
+        $reports_total ++ ;
+      }
+    # }
   }
+  $reports {$project} =~ s/, $// ;
+  $reports {$project} =~ s/count/$reports_cnt/ ;
+
   chdir ($lastdir) ;
 }
 
@@ -407,12 +477,13 @@ sub WriteHtml
              "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"/>\n" .
              "<meta http-equiv=\"refresh\" content=\"60\">\n" .
              "<title>WikiStats data gathering progress</title>\n" .
-             # "<style type=\text/css\">\n" .
-             # "li    { background-color: #f4f4f4; list-style-type: none; }\n" .
-             # "li li { background-color: white; }\n" .
-             # "li ul { margin-top: 4px; margin-bottom: 8px; text-color: #900000}\n" .
-             # "</style>\n" .
-             "<body bgcolor=#CCCCCC>\n" ;
+             "<style type=\text/css\">\n" .
+             "a:link { color:blue;text-decoration:none;}\n" .
+             "a:visited {color:#0000FF;text-decoration:none;}\n" .
+             "a:active  {color:#0000FF;text-decoration:none;}\n" .
+             "a:hover   {color:#FF00FF;text-decoration:underline}\n" .
+             "</style>\n" .
+             "</head>\n<body bgcolor=#CCCCCC>\n" ;
 
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=gmtime(time);
   $now_gm = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
@@ -504,12 +575,14 @@ sub WriteHtml
   {
     print HTML "<a name='reports' id='reports'></a>" .
                "<hr><b>Reports generated</b>\n" .
-               "<table>\n";
-    foreach $report (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
-    { print HTML $reports {$report} . "\n" ; }
-    print HTML "</table>\n</small>\n" ;
-  }
+               "<small>This section shows -per project per target language- the <b>file age of index.html in days</b> (for age < 24 hours in minutes). " .
+               "Note that a very recently generated report does not always contain counts up to the previous month. " .
+               "See above for how up to data counts are per project language. " .
+               "Color green here means: reports have been generated and published less than 30 days ago.</small>" ;
 
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { print HTML $reports {$project} . "\n" ; }
+  }
 
   print HTML "<hr><p><b>Longest jobs</b> <small>\n" ;
   $html = "<table border=1 spacing=0><tr><td valign=top><table>\n" ;
@@ -575,10 +648,8 @@ sub WriteHtml
 
 sub WriteHtmlCurrent
 {
-  @free = `df -H /dev/sda1 /dev/sda6 /mnt/dumps` ;
-  chomp $free [3] ;
-  $free [3] .= $free [4] ;
-  $free [4] = "" ;
+  push @lines, "\nDisk resources:\n\n" ;
+  @free = `df -h | grep -P 'mnt|sda'` ;
   foreach $line (@free)
   {
     if ($line eq "") { next ; }
@@ -588,15 +659,14 @@ sub WriteHtmlCurrent
     push @lines, $line ;
   }
 
-  push @lines, "\n" ;
-  @used = `du --si /home/ezachte/wikistats /a/tmp/wikistats --si` ;
+  push @lines, "\nFolders > 1G:\n\n" ;
+  @used = `du --si /a/squid | grep [0-9]G` ;
   foreach $line (@used)
   {
     if ($line =~ /\d[MG]/)
     { push @lines, $line ; }
   }
-
-  @used = `du --si /a | grep [0-9]G` ;
+  @used = `du --si /a/wikistats | grep [0-9]G` ;
   foreach $line (@used)
   {
     if ($line =~ /\d[MG]/)
@@ -624,28 +694,43 @@ sub WriteHtmlCurrent
              "td.cb   {text-align:center; border: inset 1px #FFFFFF}\n" .
              "td.lb   {text-align:left;   border: inset 1px #FFFFFF}\n" .
              "td.rb   {text-align:right;  border: inset 1px #FFFFFF}\n" .
+             "a:link    { color:blue;text-decoration:none;}\n" .
+             "a:visited {color:#0000FF;text-decoration:none;}\n" .
+             "a:active  {color:#0000FF;text-decoration:none;}\n" .
+             "a:hover   {color:#FF00FF;text-decoration:underline}\n" .
              "-->\n" .
              "</style>\n" .
 
              "<body bgcolor=#CCCCCC>\n" ;
-  print HTML "<h3>Cached files from <a href='http://dammit.lt/wikistats'>http://dammit.lt/wikistats</a></h3>\n" ;
-  print HTML "<p><small><pre>\n" ;
-  print HTML "../projectcounts: " . sprintf ("%4d", $files_projectcounts) . " files, newest file $file_new_projectcounts\n" ;
-  print HTML "../pagecounts:    " . sprintf ("%4d", $files_pagecounts)    . " files, newest file $file_new_pagecounts\n" ;
-  print HTML "</pre></small>\n" ;
-  print HTML "<h3>Resources</h3>\n<pre>@lines</pre>\n" ;
-  print HTML "<h3>WikiStats data gathering progress for current/last job</h3><p><small><pre>\n" ;
+# print HTML "<h3>Cached files from <a href='http://dammit.lt/wikistats'>http://dammit.lt/wikistats</a></h3>\n" ;
+# print HTML "<p><small><pre>\n" ;
+# print HTML "../projectcounts: " . sprintf ("%4d", $files_projectcounts) . " files, newest file $file_new_projectcounts\n" ;
+# print HTML "../pagecounts:    " . sprintf ("%4d", $files_pagecounts)    . " files, newest file $file_new_pagecounts\n" ;
+# print HTML "</pre></small>\n" ;
+  print HTML "<h3>WikiStats data gathering progress</h3>\n" ;
+  print HTML "<p>Disclaimer: this is not an official WMF publication. This report offers a very concise overview of wikistats status for data collecting and reporting." .
+             "It has been built by Erik Zachte primarily for personal use.\n" ;
+  print HTML "<p>See also: Wikimedia dump progress reports: <a href='http://dumps.wikimedia.org/backup-index.html'>original report</a>, " .
+             "<a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>concise version</a>" ;
+  print HTML "<hr><p><b>Current/Last job</b><br><small><pre>\n" ;
   print HTML "$log_header\n" ;
 
+  $log_line = 1 ;
   foreach $line (@log2)
   {
     chomp $line ;
     print HTML "$line\n" ;
+    if (++$log_line > 20)
+    { print HTML "...\n" ; last ; }
   }
 
   print HTML "</pre></small>" ;
 
-  print HTML "<hr><p><h3>Progress per project</h3>" ;
+  print HTML "<hr><p><h3>Progress per project, collecting data</h3>" .
+             "<small>This section shows -per project per wiki language- how many days ago data were collected and till when. " .
+             "Days ago is shown in superscript. For jobs which ran an hour or more this is followed by run time, and language code is shown in bold. " .
+             "The color signals up till which month data have been processed. Best is up till last month which is shown in green. See also <a href='#legend'>legend</a>.</small> " ;
+
   $html = "" ;
   $project_prev = "" ;
   foreach $run (sort keys %runtimes2)
@@ -719,11 +804,32 @@ sub WriteHtmlCurrent
   { $project2 = "<u>$project2</u>" ; }
   print HTML "<p><b>$project2</b> <small>[$languages] $html</small>\n" ;
 
+  if ($reports_total > 0)
+  {
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { $reports_english .= $reports_english {$project} . ", "; }
+    $reports_english =~ s/, $// ;
+
+    print HTML "<a name='reports' id='reports'></a>\n" .
+               "<hr><p><h3>Progress per project, reporting</h3>" .
+               "<small>This section shows -per project per target language- the <b>file age of index.html in days</b> (for age < 24 hours in minutes). " .
+               "Note that a very recently generated report does not always contain counts up to the previous month. " .
+               "See above for how up to data counts are per project language. " .
+               "Color green here means: reports have been generated and published less than 30 days ago. English reports are generated more often (performance issue), and therefore also listed separately.</small><p>" .
+               "<b>English reports</b>: $reports_english<p>" ;
+
+
+    foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
+    { print HTML $reports {$project} . "\n" ; }
+  }
+
   print HTML "<hr>" ;
   &WriteHtmlJobRunTimes ;
 
   print HTML $colorsused ;
   print HTML "<small><p>xx<sup>y [z]</sup>: z=job run length in minutes if &ge; 10</small>" ;
+
+  print HTML "<h3>Resources</h3>\n<pre>@lines</pre>\n" ;
 
   print HTML "<small><p>Author: Erik Zachte (<a href='http://infodisiac.com'>Web site</a>)<br>\n" .
              "Mail: ezachte@### (no spam: ### = wikimedia.org)<p>\n".
@@ -898,7 +1004,7 @@ sub i2KMB2
 sub ReadWikiCountsThresholdEditsOnly
 {
   my $text = '' ;
-  my $file_perl = "/home/ezachte/wikistats/WikiCounts.pl" ;
+  my $file_perl = "/a/wikistats/scripts/perl/WikiCounts.pl" ;
   open PERL, '<', $file_perl ;
   while ($line = <PERL>)
   {

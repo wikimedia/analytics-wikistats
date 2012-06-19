@@ -102,16 +102,16 @@ sub GenerateGallery
   my $footer  = "<small><font color=#A0A0A0> Screenshots collected with <a href='http://www.pixel-technology.com/freeware/url2bmp/'><font color=#A0A0D0>url2bmp.exe</font></a> (Windows freeware)<br>\n" .
                 " Please note: on a few pages javascript errors may have influenced page rendition<br>" .
                 " Script author: <a href='http://infodisiac.com'><font color=#A0A0D0>Erik Zachte</font></a></font></small>" ;
-  my $out_html = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
+  my $out_html = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_tracker_code\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_40 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
+  my $out_html_40 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_tracker_code\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_1024_768 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
+  my $out_html_1024_768 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_tracker_code\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
-  my $out_html_768_1024 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_google_analytics\n\n" .
+  my $out_html_768_1024 = "<html><head><title>$out_publication2 Main Page Gallery - screen shots taken $date</title></head>\n\n$out_tracker_code\n\n" .
                  "<body bgcolor=black><small><font color=#C0C0C0>$description</font></small>" .
                  "<table summary='Gallery'><tr>\n" ;
 
@@ -316,7 +316,8 @@ sub GenerateSiteMapNew
       $out_html .= "<thead>\n" ;
 
     # $out_html .= &tr ($mode_wp ? &tdcbt5 (&b ("Languages")) : &tdcbt4 (&b ("Languages")) .
-      $out_html .= &tr (&tdcbt5 (&b ("Languages")) .
+      $out_html .= &tr (&tdcbt  (&b ("Data")) .
+                        &tdcbt5 (&b ("Languages")) .
                         &tdcbt  (&b ("Regions")) .
                         &tdcbt3 (&b ("Participation")) .
                         &tdcbt  (&b ("Usage")) .
@@ -329,13 +330,15 @@ sub GenerateSiteMapNew
 #                       $out_participation {"header"} .
 #                       &tdcbt ("<small>Views<br>per hour</small>") .
 #                       &tdcbt ("<small>Article<br>count</small>")) ;
-      $out_html .= &tr (&the . &the . &the .
+      $out_html .= &tr (&tdcbt  ("<small>Month</small>") .
+                        &tde . &tde . &tde .
                         (&tdcbt ("<small>Code<br>&rArr; Project<br>Main Page</small>")) .
                         (&tdlbt ("<small>Language<br>&rArr; Wikipedia article</small>")) .
                         $out_participation {"header"} .
                         &tdcbt ("<small>Views<br>per hour</small>") .
                         &tdcbt ("<small>Article<br>count</small>")) ;
-      $out_html .= &tr (&tdlb(blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>") . "&nbsp;") . &tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the) ;
+#     $out_html .= &tr (&tde . &tde . &tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
+      $out_html .= &tr (&the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
     # $out_html .= &tr (&tdimg ("<a href='TablesWikipediaZZ.htm'><img src='../Tables.png'></a> <a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>") .
 
       if ($region eq '')
@@ -343,7 +346,7 @@ sub GenerateSiteMapNew
         $out_html .= &tr (
                         # &tdimg ("<font size=+1 color='#FFFFDD' face=\'Times'>W</font><a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>&nbsp;") .
                         # &tdimg ("<a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>&nbsp;") .
-                          &tde .
+                          &tde . &tde .
                           &tdcb (&w("<a href='TablesWikipediaZZ.htm'> " . $out_btn_tables . " </a>")) .
                           &tdcb (&w("<a href='ChartsWikipediaZZ.htm'> " . $out_btn_charts . " </a>")) .
                           &tdcbt ("<a href='$out_url_all'>&Sigma;</a>") .
@@ -481,6 +484,7 @@ sub GenerateSiteMapNew
           $out_html .= &tr (
                           # &tdcb ($out_language_article .
                           # "<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
+                             &tdcb (&w($lastdump_short_month {$wp})) .
                             &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
@@ -1435,7 +1439,7 @@ sub GenerateHtmlStart
                "<title>".$out_html_title."</title>\n" .
                $out_meta_charset . $out_meta_robots .
                $out_scriptfile . $out_style .
-               $out_google_analytics .
+               $out_tracker_code .
                "</head>\n\n" .
                "<body bgcolor='#FFFFDD'>\n" .
                $out_page_header2 . $out_msg . "<hr class=b>$out_special_msg\n" ;

@@ -2,21 +2,22 @@
 
 sub SetScriptTrackerCode
 {
-$out_google_analytics = <<__GOOGLE_ANALYTICS__ ;
-<script type="text/javascript">
+#disabled on request, retaining the variable (and code, as example) for other sites or more acceptable page tracker in the future
+#$out_tracker_code = <<__TRACKER_CODE__ ;
+#<script type="text/javascript">
 
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-25704186-1']);
-  _gaq.push(['_trackPageview']);
+#  var _gaq = _gaq || [];
+#  _gaq.push(['_setAccount', 'UA-25704186-1']);
+#  _gaq.push(['_trackPageview']);
 
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
+#  (function() {
+#    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+#    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+#    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+#  })();
 
-</script>
-__GOOGLE_ANALYTICS__
+#</script>
+#__TRACKER_CODE__
 }
 
 sub SetScriptImageFormat
@@ -71,10 +72,10 @@ mtext("MAX_MONTH: MAX_VALUE ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, c
 __SCRIPT_PLOT_TOP_MONTH__
 
 $out_script_plot_grid = <<__SCRIPT_PLOT_GRID__ ;
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b ", tck=1,     col="gray80") # vertical monthly bars light grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format=" ", tck=1,     col="gray80") # vertical monthly bars light grey
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"),  format="%Y ", tck=1,     col="gray80") # year numbers below x axis
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=1,     col="gray20") # vertical yearly bar dark grey
-axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format="\b ", tck=-0.02, col="gray20") # extending slightly below x asix (as tick marks)
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format=" ", tck=1,     col="gray20") # vertical yearly bar dark grey
+axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format=" ", tck=-0.02, col="gray20") # extending slightly below x asix (as tick marks)
 __SCRIPT_PLOT_GRID__
 
 $out_script_plot_axis_summary = <<__SCRIPT_PLOT_AXIS_SUMMARY__ ;
@@ -400,8 +401,8 @@ par(oma=c(0,0,0,0))
 plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lwd=2, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
+#axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
 
@@ -507,7 +508,7 @@ lines(dates,plotdata\$count_3,col="COLOR_3", lty="solid", lwd=1.8)
 lines(dates,plotdata\$count_4,col="COLOR_4", lty="solid", lwd=1.8)
 lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
 
-legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.04, bg="#E0E0E0")
+legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.02, bg="#E0E0E0")
 
 $out_script_plot_top_month
 $out_script_plot_period
@@ -533,7 +534,7 @@ lines(dates,plotdata\$count_25,col="COLOR_25", lty="solid", lwd=1.8)
 lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=1.8)
 
 #legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits ", "(reg edits only)"), lty=1, lwd=2, col=c("COLOR_5","COLOR_25", "COLOR_100", "#F0F0F0"), inset=0.05, bg="#E0E0E0")
-legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.04, bg="#E0E0E0")
+legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.02, bg="#E0E0E0")
 
 $out_script_plot_top_month
 $out_script_plot_period
@@ -610,7 +611,7 @@ lines(dates,plotdata\$uploaders_ge_5,col="COLOR_5", lty="solid", lwd=1.8)
 lines(dates,plotdata\$uploaders_ge_25,col="COLOR_25", lty="solid", lwd=1.8)
 lines(dates,plotdata\$uploaders_wizard_ge_1,col="COLOR_W1", lty="solid", lwd=1.8)
 
-legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
 
 $out_script_plot_top_month
 $out_script_plot_period
@@ -634,7 +635,7 @@ $out_script_title
 
 lines(dates,plotdata\$articles,col="orange3", lty="solid", lwd=1.8)
 
-#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
 
 $out_script_plot_top_month
 $out_script_plot_period
@@ -660,7 +661,8 @@ lines(dates,plotdata\$articles_reg, col="green4", lty="solid", lwd=1.8)
 lines(dates,plotdata\$articles_anon,col="red", lty="solid", lwd=1.8)
 lines(dates,plotdata\$articles_bot, col="blue", lty="solid", lwd=1.8)
 
-#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.04, bg="#E0E0E0")
+# http://stat.ethz.ch/R-manual/R-patched/library/graphics/html/legend.html
+legend("topleft",c("reg", "anon", "bots"), lty=1, lwd=1.8, col=c("green4","red","blue"), inset=0.02, bg="#E0E0E0")
 
 $out_script_plot_top_month
 $out_script_plot_period
@@ -814,7 +816,7 @@ $out_script_sorter_invoke = <<__SCRIPT_SORTER_INVOKE__ ;
 <script type='text/javascript'>
 \$('#table2').tablesorter({
   // debug:true,
-  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:'nohtml'},3:{sorter:'nohtml'},4:{sorter:'nohtml'},5:{sorter:false},6:{sorter:'millions'},7:{sorter:'digitsonly'},8:{sorter:'digitsonly'},9:{sorter:'digitsonly'},10:{sorter:false}}
+  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:false},3:{sorter:false},4:{sorter:'nohtml'},5:{sorter:'nohtml'},6:{sorter:'nohtml'},7:{sorter:false},8:{sorter:'millions'},9:{sorter:'digitsonly'},10:{sorter:'digitsonly'},11:{sorter:'digitsonly'},12:{sorter:false}}
 });
 </script>
 __SCRIPT_SORTER_INVOKE__

@@ -5,10 +5,10 @@
 # StatisticsUserActivitySpread.csv
 sub GenerateSummariesPerWiki
 {
-  print "Remove obsolete R plot files\n" ;
-  $cmd = "rm $path_in" . "R-Plot*" ;
-  print "$cmd\n" ;
-  `$cmd` ;
+# print "Remove obsolete R plot files\n" ;
+# $cmd = "rm $path_in" . "R-Plot*" ;
+# print "$cmd\n" ;
+# `$cmd` ;
 
   my @months_en   = qw (January February March April May June July August September October November December);
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
@@ -19,6 +19,14 @@ sub GenerateSummariesPerWiki
   $col_highlight = "#8080FF" ;
 
   $out_html_report_card = '' ;
+
+     if ($mode eq 'wb')  { $out_publication  = $out_wikibook ; }
+  elsif ($mode eq 'wk')  { $out_publication  = $out_wiktionary ; }
+  elsif ($mode eq 'wn')  { $out_publication  = $out_wikinews ; }
+  elsif ($mode eq 'wq')  { $out_publication  = $out_wikiquote ; }
+  elsif ($mode eq 'ws')  { $out_publication  = $out_wikisources ; }
+  elsif ($mode eq 'wv')  { $out_publication  = $out_wikiversity ; }
+  elsif ($mode eq 'wx')  { $out_publication  = $out_wikispecial ; }
 
   # Generate edit/view plots per wiki
   # Generate html file per single wiki
@@ -1464,6 +1472,7 @@ sub GeneratePlotArticles
   $out_language_name    =~ s/&nbsp;/ /g ;
 
   $articles_max = 0 ;
+  $articles_max_per_usertype = 0 ;
   $month_plot_max = 1 ;
   $m_lo = 999 ;
   $m_hi = 0 ;
@@ -1506,6 +1515,16 @@ sub GeneratePlotArticles
       $month_plot_max = $m ;
     }
 
+    if ($tot_or_new eq 'New')
+    {
+      if ($articles_max_per_usertype > $new_articles_per_month_reg)
+      { $articles_max_per_usertype = $new_articles_per_month_reg ; }
+      if ($articles_max_per_usertype > $new_articles_per_month_anon)
+      { $articles_max_per_usertype = $new_articles_per_month_anon ; }
+      if ($articles_max_per_usertype > $new_articles_per_month_bot)
+      { $articles_max_per_usertype = $new_articles_per_month_bot ; }
+    }
+
 # print "new articles $articles, articles max $articles_max, reg $new_articles_per_month_reg,anon $new_articles_per_month_anon,bot $new_articles_per_month_bot\n" ;
 
     $tot_articles_prev = $tot_articles ;
@@ -1519,7 +1538,9 @@ sub GeneratePlotArticles
   else
   { print ARTICLES_OUT "language,month,articles\n" ; }
 
-  ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($articles_max) ;
+  ($metric_max, $metric_max_rounded_usertype, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($articles_max_per_usertype) ;
+  ($metric_max, $metric_max_rounded,          $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($articles_max) ;
+
   for ($m = $m_lo - ($m_lo % 12) + 1 ; $m < $m_lo; $m++)
   {
     $date = &m2mmddyyyy ($m) ;
@@ -1596,7 +1617,7 @@ sub GeneratePlotArticles
   $out_script_plot =~ s/MAX_METRIC/$tot_or_new_lc articles/g ;
   $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
   $out_script_plot =~ s/MAX_VALUE/$metric_max$metric_unit_text2/g ;
-  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded/g ;
+  $out_script_plot =~ s/YLIM_MAX/$metric_max_rounded_usertype/g ;
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
   $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
@@ -1823,7 +1844,7 @@ sub HtmlSingleWiki
 <meta name="robots" content="index,follow">
 <script language="javascript" type="text/javascript" src="../WikipediaStatistics14.js"></script>
 $out_style
-$out_google_analytics
+$out_tracker_code
 </head>
 <body>
 $out_body
@@ -1889,7 +1910,7 @@ sub HtmlReportCard
 <meta name="robots" content="index,follow">
 <script language="javascript" type="text/javascript" src="../WikipediaStatistics14.js"></script>
 $out_style
-$out_google_analytics
+$out_tracker_code
 </head>
 <body>
 $header_report_card
@@ -2042,7 +2063,7 @@ sub GeneratePlotCallR
   print R_SCRIPT $script ;
   close R_SCRIPT ;
 
-  $cmd = "R CMD BATCH \"$file_script $file_script_out\"" ;
+  $cmd = "R CMD BATCH $file_script $file_script_out" ;
 
   if ($generate_edit_plots++ < 10)
   { print "$cmd\n\n" ; }

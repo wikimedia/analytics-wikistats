@@ -849,6 +849,9 @@ sub UpdateBotsAll
   &ReadFileCsv ($file_csv_bots_all) ;
 
   @bots2 = (sort {$a cmp $b} keys %bots) ;
+  foreach $bot (@bots2)
+  { $bot =~ s/,/&comma;/g ; }
+  
   if ($#bots2 > -1)
   { push @csv, "$language," . join ('|', @bots2) ; }
   @csv = sort {$a cmp $b} @csv ;
