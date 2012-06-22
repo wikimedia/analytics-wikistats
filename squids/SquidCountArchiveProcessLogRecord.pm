@@ -13,7 +13,7 @@ sub ProcessLine
   $mime       = $fields [10] ;
   $url        = lc ($fields [8]) ;
 
-  $mime =~ s/;// ;  # May 2012: mimetype "text/html;" instead of "text/html" from mobile site
+  $mime =~ s/[;\s].*// ;
   if ($mime eq '-')
   {
     # no mime type on log records from varnish, assume 'page request' on most, until that stream had been fixed
@@ -33,7 +33,7 @@ sub ProcessLine
   {
     return if $line =~ /Banner(?:Cont|List|Load|beheer)/io ;
 
-    if ($mime eq "text/html")
+    if ($mime =~ "text/html")
     {
       $ip_frequencies {$client_ip} ++ ; # do not use $count_event here!
       $html_pages_found += $count_event ;
