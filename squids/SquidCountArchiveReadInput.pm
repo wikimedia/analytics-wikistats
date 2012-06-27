@@ -1,8 +1,8 @@
  #!/usr/bin/perl
 
-# /usr/local/bin/geoiplogtag uses /usr/share/GeoIP/GeoIP.dat
+# geoiphandler.py uses /usr/share/GeoIP/GeoIP.dat
 # test:
-# echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
+# echo 125.123.123.123 | ./geoiphandler.py 0
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 use SquidCountArchiveConfig ;
 
@@ -170,9 +170,9 @@ sub ReadSquidLogFiles
     if ($job_runs_on_production_server)
     {
       if ($file_in =~ /\.gz$/o)
-      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g | python $cfg_liblocation/geoiphandler.py 12,4" ; } # http://perldoc.perl.org/functions/open.html
       else
-      { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "cat $file_in | python $cfg_liblocation/geoiphandler.py 12,4" ; } # http://perldoc.perl.org/functions/open.html
       $fields_expected = 14 ;
     }
     else
@@ -341,7 +341,6 @@ if (! $scan_ip_frequencies)
 
   if ($scan_ip_frequencies)
   { return ($data_read) ; }
-
   if ($job_runs_on_production_server)
   {
     close FILE_EDITS_SAVES ;

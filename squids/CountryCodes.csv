@@ -1,6 +1,7 @@
-# http://www.maxmind.com/app/iso3166,,,
+# http://www.maxmind.com/app/iso3166
 --,XX,X,Unknown
-A1,XX,X,Anonymous Proxy
+-P,QP,X,Proxy
+A1,QP,X,Anonymous Proxy
 A2,XX,X,Satellite Provider
 AB,XX,X,UNDEFINED
 AD,EU,N,Andorra
@@ -76,7 +77,7 @@ EU,EU,N,Europe
 FI,EU,N,Finland
 FJ,OC,S,Fiji
 FK,SA,S,Falkland Islands (Malvinas)
-FM,OC,S,"Micronesia, Federated States of"
+"FM,OC,S,""Micronesia, Federated States of"""
 FO,EU,N,Faroe Islands
 FR,EU,N,France
 G2,XX,X,UNDEFINED
@@ -113,7 +114,7 @@ IM,EU,N,Isle of Man
 IN,AS,S,India
 IO,XX,S,British Indian Ocean Territory
 IQ,AS,S,Iraq
-IR,AS,S,"Iran, Islamic Republic of"
+"IR,AS,S,""Iran, Islamic Republic of"""
 IS,EU,N,Iceland
 IT,EU,N,Italy
 JE,EU,N,Jersey
@@ -127,8 +128,8 @@ KI,OC,S,Kiribati
 KM,AF,S,Comoros
 KN,CA,S,Saint Kitts and Nevis
 KO,XX,X,UNDEFINED
-KP,AS,S,"Korea, Democratic People's Republic of"
-KR,AS,N,"Korea, Republic of"
+"KP,AS,S,""Korea, Democratic People's Republic of"""
+"KR,AS,N,""Korea, Republic of"""
 KW,AS,S,Kuwait
 KY,CA,S,Cayman Islands
 KZ,AS,S,Kazakhstan
@@ -145,7 +146,7 @@ LV,EU,N,Latvia
 LY,AF,S,Libyan Arab Jamahiriya
 MA,AF,S,Morocco
 MC,EU,N,Monaco
-MD,EU,N,"Moldova, Republic of"
+"MD,EU,N,""Moldova, Republic of"""
 ME,EU,N,Montenegro
 MF,XX,X,UNDEFINED
 MG,AF,S,Madagascar
@@ -236,7 +237,7 @@ TR,AS,S,Turkey
 TT,CA,S,Trinidad and Tobago
 TV,OC,S,Tuvalu
 TW,AS,S,Taiwan
-TZ,AF,S,"Tanzania, United Republic of"
+"TZ,AF,S,""Tanzania, United Republic of"""
 UA,EU,N,Ukraine
 UG,AF,S,Uganda
 UM,NA,N,United States Minor Outlying Islands
@@ -246,8 +247,8 @@ UZ,AS,S,Uzbekistan
 VA,EU,N,Holy See (Vatican City State)
 VC,CA,S,Saint Vincent and the Grenadines
 VE,SA,S,Venezuela
-VG,CA,S,"Virgin Islands, British"
-VI,CA,S,"Virgin Islands, U.S."
+"VG,CA,S,""Virgin Islands, British"""
+"VI,CA,S,""Virgin Islands, U.S."""
 VN,AS,S,Vietnam
 VU,OC,S,Vanuatu
 WF,OC,S,Wallis and Futuna

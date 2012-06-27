@@ -70,6 +70,7 @@ sub ProcessLine
   $method     = $fields [7] ;
 
   $referer    = lc ($fields [11]) ;
+  $xff        = $fields [12] ;
   $agent      = $fields [13] ;
 
 # print "\ntime '$time', client_ip '$client_ip', mime '$mime', squid '$squid', seqno '$seqno', \nstatus '$status', size '$size', method '$method', referer '$referer',\nurl '$url', agent '$agent'\n" ;
@@ -136,6 +137,8 @@ sub ProcessLine
     { $country = "--" ; }
     if (&IsInternal($client_ip))
     { $country = "-X" ; }
+    if ($xff ne "-")
+    { $country = "-P" ; }
   }
   else
   {
