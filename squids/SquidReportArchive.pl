@@ -634,9 +634,10 @@ sub PrepHtml
   $link_countries_overview = "<a href='SquidReportPageViewsPerCountryOverview.htm'>Overview</a>" ;
   $link_countries_projects = "<a href='SquidReportPageViewsPerCountryBreakdown.htm'>Projects</a>" ;
   $link_countries_trends = "<a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryTrends.htm'>Trends</a>" ;
+  $link_trends_useragents = "<a href='$file_html_user_agents_timed'>User agents</a>" ;
   $link_trends_countries = "<a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryTrends.htm'>Countries</a>" ;
-  $link_trends_ua = "<a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryTrends.htm'>User agents</a>" ;
-  $link_trends_browsers = "<a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryTrends.htm'>Browsers</a>" ;
+  $link_trends_browsers = "<a href='$file_html_browsers_timed'>Browsers</a>" ;
+  $link_trends_devices = "<a href='$file_html_devices_timed'>Devices</a>" ;
 }
 
 sub ReadCountryCodes
@@ -1446,6 +1447,7 @@ sub ReadInputCountriesNames
   if (! -e $path_csv_country_codes) { abort ("Input file $path_csv_country_codes not found!") ; }
 
   open    CSV_COUNTRY_CODES, '<', $path_csv_country_codes ;
+
   binmode CSV_COUNTRY_CODES ;
   $country_names {"--"} = "Unknown" ;
   while ($line = <CSV_COUNTRY_CODES>)
@@ -5349,7 +5351,7 @@ sub WriteReportCountriesInfo
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX')
+    if ($region_code ne 'XX' && $region_code ne 'QP')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5389,7 +5391,7 @@ sub WriteReportCountriesInfo
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
-    $region =~ s/^-P$/<b>Proxies<\/b>/ ;
+    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
@@ -5564,7 +5566,7 @@ sub WriteReportCountryOpSys
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX')
+    if ($region_code ne 'XX' && $region_code ne 'QP')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5627,12 +5629,13 @@ sub WriteReportCountryOpSys
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S XX AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
+    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
@@ -5817,7 +5820,7 @@ sub WriteReportCountryBrowser
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX')
+    if ($region_code ne 'XX' && $region_code ne 'QP')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5880,12 +5883,13 @@ sub WriteReportCountryBrowser
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S XX AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
+    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
@@ -6045,8 +6049,8 @@ sub WriteReportUserAgentsTimed
     $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
     $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
     $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-    $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br/>\nLINKS ;
-    $html =~ s/LINKS/Trends: $dummy_useragents \/ $link_trends_countries \/ $link_trends_browsers/ ;
+    $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
+    $html =~ s/LINKS/Trends: $dummy_useragents \/ $link_trends_countries \/ $link_trends_browsers \/ $link_trends_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6144,11 +6148,11 @@ sub WriteReportBrowsersTimed
   else
   {
     $html = $headerwithperc ;
-    $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
-    $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
+    $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
+    $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
     $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
     $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
-    $html =~ s/LINKS/Trends: $link_ua_trends \/ $link_trends_countries \/ $dummy_browsers/ ;
+    $html =~ s/LINKS/Trends: $link_trends_useragents \/ $link_trends_countries \/ $dummy_browsers \/ $link_trends_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6225,8 +6229,8 @@ sub WriteReportDevicesTimed
   else
   {
     $html = $headerwithperc ;
-    $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
-    $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
+    $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Devices temporal development/ ;
+    $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Devices temporal development/ ;
     $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
     $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
     $html =~ s/LINKS/Trends: $link_trends_useragents \/ $link_trends_countries \/ $link_trends_browsers \/ $dummy_devices/ ;
