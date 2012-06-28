@@ -723,6 +723,7 @@ sub ReadInputClients
       $group =~ s/^PANTECH.*$/PanTech/i ;
       $group =~ s/^Palm_Pre/Palm Pre/i ;
       $clientgroups {"$mobile,$group"} += $count ;
+      $rawclients {"$mobile,$group"} += $count ;
 
       if ($mimecat eq 'page')
       {
@@ -6050,7 +6051,7 @@ sub WriteReportUserAgentsTimed
     $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
     $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
     $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
-    $html =~ s/LINKS/Trends: $dummy_useragents \/ $link_trends_countries \/ $link_trends_browsers \/ $link_trends_devices/ ;
+    $html =~ s/LINKS/Trends: $dummy_user_agents \/ $link_trends_countries \/ $link_trends_browsers \/ $link_trends_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6080,9 +6081,9 @@ sub BrowsersTimedRow
   my $result = "<tr>" ;
   $month = &ShowMonth ($month) ;
   
-  foreach $key (@clientgroups_sorted_count)
+  foreach $key (%rawclients)
   {
-    $count = $clientgroups_html_only {$key} ;
+    $count = $rawclients {$key} ;
     ($mobile,$group) = split (',', $key) ;
     if ($mobile eq '-')
     {
