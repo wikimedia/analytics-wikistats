@@ -1,7 +1,7 @@
 # http://www.maxmind.com/app/iso3166
 --,XX,X,Unknown
--P,QP,X,Proxy
-A1,QP,X,Anonymous Proxy
+-P,QP,X,IPv6
+A1,XX,X,Anonymous Proxy
 A2,XX,X,Satellite Provider
 AB,XX,X,UNDEFINED
 AD,EU,N,Andorra

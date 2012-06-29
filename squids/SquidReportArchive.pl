@@ -5352,7 +5352,7 @@ sub WriteReportCountriesInfo
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX' && $region_code ne 'QP')
+    if ($region_code ne 'XX' && $region_code ne 'QP' && $region_code ne '')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5392,7 +5392,7 @@ sub WriteReportCountriesInfo
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
-    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
+    $region =~ s/^QP$/<b>IPv6<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
@@ -5567,7 +5567,7 @@ sub WriteReportCountryOpSys
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX' && $region_code ne 'QP')
+    if ($region_code ne 'XX' && $region_code ne 'QP' && $region_code ne '')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5636,7 +5636,7 @@ sub WriteReportCountryOpSys
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
-    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
+    $region =~ s/^QP$/<b>IPv6<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
@@ -5821,7 +5821,7 @@ sub WriteReportCountryBrowser
     else
     { $penetration = '..' ; }
 
-    if ($region_code ne 'XX' && $region_code ne 'QP')
+    if ($region_code ne 'XX' && $region_code ne 'QP' && $region_code ne '')
     {
       $html .= "<tr><th class=rh3><a id='$country' name='$country'></a>$link_country $icon</th>" .
                  "<td>$region_name</td>" .
@@ -5890,7 +5890,7 @@ sub WriteReportCountryBrowser
 
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
-    $region =~ s/^QP$/<b>Proxies<\/b>/ ;
+    $region =~ s/^QP$/<b>IPv6<\/b>/ ;
     $region =~ s/^XX$/<b>Unknown<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;

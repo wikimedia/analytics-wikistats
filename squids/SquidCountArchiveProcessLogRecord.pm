@@ -132,13 +132,41 @@ sub ProcessLine
 
   if ($job_runs_on_production_server)
   {
-    $country = $fields [14] ;
+    $country = "" ;
+    @xffparts = split ('%20',$xff) ;
+    foreach $ip (@xffparts)
+    {
+       next if $country ne "" ;
+       if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
+       {
+         $country = $savedipcountry { $ip } ;
+         if ($country eq "")
+         {
+           $country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
+           $country =~ s/.*\s([\w-\(])/$1/ ;
+           $country =~ s/\s//g ;
+           $savedipcountry { $ip } = $country ;
+         }
+         $foundip = $ip ;
+         if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
+         { $country = "" ; }
+       }
+    }
+    if ($country eq "")
+    {
+      $country = $fields [14] ;
+      $foundip = $client_ip ;
+    }
     if (($country eq "") || ($country =~ /null/))
-    { $country = "--" ; }
-    if (&IsInternal($client_ip))
+    {
+      $country = "--" ;
+      if ($foundip =~ /:/)
+      {
+        $country = "-P" ;
+      }
+    }
+    if (&IsInternal($foundip))
     { $country = "-X" ; }
-    if ($xff ne "-")
-    { $country = "-P" ; }
   }
   else
   {
