@@ -8,7 +8,7 @@
   $month_last = sprintf ("%02d", $month_last) ; # 1 -> 01
 
   # set defaults mainly for tests on local machine
-  default_argv "-i 'W:/# Out Bayes'|-o 'W:/@ Report Card/Data'|-m 2012-04" ;
+  default_argv "-i W:/#%20Out%20Bayes|-o W:/@%20Report%20Card/Data|-m 2012-05" ;
 
   use Getopt::Std ;
 
@@ -46,8 +46,8 @@ sub ParseArguments
   die ("Specify output folder as: -o path'")                       if (! defined ($options {"o"})) ;
   die ("Specify month as -m yyyy-mm")                              if (! defined ($options {"m"})) ;
 
-  $path_in  = $options {"i"} ;
-  $path_out = $options {"o"} ;
+  ($path_in  = $options {"i"}) =~ s/\%20/ /g ; ;
+  ($path_out = $options {"o"}) =~ s/\%20/ /g ; ; ;
   $yyyy_mm  = $options {"m"} ;
 
   die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
@@ -85,6 +85,8 @@ sub ReadStatisticsMonthly
   &ReadStatisticsMonthlyForProject ("ws") ;
   &ReadStatisticsMonthlyForProject ("wv") ;
   &ReadStatisticsMonthlyForProject ("wx") ;
+
+  &ReadStatisticsMonthlyAllProjects ;
 
   &ReadStatisticsPerBinariesExtensionCommons ;
 }
@@ -260,6 +262,34 @@ sub ReadStatisticsMonthlyForProject
   close CSV_IN ;
 }
 
+sub ReadStatisticsMonthlyAllProjects
+{
+  my $file_csv_in = "$path_in/csv_wp/StatisticsUserActivitySpreadAllProjects.csv" ;
+
+  if (! -e $file_csv_in)
+  { &Abort ("Input file '$file_csv_in' not found") ; }
+
+  print "Read '$file_csv_in'\n" ;
+  open CSV_IN, '<', $file_csv_in ;
+  while ($line = <CSV_IN>)
+  {
+    next if $line !~ /^zz/ ;
+    chomp $line ;
+    ($tag,$month,$dummy_reg,$dummy_article_type,@counts) = split (',', $line) ;
+
+    my $mm   = substr ($month,0,2) ;
+    my $yyyy = substr ($month,6,4) ;
+    my $m = &months_since_2000_01 ($yyyy,$mm) ;
+
+    $editors_ge_5   = $counts [2] ;
+    $editors_ge_100 = $counts [7] ;
+
+    $totals_project_edits_merged {"$tag,2,$m"} = $editors_ge_5 ;
+    $totals_project_edits_merged {"$tag,3,$m"} = $editors_ge_100 ;
+  }
+  close CSV_IN ;
+}
+
 sub ReadStatisticsPerBinariesExtensionCommons
 {
   my $file_csv_in = "$path_in/csv_wx/StatisticsPerBinariesExtension.csv" ;
@@ -363,6 +393,46 @@ sub WriteMonthlyData
 
     $line =~ s/,$// ;
     $output .= "$line\n" ;
+
+    if ($f == 2 or $f == 3)
+    {
+      $line = ",Total after merge," ;
+      for ($m = $m_start ; $m <= $m_last ; $m++)
+      { $line .= $totals_project_edits_merged {"zz,$f,$m"} . ","  ; }
+
+#     # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_12"} ) - 100). "%,"  ;
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_1" }  ) - 100). "%,"  ;
+      $line =~ s/,$// ;
+      $output .= "$line\n" ;
+
+      $line = ",Total after merge - normalized (1st 28 days)," ;
+      for ($m = $m_start ; $m <= $m_last ; $m++)
+      { $line .= $totals_project_edits_merged {"zz28,$f,$m"}  . ","  ; }
+      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_12"}) - 100). "%,"  ;
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_1"} ) - 100). "%,"  ;
+      $line =~ s/,$// ;
+      $output .= "$line\n" ;
+
+      $line = ",Total after merge - weighted (1 upload is 5 edits)," ;
+      for ($m = $m_start ; $m <= $m_last ; $m++)
+      { $line .= $totals_project_edits_merged {"zzw,$f,$m"} . ","  ; }
+      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_12"}) - 100). "%,"  ;
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_1"} ) - 100). "%,"  ;
+      $line =~ s/,$// ;
+      $output .= "$line\n" ;
+
+      $line = ",Total after merge - weighted (1 upload is 5 edits) - normalized (1st 28 days)," ;
+      for ($m = $m_start ; $m <= $m_last ; $m++)
+      { $line .= $totals_project_edits_merged {"zzw28,$f,$m"} . ","  ; }
+      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_12"} ) - 100). "%,"  ;
+      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_1"}  ) - 100). "%,"  ;
+      $line =~ s/,$// ;
+      $output .= "$line\n" ;
+    }
 
     # sort by absolute amount for last month
     %values_f_12 = %{$values {"$f,$m_last"}} ;
