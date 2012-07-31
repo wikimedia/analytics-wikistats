@@ -24,7 +24,6 @@
   &InitReportNames ;
   &ReadStatisticsMonthly ;
   &WriteMonthlyData ; # filename for old report card process
-  &CopyMonthlyData ;  # filename for new report card process
   exit ;
 
 sub LogArguments
@@ -71,6 +70,11 @@ sub ParseArguments
   print "\n" ;
 
   $file_csv_out = "$path_out/StatisticsMonthly_${year_last}_${month_last}.csv" ;
+  open CSV_OUT, '>', $file_csv_out ;
+  print CSV_OUT "File name changed for new report card!\nNew name 'wikilytics_in_wikistats_core_metrics.csv'\n" ;
+  close CSV_OUT ;
+
+  $file_csv_out = "$path_out/wikilytics_in_wikistats_core_metrics.csv"
 
   &SetComparisonPeriods ;
 }
@@ -204,7 +208,7 @@ sub ReadStatisticsMonthlyForProject
   {
     chomp $line ;
     ($language,$date,$reguser_bot,$group,$counts) = split (',', $line, 5) ;
-    next if $language =~ /^zz/ ;
+    next if $language =~ /^zz/ ; # zz[etc] language codes are project wide totals (several variations)
 
     next if $language eq 'commons' and $project ne 'wx' ; # commons also in wikipedia csv files (bug, hard to cleanup, just skip)
   # next if $language eq 'commons' ; # ignore editor count on commons alltogether, most are already counted for other project
@@ -669,20 +673,6 @@ if ($f == 2)
   close CSV_OUT  ;
 
   print "\nOutput written to $file_csv_out\n\n" ;
-}
-
-# duplicate file, keep name for old report card process (for a while) copy to file for new report card process
-sub CopyMonthlyData
-{
-  $file_csv_out2 = "$path_out/wikilytics_in_wikistats_core_metrics.csv" ;
-  print "Write copy of $file_csv_out to $file_csv_out2\n" ;
-
-  open CSV_IN,  '<', $file_csv_out ;
-  open CSV_OUT, '>', $file_csv_out2 ;
-  while ($line = <CSV_IN>)
-  { print CSV_OUT $line ; }
-  close CSV_IN ;
-  close CSV_OUT ;
 }
 
 sub SetComparisonPeriods

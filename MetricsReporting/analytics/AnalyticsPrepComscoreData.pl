@@ -40,6 +40,7 @@
   $true  = 1 ;
   $false = 0 ;
 
+  $verbose = $false ;
   $script_name    = "AnalyticsPrepComscoreData.pl" ;
   $script_version = "0.31" ;
 
@@ -145,7 +146,8 @@ sub ReadMasterComscoreDataReachPerRegion
     if ($lines++ == 0)
     {
       @regions = @data ;
-      print "Regions found: " . (join ',', @regions) . "\n";
+      if ($verbose)
+      { print "Regions found: " . (join ',', @regions) . "\n"; }
       next ;
     }
 
@@ -175,6 +177,7 @@ sub ReadMasterComscoreDataReachPerRegion
   $line_out = "yyyymm" ;
   foreach $region_name (@regions)
   { $line_out .= ",$region_name" ; }
+
   print OUT "$line_out" ;
 
   foreach $yyyymm (sort {$b cmp $a} keys %months)
@@ -218,7 +221,10 @@ sub ReadMasterComscoreDataVisitorsPerRegion
     if ($lines++ == 0)
     {
       @regions = @data ;
-      print "Regions found: " . (join ',', @regions) . "\n";
+
+      if ($verbose)
+      { print "Regions found: " . (join ',', @regions) . "\n"; }
+
       next ;
     }
 
@@ -362,7 +368,8 @@ sub UpdateMasterFileFromRecentComscoreData
   undef %white_list ;
   undef %not_white_listed ;
 
-  print "White list: ". (join (',', @white_list)) . "\n\n";
+  if ($verbose)
+  { print "White list: ". (join (',', @white_list)) . "\n\n"; }
 
   foreach $id (@white_list)
   { $white_list {$id} = $true ; }
@@ -403,6 +410,8 @@ sub UpdateMasterFileFromRecentComscoreData
   #}
 
   my $updates_found = $false ;
+
+  print "Process updates from $file_comscore_updates_latest\n" ;
 
   open CSV, '<', $file_comscore_updates_latest ;
   binmode CSV ;
@@ -478,14 +487,20 @@ sub UpdateMasterFileFromRecentComscoreData
           if (! defined $data {$yyyymm_id})
           {
             $updates_found = $true ;
-            print "New data found: $yyyymm_id = $data\n" ;
+
+            if ($verbose)
+            { print "New data found: $yyyymm_id = $data\n" ; }
+
             $data {$yyyymm_id} = $data ;
           }
         }
         else
         {
           $updates_found = $true ;
-          print "Data found: $yyyymm_id = $data\n" ;
+
+          if ($verbose)
+          { print "Data found: $yyyymm_id = $data\n" ; }
+
           $data {$yyyymm_id} = $data ;
         }
       }
@@ -493,7 +508,8 @@ sub UpdateMasterFileFromRecentComscoreData
   }
 
   $entities_not_white_listed = join (', ', sort keys %not_white_listed) ;
-  if ($entities_not_white_listed ne '')
+
+  if ($verbose and ($entities_not_white_listed ne ''))
   { print "\nEntities ignored:\n$entities_not_white_listed\n\n" ; }
 
   if (! $updates_found)
@@ -530,7 +546,9 @@ sub WriteDataAnalyticsMySQL
 
       $line = "$yyyymm,$country_code,$region_code,$property,$project,$reach,$visitors\n" ;
       print OUT $line ;
-      print     $line ;
+
+      if ($verbose)
+      { print $line ; }
     }
 
     foreach $property (sort @properties)
