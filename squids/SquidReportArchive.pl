@@ -1,15 +1,27 @@
 #!/usr/bin/perl
+use Carp;
+$| = 1; # Flush output
 
-  $| = 1; # Flush output
+my %options;
 
-  use SquidReportArchiveConfig ;
-  use lib $cfg_liblocation ;
 
-  use EzLib ;
-  $trace_on_exit = $true ;
-  ez_lib_version (2) ;
+BEGIN {
+  use Getopt::Std;
+  getopt("dmwqc", \%options) ;
+  my $__config_module = $options{"c"} || "SquidReportArchiveConfig.pm";
+  require $__config_module;
+  croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
+  unshift(@INC,$cfg_liblocation); 
+};
 
-  default_argv ($cfg_default_argv) ;
+
+
+
+use EzLib ;
+$trace_on_exit = $true ;
+ez_lib_version (2) ;
+
+default_argv ($cfg_default_argv) ;
 
 # ReportOrigin how to handle '!error <-> other
 # SquidReportOrigins.htm  total count<->alpha are not the same (+ skip total for "google (total)")
@@ -29,7 +41,6 @@
   $ratio_sqrt   = $true ;
   $ratio_linear = $false ;
 
-  getopt ("dmq", \%options) ;
 
   undef %country_code_not_specified_reported ;
 
@@ -1978,46 +1989,46 @@ sub ReadInputUseragents
     else
       { $site = 'X' ; }
 
-    $countua {$agent, '.', '.', '.'} += $count ;
-    $countua {$agent, '.', '.', $api} += $count ;
-    $countua {$agent, $site, $page, '.'} += $count ;
-    $countua {$agent, $site, '.', '.'} += $count ;
-    $countua {$agent, '.', $page, '.'} += $count ;
-    $countua {'.', '.', '.', '.'} += $count ;
-    $countua {'.', '.', '.', $api} += $count ;
-    $countua {'.', $site, $page, '.'} += $count ;
-    $countua {'.', $site, '.', '.'} += $count ;
-    $countua {'.', '.', $page, '.'} += $count ;
+    $countua {$agent , '.'   , '.'   , '.'}  += $count ;
+    $countua {$agent , '.'   , '.'   , $api} += $count ;
+    $countua {$agent , $site , $page , '.'}  += $count ;
+    $countua {$agent , $site , '.'   , '.'}  += $count ;
+    $countua {$agent , '.'   , $page , '.'}  += $count ;
+    $countua {'.'    , '.'   , '.'   , '.'}  += $count ;
+    $countua {'.'    , '.'   , '.'   , $api} += $count ;
+    $countua {'.'    , $site , $page , '.'}  += $count ;
+    $countua {'.'    , $site , '.'   , '.'}  += $count ;
+    $countua {'.'    , '.'   , $page , '.'}  += $count ;
 
     if ($agent ne 'B' && $agent ne '-')
     {
-      $countua {'Z', '.', '.', '.'} += $count ;
-      $countua {'Z', '.', '.', $api} += $count ;
-      $countua {'Z', $site, $page, '.'} += $count ;
-      $countua {'Z', $site, '.', '.'} += $count ;
-      $countua {'Z', '.', $page, '.'} += $count ;
+      $countua {'Z' , '.'   , '.'   , '.'}  += $count ;
+      $countua {'Z' , '.'   , '.'   , $api} += $count ;
+      $countua {'Z' , $site , $page , '.'}  += $count ;
+      $countua {'Z' , $site , '.'   , '.'}  += $count ;
+      $countua {'Z' , '.'   , $page , '.'}  += $count ;
       if ($agent ne 'N')
       {
-        $countua {'S', '.', '.', '.'} += $count ;
-        $countua {'S', '.', '.', $api} += $count ;
-        $countua {'S', $site, $page, '.'} += $count ;
-        $countua {'S', $site, '.', '.'} += $count ;
-        $countua {'S', '.', $page, '.'} += $count ;
+        $countua {'S' , '.'   , '.'   , '.'}  += $count ;
+        $countua {'S' , '.'   , '.'   , $api} += $count ;
+        $countua {'S' , $site , $page , '.'}  += $count ;
+        $countua {'S' , $site , '.'   , '.'}  += $count ;
+        $countua {'S' , '.'   , $page , '.'}  += $count ;
       if ($agent eq 'M' || $agent eq 'T' || $agent eq 'P')
         {
-          $countua {'C', '.', '.', '.'} += $count ;
-          $countua {'C', '.', '.', $api} += $count ;
-          $countua {'C', $site, $page, '.'} += $count ;
-          $countua {'C', $site, '.', '.'} += $count ;
-          $countua {'C', '.', $page, '.'} += $count ;
+          $countua {'C' , '.'   , '.'   , '.'}  += $count ;
+          $countua {'C' , '.'   , '.'   , $api} += $count ;
+          $countua {'C' , $site , $page , '.'}  += $count ;
+          $countua {'C' , $site , '.'   , '.'}  += $count ;
+          $countua {'C' , '.'   , $page , '.'}  += $count ;
         }
       else
         {
-          $countua {'Q', '.', '.', '.'} += $count ;
-          $countua {'Q', '.', '.', $api} += $count ;
-          $countua {'Q', $site, $page, '.'} += $count ;
-          $countua {'Q', $site, '.', '.'} += $count ;
-          $countua {'Q', '.', $page, '.'} += $count ;
+          $countua {'Q' , '.'   , '.'   , '.'}  += $count ;
+          $countua {'Q' , '.'   , '.'   , $api} += $count ;
+          $countua {'Q' , $site , $page , '.'}  += $count ;
+          $countua {'Q' , $site , '.'   , '.'}  += $count ;
+          $countua {'Q' , '.'   , $page , '.'}  += $count ;
         }
       }
     }
@@ -2394,6 +2405,25 @@ sub SortCounts
   @skins_sorted_skin  = keys_sorted_alpha_asc %skins ;
 }
 
+
+#
+# isMobile checks M,W,T,P and if $val is one of those then we have a mobile device
+# if the record is a group aggregate, then we check the agent string again to see if we have
+# a mobile device or not
+#
+
+
+sub isMobile {
+  my ($val,$agent) = @_;
+  if($val =~ /^[MWTP]$/) {
+    return 1;
+  } elsif( $val eq 'G') {
+    #warn $tags_mobile;
+    return $agent =~ /(?:$tags_mobile|$tags_tablet)/io;
+  };
+  return 0;
+}
+
 sub WriteReportClients
 {
   &Log ("WriteReportClients -> $path_reports/$file_html_clients\n") ;
@@ -2445,7 +2475,10 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne '-' ;
+    next if isMobile($mobile);
+
+
+
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2459,7 +2492,8 @@ sub WriteReportClients
 
     $perc_total_nonmobile += $perc ;
     $perc_total_html_only_nonmobile += $perc_html_only ;
-  }
+  };
+
 
   $perc = ".." ;
   $count = $clientgroups_other {'-'} ;
@@ -2540,7 +2574,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne 'M' ;
+    next if !isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2671,7 +2705,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -2721,7 +2755,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype) ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -2808,7 +2842,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne '-' ;
+    next if isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2874,7 +2908,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne 'M' ;
+    next if !isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2963,7 +2997,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -2988,7 +3022,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' && $rectype ne 'W' && rectype ne 'T' && rectype ne 'P'; # group
+    next if !isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -3586,9 +3620,11 @@ sub WriteReportOpSys
 
     next if $perc lt "0.02%" ;
 
+
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype,$os) ; # group
+
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3606,7 +3642,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype,$os) ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3662,7 +3698,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype,$os); # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3680,7 +3716,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype,$os); # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;

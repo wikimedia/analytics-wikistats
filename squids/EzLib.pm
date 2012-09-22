@@ -51,9 +51,10 @@ $path_program = Win32::GetLongPathName ($path_program) if $os_windows ;
 
 die "Operating system '$os' not supported" if (! $os_linux and ! $os_windows) ;
 
-if ($os_linux) #  && (-d "/home/ezachte")) # runs on server, to be refined
+
+if ($os_linux   && -d "/home/ezachte") # runs on server, to be refined
 {
-  $job_runs_on_production_server = $true ;
+  $job_runs_on_production_server = $true ; # this is WHY
   $path_home = "/home/ezachte" ;
 }
 else
@@ -490,6 +491,7 @@ END
 
   my ($time, $path,$program) ;
 
+
   if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)
   {
     $time_elapsed_total = time - $^T ; # $^T is program start time
@@ -501,10 +503,9 @@ END
 
   # print "\n" . '=' x (length ($msg) -1) . "\n\n$msg\n\n" ;
     print "\n" . '=' x 80 . "\n\n$msg\n\n" ;
-  }
 
-  if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)
-  {
+
+
     print "Prog: $name_program\n" ;
     print "Path: $path_program\n" ;
     if ($job_runs_on_production_server)
@@ -517,10 +518,9 @@ END
     print "Perl: " . ($a = sprintf ("%.9f",$^V), $a =~ s/\_/_/g,$a) . "\n" ; # perl version
     print "Perl: $^X\n" ;  # perl exe path
     print "EzLib: $ez_lib_version\n" ;  # perl exe path
-  }
 
-  if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_libs)
-  {
+
+
     # Get library paths
     print "\nLibs:\n", map {"      $_\n"} @INC ;
 
