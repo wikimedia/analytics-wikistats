@@ -1,10 +1,14 @@
- #!/usr/bin/perl
+#!/usr/bin/perl
 
 # /usr/local/bin/geoiplogtag uses /usr/share/GeoIP/GeoIP.dat
 # test:
 # echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-use SquidCountArchiveConfig ;
+
+
+#use SquidCountArchiveConfig ; # do not need this because we're already including that module in SquidCountArchive.pl
+
+
 
 sub CollectFilesToProcess
 {

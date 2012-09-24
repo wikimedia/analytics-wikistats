@@ -1,6 +1,6 @@
  #!/usr/bin/perl
 
-  use SquidCountArchiveConfig ;
+  #use SquidCountArchiveConfig ;
   use lib $cfg_liblocation ;
   use EzLib ;
 

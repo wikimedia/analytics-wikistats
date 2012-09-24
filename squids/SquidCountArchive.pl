@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 use Carp;
+use File::Path qw/mkpath/;
 
 # all of the following scalars will contain
 # parameters passed through command-line
@@ -11,16 +12,18 @@ my %options ;
 
 BEGIN {
   use Getopt::Std;
-  getopt("dfc", \%options) ;
-  my $__config_module = $options{"c"} || "SquidCountArchiveConfig.pm";
+  getopt("dfctr", \%options) ;
+  my $__config_module = $options{"r"} || "SquidCountArchiveConfig.pm";
   if (exists $options{"c"}) {
-    croak "Config .pm $config_module passed as parameter but it does not exist"
+    croak "Config .pm $__config_module passed as parameter but it does not exist"
       if !-f  $__config_module && 
          !-f "$__config_module.pm"
   };
   require $__config_module;
   croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
   unshift(@INC,$cfg_liblocation); 
+  #warn "cfg_file_test=$cfg_file_test\n";
+  #exit 0;
 };
 
 $date_range     = $options{"d"};
@@ -106,9 +109,9 @@ default_argv $cfg_default_argv ;
     { print "\n" . "=" x 80 . "\n" ; }
     ($path_out, $path_out_month) = &SetPathOut ($days_ago) ;
 
-    open OUT,  '>', "$path_out/$file_out" ;
-    open OUT2, '>', "$path_out/$file_out2" ;
-    open ERR,  '>', "$path_out/$file_err" ;
+    open OUT,  '>', "$path_out/$file_out" or die "Can't open $path_out/$file_out";
+    open OUT2, '>', "$path_out/$file_out2" or die "Can't open $path_out/$file_out2";
+    open ERR,  '>', "$path_out/$file_err" or die "Can't open $path_out/$file_err";
   # open FILTER_FY, '>>', "$path_out_month/$file_filter_fy" ;
 
     my $do_phase1 = &CheckProcessPhase1 ($days_ago, $path_out) ; # Collect IP frequencies
@@ -376,18 +379,18 @@ sub SetPathOut
   if (! -d $path_out)
   {
   # print "mkdir $path_out\n" ;
-    mkdir ($path_out) || die "Unable to create directory $path_out\n" ;
+    mkpath ($path_out) || die "Unable to create directory $path_out\n" ;
   }
 
   $path_out .= "/" . sprintf ("%04d-%02d-%02d", $year+1900, $month+1, $day) ;
   if (! -d $path_out)
   {
   print "mkdir $path_out\n" ;
-    mkdir ($path_out)           || die "Unable to create directory $path_out\n" ;
+    mkpath ($path_out)           || die "Unable to create directory $path_out\n" ;
   print "mkdir $path_out/private\n" ;
-    mkdir ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
+    mkpath ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
   print "mkdir $path_out/public\n" ;
-    mkdir ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
+    mkpath ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
   }
 
   # clean up obsolete signal files
@@ -925,7 +928,7 @@ sub ProcessSquidSequenceNumbers
   # input has been established for tast three months of data in WriteOutputSquidLogs
   # there for each day per squid and hour of day total event and total gap were established
   # avg gap for all squids combined (per hour and per day) was written to this csv file
-  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' ;
+  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' or die "Can't open SquidDataSequenceNumbersAllSquids.csv";
   while ($line = <CSV>)
   {
     next if $line =~ /\*/o ;

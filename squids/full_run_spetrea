@@ -1,0 +1,3 @@
+#!/bin/bash
+perl SquidCountArchive.pl  -d 20120701  -r SquidCountArchiveConfig-spetrea.pm
+perl SquidReportArchive.pl -m 2012-07   -r SquidReportArchiveConfig-spetrea.pm

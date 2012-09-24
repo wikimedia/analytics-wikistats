@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 use Carp;
+use File::Path qw/mkpath/;
 $| = 1; # Flush output
 
 my %options;
@@ -7,8 +8,8 @@ my %options;
 
 BEGIN {
   use Getopt::Std;
-  getopt("dmwqc", \%options) ;
-  my $__config_module = $options{"c"} || "SquidReportArchiveConfig.pm";
+  getopt("dmwqcr", \%options) ;
+  my $__config_module = $options{"r"} || "SquidReportArchiveConfig.pm";
   require $__config_module;
   croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
   unshift(@INC,$cfg_liblocation); 
@@ -121,7 +122,7 @@ default_argv ($cfg_default_argv) ;
   if (! -d $path_reports)
   {
   #  print "mkdir $path_reports\n" ;
-    mkdir ($path_reports) || die "Unable to create directory $path_reports\n" ;
+    mkpath ($path_reports) || die "Unable to create directory $path_reports\n" ;
   }
 
   &InitProjectNames ;
@@ -1721,6 +1722,7 @@ sub ReadInputCountriesMonthly
   &Log ("\n") ;
 
   $months_recently = keys %months_recently ;
+
   if ($months_recently == 0) { abort ("\$months_recently == 0\n") ; }
 
   $requests_recently_start = substr ($requests_recently_start,0,4) . '/' . substr ($requests_recently_start,5,2);

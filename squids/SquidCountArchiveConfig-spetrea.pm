@@ -14,6 +14,6 @@ $cfg_logname = "sampled-1000.log" ;
 # set default arguments for test on local machine
 #$cfg_default_argv = "-d 2011/10/16-2011/10/16" ;
 
-$cfg_file_test = "/home/user/wikistats/wikistats/test/sampled-1000.log-20120701.txt";
+$cfg_file_test = "/home/user/wikistats/wikistats/squids/testdata/sampled-1000.log-20120701.txt";
 $cfg_test_maxlines = 4000000 ;
 

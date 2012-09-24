@@ -490,6 +490,7 @@ END
 # { use Win32 ; }
 
   my ($time, $path,$program) ;
+  exit 0; # just for debugging(TODO:clear this exit)
 
 
   if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)

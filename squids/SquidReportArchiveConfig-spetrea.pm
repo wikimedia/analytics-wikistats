@@ -9,7 +9,7 @@ $cfg_liblocation       = "$base/scripts" ;
 $cfg_path_csv          = "$base/csv" ;
 
 $cfg_path_reports      = "$base/reports" ;
-`mkdir -p $cfg_path_reports`;
+#`mkdir -p $cfg_path_reports`;
 
 $cfg_path_log          = "$base/log" ;
 
