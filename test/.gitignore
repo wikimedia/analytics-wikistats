@@ -3,4 +3,4 @@
 !*.pm
 !*.sh
 !.gitignore
-
+!read*
