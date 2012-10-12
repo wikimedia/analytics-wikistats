@@ -1,3 +1,6 @@
 # ignore all
+# these folders are for transient test data, not scripts
 *
+
+# add exceptions as ! followed by white list string 
 

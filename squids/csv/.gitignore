@@ -1,14 +1,7 @@
 # ignore all
 *
 
-# expect this file
+# except these
 !.gitignore
-
-# select scripts
-!*.pl
-!*.pm
-!*.sh
-
-# and readme's
-!.read*
+!meta/ 
 
