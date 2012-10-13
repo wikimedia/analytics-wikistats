@@ -3,9 +3,8 @@
 
 # expect this file
 !.gitignore
-!scripts/
-!scripts/perl/
-!scripts/bash
+!perl/
+!bash
 
 # select scripts
 !*.pl
