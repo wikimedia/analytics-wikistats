@@ -1,5 +1,9 @@
 #!/bin/bash
 ulimit -v 20000
+
+echo legacy script, uses old paths from other server 
+exit
+
 cd /a/ezachte 
 #target=/mnt/data/xmldatadumps/public/other/pagecounts-ez/squids
 target=/mnt/htdocs/reportcard/staff/squids

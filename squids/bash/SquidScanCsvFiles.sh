@@ -1,6 +1,8 @@
 #! /bin/sh
 ulimit -v 4000000
 
-cd /a/ezachte
+wikistats=/a/wikistats_git
+perl=$wikistats/perl
+cd $perl
 
 perl ./SquidScanCsvFiles.pl

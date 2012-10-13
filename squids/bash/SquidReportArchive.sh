@@ -1,18 +1,17 @@
 #! /bin/sh
 ulimit -v 4000000
 
+wikistats=/a/wikistats_git
+perl=$wikistats/perl
+csv=$wikistats/csv
+reports=$wikistats/reports
+cd $perl
+
 month=2012-09
 
 quarter=2012Q3
 
-stats=/a/squid/stats
-scripts=$stats/scripts
-reports=$stats/reports
-csv=$stats/csv
-
-cd $scripts 
-
-# perl $scripts/SquidReportArchive.pl -m 201007 > SquidReportArchiveLog.txt
+# perl SquidReportArchive.pl -m 201007 > SquidReportArchiveLog.txt
 # after further automating SquidScanCountries.sh
 
 # perl SquidCountryScan.pl                  # collect csv data for all months, start in July 2009
