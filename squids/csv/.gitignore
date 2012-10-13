@@ -1,7 +1,0 @@
-# ignore all
-*
-
-# except these
-!.gitignore
-!meta/ 
-

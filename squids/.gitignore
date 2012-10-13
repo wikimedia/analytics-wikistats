@@ -11,5 +11,8 @@
 
 # and readme's
 !.read*
-!meta/ # except meta
 
+# advice Linus
+# use add -f to add few files in ignored folders
+# and now you're done - git won't ignore them, since explcitly you told git to track them
+# http://git.661346.n2.nabble.com/negated-list-in-gitignore-no-fun-td1675067.html
