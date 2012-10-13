@@ -1,10 +1,12 @@
 #!/usr/bin/perl
 
-  $cfg_liblocation       = "/a/squid/stats/scripts" ;
+  $wikistats             = "/a/wikistats_git" ;
+  $squids                = "$wikistats/squids" ;
+  $cfg_liblocation       = "$squids/perl" ;
 
-  $cfg_path_csv          = "/a/squid/stats/csv" ;
-  $cfg_path_reports      = "/a/squid/stats/reports" ;
-  $cfg_path_log          = "/a/squid/stats/scripts" ;
+  $cfg_path_csv          = "$squids/csv" ;
+  $cfg_path_reports      = "$squids/reports" ;
+  $cfg_path_log          = "$squids/logs" ;
 
   $cfg_path_csv_test     = "W:/# Out Locke" ;      # Erik
   $cfg_path_reports_test = "W:/# Out Test/Locke" ; # Erik

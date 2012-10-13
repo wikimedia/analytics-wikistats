@@ -1,18 +1,20 @@
 #!/usr/bin/perl
 
-  $cfg_liblocation = "/a/squid/stats/scripts" ;
+$wikistats = "/a/wikistats_git" ;
+$squids = "/a/$wikistats/squids" ;
 
-  $cfg_path_root_production = "/a/squid/stats/csv" ; 
-  $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
+$cfg_liblocation = "$squids/perl" ;
 
-  $cfg_dir_in_production = "/a/squid/archive/sampled" ;
-  $cfg_dir_in_test = "?" ; # Erik
+$cfg_path_root_production = "$squids/csv" ; 
+$cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
 
-  $cfg_logname = "sampled-1000.log" ;
+$cfg_dir_in_production = "/a/squid/archive/sampled" ;
+$cfg_dir_in_test = "?" ; # Erik
+
+$cfg_logname = "$squids/logs/sampled-1000.log" ;
   
-# set default arguments for test on local machine
-  $cfg_default_argv = "-d 2011/10/16-2011/10/16" ;
+$cfg_default_argv = "-d 2011/10/16-2011/10/16" ; #set default arguments for test on local machine
 
-  $cfg_file_test = "w:/! Perl/Squids/Archive/sampled-1000.log-20111016.txt" ; # Erik
-  $cfg_test_maxlines = 4000000 ;
+$cfg_file_test = "w:/! Perl/Squids/Archive/sampled-1000.log-20111016.txt" ; # Erik
+$cfg_test_maxlines = 4000000 ;
 
