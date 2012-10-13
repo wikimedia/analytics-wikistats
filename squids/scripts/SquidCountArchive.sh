@@ -2,12 +2,14 @@
 
 ulimit -v 4000000
 
-home="/a/ezachte"
-log="$home/SquidCountArchiveLog.txt"
-script="$home/SquidCountArchive.pl"
+workdir="/a/squid/stats/scripts"
+log="$workdir/SquidCountArchiveSep.log"
+
+script="$workdir/SquidCountArchive.pl"
 
 echo "" > $log
 
-nice perl $script -d 2011/02/07-2011/02/11 
+nice perl $script -d 2012/09/01-2012/09/30
+
 echo "Ready" >> $log
 echo "Ready"
