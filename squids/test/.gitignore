@@ -1,6 +1,10 @@
 # ignore all
-# these folders are for transient test data, not scripts
 *
 
-# add exceptions as ! followed by white list string 
+# expect this file
+!.gitignore
 
+# advice Linus
+# use add -f to add few files in ignored folders
+# and now you're done - git won't ignore them, since explcitly you told git to track them
+# http://git.661346.n2.nabble.com/negated-list-in-gitignore-no-fun-td1675067.html
