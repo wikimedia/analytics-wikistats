@@ -1,25 +1,44 @@
 #!/usr/bin/perl
 
-# Rather quick and simple script to collect browserstats for Excel chart, see for Excel output example:
+# Quick script to collect browserstats for Excel chart, see for Excel output example:
 # http://infodisiac.com/blog/2012/02/wikimedia-usage-share-per-browserstraffic-breakdown-by-browser/
 
-use Time::Local ;
+  use Getopt::Std ;
+  use File::Path ;
+  use Time::Local ;
+  getopt ("io", \%options) ;
 
-$mode_all_pages = 0 ; # to do: make runtime argument
+  print "\nQuick script to collect browserstats for Excel chart, see example Excel chart:\n" ;
+  print "http://infodisiac.com/blog/2012/02/wikimedia-usage-share-per-browserstraffic-breakdown-by-browser/\n" ;
 
-if ($mode_all_pages)
-{ $time  = timegm (0,0,0,1,2,109) ; } # start 2009-3-1 - oldest month with counts
-else
-{ $time  = timegm (0,0,0,1,4,111) ; } # start 2011-5-1 - oldest month with mime-type column (page,image,other)
+  $path_csv_in = $options {'i'} ;
+  die "Specify input path (squids csv top folder) as -i [path]" if $path_csv_in eq '' ;
+  die "Input path '$path_csv_in' not found (squids csv top folder)" if ! -d $path_csv_in ;
+
+  $path_csv_out = $options {'o'} ;
+  die "Specify output path as -o [path]" if $path_csv_out eq '' ;
+  if (! -d $path_csv_out)
+  {
+    mkpath $path_csv_out ;
+    die "Path '$path_csv_out' could not be created" if ! -d $path_csv_out ;
+  }
+
+
+  $mode_all_pages = 0 ; # to do: make runtime argument
+
+  if ($mode_all_pages)
+  { $time  = timegm (0,0,0,1,2,109) ; } # start 2009-3-1 - oldest month with counts
+  else
+  { $time  = timegm (0,0,0,1,4,111) ; } # start 2011-5-1 - oldest month with mime-type column (page,image,other)
 
   if ($mode_all_pages)
   { $mime_filter = "AllRequests" ; }
   else
   { $mime_filter = "HtmlRequests" ; }
 
-  open CSV_OUT_DAILY ,  '>', "SquidScanClientsDaily$mime_filter.csv" ;
-  open CSV_OUT_WEEKLY,  '>', "SquidScanClientsWeekly$mime_filter.csv" ;
-  open CSV_OUT_MONTHLY, '>', "SquidScanClientsMonthly$mime_filter.csv" ;
+  open CSV_OUT_DAILY ,  '>', "$path_csv_out/SquidScanClientsDaily$mime_filter.csv" ;
+  open CSV_OUT_WEEKLY,  '>', "$path_csv_out/SquidScanClientsWeekly$mime_filter.csv" ;
+  open CSV_OUT_MONTHLY, '>', "$path_csv_out/SquidScanClientsMonthly$mime_filter.csv" ;
 
   $days_done = 0 ;
   while ($time < time)
@@ -47,7 +66,7 @@ else
 
     print "$yyyy_mm_dd\n" ;
 
-    $folder = "/a/ezachte/$yyyy_mm/$yyyy_mm_dd" ;
+    $folder = "$path_csv_in/$yyyy_mm/$yyyy_mm_dd" ;
 
     if ($yyyy_mm ge "2010-07")
     { $folder .= "/public" ; }
