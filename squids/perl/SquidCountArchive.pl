@@ -2,6 +2,9 @@
 
   use SquidCountArchiveConfig ;
   use lib $cfg_liblocation ;
+
+  print "Find EzLib at location $cfg_liblocation\n" ;
+
   use EzLib ;
 
   $trace_on_exit = $true ;
@@ -40,6 +43,8 @@
 
 # todo: parm -e use unsampled file with all edits and saves
 # todo: parm -r root folder
+
+#print "cfg_logname: $cfg_logname\n" ;
 
   $test = $false  ;
   $test_maxlines = $cfg_test_maxlines ;
@@ -354,13 +359,20 @@ sub SetPathOut
   }
 
   $path_out .= "/" . sprintf ("%04d-%02d-%02d", $year+1900, $month+1, $day) ;
+
   if (! -d $path_out)
   {
-  # print "mkdir $path_out\n" ;
-    mkdir ($path_out)           || die "Unable to create directory $path_out\n" ;
-  #  print "mkdir $path_out/private\n" ;
+    print "mkdir $path_out\n" ;
+    mkdir ($path_out)          || die "Unable to create directory $path_out\n" ;
+  }
+  if (! -d "$path_out/private")
+  {
+    print "mkdir $path_out/private\n" ;
     mkdir ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
-  # print "mkdir $path_out/public\n" ;
+  }
+  if (! -d "$path_out/public")
+  {
+    print "mkdir $path_out/public\n" ;
     mkdir ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
   }
 

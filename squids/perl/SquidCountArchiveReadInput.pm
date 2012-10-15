@@ -47,9 +47,9 @@ sub CollectFilesToProcess
 
     ($sec,$min,$hour,$day,$month,$year) = localtime ($time_start - $days_ago_inspect * 24 * 3600) ;
     $date_archived = sprintf ("%4d%02d%02d", $year+1900, $month+1, $day) ;
-    print "\n- Inspect file saved $days_ago_inspect days ago: $cfg_logname-$date_archived.gz\n" ;
 
     my $file = "$dir_in/$cfg_logname-$date_archived.gz" ;
+    print "\n- Inspect file saved $days_ago_inspect days ago: $file\n" ;
 
     if (! -e $file)
     { print "- File not found: $file\n" ; }

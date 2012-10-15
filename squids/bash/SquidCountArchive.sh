@@ -2,15 +2,12 @@
 ulimit -v 4000000
 
 wikistats=/a/wikistats_git
-perl=$wikistats/perl
-logs=$wikistats/logs
+squids=$wikistats/squids
+perl=$squids/perl
+logs=$squids/logs
 cd $perl
 
 log=$logs/SquidCountArchive.log
 
-echo "" > $log
-
-nice perl SquidCountArchive.pl -d 2012/09/01-2012/09/30
-
-echo "Ready" >> $log
-echo "Ready"
+# process one day for test, usually do full month 
+nice perl SquidCountArchive.pl -d 2012/10/02-2012/10/02 | tee $log | cat 
