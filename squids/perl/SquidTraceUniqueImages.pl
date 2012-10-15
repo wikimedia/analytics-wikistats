@@ -1,9 +1,35 @@
 #!/usr/bin/perl
 
-  $max_days_ago = 100 ;
+  use Getopt::Std ;
+  use File::Path ;
+  getopt ("iod", \%options) ;
+
+  print "\nScan daily file SquidDataBinaries.csv for -d days and report unique images per day\n\n" ;
+
+  $path_csv_in = $options {'i'} ;
+  die "Specify input path (squids csv top folder) as -i [path]" if $path_csv_in eq '' ;
+  die "Input path '$path_csv_in' not found (squids csv top folder)" if ! -d $path_csv_in ;
+
+  $path_csv_out = $options {'o'} ;
+  die "Specify output path as -o [path]" if $path_csv_out eq '' ;
+  if (! -d $path_csv_out)
+  {
+    mkpath $path_csv_out ;
+    die "Path '$path_csv_out' could not be created" if ! -d $path_csv_out ;
+  }
+
+  $max_days_ago = $options {'d'} ;
+  if ($max_days_ago !~ /^\d+$/)
+  {
+    $max_days_ago = 10 ;
+    print "No number of days specified. Use default: $max_days_ago days\n" ;
+  }
+  if ($max_days_ago > 365)
+  { die "No valid number of days specified: $max_days_ago. Specify -d [days] (max 365)\n" ; }
+
   $time_start   = time ;
 
-  open CSV_OUT, '>', '/a/ezachte/SquidDataTrendUniqueImages.csv' ;
+  open CSV_OUT, '>', "$path_csv_out/SquidDataTrendUniqueImages.csv" ;
   print CSV_OUT ",unique files,,,,unique images\n" ;
   print CSV_OUT "date,count,delta,,date,count,delta\n" ;
 
@@ -18,14 +44,28 @@
 
     # print "$days_ago days ago -> $yyyy_mm_dd\n" ;
 
-    $file = "/a/ezachte/$yyyy_mm/$yyyy_mm_dd/public/SquidDataBinaries.csv" ;
+    $file = "$path_csv_in/$yyyy_mm/$yyyy_mm_dd/public/SquidDataBinaries.csv" ;
 
     if (! -e $file)
-    { print "No file $file\n" ; next }
+    {
+      $file_bz2 .= "$file.bz2" ;
+      if (! -e $file_bz2)
+      {
+        print "No file ${file}[.bz2]\n" ;
+        next ;
+      }
+      else
+      {
+        print "Process $file_bz2\n" ;
+        open CSV_IN, "-|", "bzip2 -dc \"$file_bz2\"" || abort ("Input file '$file_bz2' could not be opened.") ;
+      }
+    }
+    else
+    {
+      print "Process $file\n" ;
+      open CSV_IN, '<', $file ;
+    }
 
-    print "Process $file\n" ;
-
-    open CSV_IN, '<', $file ;
     while ($line = <CSV_IN>)
     {
       chomp $line ;

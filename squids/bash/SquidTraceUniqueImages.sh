@@ -2,8 +2,10 @@
 ulimit -v 4000000
 
 wikistats=/a/wikistats_git
-perl=$wikistats/perl
+squids=$wikistats/squids
+perl=$squids/perl
+csv=$squids/csv
+
 cd $perl
 
-perl SquidTraceUniqueImages.pl 
-
+perl SquidTraceUniqueImages.pl -i $csv -o $csv/uniques -d 30 
