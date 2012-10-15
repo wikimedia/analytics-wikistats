@@ -1,6 +1,23 @@
 #! /usr/bin/perl
 
+  use Getopt::Std ;
+  use File::Path ;
+  getopt ("io", \%options) ;
+
   $| = 1; # flush screen output
+
+  $path_csv_in = $options {'i'} ;
+  die "Specify input path (squids csv top folder) as -i [path]" if $path_csv_in eq '' ;
+  die "Input path '$path_csv_in' not found (squids csv top folder)" if ! -d $path_csv_in ;
+
+  $path_csv_out = $options {'o'} ;
+  die "Specify output path as -o [path]" if $path_csv_out eq '' ;
+
+  if (! -d $path_csv_out)
+  {
+    mkpath $path_csv_out ;
+    die "Path '$path_csv_out' could not be created" if ! -d $path_csv_out ;
+  }
 
 # read all files on squid log aggregator with hourly counts for
 # - number of events received per squid
@@ -9,11 +26,42 @@
 
   &ReadData ;
   &ProcessData ;
+
   &WriteHourlyAveragedDeltaSequenceNumbers ;
   &WriteMonthlyAveragedEventsPerSquidPerHour ;
   &WriteMonthlyMetricsPerSquidSet ;
 
   print "\n\nReady\n\n" ;
+
+sub ReadData
+{
+  chdir $path_csv_in ;
+
+  @files = <*>;
+  foreach $file (@files)
+  {
+    next if ! -d $file ;
+    next if $file !~ /^\d\d\d\d-\d\d$/ ;
+    push @folders, $file ;
+  }
+
+  foreach $folder (@folders)
+  {
+    print "Scanning $folder\n" ;
+    chdir "$path_csv_in/$folder" ;
+    @files = <*>;
+
+    foreach $file (@files)
+    {
+      next if ! -d $file ;
+      next if $file !~ /^\d\d\d\d-\d\d-\d\d$/ ;
+      $folder2 = $file ;
+      $file_csv = "$path_csv_in/$folder/$folder2/SquidDataSequenceNumbersPerSquidHour.csv" ;
+      if (-e $file_csv)
+      { &ProcessData ($folder2, $file_csv) ; }
+    }
+  }
+}
 
 sub ProcessData
 {
@@ -65,41 +113,11 @@ sub ProcessData
   close CSV ;
 }
 
-sub ReadData
-{
-  $path_squid_counts = "/a/ezachte" ;
-
-  @files = <*>;
-  foreach $file (@files)
-  {
-    next if ! -d $file ;
-    next if $file !~ /^\d\d\d\d-\d\d$/ ;
-    push @folders, $file ;
-  }
-
-  foreach $folder (@folders)
-  {
-    print "Scanning $folder\n" ;
-    chdir "$path_squid_counts/$folder" ;
-    @files = <*>;
-
-    foreach $file (@files)
-    {
-      next if ! -d $file ;
-      next if $file !~ /^\d\d\d\d-\d\d-\d\d$/ ;
-      $folder2 = $file ;
-      $file_csv = "$path_squid_counts/$folder/$folder2/SquidDataSequenceNumbersPerSquidHour.csv" ;
-      if (-e $file_csv)
-      { &ProcessData ($folder2, $file_csv) ; }
-    }
-  }
-}
-
 # this file can be used to patch projectcounts files from dammit.lt/wikistats to make up for missing events (due to server overload)
 # if for some hour average gap in sequence numbers is 1200 instead of 1000 this means all per wiki counts in projectcount file for that hour need correction: * 1200/1000
 sub WriteHourlyAveragedDeltaSequenceNumbers
 {
-  open CSV , '>',  "$path_squid_counts/SquidDataHourlyAverageDeltaSequenceNumbers.csv" ;
+  open CSV , '>',  "$path_csv_out/SquidDataHourlyAverageDeltaSequenceNumbers.csv" ;
   foreach $date_hour (sort keys %all_regular_squids_active)
   {
     $avg_delta_all_regular_squids = sprintf ("%.0f", $all_regular_squids_delta_hour  {$date_hour} / $all_regular_squids_active {$date_hour}) ;
@@ -111,7 +129,7 @@ sub WriteHourlyAveragedDeltaSequenceNumbers
 
 sub WriteMonthlyAveragedEventsPerSquidPerHour
 {
-  open CSV , '>',  "$path_squid_counts/SquidDataMonthlyEventsPerSquidPerHour.csv" ;
+  open CSV , '>',  "$path_csv_out/SquidDataMonthlyEventsPerSquidPerHour.csv" ;
   foreach $key (sort keys %squid_events_month)
   {
     $events_per_hour =  sprintf ("%.0f", $squid_events_month {$key} / $squid_hours_month {$key}) ;
@@ -125,7 +143,7 @@ sub WriteMonthlyAveragedEventsPerSquidPerHour
 # monthly data per squid set, first average hourly delta between sequence numbers, then hourly number of events
 sub WriteMonthlyMetricsPerSquidSet
 {
-  open CSV , '>',  "$path_squid_counts/SquidDataMonthlyPerSquidSet.csv" ;
+  open CSV , '>',  "$path_csv_out/SquidDataMonthlyPerSquidSet.csv" ;
   print CSV "\nAverage delta in sequence numbers per squid per active hour \n\n" ;
   $line = "month" ;
   foreach $squid_set (sort keys %squid_sets)
