@@ -16,7 +16,7 @@
 
   $dir_tars    = "/a/dammit.lt/projectcounts" ;
   $dir_dumps   = "/mnt/data/xmldatadumps/public/other/pagecounts-raw" ;
-  $dir_archive = "/mnt/data/xmldatadumps/public/other/pagecounts-ez/projectcounts" ;
+  $dir_archive = "dataset2::pagecounts-ez/projectcounts" ;
 
   if (! -d $dir_tars)
   { &Abort ("Folder not found: '$dir_tars'\n") ; }
@@ -97,14 +97,14 @@ sub GetFile
 
 sub ArchiveTars
 {
+  open LAST, '>', "$dir_tars/most_recent_file.txt" ;
+  print LAST $last_file_added ;
+  close LAST ;
+
   $cmd = "rsync -av $dir_tars/projectcounts-20??.tar $dir_archive" ;
   &Log ("Cmd '$cmd'\n") ;
   $result = `$cmd` ;
   print "$result\n" ;
-
-  open LAST, '>', "$dir_archive/most_recent_file.txt" ;
-  print LAST $last_file_added ;
-  close LAST ;
 }
 
 sub Log
