@@ -1,13 +1,14 @@
+echo legacy, similar work now done with bash commands
+echo note perl file still has hard coded paths !
+echo abort
+exit
+
 #!/bin/bash
 ulimit -v 2000000
 
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
-perl=$dammit/perl
-logs=$dammit/logs
-
-data=/a/dammit.lt
-pagecounts=$data/pagecounts
+perl=$dammit/perl/cellar
 
 cd $perl
 
@@ -16,4 +17,4 @@ cd $perl
 #o='/home/ezachte/wikistats/scans' # output dir
 #f=20090424 # from date
 #t=20091110 # till date
-perl /a/dammit.lt/DammitFilterDailyPageCountsPerLanguage.pl 
+perl !DammitFilterDailyPageCountsPerLanguage.pl 

@@ -1,6 +1,8 @@
 #!/bin/bash
 ulimit -v 2000000
 
+# collect newewest projectcounts files (hourly page view stats per wiki), add to tar, and publish
+
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
@@ -11,5 +13,4 @@ pagecounts=$data/pagecounts
 
 cd $perl
 
-perl /a/dammit.lt/DammitSyncFiles.pl 
-#perl /home/ezachte/wikistats/WikiCountsJobProgress.pl >> /a/dammit.lt/cron.txt
+perl DammitSyncProjectCounts.pl 

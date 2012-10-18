@@ -96,12 +96,12 @@
 
   &DetectCurrentMonth ;
 
-  ($dir_in,$dir_out,$dir_filtered,$date_range,$max_file_age,$test_run) = &ReadAndValidateCmdLineArguments ;
+  ($dir_in,$dir_out,$dir_log,$dir_filtered,$date_range,$max_file_age,$test_run) = &ReadAndValidateCmdLineArguments ;
 
   &SetFolders ;
 
-  open $fh_log, ">>", "$work/$fn_log" ;
-  print "Log file: $work/$fn_log\n" ;
+  open $fh_log, ">>", "$dir_log/$fn_log" ;
+  print "Log file: $dir_log/$fn_log\n" ;
   &Log ("\n\n" . '=' x 80 . "\n\n") ;
 
   # the main body of work
@@ -118,7 +118,7 @@ sub OnTestOnlySetDefaultArgs
 {
 # &default_argv ("-v ''|-d 20111101|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'|-t") ;
 #  &default_argv ("-m ''|-d 201111|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'|-t") ;
-   &default_argv ("-m ''|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'") ;
+   &default_argv ("-m ''|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-l 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'") ;
 }
 
 #sub MergeFilesFullMonth
@@ -593,6 +593,7 @@ sub CheckHoursMissing
 
 sub AttachLibraries
 {
+  print "\nAttachLibraries\n" ;
   # to be changed: some general routines are in EzLib, at unusual location (workaround for access rights issues)
   use lib "/home/ezachte/lib" ;
   use EzLib ;
@@ -621,8 +622,9 @@ sub AttachLibraries
 
 sub ReadAndValidateCmdLineArguments
 {
+  print "\nReadAndValidateCmdLineArguments\n" ;
   my $options ;
-  getopt ("adfimotv", \%options) ;
+  getopt ("adfioltv", \%options) ;
 
   $phase_build_monthly_file = $options {"m"} ;
   $phase_build_daily_file = ! $phase_build_monthly_file ;
@@ -634,10 +636,13 @@ sub ReadAndValidateCmdLineArguments
     if (! defined ($options {"f"})) { &Abort ("Specify filter dir as: -f dirname") } ;
   }
 
+  if (! defined ($options {"l"})) { &Abort ("Specify log dir as: -l dirname") } ;
+
   my $max_file_age = $options {"a"} ;
   my $date_range   = $options {"d"} ;
   my $dir_in       = $options {"i"} ;
   my $dir_out      = $options {"o"} ;
+  my $dir_log      = $options {"l"} ;
   my $dir_filtered = $options {"f"} ;
   my $test_run     = $options {"t"} ;
 
@@ -737,7 +742,7 @@ sub ReadAndValidateCmdLineArguments
     }
   }
 
-  return ($dir_in,$dir_out,$dir_filtered,$date_range,$max_file_age, $test_run) ;
+  return ($dir_in,$dir_out,$dir_log,$dir_filtered,$date_range,$max_file_age, $test_run) ;
 }
 
 sub CompactFiles
@@ -1935,6 +1940,7 @@ sub SetFolders
 
 sub DetectCurrentMonth
 {
+  print "\nDetectCurrentMonth\n" ;
   ($month,$year) = (gmtime(time))[4,5] ;
   $year = $year + 1900;
   $month++ ;
@@ -1944,6 +1950,8 @@ sub DetectCurrentMonth
 
 sub SetFilterFoundationWikis
 {
+  print "\nSetFilterFoundationWikis\n" ;
+
   $filter = "outreach|quality|strategy|usability" ;
   &Log ("Filter: $filter\n") ;
   $filter = "^(?:$filter)\.m\$" ;
