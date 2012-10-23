@@ -92,7 +92,9 @@
 
   print "Write report to $path_reports\n" ;
 
-  $path_reports =~ s/ /-/g ;
+  if (! $os_windows)      
+  { $path_reports =~ s/ /-/g ; }
+
   if (! -d $path_reports)
   {
   #  print "mkdir $path_reports\n" ;
@@ -501,7 +503,6 @@ sub SetPeriod
   { $period .= " ($quarter_only) " ; }
   else
   { $period .= " (last 12 months) " ; }
-
 
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
@@ -1597,9 +1598,14 @@ sub ReadInputCountriesMonthly
   $requests_all            = 0 ;
   $requests_recently_all   = 0 ;
 
-  my ($sec,$min,$hour,$day,$report_month,$report_year) = localtime (time) ;
+  my ($sec,$min,$hour,$day,$report_month,$report_year) = localtime (time) ; 
   $report_year  += 1900 ;
-  $report_month ++ ;
+#  $report_month ++ ;
+   if ($report_month == 0) # EZ 10/2012 report till end of last month 
+   {
+     $report_month = 12 ;	   
+     $report_year-- ;
+   }
 
   &Log ("Only process data for project $project_mode (wp=Wikipedia, etc)\n") ;
   &Log ("Read data from $path_csv_squid_counts_monthly\n") ;
@@ -1628,7 +1634,8 @@ sub ReadInputCountriesMonthly
 
     $recently = $false ;
 
-    if (($year == $report_year) or (($year == $report_year - 1) && ($month >= $report_month))) # last 12 months
+    if ((($year == $report_year) && ($month <= $report_month)) or # EZ 10/2012, skip current month  
+        (($year == $report_year - 1) && ($month > $report_month))) 
     { $recently = $true ; }
 
        if ($month <= 3) { $quarter = $year . ' Q1' ; }
@@ -6440,10 +6447,8 @@ sub WriteReportPerLanguageBreakDown
     if ($requests_recently_all > 0)
     { $perc_global = &Percentage ($requests_this_language / $requests_recently_all) ; }
 
-  $html_total .= "<tr><td colspan=6>&nbsp;</td><td colspan=8>&nbsp;</td><td colspan=8>&nbsp;</td></tr>" ;
+    $html_total .= "<tr><td colspan=6>&nbsp;</td><td colspan=8>&nbsp;</td><td colspan=8>&nbsp;</td></tr>" ;
 
-    $html .= "<tr><th colspan=5 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th>" ;
-    $html .= "<tr><th colspan=8 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th>" ;
     $html .= "<tr><th colspan=8 class=lh3><a id='$anchor_language' name='$anchor_language'></a><br>$language_name ($language) <small>($perc_global share of global total)</small></th></tr>" ;
 
     if ($languages_reported % 2 == 0)
