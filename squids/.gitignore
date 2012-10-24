@@ -10,6 +10,7 @@
 !*.pl
 !*.pm
 !*.sh
+!.gitattributes
 
 # and readme's
 !read*
