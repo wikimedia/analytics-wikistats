@@ -1,13 +1,29 @@
 #!/usr/bin/perl
+use Carp;
+use File::Path qw/mkpath/;
+$| = 1; # Flush output
 
-  $| = 1; # Flush output
+my %options;
 
-  use SquidReportArchiveConfig ;
-  use EzLib ;
-  $trace_on_exit = $true ;
-  ez_lib_version (2) ;
 
-  default_argv ($cfg_default_argv) ;
+BEGIN {
+  use Getopt::Std;
+  getopt("dmwqcr", \%options) ;
+  my $__config_module = $options{"r"} || "SquidReportArchiveConfig.pm";
+  require $__config_module;
+  croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
+  unshift(@INC,$cfg_liblocation); 
+};
+
+
+
+
+use EzLib ;
+$trace_on_exit = $true ;
+ez_lib_version (2) ;
+
+default_argv ($cfg_default_argv) ;
+
 
   use Time::Local ;
   use Cwd;
@@ -15,7 +31,7 @@
   $ratio_sqrt   = $true ;
   $ratio_linear = $false ;
 
-  getopt ("dmq", \%options) ;
+
 
   undef %country_code_not_specified_reported ;
 
@@ -98,8 +114,10 @@
   if (! -d $path_reports)
   {
   #  print "mkdir $path_reports\n" ;
-    mkdir ($path_reports) || die "Unable to create directory $path_reports\n" ;
+    mkpath ($path_reports) || die "Unable to create directory $path_reports\n" ;
   }
+
+
 
   &InitProjectNames ;
 
@@ -503,6 +521,7 @@ sub SetPeriod
   { $period .= " ($quarter_only) " ; }
   else
   { $period .= " (last 12 months) " ; }
+
 
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
@@ -1703,6 +1722,7 @@ sub ReadInputCountriesMonthly
   &Log ("\n") ;
 
   $months_recently = keys %months_recently ;
+
   if ($months_recently == 0) { abort ("\$months_recently == 0\n") ; }
 
   $requests_recently_start = substr ($requests_recently_start,0,4) . '/' . substr ($requests_recently_start,5,2);
@@ -2387,6 +2407,25 @@ sub SortCounts
   @skins_sorted_skin  = keys_sorted_alpha_asc %skins ;
 }
 
+
+#
+# isMobile checks M,W,T,P and if $val is one of those then we have a mobile device
+# if the record is a group aggregate, then we check the agent string again to see if we have
+# a mobile device or not
+#
+
+
+sub isMobile {
+  my ($val,$agent) = @_;
+  if($val =~ /^[MWTP]$/) {
+    return 1;
+  } elsif( $val eq 'G') {
+    #warn $tags_mobile;
+    return $agent =~ /(?:$tags_mobile|$tags_tablet)/io;
+  };
+  return 0;
+}
+
 sub WriteReportClients
 {
   &Log ("WriteReportClients -> $path_reports/$file_html_clients\n") ;
@@ -2438,7 +2477,10 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne '-' ;
+    next if isMobile($mobile);
+
+
+
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2452,7 +2494,8 @@ sub WriteReportClients
 
     $perc_total_nonmobile += $perc ;
     $perc_total_html_only_nonmobile += $perc_html_only ;
-  }
+  };
+
 
   $perc = ".." ;
   $count = $clientgroups_other {'-'} ;
@@ -2533,7 +2576,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne 'M' ;
+    next if !isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2664,7 +2707,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -2714,7 +2757,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype) ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -2801,7 +2844,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne '-' ;
+    next if isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2867,7 +2910,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if $mobile ne 'M' ;
+    next if !isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2956,7 +2999,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -2981,7 +3024,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' && $rectype ne 'W' && rectype ne 'T' && rectype ne 'P'; # group
+    next if !isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -3579,9 +3622,11 @@ sub WriteReportOpSys
 
     next if $perc lt "0.02%" ;
 
+
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype,$os) ; # group
+
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3599,7 +3644,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype,$os) ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3655,7 +3700,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne '-' ; # group
+    next if isMobile($rectype,$os); # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3673,7 +3718,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if $rectype ne 'M' ; # group
+    next if !isMobile($rectype,$os); # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -5053,7 +5098,7 @@ sub WriteReportUserAgents
 
   $html .= "<tr><th class=l valign='top' rowspan=2 colspan=4>&nbsp;</th><th rowspan=15>&nbsp;</th><th class=c colspan=4>Page views</th><th rowspan=15>&nbsp;</th><th class=c colspan=4>All requests</th></tr>\n" ;
   $html .= "<tr><th class=c>Total</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>Search-based estimate<a href='#explain_search'>[1]</a></th>" ;
-  $html .= "<th class=c>Total</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ;
+  $html .= "<th class=c>Total</th><th class=c>To mobile</th><th class=c>To main site</th><th class=c>To other servers<a href='#explain_other'>[2]</a></th></tr>\n" ; 
   $total_count                   = $countua {'Z', '.', '.', '.'} * $multiplier ;
   $total_html                    = ($countua {'Z', 'M', 'page', '.'} + $countua {'Z', 'W', 'page', '.'}) * $multiplier ;
   $total_opensearch              = $countua {'Z', '.', '.', 'opensearch'} * $multiplier ;
@@ -5203,7 +5248,7 @@ sub WriteReportCountriesInfo
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trend<br\/>\nLINKS/ ;
-  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $dummy_countries_useragents \/ $link_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $dummy_countries_useragents \/ $link_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ; 
 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -5216,7 +5261,7 @@ sub WriteReportCountriesInfo
 
   $html .= "<p><table border=1 width=800 class=tablesorter id=table1>\n" ;
   $html .= "<thead>\n" ;
-
+ 
   $html .= "<tr><td class=hr colspan=3 rowspan=1><b>Location</b></td>" .
                "<td class=hc rowspan=3><b>Population</b></td>" .
                "<td class=hc colspan=2 rowspan=3><b>Internet<br>Users</b><br><small><font color=#404040>absolute count and percentage of country population</font></small></td>" .
@@ -5328,14 +5373,14 @@ sub WriteReportCountriesInfo
     ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
 
     $icon =~ s/\"\/\/upload/\"http:\/\/upload/ ;
-    $population_tot += $population ;
+    $population_tot += $population ;   
     $connected_tot += $connected ;
     $population_region {$region_code} += $population ;
     $connected_region {$region_code } += $connected ;
     $population_region {$north_south_code} += $population ;
     $connected_region {$north_south_code } += $connected ;
     $perc_connected = ".." ;
-
+    
     $regionpopulation = $population_region {$region_code} ;
 
     $population2 = &i2KM2 ($population) ;
@@ -5351,12 +5396,12 @@ sub WriteReportCountriesInfo
                  "<td>$region_name</td>" .
                  "<td>$north_south_name</td>" .
                  "<td>$population2</td>" .
-                 "<td>$connected2</td>" .
+                 "<td>$connected2</td>" . 
                  "<td>$penetration</td>" .
                  &ReportLineCountriesInfoTypes($code) .
                  "</tr>\n" ;
     }
-
+    
   }
 
   $population_tot2 = &i2KM2 ($population_tot) ;
@@ -5450,7 +5495,7 @@ sub WriteReportCountryOpSys
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trends<br\/>\nLINKS/ ;
-  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $link_countries_browsers \/ $dummy_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $link_countries_browsers \/ $dummy_countries_os \/ $link_countries_projects \/ $link_countries_trends / ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
 
@@ -5462,7 +5507,7 @@ sub WriteReportCountryOpSys
            "<td class=hc><b>Total</b></td>" ;
   $counter = 0 ;
   foreach $os (keys_sorted_by_value_num_desc %allcountryos)
-  {
+  { 
      next if ($os eq '..') ;
      next if ($counter++ > 12) ;
      $html .= "<td class=hc>$os</td>" ;
@@ -5550,7 +5595,7 @@ sub WriteReportCountryOpSys
     $population_region {$north_south_code} += $population ;
     $connected_region {$north_south_code } += $connected ;
     $perc_connected = ".." ;
-
+    
     $regionpopulation = $population_region {$region_code} ;
 
     $population2 = &i2KM2 ($population) ;
@@ -5566,7 +5611,7 @@ sub WriteReportCountryOpSys
                  "<td>$region_name</td>" .
                  "<td>$north_south_name</td>" .
                  "<td>$population2</td>" .
-                 "<td>$connected2</td>" .
+                 "<td>$connected2</td>" . 
                  "<td>$penetration</td>" ;
       $html .= UserAgentField( $country_total { $code } ) ;
       $counter = 0 ;
@@ -5579,7 +5624,7 @@ sub WriteReportCountryOpSys
       $html .= UserAgentFieldNew($countryos {$code, '..'}, $false, $country_total { $code } * $multiplier ) ;
       $html .= "</tr>\n" ;
     }
-
+   
   }
 
   $population_tot2 = &i2KM2 ($population_tot) ;
@@ -5594,7 +5639,7 @@ sub WriteReportCountryOpSys
   foreach $os (keys_sorted_by_value_num_desc %allcountryos)
   {
     next if ($os eq '..') ;
-    if ($counter++ > 12)
+    if ($counter++ > 12) 
     { $allcountryos {'..'} += $allcountryos {$os} ; }
     else
     { $allcountriesallos += $allcountryos {$os} ; }
@@ -5611,7 +5656,7 @@ sub WriteReportCountryOpSys
 
   $counter = 0 ;
   foreach $os (keys_sorted_by_value_num_desc %allcountryos)
-  {
+  { 
     next if ($os eq '..') ;
     next if ($counter++ > 12) ;
     $html_total .= UserAgentFieldNew($allcountryos {$os}, $false, $allcountriesallos * $multiplier ) ;
@@ -5704,7 +5749,7 @@ sub WriteReportCountryBrowser
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browser breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trends <br\/>\nLINKS/ ;
-  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $dummy_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $dummy_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
 
@@ -5716,7 +5761,7 @@ sub WriteReportCountryBrowser
            "<td class=hc><b>Total</b></td>" ;
   $counter = 0 ;
   foreach $browser (keys_sorted_by_value_num_desc %allcountrybrowser)
-  {
+  { 
      next if ($browser eq '..') ;
      next if ($counter++ > 12) ;
      $html .= "<td class=hc>$browser</td>" ;
@@ -5804,7 +5849,7 @@ sub WriteReportCountryBrowser
     $population_region {$north_south_code} += $population ;
     $connected_region {$north_south_code } += $connected ;
     $perc_connected = ".." ;
-
+    
     $regionpopulation = $population_region {$region_code} ;
 
     $population2 = &i2KM2 ($population) ;
@@ -5820,7 +5865,7 @@ sub WriteReportCountryBrowser
                  "<td>$region_name</td>" .
                  "<td>$north_south_name</td>" .
                  "<td>$population2</td>" .
-                 "<td>$connected2</td>" .
+                 "<td>$connected2</td>" . 
                  "<td>$penetration</td>" ;
       $html .= UserAgentField( $country_total { $code } ) ;
       $counter = 0 ;
@@ -5833,7 +5878,7 @@ sub WriteReportCountryBrowser
       $html .= UserAgentFieldNew($countrybrowser {$code, '..'}, $false, $country_total { $code } * $multiplier ) ;
      $html .= "</tr>\n" ;
     }
-
+    
   }
 
   $population_tot2 = &i2KM2 ($population_tot) ;
@@ -5848,7 +5893,7 @@ sub WriteReportCountryBrowser
   foreach $browser (keys_sorted_by_value_num_desc %allcountrybrowser)
   {
     next if ($browser eq '..') ;
-    if ($counter++ > 12)
+    if ($counter++ > 12) 
     { $allcountrybrowser {'..'} += $allcountrybrowser {$browser} ; }
     else
     { $allcountriesallbrowser += $allcountrybrowser {$browser} ; }
@@ -5865,7 +5910,7 @@ sub WriteReportCountryBrowser
 
   $counter = 0 ;
   foreach $browser (keys_sorted_by_value_num_desc %allcountrybrowser)
-  {
+  { 
     next if ($browser eq '..') ;
     next if ($counter++ > 12) ;
     $html_total .= UserAgentFieldNew($allcountrybrowser {$browser}, $false, $allcountriesallbrowser * $multiplier ) ;
@@ -6015,7 +6060,7 @@ sub UserAgentsTimedRow
   return $result ;
 }
 
-sub WriteReportUserAgentsTimed
+sub WriteReportUserAgentsTimed 
 {
   &Log ("WriteReportUserAgentsTimed\n") ;
 
@@ -6050,7 +6095,7 @@ sub WriteReportUserAgentsTimed
 
     $html .= "<p><table border=1 width=800>\n" ;
     $html .= "<thead>\n" ;
-
+ 
     $html .= "<tr><td class=hc rowspan=3 rowspan=1><b>Month</b></td>" .
                  "<td rowspan=3>&nbsp;</td>" .
                  "<td class=hc colspan=10><b>All pageviews</b></td>" .
@@ -6073,7 +6118,7 @@ sub BrowsersTimedRow
   my $month = shift ;
   my $result = "<tr>" ;
   $month = &ShowMonth ($month) ;
-
+  
   foreach $key (%rawclients)
   {
     $count = $rawclients {$key} ;
@@ -6117,7 +6162,7 @@ sub BrowsersTimedRow
   return $result ;
 }
 
-sub WriteReportBrowsersTimed
+sub WriteReportBrowsersTimed 
 {
   &Log ("WriteReportBrowsersTimed\n") ;
 
@@ -6152,7 +6197,7 @@ sub WriteReportBrowsersTimed
 
     $html .= "<p><table border=1 width=800>\n" ;
     $html .= "<thead>\n" ;
-
+ 
     $html .= "<tr><td class=hc rowspan=2><b>Month</b></td>" .
                  "<td rowspan=2>&nbsp;</td>" .
                  "<td class=hc colspan=6>Non-mobile</td><td rowspan=2>&nbsp;</td><td class=hc colspan=6>Mobile</td></tr>\n";
@@ -6198,7 +6243,7 @@ sub DevicesTimedRow
 }
 
 
-sub WriteReportDevicesTimed
+sub WriteReportDevicesTimed 
 {
   &Log ("WriteReportDevicesTimed\n") ;
 
@@ -6233,7 +6278,7 @@ sub WriteReportDevicesTimed
 
     $html .= "<p><table border=1 width=800>\n" ;
     $html .= "<thead>\n" ;
-
+ 
     $html .= "<tr><td class=hc><b>Month</b></td>" .
                  "<td>&nbsp;</td>" .
                  "<td class=hc>iOS</td><td class=hc>Android</td><td class=hc>BlackBerry</td><td class=hc>Windows Mobile</td><td class=hc>Symbian/Nokia</td><td class=hc>Bada/Samsung</td><td class=hc>Playstation</td><td class=hc>Nintendo</td><td class=hc>Other</td></tr>\n" ;
@@ -7702,7 +7747,7 @@ sub ShowCount
   {
     my $percentage = '' ;
     if ($percbase ne '')
-    {
+    { 
       $percentage = &ShowPerc(100 * $num / $percbase) ;
     }
 
@@ -7711,7 +7756,7 @@ sub ShowCount
 
     if ($num =~ /\D/) # contains non-digit ? enclose in double quotes
     { $num ="\"$num\"" ; }
-
+    
     $num = "<script>showCount($num, '$percentage');</script>" ;
   }
 
@@ -8568,7 +8613,7 @@ function refreshPage ()
 {
   // alert ('refreshPage') ;
   var element = document.getElementById ('form_select_period');
-
+  
   if (element.selectedIndex == 3)
   {
   setCookie ('select_period', (getCookie ('select_period') || 0) + 10) ;

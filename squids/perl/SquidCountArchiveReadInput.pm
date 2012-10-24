@@ -1,10 +1,12 @@
- #!/usr/bin/perl
+#!/usr/bin/perl
 
 # /usr/local/bin/geoiplogtag uses /usr/share/GeoIP/GeoIP.dat
 # test:
 # echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-use SquidCountArchiveConfig ;
+
+
+
 
 sub CollectFilesToProcess
 {
@@ -49,7 +51,9 @@ sub CollectFilesToProcess
     $date_archived = sprintf ("%4d%02d%02d", $year+1900, $month+1, $day) ;
 
     my $file = "$dir_in/$cfg_logname-$date_archived.gz" ;
+
     print "\n- Inspect file saved $days_ago_inspect days ago: $file\n" ;
+
 
     if (! -e $file)
     { print "- File not found: $file\n" ; }

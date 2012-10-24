@@ -4,12 +4,16 @@
 # expect this file
 !.gitignore
 !perl/
+!perl/UA
+!t/
+!t/*.t
 !bash/
 
 # select scripts
 !*.pl
 !*.pm
 !*.sh
+# file specifying line-ending characters
 !.gitattributes
 
 # and readme's

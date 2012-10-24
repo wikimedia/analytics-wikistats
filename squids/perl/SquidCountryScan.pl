@@ -1,4 +1,3 @@
-
 #!/usr/bin/perl
 ## Collect page views stats by country on Locke
 ## sub CollectRawData -> SquidDataCountries.csv
@@ -93,7 +92,7 @@ sub CollectRawData
         {
           $days_found++ ;
         # print "File: $file\n" ;
-          open IN, '<', $file ;
+          open IN, '<', $file or die "Couldn't open $file" ;
           while ($line = <IN>)
           {
             if ($line =~ /^#/) { next ; }
@@ -215,7 +214,7 @@ sub CollectRawData
 #    print sprintf ("%5d", $visits {$key}) . " $key\n" ;
 #  }
 
-  open CSV_MONTHLY, '>', $file_raw_data_monthly ;
+  open CSV_MONTHLY, '>', $file_raw_data_monthly  or die "Can't open $file_raw_data_monthly";
   foreach $key (sort keys %visits_monthly)
   {
     ($yyyymm, $project, $language, $country) = split (',', $key) ;
@@ -233,7 +232,7 @@ sub CollectRawData
   close CSV_MONTHLY ;
 
   # note correct for missing days in follow processing, see monthly data above
-  open CSV_DAILY, '>', $file_raw_data_daily ;
+  open CSV_DAILY, '>', $file_raw_data_daily or die "Can't open $file_raw_data_daily";
   foreach $key (sort keys %visits_daily)
   { print CSV_DAILY "$key,${visits_daily{$key}}\n" ; }
   close CSV_DAILY ;
@@ -253,8 +252,8 @@ sub ProcessRawData
 {
   print "\nProcessRawData\n\n" ;
 
-  open IN,  '<', $file_raw_data ;
-  open OUT, '>', $file_csv_counts_daily_project ;
+  open IN,  '<', $file_raw_data or die "Can't open $file_raw_data";
+  open OUT, '>', $file_csv_counts_daily_project or die "Can't open $file_csv_counts_daily_project" ;
 
   $date_prev = "" ;
 
@@ -378,7 +377,7 @@ sub ProcessRawData
 
  # Write CSV_COUNT_DAILY
 
-  open CSV_COUNT_DAILY, '>', $file_csv_counts_daily ;
+  open CSV_COUNT_DAILY, '>', $file_csv_counts_daily or die "Can't open $file_csv_counts_daily";
   foreach $key (sort keys %counts)
   { print CSV_COUNT_DAILY sprintf ("%6d", $counts {$key}) . ",$key\n" ; }
   close CSV_COUNT_DAILY ;

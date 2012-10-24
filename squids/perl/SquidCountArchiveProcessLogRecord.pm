@@ -2,7 +2,10 @@
 
 sub ProcessLine
 {
+
   my $line = shift ;
+
+  $version=""; #reset version
 
   $time = $fields [2] ;
   if ($time !~ /\.\d\d\d/) # for column alignment
@@ -14,6 +17,8 @@ sub ProcessLine
   $url        = lc ($fields [8]) ;
 
   $mime =~ s/;.*// ;
+
+
   
   if ($mime eq '-')
   {
@@ -209,6 +214,7 @@ sub ProcessLine
   $agent2 =~ s/jig browser9 (\d)/JigBrowser\/$1/o ;
   $agent2 =~ s/jig browser web; (\d)/JigBrowser9\/$1/o ;
 
+
   # Remove explanation for KHTML
   $agent2 =~ s/\(KHTML, like Gecko\)/KHTML/o ;
   $agent2 =~ s/(KHTML[^\s]*) \(like Gecko\)/$1/o ;
@@ -335,15 +341,20 @@ sub ProcessLine
   #}
 
   # MOBILE
+
+
   $mobile = '-' ;
+
   if (($url =~ /\?seg=/) or ($url =~ /&seg=/)) # Andre, tweede is al in eerste gevat en seg= is wel erg generiek kan ook pageseg= of zoiets zijn  if (($url =~ /\?seg=/) or ($url =~ /&seg=/))
   { $mobile = 'P' ; }
+  elsif ($agent2 =~ /(?:$tags_mobile)/io)
+  { $mobile = 'M' ; }
   elsif ($agent2 =~ /(?:$tags_wiki_mobile)/io)
   { $mobile = 'W' ; }
   elsif ($agent2 =~ /(?:$tags_tablet)/io)
   { $mobile = 'T' ; }
-  elsif ($agent2 =~ /(?:$tags_mobile)/io)
-  { $mobile = 'M' ; }
+
+
 
   $os = ".." ;
 
@@ -654,6 +665,8 @@ sub ProcessLine
     $version =~ s/\([^\)]{10}.*$//io ;
   }
 
+
+  $mobile2=$mobile; # reset mobile2
   if ((! $bot) && ($agent ne "-"))
   {
     $engine  =~ s/,/&comma;/go ;
@@ -672,9 +685,15 @@ sub ProcessLine
     $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
+
+    #warn "mobile=$mobile os=$os";
     ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
-    $operating_systems {"$mobile2,$os"} += $count_event ; ;
-  }
+
+    #warn "mobile2=$mobile2 os=$os";
+    $operating_systems{"$mobile2,$os"} += $count_event ;
+  };
+
+
 
   if ($count_hits_per_ip_range)
   {
@@ -915,11 +934,20 @@ sub ProcessLine
     }
   }
 
- ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
+  $mobile2 = $mobile;
+  $mobile2 =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
+
+  if( ($mobile2 eq "-" || $mobile eq "-") && $os =~ /iPad|BlackBerry|iPhone|iPod/io) {
+    warn "ERROR2, exiting";
+    exit 0;
+  };
+
+
   $records {"$mobile2,$mimecat"} += $count_event ;
   $records {"*,$mimecat"}       += $count_event ;
   $records {"$mobile2,*"}        += $count_event ;
   $records {"*,*"}              += $count_event ;
+
 }
 
 sub ExtractLanguage

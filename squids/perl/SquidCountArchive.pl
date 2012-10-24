@@ -1,22 +1,51 @@
- #!/usr/bin/perl
+#!/usr/bin/perl
+use Carp;
+use File::Path qw/mkpath/;
 
-  use SquidCountArchiveConfig ;
-  use lib $cfg_liblocation ;
+# all of the following scalars will contain
+# parameters passed through command-line
+my ($date_range,
+    $force_phases,
+    $config_module);
+# a hash with keys being parameter names and values, the values of the params
+my %options ;
 
-  print "Find EzLib at location $cfg_liblocation\n" ;
+BEGIN {
+  use Getopt::Std;
+  getopt("dfctr", \%options) ;
+  my $__config_module = $options{"r"} || "SquidCountArchiveConfig.pm";
+  if (exists $options{"c"}) {
+    croak "Config .pm $__config_module passed as parameter but it does not exist"
+      if !-f  $__config_module && 
+         !-f "$__config_module.pm"
+  };
+  require $__config_module;
+  croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
+  unshift(@INC,$cfg_liblocation); 
+  #warn "cfg_file_test=$cfg_file_test\n";
+  #exit 0;
+};
 
-  use EzLib ;
+$date_range     = $options{"d"};
+$force_phases   = $options{"f"};
 
-  $trace_on_exit = $true ;
-  ez_lib_version (13) ;
 
-  use Compress::Zlib;
 
-  use SquidCountArchiveProcessLogRecord ;
-  use SquidCountArchiveReadInput ;
-  use SquidCountArchiveWriteOutput ;
 
-  default_argv $cfg_default_argv ;
+
+
+use EzLib ;
+
+$trace_on_exit = $true ;
+ez_lib_version (13) ;
+
+use Compress::Zlib;
+
+use SquidCountArchiveProcessLogRecord ;
+use SquidCountArchiveReadInput ;
+use SquidCountArchiveWriteOutput ;
+
+default_argv $cfg_default_argv ;
 
 # http://wikitech.wikimedia.org/view/Squid_log_format
 # 1. Hostname
@@ -82,9 +111,9 @@
     { print "\n" . "=" x 80 . "\n" ; }
     ($path_out, $path_out_month) = &SetPathOut ($days_ago) ;
 
-    open OUT,  '>', "$path_out/$file_out" ;
-    open OUT2, '>', "$path_out/$file_out2" ;
-    open ERR,  '>', "$path_out/$file_err" ;
+    open OUT,  '>', "$path_out/$file_out" or die "Can't open $path_out/$file_out";
+    open OUT2, '>', "$path_out/$file_out2" or die "Can't open $path_out/$file_out2";
+    open ERR,  '>', "$path_out/$file_err" or die "Can't open $path_out/$file_err";
   # open FILTER_FY, '>>', "$path_out_month/$file_filter_fy" ;
 
     my $do_phase1 = &CheckProcessPhase1 ($days_ago, $path_out) ; # Collect IP frequencies
@@ -165,12 +194,7 @@ sub ParseArguments
 {
   trace ParseArguments ;
 
-  my %options ;
 
-  getopt ("df", \%options) ;
-
-  $date_range   = $options {"d"} ;
-  $force_phases = $options {"f"} ;
 
   if ($force_phases !~ /^(?:|1|2|12|21)$/)
   { abort "Invalid data for -f parameter: specify which phases to force as -f [1|2|12]\nForce  = execute phase even when already done succesfully earlier\nPhase1 = collect ip counts\nPhase2 = collect other counts\n" ; }
@@ -178,6 +202,8 @@ sub ParseArguments
   if ($date_range eq '')
   { abort "No valid date range specified\n\nSpecify first and last day to process as:\n'-d yyyymmdd[-yyyymmdd]' (yymmdd or yyyy/mm/dd, " .
           "second date defaults to first)\nor\n'-d mmm[-nnn]', where mmm and nnn are days before today (mmm less or equal to nnn), nnn defaults to mmm\n\n" ; }
+
+
 
   if ($date_range =~ m/^\d{4}\/?\d{2}\/?\d{2}(?:\-\d{4}\/?\d{2}\/?\d{2})?$/) # specify daterange as yyyymmdd-yyyymmdd or yyyy/mm/dd-yyyy/mm/dd
   {
@@ -355,25 +381,18 @@ sub SetPathOut
   if (! -d $path_out)
   {
   # print "mkdir $path_out\n" ;
-    mkdir ($path_out) || die "Unable to create directory $path_out\n" ;
+    mkpath ($path_out) || die "Unable to create directory $path_out\n" ;
   }
 
   $path_out .= "/" . sprintf ("%04d-%02d-%02d", $year+1900, $month+1, $day) ;
-
   if (! -d $path_out)
   {
-    print "mkdir $path_out\n" ;
-    mkdir ($path_out)          || die "Unable to create directory $path_out\n" ;
-  }
-  if (! -d "$path_out/private")
-  {
-    print "mkdir $path_out/private\n" ;
-    mkdir ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
-  }
-  if (! -d "$path_out/public")
-  {
-    print "mkdir $path_out/public\n" ;
-    mkdir ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
+  print "mkdir $path_out\n" ;
+    mkpath ($path_out)           || die "Unable to create directory $path_out\n" ;
+  print "mkdir $path_out/private\n" ;
+    mkpath ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
+  print "mkdir $path_out/public\n" ;
+    mkpath ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
   }
 
   # clean up obsolete signal files
@@ -581,7 +600,13 @@ sub ProcessPhase2 # Collect other data
    `$cmd` ;
     $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> /home/ezachte/SquidCountArchiveLog.txt\n\n" ;
    `$cmd` ;
-  }
+  } else {
+    $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
+   `$cmd` ;
+    my $home = $ENV{HOME};
+    $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> $home/SquidCountArchiveLog.txt\n\n" ;
+   `$cmd` ;
+  };
 }
 
 #sub ScanSquidArchive
@@ -911,7 +936,7 @@ sub ProcessSquidSequenceNumbers
   # input has been established for tast three months of data in WriteOutputSquidLogs
   # there for each day per squid and hour of day total event and total gap were established
   # avg gap for all squids combined (per hour and per day) was written to this csv file
-  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' ;
+  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' or die "Can't open SquidDataSequenceNumbersAllSquids.csv";
   while ($line = <CSV>)
   {
     next if $line =~ /\*/o ;
