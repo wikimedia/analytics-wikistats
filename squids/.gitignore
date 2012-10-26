@@ -9,6 +9,10 @@
 !t/*.t
 !bash/
 
+# documentation
+!docs/
+!docs/*.dia
+
 # select scripts
 !*.pl
 !*.pm

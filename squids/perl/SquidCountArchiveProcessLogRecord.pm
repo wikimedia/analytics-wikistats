@@ -1,4 +1,6 @@
 # to do: study http://www.zytrax.com/tech/web/mobile_ids.html
+use UA::iPad;
+use Data::Dumper;
 
 sub ProcessLine
 {
@@ -272,16 +274,8 @@ sub ProcessLine
   { ($browserengine = $agent2) =~ s/^.*?Trident[\/ ]?(\d+\.?\d*).*$/Trident $1/io ; }
   elsif ($agent2 =~ /Presto[\/ ]?\d/io)
   { ($browserengine = $agent2) =~ s/^.*?Presto[\/ ]?(\d+\.?\d*).*$/Presto $1/io ; }
-  elsif ($agent2 =~ /AppleWebKit/io)
-  { $browserengine = "AppleWebKit" ; }
-  elsif ($agent2 =~ /Trident/io)
-  { $browserengine = "Trident" ; }
-  elsif ($agent2 =~ /Presto/io)
-  { $browserengine = "Presto" ; }
-  elsif ($agent2 =~ /KHTML/io)
-  { $browserengine = "KHTML" ; }
-  elsif ($agent2 =~ /Gecko/io)
-  { $browserengine = "Gecko" ; }
+  elsif ($agent2 =~ /(AppleWebKit|Trident|Presto|KHTML|Gecko)/io)
+  { $browserengine = $1 ; }
 
   # APPLEWEBKIT
   #$applewebkit = "" ;
@@ -358,10 +352,25 @@ sub ProcessLine
 
   $os = ".." ;
 
+  my $agent2_copy = $agent2;
+
+  my $ipad_data = undef;
   if ($agent2 =~ /CFNetwork/io)         { $os = "iOS/OS X" }
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
-  elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
+  elsif ($agent2 =~ /iPad/io)           { 
+    $version = "iPad" ;
+    if( ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ) {
+    } else {
+      $ipad_data = ipad_extract_data($agent2);
+      if($ipad_data) {
+        #warn Dumper $ipad_data;
+        #warn "NOT MATCHED{$agent2}\n";
+        $os = "iPad OS ".$ipad_data->{os_version};
+        #warn "os=[$os]";
+      };
+    };
+  }
   elsif ($agent2 =~ /iPod/io)           { $version = "iPod" ;   ($os = $agent2) =~ s/^.*?(iPhone OS \d+\_\d+).*$/$1/io ; }
   elsif ($agent2 =~ /iPhone/io)         { $version = "iPhone" ; ($os = $agent2) =~ s/^.*?(iPhone OS \d+\_\d+).*$/$1/io ; }
   elsif ($agent2 =~ /webOS.* Pre/io)    { $version = "Pre" ;    ($os = $agent2) =~ s/^.*?(webOs\/\d+\.?\d*).*$/$1/io ; } # Palm Pre
@@ -479,7 +488,12 @@ sub ProcessLine
   # iOS APPLICATIONS
   elsif ($agent2 =~ /CFNetwork/io)
   {
-    $agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io ;
+    if($agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io) {
+    } else {
+      if($ipad_data && $ipad_data->{flag_cfnetworks}) {
+        $agent2 = "iOS: ".$ipad_data->{browser};
+      };
+    };
     if ($agent2 =~ /Wikipedia Mobile\//io) { $agent2 =~ s/$/ (WMF)/io ; }
     $version = $agent2 ;
   }
@@ -507,8 +521,7 @@ sub ProcessLine
 
     $agent2 =~ s/Windows NT \d\.\d/Windows/o ;
     $agent2 =~ s/X11; Linux [^;]+/Linux/o ;
-    $agent2 =~ s/(Opera Mini\/\d+\.\d+)[^;\) ]+/$1/o ;
-    $agent2 =~ s/J2ME\/MIDP/Java mobile (J2ME)/o ; # J2ME\/MIDP
+    $agent2 =~ s/(Opera Mini\/\d+\.\d+)[^;\) ]+/$1/o ; $agent2 =~ s/J2ME\/MIDP/Java mobile (J2ME)/o ; # J2ME\/MIDP
 
     $agent2 = &ExtractLanguage ($agent2, 'Opera') ;
 
