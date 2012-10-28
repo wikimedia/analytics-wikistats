@@ -260,14 +260,17 @@ sub FindLargestWikis
   print "Largest projects (most accumulated very active editors):\n";
   @total_edits_ge_100 = sort {$total_edits_ge_100 {$b} <=> $total_edits_ge_100 {$a}} keys %total_edits_ge_100 ;
   $rank = 0 ;
+  my $line ;
   foreach $project_language (@total_edits_ge_100)
   {
     $largest_projects {$project_language} = $rank++ ;
-    print "$project_language," ;
+    $line .= "$project_language | " ;
     last if $rank > 10 ;
   }
-  print "\n\n" ;
+  $line =~ s/\|$// ;
+  print "$line\n" ;
 
+  my $data_missing ;
   foreach $yyyymm (sort keys %months)
   {
     next if $yyyymm lt '2011' ;
@@ -276,11 +279,14 @@ sub FindLargestWikis
       ($project,$language) = split (',', $project_language) ;
           if ($data2 {"$project,$language,$yyyymm"} eq '')
       {
-        print "No data yet for large wiki $project_language for $yyyymm-> skip month $yyyymm\n" ;
-        $months {$yyyymm} = 0 ;
+        $months {$yyyymm} = 0 ; # when execution is not aborted skip this month in output
+      #	print "No data yet for large wiki '$project_language' for $yyyymm-> skip month $yyyymm\n" ;
+	$data_missing .= "!!! No data yet for $project_language/$yyyymm\n" ;
       }
     }
   }
+  if ($data_missing ne '')
+  { Abort ("No data yet for large wiki(s):\n$data_missing") ; }
 }
 
 sub WriteMonthlyData
@@ -299,7 +305,8 @@ sub WriteMonthlyData
     $data2 = $data2 {$project_wiki_month} ;
     if ($data2 eq '')
     {
-      print "Editor data missing for $project_wiki_month\n" ;
+      if ($project_wiki_month !~ /(?:wb,ba,200|wq,cr,200)/) # known bunch of very old missing data
+      { print "Editor data missing for $project_wiki_month\n" ; }
       $data2 = $data2_default ;
     }
     $data1 =~ s/data2/$data2/ ; # insert rather than append to have all editor fields close together
@@ -328,9 +335,9 @@ sub AcceptWiki
 sub Abort
 {
   my $msg = shift ;
-  print "$msg\nExecution aborted." ;
+  print "\n!!! $msg !!!\nExecution aborted." ;
   # to do: log also to file
-  exit ;
+  exit (1) ;
 }
 
 

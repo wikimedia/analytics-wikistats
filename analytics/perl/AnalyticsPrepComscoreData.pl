@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/bin/perl
 
 # Copyright (C) 2011 Wikimedia Foundation
 # This program is free software; you can redistribute it and/or
