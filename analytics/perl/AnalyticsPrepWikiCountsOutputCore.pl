@@ -56,6 +56,11 @@ sub ParseArguments
   $month_last  = substr ($options {"m"},5,2) ;
   $year_last   = substr ($options {"m"},0,4) ;
 
+# full history
+# $month_start = 1 ;
+# $year_start  = 2001 ;
+
+# last 36 months
   $month_start = $month_last ;
   $year_start  = $year_last - 3 ;
 
@@ -74,7 +79,7 @@ sub ParseArguments
   print CSV_OUT "File name changed for new report card!\nNew name 'wikilytics_in_wikistats_core_metrics.csv'\n" ;
   close CSV_OUT ;
 
-  $file_csv_out = "$path_out/wikilytics_in_wikistats_core_metrics.csv"
+  $file_csv_out = "$path_out/wikilytics_in_wikistats_core_metrics.csv" ;
 
   &SetComparisonPeriods ;
 }
@@ -119,6 +124,7 @@ sub ReadStatisticsMonthlyForProject
     next if $language =~ /^zz/ ;
     next if $language eq 'commons' and $project ne 'wx' ;
     next if $language eq 'sr'      and $project eq 'wn' ; # ignore insane bot spam on
+    next if $language eq 'nostalgia' ;                    # restored and renamed copy of old english wikipedia
 
     ($month,$day,$year) = split ('\/', $date) ;
     my $m = &months_since_2000_01 ($year,$month) ;
@@ -139,6 +145,8 @@ sub ReadStatisticsMonthlyForProject
     for ($m = $m_start ; $m <= $m_last ; $m++)
     {
       $line = $lines {$language}{$m} ;
+      next if $lines {$language}{$m} eq '' ;
+
       chomp $line ;
       ($language,$date,$counts) = split (',', $line, 3) ;
       @fields = split (',', $counts) ;
@@ -236,6 +244,8 @@ sub ReadStatisticsMonthlyForProject
     for ($m = $m_start ; $m <= $m_last ; $m++)
     {
       $line = $lines {$language}{$m} ;
+      next if $lines {$language}{$m} eq '' ;
+
       chomp $line ;
       ($language,$date,$reguser_bot,$group,$counts) = split (',', $line, 5) ;
       @fields = split (',', $counts) ;
@@ -374,68 +384,85 @@ sub WriteMonthlyData
     $output .= "\n,${out_report_descriptions [$f]} - Absolute - Per Wiki\n" ;
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
 
-    $line = ",Total," ;
-    for ($m = $m_start ; $m <= $m_last ; $m++)
+    if ($f != 2 and $f != 3)
     {
-      if ($f <= 3) # new editors, editors_gt_5, editors_gt_100,
-      { $line .= $totals_project {"$f,$m"} {$all_projects} . ","  ; }
+      $line = ",Total," ;
+      for ($m = $m_start ; $m <= $m_last ; $m++)
+      {
+        if ($f <= 3) # new editors, editors_gt_5, editors_gt_100,
+        { $line .= $totals_project {"$f,$m"} {$all_projects} . ","  ; }
+        else
+        { $line .= $totals {"$f,$m"} . ","  ; }
+      }
+
+      # growth in one year
+      if ($totals {"$f,$m_last_12"} != 0)
+      { $line .= sprintf ("%.1f", 100 * ($totals {"$f,$m_last"} / $totals {"$f,$m_last_12"}) - 100). "%,"  ; }
       else
-      { $line .= $totals {"$f,$m"} . ","  ; }
+      { $line .= "n.a.," ; }
+
+      # growth in one month
+      if ($totals {"$f,$m_last_1"} != 0)
+      { $line .= sprintf ("%.1f", 100 * ($totals {"$f,$m_last"} / $totals {"$f,$m_last_1"}) - 100). "%,"  ; }
+      else
+      { $line .= "n.a.," ; }
+
+      $line =~ s/,$// ;
+      $output .= "$line\n" ;
     }
-
-    # growth in one year
-    if ($totals {"$f,$m_last_12"} != 0)
-    { $line .= sprintf ("%.1f", 100 * ($totals {"$f,$m_last"} / $totals {"$f,$m_last_12"}) - 100). "%,"  ; }
-    else
-    { $line .= "n.a.," ; }
-
-    # growth in one month
-    if ($totals {"$f,$m_last_1"} != 0)
-    { $line .= sprintf ("%.1f", 100 * ($totals {"$f,$m_last"} / $totals {"$f,$m_last_1"}) - 100). "%,"  ; }
-    else
-    { $line .= "n.a.," ; }
-
-    $line =~ s/,$// ;
-    $output .= "$line\n" ;
 
     if ($f == 2 or $f == 3)
     {
-      $line = ",Total after merge," ;
+    # $line = ",Total after removing double counts," ;
+      $line = ",Total," ;
       for ($m = $m_start ; $m <= $m_last ; $m++)
       { $line .= $totals_project_edits_merged {"zz,$f,$m"} . ","  ; }
 
 #     # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_12"} ) - 100). "%,"  ;
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_1" }  ) - 100). "%,"  ;
+      if ($totals_project_edits_merged {"zz,$f,$m_last_12"} > 0)
+      { $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_12"} ) - 100). "%,"  ; }
+      else
+      { $line .= "n.a.,"  ; }
+      if ($totals_project_edits_merged {"zz,$f,$m_last_1" } > 0)
+      { $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz,$f,$m_last"} / $totals_project_edits_merged {"zz,$f,$m_last_1" }  ) - 100). "%,"  ; }
+      else
+      { $line .= "n.a.," ; }
       $line =~ s/,$// ;
       $output .= "$line\n" ;
 
-      $line = ",Total after merge - normalized (1st 28 days)," ;
-      for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $totals_project_edits_merged {"zz28,$f,$m"}  . ","  ; }
-      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_12"}) - 100). "%,"  ;
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_1"} ) - 100). "%,"  ;
-      $line =~ s/,$// ;
-      $output .= "$line\n" ;
+    # $line = ",Total after merge - normalized (1st 28 days)," ;
+    # for ($m = $m_start ; $m <= $m_last ; $m++)
+    # { $line .= $totals_project_edits_merged {"zz28,$f,$m"}  . ","  ; }
+    # # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+    # if ($totals_project_edits_merged {"zz28,$f,$m_last_12"} > 0)
+    # { $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_12"}) - 100). "%,"  ; }
+    # else
+    # { $line .= "n.a.," ; }
+    # if ($totals_project_edits_merged {"zz28,$f,$m_last_1"} > 0)
+    # { $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zz28,$f,$m_last"} / $totals_project_edits_merged {"zz28,$f,$m_last_1"} ) - 100). "%,"  ; }
+    # else
+    # { $line .= "n.a.," ; }
+    # $line =~ s/,$// ;
+    # $output .= "$line\n" ;
 
-      $line = ",Total after merge - weighted (1 upload is 5 edits)," ;
-      for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $totals_project_edits_merged {"zzw,$f,$m"} . ","  ; }
-      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_12"}) - 100). "%,"  ;
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_1"} ) - 100). "%,"  ;
-      $line =~ s/,$// ;
-      $output .= "$line\n" ;
-
-      $line = ",Total after merge - weighted (1 upload is 5 edits) - normalized (1st 28 days)," ;
-      for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $totals_project_edits_merged {"zzw28,$f,$m"} . ","  ; }
-      # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_12"} ) - 100). "%,"  ;
-      $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_1"}  ) - 100). "%,"  ;
-      $line =~ s/,$// ;
-      $output .= "$line\n" ;
+    # experimental stats where image uploads are more important ==>
+    # $line = ",Total after merge - weighted (1 upload is 5 edits)," ;
+    # for ($m = $m_start ; $m <= $m_last ; $m++)
+    # { $line .= $totals_project_edits_merged {"zzw,$f,$m"} . ","  ; }
+    # # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+    # $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_12"}) - 100). "%,"  ;
+    # $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw,$f,$m_last"} / $totals_project_edits_merged {"zzw,$f,$m_last_1"} ) - 100). "%,"  ;
+    # $line =~ s/,$// ;
+    # $output .= "$line\n" ;
+    # $line = ",Total after merge - weighted (1 upload is 5 edits) - normalized (1st 28 days)," ;
+    # for ($m = $m_start ; $m <= $m_last ; $m++)
+    # { $line .= $totals_project_edits_merged {"zzw28,$f,$m"} . ","  ; }
+    # # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
+    # $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_12"} ) - 100). "%,"  ;
+    # $line .= sprintf ("%.1f", 100 * ($totals_project_edits_merged {"zzw28,$f,$m_last"} / $totals_project_edits_merged {"zzw28,$f,$m_last_1"}  ) - 100). "%,"  ;
+    # $line =~ s/,$// ;
+    # $output .= "$line\n" ;
+    # <== experimental stats where image uploads are more important
     }
 
     # sort by absolute amount for last month
@@ -470,8 +497,9 @@ sub WriteMonthlyData
     }
 
     $output .= "\n,${out_report_descriptions [$f]} - Absolute - Per Project\n" ;
-    if ($f <= 3)  # 0 = Contributors, 1 = New Wikimedians, 2 = Active Editors (5+ edits), 3 = Very Active Editors (100+ edits),
-    { $output .= ",Note: All projects does not include Commons\n" ; }
+  # no longer applicable, remove soon:
+  # if ($f <= 3)  # 0 = Contributors, 1 = New Wikimedians, 2 = Active Editors (5+ edits), 3 = Very Active Editors (100+ edits),
+  # { $output .= ",Note: All projects does not include Commons\n" ; }
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
 
     foreach $project (sort {$totals_project {"$f,$m_last"} {$b} <=> $totals_project {"$f,$m_last"} {$a}} @projects)

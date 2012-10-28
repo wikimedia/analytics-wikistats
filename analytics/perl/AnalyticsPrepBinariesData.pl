@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/bin/perl
 
   use Getopt::Std ;
 
@@ -49,7 +49,6 @@ sub ReadStatisticsPerBinariesExtension
 
   if (! -e $file_csv_in)
   { die "Input file '$file_csv_in' not found" ; }
-
 
   print "Read '$file_csv_in'\n" ;
   open CSV_IN, '<', $file_csv_in ;
