@@ -1,37 +1,30 @@
 #!/usr/bin/perl
-use Carp;
-use File::Path qw/mkpath/;
-$| = 1; # Flush output
+  use Carp;
+  use File::Path qw/mkpath/;
+  $| = 1; # Flush output
 
-my %options;
-
+  my %options;
 
 BEGIN {
   use Getopt::Std;
-  getopt("dmwqcr", \%options) ;
+  getopt("dmwqr", \%options) ;
   my $__config_module = $options{"r"} || "SquidReportArchiveConfig.pm";
   require $__config_module;
   croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
   unshift(@INC,$cfg_liblocation); 
 };
 
+  use EzLib ;
+  $trace_on_exit = $true ;
+  ez_lib_version (2) ;
 
-
-
-use EzLib ;
-$trace_on_exit = $true ;
-ez_lib_version (2) ;
-
-default_argv ($cfg_default_argv) ;
-
+  default_argv ($cfg_default_argv) ;
 
   use Time::Local ;
   use Cwd;
 
   $ratio_sqrt   = $true ;
   $ratio_linear = $false ;
-
-
 
   undef %country_code_not_specified_reported ;
 
@@ -94,7 +87,6 @@ default_argv ($cfg_default_argv) ;
   }
   else { &Log ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
 
-
   # date range used to be read from csv file with ReadDate, now there are daily csv files
   # if earlier methods still is useful it needs to be tweaked
   # if (($reportmonth ne "") && ($reportmonth !~ /^\d{6}$/))
@@ -117,17 +109,15 @@ default_argv ($cfg_default_argv) ;
     mkpath ($path_reports) || die "Unable to create directory $path_reports\n" ;
   }
 
-
-
   &InitProjectNames ;
 
+  &ReadInputRegionCodes ;
   &ReadInputCountriesNames ;
+  &ReadInputCountriesMeta ;
 
   if ($reportcountries)
   {
     $project_mode = "wp" ; # discard all log data from other projects than Wikipedia
-
-    &ReadInputCountriesMeta ;
 
     &CollectRegionCounts ;
 
@@ -137,8 +127,6 @@ default_argv ($cfg_default_argv) ;
     exit ;
   }
 
-  &ReadInputCountriesMeta ; # also necessary for countriesdata report
-
   $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
 
   $threshold_mime    = 0 ;
@@ -146,61 +134,62 @@ default_argv ($cfg_default_argv) ;
 
   $file_log               = "SquidReportArchive.log" ;
 
-  $file_html_crawlers     = "SquidReportCrawlers.htm" ;
-  $file_html_methods      = "SquidReportMethods.htm" ;
-  $file_html_origins      = "SquidReportOrigins.htm" ;
-  $file_html_opsys        = "SquidReportOperatingSystems.htm" ;
-  $file_html_opsys_html   = "SquidReportOperatingSystemsHtmlOnly.htm" ;
-  $file_html_scripts      = "SquidReportScripts.htm" ;
-  $file_html_skins        = "SquidReportSkins.htm" ;
-  $file_html_user_agents  = "SquidReportUserAgents.htm" ;
-  $file_html_devices      = "SquidReportDevices.htm" ;
-  $file_csv_user_agents_out = "SquidReportUserAgents.csv" ;
-  $file_html_requests     = "SquidReportRequests.htm" ;
-  $file_html_google       = "SquidReportGoogle.htm" ;
-  $file_html_clients      = "SquidReportClients.htm" ;
-  $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
-  $file_html_countries_info = "SquidReportCountryData.htm" ;
+  $file_html_crawlers          = "SquidReportCrawlers.htm" ;
+  $file_html_methods           = "SquidReportMethods.htm" ;
+  $file_html_origins           = "SquidReportOrigins.htm" ;
+  $file_html_opsys             = "SquidReportOperatingSystems.htm" ;
+  $file_html_opsys_html        = "SquidReportOperatingSystemsHtmlOnly.htm" ;
+  $file_html_scripts           = "SquidReportScripts.htm" ;
+  $file_html_skins             = "SquidReportSkins.htm" ;
+  $file_html_user_agents       = "SquidReportUserAgents.htm" ;
+  $file_html_devices           = "SquidReportDevices.htm" ;
+  $file_csv_user_agents_out    = "SquidReportUserAgents.csv" ;
+  $file_html_requests          = "SquidReportRequests.htm" ;
+  $file_html_google            = "SquidReportGoogle.htm" ;
+  $file_html_clients           = "SquidReportClients.htm" ;
+  $file_html_clients_html      = "SquidReportClientsHtmlOnly.htm" ;
+  $file_html_countries_info    = "SquidReportCountryData.htm" ;
   $file_html_countries_browser = "SquidReportCountryBrowser.htm" ;
-  $file_html_countries_os = "SquidReportCountryOs.htm" ;
-  $file_html_countries_device = "SquidReportCountryDevice.htm" ;
+  $file_html_countries_os      = "SquidReportCountryOs.htm" ;
+  $file_html_countries_device  = "SquidReportCountryDevice.htm" ;
   $file_html_user_agents_timed = "SquidReportUserAgentsTimed.htm" ;
-  $file_html_browsers_timed = "SquidReportBrowsersTimed.htm" ;
-  $file_html_devices_timed = "SquidReportDevicesTimed.htm" ;
-  $file_csv_user_agents   = "SquidReportUserAgents.csv" ;
+  $file_html_browsers_timed    = "SquidReportBrowsersTimed.htm" ;
+  $file_html_devices_timed     = "SquidReportDevicesTimed.htm" ;
+  $file_csv_user_agents        = "SquidReportUserAgents.csv" ;
+
 # names till 2010-07-01
 #
-#  $file_csv_crawlers      = "SquidDataCrawlers.csv" ;
-#  $file_csv_methods       = "SquidDataMethods.csv" ;
-#  $file_csv_origins       = "SquidDataOrigins.csv" ;
-#  $file_csv_opsys         = "SquidDataOpSys.csv" ;
-#  $file_csv_requests      = "SquidDataRequests.csv" ;
-#  $file_csv_scripts       = "SquidDataScripts.csv" ;
-#  $file_csv_google        = "SquidDataSearch.csv" ;
-#  $file_csv_skins         = "SquidDataSkins.csv" ;
-#  $file_csv_clients       = "SquidDataClients.csv" ;
-#  $file_csv_google_bots   = "SquidDataGoogleBots.csv" ;
-#  $file_csv_indexphp      = "SquidDataIndexPhp.csv" ;
-#  $file_csv_countries_languages_visited = "SquidDataCountriesLanguagesVisited.csv" ;
-#  $file_csv_countries_timed   = "SquidDataCountriesTimed.csv" ;
-#  $file_csv_browser_languages = "SquidDataLanguages.csv" ;
+# $file_csv_crawlers           = "SquidDataCrawlers.csv" ;
+# $file_csv_methods            = "SquidDataMethods.csv" ;
+# $file_csv_origins            = "SquidDataOrigins.csv" ;
+# $file_csv_opsys              = "SquidDataOpSys.csv" ;
+# $file_csv_requests           = "SquidDataRequests.csv" ;
+# $file_csv_scripts            = "SquidDataScripts.csv" ;
+# $file_csv_google             = "SquidDataSearch.csv" ;
+# $file_csv_skins              = "SquidDataSkins.csv" ;
+# $file_csv_clients            = "SquidDataClients.csv" ;
+# $file_csv_google_bots        = "SquidDataGoogleBots.csv" ;
+# $file_csv_indexphp           = "SquidDataIndexPhp.csv" ;
+# $file_csv_countries_languages_visited = "SquidDataCountriesLanguagesVisited.csv" ;
+# $file_csv_countries_timed    = "SquidDataCountriesTimed.csv" ;
+# $file_csv_browser_languages  = "SquidDataLanguages.csv" ;
 
-  $file_csv_crawlers      = "public/SquidDataCrawlers.csv" ;
-  $file_csv_methods       = "public/SquidDataMethods.csv" ;
-  $file_csv_origins       = "public/SquidDataOrigins.csv" ;
-  $file_csv_opsys         = "public/SquidDataOpSys.csv" ;
-  $file_csv_requests      = "public/SquidDataRequests.csv" ;
-  $file_csv_scripts       = "public/SquidDataScripts.csv" ;
-  $file_csv_google        = "public/SquidDataSearch.csv" ;
-  $file_csv_skins         = "public/SquidDataSkins.csv" ;
-  $file_csv_clients       = "public/SquidDataClients.csv" ;
-  $file_csv_google_bots   = "public/SquidDataGoogleBots.csv" ;
-  $file_csv_indexphp      = "public/SquidDataIndexPhp.csv" ;
-  $file_csv_browser_languages = "public/SquidDataLanguages.csv" ;
-  $file_csv_user_agents   = "public/SquidDataUserAgents.csv" ;
-  $file_csv_devices       = "public/SquidDataDevices.csv" ;
-  $file_csv_countries_info= "public/SquidDataCountriesInfo.csv" ;
-  $file_csv_useragents_time= "SquidDataUserAgentsMonths.csv" ;
+  $file_csv_crawlers           = "public/SquidDataCrawlers.csv" ;
+  $file_csv_methods            = "public/SquidDataMethods.csv" ;
+  $file_csv_origins            = "public/SquidDataOrigins.csv" ;
+  $file_csv_opsys              = "public/SquidDataOpSys.csv" ;
+  $file_csv_requests           = "public/SquidDataRequests.csv" ;
+  $file_csv_scripts            = "public/SquidDataScripts.csv" ;
+  $file_csv_google             = "public/SquidDataSearch.csv" ;
+  $file_csv_skins              = "public/SquidDataSkins.csv" ;
+  $file_csv_clients            = "public/SquidDataClients.csv" ;
+  $file_csv_google_bots        = "public/SquidDataGoogleBots.csv" ;
+  $file_csv_indexphp           = "public/SquidDataIndexPhp.csv" ;
+  $file_csv_browser_languages  = "public/SquidDataLanguages.csv" ;
+  $file_csv_user_agents        = "public/SquidDataUserAgents.csv" ;
+  $file_csv_devices            = "public/SquidDataDevices.csv" ;
+  $file_csv_countries_info     = "public/SquidDataCountriesInfo.csv" ;
+  $file_csv_useragents_time    = "SquidDataUserAgentsMonths.csv" ;
 
   $file_csv_countries_languages_visited = "SquidDataCountriesViews.csv" ;
   $file_csv_countries_timed             = "SquidDataCountriesViewsTimed.csv" ;
@@ -321,8 +310,6 @@ default_argv ($cfg_default_argv) ;
     print "\n" ;
   }
 
-
-
 #  foreach $key (keys_sorted_by_value_num_desc %edit_submit_bot_agent)
 # { print "AGENT: " .sprintf ("%5d", $edit_submit_bot_agent {$key}) . ": $key\n" ; }
 #  print "\n\n" ;
@@ -338,6 +325,11 @@ default_argv ($cfg_default_argv) ;
   &CalcPercentages ;
   &NormalizeCounts ;
   &SortCounts ;
+
+# still to fix: empty totals & all region are Africa
+# &WriteReportCountryOpSys ;
+# print "ready\n" ;
+# exit ;
 
   &WriteReportClients ;
   &WriteReportCrawlers ;
@@ -648,21 +640,23 @@ sub PrepHtml
 
 sub ReadCountryCodes
 {
-  &Log ("ReadCountryCodes\n") ;
+#  &Log ("ReadCountryCodes\n") ;
 
-  open CODES, '<', "$path_csv/meta/$file_csv_country_codes" ;
-  while ($line = <CODES>)
-  {
-    if ($line =~ /^[A-Z]/)
-    {
-      chomp ($line) ;
-      ($code,$region,$north_south,$name) = split (',',$line,4) ;
-      $country_codes {$code} = unicode_to_html ($name) ;
-      # print "$code => $name\n" ;
-    }
-  }
-  $country_codes {'--'} = 'Unknown' ;
-  close CODES ;
+#  open CODES, '<', "$path_csv/meta/$file_csv_country_codes" ;
+#  while ($line = <CODES>)
+#  {
+#    if ($line =~ /^[A-Z]/)
+#    {
+#      chomp ($line) ;
+#      ($code,$region,$north_south,$name) = split (',',$line,4) ;
+
+#      $country_codes {$code} = unicode_to_html ($name) ;
+#      # print "$code => $name\n" ;
+#    }
+#  }
+#  $country_codes {'--'} = 'Unknown' ;
+#  close CODES ;
+#  %country_codes = %country_names ; # ???
 }
 
 sub ReadInputClients
@@ -1445,6 +1439,32 @@ sub ReadInputCountriesTimed
   close CSV_COUNTRIES ;
 }
 
+sub ReadInputRegionCodes
+{
+  &Log ("ReadInputregioncodes\n") ;
+
+  $file_csv_region_codes = "RegionCodes.csv" ;
+  $path_csv_region_codes = "$path_csv/meta/$file_csv_region_codes" ;
+  if (! -e $path_csv_region_codes) { abort ("Input file $path_csv_region_codes not found!") ; }
+
+  open    CSV_REGION_CODES, '<', $path_csv_region_codes ;
+
+  binmode CSV_REGION_CODES ;
+  while ($line = <CSV_REGION_CODES>)
+  {
+    chomp $line ;
+    ($country_code,$region_code,$north_south_code) = split (',', $line) ;
+    $region_codes      {$country_code} = $region_code ;
+    $north_south_codes {$country_code} = $north_south_code ;
+  }
+
+  close CSV_REGION_CODES ;
+}
+
+# CountryCodes.csv is partially based on http://www.maxmind.com/en/iso3166
+# Some country names were edited manually, region and N/S code were added manually 
+# Some more editing of ocuntry names occurs in this script (in way too many places !! -> more clean-up needed)
+# Best is too keep input from MaxMind as is, and do all name normalization here, and store region and N/S codes in separate file 
 sub ReadInputCountriesNames
 {
   &Log ("ReadInputCountriesNames\n") ;
@@ -1463,12 +1483,40 @@ sub ReadInputCountriesNames
 
     next if $line =~ /^#/ ;
 
-    $line =~ s/[\x00-\x1f]//g ;
-    $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
+    $line =~ s/\"//g ;
 
-    ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
-    $region_codes      {$country_code} = $region_code ;
-    $north_south_codes {$country_code} = $north_south_code ;
+    $line =~ s/[\x00-\x1f]//g ;
+    $line =~ s/UNDEFINED/Undefined/g ;
+    $line =~ s/territories/Territories/ ;
+    $line =~ s/(Falkland Islands).*$/$1/g ; # - (Malvinas)
+    $line =~ s/Reunion/Réunion/ ;
+    $line =~ s/Aland Islands/Åland Islands/ ;
+    $line =~ s/Bonaire, Saint Eustatius and Saba/Caribbean Netherlands/ ;
+    $line =~ s/Congo, The Democratic Republic of the/Congo Dem. Rep./ ;
+    $line =~ s/Congo$/Congo Rep./ ;
+    $line =~ s/Curacao/Curaçao/ ;
+    $line =~ s/Brunei Darussalam/Brunei/ ;
+    $line =~ s/Holy See.*$/Vatican City/ ;
+    $line =~ s/Iran, Islamic Republic of/Iran/ ;
+    $line =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $line =~ s/Korea, Republic of/South Korea/ ;
+    $line =~ s/Lao People's Democratic Republic/Laos/ ;
+    $line =~ s/Libyan Arab Jamahiriya/Libya/ ;
+    $line =~ s/Micronesia, Federated States of/Micronesia/ ;
+    $line =~ s/Moldova, Republic of/Moldova/ ;
+    $line =~ s/Palestinian Territory/Palestinian Territories/ ;
+    $line =~ s/Pitcairn/Pitcairn Islands/ ;
+    $line =~ s/Russian Federation/Russia/ ;
+    $line =~ s/American American Samoa/American Samoa/ ;
+    $line =~ s/Saint Bartelemey/Saint Barthélemy/ ;
+    $line =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
+    $line =~ s/Syrian Arab Republic/Syria/ ;
+    $line =~ s/Tanzania, United Republic of/Tanzania/ ;
+    $line =~ s/Virgin Islands, British/Virgin Islands, UK/ ;
+    $line =~ s/Virgin Islands, U.S./Virgin Islands, US/ ;
+
+    # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
+    ($country_code,$country_name) = split (',', $line,2) ;
 
     $country_name =~ s/"//g ;
 
@@ -1483,12 +1531,13 @@ sub ReadInputCountriesNames
 #      if ($country_meta_info_not_found_reported {$country} ++ == 0)
 #      { print "Meta info not found for country '$country'\n" ; }
 #    }
-    $country_name =~ s/^C..?te d/C&ocirc;te d/ ;
 
-    $country_names     {$country_code} = $country_name ;
-    $country_codes_all {"$country_name|$country_code"} ++ ;
+    $country_names_found {$country_name} ++ ;
+    $country_names       {$country_code} = $country_name ;
+    $country_codes_all   {"$country_name|$country_code"} ++ ;
   }
 
+  close CSV_COUNTRY_CODES ;
 }
 
 sub ReadInputCountriesMeta
@@ -1509,31 +1558,22 @@ sub ReadInputCountriesMeta
     # print "COUNTRY $country\nLINK $link\nPOPULATION $population\nCONNECTED $connected\n\n" ;
     $country =~ s/&comma;/,/g ;
 
-    # use country names as given by MaxMind
-    $country =~ s/Brunei/Brunei Darussalam/ ;
-  # $country =~ s/Congo, The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country =~ s/Dem. Rep. of Congo/Democratic Republic of the Congo/ ;
+    $country =~ s/territories/Territories/ ;
+    $country =~ s/American American Samoa/American Samoa/ ;
+    $country =~ s/C..?te d'Ivoire/Cote d'Ivoire/g ;
+    $country =~ s/Democratic Republic of the Congo/Congo Dem. Rep./ ;
+    $country =~ s/^Republic of the Congo/Congo Rep./ ;
     $country =~ s/East timor/Timor-Leste/ ;
     $country =~ s/Guyane/French Guiana/ ;
-    $country =~ s/Iran/Iran, Islamic Republic of/ ;
-    $country =~ s/Laos/Lao People's Democratic Republic/ ;
-    $country =~ s/Libya/Libyan Arab Jamahiriya/ ;
+    $country =~ s/Ivory Coast/Cote d'Ivoire/ ;
+    $country =~ s/^.*Micronesia/Micronesia/ ; # - Federated States of
     $country =~ s/Macau/Macao/ ;
-    $country =~ s/Moldova/Moldova, Republic of/ ;
-  # $country =~ s/North Korea/Korea, Republic of/ ;
-    $country =~ s/Palestine/Palestinian Territory/ ;
-  # $country =~ s/Republic of the Congo/Congo/ ;
-    $country =~ s/Russia/Russian Federation/ ;
-  # $country =~ s/North Korea/Korea, Democratic People's Republic of/ ;
-  # $country =~ s/South Korea/Korea, Republic of/ ;
-    $country =~ s/Syria/Syrian Arab Republic/ ;
-    $country =~ s/Tanzania/Tanzania, United Republic of/ ;
-    $country =~ s/U.S. Virgin Islands/Virgin Islands, British/ ;
-    $country =~ s/Vatican City/Holy See (Vatican City State)/ ;
-  # $country =~ s/^Korea$/South Korea/ ;
+    $country =~ s/Saint Helena.*$/Saint Helena/ ;  # - , Ascension and Tristan da Cunha 
+    $country =~ s/United States Virgin Islands/Virgin Islands, US/ ;
+    $country =~ s/British Virgin Islands/Virgin Islands, UK/ ;
 
     if ($connected eq 'connected')
-    { &Log ("connected unknown: $country\n") ; }
+    { $ip_connections_unknown .= "$country, " ; }
 
     $connected =~ s/connected/../g ;
 
@@ -1543,6 +1583,35 @@ sub ReadInputCountriesMeta
   }
 
   close COUNTRY_META_INFO ;
+
+  if ($ip_connections_unknown ne '')
+  { 
+    $ip_connections_unknown =~ s/, $// ; 
+    &Log ("\nIP connections unknown for:\n$ip_connections_unknown\n\n") ; 
+  }
+
+  &ValidateCountryNames ;
+}
+
+sub ValidateCountryNames
+{
+  &Log ("ValidateCountryNames\n") ;
+
+  print "\nCompare country names in two hash arrays:\n" ; 
+  print "\nCountries in \%country_names_found not found in \%country_meta_info:\n\n" ; 
+  foreach $country (sort keys %country_names_found) 
+  {
+    if ($country_meta_info {$country} eq '')
+    { print "$country\n" ; } 
+  }
+  
+  print "\n\nCountries in \%country_meta_info not found in \%country_names_found:\n\n" ; 
+  foreach $country (sort keys %country_meta_info) 
+  {
+    if ($country_names_found {$country} eq '')
+    { print "$country\n" ; } 
+  }
+  print "\n" ;
 }
 
 sub CollectRegionCounts
@@ -1589,7 +1658,6 @@ sub ReadInputCountriesMonthly
   undef %yyyymm_ ;
   undef %quarters ;
   undef %requests_unknown_per_quarter ;
-# undef %country_codes ;
   undef %requests_all ;
   undef %requests_all_per_period ;
   undef %requests_per_quarter ;
@@ -1671,7 +1739,7 @@ sub ReadInputCountriesMonthly
 
     if (($country =~ /\?/) || ($country =~ /unknown/i))
     { $requests_unknown_per_quarter {$quarter} += $count ; next ; }
-    $country_codes {"$country|$code"}++ ;
+
     $requests_all                                                                     += $count ;
     $requests_all_per_period                       {$yyyymm}                          += $count ;
     $requests_per_quarter                          {$quarter}                         += $count ;
@@ -1762,7 +1830,6 @@ sub ReadInputCountriesDaily
 
   my $project_mode = shift ;
 
-  undef %country_codes_found ;
   undef %weeknum_this_years ;
   undef %descriptions_per_period ;
   undef %days_in_input_for_week ;
@@ -1798,8 +1865,6 @@ sub ReadInputCountriesDaily
 
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
     $country = &GetCountryName ($code) ;
-
-    $country_codes_found {"$country|$code"} ++ ;
 
     next if &DiscardSquidInput ($bot,$project,$project_mode,$code,$language) ;
 
@@ -2082,6 +2147,12 @@ sub ReadInputCountriesInfo
 
     (my $type, my $country, my $value, my $count) = split (',', $line) ;
 
+    if ($country !~ /^(?:--|-P|-X|A1|A2|[A-Z][A-Z])$/)
+    {
+      print "Invalid country code $country\n" ;
+      next ;
+    }
+
     if ($type eq 'M')
     {
       $allcountrytotal += $count ;
@@ -2100,6 +2171,12 @@ sub ReadInputCountriesInfo
     }
     elsif ($type eq 'O')
     {
+      if ($value !~ /^[a-zA-Z0-9\-\.]+$/)
+      {
+        print "Invalid OS $value -> 'Error'\n" ;
+        $value = 'Error' ;      
+      }
+
       $countryos { $country, $value } += $count ;
       $allcountryos { $value } += $count ;
       $countryallos { $country } += $count ;
@@ -4932,13 +5009,9 @@ sub UserAgentField
 {
    my ($value, $ismarked) = @_;
    if ($ismarked)
-   {
-     $shownumber = &ShowCount ($value * $multiplier, $ismarked) ;
-   }
+   { $shownumber = &ShowCount ($value * $multiplier, $ismarked) ; }
    else
-   {
-     $shownumber = &ShowCount ($value * $multiplier) ;
-   }
+   { $shownumber = &ShowCount ($value * $multiplier) ; }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -4950,13 +5023,9 @@ sub UserAgentFieldPerc
    if ($value < 1)
    { $shownumber = '-' }
    elsif ($ismarked)
-   {
-     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $ismarked) ;
-   }
+   { $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $ismarked) ; }
    else
-   {
-     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare) ;
-   }
+   { $shownumber = &ShowPerc (100 * $value * $multiplier / $compare) ; }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -4964,13 +5033,9 @@ sub UserAgentFieldNew
 {
    my ($value, $ismarked, $percbase) = @_;
    if ($ismarked)
-   {
-     $shownumber = &ShowCount ($value * $multiplier, $ismarked, $percbase) ;
-   }
+   { $shownumber = &ShowCount ($value * $multiplier, $ismarked, $percbase) ; }
    else
-   {
-     $shownumber = &ShowCount ($value * $multiplier, '', $percbase) ;
-   }
+   { $shownumber = &ShowCount ($value * $multiplier, '', $percbase) ; }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -5301,23 +5366,10 @@ sub WriteReportCountriesInfo
   foreach $code (keys_sorted_by_value_num_desc %countrycount)
   {
     next if ($code eq '-X') ;
-    my $country = $country_codes {$code} ;
+    my $country = $country_names {$code} ;
 
-    $country =~ s/\"//g ;
-    $country =~ s/Korea, Republic of/South Korea/ ;
-    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
-    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
-    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-    $country =~ s/Reunion/Réunion/ ;
-    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
-    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
-    $country =~ s/\(Malvinas\)// ;
-    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
-    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-    $country =~ s/^\s+// ;
-    $country =~ s/\s+$// ;
+    if ($country eq '')
+    { $country = "Unknown ($code)" ; }
 
     my $region_code      = $region_codes {$code} ;
     my $north_south_code = $north_south_codes {$code} ;
@@ -5488,7 +5540,7 @@ sub WriteReportCountriesInfo
 sub WriteReportCountryOpSys
 {
   &Log ("WriteReportCountryOpSys\n") ;
-  open FILE_HTML_COUNTRIES_OPSYS, '>', "$path_reports/$file_html_countries_os" ;
+  open FILE_HTML_COUNTRIES_OPSYS, '>', "$path_reports/$file_html_countries_os" || die ("Can not write $path_reports/$file_html_countries_os\n") ;
 
   my $html = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
@@ -5530,27 +5582,18 @@ sub WriteReportCountryOpSys
   foreach $code (keys_sorted_by_value_num_desc %countryallos)
   {
     next if ($code eq '-X') ;
-    my $country = $country_codes {$code} ;
 
-    $country =~ s/\"//g ;
-    $country =~ s/Korea, Republic of/South Korea/ ;
-    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
-    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
-    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-    $country =~ s/Reunion/Réunion/ ;
-    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
-    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
-    $country =~ s/\(Malvinas\)// ;
-    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
-    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-    $country =~ s/^\s+// ;
-    $country =~ s/\s+$// ;
+    my $country = $country_names {$code} ;
 
-    my $region_code      = $region_codes {$code} ;
+    if ($country eq '')
+    { 
+      $country = 'Unknown' ; 
+      $code    = 'XX' ;
+    }
+    
     if ($region_code eq '')
     { $region_code = 'XX' ; }
+
     my $north_south_code = $north_south_codes {$code} ;
 
     $region_name = $region_code ;
@@ -5562,6 +5605,7 @@ sub WriteReportCountryOpSys
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
+    $region_name =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -5685,6 +5729,7 @@ sub WriteReportCountryOpSys
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
+    $region =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
 
     $population_region  = $population_region {$key} ;
     $connected_region   = $connected_region  {$key} ;
@@ -5784,23 +5829,7 @@ sub WriteReportCountryBrowser
   foreach $code (keys_sorted_by_value_num_desc %countryallbrowser)
   {
     next if ($code eq '-X') ;
-    my $country = $country_codes {$code} ;
-
-    $country =~ s/\"//g ;
-    $country =~ s/Korea, Republic of/South Korea/ ;
-    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
-    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
-    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-    $country =~ s/Reunion/Réunion/ ;
-    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
-    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
-    $country =~ s/\(Malvinas\)// ;
-    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
-    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-    $country =~ s/^\s+// ;
-    $country =~ s/\s+$// ;
+    my $country = $country_names {$code} ;
 
     my $region_code      = $region_codes {$code} ;
     if ($region_code eq '')
@@ -5816,6 +5845,7 @@ sub WriteReportCountryBrowser
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
+    $region_name =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -6689,7 +6719,7 @@ sub WriteReportPerCountryOverview
   # $country2 =~ s/Korea, Democratic People's Republic of/North Korea/ ;
     $country2 =~ s/Iran, Islamic Republic of/Iran/ ;
     $country2 =~ s/UAE/United Arab Emirates/ ;
-    $country2 =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+    $country2 =~ s/Congo - The Democratic Republic of the/Congo Dem. Rep./ ;
   # $country2 =~ s/^Congo$/Republic of the Congo/ ;
     $country2 =~ s/Syrian Arab Republic/Syria/ ;
     $country2 =~ s/Tanzania, United Republic of/Tanzania/ ;
@@ -6959,19 +6989,11 @@ sub WriteCsvFilePerCountryDensity
     { $perc_connected = sprintf ("%.1f", 100 * $connected / $population) .'%' ; }
 
     # now use country names that are suitable for http://gunn.co.nz/map/
-    $country =~ s/Moldova, Republic of/Moldova/ ;
-    $country =~ s/Korea, Republic of/South Korea/ ;
-    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $country =~ s/Iran, Islamic Republic of/Iran/ ;
-    $country =~ s/UAE/United Arab Emirates/ ;
-    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country =~ s/^Congo$/Republic of the Congo/ ;
-    $country =~ s/Syrian Arab Republic/Syria/ ;
-    $country =~ s/Tanzania, United Republic of/Tanzania/ ;
-    $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
-  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-    $country =~ s/Serbia/republic of serbia/ ;
-    $country =~ s/Lao People's Democratic Republic/Laos/ ;
+    $country =~ s/UAE/United Arab Emirates/ ;                                                 # http://gunn.co.nz/map/ 
+    $country =~ s/Congo Dem. Rep./Democratic Republic of the Congo/ ;                         # http://gunn.co.nz/map/
+  # $country =~ s/^Congo$/Republic of the Congo/ ;                                            # http://gunn.co.nz/map/
+  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;                                              # http://gunn.co.nz/map/
+    $country =~ s/Serbia/republic of serbia/ ;                                                # http://gunn.co.nz/map/
     $country =~ s/,/./g ;
 
 #Missing values for large countries (large as visible on http://gunn.co.nz/map/)
@@ -7150,8 +7172,8 @@ next ;
     $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
     $country =~ s/Iran, Islamic Republic of/Iran/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
-    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country =~ s/^Congo$/Republic of the Congo/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Dem. Rep. Congo/ ;
+  # $country =~ s/^Congo$/Rep. Congo/ ;
     $country =~ s/Syrian Arab Republic/Syria/ ;
     $country =~ s/Tanzania, United Republic of/Tanzania/ ;
     $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
@@ -8297,13 +8319,12 @@ sub ReadWikipedia
     $country =~ s/Bosnia-Herzegovina/Bosnia and Herzegovina/ ;
     $country =~ s/C.*.+te d'Ivoire/Cote d'Ivoire/ ;
     $country =~ s/Macao/Macau/ ; # will be changed back later
-    $country =~ s/Samoa/American Samoa/ ;
     $country =~ s/Timor Leste/Timor-Leste/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
     $country =~ s/Korea, South/South Korea/ ;
-    $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
-    $country =~ s/Congo, Republic of/Republic of the Congo/ ;
-    $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
+    $country =~ s/Congo, Democratic Republic of/Dem. Rep. Congo/ ;
+    $country =~ s/Congo, Republic of/Rep. Congo/ ;
+    $country =~ s/Macedonia, Republic of/Macedonia/ ;
     $country =~ s/Gambia, The/Gambia/ ;
     $country =~ s/Bahamas, The/The Bahamas/ ;
     $country =~ s/,/&comma;/g ;
@@ -8347,9 +8368,9 @@ sub ReadWikipedia
     $country =~ s/Timor Leste/Timor-Leste/ ;
     $country =~ s/UAE/United Arab Emirates/ ;
     $country =~ s/Korea, South/South Korea/ ;
-    $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
-    $country =~ s/Congo, Republic of/Republic of the Congo/ ;
-    $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
+    $country =~ s/Congo, Democratic Republic of/Dem. Rep. Congo/ ;
+    $country =~ s/Congo, Republic of/Rep. Congo/ ;
+    $country =~ s/Macedonia, Republic of/Macedonia/ ;
     $country =~ s/Gambia, The/Gambia/ ;
     $country =~ s/Bahamas, The/The Bahamas/ ;
     $country =~ s/,/&comma;/g ;
