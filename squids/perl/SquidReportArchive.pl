@@ -5476,7 +5476,8 @@ sub WriteReportCountriesInfo
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -5513,7 +5514,8 @@ sub WriteReportCountriesInfo
                      &ReportLineCountriesInfoTypes('reg_' . $key) .
                      "</tr>\n" ;
 
-    if (($key eq 'XX') || (($key eq 'OC')))
+  # if (($key eq 'XX') || (($key eq 'OC')))
+    if (($key eq 'S') || (($key eq 'OC')))
     {   $html_regions .= "<tr><td colspan=999>&nbsp;</td></tr>" ; }
   }
 
@@ -5580,9 +5582,7 @@ sub WriteReportCountryOpSys
   { $countryos {'--', $os} += $countryos {'-X', $os} ; }
 
   foreach $code (keys_sorted_by_value_num_desc %countryallos)
-  {
-    next if ($code eq '-X') ;
-
+ {
     my $country = $country_names {$code} ;
 
     if ($country eq '')
@@ -5591,6 +5591,9 @@ sub WriteReportCountryOpSys
       $code    = 'XX' ;
     }
     
+    next if $code =~ /(?:-X|XX|QP)/ ; # skip rows for IPv6 / Unknown till those data are vetted
+    
+    my $region_code = $region_codes {$code} ;
     if ($region_code eq '')
     { $region_code = 'XX' ; }
 
@@ -5712,7 +5715,8 @@ sub WriteReportCountryOpSys
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -5760,7 +5764,8 @@ sub WriteReportCountryOpSys
 
     $html_regions .= "</tr>\n" ;
 
-    if (($key eq 'XX') || (($key eq 'OC')))
+  # if (($key eq 'XX') || (($key eq 'OC')))
+    if (($key eq 'S') || (($key eq 'OC')))
     { $html_regions .= "<tr><td colspan=99>&nbsp;</td></tr>" ; }
   }
   $html .= "</tbody>\n</table>" ;
@@ -5952,7 +5957,8 @@ sub WriteReportCountryBrowser
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -5999,7 +6005,8 @@ sub WriteReportCountryBrowser
 
     $html_regions .= "</tr>\n" ;
 
-    if (($key eq 'XX') || (($key eq 'OC')))
+  # if (($key eq 'XX') || (($key eq 'OC')))
+    if (($key eq 'S') || (($key eq 'OC')))
     { $html_regions .= "<tr><td colspan=99>&nbsp;</td></tr>" ; }
   }
   $html .= "</tbody>\n</table>" ;
