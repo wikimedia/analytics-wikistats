@@ -1,11 +1,9 @@
 #!/bin/sh
 
-backup=/a/wikistats/backup
-analytics=/a/wikistats/analytics
-scripts=/a/wikistats/scripts
-csv=/a/wikistats/csv
-projectcounts=/a/dammit.lt/projectcounts
-dammit=/a/dammit.lt
+wikistats=/a/wikistats_git
+backup=$wikistats/backup
+dumps=$wikistats/dumps
+csv=$dumps/csv
 
 dt=$(date +[%Y-%m-%d][%H:%M])
 

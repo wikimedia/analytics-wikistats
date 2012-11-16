@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cd /a/wikistats/scripts/bash
+wikistats=/a/wikistats_git
+cd $wikistats/dumps/bash
 
 ./zip_csv.sh wb
 ./zip_csv.sh wk
