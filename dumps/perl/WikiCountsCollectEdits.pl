@@ -1,19 +1,38 @@
 #!/usr/bin/perl
 
   use Time::Local ;
+  use Getopt::Std ;
 
   $| = 1; # Flush output
   $verbose = 0 ;
 
-  $file_newest_dumps = "/a/wikistats/csv/csv_wp/StatisticsNewestDumps.csv" ;
-# $file_newest_dumps = "/a/wikistats/csv/csv_wx/StatisticsNewestDumps.csv" ;
-  open CSV_IN, '<', $file_newest_dumps ;
+  my %options ;
+  getopt ("cipw", \%options) ;
+  $path_csv = $options {'c'} ;
+  $project  = $options {'p'} ;
+  $wiki     = $options {'w'} ;
+  $dump     = $options {'i'} ;
+  
+  die "Specify path to csv files as: -c [path]" if ! -d $path_csv ;
+  print "Path to csv files: $path_csv\n" ;
+
+  die "Specify project code as: -p [wb|wk|wn|wp|wq|ws|wv|wx|wo]" if $project !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx|wo)$/ ;
+  print "Project code: $project\n" ;
+
+  die "Specify wiki code as: -w [some wiki, e.g. enwiki]" if $wiki eq '' ;
+  print "Wiki code: $wiki\n" ;
+
+  die "Specify dump file as: -i [full path to stub dump]" if ! -e $dump ;
+  print "Stub dump: $dump\n" ;
+
+  $file_newest_dumps = "$path_csv/csv_$project/StatisticsNewestDumps.csv" ;
+  
+  open CSV_IN, '<', $file_newest_dumps || die "Could not open $file_newest_dumps" ;
   binmode CSV_IN ;
   @dumplist = <CSV_IN> ;
   close CSV_IN ;
 
-  open CSV_IN, '<', "/a/wikistats/csv/csv_wp/BotsAll.csv" ;
-# open CSV_IN, '<', "/a/wikistats/csv/csv_wx/BotsAll.csv" ;
+  open CSV_IN, '<', "$path_csv/csv_$project/BotsAll.csv" || die "Could not open $path_csv/csv_$project/BotsAll.csv" ;
   binmode CSV_IN ;
   @botsall = <CSV_IN> ;
   close CSV_IN ;
@@ -28,7 +47,7 @@
 #    if (-e $path)
 #    { &ProcessDump ($project, $wiki, $path) ; }
 #  }
-  &ProcessDump ("wp", "enwiki", "/mnt/data/xmldatadumps/public/enwiki/20110620/enwiki-20110620-stub-meta-history.xml.gz") ;
+  &ProcessDump ($project, $wiki, $dump) ;
 
   print "\nReady\n" ;
   exit ;
@@ -37,13 +56,13 @@ sub ProcessDump
 {
   my ($project,$wiki,$path) = @_ ;
 
-  ($wp = $wiki) =~ s/wiki//g ;
+  ($wp = $wiki) =~ s/wik.*$//g ;
 
   my ($ss,$mm,$hh) = (localtime (time))[0,1,2] ;
   my $time = sprintf ("%02d:%02d:%02d", $hh, $mm, $ss) ;
   my $titles = 0 ;
 
-  print "$time Process project $project, wiki $wiki: " ;
+  print "$time Process project '$project', wiki '$wiki', dump '$path'\n\n" ;
   $timestart = time ;
 
   my $bots = '' ;
@@ -57,7 +76,7 @@ sub ProcessDump
   }
 
   if ($bots eq '')
-  { print "No line found for $wiki in BotsAll.csv\n" ; }
+  { print "No line found for $wiki in $path_csv/csv_$project/BotsAll.csv\n" ; }
   else
   {
     chomp $bots ;
@@ -78,15 +97,15 @@ sub ProcessDump
   else
   {  print "Unexpected extension: $path\n" ; exit ; }
 
-  open CSV_OUT, '>', "/a/wikistats/csv/csv_wp/EditsTimestampsOldest" . uc ($wp) . ".csv" ;
-# open CSV_OUT, '>', "/a/wikistats/csv/csv_wp/EditsTimestamps" . uc ($wp) . ".csv" ;
-# open CSV_OUT, '>', "/a/wikistats/csv/csv_wx/EditsTimestamps" . uc ($wp) . ".csv" ;
+  $file_out =  "$path_csv/csv_$project/EditsTimestamps" . uc ($wp) . ".csv" ;
+  print "Write output to  $file_out\n\n" ;
+  open CSV_OUT, '>', $file_out || die "Could not open $file_out" ;
   binmode CSV_OUT ;
   print CSV_OUT "# n=namespace, t=title, e=edit, R=registered user, B=bot. A=anonymous\n" ;
 
   while ($line = <XML>)
   {
-    if ($line =~ /\s*\<timestamp\>/) # Q&D: no check on right xml level (below <page>)
+    if ($line =~ /\s*\<timestamp\>/) # Q&D: no check on xml level (below <page>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
@@ -96,7 +115,7 @@ sub ProcessDump
       # print CSV_OUT "e,$timestamp\n" ;
     }
 
-    if ($line =~ /\s*\<username\>/) # Q&D: no check on right xml level (below <revision>)
+    if ($line =~ /\s*\<username\>/) # Q&D: no check on xml level (below <revision>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
@@ -111,7 +130,7 @@ sub ProcessDump
       print CSV_OUT "e,$usertype,$timestamp,$user\n" ;
     }
 
-    if ($line =~ /\s*\<ip\>/) # Q&D: no check on right xml level (below <revision>)
+    if ($line =~ /\s*\<ip\>/) # Q&D: no check on xml level (below <revision>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
@@ -122,7 +141,7 @@ sub ProcessDump
       print CSV_OUT "e,A,$timestamp,$user\n" ;
     }
 
-    if ($line =~ /\s*\<title\>/) # Q&D: no check on right xml level (below <page>)
+    if ($line =~ /\s*\<title\>/) # Q&D: no check on xml level (below <page>)
     {
       $titles++ ;
       if ($titles % 10000 == 0)
@@ -138,7 +157,7 @@ sub ProcessDump
       print CSV_OUT "t,$title\n" ;
     }
 
-    if ($line =~ /\s*\<namespace key/) # Q&D: no check on right xml level (below <namespaces>)
+    if ($line =~ /\s*\<namespace key/) # Q&D: no check on xml level (below <namespaces>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
