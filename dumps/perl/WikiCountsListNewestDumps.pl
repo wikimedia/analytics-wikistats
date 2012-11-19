@@ -1,24 +1,39 @@
 #!/usr/bin/perl
 
-# $file_dblist = "/a/wikistats/dblists/wikipedia.dblist" ;
-  $file_dblist = "/a/wikistats/dblists/special.dblist" ;
+# List for every wiki in one project the latest stub dump per language (languages as specified in dblist)
+  use Getopt::Std ;
+  $| = 1; # Flush output
+  
+  my %options ;
+  getopt ("clpw", \%options) ;
+  $path_csv    = $options {'c'} ; 
+  $project     = $options {'p'} ;
+  $file_dblist = $options {'l'} ;
+
+  die "Specify path to csv files as: -c [path]" if ! -d $path_csv ;
+  print "Path to csv files: $path_csv\n" ;
+
+  die "Specify project code as: -p [wb|wk|wn|wp|wq|ws|wv|wx|wo]" if $project !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx|wo)$/ ;
+  print "Project code: $project\n" ;
+
+  die "Dblist file '$file_dblist' not found" if ! -e $file_dblist ; 
+
   open DBLIST, '<', $file_dblist ;
   @dblist = <DBLIST> ;
   close DBLIST ;
-
   @dblist = sort @dblist ;
 
-# $file_newest_dumps = "/a/wikistats/csv/csv_wp/StatisticsNewestDumps.csv" ;
-  $file_newest_dumps = "/a/wikistats/csv/csv_wx/StatisticsNewestDumps.csv" ;
+  $file_newest_dumps = "$path_csv/csv_$project/StatisticsNewestDumps.csv" ;
+  print "Write output to $file_newest_dumps\n" ;
+
   open DUMPS, '>', $file_newest_dumps ;
-  print DUMPS "#from WikiCountsListNewestDumps.pl (Q&D, now only for stub dumps and wikipedia: wp)\n" ;
+  print DUMPS "#from WikiCountsListNewestDumps.pl\n" ;
   foreach $wiki (@dblist)
   {
     chomp $wiki ;
     $wiki =~ s/\s//g;
-    &FindNewestDumps ('wp', $wiki) ;
+    &FindNewestDumps ($project, $wiki) ;
   }
-
   close DUMPs ;
 
   print "\nReady\n" ;
