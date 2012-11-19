@@ -10,26 +10,31 @@
   use CGI::Carp qw(fatalsToBrowser);
   use Time::Local ;
   use Net::Domain qw (hostname);
+  use Getopt::Std ;
 
-  $file_namespaces = "StatisticsContentNamespaces.csv" ;
+  my %options ;
+  getopt ("c", \%options) ;
+  $path_csv = $options {'c'} ;
+
+  die "specify path to csv files as -c [path]" if ! -d $path_csv ;
+  print "Path to csv files: $path_csv\n" ; 
+
+  $file_namespaces = "$path_csv/csv_mw/StatisticsContentNamespaces.csv" ;
   $file_run_stats  = "StatisticsLog.csv" ;
-  # die "File $file_namespaces could not be found" if ! -e $file_namespaces ;
 
-  if ($job_runs_on_production_server)
-  { $file_csv_in  = "/a/wikistats/csv/csv_mw/$file_namespaces" ; }
-  else
-  { $file_csv_in  = "w:/# Out Test/csv_mw/$file_namespaces" ; }
-
-  open CSV_IN, '<', $file_csv_in ;
-  while ($line = <CSV_IN>)
+  if (-e $file_namespaces)
   {
-    next if $line !~ /.*?,.*?,/ ;
-    chomp $line ;
-    ($proj_code,$lang,$namespaces) = split (',', $line,3) ;
-    $namespaces =~ s/,+$// ;
-    $namespaces {"$proj_code,$lang"} = $namespaces ;
+    open CSV_IN, '<', $file_namespaces || die "Can't open $file_namespaces" ;
+    while ($line = <CSV_IN>)
+    {
+      next if $line !~ /.*?,.*?,/ ;
+      chomp $line ;
+      ($proj_code,$lang,$namespaces) = split (',', $line,3) ;
+      $namespaces =~ s/,+$// ;
+      $namespaces {"$proj_code,$lang"} = $namespaces ;
+    }
+    close CSV_IN ;
   }
-  close CSV_IN ;
 
   &GetNamespaces ('wb','wikibooks') ;
   &GetNamespaces ('wk','wiktionary') ;
@@ -48,12 +53,9 @@ sub GetNamespaces
 {
   my ($proj_code,$proj_name) = @_ ;
 
-  if ($job_runs_on_production_server)
-  { $file_csv_in  = "/a/wikistats/csv/csv_$proj_code/$file_run_stats" ; }
-  else
-  { $file_csv_in  = "w:/# Out Test/csv_$proj_code/$file_run_stats" ; }
+  $file_csv_in  = "$path_csv/csv_$proj_code/$file_run_stats" ;  
 
-  open CSV_IN, '<', $file_csv_in ;
+  open CSV_IN, '<', $file_csv_in || die "Can't open $file_csv_in" ;
   while ($line = <CSV_IN>)
   {
     next if $line !~ /^\w+/ ;
@@ -105,14 +107,7 @@ sub GetNamespaces
 
 sub SaveNamespaces
 {
-  my ($proj_code,$proj_name) = @_ ;
-
-  if ($job_runs_on_production_server)
-  { $file_csv_out = "/a/wikistats/csv/csv_mw/$file_namespaces" ; }
-  else
-  { $file_csv_out = "w:/# Out Test/csv_mw/$file_namespaces" ; }
-
-  open CSV_OUT, '>', $file_csv_out ;
+  open CSV_OUT, '>', $file_namespaces || die "Can't open $file_namespaces" ;
   foreach $key (sort keys %namespaces)
   { print CSV_OUT "$key," . $namespaces {$key} . "\n" ; }
   close CSV_OUT ;

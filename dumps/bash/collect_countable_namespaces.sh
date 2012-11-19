@@ -2,14 +2,14 @@
 
 ulimit -v 100000
 
-perl=/a/wikistats/scripts/perl
-csv=/a/wikistats/csv
+wikistats=/a/wikistats_git
+perl=$wikistats/dumps/perl
+csv=$wikistats/dumps/csv
 
 clear
 
 cd $perl
-
-perl ./WikiCountsScanNamespacesWithContent.pl
+perl WikiCountsScanNamespacesWithContent.pl -c $csv
 
 cd $csv/csv_mw
 grep "project" StatisticsContentNamespaces.csv >  StatisticsContentNamespacesExtraNamespaces.csv # first line with headers
