@@ -1999,25 +1999,30 @@ sub ReadDumpMetaData
   foreach $line (@csv)
   {
     ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile) = split ',' ,$line ;
+    print "ReadDumpMetaData line $line\n" ;
     if ($dumptype !~ /^(?:edits_only|full_dump)$/)
-    { $dumptype = 'unknown' ; }
+    { $dumptype .= 'unknown' ; }
     &Log ("$line\n") ;
   }
 
-  $dumptype =~ s/_/ /g ;
-  $dumpfile =~ s/^.*?([^\/\\]*)$/$1/ ;
+  if ($dump_size_compressed > 0)
+  {
+    $dumptype =~ s/_/ /g ;
+    $dumpfile =~ s/^.*?([^\/\\]*)$/$1/ ;
 
-  $dump_size_compressed = &i2KbMb ($dump_size_compressed) ;
-  $dump_size_uncompressed = &i2KbMb ($dump_size_uncompressed) ;
+    $dump_size_compressed = &i2KbMb ($dump_size_compressed) ;
+    $dump_size_uncompressed = &i2KbMb ($dump_size_uncompressed) ;
 
-  $processed_till = $months_en [substr ($processed_till,4,2)-1] .' ' . substr ($processed_till,6,2) . ', ' . substr ($processed_till,0,4) ;
+    $processed_till = $months_en [substr ($processed_till,4,2)-1] .' ' . substr ($processed_till,6,2) . ', ' . substr ($processed_till,0,4) ;
 
-  $dumpdetails = "Dump file <b>$dumpfile</b> (<b>$dumptype</b>), size <b>$dump_size_compressed</b> as <b>$file_format</b> -> <b>$dump_size_uncompressed</b>\n<br>Dump processed till <b>$processed_till</b>, on server <b>$server</b>, ready at <b>$time_now_english</b> after <b>" . ddhhmmss ($time_total) . "</b>.\n" ;
-  $dumpdetails2 = $dumpdetails ;
-  $dumpdetails2 =~ s/<[^>]*>//g ;
-  $dumpdetails2 =~ s/\&nbsp;//g ;
+    $dumpdetails = "Dump file <b>$dumpfile</b> (<b>$dumptype</b>), size <b>$dump_size_compressed</b> as <b>$file_format</b> -> <b>$dump_size_uncompressed</b>\n<br>Dump processed till <b>$processed_till</b>, on server <b>$server</b>, ready at <b>$time_now_english</b> after <b>" . ddhhmmss ($time_total) . "</b>.\n" ;
+    $dumpdetails2 = $dumpdetails ;
+    $dumpdetails2 =~ s/<[^>]*>//g ;
+    $dumpdetails2 =~ s/\&nbsp;//g ;
 
-  &Log ("\n$dumpdetails2\n") ;
+    &Log ("\n$dumpdetails2\n") ;
+  }
+
   return ($dumptype,$dumpdetails) ;
 }
 

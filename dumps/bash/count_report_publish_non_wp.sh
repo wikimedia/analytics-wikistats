@@ -11,7 +11,7 @@ cd $bash
 
 while [ 1 = 1 ]
 do
-
+ls -l
 echo "\n\n======================================\n" >> $log
 echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> $log
 

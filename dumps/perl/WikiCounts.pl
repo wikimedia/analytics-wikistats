@@ -94,7 +94,6 @@
   $log_enabled = $false ;
   $skip_on_dumpdate = $false ;
 
-
   $weekly_plotdata = $false ;
   if ($weekly_plotdata)
   { $period_significant_digits = 8 ; } # compare dates on day level, only process last edit per article per day
@@ -137,10 +136,6 @@
   $useritem_edits_10 = 13 ;                      # count if user made 10 or more edits
 
   &ParseArguments ;
-
-  $file_log_concise = "log_" . $mode . "_wikistats_concise.txt" ;
-  if ($job_runs_on_production_server)
-  { $file_log_concise = "/a/wikistats_git/logs/$file_log_concise" ; }
 
   &SetEnvironment ;
 
@@ -301,7 +296,8 @@
   else
   { &LogC (" -> " . ddhhmmss (time - $timestart). "\n") ; }
 
-  &WriteDiskStatus ;
+  if ($min_run > 1)
+  { &WriteDiskStatus ; }
 
   rmdir $path_temp ; # remove if empty
   if (-d $path_temp)

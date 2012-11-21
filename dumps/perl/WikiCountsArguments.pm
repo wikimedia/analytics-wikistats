@@ -35,6 +35,11 @@ sub ParseArguments
   $dumpdate         = $options {"d"} ;
   $dump2csv         = $options {"c"} ;
 
+  $path_log = -d '/a/wikistats_git' ? '/a/wikistats_git/dumps/logs' : '/a/wikistats/dumps/logs' ;
+  $file_log_concise = "log_" . $mode . "_wikistats_concise.txt" ;
+  if ($job_runs_on_production_server)
+  { $file_log_concise = "$path_log/$file_log_concise" ; }
+
   if (defined ($options {"e"}))
   {
     $edits_only = $true ;
