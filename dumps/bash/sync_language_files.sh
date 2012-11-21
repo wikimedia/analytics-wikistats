@@ -1,9 +1,12 @@
 #!/bin/sh
 
-exit # needs further testing after move to stat1
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+csv=$dumps/csv
+
+#exit # needs further testing after move to stat1
 
 echo "Sync language files" ;
-csv=/a/wikistats/csv ;
 
 file1="LanguageNamesViaPhp.csv" ;
 
