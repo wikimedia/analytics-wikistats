@@ -11,7 +11,12 @@
   $date = '20120902' ;
 
   $file_in  = "/mnt/data/xmldatadumps/public/${lang}wiki/$date/${lang}wiki-${date}-stub-meta-history.xml.gz" ;
-  $file_out = "/a/wikistats/tmp/${lang}wiki-${date}-stub-meta-history.xml" ;
+  
+  # Q&D fix for Q&D script
+  if (-d '/a/wikistats_git')
+  { $file_out = "/a/wikistats_git/tmp/${lang}wiki-${date}-stub-meta-history.xml" ; }
+  else
+  { $file_out = "/a/wikistats/tmp/${lang}wiki-${date}-stub-meta-history.xml" ; }
 
 # local test
 # $file_in  = 'w:/# in dumps/aawiki-20120913-stub-meta-history.xml' ;

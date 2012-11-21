@@ -126,7 +126,7 @@ $out_reg_user_edited  = "reg. user edited" ;  # new
 
 $out_no_wikimedia = "This script has been developed for <a href='http://www.wikimedia.org'>Wikimedia</a>.<br>" .
                     "Results on other sites running Mediawiki software may vary.<br>" .
-                    "For comparison: <a href='http://en.wikipedia.org/wikistats/EN/Sitemap.htm'>Wikipedia statistics</a>." ;
+                    "For comparison: <a href='http://stats.wikimedia.org/EN/Sitemap.htm'>Wikipedia statistics</a>." ;
 
 $out_webalizer_note = "Note: Webalizer data are not consistently available. Low figures for Dec 2003 are result of major server outage." ;
 $out_svg_firefox  = "<br><a href='http://magnusmanske.de/wikimaps/index.php/How_to_SVG-enable_Firefox'>How to enable SVG in Firefox for Windows</a>" ;

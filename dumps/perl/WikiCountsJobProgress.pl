@@ -20,16 +20,18 @@
   use Cwd ;
 
   my %options ;
-  getopt ("dio", \%options) ;
+  getopt ("dipou", \%options) ;
   $dir_dammit = $options {'d'} ;
   $dir_dumps  = $options {'i'} ;
   $dir_out    = $options {'o'} ;
   $dir_usage  = $options {'u'} ;
+  $dir_perl   = $options {'p'} ;
     
   die "Specify dir to dammit.lt files as: -d [path]" if ! -d $dir_dammit ;
   die "Specify dir to dumps as: -i [path]"           if ! -d $dir_dumps ;
   die "Specify dir to output files as: -o [path]"    if ! -d $dir_out ;
   die "Specify dir to scan for usage as: -u [path]"  if ! -d $dir_usage ;
+  die "Specify dir to dump perl scripts: -p [path]"  if ! -d $dir_perl ;
 
   $timestart = time ;
   $false     = 0 ;
@@ -944,7 +946,7 @@ sub i2KMB2
 sub ReadWikiCountsThresholdEditsOnly
 {
   my $text = '' ;
-  my $file_perl = "/a/wikistats/scripts/perl/WikiCounts.pl" ;
+  my $file_perl = "$dir_perl/WikiCounts.pl" ;
   open PERL, '<', $file_perl ;
   while ($line = <PERL>)
   {

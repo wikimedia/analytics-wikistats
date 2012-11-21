@@ -18,8 +18,10 @@
   $false = 0 ;
 
 # server paths
-  $path_dblist = "/a/wikistats/dblists/" ;
-  $path_csv    = "/a/wikistats/csv/" ;
+  $path_wikistats = -d '/a/wikistats_git' ? '/a/wikistats_git' : '/a/wikistats' ;
+  
+  $path_dblist = "$path_wikistats/dumps/dblists/" ;
+  $path_csv    = "$path_wikistats/dumps/csv/" ;
   $path_dumps  = "/mnt/data/xmldatadumps/public/" ;
 
   $file_csv_content_namespaces_all = $path_csv . "csv_mw/StatisticsContentNamespaces.csv" ;

@@ -142,7 +142,7 @@
   $out_myname = "Erik Zachte" ;
   $out_mymail = "ezachte@### (no spam: ### = wikimedia.org)" ;
   $out_mysite = "http://infodisiac.com/" ;
-  $out_pageviewlogs = "http://dammit.lt/wikistats/" ;
+  $out_pageviewlogs = "http://dumps.wikimedia.org/other/pagecounts-raw/" ;
 
   $crossref = "ast,bg,br,ca,cs,da,de,en,eo,es,fr,he,hu,id,it,ja,nl,nn,pl,pt,ro,ru,sk,sl,sr,sv,wa,zh" ;
   $languages_force_case_uc = "ast|br|de|en|id|nl|wa" ;
