@@ -1,9 +1,15 @@
 #!/bin/sh
 ulimit -v 1000000
 
-perl=/a/wikistats/scripts/perl
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+out=$dumps/out
+dammit=/a/dammit.lt
+htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs
 
-perl $perl/WikiCountsJobProgress.pl >/dev/null
+cd $perl
+perl WikiCountsJobProgress.pl -i $dumps -d $dammit -o $out
 
-rsync -av /a/wikistats/out/out_wm/WikiCountsJobProgress*.html  stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs
+rsync -av $out/out_wm/WikiCountsJobProgress*.html $htdocs
 

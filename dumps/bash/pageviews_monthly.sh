@@ -1,11 +1,13 @@
 #!/bin/sh
 
-perl=/a/wikistats/scripts/perl
-csv=/a/wikistats/csv
-out=/a/wikistats/out
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
-report=/a/wikistats/logs/log_pageviews_monthly.txt
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+csv=$dumps/csv
+out=$dumps/out
+report=$dumps/logs/log_pageviews_monthly.txt
 projectcounts=/a/dammit.lt/projectcounts
+htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
 echo "**************************" | tee -a $report | cat
 echo "Start pageviews_monthly.sh" | tee -a $report | cat
