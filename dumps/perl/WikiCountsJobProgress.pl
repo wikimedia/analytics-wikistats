@@ -24,10 +24,12 @@
   $dir_dammit = $options {'d'} ;
   $dir_dumps  = $options {'i'} ;
   $dir_out    = $options {'o'} ;
+  $dir_usage  = $options {'u'} ;
     
   die "Specify dir to dammit.lt files as: -d [path]" if ! -d $dir_dammit ;
   die "Specify dir to dumps as: -i [path]"           if ! -d $dir_dumps ;
   die "Specify dir to output files as: -o [path]"    if ! -d $dir_out ;
+  die "Specify dir to scan for usage as: -u [path]"  if ! -d $dir_usage ;
 
   $timestart = time ;
   $false     = 0 ;
@@ -640,13 +642,7 @@ sub WriteHtmlCurrent
   }
 
   push @lines, "\nFolders > 1G:\n\n" ;
-  @used = `du --si /a/squid | grep [0-9]G` ;
-  foreach $line (@used)
-  {
-    if ($line =~ /\d[MG]/)
-    { push @lines, $line ; }
-  }
-  @used = `du --si /a/wikistats | grep [0-9]G` ;
+  @used = `du --si $dir_usage | grep [0-9]G` ;
   foreach $line (@used)
   {
     if ($line =~ /\d[MG]/)

@@ -435,7 +435,6 @@ sub WriteTraceBuffer
 sub WriteDiskStatus
 {
   &Log ("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++") ;
-  $path_temp2 = "/a/tmp/wikistats" ;
   if (($path_in !~ /\\/) && (-d $path_temp)) # Windows ?
   {
     $text = `df -h $path_temp` ;
@@ -449,8 +448,8 @@ sub WriteDiskStatus
       &Log ("List $path_temp =>" . $text . "\n") ;
     }
   }
-  $text = `ls -l $path_temp2` ;
-  &Log ("List $path_temp2 =>" . $text) ;
+  $text = `ls -l $path_temp` ;
+  &Log ("List $path_temp =>\n" . $text) ;
   &Log ("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n") ;
 }
 

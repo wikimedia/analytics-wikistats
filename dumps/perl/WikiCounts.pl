@@ -140,7 +140,7 @@
 
   $file_log_concise = "log_" . $mode . "_wikistats_concise.txt" ;
   if ($job_runs_on_production_server)
-  { $file_log_concise = "/a/wikistats/log/$file_log_concise" ; }
+  { $file_log_concise = "/a/wikistats_git/logs/$file_log_concise" ; }
 
   &SetEnvironment ;
 

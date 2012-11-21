@@ -2327,8 +2327,14 @@ sub ReadUserNamesWikiLovesMonuments
 {
   # use this list of participants (in any year) to copy namespace 6
   &LogPhase ("ReadUserNamesWikiLovesMonuments") ;
+  
+  my $path_csv_wm = $path_out ;
+  $path_csv_wm =~ s/csv_.*$/csv_mw/ ;
   my $year = 2010 ;
-  my $file_participants_per_year = "/a/wikistats/csv/csv_mw/WLM_uploaders_$year.txt" ;
+  my $file_participants_per_year = "$path_csv_wm/WLM_uploaders_$year.txt" ;
+
+  if (! -d $path_csv_wm)
+  { print "Dir $path_csv_wm not found\n" ; } 
 
   while (-e $file_participants_per_year)
   {
@@ -2347,7 +2353,7 @@ sub ReadUserNamesWikiLovesMonuments
     close CSV_WLM ;
 
     $year++ ;
-    $file_participants_per_year = "/a/wikistats/csv/csv_mw/WLM_uploaders_$year.txt" ;
+    $file_participants_per_year = "$path_csv_wm/WLM_uploaders_$year.txt" ;
   }
   @wiki_loves_monuments_participant = keys %wiki_loves_monuments_participant ;
   print '' . ($#wiki_loves_monuments_participant + 1) . " participants found in all event files combined\n\n" ; # start with '' to avoid "print interpreted as a function"

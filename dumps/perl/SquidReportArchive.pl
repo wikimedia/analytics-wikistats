@@ -47,14 +47,6 @@
   &Log ("Path in  = $path_in\n") ;
   &Log ("Path out = $path_out\n") ;
 
-# following test needs to change -> remove server name dependency (new run argument ?)
-# elsif ($hostname eq 'bayes')
-# {
-#   &Log ("\n\nJob runs on server $hostname\n\n") ;
-#   $path_in  = "/home/ezachte/wikistats/animation" ;
-#   $path_out = "/home/ezachte/wikistats/animation" ;
-# }
-
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
   # periodically harvest updated metrics from

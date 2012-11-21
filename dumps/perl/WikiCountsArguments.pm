@@ -162,6 +162,10 @@ sub SetEnvironment
   if (! -d $path_out)
   { mkdir $path_out, 0777 ; }
 
+  $path_temp = $path_out ;
+  $path_temp =~ s/(\/.*?\/.*?\/).*/$1/ ;
+  $path_temp .= "tmp" ;
+
   $file_log      = $path_out . "WikiCountsLog.txt" ;
   $file_errors   = $path_out . "WikiCountsErrors.txt" ;
   $file_aborted  = $path_out . "WikiCountsRunAborted.txt" ;
@@ -432,12 +436,6 @@ sub SetEnvironment
       }
     }
 
-    # used to build a list of valid latest full archive xml dumps for all wikis, for special processing
-    # open  FILE_XML, '>>', "/home/ezachte/wikistats/ListXmlDumpsFullArchive.txt" ;
-    # print FILE_XML "$file_in_xml_full\n" ;
-    # close FILE_XML ;
-    # exit ;
-
     $file_csv_stats_ploticus        = $path_out . "StatisticsPlotInput.csv" ;
     $file_csv_monthly_stats         = $path_out . "StatisticsMonthly.csv" ;
     $file_csv_monthly_editors       = $path_out . "StatisticsMonthlyEditors.csv" ;
@@ -668,28 +666,11 @@ sub SetProofReadNameSpaces
 sub PrepTempDir
 {
   &LogT ("PrepTempDir\n") ;
-  $path_temp = "/a/tmp/wikistats" ;
   print "Temp   $path_temp\n" ;
-
-  if ((-d "/a/tmp") && (! -d "/a/tmp/wikistats"))
-  { mkdir "/a/tmp/wikistats", 0770 ; }
-
-# obsolete
-# if ((-d "/a/tmp") && (! -d "/a/tmp/wikistats/$mode\_$language"))
-# { mkdir "/a/tmp/wikistats/$mode\_$language", 0770 ; }
-
-# obsolete
-# if (($language eq "strategy") || ($language eq "usability") || ($language eq "outreach"))
-# {
-#   $path_temp = "/a/tmp/wikistats/wx/projects" ;
-#   if ((-d "/a/tmp") && (! -d "/a/tmp/wikistats/wx/projects"))
-#   {
-#     mkdir "/a/tmp/wikistats/wx/projects", 0770 ;
-#   }
-# }
 
   if (! -d $path_temp)
   {
+    print "Temp   $path_temp not found ->\n" ;
     $path_temp = $path_out ;
     $path_temp =~ s/\/[^\/]*\/$/\// ;
     $path_temp .= "temp" ;
