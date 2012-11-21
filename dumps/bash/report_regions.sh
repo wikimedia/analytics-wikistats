@@ -1,13 +1,14 @@
 #!/bin/bash
 
-
-perl=/a/wikistats/scripts/perl
-bash=/a/wikistats/scripts/bash
-csv=/a/wikistats/csv
-out=/a/wikistats/out
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+bash=$dumps/bash
+csv=$dumps/csv
+out=$dumps/out
 htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
-log=/a/wikistats/logs/log_report_regions.txt
+log=$dumps/logs/log_report_regions.txt
 
 /interval_days=-1 # set to -1 to have all reports generated despite age
 
@@ -72,7 +73,7 @@ do
       echo2 ""	
       echo2 "Generate reports for $region in language $lang "
       region_lc=$( echo "$region" | tr '[:upper:]' '[:lower:]' )	
-      perl WikiReports.pl -r $region_lc -m wp -l $lang -i /a/wikistats/csv_wp/ -o /a/out/out_wp # >> $log
+      perl WikiReports.pl -r $region_lc -m wp -l $lang -i $csv/csv_wp/ -o $out/out_wp # >> $log
       echo2 ""
       echo2 "Reports for $region completed, rsync to htdocs"
       echo2 "rsync -a /a/out/out_wp/EN_$region/ $htdocs/EN_$region"
@@ -85,17 +86,17 @@ exit
 # for x in en ast bg br ca cs da de eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 for x in en ;
 do 
-  perl WikiReports.pl -r india      -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp # >> $log
-  rsync -avv /a/out/out_wp/EN_India
-#  perl WikiReports.pl -r africa     -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
-#  perl WikiReports.pl -r america    -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
-#  perl WikiReports.pl -r asia       -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
-#  perl WikiReports.pl -r europe     -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
-#  perl WikiReports.pl -r oceania    -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
-#  perl WikiReports.pl -r artificial -m wp -l $x -i /a/wikistats/csv_wp/ -o /a/out/out_wp ;
+  perl WikiReports.pl -r india      -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp # >> $log
+  rsync -avv $out/out_wp/EN_India
+#  perl WikiReports.pl -r africa     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+#  perl WikiReports.pl -r america    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+#  perl WikiReports.pl -r asia       -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+#  perl WikiReports.pl -r europe     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+#  perl WikiReports.pl -r oceania    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+#  perl WikiReports.pl -r artificial -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
 done;
 
-# perl WikiReports.pl -c -m $1 -l en -i /a/wikistats/csv_$1/ -o /a/out/out_$1 
+# perl WikiReports.pl -c -m $1 -l en -i $csv_$1/ -o $out_$1 
 
 # ./zip_out.sh $1
 

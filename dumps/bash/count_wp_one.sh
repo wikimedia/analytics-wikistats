@@ -3,10 +3,12 @@
 ulimit -v 8000000
 clear
 
-perl=/a/wikistats/scripts/perl
-dumps=/mnt/data/xmldatadumps/public
-csv=/a/wikistats/csv
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+csv=$dumps/csv
 php=/a/mediawiki/core/languages
+dumps_public=/mnt/data/xmldatadumps/public
 
 cd $perl
 
@@ -18,7 +20,7 @@ edits_only=-e # comment to run full scan
 #reverts_only="-u 1" # comment to collect all data (u for undo)
 #date=$1
 
-rm /a/wikistats/csv/csv_$set/WikiCountsRunAborted.txt
+rm $csv/csv_$set/WikiCountsRunAborted.txt
 
 # run from specific dump file
 #x=enwiki

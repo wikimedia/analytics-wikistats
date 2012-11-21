@@ -1,9 +1,11 @@
 #!/bin/sh
 ulimit -v 8000000
 
-perl=/a/wikistats/scripts/perl
-csv=/a/wikistats/csv
-out=/a/wikistats/out
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+csv=$dumps/csv
+out=$dumps/out
 
 clear
 # -y = collect editor counts for one project

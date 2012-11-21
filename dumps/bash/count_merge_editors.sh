@@ -2,10 +2,12 @@
 ulimit -v 8000000
 
 clear
-perl=/a/wikistats/scripts/perl
-csv=/a/wikistats/csv/
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/prl
+csv=$dumps/csv
 
-log=/a/wikistats/logs/count_merge_editors.log
+log=$dumps/logs/count_merge_editors.log
 
 cd $perl
 

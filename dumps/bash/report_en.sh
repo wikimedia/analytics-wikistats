@@ -3,11 +3,13 @@
 ulimit -v 8000000
 clear
 
-perl=/a/wikistats/scripts/perl
-bash=a/wikistats/scripts/bash
-logs=/a/wikistats/logs
-csv=/a/wikistats/csv
-out=/a/wikistats/out
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+bash=$dumps/bash
+logs=$dumps/logs
+csv=$dumps/csv
+out=$dumps/out
 
 #abort_before=$2
 #day_of_month=$(date +"%d")
@@ -23,11 +25,9 @@ echo "\nStart report.sh $1" >> $logs/report_en.sh.log
 
 # date >> report.txt
 
-cd $bash
-./sync_language_files.sh
-
-./report_regions.sh 
+$bash/sync_language_files.sh
+$bash/report_regions.sh 
 
 perl $perl/WikiReports.pl -c -m $1 -l en -i $csv/csv_$1/ -o $out/out_$1 
 
-./zip_out.sh $1
+$bash/zip_out.sh $1

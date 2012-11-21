@@ -1,12 +1,14 @@
 #!/bin/bash
 
-perl=/a/wikistats/scripts/perl
-bash=/a/wikistats/scripts/bash
-csv=/a/wikistats/csv
-out=/a/wikistats/out
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+bash=$dumps/bash
+csv=$dumps/csv
+out=$dumps/out
 htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
-log=/a/wikistats/logs/log_report_sh.txt
+log=$dumps/logs/log_report_sh.txt
 
 # Update English reports for project $1 whenever input csv files are newer than html reports
 # Update reports for other 25+ languages at most once a month, to economize processing time 

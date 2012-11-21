@@ -1,8 +1,10 @@
 #!/bin/bash
 
-perl=/a/wikistats/scripts/perl
-csv=/a/wikistats/csv
-out=/a/wikistats/out
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+perl=$dumps/perl
+csv=$dumps/csv
+out=$dumps/out
 htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
 cd $perl

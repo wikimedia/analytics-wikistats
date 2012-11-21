@@ -2,7 +2,8 @@
 
 ulimit -v 8000000
 
-log=/a/wikistats/logs/log_count_report_publish_concise_wp.txt
+wikistats=/a/wikistats_git
+log=$wikistats/dumps/logs/log_count_report_publish_concise_wp.txt
 
 while [ 1 = 1 ]
 do 	

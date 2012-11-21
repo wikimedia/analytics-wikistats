@@ -3,13 +3,18 @@
 ulimit -v 8000000
 clear
 
-cd /a/wikistats/scripts/bash
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+bash=$dumps/bash
+
+$log=$dumps/logs/WikiCountsLogConcise.txt
+cd $bash
  
 while [ 1 = 1 ]
 do 	
 
-echo "\n\n======================================\n" >> WikiCountsLogConcise.txt
-echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> WikiCountsLogConcise.txt
+echo "\n\n======================================\n" >> $log
+echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
 # Sep 2011: step publish.sh obsolete, rsync now done in report.sh 
 
@@ -52,8 +57,8 @@ echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> WikiCountsLogConcise.txt
 
 #./report_regions.sh
 
-echo "\n\n" >> WikiCountsLogConcise.txt
-echo Job suspended for 8 hours at $(date +"%d/%m/%y %H:%M") UTC >> WikiCountsLogConcise.txt
+echo "\n\n" >> $log
+echo Job suspended for 8 hours at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
 sleep 8h
 done 

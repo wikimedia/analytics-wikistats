@@ -1,6 +1,7 @@
 #!/bin/sh
 
-cd /a/wikistats/scripts/bash
+wikistats=/a/wikistats_git
+cd $wikistats/dumps/bash
 
 ./report_regions.sh wp
 # ./report.sh wp

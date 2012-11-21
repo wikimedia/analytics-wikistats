@@ -2,9 +2,12 @@
 
 ulimit -v 8000000
 
-log=/a/wikistats/logs/log_count_report_publish_non_wp.txt
+wikistats=/a/wikistats_git
+dumps=$wikistats/dumps
+bash=$dumps/bash
+log=$dumps/logs/log_count_report_publish_non_wp.txt
 
-cd /a/wikistats/scripts/bash
+cd $bash
 
 while [ 1 = 1 ]
 do
