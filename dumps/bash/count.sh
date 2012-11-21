@@ -23,6 +23,7 @@ dumps=$wikistats/dumps                     # folder for scripts and output
 perl=$dumps/perl
 csv=$dumps/csv
 bash=$dumps/bash
+dblists=$dumps/dblists
 php=/a/mediawiki/core/languages
 dumps_public=/mnt/data/xmldatadumps/public # input dumps 
 
@@ -61,7 +62,7 @@ edits_only=-e
 clear
 
 cd $perl
-for x in `cat /a/wikistats/dblists/$dblist`
+for x in `cat $dblists/$dblist`
 #for x in omwiki
 do perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
 done

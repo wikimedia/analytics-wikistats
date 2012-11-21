@@ -19,6 +19,16 @@
   use Getopt::Std ;
   use Cwd ;
 
+  my %options ;
+  getopt ("dio", \%options) ;
+  $dir_dammit = $options {'d'} ;
+  $dir_dumps  = $options {'i'} ;
+  $dir_out    = $options {'o'} ;
+    
+  die "Specify dir to dammit.lt files as: -d [path]" if ! -d $dir_dammit ;
+  die "Specify dir to dumps as: -i [path]"           if ! -d $dir_dumps ;
+  die "Specify dir to output files as: -o [path]"    if ! -d $dir_out ;
+
   $timestart = time ;
   $false     = 0 ;
   $true      = 1 ;
@@ -37,33 +47,19 @@
   $out_mymail = "ezachte@###.org (no spam: ### = wikimedia)" ;
   $out_mysite = "http://infodisiac.com/" ;
 
-# hard coded paths, yes I know :) to be parametrized
-  $dir_html    = "W:/# Out Test/htdocs/EN" ;
-  $dir_csv     = "W:/# Out Bayes/" ;
-  $dir_lists   = "W:/# Out Bayes/dblists" ;
-  $file_html   = "$dir_html/WikiCountsJobProgress.html" ;
-  $file_html_c = "$dir_html/WikiCountsJobProgressCurrent.html" ;
-  $file_log    = "WikiCountsLogConcise.txt" ;
+  $dir_csv           = "$dir_dumps/csv/" ;
+  $dir_dblists       = "$dir_dumps/dblists" ;
 
-  if ($job_runs_on_production_server)
-  {
-    print "Job runs on $hostname\n" ;
+  $file_log          = "$dir_dumps/logs/log_wikistats_concise.txt" ;
+  
+  $dir_projectcounts = "$dir_dammit/projectcounts" ;
+  $dir_pagecounts    = "$dir_dammit/pagecounts" ;
 
-    if (-d "/a/wikistats/csv") # new folders at stat1
-    {
-      $dir_csv           = "/a/wikistats/csv/" ;
-      $dir_lists         = "/a/wikistats/dblists" ;
-      $dir_projectcounts = "/a/dammit.lt/projectcounts" ;
-      $dir_pagecounts    = "/a/dammit.lt/pagecounts" ;
-      $file_log          = "/a/wikistats/logs/log_wikistats_concise.txt" ;
-
-      $dir_html          = "/a/wikistats/out/" ;
-      $file_html         = "/a/wikistats/out/out_wm/WikiCountsJobProgress.html" ;
-      $file_html_c       = "/a/wikistats/out/out_wm/WikiCountsJobProgressCurrent.html" ;
-    }
-    &ReadWikiCountsThresholdEditsOnly ;
+  $file_html         = "$dir_out/out_wm/WikiCountsJobProgress.html" ;
+  $file_html_c       = "$dir_out/out_wm/WikiCountsJobProgressCurrent.html" ;
+  
+  &ReadWikiCountsThresholdEditsOnly ;
   # &ReadDammitStats ; # process to process dammit files is no longer in use, new version not yet live
-  }
 
   ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time);
   $year  = $year  + 1900 ;
@@ -126,23 +122,23 @@
   &ReadStatsCsv ("wv") ;
   &ReadStatsCsv ("wx") ;
 
-  &ReadStatsHtml ($dir_html,"wikipedia","wp") ;
-  &ReadStatsHtml ($dir_html,"wikibooks","wb") ;
-  &ReadStatsHtml ($dir_html,"wiktionary","wk") ;
-  &ReadStatsHtml ($dir_html,"wikinews","wn") ;
-  &ReadStatsHtml ($dir_html,"wikiquote","wq") ;
-  &ReadStatsHtml ($dir_html,"wikisource","ws") ;
-  &ReadStatsHtml ($dir_html,"wikiversity","wv") ;
-  &ReadStatsHtml ($dir_html,"wikispecial","wx") ;
+  &ReadStatsHtml ($dir_out,"wikipedia","wp") ;
+  &ReadStatsHtml ($dir_out,"wikibooks","wb") ;
+  &ReadStatsHtml ($dir_out,"wiktionary","wk") ;
+  &ReadStatsHtml ($dir_out,"wikinews","wn") ;
+  &ReadStatsHtml ($dir_out,"wikiquote","wq") ;
+  &ReadStatsHtml ($dir_out,"wikisource","ws") ;
+  &ReadStatsHtml ($dir_out,"wikiversity","wv") ;
+  &ReadStatsHtml ($dir_out,"wikispecial","wx") ;
 
-  &ReadStatsDblist ($dir_lists,"wikibooks") ;
-  &ReadStatsDblist ($dir_lists,"wiktionary") ;
-  &ReadStatsDblist ($dir_lists,"wikinews") ;
-  &ReadStatsDblist ($dir_lists,"wikipedia") ;
-  &ReadStatsDblist ($dir_lists,"wikiquote") ;
-  &ReadStatsDblist ($dir_lists,"wikisource") ;
-  &ReadStatsDblist ($dir_lists,"wikiversity") ;
-  &ReadStatsDblist ($dir_lists,"special") ;
+  &ReadStatsDblist ($dir_dblists,"wikibooks") ;
+  &ReadStatsDblist ($dir_dblists,"wiktionary") ;
+  &ReadStatsDblist ($dir_dblists,"wikinews") ;
+  &ReadStatsDblist ($dir_dblists,"wikipedia") ;
+  &ReadStatsDblist ($dir_dblists,"wikiquote") ;
+  &ReadStatsDblist ($dir_dblists,"wikisource") ;
+  &ReadStatsDblist ($dir_dblists,"wikiversity") ;
+  &ReadStatsDblist ($dir_dblists,"special") ;
 
   $colorsused = "<a name='legend' id='legend'></a>" .
                 "<hr><b>Legend</b><small>\n" .
@@ -451,6 +447,7 @@ sub ReadStatsDblist
 
 sub WriteHtml
 {
+  print "Write $file_html\n" ;
   open HTML, '>', $file_html ;
   print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN" .
              "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" .
@@ -656,6 +653,7 @@ sub WriteHtmlCurrent
     { push @lines, $line ; }
   }
 
+  print "Write $file_html_c\n" ;
   open HTML, '>', $file_html_c ;
   print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN" .
              "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" .

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
-  open "CSV_IN", "<", "/a/wikistats/csv/csv_wx/EditsBreakdownPerUserPerMonthCOMMONS_NS6.csv" ;
-  open "CSV_OUT", ">", "/a/wikistats/csv/csv_mw/uploaders_all.txt" ;
+  open "CSV_IN", "<", "/a/wikistats_git/dumps/csv/csv_wx/EditsBreakdownPerUserPerMonthCOMMONS_NS6.csv" ;
+  open "CSV_OUT", ">", "/a/wikistats_git/dumps/csv/csv_mw/uploaders_all.txt" ;
 
   $line_prev = '' ;
   while ($line = <CSV_IN>)
