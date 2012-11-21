@@ -102,6 +102,7 @@
   &ReadJobHistory ($dir_csv, "wb") ;
   &ReadJobHistory ($dir_csv, "wk") ;
   &ReadJobHistory ($dir_csv, "wn") ;
+  &ReadJobHistory ($dir_csv, "wo") ;
   &ReadJobHistory ($dir_csv, "wp") ;
   &ReadJobHistory ($dir_csv, "wq") ;
   &ReadJobHistory ($dir_csv, "ws") ;
@@ -111,6 +112,7 @@
   $projects {"wb"} = "Wikibooks" ;
   $projects {"wk"} = "Wiktionary" ;
   $projects {"wn"} = "Wikinews" ;
+  $projects {"wo"} = "Wikivoyage" ;
   $projects {"wp"} = "Wikipedia" ;
   $projects {"wq"} = "Wikiquote" ;
   $projects {"ws"} = "Wikisource";
@@ -120,6 +122,7 @@
   &ReadStatsCsv ("wb") ;
   &ReadStatsCsv ("wk") ;
   &ReadStatsCsv ("wn") ;
+  &ReadStatsCsv ("wo") ;
   &ReadStatsCsv ("wp") ;
   &ReadStatsCsv ("wq") ;
   &ReadStatsCsv ("ws") ;
@@ -130,6 +133,7 @@
   &ReadStatsHtml ($dir_out,"wikibooks","wb") ;
   &ReadStatsHtml ($dir_out,"wiktionary","wk") ;
   &ReadStatsHtml ($dir_out,"wikinews","wn") ;
+  &ReadStatsHtml ($dir_out,"wikivoyage","wo") ;
   &ReadStatsHtml ($dir_out,"wikiquote","wq") ;
   &ReadStatsHtml ($dir_out,"wikisource","ws") ;
   &ReadStatsHtml ($dir_out,"wikiversity","wv") ;
@@ -435,6 +439,7 @@ sub ReadStatsDblist
    $project =~ s/wikibooks/wb/ ;
    $project =~ s/wiktionary/wk/ ;
    $project =~ s/wikinews/wn/ ;
+   $project =~ s/wikivoyage/wo/ ;
    $project =~ s/wikipedia/wp/ ;
    $project =~ s/wikiquote/wq/ ;
    $project =~ s/wikisource/ws/ ;
@@ -598,7 +603,7 @@ sub WriteHtml
   $html .= "</table></td></tr></table>\n" ;
   $html =~ s/,\s*$// ;
 
-  $html .= "<p>Project is Wikipedia unless noted otherwise:<br>wb=Wikibooks, wk=Wiktionary, wq=Wikiquote, ws=Wikisource, wv=Wikiversity, wx=Wikispecial" ; # <br>d=days, h=hours, m=minutes" ;
+  $html .= "<p>Project is Wikipedia unless noted otherwise:<br>wb=Wikibooks, wk=Wiktionary, wn=Wikinews, wo=Wikivoyage, wq=Wikiquote, ws=Wikisource, wv=Wikiversity, wx=Wikispecial" ; # <br>d=days, h=hours, m=minutes" ;
 
   $html .= "<p><h3>Total job length per project</h3>" ;
   $html .= "<table>\n" ;

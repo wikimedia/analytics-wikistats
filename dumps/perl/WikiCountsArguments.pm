@@ -98,8 +98,8 @@ sub ParseArguments
 
   if ($mode eq "")
   { $mode = "wp" ; }
-  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wx|wv)$/)
-  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wx|wv]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wx=wikispecial, wv=wikiversity)") ; }
+  if ($mode !~ /^(?:wb|wk|wn|wo|wp|wq|ws|wx|wv)$/)
+  { abort ("Specify mode as: -m [wb|wk|wn|wo|wp|wq|ws|wx|wv]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wo=wikivoyage, wq=wikiquote, ws=wikisource, wx=wikispecial, wv=wikiversity)") ; }
 
   $job_code = "c:$mode:$language" ;
   $job_code_uc = uc $job_code ;

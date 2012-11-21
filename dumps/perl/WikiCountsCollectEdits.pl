@@ -16,7 +16,7 @@
   die "Specify path to csv files as: -c [path]" if ! -d $path_csv ;
   print "Path to csv files: $path_csv\n" ;
 
-  die "Specify project code as: -p [wb|wk|wn|wp|wq|ws|wv|wx|wo]" if $project !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx|wo)$/ ;
+  die "Specify project code as: -p [wb|wk|wn|wo|wp|wq|ws|wv|wx|wo]" if $project !~ /^(?:wb|wk|wn|wo|wp|wq|ws|wv|wx|wo)$/ ;
   print "Project code: $project\n" ;
 
   die "Specify wiki code as: -w [some wiki, e.g. enwiki]" if $wiki eq '' ;
