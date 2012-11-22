@@ -7,18 +7,27 @@
 
 BEGIN {
   use Getopt::Std;
-  getopt("dmwqr", \%options) ;
+  getopt("dmwqcrp", \%options) ;
   my $__config_module = $options{"r"} || "SquidReportArchiveConfig.pm";
   require $__config_module;
   croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
   unshift(@INC,$cfg_liblocation); 
 };
 
-  use EzLib ;
-  $trace_on_exit = $true ;
-  ez_lib_version (2) ;
 
-  default_argv ($cfg_default_argv) ;
+if(exists $options{"p"}) {
+	$job_runs_on_production_server = $true;
+} else {
+	$job_runs_on_production_server = $false;
+};
+
+
+use EzLib ;
+$trace_on_exit = $true ;
+ez_lib_version (2) ;
+
+default_argv ($cfg_default_argv) ;
+
 
   use Time::Local ;
   use Cwd;
