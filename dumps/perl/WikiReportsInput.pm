@@ -549,6 +549,10 @@ sub ReadFileCsvOnly
 {
   my $file_csv = shift ;
   my $wp   = shift ;
+  
+  if ($wp eq '')
+  { $wp = $language ; }
+
   undef @csv  ;
 
   if (! -e $file_csv)
@@ -557,7 +561,7 @@ sub ReadFileCsvOnly
   open FILE_IN, "<", $file_csv ;
   while ($line = <FILE_IN>)
   {
-    if ($line =~ /^$language\,/)
+    if ($line =~ /^\s*$wp\,/)
     {
       chomp ($line) ;
       push @csv, $line ;
@@ -1987,22 +1991,21 @@ sub ReadDumpMetaData
   $language_prev = $language ;
   $language = $wp ;
   &ReadFileCsvOnly ($file_csv_run_stats, $wp) ;
+
   $language = $language_prev ;
 
-  &Log ("\nWikiCount runs for $wp:\n") ;
-  &Log ("language,process till,time now,time now english,file format,file size on disk,file size uncompressed,host name,time parse input,time total,edits namespace 0,other edits,dump type,dump file\n") ;
+  # &Log ("language,process till,time now,time now english,file format,file size on disk,file size uncompressed,host name,time parse input,time total,edits namespace 0,other edits,dump type,dump file\n") ;
 
   my ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile,$dumpdetails) ;
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
-  $dumptype = 'unknown' ;
+  $dumptype    = 'unknown' ;
+  $dumpdetails = '' ;
   foreach $line (@csv)
   {
     ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile) = split ',' ,$line ;
-    print "ReadDumpMetaData line $line\n" ;
     if ($dumptype !~ /^(?:edits_only|full_dump)$/)
-    { $dumptype .= 'unknown' ; }
-    &Log ("$line\n") ;
+    { $dumptype = 'unknown' ; }
   }
 
   if ($dump_size_compressed > 0)

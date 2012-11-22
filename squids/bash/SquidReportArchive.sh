@@ -24,9 +24,8 @@ quarter=2012Q3
 
 # perl SquidCountryScan.pl                  | tee -a $log1 | cat # collect csv data for all months, start in July 2009
 # perl SquidReportArchive.pl -c             | tee -a $log2 | cat # -c for per country reports
-# perl SquidReportArchive.pl -c             | tee -a $log2 | cat # -c for per country reports
 # perl SquidReportArchive.pl -c -q $quarter | tee -a $log2 | cat # -c for per country reports
-perl SquidReportArchive.pl -m $month        | tee -a $log2 | cat
+perl SquidReportArchive.pl -m $month -p     | tee -a $log2 | cat
 
 cd $reports/$month
 tar -cvf - *.htm | gzip > reports-$month.tar.gz

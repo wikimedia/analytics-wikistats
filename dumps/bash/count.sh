@@ -9,11 +9,11 @@ die () {
 
 project=$1
 
-if [[ "$project" = "wb" || "$project" = "wk" || "$project" = "wn" || "$project" = "wp" || "$project" = "wq" || "$project" = "ws" || "$project" = "wv" || "$project" = "wx" ]]
+if [[ "$project" = "wb" || "$project" = "wk" || "$project" = "wn" || "$project" = "wp" || "$project" = "wq" || "$project" = "ws" || "$project" = "wv" || "$project" = "wx" || "$project" = "wo" ]]
 then 
   echo "Process project $1"
 else
-  echo "Invalid project code: specify wb (wikibooks), wk (wiktionary), wn (wikinews), wp (wikipedia), wq (wikiquote), ws (wikisource), wv (wikiversity), wx (wikispecial: commons, meta...)" ; exit 
+	echo "Invalid project code: specify wb (wikibooks), wk (wiktionary), wn (wikinews), wo (wikivoyage), wp (wikipedia), wq (wikiquote), ws (wikisource), wv (wikiversity), wx (wikispecial: commons, meta...)" ; exit 
 fi
   
 ulimit -v 8000000
@@ -35,6 +35,9 @@ if [[ $project == "wk" ]] ; then
 fi
 if [[ $project == "wn" ]] ; then 	
   dblist=wikinews.dblist
+fi
+if [[ $project == "wo" ]] ; then 	
+  dblist=wikivoyage.dblist
 fi
 if [[ $project == "wp" ]] ; then 	
   dblist=wikipedia.dblist

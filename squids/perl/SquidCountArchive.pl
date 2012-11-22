@@ -12,7 +12,7 @@ my %options ;
 
 BEGIN {
   use Getopt::Std;
-  getopt("dfctr", \%options) ;
+  getopt("dfctrp", \%options) ;
   my $__config_module = $options{"r"} || "SquidCountArchiveConfig.pm";
   if (exists $options{"c"}) {
     croak "Config .pm $__config_module passed as parameter but it does not exist"
@@ -26,9 +26,13 @@ BEGIN {
   #exit 0;
 };
 
-$date_range     = $options{"d"};
-$force_phases   = $options{"f"};
-
+$date_range     	       = $options{"d"};
+$force_phases   	       = $options{"f"};
+if(exists $options{"p"}) {
+	$job_runs_on_production_server = $true;
+} else {
+	$job_runs_on_production_server = $false;
+};
 
 
 

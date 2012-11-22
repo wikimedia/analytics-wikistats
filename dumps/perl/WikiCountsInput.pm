@@ -3024,6 +3024,7 @@ sub GetContentNamespaces
      if ($project eq 'wb') { $project = 'wikibooks' ; }
   elsif ($project eq 'wk') { $project = 'wiktionary' ; }
   elsif ($project eq 'wn') { $project = 'wikinews' ; }
+  elsif ($project eq 'wo') { $project = 'wikivoyage' ; }
   elsif ($project eq 'wp') { $project = 'wikipedia' ; }
   elsif ($project eq 'wq') { $project = 'wikiquote' ; }
   elsif ($project eq 'ws') { $project = 'wikisource' ; }
