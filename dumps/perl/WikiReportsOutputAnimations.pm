@@ -260,3 +260,4 @@ sub GenerateAnimationsInputProjectsGrowth
 }
 
 1;
+

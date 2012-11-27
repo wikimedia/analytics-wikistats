@@ -46,3 +46,4 @@ zip -q $zip_all/csv_$1_activity_trends.zip *.csv -i UserActivity* -x *Temp* *Tes
 
 echo "rsync -avv $zip_all/csv_*.zip $dataset2"
 rsync -avv $zip_all/csv_*.zip $dataset2
+

@@ -43,3 +43,4 @@ echo Job suspended for 24 hours at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
 sleep 24h
 done
+

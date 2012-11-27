@@ -1586,3 +1586,4 @@ sub GenerateCrossReference
 # small html formatting functions
 
 1;
+

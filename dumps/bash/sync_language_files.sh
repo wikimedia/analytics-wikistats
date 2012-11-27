@@ -82,3 +82,4 @@ echo "copy to csv_wv" ; cp -p $csv/LanguageNames*.csv $csv/csv_wv ;
 echo "copy to csv_wx" ; cp -p $csv/LanguageNames*.csv $csv/csv_wx ;
 
 echo "Sync language files completed" ;
+
