@@ -2003,23 +2003,13 @@ sub ReadDumpMetaData
   my ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile,$dumpdetails) ;
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
-<<<<<<< HEAD
   $dumptype    = 'unknown' ;
   $dumpdetails = '' ;
-=======
-  $dumptype = 'unknown' ;
-  $line_dump_details = '' ;
->>>>>>> wikivoyage
   foreach $line (@csv)
   {
     ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile) = split ',' ,$line ;
     if ($dumptype !~ /^(?:edits_only|full_dump)$/)
-<<<<<<< HEAD
     { $dumptype = 'unknown' ; }
-=======
-    { $dumptype .= ' = unknown' ; }
-    $line_dump_details = 'dumptype $dumptype' ;
->>>>>>> wikivoyage
   }
   if ($line_dump_details ne '')
   { print "$line_dumps_details\n" ; }
