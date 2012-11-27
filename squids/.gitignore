@@ -8,6 +8,9 @@
 !t/
 !t/*.t
 !bash/
+!conf-editors
+!conf-editors/
+!conf-editors/*.pm
 
 # documentation
 !docs/

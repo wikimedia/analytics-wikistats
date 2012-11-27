@@ -10,4 +10,4 @@ cd $perl
 log=$logs/SquidCountArchive.log
 
 # process one day for test, usually do full month 
-nice perl SquidCountArchive.pl -d 2012/10/02-2012/10/02 | tee $log | cat 
+nice perl SquidCountArchive.pl -d 2012/10/02-2012/10/02 -p | tee $log | cat 
