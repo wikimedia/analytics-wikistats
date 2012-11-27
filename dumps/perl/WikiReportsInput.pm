@@ -1985,7 +1985,6 @@ sub ReadEditActivityLevels
 sub ReadDumpMetaData
 {
   my $wp = shift ;
-  &Log ("ReadDumpType for $wp from $file_csv_run_stats\n") ;
 
   # to do: do away with this clumsy global var $language
   $language_prev = $language ;
@@ -1999,17 +1998,13 @@ sub ReadDumpMetaData
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   $dumptype = 'unknown' ;
-  $line_dump_details = '' ;
   foreach $line (@csv)
   {
     ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile) = split ',' ,$line ;
     if ($dumptype !~ /^(?:edits_only|full_dump)$/)
     { $dumptype .= ' = unknown' ; }
-    $line_dump_details = 'dumptype $dumptype' ;
   }
-  if ($line_dump_details ne '')
-  { print "$line_dumps_details\n" ; }
-
+  
   if ($dump_size_compressed > 0)
   {
     $dumptype =~ s/_/ /g ;
@@ -2021,11 +2016,10 @@ sub ReadDumpMetaData
     $processed_till = $months_en [substr ($processed_till,4,2)-1] .' ' . substr ($processed_till,6,2) . ', ' . substr ($processed_till,0,4) ;
 
     $dumpdetails = "Dump file <b>$dumpfile</b> (<b>$dumptype</b>), size <b>$dump_size_compressed</b> as <b>$file_format</b> -> <b>$dump_size_uncompressed</b>\n<br>Dump processed till <b>$processed_till</b>, on server <b>$server</b>, ready at <b>$time_now_english</b> after <b>" . ddhhmmss ($time_total) . "</b>.\n" ;
-    $dumpdetails2 = $dumpdetails ;
-    $dumpdetails2 =~ s/<[^>]*>//g ;
-    $dumpdetails2 =~ s/\&nbsp;//g ;
-
-    &Log ("\n$dumpdetails2\n") ;
+    # $dumpdetails2 = $dumpdetails ;
+    # $dumpdetails2 =~ s/<[^>]*>//g ;
+    # $dumpdetails2 =~ s/\&nbsp;//g ;
+    # &Log ("\n$dumpdetails2\n") ;
   }
 
   return ($dumptype,$dumpdetails) ;

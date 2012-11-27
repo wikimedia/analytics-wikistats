@@ -33,7 +33,7 @@ date >> $log
 # Validate project code
 
 if [ "$1" == "" ] ; then
-  echo2 "Project code missing! Specify as 1st argument one of wb,wk,wn,wp,wq,ws,wv,wx"
+  echo2 "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
   exit
 fi  
  
@@ -61,17 +61,18 @@ case "$projectcode" in
   wb) project='Wikibooks' ;     dir='wikibooks' ;;
   wk) project='Wiktionaries' ;  dir='wiktionary' ;;
   wn) project='Wikinews' ;      dir='wikinews' ;;
+  wo) project='Wikivoyage' ;    dir='wikivoyage' ;;
   wp) project='Wikipedias' ;    dir='.' ;;
   wq) project='Wikiquotes' ;    dir='wikiquote' ;;
   ws) project='Wikisources' ;   dir='wikisource' ;;
   wv) project='Wikiversities' ; dir='wikiversity' ;;
   wx) project='Wikispecial' ;   dir='wikispecial' ;;
-  *)  project='unknown' ;       dir='...' ;; 
+  *)  project='unknown' ;       dir='...' ;;
 esac  
 echo2 "Generate and publish reports for project $project" 
 
-for x in it # test
-#for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+# for x in it # test
+for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
 
   echo2 ""
