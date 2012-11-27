@@ -142,6 +142,7 @@
   &ReadStatsDblist ($dir_dblists,"wikibooks") ;
   &ReadStatsDblist ($dir_dblists,"wiktionary") ;
   &ReadStatsDblist ($dir_dblists,"wikinews") ;
+  &ReadStatsDblist ($dir_dblists,"wikivoyage") ;
   &ReadStatsDblist ($dir_dblists,"wikipedia") ;
   &ReadStatsDblist ($dir_dblists,"wikiquote") ;
   &ReadStatsDblist ($dir_dblists,"wikisource") ;
@@ -293,7 +294,7 @@ sub ReadStatsCsv
     # $runlength2 = sprintf ("%07d", 9999999 - $runlength) ;
     # print "$project, $language, $days1, $days2, $minutes\n" ;
     if ($project eq "wx")
-    { if ($language !~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy$/) { next ; } }
+    { if ($language !~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy|wikidata$/) { next ; } }
 
     if ($rundate2 gt $rundatemax)
     {
@@ -446,7 +447,7 @@ sub ReadStatsDblist
    $project =~ s/wikiversity/wv/ ;
    $project =~ s/wikispecial/wx/ ;
 
-   if ($wiki =~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11$/)
+   if ($wiki =~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|wikidata$/)
    { $project = "wx" ; }
 
    @dblists {"$project,$wiki"} = $true ;
@@ -967,4 +968,5 @@ sub ReadWikiCountsThresholdEditsOnly
   }
   return ($text) ;
 }
+
 

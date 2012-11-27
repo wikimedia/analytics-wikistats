@@ -607,22 +607,16 @@ sub GeneratePlot2 {
     $scale = "1000 x" ;
   }
 
-  if ($mode_wb)
-  { $xrangelo = "07/01/2003" ; }
-  if ($mode_wk)
-  { $xrangelo = "01/01/2003" ; }
-  if ($mode_wn)
-  { $xrangelo = "11/01/2004" ; }
-  if ($mode_wp)
-  { $xrangelo = "07/01/2001" ; }
-  if ($mode_wq)
-  { $xrangelo = "07/01/2003" ; }
-  if ($mode_ws)
-  { $xrangelo = "11/01/2003" ; }
-  if ($mode_wv)
-  { $xrangelo = "01/01/2005" ; }
-  if ($mode_wx)
-  { $xrangelo = "07/01/2001" ; }
+  if ($mode_wb) { $xrangelo = "07/01/2003" ; }
+  if ($mode_wk) { $xrangelo = "01/01/2003" ; }
+  if ($mode_wn) { $xrangelo = "11/01/2004" ; }
+  if ($mode_wo) { $xrangelo = "01/01/2001" ; } # tbd
+  if ($mode_wp) { $xrangelo = "07/01/2001" ; }
+  if ($mode_wq) { $xrangelo = "07/01/2003" ; }
+  if ($mode_ws) { $xrangelo = "11/01/2003" ; }
+  if ($mode_wv) { $xrangelo = "01/01/2005" ; }
+  if ($mode_wx) { $xrangelo = "07/01/2001" ; }
+
   if (! $wikimedia)
   { $xrangelo = $plot_start ; }
 
@@ -1579,3 +1573,4 @@ sub ScanCsvFileForMaxValues {
 }
 
 1;
+

@@ -21,6 +21,7 @@ sub GenerateAnimationsInputSizeAndCommunity
   if ($mode_wb) { $from_year = 2003 ; $from_month =  7 ; }
   if ($mode_wk) { $from_year = 2002 ; $from_month = 12 ; }
   if ($mode_wn) { $from_year = 2004 ; $from_month = 11 ; }
+  if ($mode_wo) { $from_year = 2001 ; $from_month =  1 ; } # tbd
   if ($mode_wp) { $from_year = 2001 ; $from_month =  1 ; }
   if ($mode_wq) { $from_year = 2003 ; $from_month =  7 ; }
   if ($mode_ws) { $from_year = 2003 ; $from_month =  7 ; }
@@ -149,6 +150,7 @@ sub GenerateAnimationsInputProjectsGrowth
   if ($mode_wb) { $from_year = 2003 ; $from_month =  7 ; }
   if ($mode_wk) { $from_year = 2002 ; $from_month = 12 ; }
   if ($mode_wn) { $from_year = 2004 ; $from_month = 11 ; }
+  if ($mode_wo) { $from_year = 2001 ; $from_month =  1 ; } # tbd
   if ($mode_wp) { $from_year = 2001 ; $from_month =  1 ; }
   if ($mode_wq) { $from_year = 2003 ; $from_month =  7 ; }
   if ($mode_ws) { $from_year = 2003 ; $from_month =  7 ; }
@@ -258,3 +260,4 @@ sub GenerateAnimationsInputProjectsGrowth
 }
 
 1;
+

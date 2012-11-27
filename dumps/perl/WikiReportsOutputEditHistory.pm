@@ -190,6 +190,7 @@ sub GenerateEditHistoryReport
   if ($mode_wb) { $links_other_projects  =    "<font color=#808080>Wikibooks</font>" }      else { $links_other_projects  =    "<a href='$up/wikibooks/EN/PlotsPngEditHistoryTable.htm'>Wikibooks</a>" ; }
   if ($mode_wk) { $links_other_projects .= " / <font color=#808080>Wiktionary</font>" }     else { $links_other_projects .= " / <a href='$up/wiktionary/EN/PlotsPngEditHistoryTable.htm'>Wiktionary</a>" ; }
   if ($mode_wn) { $links_other_projects .= " / <font color=#808080>Wikinews</font>" }       else { $links_other_projects .= " / <a href='$up/wikinews/EN/PlotsPngEditHistoryTable.htm'>Wikinews</a>" ; }
+  if ($mode_wo) { $links_other_projects .= " / <font color=#808080>Wikivoyage</font>" }     else { $links_other_projects .= " / <a href='$up/wikinews/EN/PlotsPngEditHistoryTable.htm'>Wikivoyage</a>" ; }
   if ($mode_wp) { $links_other_projects .= " / <font color=#808080>Wikipedia</font>" }      else { $links_other_projects .= " / <a href='$up/EN/PlotsPngEditHistoryTable.htm'>Wikipedia</a>" ; }
   if ($mode_wq) { $links_other_projects .= " / <font color=#808080>Wikiquote</font>" }      else { $links_other_projects .= " / <a href='$up/wikiquote/EN/PlotsPngEditHistoryTable.htm'>Wikiquote</a>" ; }
   if ($mode_ws) { $links_other_projects .= " / <font color=#808080>Wikisource</font>" }     else { $links_other_projects .= " / <a href='$up/wikisource/EN/PlotsPngEditHistoryTable.htm'>Wikisource</a>" ; }
@@ -1077,6 +1078,7 @@ sub GenerateYearlyGrowthStats
      if ($mode_wb) { $m0 = ord (&yyyymm2b (2003, 7)) ; $project = 'Wikibooks' ; }
   elsif ($mode_wk) { $m0 = ord (&yyyymm2b (2003, 1)) ; $project = 'Wiktionaries' ;  }
   elsif ($mode_wn) { $m0 = ord (&yyyymm2b (2004,11)) ; $project = 'Wikinews' ;  }
+  elsif ($mode_wo) { $m0 = ord (&yyyymm2b (2001, 1)) ; $project = 'Wikivoyage' ;  } # tbd
   elsif ($mode_wp) { $m0 = ord (&yyyymm2b (2001, 1)) ; $project = 'Wikipedias' ; }
   elsif ($mode_wq) { $m0 = ord (&yyyymm2b (2003, 7)) ; $project = 'Wikiquote' ;  }
   elsif ($mode_ws) { $m0 = ord (&yyyymm2b (2003,11)) ; $project = 'Wikisources' ; }
@@ -1186,4 +1188,5 @@ sub GenerateYearlyGrowthStats
 }
 
 1;
+
 

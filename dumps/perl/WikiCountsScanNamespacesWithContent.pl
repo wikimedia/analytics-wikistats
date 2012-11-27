@@ -39,6 +39,7 @@
   &GetNamespaces ('wb','wikibooks') ;
   &GetNamespaces ('wk','wiktionary') ;
   &GetNamespaces ('wn','wikinews') ;
+  &GetNamespaces ('wo','wikivoyage') ;
   &GetNamespaces ('wp','wikipedia') ;
   &GetNamespaces ('wq','wikiquote') ;
   &GetNamespaces ('ws','wikisource') ;
@@ -167,6 +168,7 @@ sub GetPage
 
   return ($succes,$content) ;
 }
+
 
 
 

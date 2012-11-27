@@ -138,8 +138,8 @@ sub ParseArguments
 
 # if ($mode eq "")
 # { $mode = "wp" ; }
-# if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx)$/)
-# { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial)") ; }
+# if ($mode !~ /^(?:wb|wk|wo|wn|wp|wq|ws|wv|wx)$/)
+# { abort ("Specify mode as: -m [wb|wk|wn|wo|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wo=wikivoyage, wp=wikipedia, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial)") ; }
 }
 
 sub Log
@@ -148,5 +148,6 @@ sub Log
   print $msg ;
   print LOG $msg ;
 }
+
 
 

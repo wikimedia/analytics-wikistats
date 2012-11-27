@@ -11,7 +11,6 @@ cd $bash
 
 while [ 1 = 1 ]
 do
-ls -l
 echo "\n\n======================================\n" >> $log
 echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
@@ -23,6 +22,9 @@ echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
 ./count.sh wn        | tee -a $log | cat
 ./report.sh wn 10 | tee -a $log | cat
+
+./count.sh wo        | tee -a $log | cat
+./report.sh wo 10 | tee -a $log | cat
 
 ./count.sh wq        | tee -a $log | cat
 ./report.sh wq 10 | tee -a $log | cat
@@ -41,3 +43,4 @@ echo Job suspended for 24 hours at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
 sleep 24h
 done
+

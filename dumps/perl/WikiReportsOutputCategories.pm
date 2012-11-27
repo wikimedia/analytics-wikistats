@@ -272,6 +272,8 @@ sub GenerateCategoryOverviews
   { $base = "http://$wp.wiktionary.org/wiki/" ; }
   if ($mode_wn)
   { $base = "http://$wp.wikinews.org/wiki/" ; }
+  if ($mode_wo)
+  { $base = "http://$wp.wikivoyage.org/wiki/" ; }
   if ($mode_wp)
   { $base = "http://$wp.wikipedia.org/wiki/" ; }
   if ($mode_wq)
@@ -696,3 +698,4 @@ sub ListSubcategories
 
 
 1;
+

@@ -70,8 +70,8 @@ case "$projectcode" in
 esac  
 echo2 "Generate and publish reports for project $project" 
 
-# for x in en de # test
-for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+for x in it # test
+#for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
 
   echo2 ""
@@ -147,11 +147,13 @@ do
     echo2 "Copy new and updated files from $out_project -> $htdocs_project"
   
     if [ "$x" == "en" ] ; then
+      echo "rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
       rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
   
       echo2 "List files (except charts) from target folder older than a day"
       find $htdocs_project/ -mtime +1 | xargs ls -l | grep -P -v 'svg|png' # rather than 'ls -l $htdocs'
     else  
+      echo "rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat"
       rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat
     fi
   fi
@@ -174,3 +176,4 @@ fi
 
 echo2 ""
 echo2 "Ready" 
+

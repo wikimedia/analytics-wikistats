@@ -66,6 +66,7 @@ sub SetLanguageInfo
   # includes secondary speakers (hence adds up to much more than 6 billion)
   %wikipedias = (
 # mediawiki=>"http://wikimediafoundation.org Wikimedia",
+  wikidata=>"http://www.wikidata.org Wikidata",
   nostalgia=>"http://nostalgia.wikipedia.org Nostalgia",
   sources=>"http://wikisource.org Multilingual&nbsp;Wikisource",
   meta=>"http://meta.wikimedia.org Meta-Wiki",
@@ -467,6 +468,7 @@ sub SetLiterals
     if ($mode_wb) { $out_urls {$key} =~ s/wikipedia/wikibooks/ ; }
     if ($mode_wk) { $out_urls {$key} =~ s/wikipedia/wiktionary/ ; }
     if ($mode_wn) { $out_urls {$key} =~ s/wikipedia/wikinews/ ; }
+    if ($mode_wo) { $out_urls {$key} =~ s/wikipedia/wikivoyage/ ; }
     if ($mode_wq) { $out_urls {$key} =~ s/wikipedia/wikiquote/ ; }
     if ($mode_ws) { $out_urls {$key} =~ s/wikipedia/wikisource/ ; }
     if ($mode_wv) { $out_urls {$key} =~ s/wikipedia/wikiversity/ ; }
@@ -638,6 +640,8 @@ sub GetProjectBaseUrl
   { $base = "http://$wp.wiktionary.org/" ; }
   if ($mode_wn)
   { $base = "http://$wp.wikinews.org/" ; }
+  if ($mode_wo)
+  { $base = "http://$wp.wikivoyage.org/" ; }
   if ($mode_wp)
   { $base = "http://$wp.wikipedia.org/" ; }
   if ($mode_wq)
@@ -646,6 +650,7 @@ sub GetProjectBaseUrl
   { $base = "http://$wp.wikisource.org/" ; }
   if ($mode_wv)
   { $base = "http://$wp.wikiversity.org/" ; }
+
   if ($mode_wx)
   {
     if ($wp eq "sources")
@@ -660,13 +665,17 @@ sub GetProjectBaseUrl
     { $base = "http://species.wikipedia.org/" ; }
     elsif ($wp eq "mediawiki")
     { $base = "http://www.mediawiki.org/" ; }
+    elsif ($wp eq "wikidata")
+    { $base = "http://www.wikidata.org/" ; }
     else
     { $base = "http://$wp.wikimedia.org/" ; }
   }
 
   $base =~ s/_/-/g ; # e.g. zh-min-nan
 
+  # print "GetProjectBaseUrl wp $wp base $base\n" ;
   return $base ;
 }
 
 1;
+

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+#
   use lib "/home/ezachte/lib" ;
   use EzLib ;
   use WikiReportsNoWikimedia ;
@@ -59,6 +59,7 @@ if (0)
   if ($mode_wb) { $out_html .= "<h2>" . $out_wikibooks .    "</h2>\n" ; }
   if ($mode_wk) { $out_html .= "<h2>" . $out_wiktionaries . "</h2>\n" ; }
   if ($mode_wn) { $out_html .= "<h2>" . $out_wikinews .     "</h2>\n" ; }
+  if ($mode_wo) { $out_html .= "<h2>" . $out_wikivoyage .   "</h2>\n" ; }
   if ($mode_wp) { $out_html .= "<h2>" . $out_wikipedias .   "</h2>\n" ; }
   if ($mode_wq) { $out_html .= "<h2>" . $out_wikiquotes .   "</h2>\n" ; }
   if ($mode_ws) { $out_html .= "<h2>" . $out_wikisources .  "</h2>\n" ; }
@@ -70,6 +71,7 @@ if (0)
     if ($mode_wb) { $out_url_all = "http://wikibooks.org" ; }
     if ($mode_wk) { $out_url_all = "http://wiktionary.org" ; }
     if ($mode_wn) { $out_url_all = "http://wikinews.org" ; }
+    if ($mode_wo) { $out_url_all = "http://wikivoyage.org" ; }
     if ($mode_wp) { $out_url_all = "http://wikipedia.org" ; }
     if ($mode_wq) { $out_url_all = "http://wikiquote.org" ; }
     if ($mode_ws) { $out_url_all = "http://wikisource.org" ; }
@@ -2239,6 +2241,7 @@ sub GenerateTableEditActivityLevels
   if ($mode_wb) { $wiki = $out_wikibooks ; }
   if ($mode_wk) { $wiki = $out_wiktionaries ; }
   if ($mode_wn) { $wiki = $out_wikinews ; }
+  if ($mode_wo) { $wiki = $out_wikivoyage ; }
   if ($mode_wp) { $wiki = $out_wikipedias ; }
   if ($mode_wq) { $wiki = $out_wikiquotes ; }
   if ($mode_ws) { $wiki = $out_wikisources ; }
@@ -4157,6 +4160,7 @@ sub GenerateComparisonTable
       $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='$root/wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
       $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='$root/wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
       $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='$root/wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
+      $mode_wo ? ($out_xref .= "Wikivoyage, ")  : ($out_xref .= "<a href='$root/wikivoyage/EN/$href_current_file2'>Wikivoyage, </a>\n") ;
       $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='$root/EN/$href_current_file2'>Wikipedias, </a>\n") ;
       $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='$root/wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
       $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
@@ -4670,6 +4674,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $project_names {'wb'}   = 'wikibooks' ;
   $project_names {'wk'}   = 'wiktionary' ;
   $project_names {'wn'}   = 'wikinews' ;
+  $project_names {'wo'}   = 'wikivoyage' ;
   $project_names {'wp'}   = 'wikipedia<br>non-mobile' ;
   $project_names {'wp.m'} = 'wikipedia<br>mobile' ;
   $project_names {'wp.c'} = 'wikipedia<br>total' ;
@@ -4681,7 +4686,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $url_report_pageviews {'wb'} = "http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm" ;
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
   {
     if ($pageviews_non_mobile)
     {
@@ -4690,6 +4695,7 @@ sub GenerateComparisonTablePageviewsAllProjects
       if ($code eq 'wb')   { $link = "<a href='$root/wikibooks/EN/TablesPageViewsMonthly.htm'>Wikibooks<br>&nbsp;</a>" ; }
       if ($code eq 'wk')   { $link = "<a href='$root/wiktionary/EN/TablesPageViewsMonthly.htm'>Wiktionaries<br>&nbsp;</a>" ; }
       if ($code eq 'wn')   { $link = "<a href='$root/wikinews/EN/TablesPageViewsMonthly.htm'>Wikinews<br>&nbsp;</a>" ; }
+      if ($code eq 'wo')   { $link = "<a href='$root/wikivoyage/EN/TablesPageViewsMonthly.htm'>Wikivoyage<br>&nbsp;</a>" ; }
       if ($code eq 'wp')   { $link = "<a href='$root/EN/TablesPageViewsMonthly.htm'>Wikipedia<br>Non-mobile</a>" ; }
       if ($code eq 'wp.m') { $link = "<a href='$root/EN/TablesPageViewsMonthlyMobile.htm'>Wikipedia<br>Mobile</a>" ; }
       if ($code eq 'wp.c') { $link = "<a href='$root/EN/TablesPageViewsMonthlyMobile.htm'>Wikipedia<br>Total</a>" ; }
@@ -4706,11 +4712,12 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= &tr ($line_html) ;
 
   $line_html = &the ;
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
   {
     if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wn')   { $link = "$root/wikinews/EN/PlotEditsZZ.png" ; }
+    if ($code eq 'wo')   { $link = "$root/wikivoyage/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wp')   { $link = "$root/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wp.m') { $link = "$root/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wp.c') { $link = "$root/EN/PlotEditsZZ.png" ; }
@@ -4731,7 +4738,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     if ($topic =~ /year_trend|forecast/)
     { $line_html .= "\n<script language='javascript'>\n" ; }
 
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,$topic,data"} ;
 
@@ -4848,7 +4855,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   }
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
   $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
@@ -6656,3 +6663,4 @@ sub RecordTime
 }
 
 1;
+

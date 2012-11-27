@@ -33,6 +33,7 @@
   @projects {"wk"} = "wiktionary" ;
   @projects {"wn"} = "wikinews" ;
   @projects {"wp"} = "wikipedia" ;
+  @projects {"wo"} = "wikivoyage" ;
   @projects {"wq"} = "wikiquote" ;
   @projects {"ws"} = "wikisource";
   @projects {"wv"} = "wikiversity" ;
@@ -41,6 +42,7 @@
   &ReadStatsCsv ("wb") ;
   &ReadStatsCsv ("wk") ;
   &ReadStatsCsv ("wn") ;
+  &ReadStatsCsv ("wo") ;
   &ReadStatsCsv ("wp") ;
   &ReadStatsCsv ("wq") ;
   &ReadStatsCsv ("ws") ;
@@ -211,3 +213,4 @@ sub Edits
   ($project,$language,$title,$edits) = split (',', $key) ;
   return ($edits) ;
 }
+

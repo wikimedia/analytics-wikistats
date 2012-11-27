@@ -708,6 +708,7 @@ sub CountPageViews
       elsif ($project eq "d")  { $project = "wk"; } # wiktionary
       elsif ($project eq "m")  { $project = "wx"; } # wikimedia (meta commons, species, ...)
       elsif ($project eq "n")  { $project = "wn"; } # wikinews
+      elsif ($project eq "o")  { $project = "wo"; } # wikivoyage
       elsif ($project eq "q")  { $project = "wq"; } # wikiquote
       elsif ($project eq "s")  { $project = "ws"; } # wikisource
       elsif ($project eq "v")  { $project = "wv"; } # wikiversity
@@ -1441,6 +1442,7 @@ sub GetProjectName
   elsif ($project eq "wk") { $project_name = "Wk"; }
   elsif ($project eq "wx") { $project_name = ""; }
   elsif ($project eq "wn") { $project_name = "Wn"; }
+  elsif ($project eq "wo") { $project_name = "Wo"; }
   elsif ($project eq "wq") { $project_name = "Wq"; }
   elsif ($project eq "ws") { $project_name = "Ws"; }
   elsif ($project eq "wv") { $project_name = "Wv"; }
@@ -1457,6 +1459,7 @@ sub GetProjectName2
   $project =~ s/Wk/Wiktionary/i ;
   $project =~ s/Ws/Wikisource/i ;
   $project =~ s/Wn/Wikinews/i ;
+  $project =~ s/Wo/Wikivoyage/i ;
   $project =~ s/Wp/Wikipedia/i ;
   $project =~ s/Wq/Wikiquote/i ;
   $project =~ s/Wv/Wikiversity/i ;
@@ -1826,3 +1829,4 @@ sub months_since_2000_01
   my $m = ($year - 2000) * 12 + $month ;
   return $m ;
 }
+

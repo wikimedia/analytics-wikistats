@@ -242,6 +242,18 @@ sub Localization
       $out_publishers   = $out_wikireporters ;
     }
 
+    if ($mode_wo)
+    {
+    # to do: add to all languaga files
+      $out_wikivoyagesites = "Wikivoyage sites" ; 
+      $out_wikivoayage  = "Wikivoyage" ;     
+      $out_wikivoyagers = "Wikivoyagers" ;    
+      
+      $out_publications = $out_wikivoyagesites ;
+      $out_publication  = $out_wikivoyage ;
+      $out_publishers   = $out_wikivoyagers ;
+    }
+
     if ($mode_wq)
     {
       $out_publications = $out_wikiquotes ;
@@ -922,3 +934,4 @@ sub GetTranslateWikiData
 
 1;
  ;
+
