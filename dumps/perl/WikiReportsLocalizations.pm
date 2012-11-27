@@ -246,7 +246,7 @@ sub Localization
     {
     # to do: add to all languaga files
       $out_wikivoyagesites = "Wikivoyage sites" ; 
-      $out_wikivoayage  = "Wikivoyage" ;     
+      $out_wikivoyage   = "Wikivoyage" ;     
       $out_wikivoyagers = "Wikivoyagers" ;    
       
       $out_publications = $out_wikivoyagesites ;
