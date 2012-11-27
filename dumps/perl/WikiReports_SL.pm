@@ -41,6 +41,10 @@ $out_wikinews        = "Wikinovice" ;
 $out_wikinewssites   = "strani z Wikinovicami" ;
 $out_wikireporters   = "Wikinovinarji" ;
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisources" ; # new
 $out_wikilibrarians  = "Wikilibrarians" ; # new

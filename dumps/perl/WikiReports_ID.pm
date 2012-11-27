@@ -34,6 +34,10 @@ $out_wikinews        = "Wikinews" ;  # new
 $out_wikinewssites   = "Situs Wikinews" ; # new
 $out_wikireporters   = "WartawanWiki" ; # new
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisource" ; # new
 $out_wikilibrarians  = "PustakawanWiki" ; # new

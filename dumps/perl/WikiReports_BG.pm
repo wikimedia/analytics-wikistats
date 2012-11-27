@@ -23,6 +23,10 @@ $out_wikimedia       = "&#1059;&#1080;&#1082;&#1080;&#1084;&#1077;&#1076;&#1080;
 $out_wikimedia_sites = "&#1057;&#1072;&#1081;&#1090;&#1086;&#1074;&#1077; &#1085;&#1072; &#1059;&#1080;&#1082;&#1080;&#1084;&#1077;&#1076;&#1080;&#1103;" ; # new
 $out_comparisons  = "&#1057;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1103;" ;
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_creation_history = "Creation history" ; # new
 $out_accomplishments  = "Accomplishments" ; # new
 $out_created          = "Created" ; # new
