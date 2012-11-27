@@ -19,7 +19,8 @@
 # zz28 = like zz but for first 28 days of each month only (to allow fair comparison of consecutive months)
 # zz* = all languages for all projects
 # $language is different, this is about the language in which the data should be presented
-
+#
+#
   print "WikiReports.pl\n" ;
 
   use lib "/home/ezachte/lib" ;
