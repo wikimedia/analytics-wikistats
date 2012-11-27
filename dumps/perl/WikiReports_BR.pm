@@ -37,6 +37,10 @@ $out_wikinews        = "Wikikelo&ugrave" ;
 $out_wikinewssites   = "Lec'hienno&ugrave Wikikelo&ugrave" ;
 $out_wikireporters   = "Wikikazetennerien" ;
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisources" ; # new
 $out_wikilibrarians  = "Wikilibrarians" ; # new

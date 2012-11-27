@@ -36,6 +36,10 @@ $out_wikinews        = "Wikihírek" ;
 $out_wikinewssites   = "Wikihíroldalak" ;
 $out_wikireporters   = "Wikiriporterek" ;
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisources" ; # new
 $out_wikilibrarians  = "Wikilibrarians" ; # new

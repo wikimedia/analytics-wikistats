@@ -28,6 +28,10 @@ $out_wikinews        = "Wikinews" ;  # new
 $out_wikinewssites   = "Projekty Wikinews" ; # new
 $out_wikireporters   = "Wikireportéri" ; # new
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikizdroj" ;  # new
 $out_wikisourcesites = "Wikizdroje" ; # new
 $out_wikilibrarians  = "Wikiknihovníci" ; # new

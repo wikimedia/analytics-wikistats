@@ -31,6 +31,10 @@ $out_wikinews        = "&#1042;&#1080;&#1082;&#1080;&#1085;&#1086;&#1074;&#1086;
 $out_wikinewssites   = "&#1042;&#1080;&#1082;&#1080;&#1085;&#1086;&#1074;&#1086;&#1089;&#1090;&#1085;&#1099;&#1077; &#1089;&#1072;&#1081;&#1090;&#1099;" ;
 $out_wikireporters   = "&#1042;&#1080;&#1082;&#1080;&#1088;&#1077;&#1087;&#1086;&#1088;&#1090;&#1105;&#1088;&#1099;" ;
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisources" ; # new
 $out_wikilibrarians  = "Wikilibrarians" ; # new

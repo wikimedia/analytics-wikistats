@@ -38,6 +38,10 @@ $out_wikinews        = "Wikinot&iacute;cias" ;  # new
 $out_wikinewssites   = "S&iacute;tios de Wikinot&iacute;cias" ; # new
 $out_wikireporters   = "wikinoticiaristas" ; # new
 
+$out_wikivoyage      = "Wikivoyage" ;  # new
+$out_wikivoyagesites = "Wikivoyage sites" ; # new
+$out_wikivoyagers    = "Wikivoyagers" ; # new
+
 $out_wikisources     = "Wikisource" ;  # new
 $out_wikisourcesites = "Wikisources" ; # new
 $out_wikilibrarians  = "Wikilibrarians" ; # new
