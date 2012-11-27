@@ -20,3 +20,4 @@ cd $wikistats/dumps/bash
 ./zip_out.sh ws
 ./zip_out.sh wv
 ./zip_out.sh wx
+

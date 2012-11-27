@@ -263,3 +263,4 @@ sub LogTime
     &Log ("\n" . sprintf ("%02d", $hour) . ":" . sprintf ("%02d", $min)) ;
   }
 }
+
