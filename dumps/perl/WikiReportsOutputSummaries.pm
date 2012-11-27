@@ -1608,10 +1608,10 @@ sub GeneratePlotArticles
   if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
   {
     $out_script_plot   = $out_script_plot_articles2 ;
-    $out_script_plot =~ s/TITLE/New articles per month on $out_language_name wiki$metric_unit_text1/g ;
+    $out_script_plot =~ s/TITLE/New articles per month on $out_language_name $out_publication$metric_unit_text1/g ;
   }
   else
-  { $out_script_plot =~ s/TITLE/Total articles on $out_language_name wiki$metric_unit_text1/g ; }
+  { $out_script_plot =~ s/TITLE/Total articles on $out_language_name $out_publication$metric_unit_text1/g ; } 
 
   $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
   $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
