@@ -23,6 +23,9 @@ then echo "copy from csv_wk" ; cp $csv/csv_wk/LanguageNames*.csv $csv ; fi ;
 if ! test -e $csv/$file1 && test -e $csv/csv_wn/$file1
 then echo "copy from csv_wn" ; cp $csv/csv_wn/LanguageNames*.csv $csv ; fi ;
 
+if ! test -e $csv/$file1 && test -e $csv/csv_wo/$file1
+then echo "copy from csv_wo" ; cp $csv/csv_wo/LanguageNames*.csv $csv ; fi ;
+
 if ! test -e $csv/$file1 && test -e $csv/csv_wp/$file1
 then echo "copy from csv_wp" ; cp $csv/csv_wp/LanguageNames*.csv $csv ; fi ;
 	
@@ -48,6 +51,9 @@ then echo "upd from csv_wk" ; cp -p $csv/csv_wk/LanguageNames*.csv $csv ; fi ;
 if test $csv/csv_wn/$file1 -nt $csv/$file1
 then echo "upd from csv_wn" ; cp -p $csv/csv_wn/LanguageNames*.csv $csv ; fi ;
 	
+if test $csv/csv_wo/$file1 -nt $csv/$file1
+then echo "upd from csv_wo" ; cp -p $csv/csv_wo/LanguageNames*.csv $csv ; fi ;
+	
 if test "$csv/csv_wp/$file1" -nt "$csv/$file1"
 then echo "upd from csv_wp" ; cp -p $csv/csv_wp/LanguageNames*.csv $csv ; fi ;
 	
@@ -68,6 +74,7 @@ then echo "upd from csv_wx" ; cp -p $csv/csv_wx/LanguageNames*.csv $csv ; fi ;
 echo "copy to csv_wb" ; cp -p $csv/LanguageNames*.csv $csv/csv_wb ;
 echo "copy to csv_wk" ; cp -p $csv/LanguageNames*.csv $csv/csv_wk ;
 echo "copy to csv_wn" ; cp -p $csv/LanguageNames*.csv $csv/csv_wn ;
+echo "copy to csv_wo" ; cp -p $csv/LanguageNames*.csv $csv/csv_wo ;
 echo "copy to csv_wp" ; cp -p $csv/LanguageNames*.csv $csv/csv_wp ;
 echo "copy to csv_wq" ; cp -p $csv/LanguageNames*.csv $csv/csv_wq ;
 echo "copy to csv_ws" ; cp -p $csv/LanguageNames*.csv $csv/csv_ws ;

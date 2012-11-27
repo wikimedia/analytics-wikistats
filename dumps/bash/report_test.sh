@@ -3,6 +3,7 @@
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+perl=/home/ezachte/wikistats/dumps/perl # test
 csv=$dumps/csv
 out=$dumps/out
 

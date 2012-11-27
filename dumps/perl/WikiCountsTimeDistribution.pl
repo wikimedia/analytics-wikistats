@@ -216,6 +216,7 @@ sub OpenLog
   elsif ($mode eq "wb") { $target = "Wikibooks" ; }
   elsif ($mode eq "wk") { $target = "Wiktionary" ; }
   elsif ($mode eq "wn") { $target = "Wikinews" ; }
+  elsif ($mode eq "wo") { $target = "Wikivoyage" ; }
   elsif ($mode eq "wp") { $target = "Wikipedia" ; }
   elsif ($mode eq "wq") { $target = "Wikiquote" ; }
   elsif ($mode eq "ws") { $target = "Wikisource" ; }

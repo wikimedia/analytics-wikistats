@@ -301,6 +301,7 @@ sub GenerateSiteMapNew
       if ($mode_wb) { $out_url_all = "http://wikibooks.org" ; }
       if ($mode_wk) { $out_url_all = "http://wiktionary.org" ; }
       if ($mode_wn) { $out_url_all = "http://wikinews.org" ; }
+      if ($mode_wo) { $out_url_all = "http://wikivoyage.org" ; }
       if ($mode_wp) { $out_url_all = "http://wikipedia.org" ; }
       if ($mode_wq) { $out_url_all = "http://wikiquote.org" ; }
       if ($mode_ws) { $out_url_all = "http://wikisource.org" ; }
@@ -451,6 +452,10 @@ sub GenerateSiteMapNew
         if ($wikimedia)
         {
           $views = $PageViewsPerHour {$wp} ;
+
+	  if ($mode_wo)
+	  { $views = 0 ; } # not yet available
+
           if ($views == 0)
           { $views = "?" ; }
           elsif ($views < 0.1)
@@ -598,19 +603,23 @@ sub GenerateSiteMapNew
         if ($r == 12)
         { $out_description = $out_report_description_edits ; }
         $out_line = &tdlb ($out_description).
-                    &tdcb (&w ("<a href='Tables" . $report . ".htm'>" . $out_btn_tables . "</a>")) ;
+                    &tdlb (&w ("<a href='Tables" . $report . ".htm'>" . $out_btn_tables . "</a>")) ;
       # if (($r == 1) || (($r >= 3) && ($r <= 6)) || ($r == 12) || ($r == 13) || ($r == 15) || ($r == 16) || (($mode_wp) && ($r == 21))) # April 2010: less trivia
-        if (($r == 1) || (($r >= 3) && ($r <= 6)) || ($r == 12) || (($mode_wp) && ($r == 21)))
-        { $out_line .= &tdcb (&w ($out_btn_charts . "&nbsp;&nbsp;" .
-                                  "<a href='PlotsPng" . $report . ".htm'>PNG</a>&nbsp;&nbsp;" .
-                                  "<a href='PlotsSvg" . $report . ".htm'>SVG</a>")) ; }
-        else
-        { $out_line .= &tdeb ; }
+        if (! $mode_wo) # do not add old charts for wikivoyage, they were never generated for that project
+        {	
+          if (($r == 1) || (($r >= 3) && ($r <= 6)) || ($r == 12) || (($mode_wp) && ($r == 21)))
+          { $out_line .= &tdcb (&w ($out_btn_charts . "&nbsp;&nbsp;" .
+                                    "<a href='PlotsPng" . $report . ".htm'>PNG</a>&nbsp;&nbsp;" .
+                                    "<a href='PlotsSvg" . $report . ".htm'>SVG</a>")) ; }
+          else
+          { $out_line .= &tdeb ; }
+        }
 
         if (($imagelinks_incomplete) && ($r == 17))
         { $out_line =~ s/<\/?a[^>]*>//g ; }
 
         $out_html .= &tr ($out_line) ;
+
       }
       else
       {
@@ -735,6 +744,9 @@ sub TableSeeAlso
       if (! $mode_wn)
       { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikinews/$langcode/Sitemap.htm'>" . $out_wikinews .  "</a>") .
                           &tdlb("<a href='http://stats.wikimedia.org/wikinews/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
+      if (! $mode_wo)
+      { $out_html .= &tr (&tdlb ("$out_stats_for <a href='http://stats.wikimedia.org/wikivoyage/$langcode/Sitemap.htm'>" . $out_wikivoyage .  "</a>") .
+                          &tdlb("<a href='http://stats.wikimedia.org/wikivoyage/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/03/2013", " <font color=#008000><b>NEW</b></font>"))) ; }
       if (! $mode_wp)
       { $out_html .= &tr (&tdlb ("$more_stats <a href='http://stats.wikimedia.org/$langcode/Sitemap.htm'>" . $out_wikipedias .  "</a>") .
                           &tdlb("<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summary</a>" . blank_text_after ("30/11/2011", " <font color=#008000><b>NEW</b></font>"))) ; }
@@ -858,6 +870,7 @@ sub GenerateSiteMap
   if ($mode_wb)  { $out_html .= "<h2>" . $out_wikibooks .    "</h2>\n" ; }
   if ($mode_wk)  { $out_html .= "<h2>" . $out_wiktionaries . "</h2>\n" ; }
   if ($mode_wn)  { $out_html .= "<h2>" . $out_wikinews .     "</h2>\n" ; }
+  if ($mode_wo)  { $out_html .= "<h2>" . $out_wikivoyage .   "</h2>\n" ; }
   if ($mode_wp)  { $out_html .= "<h2>" . $out_wikipedias .   "</h2>\n" ; }
   if ($mode_wq)  { $out_html .= "<h2>" . $out_wikiquotes .   "</h2>\n" ; }
   if ($mode_ws)  { $out_html .= "<h2>" . $out_wikisources .  "</h2>\n" ; }

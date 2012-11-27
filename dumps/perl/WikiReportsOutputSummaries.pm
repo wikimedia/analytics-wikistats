@@ -25,6 +25,7 @@ sub GenerateSummariesPerWiki
      if ($mode eq 'wb')  { $out_publication  = $out_wikibook ; }
   elsif ($mode eq 'wk')  { $out_publication  = $out_wiktionary ; }
   elsif ($mode eq 'wn')  { $out_publication  = $out_wikinews ; }
+  elsif ($mode eq 'wo')  { $out_publication  = $out_wikivoyage ; }
   elsif ($mode eq 'wq')  { $out_publication  = $out_wikiquote ; }
   elsif ($mode eq 'ws')  { $out_publication  = $out_wikisources ; }
   elsif ($mode eq 'wv')  { $out_publication  = $out_wikiversity ; }
@@ -85,7 +86,8 @@ sub GenerateSummariesPerWiki
 
     &GeneratePlotEditors   ($wp) ;
 
-    &GeneratePlotPageviews ($wp) ;
+    if (! $mode_wo) # no page views yet for wikivoyage
+    { &GeneratePlotPageviews ($wp) ; }
 
     $cmd = "mv *.Rout $path_in\n" ;
     `$cmd` ;
@@ -219,6 +221,17 @@ sub GetSummaryPerWiki
   $pageviews_per_unit =~ s/M/million/g ;
   $pageviews_per_unit =~ s/k/thousand/g ;
   $pageviews_per_unit =~ s/\// per /g ;
+
+  if ($mode_wo) # no data yet for wikivoyage
+  {
+    $metric_PV_data      = '?' ;
+    $pageviews_per_month = '?' ;
+    $pageviews_per_day   = '?' ;
+    $pageviews_per_hour  = '?' ;
+    $pageviews_per_min   = '?' ;
+    $pageviews_per_sec   = '?' ;
+    $pageviews_per_unit = '?' ;
+  }  
 
   # article count
   $this_month         = $MonthlyStats {$wp.$m.$c[4]} ;
@@ -456,6 +469,9 @@ $html = <<__HTML_SUMMARY__ ;
 
 __HTML_SUMMARY__
 
+if ($mode_wo) # no data yet for wikivoyage
+{ $html =~ s/PLOT_PAGEVIEWS// ; }
+
 $html_speakers = <<__HTML_SUMMARY_SPEAKERS__ ;
           <tr>
             <td class=l>Speakers</td>
@@ -604,22 +620,15 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
   if ($region eq '')
   {
     $langcode = 'EN' ;
-    if ($mode_wb)
-    { $url_base = "http://stats.wikimedia.org/wikibooks/$langcode" ; }
-    if ($mode_wk)
-    { $url_base = "http://stats.wikimedia.org/wiktionary/$langcode" ; }
-    if ($mode_wn)
-    { $url_base = "http://stats.wikimedia.org/wikinews/$langcode" ; }
-    if ($mode_wp)
-    { $url_base = "http://stats.wikimedia.org/$langcode" ; }
-    if ($mode_wq)
-    { $url_base = "http://stats.wikimedia.org/wikiquote/$langcode" ; }
-    if ($mode_ws)
-    { $url_base = "http://stats.wikimedia.org/wikisource/$langcode" ; }
-    if ($mode_wv)
-    { $url_base = "http://stats.wikimedia.org/wikiversity/$langcode" ; }
-    if ($mode_wx)
-    { $url_base = "http://stats.wikimedia.org/wikispecial/$langcode" ; }
+    if ($mode_wb) { $url_base = "http://stats.wikimedia.org/wikibooks/$langcode" ; }
+    if ($mode_wk) { $url_base = "http://stats.wikimedia.org/wiktionary/$langcode" ; }
+    if ($mode_wn) { $url_base = "http://stats.wikimedia.org/wikinews/$langcode" ; }
+    if ($mode_wo) { $url_base = "http://stats.wikimedia.org/wikivoyage/$langcode" ; }
+    if ($mode_wp) { $url_base = "http://stats.wikimedia.org/$langcode" ; }
+    if ($mode_wq) { $url_base = "http://stats.wikimedia.org/wikiquote/$langcode" ; }
+    if ($mode_ws) { $url_base = "http://stats.wikimedia.org/wikisource/$langcode" ; }
+    if ($mode_wv) { $url_base = "http://stats.wikimedia.org/wikiversity/$langcode" ; }
+    if ($mode_wx) { $url_base = "http://stats.wikimedia.org/wikispecial/$langcode" ; }
   }
 
   $url_trends   = "$url_base/TablesWikipedia".uc($wp).".htm" ;
@@ -1765,6 +1774,7 @@ sub HtmlLogoProject
      if ($mode_wb) { $html = "<a href='http://stats.wikimedia.org/wikibooks/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/30px-Wikibooks-logo.svg.png' width='30' height='30' border='0'  alt='Wikibooks' border=0 /></a>" ; }
   elsif ($mode_wk) { $html = "<a href='http://stats.wikimedia.org/wiktionary/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/30px-Wiktionary-logo-en.png' width='30' height='30' border='0'  alt='Wiktionary' border=0 /></a>" ; }
   elsif ($mode_wn) { $html = "<a href='http://stats.wikimedia.org/wikinews/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='40' height='24' border='0'  alt='Wikinews' border=0 /></a>" ; }
+  elsif ($mode_wo) { $html = "<a href='http://stats.wikimedia.org/wikivoyage/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Travel_Guide_Logo_-_Proposal_Yiyi.svg/250px-Travel_Guide_Logo_-_Proposal_Yiyi.svg.png' width='30' height='30' border='0'  alt='Wikinews' border=0 /></a>" ; } # tbd
   elsif ($mode_wp) { $html = "<a href='http://stats.wikimedia.org/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/30px-Wikipedia-logo.png' width='30' height='30' border='0'  alt='Wikipedia' border=0 /></a>" ; }
   elsif ($mode_wq) { $html = "<a href='http://stats.wikimedia.org/wikiquote/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/30px-Wikiquote-logo.svg.png' width='30' height='30' border='0'  alt='Wikiquote' border=0 /></a>" ; }
   elsif ($mode_ws) { $html = "<a href='http://stats.wikimedia.org/wikisource/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='40' height='32' border='0'  alt='Wikisource' border=0 /></a>" ; }
@@ -2010,10 +2020,15 @@ sub HtmlSummariesCrossReference
   else
   { $html_xref_wm .= ", <font color='#808080'>Wikinews</font>\n" ; }
 
-  if (! $mode_wq)
-  { $html_xref_wm .= ", <a href='http://stats.wikimedia.org/wikiquote/EN/ReportCardTopWikis.htm'>Wikiquote</a>\n" ; }
+  if (! $mode_wo)
+  { $html_xref_wm .= ", <a href='http://stats.wikimedia.org/wikivoyage/EN/ReportCardTopWikis.htm'>Wikivoyage</a>\n" ; }
   else
-  { $html_xref_wm .= ", <font color='#808080'>Wikiquote</font>\n" ; }
+  { $html_xref_wm .= ", <font color='#808080'>Wikivoyage</font>\n" ; }
+
+  if (! $mode_wq)
+  { $html_xref_wm .= ", <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='http://stats.wikimedia.org/wikiquote/EN/ReportCardTopWikis.htm'>Wikiquote</a>\n" ; }
+  else
+  { $html_xref_wm .= ", <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color='#808080'>Wikiquote</font>\n" ; }
 
   if (! $mode_ws)
   { $html_xref_wm .= ", <a href='http://stats.wikimedia.org/wikisource/EN/ReportCardTopWikis.htm'>Wikisource</a>\n" ; }

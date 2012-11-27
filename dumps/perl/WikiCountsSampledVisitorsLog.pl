@@ -244,14 +244,14 @@ sub ProcessLine
 
   $domain  = &Abbreviate ($domain) ;
   if (($domain =~ /\./) ||
-      ($domain !~ /^[\*\@]?!(wb|wn|wp|wq|ws|wv|wk|wx|xx|wm|mw|wmf)\:/))
+      ($domain !~ /^[\*\@]?!(wb|wn|wo|wp|wq|ws|wv|wk|wx|xx|wm|mw|wmf)\:/))
   {
     $unrecognized_domains {$domain_original} ++ ;
     $domain = 'other' ;
   }
 
   $referer = &Abbreviate ($referer) ;
-  $referer_external = ($referer !~ /^[\*\@]?!(wb|wn|wp|wq|ws|wv|wk|wx|xx|wm|mw|wmf)\:/) ;
+  $referer_external = ($referer !~ /^[\*\@]?!(wb|wn|wo|wp|wq|ws|wv|wk|wx|xx|wm|mw|wmf)\:/) ;
 
   if ($referer_external)
   {
@@ -790,6 +790,7 @@ sub Abbreviate
   $legend .= "# wmf = wikimediafoundation\n" ;
   $legend .= "# wb  = wikibooks\n" ;
   $legend .= "# wn  = wikinews\n" ;
+  $legend .= "# wo  = wikivoyage\n" ;
   $legend .= "# wp  = wikipedia\n" ;
   $legend .= "# wq  = wikiquote\n" ;
   $legend .= "# ws  = wikisource\n" ;
@@ -803,6 +804,7 @@ sub Abbreviate
   $domain =~ s/wikimediafoundation/!wmf/ ;
   $domain =~ s/wikibooks/!wb/ ;
   $domain =~ s/wikinews/!wn/ ;
+  $domain =~ s/wikivoyage/!wo/ ;
   $domain =~ s/wikipedia/!wp/ ;
   $domain =~ s/wikiquote/!wq/ ;
   $domain =~ s/wikisource/!ws/ ;

@@ -106,12 +106,12 @@ sub ParseArguments
 
   abort ("Project $project is skipped: 'mania' and/or 'team' in the name") if ($project =~ /(?:mania|team)/i) ;
 
-  if ($project =~ /wik(?:|ibooks|inews|iquote|isource|tionary|iversity)$/i)
+  if ($project =~ /wik(?:|ibooks|inews|iquote|isource|tionary|iversity|ivoyage)$/i)
   {
     $project_suffix = $project ;
-    $project_suffix =~ s/wik(?:|ibooks|inews|iquote|isource|tionary|iversity)$// ;
+    $project_suffix =~ s/wik(?:|ibooks|inews|iquote|isource|tionary|iversity|ivoyage)$// ;
   }
-  $language =~ s/wik(?:|ibooks|inews|iquote|isource|tionary|iversity)$// ;
+  $language =~ s/wik(?:|ibooks|inews|iquote|isource|tionary|iversity|ivoyage)$// ;
 
   if ($project =~ /wiki$/i)
   {

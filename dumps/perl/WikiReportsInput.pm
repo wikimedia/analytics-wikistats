@@ -38,12 +38,13 @@ sub ParseArguments
 
   if ($mode eq "")
   { $mode = "wp" ; }
-  if ($mode !~ /^(?:wb|wk|wn|wp|wq|ws|wv|wx|wm)$/)
-  { abort ("Specify mode as: -m [wb|wk|wn|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial, , wm=wikimedia)") ; }
+  if ($mode !~ /^(?:wb|wk|wn|wo|wp|wq|ws|wv|wx|wm)$/)
+  { abort ("Specify mode as: -m [wb|wk|wn|wo|wp|wq|ws|wv|wx]\n(wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wo=wikivoyage, wp=wikipedia, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial, , wm=wikimedia)") ; }
 
   if ($mode eq "wb") { $mode_wb = $true ; }
   if ($mode eq "wk") { $mode_wk = $true ; }
   if ($mode eq "wn") { $mode_wn = $true ; }
+  if ($mode eq "wo") { $mode_wo = $true ; }
   if ($mode eq "wp") { $mode_wp = $true ; }
   if ($mode eq "wq") { $mode_wq = $true ; }
   if ($mode eq "ws") { $mode_ws = $true ; }
@@ -550,6 +551,8 @@ sub ReadFileCsvOnly
   my $file_csv = shift ;
   my $wp   = shift ;
   undef @csv  ;
+  if ($wp eq '')
+  { $wp = $language ; }
 
   if (! -e $file_csv)
   { &Log ("File $file_csv not found.\n") ; return ; }
@@ -557,7 +560,7 @@ sub ReadFileCsvOnly
   open FILE_IN, "<", $file_csv ;
   while ($line = <FILE_IN>)
   {
-    if ($line =~ /^$language\,/)
+    if ($line =~ /^\s*$wp\,/)
     {
       chomp ($line) ;
       push @csv, $line ;
@@ -1282,6 +1285,7 @@ if ($false)
     if ($mode_wb) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
     if ($mode_wk) { $m1 = ord (&yyyymm2b (2002,12)) ; }
     if ($mode_wn) { $m1 = ord (&yyyymm2b (2004, 7)) ; }
+    if ($mode_wo) { $m1 = ord (&yyyymm2b (2001, 1)) ; } # tbd
     if ($mode_wp) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
     if ($mode_wq) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
     if ($mode_ws) { $m1 = ord (&yyyymm2b (2001, 1)) ; }
@@ -1989,21 +1993,22 @@ sub ReadDumpMetaData
   &ReadFileCsvOnly ($file_csv_run_stats, $wp) ;
   $language = $language_prev ;
 
-  &Log ("\nWikiCount runs for $wp:\n") ;
-  &Log ("language,process till,time now,time now english,file format,file size on disk,file size uncompressed,host name,time parse input,time total,edits namespace 0,other edits,dump type,dump file\n") ;
+  # &Log ("language,process till,time now,time now english,file format,file size on disk,file size uncompressed,host name,time parse input,time total,edits namespace 0,other edits,dump type,dump file\n") ;
 
   my ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile,$dumpdetails) ;
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   $dumptype = 'unknown' ;
+  $line_dump_details = '' ;
   foreach $line (@csv)
   {
     ($lang,$processed_till,$time_now,$time_now_english,$file_format,$dump_size_compressed,$dump_size_uncompressed,$server,$time_parse_input,$time_total,$edits_ns0,$edits_nsx,$dumptype,$dumpfile) = split ',' ,$line ;
-    print "ReadDumpMetaData line $line\n" ;
     if ($dumptype !~ /^(?:edits_only|full_dump)$/)
-    { $dumptype .= 'unknown' ; }
-    &Log ("$line\n") ;
+    { $dumptype .= ' = unknown' ; }
+    $line_dump_details = 'dumptype $dumptype' ;
   }
+  if ($line_dump_details ne '')
+  { print "$line_dumps_details\n" ; }
 
   if ($dump_size_compressed > 0)
   {

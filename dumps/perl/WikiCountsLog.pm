@@ -11,6 +11,7 @@ sub OpenLog
   elsif ($mode eq "wb") { $target = "Wikibooks" ; }
   elsif ($mode eq "wk") { $target = "Wiktionary" ; }
   elsif ($mode eq "wn") { $target = "Wikinews" ; }
+  elsif ($mode eq "wo") { $target = "Wikivoyage" ; }
   elsif ($mode eq "wp") { $target = "Wikipedia" ; }
   elsif ($mode eq "wq") { $target = "Wikiquote" ; }
   elsif ($mode eq "ws") { $target = "Wikisource" ; }
@@ -268,8 +269,11 @@ sub TraceJob
   if (! $traceresources)
   { return ($false) ; }
 
-  # only trace memory on the most massive jobs: wp:en and wp:de and two smaller for tests: wp:fy and wp:af
-  if ($project !~ /^(?:enwiki|dewiki|frwiki|jawiki|nlwiki|fywiki|afwiki|itwiki|nvwiki|metawiki)/)
+  if ($mode ne 'wp')
+  { return ($false) ; }
+
+  # only trace memory on the most massive jobs and two smaller for tests: wp:fy and wp:af
+  if ($project !~ /^(?:enwiki|dewiki|frwiki|jawiki|nlwiki|fywiki|afwiki|itwiki|metawiki)/)
   { return ($false) ; }
 
   return ($true) ;

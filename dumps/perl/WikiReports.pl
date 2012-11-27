@@ -63,7 +63,7 @@
     # push @arguments, '-r oceania' ;
     # push @arguments, '-r artificial' ;
 
-    $mode = 'wx' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
+    $mode = 'wx' ;                  # specify wp=wikipedia (default), wb=wikibooks, wk=wiktionary, wn=wikinews, wo=wikivoyage, wp=wikipedia, wq=wikiquote, ws=wikisource, wv=wikiversity, wx=wikispecial
 
     $mode =~ s/\s//g ;
     push @arguments, "-m $mode" ;

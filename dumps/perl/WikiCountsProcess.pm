@@ -1547,7 +1547,7 @@ sub CollectActiveUsersPerMonthsAllProjects
   print "Input folder is " . cwd () . "\n" ;
   print "Output folder is " . cwd () . "/csv_wp\n" ;
 
-  foreach $wp (qw (wb wk wn wp wq ws wv wx))
+  foreach $wp (qw (wb wk wn wo wp wq ws wv wx))
   {
     $file = "csv_$wp/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
     $file_sizes {$wp} = -s $file ;
@@ -1936,7 +1936,7 @@ sub CollectActiveUsersWikiLovesMonuments
 
   open CSV_OUT, '>', $file_out ;
   binmode CSV_OUT ;
-  foreach $wp (qw (wb wk wn wp wq ws wv wx))
+  foreach $wp (qw (wb wk wn wo wp wq ws wv wx))
   {
     my $file = cwd () . "/csv_$wp/$filename_csv_in" ;
     open CSV_IN, '<', $file ;

@@ -6,6 +6,7 @@ cd $wikistats/dumps/bash
 ./zip_csv.sh wb
 ./zip_csv.sh wk
 ./zip_csv.sh wn
+./zip_csv.sh wo
 ./zip_csv.sh wp
 ./zip_csv.sh wq
 ./zip_csv.sh ws
@@ -15,6 +16,7 @@ cd $wikistats/dumps/bash
 ./zip_out.sh wb
 ./zip_out.sh wk
 ./zip_out.sh wn
+./zip_out.sh wo
 ./zip_out.sh wp
 ./zip_out.sh wq
 ./zip_out.sh ws

@@ -9,7 +9,7 @@ zip_all=$csv/zip_all
 dataset2=dataset2::pagecounts-ez/wikistats
 
 if [ "$1" == "" ] ; then
-  echo "Project code missing! Specify as 1st argument one of wb,wk,wn,wp,wq,ws,wv,wx"
+  echo "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
   exit
 fi  
 
