@@ -1,0 +1,1474 @@
+Process project wo
+[H[2J
+Script  started at Thu, Nov 22, 2012 15:48
+Arguments: -r | -e | -m | wo | -i | /mnt/data/xmldatadumps/public/nlwikivoyage | -o | /a/wikistats_git/dumps/csv/csv_wo/ | -l | nlwikivoyage | -d | auto | -s | /a/mediawiki/core/languages
+
+================================================================================
+
+option -e -> edits only
+
+
+[Thu, Nov 22, 2012 15:48 wo: 'nlwikivoyage' ]
+
+Temp   /a/wikistats_git/tmp
+
+Remove obsolete dirs
+
+Path   /a/wikistats_git/tmp/wb_ba
+Path   /a/wikistats_git/tmp/wo_nlwikivoyage
+
+Empty  /a/wikistats_git/tmp/wo_nlwikivoyage
+Remove /a/wikistats_git/tmp/wo_nlwikivoyage
+
+Temp   /a/wikistats_git/tmp/wo_nl/ created
+
+
+15:48:35 ===== WikiCounts / 15:48 Thursday, November 22, 2012 / ??? / project C:WO:NLWIKIVOYAGE =====
+         
+15:48:35 ParseArguments
+15:48:35 Arguments
+         -d auto
+         -e 1
+         -i /mnt/data/xmldatadumps/public/nlwikivoyage
+         -l nlwikivoyage
+         -m wo
+         -o /a/wikistats_git/dumps/csv/csv_wo/
+         -r 1
+         -s /a/mediawiki/core/languages
+         
+15:48:35 Project 'nlwikivoyage' -> language 'nl'
+         
+15:48:35 SetEnvironment
+15:48:35 SetDumpDir
+15:48:35 SetDumpDir
+         
+15:48:35 Check folders in /mnt/data/xmldatadumps/public/nlwikivoyage/
+         
+15:48:35 Check folder ../nlwikivoyage/20121106: dumps usable 'stub|7z|bz2'
+15:48:35 Check folder ../nlwikivoyage/20121118: dumps usable 'stub|7z|bz2'
+
+15:48:35 Use folder /mnt/data/xmldatadumps/public/nlwikivoyage/20121118/
+         
+15:48:35 Stub dumps ready.
+15:48:35 Read index.html -> Last dump started on 20121118 -> Process dump till 20121031
+15:48:35 Ignore revisions beyond 2012 10, timestamp 1351727999
+15:48:35 PrepTempDir
+
+df -h => Filesystem           Size  Used Avail Use% Mounted on
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+du -h => 4.0K	/a/wikistats_git/tmp/wo_nl/
+
+15:48:35 Dump file date 20121118
+
+15:48:35 Run in 'edits only' mode
+15:48:35 Read user groups: /mnt/data/xmldatadumps/public/nlwikivoyage/20121118/nlwikivoyage-20121118-user_groups.sql.gz
+15:48:35 Read users: /mnt/data/xmldatadumps/private/nlwikivoyage/20121118/nlwikivoyage-20121118-user.sql.gz
+15:48:35 Read xml file /mnt/data/xmldatadumps/public/nlwikivoyage/20121118/nlwikivoyage-20121118-stub-meta-history.xml.gz
+15:48:35 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsLog.csv not found.
+15:48:35 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsMonthly.csv not found.
+
+
+Hashes ->
+      156+ wikipedias
+
+
+15:48:35 ------------------------------------------------------------------------
+         CPU 0.0 MEM 0.0 VSZ 57196 RSS 15412
+         Mem   32934988k total  32748560k used    186428k free    448624k buffers
+         Swap  15622140k total    103000k used  15519140k free  27921780k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 38 53 perl WikiReports pl
+         15745 ezachte   20   0 57196  15m 2424 S    0  0 0   0 00 21 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ http://nl.wikivoyage.org/w/api.php?action=query&meta=siteinfo&siprop=namespaces
+15:48:35 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsContentNamespaces.csv not found.
+
+15:48:36 ------------------------------------------------------------------------
+         CPU 28.0 MEM 0.0 VSZ 76436 RSS 20236
+         Mem   32934988k total  32754992k used    179996k free    448640k buffers
+         Swap  15622140k total    103000k used  15519140k free  27922720k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 39 32 perl WikiReports pl
+         15745 ezachte   20   0 76436  19m 2748 S    0  0 1   0 00 28 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:48:37 ------------------------------------------------------------------------
+         CPU 28.0 MEM 0.0 VSZ 76436 RSS 20244
+         Mem   32934988k total  32731096k used    203892k free    448640k buffers
+         Swap  15622140k total    103000k used  15519140k free  27896812k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   1 39 87 perl WikiReports pl
+         15745 ezachte   20   0 76436  19m 2748 S    0  0 1   0 00 28 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 15:48:37 ReadBots
+15:48:37 ReadStoredBotCount: 15:48:37 File /a/wikistats_git/dumps/csv/csv_wo/Bots.csv not found.
+0 bots stored on previous run.
+
+15:48:37 Read users: '/mnt/data/xmldatadumps/private/nlwikivoyage/20121118/nlwikivoyage-20121118-user.sql.gz'
+15:48:37 Read user groups: '/mnt/data/xmldatadumps/public/nlwikivoyage/20121118/nlwikivoyage-20121118-user_groups.sql.gz'
+15:48:37 50 lines read from user groups file -> 1 bot definitions found
+15:48:37 1 lines read from users file
+15:48:37 12 user names out of 2353 sound like bot
+
+15:48:37 1 registered bots:
+          
+(WV-nl) ImportBot
+
+15:48:37 UpdateBots
+15:48:37 File /a/wikistats_git/dumps/csv/csv_wo/Bots.csv not found.
+
+15:48:37 ------------------------------------------------------------------------
+         CPU 15.5 MEM 0.0 VSZ 77380 RSS 21184
+         Mem   32934988k total  32732780k used    202208k free    448648k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897880k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   1 40 45 perl WikiReports pl
+         15745 ezachte   20   0 77380  20m 2748 S    0  0 1   0 00 31 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+
+Hashes ->
+        1+ bots
+        1+ botsndx
+
+
+15:48:38 ------------------------------------------------------------------------
+         CPU 10.3 MEM 0.0 VSZ 77380 RSS 21184
+         Mem   32934988k total  32733020k used    201968k free    448648k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897992k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 41 02 perl WikiReports pl
+         15745 ezachte   20   0 77380  20m 2748 S    0  0 1   0 00 31 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 15:48:38 AssumeBots
+15:48:38 Also assume certain accounts are bots, based on previously stored bots for all projects
+15:48:38 1 total bot names cached for all wikis
+15:48:38  total bot names cached for all wikis occur on 10+ wikis
+
+15:48:38  previously stored bots for all projects are registered on 10+ wikis and occur here as user name -> treat as bot here as well:
+          
+
+
+15:48:38 11 user names added to bot list because they sounded like one -> treat as bot here as well:
+          
+(WT-nl) DorganBot, (WT-nl) Tatatabot, (WT-nl) VolkovBot, (WV-nl) IWBot, 
+         (WV-nl) RedirectBot, (WV-nl) ScrubBot, AvocatoBot, MGA73bot, MenoBot, RomaineBot, 
+         Stefan2bot
+
+15:48:38 UpdateBotsAll -> /a/wikistats_git/dumps/csv/csv_wo/BotsAll.csv
+15:48:38 File /a/wikistats_git/dumps/csv/csv_wo/BotsAll.csv not found.
+15:48:38 12 bots found (implicit (by name) and explicit (bot flag)
+
+15:48:38 ------------------------------------------------------------------------
+         CPU 10.6 MEM 0.0 VSZ 77380 RSS 21184
+         Mem   32934988k total  32733584k used    201404k free    448648k buffers
+         Swap  15622140k total    103000k used  15519140k free  27898116k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 41 57 perl WikiReports pl
+         15745 ezachte   20   0 77380  20m 2748 S    0  0 1   0 00 32 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+
+Hashes ->
+       12+ bots
+
+
+15:48:39 ------------------------------------------------------------------------
+         CPU 8.0 MEM 0.0 VSZ 77380 RSS 21184
+         Mem   32934988k total  32734292k used    200696k free    448648k buffers
+         Swap  15622140k total    103000k used  15519140k free  27899084k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 42 13 perl WikiReports pl
+         15745 ezachte   20   0 77380  20m 2748 S    0  0 1   0 00 32 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 
+15:48:39 ReadAccessLevels
+
+15:48:39 UpdateAccessLevels
+15:48:39 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsAccessLevels.csv not found.
+
+15:48:39 ------------------------------------------------------------------------
+         CPU 8.0 MEM 0.0 VSZ 77012 RSS 20856
+         Mem   32934988k total  32734792k used    200196k free    448656k buffers
+         Swap  15622140k total    103000k used  15519140k free  27899624k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 42 69 perl WikiReports pl
+         15745 ezachte   20   0 77012  20m 2748 S    0  0 1   0 00 32 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+
+Hashes ->
+        3+ access
+
+
+15:48:40 ------------------------------------------------------------------------
+         CPU 6.4 MEM 0.0 VSZ 77012 RSS 20856
+         Mem   32934988k total  32735556k used    199432k free    448672k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900156k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 43 25 perl WikiReports pl
+         15745 ezachte   20   0 77012  20m 2748 S    0  0 1   0 00 32 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 15:48:40 Read Language Settings
+
+15:48:40 Language specific php script: '/a/mediawiki/core/languages/messages/MessagesNl.php'
+15:48:40 Language specific php file: read '/a/mediawiki/core/languages/messages/MessagesNl.php'
+15:48:40 Language specific php file found
+         
+15:48:40 Line: '	NS_CATEGORY         => 'Categorie','
+15:48:40 Category: 'Categorie'
+15:48:40 File /a/wikistats_git/dumps/csv/csv_wo/LanguageCodes.csv not found.
+
+15:48:41 ------------------------------------------------------------------------
+         CPU 7.0 MEM 0.0 VSZ 77692 RSS 21492
+         Mem   32934988k total  32735808k used    199180k free    448672k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900168k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   1 43 85 perl WikiReports pl
+         15745 ezachte   20   0 77692  20m 2748 S    0  0 1   0 00 35 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:48:41 ------------------------------------------------------------------------
+         CPU 5.8 MEM 0.0 VSZ 77692 RSS 21492
+         Mem   32934988k total  32736088k used    198900k free    448672k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901040k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   1 44 40 perl WikiReports pl
+         15745 ezachte   20   0 77692  20m 2748 S    0  0 1   0 00 35 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 
+15:48:41 Language settings:
+         Encoding 'utf-8'             
+         Category 'Categorie'         
+         Image    'Media|Bestand|Afbeelding|Image|File'
+         User     'Gebruiker'         
+         Redirect '#DOORVERWIJZING|#REDIRECT'
+         
+15:48:41 Use for image regexp '(?:Media|Bestand|Afbeelding|Image|File)'
+15:48:41 Use for redirect regexp '\#(?:DOORVERWIJZING|REDIRECT)'
+
+
+15:48:42 ------------------------------------------------------------------------
+         CPU 5.8 MEM 0.0 VSZ 77692 RSS 21496
+         Mem   32934988k total  32736460k used    198528k free    448676k buffers
+         Swap  15622140k total    103000k used  15519140k free  27902004k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   1 44 95 perl WikiReports pl
+         15745 ezachte   20   0 77692  20m 2748 S    0  0 1   0 00 35 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  4.0K	
+         ------------------------------------------------------------------------
+         
+ 
+15:48:42 ===== Start reading input =====
+
+15:48:42 Use temp dir '/a/wikistats_git/tmp/wo_nl/'
+
+
+15:48:42 Read xml dump file '/mnt/data/xmldatadumps/public/nlwikivoyage/20121118/nlwikivoyage-20121118-stub-meta-history.xml.gz'
+         
+
+15:48:42 Parse namespace tags
+         -2" case="first-letter -> 'Media'
+         -1" case="first-letter -> 'Speciaal'
+         0" case="first-letter -> ''
+         1" case="first-letter -> 'Overleg'
+         2" case="first-letter -> 'Gebruiker'
+         3" case="first-letter -> 'Overleg gebruiker'
+         4" case="first-letter -> 'Wikivoyage'
+         5" case="first-letter -> 'Overleg Wikivoyage'
+         6" case="first-letter -> 'Bestand'
+         7" case="first-letter -> 'Overleg bestand'
+         8" case="first-letter -> 'MediaWiki'
+         9" case="first-letter -> 'Overleg MediaWiki'
+         10" case="first-letter -> 'Sjabloon'
+         11" case="first-letter -> 'Overleg sjabloon'
+         12" case="first-letter -> 'Help'
+         13" case="first-letter -> 'Overleg help'
+         14" case="first-letter -> 'Categorie'
+         15" case="first-letter -> 'Overleg categorie'
+         
+
+
+[size: 3.8 Mb prev run: ]
+
+15:48:42 File size: 3.8 Mb
+15:48:42 Data read (Mb):
+
+15:48:47 - 10 20 30 
+
+15:48:57 Pages read: 9155. Revisions read: 63248 
+15:48:57 ===== Input read. Parsing xml file took 15 sec =====
+
+15:48:58 ------------------------------------------------------------------------
+         CPU 69.7 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32729588k used    205400k free    448748k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894080k cached
+         15326 ezachte   20   0  391m 335m 2780 R   98  1 0   2 01 17 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 04 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ Release table %titles
+
+Hashes ->
+       70+ binaries_per_month
+      487+ new_titles_per_namespace_per_month
+     1241+ zeitgeist_reg_users_rank
+     1241+ zeitgeist_reg_users_title
+       83+ edits_per_month
+     1707+ edits_per_user_per_month
+        1+ files_events_article
+       83+ files_events_month
+       18+ namespaces
+       18+ namespacesinv
+       14+ total_per_namespace
+        2+ undef_namespaces
+
+
+15:48:58 ------------------------------------------------------------------------
+         CPU 69.7 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32731412k used    203576k free    448756k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894732k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 01 73 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 04 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:48:59 ------------------------------------------------------------------------
+         CPU 66.8 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32731096k used    203892k free    448756k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894952k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 02 30 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 04 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ Release table %ndx_titles
+15:49:00 ------------------------------------------------------------------------
+         CPU 66.8 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32731248k used    203740k free    448756k buffers
+         Swap  15622140k total    103000k used  15519140k free  27895444k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 02 86 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 04 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:00 No image tags encountered
+
+
+15:49:00 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+15:49:00 ll =>
+         total 3916
+         -rw-rw-r-- 1 ezachte wikidev  976029 Nov 22 15:48 EditsPerUserPerMonthPerArticleNL.csv
+         -rw-rw-r-- 1 ezachte wikidev 1600160 Nov 22 15:48 EventsSortByArticle~00000
+         -rw-rw-r-- 1 ezachte wikidev    2752 Nov 22 15:48 EventsSortByMonth~2005-12
+         -rw-rw-r-- 1 ezachte wikidev    3488 Nov 22 15:48 EventsSortByMonth~2006-01
+         -rw-rw-r-- 1 ezachte wikidev    1088 Nov 22 15:48 EventsSortByMonth~2006-02
+         -rw-rw-r-- 1 ezachte wikidev    1152 Nov 22 15:48 EventsSortByMonth~2006-03
+         -rw-rw-r-- 1 ezachte wikidev    4160 Nov 22 15:48 EventsSortByMonth~2006-04
+         -rw-rw-r-- 1 ezachte wikidev    2432 Nov 22 15:48 EventsSortByMonth~2006-05
+         -rw-rw-r-- 1 ezachte wikidev    1536 Nov 22 15:48 EventsSortByMonth~2006-06
+         -rw-rw-r-- 1 ezachte wikidev   12576 Nov 22 15:48 EventsSortByMonth~2006-07
+         -rw-rw-r-- 1 ezachte wikidev    2880 Nov 22 15:48 EventsSortByMonth~2006-08
+         -rw-rw-r-- 1 ezachte wikidev    4544 Nov 22 15:48 EventsSortByMonth~2006-09
+         -rw-rw-r-- 1 ezachte wikidev    1664 Nov 22 15:48 EventsSortByMonth~2006-10
+         -rw-rw-r-- 1 ezachte wikidev    2176 Nov 22 15:48 EventsSortByMonth~2006-11
+         -rw-rw-r-- 1 ezachte wikidev    8128 Nov 22 15:48 EventsSortByMonth~2006-12
+         -rw-rw-r-- 1 ezachte wikidev    2432 Nov 22 15:48 EventsSortByMonth~2007-01
+         -rw-rw-r-- 1 ezachte wikidev    4288 Nov 22 15:48 EventsSortByMonth~2007-02
+         -rw-rw-r-- 1 ezachte wikidev   55936 Nov 22 15:48 EventsSortByMonth~2007-03
+         -rw-rw-r-- 1 ezachte wikidev   36608 Nov 22 15:48 EventsSortByMonth~2007-04
+         -rw-rw-r-- 1 ezachte wikidev   53920 Nov 22 15:48 EventsSortByMonth~2007-05
+         -rw-rw-r-- 1 ezachte wikidev   22624 Nov 22 15:48 EventsSortByMonth~2007-06
+         -rw-rw-r-- 1 ezachte wikidev   19104 Nov 22 15:48 EventsSortByMonth~2007-07
+         -rw-rw-r-- 1 ezachte wikidev   13344 Nov 22 15:48 EventsSortByMonth~2007-08
+         -rw-rw-r-- 1 ezachte wikidev   32096 Nov 22 15:48 EventsSortByMonth~2007-09
+         -rw-rw-r-- 1 ezachte wikidev   29376 Nov 22 15:48 EventsSortByMonth~2007-10
+         -rw-rw-r-- 1 ezachte wikidev   87424 Nov 22 15:48 EventsSortByMonth~2007-11
+         -rw-rw-r-- 1 ezachte wikidev   15392 Nov 22 15:48 EventsSortByMonth~2007-12
+         -rw-rw-r-- 1 ezachte wikidev   26016 Nov 22 15:48 EventsSortByMonth~2008-01
+         -rw-rw-r-- 1 ezachte wikidev   13344 Nov 22 15:48 EventsSortByMonth~2008-02
+         -rw-rw-r-- 1 ezachte wikidev    7136 Nov 22 15:48 EventsSortByMonth~2008-03
+         -rw-rw-r-- 1 ezachte wikidev    7584 Nov 22 15:48 EventsSortByMonth~2008-04
+         -rw-rw-r-- 1 ezachte wikidev    9984 Nov 22 15:48 EventsSortByMonth~2008-05
+         -rw-rw-r-- 1 ezachte wikidev    9664 Nov 22 15:48 EventsSortByMonth~2008-06
+         -rw-rw-r-- 1 ezachte wikidev    9408 Nov 22 15:48 EventsSortByMonth~2008-07
+         -rw-rw-r-- 1 ezachte wikidev   12224 Nov 22 15:48 EventsSortByMonth~2008-08
+         -rw-rw-r-- 1 ezachte wikidev    3488 Nov 22 15:48 EventsSortByMonth~2008-09
+         -rw-rw-r-- 1 ezachte wikidev   11136 Nov 22 15:48 EventsSortByMonth~2008-10
+         -rw-rw-r-- 1 ezachte wikidev   13344 Nov 22 15:48 EventsSortByMonth~2008-11
+         -rw-rw-r-- 1 ezachte wikidev   11008 Nov 22 15:48 EventsSortByMonth~2008-12
+         -rw-rw-r-- 1 ezachte wikidev   17696 Nov 22 15:48 EventsSortByMonth~2009-01
+         -rw-rw-r-- 1 ezachte wikidev   13056 Nov 22 15:48 EventsSortByMonth~2009-02
+         -rw-rw-r-- 1 ezachte wikidev   17760 Nov 22 15:48 EventsSortByMonth~2009-03
+         -rw-rw-r-- 1 ezachte wikidev    3264 Nov 22 15:48 EventsSortByMonth~2009-04
+         -rw-rw-r-- 1 ezachte wikidev   60864 Nov 22 15:48 EventsSortByMonth~2009-05
+         -rw-rw-r-- 1 ezachte wikidev   19360 Nov 22 15:48 EventsSortByMonth~2009-06
+         -rw-rw-r-- 1 ezachte wikidev   19296 Nov 22 15:48 EventsSortByMonth~2009-07
+         -rw-rw-r-- 1 ezachte wikidev   12768 Nov 22 15:48 EventsSortByMonth~2009-08
+         -rw-rw-r-- 1 ezachte wikidev    6368 Nov 22 15:48 EventsSortByMonth~2009-09
+         -rw-rw-r-- 1 ezachte wikidev   17280 Nov 22 15:48 EventsSortByMonth~2009-10
+         -rw-rw-r-- 1 ezachte wikidev    7040 Nov 22 15:48 EventsSortByMonth~2009-11
+         -rw-rw-r-- 1 ezachte wikidev   13824 Nov 22 15:48 EventsSortByMonth~2009-12
+         -rw-rw-r-- 1 ezachte wikidev   12064 Nov 22 15:48 EventsSortByMonth~2010-01
+         -rw-rw-r-- 1 ezachte wikidev   13408 Nov 22 15:48 EventsSortByMonth~2010-02
+         -rw-rw-r-- 1 ezachte wikidev   10336 Nov 22 15:48 EventsSortByMonth~2010-03
+         -rw-rw-r-- 1 ezachte wikidev    5152 Nov 22 15:48 EventsSortByMonth~2010-04
+         -rw-rw-r-- 1 ezachte wikidev    2816 Nov 22 15:48 EventsSortByMonth~2010-05
+         -rw-rw-r-- 1 ezachte wikidev    3264 Nov 22 15:48 EventsSortByMonth~2010-06
+         -rw-rw-r-- 1 ezachte wikidev    5344 Nov 22 15:48 EventsSortByMonth~2010-07
+         -rw-rw-r-- 1 ezachte wikidev    8640 Nov 22 15:48 EventsSortByMonth~2010-08
+         -rw-rw-r-- 1 ezachte wikidev   10176 Nov 22 15:48 EventsSortByMonth~2010-09
+         -rw-rw-r-- 1 ezachte wikidev   10112 Nov 22 15:48 EventsSortByMonth~2010-10
+         -rw-rw-r-- 1 ezachte wikidev   12576 Nov 22 15:48 EventsSortByMonth~2010-11
+         -rw-rw-r-- 1 ezachte wikidev   21984 Nov 22 15:48 EventsSortByMonth~2010-12
+         -rw-rw-r-- 1 ezachte wikidev   25472 Nov 22 15:48 EventsSortByMonth~2011-01
+         -rw-rw-r-- 1 ezachte wikidev   17376 Nov 22 15:48 EventsSortByMonth~2011-02
+         -rw-rw-r-- 1 ezachte wikidev   16832 Nov 22 15:48 EventsSortByMonth~2011-03
+         -rw-rw-r-- 1 ezachte wikidev    9920 Nov 22 15:48 EventsSortByMonth~2011-04
+         -rw-rw-r-- 1 ezachte wikidev   15936 Nov 22 15:48 EventsSortByMonth~2011-05
+         -rw-rw-r-- 1 ezachte wikidev    5664 Nov 22 15:48 EventsSortByMonth~2011-06
+         -rw-rw-r-- 1 ezachte wikidev   12736 Nov 22 15:48 EventsSortByMonth~2011-07
+         -rw-rw-r-- 1 ezachte wikidev   14528 Nov 22 15:48 EventsSortByMonth~2011-08
+         -rw-rw-r-- 1 ezachte wikidev    6656 Nov 22 15:48 EventsSortByMonth~2011-09
+         -rw-rw-r-- 1 ezachte wikidev   10368 Nov 22 15:48 EventsSortByMonth~2011-10
+         -rw-rw-r-- 1 ezachte wikidev   11968 Nov 22 15:48 EventsSortByMonth~2011-11
+         -rw-rw-r-- 1 ezachte wikidev   19264 Nov 22 15:48 EventsSortByMonth~2011-12
+         -rw-rw-r-- 1 ezachte wikidev   25600 Nov 22 15:48 EventsSortByMonth~2012-01
+         -rw-rw-r-- 1 ezachte wikidev   19520 Nov 22 15:48 EventsSortByMonth~2012-02
+         -rw-rw-r-- 1 ezachte wikidev   11616 Nov 22 15:48 EventsSortByMonth~2012-03
+         -rw-rw-r-- 1 ezachte wikidev    6560 Nov 22 15:48 EventsSortByMonth~2012-04
+         -rw-rw-r-- 1 ezachte wikidev    6912 Nov 22 15:48 EventsSortByMonth~2012-05
+         -rw-rw-r-- 1 ezachte wikidev    4352 Nov 22 15:48 EventsSortByMonth~2012-06
+         -rw-rw-r-- 1 ezachte wikidev    7616 Nov 22 15:48 EventsSortByMonth~2012-07
+         -rw-rw-r-- 1 ezachte wikidev    1088 Nov 22 15:48 EventsSortByMonth~2012-08
+         -rw-rw-r-- 1 ezachte wikidev   40256 Nov 22 15:48 EventsSortByMonth~2012-09
+         -rw-rw-r-- 1 ezachte wikidev   13024 Nov 22 15:48 EventsSortByMonth~2012-10
+         -rw-rw-r-- 1 ezachte wikidev   69709 Nov 22 15:48 WO_NL_Categories.txt
+
+15:49:00 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+15:49:00 UpdateNamespaces
+
+
+15:49:00 ------------------------------------------------------------------------
+         CPU 64.2 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32731680k used    203308k free    448756k buffers
+         Swap  15622140k total    103000k used  15519140k free  27896504k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 03 42 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 05 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ 15:49:00 File /a/wikistats_git/dumps/csv/csv_wo/Namespaces.csv not found.
+
+15:49:01 ------------------------------------------------------------------------
+         CPU 61.7 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32731732k used    203256k free    448764k buffers
+         Swap  15622140k total    103000k used  15519140k free  27896496k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 03 97 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 05 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:01 ------------------------------------------------------------------------
+         CPU 61.7 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32732964k used    202024k free    448764k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897212k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 04 53 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 06 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:01 SortArticleHistoryOnArticleDateTime
+
+15:49:02 ------------------------------------------------------------------------
+         CPU 59.5 MEM 0.0 VSZ 79340 RSS 23172
+         Mem   32934988k total  32733428k used    201560k free    448768k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897692k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 05 09 perl WikiReports pl
+         15745 ezachte   20   0 79340  22m 2748 S    0  0 1   0 16 07 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  3.9M	
+         ------------------------------------------------------------------------
+         
+ 15:49:02 Read /a/wikistats_git/tmp/wo_nl/EventsSortByArticle~00000:   1600160 bytes,  50005 events
+
+15:49:02 ------------------------------------------------------------------------
+         CPU 59.7 MEM 0.0 VSZ 83376 RSS 27140
+         Mem   32934988k total  32739236k used    195752k free    448788k buffers
+         Swap  15622140k total    103000k used  15519140k free  27899672k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 05 72 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2748 S    0  0 1   0 16 13 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  5.4M	
+         ------------------------------------------------------------------------
+         
+ 15:49:02 Sort took 0 sec.
+
+15:49:02 CountArticlesPerNamespacePerMonth
+
+15:49:03 ------------------------------------------------------------------------
+         CPU 57.6 MEM 0.0 VSZ 83376 RSS 27140
+         Mem   32934988k total  32740276k used    194712k free    448792k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900476k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 06 27 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2748 S    0  0 1   0 16 14 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  5.4M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:04 ------------------------------------------------------------------------
+         CPU 57.7 MEM 0.0 VSZ 83376 RSS 27140
+         Mem   32934988k total  32740052k used    194936k free    448800k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901076k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 06 84 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2748 S    0  0 1   0 16 16 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  5.4M	
+         ------------------------------------------------------------------------
+         
+ Release table %new_titles_per_namespace_per_month
+15:49:04 CountEditsPerNamespacePerMonth
+
+
+Hashes ->
+        0- new_titles_per_namespace_per_month
+
+
+15:49:04 ------------------------------------------------------------------------
+         CPU 55.7 MEM 0.0 VSZ 83376 RSS 27140
+         Mem   32934988k total  32740112k used    194876k free    448800k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901064k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 07 41 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2748 S    0  0 1   0 16 17 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  5.4M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:04 CountArticlesPerMonth
+
+15:49:05 ------------------------------------------------------------------------
+         CPU 54.0 MEM 0.0 VSZ 83376 RSS 27140
+         Mem   32934988k total  32741488k used    193500k free    448800k buffers
+         Swap  15622140k total    103000k used  15519140k free  27902040k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 08 00 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2748 S    0  0 1   0 16 21 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  5.4M	
+         ------------------------------------------------------------------------
+         
+ 15:49:05 Reading /a/wikistats_git/tmp/wo_nl/EventsSortByArticleTime: 1.5 Mb.
+15:49:05 Written /a/wikistats_git/tmp/wo_nl/EventsSortByArticleTimeConcise: 568 Kb.
+15:49:05 18317 out of 50006 events copied to new file (36.6%)
+
+15:49:06 ------------------------------------------------------------------------
+         CPU 54.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32742240k used    192748k free    448808k buffers
+         Swap  15622140k total    103000k used  15519140k free  27903484k cached
+         15326 ezachte   20   0  391m 335m 2780 R   98  1 0   2 09 12 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 16 79 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:06 First edit in year 2005, month 12
+
+15:49:06 ------------------------------------------------------------------------
+         CPU 54.2 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32743452k used    191536k free    448816k buffers
+         Swap  15622140k total    103000k used  15519140k free  27904432k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 09 70 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 16 81 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:07 ------------------------------------------------------------------------
+         CPU 53.2 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32742912k used    192076k free    448816k buffers
+         Swap  15622140k total    103000k used  15519140k free  27904596k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 10 48 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 17 03 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:08 ------------------------------------------------------------------------
+         CPU 53.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32744864k used    190124k free    448840k buffers
+         Swap  15622140k total    103000k used  15519140k free  27905564k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 11 51 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 17 50 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:09 ------------------------------------------------------------------------
+         CPU 53.3 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32746212k used    188776k free    448856k buffers
+         Swap  15622140k total    103000k used  15519140k free  27906496k cached
+         15326 ezachte   20   0  391m 335m 2780 R  100  1 0   2 12 68 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 18 14 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:11 ------------------------------------------------------------------------
+         CPU 52.5 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32748112k used    186876k free    448856k buffers
+         Swap  15622140k total    103000k used  15519140k free  27907484k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 14 01 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 18 92 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:12 ------------------------------------------------------------------------
+         CPU 53.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32749096k used    185892k free    448864k buffers
+         Swap  15622140k total    103000k used  15519140k free  27908496k cached
+         15326 ezachte   20   0  391m 335m 2780 R   98  1 0   2 15 26 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 19 63 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:13 ------------------------------------------------------------------------
+         CPU 53.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32748856k used    186132k free    448864k buffers
+         Swap  15622140k total    103000k used  15519140k free  27909224k cached
+         15326 ezachte   20   0  391m 335m 2780 R  102  1 0   2 16 67 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 20 50 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:14 CountArticlesPerMonth ready
+
+15:49:14 CollectUserStats
+
+15:49:15 ------------------------------------------------------------------------
+         CPU 53.4 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32750408k used    184580k free    448872k buffers
+         Swap  15622140k total    103000k used  15519140k free  27910312k cached
+         15326 ezachte   20   0  391m 335m 2780 R  100  1 0   2 18 07 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 36 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:15 ------------------------------------------------------------------------
+         CPU 53.4 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32751048k used    183940k free    448880k buffers
+         Swap  15622140k total    103000k used  15519140k free  27911068k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 18 65 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 36 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:15 CollectActiveUsersPerMonth
+
+15:49:16 ------------------------------------------------------------------------
+         CPU 52.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32751460k used    183528k free    448880k buffers
+         Swap  15622140k total    103000k used  15519140k free  27911568k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 19 20 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 37 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:16 UpdateMonthlyStats
+
+
+Hashes ->
+        0- edits_per_user_per_month
+
+
+15:49:17 ------------------------------------------------------------------------
+         CPU 52.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32752500k used    182488k free    448880k buffers
+         Swap  15622140k total    103000k used  15519140k free  27911936k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 19 78 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 39 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:17 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsPerNamespace.csv not found.
+15:49:17 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsEditsPerNamespace.csv not found.
+15:49:17 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsUserActivitySpread.csv not found.
+15:49:17 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsMonthly.csv not found.
+15:49:17 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsMonthly.csv not found.
+
+15:49:17 ------------------------------------------------------------------------
+         CPU 51.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32752636k used    182352k free    448888k buffers
+         Swap  15622140k total    103000k used  15519140k free  27912384k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 20 40 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 47 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table %articles_per_month
+15:49:18 ------------------------------------------------------------------------
+         CPU 49.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32753552k used    181436k free    448888k buffers
+         Swap  15622140k total    103000k used  15519140k free  27912748k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 20 96 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 47 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Print monthly stats to /a/wikistats_git/dumps/csv/csv_wo/StatisticsMonthly.csv
+
+15:49:18 ------------------------------------------------------------------------
+         CPU 49.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32754228k used    180760k free    448888k buffers
+         Swap  15622140k total    103000k used  15519140k free  27913264k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 21 52 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 48 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:19 ------------------------------------------------------------------------
+         CPU 48.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32731372k used    203616k free    448896k buffers
+         Swap  15622140k total    103000k used  15519140k free  27889692k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 22 08 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 48 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:19 ------------------------------------------------------------------------
+         CPU 48.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32730232k used    204756k free    448916k buffers
+         Swap  15622140k total    103000k used  15519140k free  27890404k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 22 64 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 48 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:20 ------------------------------------------------------------------------
+         CPU 47.7 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32729316k used    205672k free    448916k buffers
+         Swap  15622140k total    103000k used  15519140k free  27890332k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 23 20 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 49 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:21 ------------------------------------------------------------------------
+         CPU 47.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32729096k used    205892k free    448916k buffers
+         Swap  15622140k total    103000k used  15519140k free  27890816k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 23 77 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 51 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:21 ------------------------------------------------------------------------
+         CPU 46.7 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32730228k used    204760k free    448924k buffers
+         Swap  15622140k total    103000k used  15519140k free  27891032k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 24 33 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 51 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:22 ------------------------------------------------------------------------
+         CPU 45.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32729764k used    205224k free    448932k buffers
+         Swap  15622140k total    103000k used  15519140k free  27891192k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 24 91 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 54 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:22 ------------------------------------------------------------------------
+         CPU 45.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32729936k used    205052k free    448932k buffers
+         Swap  15622140k total    103000k used  15519140k free  27891544k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 25 46 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 54 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:22 RankUserStats
+
+15:49:23 ------------------------------------------------------------------------
+         CPU 44.8 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32730684k used    204304k free    448932k buffers
+         Swap  15622140k total    103000k used  15519140k free  27892028k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 26 02 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 54 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:23 UpdateActiveUsers
+
+15:49:23 ------------------------------------------------------------------------
+         CPU 44.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32730516k used    204472k free    448940k buffers
+         Swap  15622140k total    103000k used  15519140k free  27892400k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 26 59 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 57 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:23 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsActiveUsers.csv not found.
+
+15:49:24 ------------------------------------------------------------------------
+         CPU 44.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32731540k used    203448k free    448940k buffers
+         Swap  15622140k total    103000k used  15519140k free  27893192k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 27 16 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 58 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:25 ------------------------------------------------------------------------
+         CPU 44.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32732640k used    202348k free    448956k buffers
+         Swap  15622140k total    103000k used  15519140k free  27893664k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 27 71 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 58 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:25 UpdateSleepingUsers
+
+15:49:25 ------------------------------------------------------------------------
+         CPU 43.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32732108k used    202880k free    448956k buffers
+         Swap  15622140k total    103000k used  15519140k free  27893768k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 28 28 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 58 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:25 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsSleepingUsers.csv not found.
+
+15:49:26 ------------------------------------------------------------------------
+         CPU 43.1 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32732416k used    202572k free    448956k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894252k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 28 84 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 58 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:26 ------------------------------------------------------------------------
+         CPU 42.3 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32732592k used    202396k free    448964k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894544k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 29 39 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 58 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:26 UpdateBotEdits
+
+15:49:27 ------------------------------------------------------------------------
+         CPU 41.5 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32732668k used    202320k free    448964k buffers
+         Swap  15622140k total    103000k used  15519140k free  27894556k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 29 94 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 59 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:27 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsBots.csv not found.
+
+15:49:27 ------------------------------------------------------------------------
+         CPU 41.5 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32733228k used    201760k free    448972k buffers
+         Swap  15622140k total    103000k used  15519140k free  27895216k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 30 50 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 60 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:28 ------------------------------------------------------------------------
+         CPU 40.7 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32733672k used    201316k free    448972k buffers
+         Swap  15622140k total    103000k used  15519140k free  27895688k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 31 05 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 61 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:28 ------------------------------------------------------------------------
+         CPU 40.7 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32734848k used    200140k free    448972k buffers
+         Swap  15622140k total    103000k used  15519140k free  27896184k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 31 62 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 61 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @user_stats_bot
+15:49:28 CountBinariesPerExtensionPerMonth
+
+15:49:29 ------------------------------------------------------------------------
+         CPU 40.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32734860k used    200128k free    448972k buffers
+         Swap  15622140k total    103000k used  15519140k free  27896636k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 32 17 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 61 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:29 UpdBinariesStats
+
+
+Hashes ->
+        0- binaries_per_month
+
+
+15:49:30 ------------------------------------------------------------------------
+         CPU 40.0 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32735744k used    199244k free    448980k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897116k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 32 73 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 62 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:30 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsPerBinariesExtension.csv not found.
+
+15:49:30 ------------------------------------------------------------------------
+         CPU 39.3 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32735768k used    199220k free    448980k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897540k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 33 29 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 63 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:31 ------------------------------------------------------------------------
+         CPU 38.6 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32736268k used    198720k free    448984k buffers
+         Swap  15622140k total    103000k used  15519140k free  27897548k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 33 85 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 63 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:31 UpdateUsers
+
+15:49:31 ------------------------------------------------------------------------
+         CPU 38.6 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32736596k used    198392k free    448992k buffers
+         Swap  15622140k total    103000k used  15519140k free  27898084k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 34 41 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 63 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:31 File /a/wikistats_git/dumps/csv/csv_wo/EditsPerUserNL.csv not found.
+15:49:31 Sorting 122 user records took 0 sec.
+
+15:49:32 ------------------------------------------------------------------------
+         CPU 37.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32737096k used    197892k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27898576k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 34 98 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 65 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:32 ------------------------------------------------------------------------
+         CPU 37.9 MEM 0.0 VSZ 83376 RSS 27144
+         Mem   32934988k total  32737612k used    197376k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27898732k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 35 54 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2752 S    0  0 1   0 21 66 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:32 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsEditDistribution.csv not found.
+
+15:49:33 ------------------------------------------------------------------------
+         CPU 37.3 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32738204k used    196784k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27899540k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 36 10 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 66 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:33 ------------------------------------------------------------------------
+         CPU 37.3 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32738224k used    196764k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900036k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 36 66 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 66 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:34 ------------------------------------------------------------------------
+         CPU 36.7 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32738196k used    196792k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900476k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 37 21 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 66 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:35 ------------------------------------------------------------------------
+         CPU 36.7 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32738616k used    196372k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27900960k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 37 77 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 67 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @user_stats_reg
+15:49:35 UpdateZeitGeist
+
+
+15:49:35 ------------------------------------------------------------------------
+         CPU 36.1 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32738636k used    196352k free    449000k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901320k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 38 33 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 67 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:35 File /a/wikistats_git/dumps/csv/csv_wo/ZeitGeist.csv not found.
+
+15:49:36 ------------------------------------------------------------------------
+         CPU 35.5 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32739596k used    195392k free    449016k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901304k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 38 89 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 69 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:36 ------------------------------------------------------------------------
+         CPU 35.5 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32740560k used    194428k free    449036k buffers
+         Swap  15622140k total    103000k used  15519140k free  27901920k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 39 44 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 69 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:37 ------------------------------------------------------------------------
+         CPU 34.9 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32741040k used    193948k free    449036k buffers
+         Swap  15622140k total    103000k used  15519140k free  27902404k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 40 00 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 69 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:37 ------------------------------------------------------------------------
+         CPU 35.0 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32741412k used    193576k free    449044k buffers
+         Swap  15622140k total    103000k used  15519140k free  27902456k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 40 56 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 70 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:37 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsLog.csv not found.
+
+15:49:37 StatisticsLog.csv <- nl,20121031,11/22/2012,0 days 0 hrs 1 min 2 sec,0,0,0,10,50005,13031,10177,902,edits_only
+
+15:49:38 ------------------------------------------------------------------------
+         CPU 34.4 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32741316k used    193672k free    449044k buffers
+         Swap  15622140k total    103000k used  15519140k free  27903048k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 41 12 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 70 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:39 ------------------------------------------------------------------------
+         CPU 34.4 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32741984k used    193004k free    449044k buffers
+         Swap  15622140k total    103000k used  15519140k free  27903052k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 41 68 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 71 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:39 SortAndCompactEditsUserMonth
+
+15:49:39 ------------------------------------------------------------------------
+         CPU 33.9 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32742108k used    192880k free    449044k buffers
+         Swap  15622140k total    103000k used  15519140k free  27903728k cached
+         15326 ezachte   20   0  391m 335m 2780 R   97  1 0   2 42 23 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 72 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.0M	
+         ------------------------------------------------------------------------
+         
+ 15:49:39 Cmd sort /a/wikistats_git/tmp/wo_nl/EditsPerUserPerMonthPerArticleNL.csv -o /a/wikistats_git/tmp/wo_nl/EditsPerUserPerMonthPerArticleSortedNL.csv -T /a/wikistats_git/tmp/wo_nl/ -> result ''
+15:49:39 Sort took 0 sec.
+
+15:49:40 ------------------------------------------------------------------------
+         CPU 33.4 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32743760k used    191228k free    449052k buffers
+         Swap  15622140k total    103000k used  15519140k free  27905184k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 42 82 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 72 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ 15:49:40 Compact into /a/wikistats_git/dumps/csv/csv_wo/EditsBreakdownPerUserPerMonthNL.csv
+15:49:40 File '/a/wikistats_git/dumps/csv/csv_wo/EditsBreakdownPerUserPerMonthNL.csv' (953 Kb -> 75 Kb))
+
+15:49:40 ------------------------------------------------------------------------
+         CPU 33.6 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32744488k used    190500k free    449052k buffers
+         Swap  15622140k total    103000k used  15519140k free  27905496k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 43 52 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 85 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:41 ------------------------------------------------------------------------
+         CPU 33.1 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32745248k used    189740k free    449060k buffers
+         Swap  15622140k total    103000k used  15519140k free  27906132k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 44 07 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 85 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:41 RenameTempCsvFiles
+/a/wikistats_git/dumps/csv/csv_wo/CreatesNL.csv.tmp ->
+/a/wikistats_git/dumps/csv/csv_wo/CreatesNL.csv
+
+/a/wikistats_git/dumps/csv/csv_wo/TempEditsPerArticle.csv.tmp ->
+/a/wikistats_git/dumps/csv/csv_wo/TempEditsPerArticle.csv
+
+15:49:41 WriteJobRunStats
+
+15:49:41 UpdateUsersAnonymous
+
+15:49:41 ------------------------------------------------------------------------
+         CPU 33.1 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32746044k used    188944k free    449068k buffers
+         Swap  15622140k total    103000k used  15519140k free  27906596k cached
+         15326 ezachte   20   0  391m 335m 2780 R  101  1 0   2 44 63 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 86 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ 15:49:41 File /a/wikistats_git/dumps/csv/csv_wo/StatisticsAnonymousUsers.csv not found.
+
+15:49:42 ------------------------------------------------------------------------
+         CPU 32.6 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32745884k used    189104k free    449068k buffers
+         Swap  15622140k total    103000k used  15519140k free  27906764k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 45 19 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 87 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ Release table @csv
+15:49:43 ------------------------------------------------------------------------
+         CPU 32.6 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32746492k used    188496k free    449076k buffers
+         Swap  15622140k total    103000k used  15519140k free  27907268k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 45 75 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 88 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ 
+15:49:43 ------------------------------------------------------------------------
+         CPU 32.1 MEM 0.0 VSZ 83376 RSS 27160
+         Mem   32934988k total  32746312k used    188676k free    449076k buffers
+         Swap  15622140k total    103000k used  15519140k free  27907640k cached
+         15326 ezachte   20   0  391m 335m 2780 R   99  1 0   2 46 30 perl WikiReports pl
+         15745 ezachte   20   0 83376  26m 2768 S    0  0 1   0 21 88 perl WikiCounts pl 
+         /dev
+         /dev/mapper/stat1-a  6.4T 1002G  5.1T  17% /a
+         /a/wikistats_git/tmp/wo_nl/  6.9M	
+         ------------------------------------------------------------------------
+         
+ Release table %edits_per_user_ip_namespace_..15:49:43 SignalReportingToDo
+New counts collected, reporting step required for these wikis:
+language, dump date, run time
+nl,2012/10/31,2012/11/18 05:46:47
+
+
+[ -> 1 min, 8 sec]
+
+
+*** Job c:wo:nlwikivoyage completed succesfully ***
+
+================================================================================
+
+
+
+Prog: 
+Path: WikiCounts.pl
+Host: stat1 (production)
+
+Args:
+
+      -r
+      -e
+      -m
+      wo
+      -i
+      /mnt/data/xmldatadumps/public/nlwikivoyage
+      -o
+      /a/wikistats_git/dumps/csv/csv_wo/
+      -l
+      nlwikivoyage
+      -d
+      auto
+      -s
+      /a/mediawiki/core/languages
+OS:   linux
+Perl: 5.014002000
+Perl: /usr/bin/perl
+EzLib: 14
+Executing times:
+      ProcessRevision:            0 min,  6 sec /      60182 calls = 0.000111 sec/pass
+      ProcessRevision1:           0 min,  0 sec /      60182 calls = 0.000002 sec/pass
+      ProcessRevision2:           0 min,  3 sec /      60182 calls = 0.000051 sec/pass
+      ProcessRevision3:           0 min,  0 sec /      60182 calls = 0.000002 sec/pass
+      ProcessRevision4:           0 min,  2 sec /      60182 calls = 0.000038 sec/pass
+      ReadInputXmlPage:           0 min, 15 sec /       9155 calls = 0.001686 sec/pass
+
+
+
+================================================================================
+================================================================================
+
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_main.zip
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_creates.zip
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_edits.zip
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_reverts.zip
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_categories.zip
+rebuild /a/wikistats_git/dumps/csv/zip_all/csv_wo_activity_trends.zip
+rsync -avv /a/wikistats_git/dumps/csv/zip_all/csv_*.zip dataset2::pagecounts-ez/wikistats
+opening tcp connection to dataset2 port 873
+sending daemon args: --server -vvlogDtpre.iLsf . pagecounts-ez/wikistats 
+sending incremental file list
+csv_wo_activity_trends.zip
+csv_wo_categories.zip
+csv_wo_creates.zip
+csv_wo_edits.zip
+csv_wo_main.zip
+csv_wo_reverts.zip
+total: matches=152  hash_hits=171  false_alarms=0 data=28169
+
+sent 30245 bytes  received 1292 bytes  63074.00 bytes/sec
+total size is 20903904258  speedup is 662837.44

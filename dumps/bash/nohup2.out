@@ -1,0 +1,152 @@
+[H[2J
+========================================================================
+
+Start report.sh wp
+Day of month 22 le 0 - continue
+Sync language files
+copy to csv_wb
+copy to csv_wk
+copy to csv_wn
+copy to csv_wp
+copy to csv_wq
+copy to csv_ws
+copy to csv_wv
+copy to csv_wx
+Sync language files completed
+Generate and publish reports for project Wikipedias
+
+Wiki wp:en
+Target folder /a/wikistats_git/dumps/out/out_wp/EN
+File /a/wikistats_git/dumps/out/out_wp/EN/#index.html generated 0 days ago
+File /a/wikistats_git/dumps/csv/csv_wp/StatisticsLog.csv generated 0 days ago
+Forced run of reports
+Run reporting for language EN
+WikiReports.pl
+
+Script  started at Thu, Nov 22, 2012 14:17
+Arguments: -m | wp | -l | en | -i | /a/wikistats_git/dumps/csv/csv_wp/ | -o | /a/wikistats_git/dumps/out/out_wp
+
+================================================================================
+
+
+===== WikiReports / 14:17 Thursday November 22, 2012 / Project R:WP:EN =====
+
+14:17:14 Runtime errors on previous run spooled to /a/wikistats_git/dumps/csv/csv_wp/WikiReportsLog.txt.
+
+Arguments
+ -i /a/wikistats_git/dumps/csv/csv_wp/
+ -l en
+ -m wp
+ -o /a/wikistats_git/dumps/out/out_wp
+
+InitGlobals
+Script runs for Wikimedia site
+14:17:14 Localization
+
+Test language file:
+
+No value specified for '$out_conversions1' !
+
+Refresh file LanguageNamesViaPhp.csv not needed. File is recent.
+Refresh file LanguageNamesViaWpEn.csv not needed. File is recent.
+
+14:17:14 WhiteListLanguages
+
+Language codes not accepted, but dump processing logged in StatisticsLog.csv:
+
+- Keyword prohibited: closed_zh_tw,test
+- Keyword reserved: 
+- Wiki obsolete: dk,ru_sib,tlh
+- Wrong list: commons
+- Outside selection: 
+
+Language codes not on white or black list, but monthly counts available in StatisticsMonthly.csv:
+
+- Not lowercase: 
+- No dump processed: closed-zh-tw,ru-sib
+- < 10 articles: aa,ho,hz,kj,kr,mh,mus
+- < 10 edits: cho,ii,mo,ng
+
+Refresh file TranslateWiki.csv not needed. File is recent.
+
+Fetch localization levels from 'http://translatewiki.net/static/stats/wmf.csv'
+
+14:17:14 Read Bot Statistics
+14:17:15 ProcessEditorStats
+
+14:17:15 No editors breakdown file found for language codes: aa,ab,ace,af,ak,als,am,an,ang,ar,arc,arz,as,ast,av,ay,az,ba,bar,bat_smg,bcl,be,be_x_old,bg,bh,bi,bjn,bm,bn,bo,bpy,br,bs,bug,bxr,ca,cbk_zam,cdo,ce,ceb,ch,cho,chr,chy,ckb,co,cr,crh,cs,csb,cu,cv,cy,da,de,diq,dsb,dv,dz,ee,el,eml,en,eo,es,et,eu,ext,fa,ff,fi,fiu_vro,fj,fo,fr,frp,frr,fur,fy,ga,gan,gd,gl,glk,gn,got,gu,gv,ha,hak,haw,he,hi,hif,ho,hr,hsb,ht,hu,hy,hz,ia,id,ie,ig,ii,ik,ilo,io,is,it,iu,ja,jbo,jv,ka,kaa,kab,kbd,kg,ki,kj,kk,kl,km,kn,ko,koi,kr,krc,ks,ksh,ku,kv,kw,ky,la,lad,lb,lbe,lez,lg,li,lij,lmo,ln,lo,lt,ltg,lv,map_bms,mdf,mg,mh,mhr,mi,mk,ml,mn,mo,mr,mrj,ms,mt,mus,mwl,my,myv,mzn,na,nah,nap,nds,nds_nl,ne,new,ng,nl,nn,no,nov,nrm,nso,nv,ny,oc,om,or,os,pa,pag,pam,pap,pcd,pdc,pi,pih,pl,pms,pnb,pnt,ps,pt,qu,rm,rmy,rn,ro,roa_rup,roa_tara,ru,rue,rw,sa,sah,sc,scn,sco,sd,se,sg,sh,si,simple,sk,sl,sm,sn,so,sq,sr,srn,ss,st,stq,su,sv,sw,szl,ta,te,tet,tg,th,ti,tk,tl,tn,to,tokipona,tpi,tr,ts,tt,tum,tw,ty,udm,ug,uk,ur,uz,ve,vec,vep,vi,vls,vo,wa,war,wo,wuu,xal,xh,yi,yo,za,zea,zh,zh_classical,zh_min_nan,zh_yue,zu
+14:17:15 Skip MergeEditorStats, merged editors stats file is up to date
+
+14:17:15 Read Monthly Statistics
+14:17:15 ReadMonthlyStats 
+
+Read page views from /a/wikistats_git/dumps/csv/csv_wp/PageViewsPerMonthAll.csv
+
+14:17:27 Generate Current Status
+14:17:27 Generate Current Status Tables
+14:17:28 Generate Site Map
+14:17:28 Generate Sitemap
+14:17:28 Generate Summaries Per Wiki
+
+14:17:28 1/272: skip zz
+14:17:28 2/272: month October 2012 English Wikipedia (en)
+
+Ignore input beyond month 154: Oct 2012
+
+CMD R CMD BATCH "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_TotalArticles.R-in" "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_TotalArticles.R-out"
+CMD R CMD BATCH "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_NewArticles.R-in" "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_NewArticles.R-out"
+CMD R CMD BATCH "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_Editors.R-in" "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_Editors.R-out"
+CMD R CMD BATCH "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_Pageviews.R-in" "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_Pageviews.R-out"
+
+Move R plot output logs -> mv *.Rout /a/wikistats_git/dumps/csv/csv_wp/
+
+
+14:17:29 3/272: month October 2012 Spanish Wikipedia (es)
+CMD R CMD BATCH "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_TotalArticles.R-in" "/a/wikistats_git/dumps/csv/csv_wp/R_PlotScript_TotalArticles.R-out"
+14:17:31 4/272: month October 2012 Japanese Wikipedia (ja)
+14:17:32 5/272: month October 2012 German Wikipedia (de)
+14:17:34 6/272: month October 2012 Russian Wikipedia (ru)
+14:17:35 7/272: month October 2012 French Wikipedia (fr)
+14:17:37 8/272: month October 2012 Italian Wikipedia (it)
+14:17:39 9/272: month October 2012 Portuguese Wikipedia (pt)
+14:17:40 10/272: month October 2012 Polish Wikipedia (pl)
+14:17:42 11/272: month October 2012 Chinese Wikipedia (zh)
+14:17:43 12/272: month October 2012 Dutch Wikipedia (nl)
+14:17:45 13/272: month October 2012 Turkish Wikipedia (tr)
+14:17:47 14/272: month October 2012 Arabic Wikipedia (ar)
+14:17:48 15/272: month October 2012 Swedish Wikipedia (sv)
+14:17:50 16/272: month October 2012 Czech Wikipedia (cs)
+14:17:52 17/272: month October 2012 Indonesian Wikipedia (id)
+14:17:53 18/272: month October 2012 Finnish Wikipedia (fi)
+14:17:55 19/272: month October 2012 Ukrainian Wikipedia (uk)
+14:17:56 20/272: month October 2012 Korean Wikipedia (ko)
+14:17:57 21/272: month October 2012 Thai Wikipedia (th)
+14:17:59 22/272: month October 2012 Persian Wikipedia (fa)
+14:18:01 23/272: month October 2012 Hungarian Wikipedia (hu)
+14:18:02 24/272: month October 2012 Norwegian Wikipedia (no)
+14:18:04 25/272: month October 2012 Hebrew Wikipedia (he)
+14:18:06 26/272: month October 2012 Vietnamese Wikipedia (vi)
+14:18:07 27/272: month October 2012 Danish Wikipedia (da)
+14:18:09 28/272: month October 2012 Romanian Wikipedia (ro)
+14:18:10 29/272: month October 2012 Bulgarian Wikipedia (bg)
+14:18:12 30/272: month October 2012 Catalan Wikipedia (ca)
+14:18:14 31/272: month October 2012 Greek Wikipedia (el)
+14:18:15 32/272: month October 2012 Croatian Wikipedia (hr)
+14:18:17 33/272: month October 2012 Slovak Wikipedia (sk)
+14:18:19 34/272: month October 2012 Lithuanian Wikipedia (lt)
+14:18:20 35/272: month October 2012 Serbian Wikipedia (sr)
+14:18:22 36/272: month October 2012 Simple English Wikipedia (simple)
+14:18:24 37/272: month October 2012 Slovene Wikipedia (sl)
+14:18:25 38/272: month October 2012 Malay Wikipedia (ms)
+14:18:27 39/272: month October 2012 Estonian Wikipedia (et)
+14:18:29 40/272: month October 2012 Tagalog Wikipedia (tl)
+14:18:30 41/272: month October 2012 Esperanto Wikipedia (eo)
+14:18:32 42/272: month October 2012 Kazakh Wikipedia (kk)
+14:18:33 43/272: month October 2012 Georgian Wikipedia (ka)
+14:18:35 44/272: month October 2012 Serbo-Croatian Wikipedia (sh)
+14:18:37 45/272: month October 2012 Hindi Wikipedia (hi)
+14:18:38 46/272: month October 2012 Bosnian Wikipedia (bs)
+14:18:40 47/272: month October 2012 Latvian Wikipedia (lv)
+14:18:42 48/272: month October 2012 Azeri Wikipedia (az)
+14:18:43 49/272: month October 2012 Basque Wikipedia (eu)
+14:18:45 50/272: month October 2012 Nynorsk Wikipedia (nn)
