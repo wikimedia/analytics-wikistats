@@ -52,16 +52,6 @@ $path_program = Win32::GetLongPathName ($path_program) if $os_windows ;
 die "Operating system '$os' not supported" if (! $os_linux and ! $os_windows) ;
 
 
-# we can reuse this later on
-my $RUNS_ON_SERVER = $os_linux  && -d "/home/ezachte";
-
-if ($RUNS_ON_SERVER)
-{
-  $job_runs_on_production_server = $true ;
-  $path_home = "/home/ezachte" ;
-}
-else
-{ $path_home = getcwd () ; }
 
 $trace_on_exit         = $false ; # shorthand for $trace_on_exit_concise
 $trace_on_exit_concise = $false ;
