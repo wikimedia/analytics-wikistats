@@ -1112,6 +1112,7 @@ sub ReadMonthlyStats
     {
       $MonthlyStatsWpStop {"zz"} = $m ;
       $MonthlyStatsWpDate {"zz"} = $date ;
+      &Log ("wp $wp -> MonthlyStatsWpStop $m = $date\n") ;
     }
 
     if ($m > $MonthlyStatsWpStop {$wp})
