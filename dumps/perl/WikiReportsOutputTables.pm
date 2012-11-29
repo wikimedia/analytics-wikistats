@@ -1591,7 +1591,7 @@ sub GenerateTablesAllProjects
   $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpreadAllProjects.csv" ;
 
   # use file also to find most recent month with data
-  $m_max = 0 ;
+  $m_max = chr (0) ;
   &ReadFileCsv ($file_csv_users_activity_spread) ;
   foreach $line (@csv)
   {
@@ -1607,9 +1607,11 @@ sub GenerateTablesAllProjects
   # zz = all languages
   # w = editors and uploaders weighted (where one upload equals 5 other edits)
   $MonthlyStatsWpStart {'zz*'}  = 13 ;
-  $MonthlyStatsWpStop  {'zz*'}  = ord ($m_max) - 1 ;
+# $MonthlyStatsWpStop  {'zz*'}  = ord ($m_max) - 1 ;
+  $MonthlyStatsWpStop  {'zz*'}  = ord ($m_max) ;
   $MonthlyStatsWpStart {'zzw'} = 13 ;
-  $MonthlyStatsWpStop  {'zzw'} = ord ($m_max) - 1 ;
+# $MonthlyStatsWpStop  {'zzw'} = ord ($m_max) - 1 ;
+  $MonthlyStatsWpStop  {'zzw'} = ord ($m_max) ;
   $MonthlyStatsWpStart {'zz'}    = $MonthlyStatsWpStart {'zz*'} ;
   $MonthlyStatsWpStop  {'zz'}    = $MonthlyStatsWpStop  {'zz*'} ;
 
@@ -1662,7 +1664,7 @@ sub GenerateTableMonthlyStats
   if ($wp !~ /^zzz?$/)
   { $out_html .= "\n\n<a id='monthlycounts' name='monthlycounts'>&nbsp;</a><br>" . &b("Monthly counts & Quarterly rankings") . ": " .  &b ("<font color=#0000FF>" . $lastdump_long {$wp}) . "</font><br>&nbsp;\n" ; }
 
-  if ($wp =~ /^zz/) # qqq
+  if ($wp =~ /^zz/) 
   { $out_html .= blank_text_after ("01/01/2013", "<p><font color=#008000>". &b(ucfirst($out_new).": July, 2012:</font><br>")) .
                  "For active and very active editors (columns C and D) each editor is counted only once, even if they contributed to several languages.</font><br>" .
                  "For a more complete breakdown and some trends see second table <a href='#editor_activity_levels'>Edit activity levels of registered users</a>" ; }
@@ -2679,7 +2681,6 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
 }
 
-# qqqq
 sub GenerateTableUploadActivityLevels
 {
   my $wp = shift ;

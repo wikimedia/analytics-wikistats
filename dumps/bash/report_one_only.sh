@@ -12,7 +12,7 @@ csv=$dumps/csv
 out=$dumps/out
 htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
-mode=wx
+mode=wp
 lang=en
 
 cd $perl
