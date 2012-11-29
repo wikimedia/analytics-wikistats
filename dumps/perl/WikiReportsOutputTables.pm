@@ -4686,7 +4686,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   $url_report_pageviews {'wb'} = "http://stats.wikimedia.org/EN/TablesPageViewsMonthly.htm" ;
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+# foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   {
     if ($pageviews_non_mobile)
     {
@@ -4738,7 +4739,8 @@ sub GenerateComparisonTablePageviewsAllProjects
     if ($topic =~ /year_trend|forecast/)
     { $line_html .= "\n<script language='javascript'>\n" ; }
 
-    foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+  # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,$topic,data"} ;
 
@@ -4770,6 +4772,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     next if $line_html eq '' ;
 
     $line_html .= "\n<script language='javascript'>\n" ;
+  # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
     foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
@@ -4799,6 +4802,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     next if $line_html eq '' ;
 
     $line_html .= "\n<script language='javascript'>\n" ;
+  # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
     foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
@@ -4855,7 +4859,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   }
 
   $line_html = &the;
-  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+# foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
   $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
