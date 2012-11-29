@@ -1,6 +1,9 @@
 #!/bin/bash
 
-while getopts "d" optname
+
+INPUT_DIR=""
+OUTPUT_DIR=""
+while getopts "se" optname
   do
     case "$optname" in
       "s")
@@ -36,7 +39,7 @@ for file_path in $INPUT_DIR*.gz
 	file_name=`basename $file_path`
 	# add geocoded inside filename
 	geocoded_file_name=$(echo $file_name | sed -e 's/.gz/'.geocode.gz'/')
-	zcat $file_path |  ./udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
+	zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
 	echo "Finished processing $file_path"
 
 done
