@@ -4713,7 +4713,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= &tr ($line_html) ;
 
   $line_html = &the ;
-  foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+# foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
   {
     if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
