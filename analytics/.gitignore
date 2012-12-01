@@ -3,6 +3,7 @@
 
 # expect this file
 !.gitignore
+!csv/.gitignore
 !perl/
 !bash/
 

@@ -1,0 +1,49 @@
+"MULTI-COUNTRY MEDIA TREND REPORT","","","Geography : Worldwide, Middle East - Africa, Asia Pacific, Europe, Latin America, North America, China, India, United States","","","","","","MyMetrix"
+"","","","Location : All Locations","","","","","","MediaMetrix 2.0"
+"","","","Time Period : July 2008 - September 2009","","","","","","(c)2009 comScore, Inc"
+"","","","Target : Persons 15+",
+"","","","Media : Wikimedia Foundation Sites",
+"","","","Measures : Total Unique Visitors (000)",
+"","","","Date : 10/26/2009",
+
+"","","[P] Wikimedia Foundation Sites","","","","","","","","","","","","","","",
+"Items 1 to 9",""," Jul-2008"," Aug-2008"," Sep-2008"," Oct-2008"," Nov-2008"," Dec-2008"," Jan-2009"," Feb-2009"," Mar-2009"," Apr-2009"," May-2009"," Jun-2009"," Jul-2009"," Aug-2009"," Sep-2009",
+"1","World-Wide","244,326","248,539","272,109","277,208","280,969","272,998","289,811","300,751","327,148","320,043","317,255","302,940","295,484","307,641","325,998",
+"2","Europe","86,905","83,931","98,304","102,955","106,199","105,318","112,449","117,828","126,474","119,578","118,874","112,270","108,552","111,190","123,062",
+"3","Asia Pacific","65,838","66,895","68,291","65,703","68,371","66,026","71,203","70,862","78,009","76,024","75,595","76,239","74,990","77,365","77,948",
+"4","North America","57,347","59,494","64,075","66,785","65,133","63,782","67,971","65,855","66,878","70,908","69,387","64,678","66,142","68,084","71,661",
+"5","United States","48,220","50,171","53,951","56,340","54,556","52,860","56,159","54,150","54,783","58,977","57,684","53,613","54,873","56,943","60,276",
+"6","Latin America","23,220","26,847","28,886","27,974","27,416","22,769","22,558","27,440","34,229","33,400","33,870","33,263","29,298","33,186","35,264",
+"7","Middle East - Africa","11,016","11,371","12,553","13,790","13,850","15,103","15,630","18,765","21,558","20,133","19,529","16,489","16,502","17,816","18,063",
+"8","India","5,720","6,217","6,025","5,799","6,286","6,421","6,764","6,587","7,014","6,807","7,168","7,522","7,908","8,398","8,480",
+"9","China","232","1,382","2,735","2,037","2,185","2,286","1,825","2,002","2,752","3,115","2,936","4,566","3,839","3,547","2,882",
+
+
+"Media Metrix 2.0 Legend" 
+
+"[P]         Property" 
+"[M]         Media Title" 
+"[C]         Channel" 
+"[S]         Subchannel" 
+"[G]         Group" 
+"[SG]         Subgroup" 
+"[E]         Custom Entity" 
+"[N]         Ad Network" 
+"[A#]         Alternate Rollup" 
+"[X1]         Extended Network" 
+"[a1]         Advertiser Level" 
+"[P1]         Product Level" 
+
+"(H)         Full Hybrid - Used to identify entities that are measured and reported completely based on Panel-Centric Hybrid (Panel + Census) measurement." 
+"(h)         Partial Hybrid - Used to identify entities with at least one child entity that is Full Hybrid, but not all." 
+"w/History         Trend combines media previously reported under different parent and/or different level." 
+"*         Indicates that the entity has assigned traffic to certain pages in the domain to other <a href="help.aspx?h=definitions#anchor2" target="_new">entities</a>." 
+"**         Indicates that the entity is an advertising network." 
+"(v)         Indicates that the advertising network has been verified by comScore." 
+"...         Indicates data used fell below minimum reporting standards and/or data not available." 
+"N/A         Indicates data is not available in the data set for reporting for the specified time period." 
+"#         Caution - small base may result in unstable projection." 
+"##         Directional purposes only - base too unstable for reliable projection." 
+"Details on minimum reporting standards are located at: http://mymetrix.comscore.com/mmx/definitions_minreportingstandards.asp" 
+
+

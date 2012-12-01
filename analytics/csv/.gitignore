@@ -3,6 +3,8 @@
 
 # expect this file
 !.gitignore
+!comscore/
+!comscore/*.csv
 
 # advice Linus
 # use add -f to add few files in ignored folders
