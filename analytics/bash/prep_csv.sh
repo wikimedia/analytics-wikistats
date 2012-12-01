@@ -6,9 +6,9 @@ set -o pipefail
 wikistats=/a/wikistats_git
 analytics=$wikistats/analytics
 perl=$analytics/perl
-perl=/home/ezachte/wikistats/analytics/perl # tests
+# perl=/home/ezachte/wikistats/analytics/perl # tests
 csv_rc=$analytics/csv  # rc for report card
-csv_dumps=/a/wikistats/csv # upd to wikistats_git when dumps project has migrated
+csv_dumps=$wikistats/dumps/csv 
 
 function echo_exec { 
   printf '>%.s' {1..120} 
