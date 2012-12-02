@@ -122,6 +122,11 @@ sub ReadCsv
   while ($line = <CSV_IN>)
   {
     chomp $line ;
+
+    if ($line =~ /^\d+,,/) 
+    { die "Invalid line, language name missing '$line'\n" ; }
+
+    $line_original = $line ;
     $line =~ s/^,+// ;
     $line =~ s/,+$// ;
     @fields = split (',', $line) ;
@@ -130,18 +135,16 @@ sub ReadCsv
     next if $line =~ /Note/i ;
 
     # find section name
-    if ($#fields < 3)
+    if (($#fields < 3) && ($line_original !~ /,,,,/))
     {
       $section = $fields [0] ;
 
       next if $section =~ /Note/i ;
       next if $file_csv_in =~ /core_metrics/ and $line =~ /===/ ;
       next if $file_csv_in =~ /pageviews/    and $line =~ /Page view data are normalized to 30 day months/ ; # actually not a section header
-
       $section =~ s/===//g ;
       $section =~ s/^\s+// ;
       $section =~ s/\s+$// ;
-
       $sections {$section} ++ ;
       next ;
     }
