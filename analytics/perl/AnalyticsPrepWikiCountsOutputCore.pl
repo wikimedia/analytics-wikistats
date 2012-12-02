@@ -16,7 +16,7 @@
 # $file_regions_Reach = "Multi-Country Media Trend, % reach by region (July 2008 - September 2009)_10786.csv" ;
 
   $maxpopularwikis = 25 ;
-  @projects = ('wb','wk','wn','wp','wq','ws','wv','wx','commons','*') ;
+  @projects = ('wb','wk','wn','wo','wp','wq','ws','wv','wx','commons','*') ;
 
   &LogArguments ;
   &ParseArguments ;
@@ -89,6 +89,7 @@ sub ReadStatisticsMonthly
   &ReadStatisticsMonthlyForProject ("wb") ;
   &ReadStatisticsMonthlyForProject ("wk") ;
   &ReadStatisticsMonthlyForProject ("wn") ;
+  &ReadStatisticsMonthlyForProject ("wo") ;
   &ReadStatisticsMonthlyForProject ("wp") ;
   &ReadStatisticsMonthlyForProject ("wq") ;
   &ReadStatisticsMonthlyForProject ("ws") ;
@@ -472,10 +473,14 @@ sub WriteMonthlyData
     {
       ($project,$language) = split (",", $key) ;
       $language_name = $out_languages {$language} ;
+
+      if ($language_name eq '')
+      { die "No name found for language code '$language' (upd hash \%wikipedias)" ; }
+
       if (($project ne "wp") && ($project ne "wx"))
       { $line = "$index,$language_name " . &GetProjectName ($project) . "," ; }
       else
-      { $line = "$index,$language_name," ; }
+      { $line = "$index,$language_name," ; } 
 
       for ($m = $m_start ; $m <= $m_last ; $m++)
       { $line .= $values {"$f,$m"} {$key} . ","  ; }
@@ -579,7 +584,6 @@ if ($f == 2)
 
     $output .= "\n,${out_report_descriptions [$f]} - Indexed - Per Project\n" ;
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
-
     foreach $project (sort {$totals_project {"$f,$m_last"} {$b} <=> $totals_project {"$f,$m_last"} {$a}} @projects)
     {
 #     next if $project eq 'commons' and ($f ==2 or $f == 3) ; # (very) active editors no longer counted for commons
@@ -881,6 +885,7 @@ sub GetProjectName
   elsif ($project eq "wk") { $project_name = "Wiktionary"; }
   elsif ($project eq "wx") { $project_name = "Other Wikis"; }
   elsif ($project eq "wn") { $project_name = "Wikinews"; }
+  elsif ($project eq "wo") { $project_name = "Wikivoyage"; }
   elsif ($project eq "wq") { $project_name = "Wikiquote"; }
   elsif ($project eq "ws") { $project_name = "Wikisource"; }
   elsif ($project eq "wv") { $project_name = "Wikiversity"; }
@@ -948,6 +953,7 @@ sub InitProjectNames
 
   %wikipedias = (
 # mediawiki=>"http://wikimediafoundation.org Wikimedia",
+  wikidata=>"http://www.wikidata.org Wikidata", 
   nostalgia=>"http://nostalgia.wikipedia.org Nostalgia",
   sources=>"http://wikisource.org Old&nbsp;Wikisource",
   meta=>"http://meta.wikimedia.org Meta-Wiki",
