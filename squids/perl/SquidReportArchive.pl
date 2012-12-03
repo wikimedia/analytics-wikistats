@@ -118,6 +118,8 @@ default_argv ($cfg_default_argv) ;
     mkpath ($path_reports) || die "Unable to create directory $path_reports\n" ;
   }
 
+  $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
+
   &InitProjectNames ;
 
   &ReadInputRegionCodes ;
@@ -135,8 +137,6 @@ default_argv ($cfg_default_argv) ;
 
     exit ;
   }
-
-  $days_in_month = &DaysInMonth (substr ($reportmonth,0,4), substr ($reportmonth,5,2)) ;
 
   $threshold_mime    = 0 ;
   $threshold_project = 10 ;
