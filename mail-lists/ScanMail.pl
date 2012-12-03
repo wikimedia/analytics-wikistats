@@ -276,6 +276,11 @@ sub ScanFile
   my $file   = shift ;
   my $period = shift ;
 
+  # Wikimedia-l didn't exist before 2012-04-09: skip the archives before this date
+  # They're also broken mirrors, with twice as many posts as foundation-l had
+  if ( ($folder eq "Wikimedia-l") && ($period < 2012*12+4) )
+  { return ($continue) ; }
+
   open "FILE_ARCHIVE", "<", $file  || abort ("File '$file' could not be opened.") ;
   $continue = $true ;
   while (($line = <FILE_ARCHIVE>) && $continue)
