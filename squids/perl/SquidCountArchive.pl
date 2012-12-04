@@ -11,6 +11,7 @@ my ($date_range,
 my %options ;
 
 BEGIN {
+  use Carp;
   use Getopt::Std;
   getopt("dfctrp", \%options) ;
   my $__config_module = $options{"r"} || "SquidCountArchiveConfig.pm";
@@ -423,6 +424,13 @@ sub SetTimeRangeToProcess
 
   # if ($test)
   # { $time_to_stop  = $date_collect_files . "T00:30:00" ; }
+  
+
+  ##################################################################
+  # The following line will force the window which will be processed
+  # to be 10minutes (comes in handy for debugging)
+  ##################################################################
+  $time_to_stop  = $date_collect_files . "T00:10:00" ;
 
   return ($date_collect_files, $time_to_start, $time_to_stop) ;
 }
