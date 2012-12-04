@@ -140,25 +140,40 @@ sub ProcessLine
   if ($job_runs_on_production_server)
   {
     $country = "" ;
-    @xffparts = split ('%20',$xff) ;
-    foreach $ip (@xffparts)
-    {
-       next if $country ne "" ;
-       if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
-       {
-         $country = $savedipcountry { $ip } ;
-         if ($country eq "")
-         {
-           $country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
-           $country =~ s/.*\s([\w-\(])/$1/ ;
-           $country =~ s/\s//g ;
-           $savedipcountry { $ip } = $country ;
-         }
-         $foundip = $ip ;
-         if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
-         { $country = "" ; }
-       }
-    }
+
+    #################################################
+    # udp-filters has logic for gelocating and it's using
+    # the x-forwarded-for field to geolocate first if that's
+    # present but only the first ip inside that field.
+    # 
+    # At the present moment there is not enough time to 
+    # check all the ips in XFF field but we can come back
+    # at this later -- Stefan Petrea
+    #
+    # The reason for this is that now 2012-Dec-04 we have a high
+    # priority for getting editor reports for November out
+    # there.
+    #################################################
+
+    #@xffparts = split('%20',$xff) ;
+    #foreach $ip (@xffparts)
+    #{
+       #next if $country ne "" ;
+       #if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
+       #{
+         #$country = $savedipcountry { $ip } ;
+         #if ($country eq "")
+         #{
+           #$country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
+           #$country =~ s/.*\s([\w-\(])/$1/ ;
+           #$country =~ s/\s//g ;
+           #$savedipcountry { $ip } = $country ;
+         #}
+         #$foundip = $ip ;
+         #if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
+         #{ $country = "" ; }
+       #}
+    #}
     if ($country eq "")
     {
       $country = $fields [14] ;
