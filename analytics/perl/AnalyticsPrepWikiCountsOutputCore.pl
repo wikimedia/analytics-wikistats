@@ -1,9 +1,10 @@
 #!/usr/local/bin/perl
 
-  use lib "/home/ezachte/lib" ;
+# use lib "/home/ezachte/lib" ; # moved to ../perl folder 
   use EzLib ;
-  $trace_on_exit = $true ;
-  ez_lib_version (2) ;
+# $trace_on_exit_concise = $true ;
+# $trace_on_exit         = $true ;
+  ez_lib_version (15) ; # minimum version of EzLib.pm required
 
   $month_last = sprintf ("%02d", $month_last) ; # 1 -> 01
 

@@ -1,24 +1,17 @@
 #!/bin/bash
-ulimit -v 400000
+
+c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green 
+c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow 
+limit -v 400000
 set -e 
 set -o pipefail
 
 wikistats=/a/wikistats_git
 analytics=$wikistats/analytics
 perl=$analytics/perl
-# perl=/home/ezachte/wikistats/analytics/perl # tests
+#perl=/home/ezachte/wikistats/analytics/perl # tests
 csv_rc=$analytics/csv  # rc for report card
 csv_dumps=$wikistats/dumps/csv 
-
-function echo_exec { 
-  printf '>%.s' {1..120} 
-  echo 
-  echo $1
-  printf '<%.s' {1..120}
-  echo
-  echo  
-  $1
-} 
 
 clear
 
@@ -33,6 +26,8 @@ yyyymmdd=$(date +"%Y_%m_%d")
 echo process data up to $yyyymm and write to rc-$yyyymm.zip
 log=$analytics/logs/prep_csv_$yyyymmdd.log 
 
+set -x # show commands
+
 mkdir -p $csv_rc/$yyyymm
 rm -f $csv_rc/$yyyymm/comparison* 
 
@@ -42,7 +37,7 @@ cd $perl
 # It filters and reorganizes data and produces analytics_in_binaries.csv
 # Output csv contains: project code, language, month, extension name, count
 
-echo_exec "perl AnalyticsPrepBinariesData.pl -i $csv_dumps -o $csv_rc/$yyyymm | tee $log | cat"
+c1 perl AnalyticsPrepBinariesData.pl -i $csv_dumps -o $csv_rc/$yyyymm | tee $log | cat
 
 # AnalyticsPrepComscoreData.pl scans /a/analytics/comscore for newest comScore csv files (with data for last 14 months) 
 # parses those csv files, adds/replaces data from these csv files into master files (containing full history)
@@ -57,14 +52,14 @@ echo_exec "perl AnalyticsPrepBinariesData.pl -i $csv_dumps -o $csv_rc/$yyyymm | 
 # -o output csv file, with reach per region, UV's per region and UV's per top web property, ready for import
 
 # perl AnalyticsPrepComscoreData.pl -r -i $csv_rc/comscore -m /a/wikistats_git/analytics/csv/history -o $csv_rc | tee -a $log | cat
-echo_exec "perl AnalyticsPrepComscoreData.pl -r -i $csv_rc/comscore -m /a/wikistats_git/analytics/csv/history -o $csv_rc/$yyyymm | tee -a $log | cat"
+c1 perl AnalyticsPrepComscoreData.pl -r -i $csv_rc/comscore -m /a/wikistats_git/analytics/csv/history -o $csv_rc/$yyyymm | tee -a $log | cat
 
 # AnalyticsPrepWikiCountsOutput.pl reads a plethora of fields from several csv files from wikistats process
 # - It filters and reorganizes data and produces analytics_in_wikistats.csv, ready for import 
 
-echo_exec "perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm            | tee -a $log | cat"
+c1 perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm            | tee -a $log | cat
 
-echo_exec "perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat"
+c1 perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat
 
 # analytics_in_page_views.csv is written daily as part of WikiCountsSummarizeProjectCounts.pl 
 # part of (/home/ezachte/pageviews_monthly.sh job) 
@@ -74,16 +69,16 @@ echo_exec "perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$y
 # note: unlike folder name suggests this file contains stats for all projects
 
 
-echo_exec "cp $csv_dumps/csv_wp/analytics_in_page_views.csv $csv_rc/$yyyymm " # adjust to wikistat_git when dump process has been migrated
+cp $csv_dumps/csv_wp/analytics_in_page_views.csv $csv_rc/$yyyymm # adjust to wikistat_git when dump process has been migrated
+cp $csv_dumps/csv_wp/wikilytics_in_pageviews.csv $csv_rc/$yyyymm # adjust to wikistat_git when dump process has been migrated
 
-echo_exec "cp $csv_dumps/csv_wp/wikilytics_in_pageviews.csv $csv_rc/$yyyymm " # adjust to wikistat_git when dump process has been migrated
+echo compare csv files from folders $yyyymm2 and $yyyymm
+c2 perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_pageviews.csv 
+c2 perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_wikistats_core_metrics.csv
 
-# compare csv files $yyyymm2 and $yyyymm
-echo_exec "perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_pageviews.csv" 
-echo_exec "perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_wikistats_core_metrics.csv"
+# set +x # do not show commands
 
-# echo_exec "cd $csv_rc/$yyyymm | zip rc-$yyyymm.zip wikilytics*.csv" # pipe does not work
-echo_exec "cd $csv_rc/$yyyymm"
-echo_exec "zip rc-$yyyymm.zip wikilytics*.csv comparison*.txt"
+cd $csv_rc/$yyyymm
+zip rc-$yyyymm.zip wikilytics*.csv comparison*.txt
 
 echo -e "\n>>> ready <<<"
