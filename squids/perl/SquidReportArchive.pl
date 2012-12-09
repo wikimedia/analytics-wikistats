@@ -3553,7 +3553,7 @@ sub WriteReportMimeTypes
     $count = &FormatCount ($mimetypes {$mimetype}) ;
     if ($columns == 1)
     { $html .= &ShowCountTh ($count,"#008000") . "\n" ; }
-    if (($columns >= 2) && ($columns <= 4))
+    elsif (($columns >= 2) && ($columns <= 4))
     { $html .= &ShowCountTh ($count,"#900000") . "\n" ; }
     else
     { $html .= &ShowCountTh ($count) . "\n" ; }
