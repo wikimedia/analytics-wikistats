@@ -3,8 +3,6 @@ use strict;
 use warnings;
 use Exporter 'import';
 our @EXPORT=qw/ipad_extract_data/;
-use URI::Escape::XS qw/uri_unescape/;
-use Regexp::Assemble;
 
 
 sub check_values_ok {
@@ -18,6 +16,23 @@ sub check_values_ok {
     } else {
       return 0;
     };
+}
+
+sub uri_unescape {
+    # Note from RFC1630:  "Sequences which start with a percent sign
+    # but are not followed by two hexadecimal characters are reserved
+    # for future extension"
+    my $str = shift;
+    if (@_ && wantarray) {
+        # not executed for the common case of a single argument
+        my @str = ($str, @_);  # need to copy
+        for (@str) {
+            s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        }
+        return @str;
+    }
+    $str =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if defined $str;
+    $str;
 }
 
 #

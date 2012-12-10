@@ -5,8 +5,12 @@
 !.gitignore
 !perl/
 !perl/UA
+
 !t/
 !t/*.t
+!t/Generate/
+!t/Generate/*.pm
+
 !bash/
 !conf-editors
 !conf-editors/
@@ -22,6 +26,9 @@
 !*.sh
 # file specifying line-ending characters
 !.gitattributes
+!testdata/
+!testdata/*
+!testdata/*/*.gz
 
 # and readme's
 !read*

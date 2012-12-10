@@ -29,6 +29,10 @@ ez_lib_version (2) ;
 default_argv ($cfg_default_argv) ;
 
 
+
+my $REGEX_MIMETYPES = qr/image\/(?:png|jpeg|gif)/;
+
+
   use Time::Local ;
   use Cwd;
 
@@ -868,8 +872,7 @@ sub ReadInputMethods
   close CSV_METHODS ;
 }
 
-sub ReadInputMimeTypes
-{
+sub ReadInputMimeTypes {
   &Log ("ReadInputMimeTypes\n") ;
 
   my $file_csv = "$path_process/$file_csv_requests" ;
@@ -913,21 +916,23 @@ sub ReadInputMimeTypes
     $counts_pm {"$project,$mime"} += $count ;
     ($domain = $project) =~ s/\:.*$// ;
     $counts_dm  {"$domain,$mime"} += $count ;
-    $mimetypes {$mime} += $count ;
-    $projects  {$project} += $count ;
-    $domains   {$domain} += $count ;
+    $mimetypes{$mime}    += $count ;
+    $projects{$project}  += $count ;
+    $domains{$domain}    += $count ;
 
     if ($mime =~ /image\/(?:png|jpeg|gif)/)
     {
-      $images_project {$project} += $count ;
-      $images_domain  {$domain} += $count ;
+      $images_project{$project} += $count ;
+      $images_domain{$domain}   += $count ;
     }
-    $mimetypes_found {$mime} ++ ;
+    $mimetypes_found{$mime} ++ ;
     # @counts_prem {"$project,$origin,$ext,$mime"} += $count ;
 
     $total_mimes += $count ;
   }
   close CSV_REQUESTS ;
+
+
 
 #  $html .= "<tr><th class=c>counts</th><th class=l>project</th><th class=l>origin</th><th class=l>extension</th><th class=l>mime</th></tr>\n" ;
 #  $rows = 0 ;
@@ -2117,12 +2122,13 @@ sub ReadInputDevices
   &Log ("ReadInputDevices\n") ;
 
   my $file_csv = "$path_process/$file_csv_devices" ;
+
   if (! -e $file_csv)
   {
     &Log ("Missing file $file_csv - devices screen will not be generated.\n") ;
     return $false ;
-  }
-  open CSV_DEVICES, '<', $file_csv ;
+  };
+  open CSV_DEVICES, '<', $file_csv;
 
   while ($line = <CSV_DEVICES>)
   {
@@ -2136,7 +2142,9 @@ sub ReadInputDevices
     $catfordevice { $device } = $category ;
     $devicecats { $category } += $count ;
     $alldevices += $count ;
-  }
+  };
+
+  $alldevices //= 0;
   return $true ;
 }
 
@@ -2231,22 +2239,58 @@ sub CalcPercentages
 {
   &Log ("CalcPercentages\n") ;
 
+  #warn "[DBG]
+
+
+  $total_opsys_mobile               //= 0;
+  $total_opsys_non_mobile           //= 0;
+  $total_opsys_mobile_html_only     //= 0;
+  $total_opsys_non_mobile_html_only //= 0;
+  $total_clients_html_only          //= 0;
+  $total_clients_html_only          //= 0;
+  $total_clients                    //= 0;
+
+  warn "[DBG] total_opsys_mobile               = $total_opsys_mobile";
+  warn "[DBG] total_opsys_non_mobile           = $total_opsys_non_mobile";
+  warn "[DBG] total_opsys_mobile_html_only     = $total_opsys_mobile_html_only";
+  warn "[DBG] total_opsys_non_mobile_html_only = $total_opsys_non_mobile_html_only";
+
   my $total_opsys           = $total_opsys_mobile           + $total_opsys_non_mobile ;
   my $total_opsys_html_only = $total_opsys_mobile_html_only + $total_opsys_non_mobile_html_only ;
-  foreach $key (keys %opsys)
-  { $opsys_perc {$key} = sprintf ("%.2f",(100*$opsys {$key}/$total_opsys)) . "%" ; }
-  foreach $key (keys %opsys_html_only)
-  { $opsys_perc_html_only {$key} = sprintf ("%.2f",(100*$opsys_html_only {$key}/$total_opsys_html_only)) . "%" ; }
 
-  foreach $key (keys %clients)
-  { $clients_perc {$key} = sprintf ("%.2f",(100*$clients {$key}/$total_clients)) . "%" ; }
-  foreach $key (keys %clients_html_only)
-  { $clients_perc_html_only {$key} = sprintf ("%.2f",(100*$clients_html_only {$key}/$total_clients_html_only)) . "%" ; }
+  warn "[DBG] ==============================================";
+  warn "[DBG] total_opsys                      = $total_opsys";
+  warn "[DBG] total_opsys_html_only            = $total_opsys_html_only";
+  warn "[DBG] total_clients                    = $total_clients          ";
+  warn "[DBG] total_clients_html_only          = $total_clients_html_only";
 
-  foreach $key (keys %clientgroups)
-  {
-    $perc           = 100*$clientgroups           {$key}/$total_clients ;
-    $perc_html_only = 100*$clientgroups_html_only {$key}/$total_clients_html_only ;
+  foreach $key (keys %opsys) { 
+    $opsys_perc{$key} = sprintf("%.2f",(100*$opsys{$key}/$total_opsys)) . "%" ; 
+  };
+
+  foreach $key (keys %opsys_html_only) { 
+    $opsys_perc_html_only{$key} = sprintf("%.2f",(100*$opsys_html_only{$key}/$total_opsys_html_only)) . "%" ;
+  }
+
+  foreach $key (keys %clients) { 
+    $clients_perc {$key} = sprintf("%.2f",(100*$clients {$key}/$total_clients)) . "%" ; 
+  }
+  foreach $key (keys %clients_html_only) { 
+    $clients_perc_html_only {$key} = sprintf("%.2f",(100*$clients_html_only{$key}/$total_clients_html_only)) . "%" ; 
+  }
+
+  warn "[DBG] ==============================================";
+  foreach $key (keys %clientgroups) {
+
+    $perc           = $total_clients
+                        ? 100*$clientgroups{$key}/$total_clients
+                        : 0;
+
+    $perc_html_only = $total_clients_html_only
+                        ? 100*$clientgroups_html_only{$key}/$total_clients_html_only 
+                        : 0;
+
+
     if ($key =~ /^M/)
     { $perc_threshold = 0.005 ; }
     elsif ($key =~ /^W/ || $key =~ /^P/)
@@ -2257,15 +2301,15 @@ sub CalcPercentages
     if ($perc > $perc_threshold)
     {
       $precision = ($key =~ /^W/) ? "%.3f" : "%.2f" ;
-      $clientgroups_perc           {$key} = sprintf ($precision,$perc)           . "%" ;
-      $clientgroups_perc_html_only {$key} = sprintf ($precision,$perc_html_only) . "%" ;
+      $clientgroups_perc{$key}           = sprintf ($precision,$perc)           . "%" ;
+      $clientgroups_perc_html_only{$key} = sprintf ($precision,$perc_html_only) . "%" ;
     }
     else
     {
       ($mobile,$group) = split (',', $key) ;
 
-      $clientgroups_other           {$mobile} += $clientgroups           {$key} ;
-      $clientgroups_other_html_only {$mobile} += $clientgroups_html_only {$key} ;
+      $clientgroups_other{$mobile}           += $clientgroups{$key} ;
+      $clientgroups_other_html_only{$mobile} += $clientgroups_html_only{$key} ;
 
       $clientgroups           {$key} = 0 ;
       $clientgroups_html_only {$key} = 0 ;
@@ -2366,7 +2410,8 @@ sub NormalizeCounts
   { $opsys {$key} = &Normalize ($opsys {$key}) ; }
 
   $total_opsys_non_mobile = &Normalize ($total_opsys_non_mobile) ;
-  $total_opsys_mobile     = &Normalize ($total_opsys_mobile) ;
+  $total_opsys_mobile     = &Normalize ($total_opsys_mobile);
+
 
 # ReadInputOrigins
   foreach $key (keys %origin_int_top)
@@ -2452,7 +2497,19 @@ sub SortCounts
   @methods_sorted_method             = keys_sorted_alpha_desc           %methods ;
 
 # ReadInputMimeTypes
+
+  
   @mimetypes_sorted                  = sort {&SortMime ($b) <=> &SortMime ($a)} keys %mimetypes ;
+
+  use Data::Dumper;
+  my $DBG_str_mimetypes_sorted = Dumper(\@mimetypes_sorted);
+  $DBG_str_mimetypes_sorted =~ s/\n|^/\n[DBG]/g;
+  warn $DBG_str_mimetypes_sorted;
+
+
+
+
+
   @projects_sorted                   = keys_sorted_by_value_num_desc %projects ;
   @domains_sorted                    = keys_sorted_by_value_num_desc %domains ;
 
@@ -2592,9 +2649,10 @@ sub WriteReportClients
   }
   $perc_html_only = ".." ;
   $count_html_only = $clientgroups_other_html_only {'-'} ;
-  if ($total_all_clientgroups > 0)
+  if ($total_all_clientgroups_html_only > 0)
   {
-    $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only {'-'} / $total_all_clientgroups_html_only) ;
+    warn "[DBG] total_all_clientgroups_html_only = $total_all_clientgroups_html_only";
+    $perc_html_only = sprintf ("%.2f", 100 * $clientgroups_other_html_only{'-'}/$total_all_clientgroups_html_only) ;
     $perc_total_html_only_nonmobile += $perc_html_only ;
   }
 
@@ -3100,7 +3158,22 @@ sub WriteReportClients
   $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_non_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
+
+  warn "[DBG] numerator=>total_clients_non_mobile_html_only  = $total_clients_non_mobile_html_only";
+  warn "[DBG] total_clients_mobile_html_only      = $total_clients_mobile_html_only";
+  warn "[DBG] total_clients_non_mobile_html_only  = $total_clients_non_mobile_html_only";
+  warn "[DBG] total_clients_wiki_mobile_html_only = $total_clients_wiki_mobile_html_only";
+
+
+
+    $perc_html_only_numer = $total_clients_non_mobile_html_only;
+    $perc_html_only_denom = ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only);
+    
+    $perc_html_only = $perc_html_only_numer >= 0 && $perc_html_only_denom > 0
+                        ? sprintf ("%.1f",100*$perc_html_only_numer / $perc_html_only_denom)
+                        : 0;
+
+
 
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -3125,7 +3198,14 @@ sub WriteReportClients
   $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
-  $perc_html_only = sprintf ("%.1f",100*$total_clients_mobile_html_only / ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only)) ;
+
+    $perc_html_only_numer = $total_clients_mobile_html_only;
+    $perc_html_only_denom = ($total_clients_mobile_html_only + $total_clients_non_mobile_html_only + $total_clients_wiki_mobile_html_only);
+
+    $perc_html_only = $perc_html_only_numer >= 0 && $perc_html_only_denom > 0
+                        ? sprintf ("%.1f",100*$perc_html_only_numer / $perc_html_only_denom)
+                        : 0;
+
 
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_html_only\%</th></tr>\n" ;
 
@@ -3490,8 +3570,9 @@ sub WriteReportMimeTypes
     $mimetype2 = $mimetype ;
     if ($mimetype2 eq "text/html")
     { $mimetype2 .= "<br><small>(page)</small> " ; }
-    if ($mimetype2 =~ /image\/(?:png|jpeg|gif)/)
+    elsif ($mimetype2 =~ /image\/(?:png|jpeg|gif)/)
     { $mimetype2 .= "<br><small>(img)</small> " ; }
+
     if ($columns == 1)
     { $mimetype2 = "<font color=#008000>$mimetype2</font>" ; }
     elsif (($columns >= 2) && ($columns <= 4))
@@ -3502,6 +3583,7 @@ sub WriteReportMimeTypes
   $header2 .= "</tr>\n" ;
   $html .= $header1 . $header2 ;
 
+  warn "[DBG] mimetypes_sorted=".(scalar(@mimetypes_sorted));
   $rows = 0 ;
   $total_mimes2  = 0 ;
   $total_images1 = 0 ;
@@ -3886,19 +3968,19 @@ sub WriteReportOrigins
   $total_rest  = 0 ;
   foreach $project (@project_int_top_sorted_count)
   {
-    $total  = $project_int_top {$project} ;
-    $page   = $project_int_top_split {"page:$project"} ;
-    $image  = $project_int_top_split {"image:$project"} ;
-    $rest   = $project_int_top_split {"other:$project"} ;
+    $total        = $project_int_top {$project} ;
+    $page         = $project_int_top_split {"page:$project"} ;
+    $image        = $project_int_top_split {"image:$project"} ;
+    $rest         = $project_int_top_split {"other:$project"} ;
     $total_total  += $total ;
     $total_page   += $page ;
     $total_image  += $image ;
     $total_rest   += $rest ;
-    $total  = &FormatCount ($total) ;
-    $page   = &FormatCount ($page) ;
-    $image  = &FormatCount ($image) ;
-    $rest   = &FormatCount ($rest) ;
-    $html .= "<tr><td colspan=2 class=l>" . ucfirst($project) . "</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
+    $total        = &FormatCount ($total) ;
+    $page         = &FormatCount ($page) ;
+    $image        = &FormatCount ($image) ;
+    $rest         = &FormatCount ($rest) ;
+    $html         .= "<tr><td colspan=2 class=l>" . ucfirst($project) . "</td>" . &ShowCountTh ($total) . &ShowCountTd ($page) . &ShowCountTd ($image) . &ShowCountTd ($rest) . "</tr>\n" ;
   }
   $total_total  = &FormatCount ($total_total) ;
   $total_page   = &FormatCount ($total_page) ;
@@ -5098,15 +5180,27 @@ sub UserAgentCsvLine
   $value = 1000 * ($countua {$code, 'M', 'page', '.'} + $countua {$code, 'W', 'page', '.'}) * $multiplier ;
   $writevalue = sprintf("%.0f", $value) ;
   $result .= ",$writevalue" ;
-  if ($showperc)
-  {
-    $perc = 0.1 * $value / $total_html ;
+
+
+  if ($showperc) {
+
+    $perc = $total_html > 0 && $value > 0
+              ? 0.1 * $value / $total_html 
+              : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
-    $perc = 100 * $countua {$code, 'M', 'page', '.'} * $multiplier / $total_html ;
+
+    $perc = $countua{$code, 'M', 'page', '.'} > 0 && $multiplier > 0 && $total_html > 0
+              ? 100 * $countua{$code, 'M', 'page', '.'} * $multiplier / $total_html 
+              : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
-    $perc = 100 * $countua {$code, 'W', 'page', '.'} * $multiplier / $total_html ;
+
+
+    $perc = $countua{$code, 'W', 'page', '.'} > 0 && $multiplier > 0 && $total_html > 0
+            ?100 * $countua {$code, 'W', 'page', '.'} * $multiplier / $total_html 
+            : 0; 
+
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
     if ($total_opensearch > 0)
@@ -5234,8 +5328,11 @@ sub WriteReportUserAgents
 sub SectionReportDevices
 {
   my ($section, $section_name) = @_ ;
-  $value = &ShowCount ( $devicecats { $section } * $multiplier ) ;
-  $perc = &ShowPerc ( 100 * $devicecats { $section } / $alldevices ) ;
+  $value = &ShowCount( $devicecats { $section } * $multiplier ) ;
+
+  $perc  = $alldevices > 0 && $devicecats { $section }
+            ? &ShowPerc(  100 * $devicecats { $section } / $alldevices )
+            : 0;
   my $result = "<tr><td class=lt rowspan=@@>$section_name</td><td class=rt rowspan=@@>$value</td><td class=rt rowspan=@@>$perc</td>\n" ;
   $devcounter = 0 ;
   foreach $device (keys_sorted_by_value_num_desc %devices)

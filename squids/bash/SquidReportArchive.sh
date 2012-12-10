@@ -101,8 +101,8 @@ case "$PROCESSTYPE" in
 	monthly)
 		echo "Processing $PROCESSTYPE"
 		MONTH=$ARG_MONTH
-		perl  SquidReportArchive.pl	\
-			-m $MONTH			\
+		perl    SquidReportArchive.pl	  \
+			-m $MONTH		  \
 			-p | tee -a $LOG2 | cat
 		cd $REPORTS/$MONTH
 		tar -cvf - *.htm | gzip > reports-$MONTH.tar.gz

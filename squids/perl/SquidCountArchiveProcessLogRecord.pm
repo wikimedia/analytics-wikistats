@@ -77,6 +77,7 @@ sub ProcessLine
   $method     = $fields [7] ;
 
   $referer    = lc ($fields [11]) ;
+
   $xff        = $fields [12] ;
   $agent      = $fields [13] ;
 
@@ -867,7 +868,7 @@ sub ProcessLine
   {
     $tot_referers_external += $count_event ; ;
 
-    ($origin, $toplevel) = &DetectOrigin ($client_ip, $referer_original, $agent, $mime, $mimecat, $service, $ext) ;
+    ($origin, $toplevel) = &DetectOrigin($client_ip, $referer_original, $agent, $mime, $mimecat, $service, $ext) ;
 
     &CountOrigin ("external", $origin, $toplevel, $mimecat) ;
 
@@ -1175,10 +1176,7 @@ sub DetectOrigin
   my $referer_original = $referer ;
   my $origin ;
 
-  if ($referer ne '-')
-  { $origin = $referer ; }
-  else
-  { $origin = $client_ip ; }
+  $origin = $referer;
 
   my $origin_original = $origin ;
 
@@ -1402,6 +1400,7 @@ sub GetTopLevelDomain
   my $domain = shift ;
   $domain =~ s/\:\d+$//o ; # remove port number
 
+
   if ($domain eq '-')
   { $top_level_domain = '-' ; }
   elsif ($domain =~ /!?localhost/o)
@@ -1421,6 +1420,7 @@ sub GetSecondaryDomain
 {
   my $domain = shift ;
   $domain =~ s/\:\d+$//o ; # remove port number
+
 
   if ($domain !~ /\./)
   { return ($domain) ; }
