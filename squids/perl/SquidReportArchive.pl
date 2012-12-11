@@ -921,7 +921,7 @@ sub ReadInputMimeTypes {
     $projects{$project}  += $count ;
     $domains{$domain}    += $count ;
 
-    if ($mime =~ /image\/(?:png|jpeg|gif)/)
+    if ($mime =~ $REGEX_MIMETYPES)
     {
       $images_project{$project} += $count ;
       $images_domain{$domain}   += $count ;
@@ -2499,29 +2499,24 @@ sub SortCounts
 
 # ReadInputMimeTypes
 
-  
-  @mimetypes_sorted                  = sort {&SortMime ($b) <=> &SortMime ($a)} keys %mimetypes ;
 
 
   # To make the tables in SquidReportRequests.htm  more explicit
   # we add here these mimetypes so they will be used as columns inside the tables.
   # Currently this does not happen and make the tables seem incomplete.
-  my $const_mimetypes_images = ["image/png","image/jpeg","image/gif","" ];
-
-  for my $const_mimetype ( @$const_mimetypes_images ) {
-    if(!first { $_ eq $const_mimetype } @mimetypes_sorted) {
-      push @mimetypes_sorted, $const_mimetype;
+  my @mimetypes_to_be_sorted = keys %mimetypes;
+  for my $const_mimetype ("text/html","image/png","image/jpeg","image/gif","") {
+    if(!first { $_ eq $const_mimetype } @mimetypes_to_be_sorted) {
+      push @mimetypes_to_be_sorted, $const_mimetype;
     };
   };
 
+  @mimetypes_sorted                  = sort {&SortMime ($b) <=> &SortMime ($a)} @mimetypes_to_be_sorted ;
 
-  use Data::Dumper;
-  my $DBG_str_mimetypes_sorted = Dumper(\@mimetypes_sorted);
-  $DBG_str_mimetypes_sorted =~ s/\n|^/\n[DBG]/g;
-  warn $DBG_str_mimetypes_sorted;
-
-
-
+  #use Data::Dumper;
+  #my $DBG_str_mimetypes_sorted = Dumper(\@mimetypes_sorted);
+  #$DBG_str_mimetypes_sorted =~ s/\n|^/\n[DBG]/g;
+  #warn $DBG_str_mimetypes_sorted;
 
 
   @projects_sorted                   = keys_sorted_by_value_num_desc %projects ;
@@ -3575,24 +3570,25 @@ sub WriteReportMimeTypes
   $header1 = "<tr><th colspan=2 class=l><small>x 1000</small></th><th colspan=2 class=c>Totals</th><th class=c><font color=#008000>Pages</font></th><th colspan=3 class=c><font color=#900000>Images</font></th><th colspan=99 class=c>Other</th></tr>\n" ;
   $header2 = "<tr><th colspan=2 class=l>&nbsp;</th><th class=c>total<br>all</th><th class=c><font color=#900000>total<br>images</font></th>\n" ;
   $columns = 0 ;
-  foreach $mimetype (@mimetypes_sorted)
-  {
+  foreach $mimetype (@mimetypes_sorted) {
     $columns++ ;
 
     next if $mimetypes_found {$mimetype} < $threshold_mime ;
 
     $mimetype2 = $mimetype ;
-    if ($mimetype2 eq "text/html")
+    $mimetype2 =~ s/\//<br>/;
+
+    if ($mimetype eq "text/html")
     { $mimetype2 .= "<br><small>(page)</small> " ; }
-    elsif ($mimetype2 =~ /image\/(?:png|jpeg|gif)/)
+    elsif ($mimetype =~ $REGEX_MIMETYPES)
     { $mimetype2 .= "<br><small>(img)</small> " ; }
 
     if ($columns == 1)
     { $mimetype2 = "<font color=#008000>$mimetype2</font>" ; }
     elsif (($columns >= 2) && ($columns <= 4))
     { $mimetype2 = "<font color=#900000>$mimetype2</font>" ; }
-    ($mime1,$mime2) = split ('\/', $mimetype2, 2) ;
-    $header2 .= "<th class=c>$mime1<br>$mime2</th>\n" ;
+
+    $header2 .= "<th class=c>$mimetype2</th>\n" ;
   }
   $header2 .= "</tr>\n" ;
   $html .= $header1 . $header2 ;
@@ -7936,7 +7932,7 @@ sub SortMime
   my $mime = shift ;
   if ($mime eq "text/html")
   { return (2000000000 + $mimetypes {$mime}) ; }
-  elsif ($mime =~ /image\/(?:png|jpeg|gif)/)
+  elsif ($mime =~ $REGEX_MIMETYPES)
   { return (1000000000 + $mimetypes {$mime}) ; }
   else
   { return ($mimetypes {$mime}) ; }

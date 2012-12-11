@@ -168,21 +168,36 @@ sub generate_line {
       unless first { $_ eq $params->{geocode} } @ALL_COUNTRY_CODES;
   };
 
-  my $field_squid_hostname         = "cp1004.eqiad.wmnet"; #hardcoded
+  my $default = {
+    squid_hostname         => "cp1004.eqiad.wmnet",
+    request_service_time   => "242",
+    client_ip              => "111.22.33.44",
+    squid_request_status   => "TCP_MEM_HIT/200",
+    reply_size             => "66918",
+    request_method         => "GET",
+    url                    => "http://en.wikipedia.org/wiki/Harry_Potter_and_the_Half-Blood_Prince_(film)",
+    squid_hierarchy_status => "NONE/-",
+    mime_content_type      => "text/html",
+    referer_header         => "http://en.wikipedia.org/wiki/Phil_of_the_Future",
+    x_forwarded_for_header => "-",
+    user_agent_header      => "Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:15.0)%20Gecko/20100101%20Firefox/15.0.1",
+    geocode                => "US",
+  };
   my $field_seqnumber              = int(181_117_455 + rand(500_000));
+  my $field_squid_hostname         = $default->{squid_hostname}; #hardcoded
   my $field_current_time           = $self->{current_datetime}; # COMPUTED
-  my $field_request_service_time   = 242; # hardcoded
-  my $field_client_ip              = "111.22.33.44";
-  my $field_squid_request_status   = "TCP_MEM_HIT/200";  # hardcoded
-  my $field_reply_size             = "66918"; #hardcoded
-  my $field_request_method         = "GET"; #hardcoded
-  my $field_url                    = $params->{url} // "http://en.wikipedia.org/wiki/Harry_Potter_and_the_Half-Blood_Prince_(film)";
-  my $field_squid_hierarchy_status = $params->{squid_hierarchy_status} // "NONE/-";
-  my $field_mime_content_type      = $params->{mime_content_type} // "text/html";
-  my $field_referer_header         = $params->{referer_header} // "http://en.wikipedia.org/wiki/Phil_of_the_Future";
-  my $field_x_forwarded_for_header = "-"; #hardcoded
-  my $field_user_agent_header      = $params->{user_agent_header} // "Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:15.0)%20Gecko/20100101%20Firefox/15.0.1";
-  my $field_geocode                = $params->{geocode} // "US";
+  my $field_request_service_time   = $params->{request_service_time}   // $default->{request_service_time}; # hardcoded
+  my $field_client_ip              = $params->{client_ip}              // $default->{client_ip};
+  my $field_squid_request_status   = $params->{squid_request_status}   // $default->{squid_request_status};  # hardcoded
+  my $field_reply_size             = $params->{reply_size}             // $default->{reply_size}; #hardcoded
+  my $field_request_method         = $params->{request_method}         // $default->{request_method};
+  my $field_url                    = $params->{url}                    // $default->{url};
+  my $field_squid_hierarchy_status = $params->{squid_hierarchy_status} // $default->{squid_hierarchy_status};
+  my $field_mime_content_type      = $params->{mime_content_type}      // $default->{mime_content_type};
+  my $field_referer_header         = $params->{referer_header}         // $default->{referer_header};
+  my $field_x_forwarded_for_header = $params->{x_forwarded_for_header} // $default->{x_forwarded_for_header};
+  my $field_user_agent_header      = $params->{user_agent_header}      // $default->{user_agent_header};
+  my $field_geocode                = $params->{geocode}                // $default->{geocode};
 
   # Currently wikistats accepts 15-field entries, geocode field included (will have to talk to Erik about fields
   # 15 and 16 in the description above because we seem to be dropping those at the 15-field-count-check)
