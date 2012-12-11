@@ -28,6 +28,7 @@ ez_lib_version (2) ;
 
 default_argv ($cfg_default_argv) ;
 
+use List::Util qw/first/;
 
 
 my $REGEX_MIMETYPES = qr/image\/(?:png|jpeg|gif)/;
@@ -2500,6 +2501,19 @@ sub SortCounts
 
   
   @mimetypes_sorted                  = sort {&SortMime ($b) <=> &SortMime ($a)} keys %mimetypes ;
+
+
+  # To make the tables in SquidReportRequests.htm  more explicit
+  # we add here these mimetypes so they will be used as columns inside the tables.
+  # Currently this does not happen and make the tables seem incomplete.
+  my $const_mimetypes_images = ["image/png","image/jpeg","image/gif","" ];
+
+  for my $const_mimetype ( @$const_mimetypes_images ) {
+    if(!first { $_ eq $const_mimetype } @mimetypes_sorted) {
+      push @mimetypes_sorted, $const_mimetype;
+    };
+  };
+
 
   use Data::Dumper;
   my $DBG_str_mimetypes_sorted = Dumper(\@mimetypes_sorted);
