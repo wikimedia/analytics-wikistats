@@ -14,9 +14,15 @@ use Carp;
 # 
 # a total of 250 countries (the first 6 are sorted descending by population)
 # (also added XX in there so of those many country codes one is XX)
-our @ALL_COUNTRY_CODES = qw/CH IN US ID BR PK RU AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BV IO BN BG BF BI KH CM CA CV KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE ET FK FO FJ FI FR GF PF TF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM VA HN HK HU IS IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR KW KG LA LV LB LS LR LY LI LT LU MO MK MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MP NO OM PW PS PA PG PY PE PH PN PL PT PR QA RE RO RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS SS ES LK SD SR SJ SZ SE SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB UM UY UZ VU VE VN VG VI WF EH YE ZM ZW XX/;
+# our @ALL_COUNTRY_CODES = qw/CH IN US ID BR PK RU AF AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BV IO BN BG BF BI KH CM CA CV KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE ET FK FO FJ FI FR GF PF TF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM VA HN HK HU IS IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR KW KG LA LV LB LS LR LY LI LT LU MO MK MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MP NO OM PW PS PA PG PY PE PH PN PL PT PR QA RE RO RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS SS ES LK SD SR SJ SZ SE SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB UM UY UZ VU VE VN VG VI WF EH YE ZM ZW XX/;
+# 
+# Update: replaced list of geocode country codes with the one found in the source of the official Perl API for MaxMind's Geocode DB  http://cpansearch.perl.org/src/BORISZ/Geo-IP-PurePerl-1.25/lib/Geo/IP/PurePerl.pm
+#
+# Update: We have some custom codes in wikistats, -P means IPv6 which is marked unknown because Maxmind doesn't support them yet
 
-
+our @ALL_WIKISTATS_CUSTOM_CODES  = qw/-P -- XX/;
+our @ALL_WIKISTATS_REGULAR_CODES = qw/A1 A2 AB MF AQ BL G2 GF KO O1 TE TK BV IO TF AD AE AF AG AI AL AM AN AO AP AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BM BN BO BR BS BT BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET EU FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR ST SV SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW/;
+our @ALL_COUNTRY_CODES          = (@ALL_WIKISTATS_CUSTOM_CODES,@ALL_WIKISTATS_REGULAR_CODES);
 #
 # This module is written to generate valid Squid log lines
 # in order for them to be used inside tests
@@ -115,6 +121,28 @@ sub __increase_day  {
 };
 
 
+# Generate a random ip
+# Will be used in case we specify client_ip to be
+# "random_ip" in generate_line 
+sub __generate_random_ipv4 {
+  return 
+    join(".",map { 1+int(rand(255)) } 1..4);
+};
+
+sub __generate_random_ipv6 {
+  return
+    sprintf(
+        join(":",map{"%04x"}1..8),     # format with 8 groups of padded-hex numbers separated by :
+        map{ int(rand(16**4-1)) }1..8  # arguments are 8 random numbers between 0 and 16**4-1
+    );
+};
+
+sub __generate_random_country {
+  return
+    $ALL_COUNTRY_CODES[int(rand(@ALL_COUNTRY_CODES))];
+};
+
+
 sub dump_to_disk_and_increase_day {
   my ($self) = @_;
 
@@ -183,11 +211,25 @@ sub generate_line {
     user_agent_header      => "Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:15.0)%20Gecko/20100101%20Firefox/15.0.1",
     geocode                => "US",
   };
+
+  my $field_client_ip;
   my $field_seqnumber              = int(181_117_455 + rand(500_000));
   my $field_squid_hostname         = $default->{squid_hostname}; #hardcoded
   my $field_current_time           = $self->{current_datetime}; # COMPUTED
+
+  if(defined($params->{client_ip})) {
+    if(      $params->{client_ip} eq "random_ipv4") {
+     $field_client_ip  = $self->__generate_random_ipv4;
+    } elsif ($params->{client_ip} eq "random_ipv6") {
+      $field_client_ip = $self->__generate_random_ipv6;
+    } else {
+      $field_client_ip = $params->{client_ip};
+    };
+  } else {
+    $field_client_ip = $default->{client_ip};
+  };
+
   my $field_request_service_time   = $params->{request_service_time}   // $default->{request_service_time}; # hardcoded
-  my $field_client_ip              = $params->{client_ip}              // $default->{client_ip};
   my $field_squid_request_status   = $params->{squid_request_status}   // $default->{squid_request_status};  # hardcoded
   my $field_reply_size             = $params->{reply_size}             // $default->{reply_size}; #hardcoded
   my $field_request_method         = $params->{request_method}         // $default->{request_method};

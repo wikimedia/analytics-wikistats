@@ -283,6 +283,8 @@ my $REGEX_MIMETYPES = qr/image\/(?:png|jpeg|gif)/;
   {
     print "\nDays input = $days_input_found\n" ;
     $multiplier = 1 / $days_input_found ;
+    warn "[DBG] days_input_found=$days_input_found";
+    warn "[DBG] multiplier=$multiplier";
     &Log ("\nMultiplier = " . sprintf ("%.4f", $multiplier) . "\n") ;
   }
   else { &Log ("\nDays input = 0 (zero!)\n") ; }
@@ -5110,9 +5112,9 @@ sub UserAgentField
 {
    my ($value, $ismarked) = @_;
    if ($ismarked)
-   { $shownumber = &ShowCount ($value * $multiplier, $ismarked) ; }
+   { $shownumber = &ShowCount($value * $multiplier, $ismarked) ; }
    else
-   { $shownumber = &ShowCount ($value * $multiplier) ; }
+   { $shownumber = &ShowCount($value * $multiplier) ; }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -5392,6 +5394,7 @@ sub WriteReportDevices
 sub ReportLineCountriesInfoTypes
 {
     my $country = shift ;
+
     $rowvalue = $countryua { $country, '.', '.'} * $multiplier ;
     $rowvaluemobile = $countryua { $country, '.', 'M'} * $multiplier ;
     $result = "<td/>" ;
@@ -5521,6 +5524,7 @@ sub WriteReportCountriesInfo
     $countryua {'reg_'.$region_code, 'P', 'M' } += $countryua {$code, 'P', 'M' } ;
     $countryua {'reg_'.$region_code, 'N', 'M' } += $countryua {$code, 'N', 'M' } ;
 
+
     $countryua {'reg_'.$north_south_code, '.', '.' } += $countryua {$code, '.', '.' } ;
     $countryua {'reg_'.$north_south_code, 'I', '.' } += $countryua {$code, 'I', '.' } ;
     $countryua {'reg_'.$north_south_code, 'A', '.' } += $countryua {$code, 'A', '.' } ;
@@ -5553,6 +5557,16 @@ sub WriteReportCountriesInfo
 
     $population2 = &i2KM2 ($population) ;
     $connected2  = &i2KM2 ($connected) ;
+
+    #if($code eq "BV") {
+      #warn sprintf("
+        #",
+        #$countryua {$code, '.', '.' },
+        #$countryua {'reg_'.$north_south_code, '.', '.' },
+      #);
+    #};
+
+
     if ( $connected > 0 )
     { $penetration = sprintf ("%.0f", 100 * $connected / $population) .'%' ; }
     else
@@ -5592,8 +5606,8 @@ sub WriteReportCountriesInfo
 
   $html_regions = '' ;
 
-# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
-  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+foreach $key (qw (N S QP XX    AF AS AU EU CA NA SA OC))
+  #foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 

@@ -49,7 +49,7 @@ my @countries_data =
     );
 
 # Date is 2012-09-30
-$o->generate_line({ geocode=>"XX"  });
+$o->generate_line({ geocode=>"--"  });
 $o->__increase_day; 
 # Date is 2012-10-01
 for my $country (@countries_data) {
@@ -67,7 +67,7 @@ for my $country (@countries_data) {
 };
 $o->__increase_day;
 # Date is 2012-10-02
-$o->generate_line({ geocode=>"XX"  });
+$o->generate_line({ geocode=>"--"  });
 $o->dump_to_disk_and_increase_day;
 
 

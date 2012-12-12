@@ -19,7 +19,7 @@ my $o = Generate::Squid->new({
    output_dir => "$__DATA_BASE",
 });
 
-$o->generate_line({ geocode=>"XX"  });
+$o->generate_line({ geocode=>"--"  });
 $o->__increase_day; 
 $o->generate_line({ geocode=>"CA"  }) for 1..100;
 $o->generate_line({ geocode=>"US"  }) for 1..60;
@@ -27,7 +27,7 @@ $o->generate_line({ geocode=>"BR"  }) for 1..40;
 $o->generate_line({ geocode=>"BE"  }) for 1..30;
 $o->generate_line({ geocode=>"NL"  }) for 1..30;
 $o->__increase_day; 
-$o->generate_line();
+$o->generate_line({ geocode=>"--" });
 $o->dump_to_disk_and_increase_day;
 
 
