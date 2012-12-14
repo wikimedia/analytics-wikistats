@@ -104,7 +104,7 @@ sub LogT
   $msg2 =~ s/([^\n])\n(.)/$1\n         $2/gs ;
   $msg2 =~ s/(^\n*)/$1$time /s ;
 
-  if ($time ne $prev_time_logt)
+  if (substr ($time,0,5) ne substr ($prev_time_logt,0,5)) # one per minute log which wiki this is about
   { 
     $msg = "$mode:$language\n$msg" ;
     $prev_time_logt = $time ;
