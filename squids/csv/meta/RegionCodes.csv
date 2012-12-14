@@ -1,9 +1,22 @@
 #country code, region code, N/S, country name
---,XX,X,Unknown
 -P,QP,X,IPv6
+--,XX,X,Unknown
+XX,XX,X,Unknown
 A1,XX,X,Anonymous Proxy
 A2,XX,X,Satellite Provider
 AB,XX,X,UNDEFINED
+MF,XX,X,UNDEFINED
+AQ,XX,X,Antarctica
+BL,XX,X,UNDEFINED
+G2,XX,X,UNDEFINED
+GF,XX,X,UNDEFINED
+KO,XX,X,UNDEFINED
+O1,XX,X,Other Country
+TE,XX,X,UNDEFINED
+TK,XX,X,UNDEFINED
+BV,XX,X,Bouvet Island
+IO,XX,X,British Indian Ocean Territory
+TF,XX,X,French Southern Territories
 AD,EU,N,Andorra
 AE,AS,S,United Arab Emirates
 AF,AS,S,Afghanistan
@@ -14,7 +27,6 @@ AM,AS,S,Armenia
 AN,CA,S,Netherlands Antilles
 AO,AF,S,Angola
 AP,AS,S,Asia/Pacific Region
-AQ,XX,X,Antarctica
 AR,SA,S,Argentina
 AS,OC,S,American Samoa
 AT,EU,N,Austria
@@ -31,14 +43,12 @@ BG,EU,N,Bulgaria
 BH,AS,S,Bahrain
 BI,AF,S,Burundi
 BJ,AF,S,Benin
-BL,XX,X,UNDEFINED
 BM,NA,N,Bermuda
 BN,AS,S,Brunei
 BO,SA,S,Bolivia
 BR,SA,S,Brazil
 BS,NA,N,Bahamas
 BT,AS,S,Bhutan
-BV,XX,S,Bouvet Island
 BW,AF,S,Botswana
 BY,EU,N,Belarus
 BZ,CA,S,Belize
@@ -80,13 +90,11 @@ FK,SA,S,Falkland Islands (Malvinas)
 FM,OC,S,Micronesia
 FO,EU,N,Faroe Islands
 FR,EU,N,France
-G2,XX,X,UNDEFINED
 GA,AF,S,Gabon
 GB,EU,N,United Kingdom
 GD,CA,S,Grenada
 GE,AS,S,Georgia
 GF,SA,S,French Guiana
-GF,XX,X,UNDEFINED
 GG,EU,N,Guernsey
 GH,AF,S,Ghana
 GI,EU,N,Gibraltar
@@ -112,7 +120,6 @@ IE,EU,N,Ireland
 IL,AS,S,Israel
 IM,EU,N,Isle of Man
 IN,AS,S,India
-IO,XX,S,British Indian Ocean Territory
 IQ,AS,S,Iraq
 IR,AS,S,Iran
 IS,EU,N,Iceland
@@ -127,7 +134,6 @@ KH,AS,S,Cambodia
 KI,OC,S,Kiribati
 KM,AF,S,Comoros
 KN,CA,S,Saint Kitts and Nevis
-KO,XX,X,UNDEFINED
 KP,AS,S,North Korea
 KR,AS,N,South Korea
 KW,AS,S,Kuwait
@@ -148,7 +154,6 @@ MA,AF,S,Morocco
 MC,EU,N,Monaco
 MD,EU,N,Moldova
 ME,EU,N,Montenegro
-MF,XX,X,UNDEFINED
 MG,AF,S,Madagascar
 MH,OC,S,Marshall Islands
 MK,EU,N,Macedonia
@@ -179,7 +184,6 @@ NP,AS,S,Nepal
 NR,OC,S,Nauru
 NU,OC,S,Niue
 NZ,OC,N,New Zealand
-O1,XX,X,Other Country
 OM,AS,S,Oman
 PA,CA,S,Panama
 PE,SA,S,Peru
@@ -222,13 +226,10 @@ SY,AS,S,Syria
 SZ,AF,S,Swaziland
 TC,CA,S,Turks and Caicos Islands
 TD,AF,S,Chad
-TE,XX,X,UNDEFINED
-TF,XX,S,French Southern Territories
 TG,AF,S,Togo
 TH,AS,S,Thailand
 TJ,AS,S,Tajikistan
 TK,OC,S,Tokelau
-TK,XX,X,UNDEFINED
 TL,AS,S,Timor-Leste
 TM,AS,S,Turkmenistan
 TN,AF,S,Tunisia

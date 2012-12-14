@@ -77,6 +77,7 @@ default_argv $cfg_default_argv ;
 
 # todo: parm -e use unsampled file with all edits and saves
 # todo: parm -r root folder
+#print "cfg_logname: $cfg_logname\n" ;
 
 #print "cfg_logname: $cfg_logname\n" ;
 
@@ -430,7 +431,7 @@ sub SetTimeRangeToProcess
   # The following line will force the window which will be processed
   # to be 10minutes (comes in handy for debugging)
   ##################################################################
-  $time_to_stop  = $date_collect_files . "T00:10:00" ;
+  #$time_to_stop  = $date_collect_files . "T00:10:00" ;
 
   return ($date_collect_files, $time_to_start, $time_to_stop) ;
 }
@@ -606,19 +607,12 @@ sub ProcessPhase2 # Collect other data
   { &MoveAndCompressFiles ($path_out, $path_out_month, $date_collect_files) ; }
 
 
-  if ($job_runs_on_production_server)
-  {
-    $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
-   `$cmd` ;
-    $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> /home/ezachte/SquidCountArchiveLog.txt\n\n" ;
-   `$cmd` ;
-  } else {
-    $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
-   `$cmd` ;
-    my $home = $ENV{HOME};
-    $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> $home/SquidCountArchiveLog.txt\n\n" ;
-   `$cmd` ;
-  };
+
+  $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
+  `$cmd` ;
+  my $home_dir = $ENV{HOME};
+  $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> $home_dir/SquidCountArchiveLog.txt\n\n" ;
+  `$cmd` ;
 }
 
 #sub ScanSquidArchive

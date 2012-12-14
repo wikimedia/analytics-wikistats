@@ -8,7 +8,7 @@ $cfg_liblocation = "$squids/perl" ;
 $cfg_path_root_production = "$squids/csv" ; 
 $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
 
-$cfg_dir_in_production = "/a/squid/archive/sampled" ;
+$cfg_dir_in_production = "/a/squid/archive/sampled-geocoded" ;
 $cfg_dir_in_test = "?" ; # Erik
 
 $cfg_logname = "sampled-1000.log" ;

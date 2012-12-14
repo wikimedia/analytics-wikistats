@@ -29,7 +29,7 @@
 
     $dir_in  = "." ;
     $dir_out = "." ;
-  }
+  };
 
   $dir_out .= "/" . sprintf ("%04d-%02d", $year, $month) ;
 

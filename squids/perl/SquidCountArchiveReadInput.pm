@@ -66,9 +66,12 @@ sub CollectFilesToProcess
       {
         print "- Include this file\n" ;
 
+
         $some_files_found = $true ;
         push @files, $file ;
         if ($timehead le $time_to_start) { $head_found = $true ; print "- Head found\n" ; }
+        warn $timetail;
+        warn $time_to_stop;
         if ($timetail ge $time_to_stop)  { $tail_found = $true ; print "- Tail found\n" ; }
       }
 
@@ -191,7 +194,7 @@ sub ReadSquidLogFiles
     $line = "" ;
     while ($line = <IN>)
     {
-      $lines_to_process ++ ;
+      $lines_to_process++ ;
 
     # if ($line =~ /fy\.wikipedia\.org/o) # test/debug
     # {
@@ -210,6 +213,7 @@ sub ReadSquidLogFiles
       $line =~ s/; charset/;%20charset/ ; # log lines are space delimited, other spaces should be encoded
 
       @fields = split (' ', $line) ;
+	#print "record with ".(~~@fields)." fields\n";
 # next if $line =~ /upload/ ;
 # next if $line !~ /en\.m\.wikipedia/ ;
 # next if $fields[10] eq '-' ;
@@ -218,27 +222,27 @@ sub ReadSquidLogFiles
 #next if $fields [9] =~ /NONE/ ;
      if ($#fields > 14)
      {
-if (! $scan_ip_frequencies)
-{
+	     if (! $scan_ip_frequencies)
+	     {
 # print "line $line2\n" ;
 # print "fields " . $#fields . "\n$line\n" ;
-}
+	     }
 
-      $country_code = $fields [$#fields] ;
-      $fields [$#fields] = '' ;
-      $line = join (' ', @fields) ;
-      @fields = split (' ', $line, 14) ;
-      $fields [14] = $country_code ;
- $fields [13] =~ s/ /%20/g ;
+	     $country_code = $fields [$#fields] ;
+	     $fields [$#fields] = '' ;
+	     $line = join (' ', @fields) ;
+	     @fields = split (' ', $line, 14) ;
+	     $fields [14] = $country_code ;
+	     $fields [13] =~ s/ /%20/g ;
 
-if (! $scan_ip_frequencies)
-{
+	     if (! $scan_ip_frequencies)
+	     {
 # print "2 $line\n" ;
 # print "\n\n12: " . $fields [12] . "\n"  ;
 # print "13: " . $fields [13] . "\n"  ;
 # print "14: " . $fields [14] . "\n"  ;
 # print "15: " . $fields [15] . "\n"  ;
-}
+	     }
       }
 
       if (! $scan_ip_frequencies) # phase 2

@@ -17,13 +17,13 @@ do
 			echo "Running SquidCountArchive for sampled log archives";
 			RUNTYPE="sampled"
 			CONFIG_FILE_SWITCH=""
-			log="$LOGS/SquidCountArchive.log"
+			LOG="$LOGS/SquidCountArchive.log"
 			;;
 		"e")
 			echo "Running SquidCountArchive for editors log archives";
 			RUNTYPE="editors"
 			CONFIG_FILE_SWITCH="-r ../conf-editors/SquidCountArchiveConfig-editors.pm"
-			log="$LOGS/SquidCountArchive-editors.log"
+			LOG="$LOGS/SquidCountArchive-editors.log"
 			;;
 		"?")
 			echo "Option not recognized $OPTARG"
