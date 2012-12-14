@@ -239,6 +239,10 @@ sub SetEnvironment
       }
     }
   }
+  else
+  {
+    $edits_only = $false ; # for now only speed up Wikipedia, not other mostly much smaller projects
+  }
 
   if ($path_in =~ /\/\d{8,8}[\/\\]$/)
   {

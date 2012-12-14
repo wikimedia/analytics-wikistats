@@ -5,6 +5,7 @@ ulimit -v 8000000
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 bash=$dumps/bash
+bash=/home/ezachte/wikistats/dumps/bash # tests
 log=$dumps/logs/log_count_report_publish_non_wp.txt
 
 cd $bash
@@ -41,6 +42,6 @@ echo Job resumed at $(date +"%d/%m/%y %H:%M") UTC >> $log
 echo "\n\n" >> $log
 echo Job suspended for 24 hours at $(date +"%d/%m/%y %H:%M") UTC >> $log
 
-sleep 24h
+sleep 12h
 done
 
