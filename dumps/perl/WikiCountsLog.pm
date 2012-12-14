@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+ 
 sub OpenLog
 {
   my $job = shift ;
