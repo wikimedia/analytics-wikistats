@@ -58,7 +58,6 @@
 # Command line arguments:
 # -a max age of hourly files in days (derived from yyyymmdd part of file name, not from file timestamp), or monthly files in months
 # -i folder for input (for hourly files top folder which contains one folder per year, which contains one folder per month, which contains files)
-# -f filter folder (receives copy of all lines for certain wikis) (deprecated)
 # -d date range, specify as yyyy[mm[dd]]
 # -o output folder
 # -t test run, just print which files were found and should be processed, do not actually process them
@@ -67,12 +66,8 @@
 # if both max_age (-a) and date range (-d) have been specified both criteria will have to be fulfilled, allows e.g. to (re)process only files for first three months of year
 # note for monthly processing specifying both -a + -d may seem a bit over the top, -a is default for cron processing (-d may be deprecated)
 
-  $fn_log         = "DammitCompactPageCountFiles.log" ;
-  $fn_log_summary = "DammitCompactPageCountFilesSummary.log" ;
-
   &AttachLibraries ;
   &OnTestOnlySetDefaultArgs ;
-  &SetFilterFoundationWikis ;
 
   $| = 1; # flush screen output
 
@@ -86,7 +81,7 @@
   $fs_closed  = 'C' ;
 
   $test_max_lines_output = 0 ;    # if $test_max_lines_output > 0 break after $test_max_lines_output lines output
-  $test_max_language     = 'ad' ; # if $test_max_language ne '', treat input line starting with language code gt $test_max_language as end of file
+# $test_max_language     = 'ad' ; # if $test_max_language ne '', treat input line starting with language code gt $test_max_language as end of file
 
   $threshold_views_per_day   = 0 ; # while merging hourly files, omit titles with less views than ..
   $threshold_views_per_month = 5 ; # while merging daily files, omit titles with less views than ..
@@ -96,18 +91,13 @@
 
   &DetectCurrentMonth ;
 
-  ($dir_in,$dir_out,$dir_log,$dir_filtered,$date_range,$max_file_age,$test_run) = &ReadAndValidateCmdLineArguments ;
+  ($dir_in,$dir_out,$dir_temp,$date_range,$max_file_age,$test_run) = &ReadAndValidateCmdLineArguments ;
 
   &SetFolders ;
-
-  open $fh_log, ">>", "$dir_log/$fn_log" ;
-  print "Log file: $dir_log/$fn_log\n" ;
-  &Log ("\n\n" . '=' x 80 . "\n\n") ;
-
   # the main body of work
-  &CompactFiles ($dir_in,$dir_out,$dir_filtered,$date_range,$max_file_age, $test_run) ;
+  &CompactFiles ($dir_in,$dir_out,$date_range,$max_file_age, $test_run) ;
 
-  close $fh_log ;
+# close $fh_log ;
 
   &Log ("\nReady\n") ;
   exit ;
@@ -116,9 +106,9 @@
 # set defaults mainly for tests on local machine, see EzLib
 sub OnTestOnlySetDefaultArgs
 {
-# &default_argv ("-v ''|-d 20111101|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'|-t") ;
-#  &default_argv ("-m ''|-d 201111|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'|-t") ;
-   &default_argv ("-m ''|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-l 'w:/# in dammit.lt/pagecounts'|-f 'w:/# in dammit.lt/pagecounts/filtered'") ;
+# &default_argv ("-v ''|-d 20111101|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-t") ;
+#  &default_argv ("-m ''|-d 201111|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-t") ;
+   &default_argv ("-m ''|-i 'w:/# in dammit.lt/pagecounts'|-o 'w:/# in dammit.lt/pagecounts'|-l 'w:/# in dammit.lt/pagecounts'") ;
 }
 
 #sub MergeFilesFullMonth
@@ -138,7 +128,6 @@ sub OnTestOnlySetDefaultArgs
 
 #  $lines = 0 ;
 
-#  undef @in_day ;
 #  my $time_start = time ;
 
 #  if ($dir eq $month_run)
@@ -509,17 +498,12 @@ sub CheckHoursMissing
 
   &Log ("\nCheckHoursMissing for day " . ($day+1) . "\n") ;
 
-  if ($job_runs_on_production_server)
-  {
-    return if $fn_in_check !~ /\.(?:bz2|7z)/ ;
+  return if $fn_in_check !~ /\.(?:bz2|7z)/ ;
 
-    if ($fn_in_check =~ /\.bz2$/)
-    { open $fh_in_check, "-|", "bzip2 -dc \"$fn_in_check\"" || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
-    else #7z
-    { open $fh_in_check, "-|", "7z e -so \"$fn_in_check\""  || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
-  }
-  else
-  { open $fh_in_check, '<', $fn_in_check || &Abort ("Open failed for '$fn_in_check'\n") ; }
+  if ($fn_in_check =~ /\.bz2$/)
+  { open $fh_in_check, "-|", "bzip2 -dc \"$fn_in_check\"" || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
+  else #7z
+  { open $fh_in_check, "-|", "7z e -so \"$fn_in_check\""  || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
 
   binmode $fh_in_check ;
 
@@ -594,58 +578,38 @@ sub CheckHoursMissing
 sub AttachLibraries
 {
   print "\nAttachLibraries\n" ;
-  # to be changed: some general routines are in EzLib, at unusual location (workaround for access rights issues)
-  use lib "/home/ezachte/lib" ;
+# use lib "/home/ezachte/lib" ; # moved to ../perl
   use EzLib ;
-
-  # on exit print names and timestamp of used libraries
   $trace_on_exit = $true ;
-
-  # check if EzLib is recent enough on this server
-  ez_lib_version (13) ;
+  ez_lib_version (15) ; # check if EzLib is recent enough on this server
 
   use CGI qw(:all);
   use URI::Escape;
   use Cwd ;
-
-  # to be changed: some general routines are in EzLib, at unusual location (workaround for access rights issues)
-  $job_runs_on_production_server = -d "/a/dammit.lt" ;
-
-  if (! $job_runs_on_production_server)
-  {
-    &Log ("Test on Windows\n") ;
-    use IO::Compress::Bzip2 qw(bzip2 $Bzip2Error) ;
-    use IO::Uncompress::Gunzip qw(gunzip $GunzipError) ; # install IO-Compress-Zlib
-    use IO::Compress::Gzip     qw(gzip   $GzipError) ;   # install IO-Compress-Zlib
-  }
 }
 
 sub ReadAndValidateCmdLineArguments
 {
   print "\nReadAndValidateCmdLineArguments\n" ;
   my $options ;
-  getopt ("adfioltv", \%options) ;
+  getopt ("adiot", \%options) ; # only list switches that expect argument 
 
   $phase_build_monthly_file = $options {"m"} ;
   $phase_build_daily_file = ! $phase_build_monthly_file ;
 
   if (! defined ($options {"i"})) { &Abort ("Specify input dir: -i dirname") } ;
-  if ($phase_build_daily_file)
-  {
-    if (! defined ($options {"o"})) { &Abort ("Specify output dir as: -o dirname") } ;
-    if (! defined ($options {"f"})) { &Abort ("Specify filter dir as: -f dirname") } ;
-  }
+  if (! defined ($options {"o"})) { &Abort ("Specify output dir as: -o dirname") } ;
+  if (! defined ($options {"t"})) { &Abort ("Specify temp dir as: -t temp") } ;
 
-  if (! defined ($options {"l"})) { &Abort ("Specify log dir as: -l dirname") } ;
+# if (! defined ($options {"l"})) { &Abort ("Specify log dir as: -l dirname") } ;
 
   my $max_file_age = $options {"a"} ;
   my $date_range   = $options {"d"} ;
   my $dir_in       = $options {"i"} ;
   my $dir_out      = $options {"o"} ;
-  my $dir_log      = $options {"l"} ;
-  my $dir_filtered = $options {"f"} ;
-  my $test_run     = $options {"t"} ;
-
+  my $dir_temp     = $options {"t"} ;
+  my $test_run     = $options {"T"} ;
+  
   if (defined ($options {"v"}))
   { $verbose = $true ; }
 
@@ -656,7 +620,9 @@ sub ReadAndValidateCmdLineArguments
 
   $dir_in       =~ s/'//g ;
   $dir_out      =~ s/'//g ;
-  $dir_filtered =~ s/'//g ;
+
+  if (! -d $dir_in)  { &Abort ("Input folder '$dir_in' not found") ; }
+  if (! -d $dir_out) { &Abort ("Input folder '$dir_out' not found") ; }
 
   ($today_day,$today_month,$today_year) = (gmtime(time))[3,4,5] ;
   $today_year = $today_year + 1900;
@@ -694,30 +660,13 @@ sub ReadAndValidateCmdLineArguments
     }
     else
     {
-      if ($max_file_age !~ /^\d{1,3}$/)
-      { &Abort ("Specify max file age in days as: -a n (1 <= n <= 999)") } ;
+      if ($max_file_age !~ /^\d{1,4}$/)
+      { &Abort ("Specify max file age in days as: -a n (1 <= n <= 9999)") } ;
       &Log ("\nMaximum file age in days (-a ..) specified: $max_file_age\n\n") ;
     }
   }
   else # $phase_build_monthly_file
   {
-  # -d argument for monthly processing obsolete, remove code later
-  #
-  # if ($date_range ne '')
-  # {
-  #   if ($date_range !~ /^\d{4}\d{2}?$/)                        { &Abort ("Invalid date range, specify as: -d yyyy[mm]") } ;
-  #
-  #   my $year  = substr ($date_range,0,4) ;
-  #   my $month = substr ($date_range,4,2) ;
-  #
-  #   if (($year < 2008) || ($year > $today_year))               { &Abort ("Invalid date range, year $year, specify as: -d yyyy[mm[dd]]") } ;
-  #   if ($month ne '')
-  #   {
-  #     if (($month < 1)   || ($month > 12))                       { &Abort ("Invalid date range, month $month, specify as: -d yyyy[mm[dd]]") } ;
-  #     if (($year == $today_year) && ($month >= $today_month))    { &Abort ("Invalid date range, month $month, specify as: -d yyyy[mm[dd]], last month allowed is previous month") } ;
-  #   }
-  # }
-
     if ($date_range ne '')
     {
       &Log ("\nDate range (-d) no longer valid option for phase 'build monthly file', and will be ignored. Instead specify max age in months (-a).\n\n") ;
@@ -726,14 +675,9 @@ sub ReadAndValidateCmdLineArguments
 
     if ($max_file_age eq '')
     {
-  #   if ($date_range ne '')
-  #   { $max_file_age = 99 ; }
-  #   else
-  #   {
-        $max_file_age = 12 ;
-        &Log ("\nNo maximum file age in months (-a ..) specified: default is 12\n\n") ;
-      }
-  # }
+      $max_file_age = 12 ;
+      &Log ("\nNo maximum file age in months (-a ..) specified: default is 12\n\n") ;
+    }
     else
     {
       if ($max_file_age !~ /^\d{1,2}$/)
@@ -742,12 +686,12 @@ sub ReadAndValidateCmdLineArguments
     }
   }
 
-  return ($dir_in,$dir_out,$dir_log,$dir_filtered,$date_range,$max_file_age, $test_run) ;
+  return ($dir_in,$dir_out,$dir_temp,$date_range,$max_file_age, $test_run) ;
 }
 
 sub CompactFiles
 {
-  my ($dir_in,$dir_out,$dir_filtered,$date_range,$max_file_age,$test_run) = @_ ;
+  my ($dir_in,$dir_out,$date_range,$max_file_age,$test_run) = @_ ;
 
   my $cycles = 0 ;
 
@@ -770,7 +714,10 @@ sub CompactFiles
       @files_to_merge = &PhaseBuildDailyFile_SelectFilesToMergeForOneDay ($date, @files_to_process) ;
 
       if (! $test_run)
-      { &PhaseBuildDailyFile_MergeFiles ($dir_in, $dir_out, $dir_filtered, $date, @files_to_merge) ; }
+      { 
+	&PhaseBuildDailyFile_MergeFiles     ($dir_in, $dir_out, $date, @files_to_merge) ; 
+	&ValidateCounts ($date) ; 
+      }
     }
   }
   else # $phase_build_monthly_file
@@ -783,7 +730,10 @@ sub CompactFiles
       &Log ("\n" . '=' x 80 . "\n\n") ;
 
       if (! $test_run)
-      { &PhaseBuildMonthlyFile_MergeFiles ($dir_in, $dir_out, $month) ; }
+      { 
+	&PhaseBuildMonthlyFile_MergeFiles ($dir_in, $dir_out, $month) ; 
+	&ValidateCounts ($month) ; 
+      }
     }
   }
 
@@ -801,8 +751,8 @@ sub PhaseBuildDailyFile_CollectFilesToProcessForAllDays
   my (@folders, @files) ;
 
   &Log ("\nPhaseBuildDailyFile_CollectFilesToProcessForAllDays\n") ;
-  &Log ("\nCollect file names for hourly pagecount files, for last $max_file_age_in_days days\n") ;
-  &Log ("\n\nRead input files from folder:$dir_in\nWrite merged files to folder:$dir_out\nWrite filtered lines to folder:$dir_filtered\n\n") ;
+  &Log ("\nCollect file names for hourly pagecount files, for last $max_file_age_in_days completed days\n") ;
+  &Log ("\n\nRead input files from $dir_in\nWrite merged files to $dir_out\n\n") ;
 
   chdir ($dir_in) || &Abort ("Cannot chdir to $dir_in\n") ;
   local (*DIR);
@@ -891,7 +841,7 @@ sub PhaseBuildDailyFile_CollectFilesToProcessForAllDays
 
   my $files_to_process = $#files + 1 ;
   if ($files_to_process < 1)
-  { &Abort ("!! No compactable files found for last $max_file_age_in_days days. End processing.\n") ; }
+  { &Abort ("!! No compactable files found for last $max_file_age_in_days completed days. End processing.\n") ; }
 
   return (sort @files) ;
 }
@@ -919,7 +869,7 @@ sub PhaseBuildDailyFile_CollectDatesToProcess
   my (@files) = @_ ;
   my (%files_per_date, @dates_found, @dates_to_process) ;
 
-  &Log ("\nDetermine which dates to process from collected files\n") ;
+  &Log ("Determine which dates to process from collected files\n") ;
 
   foreach $file (@files)
   {
@@ -937,23 +887,23 @@ sub PhaseBuildDailyFile_CollectDatesToProcess
     my $month = substr ($date,4,2) ;
     my $day   = substr ($date,6,2) ;
 
-    $file_to_build =  sprintf ("pagecounts-%04d-%02d-%02d.gz", $year, $month, $day) ;
+    $file_to_build =  sprintf ("pagecounts-%04d-%02d-%02d.bz2", $year, $month, $day) ;
     $path_to_build =  "$dir_out/" . sprintf ("%04d/%04d-%02d/%s", $year, $year, $month, $file_to_build) ;
 
     if (-e $path_to_build)
     { &Log ("File $file_to_build already exists. Skip date.\n") ; }
     else
     {
-      &Log ("File $file_to_build not found. Store date $date.\n") ;
+      &Log ("Output file $file_to_build does not exist already. Store date $date.\n") ;
       push @dates_to_process, $date ;
     }
   }
 
   my $dates_to_process = $#dates_to_process + 1 ;
   if ($dates_to_process < 1)
-  { &Abort ("\n!! No dates found for which files need to be compacted. End processing.\n") ; }
+  { &Abort ("No dates found for which files need to be compacted. End processing.") ; }
 
-  $last_date = $dates_to_process {$#dates} ;
+  $last_date = $dates_to_process [$#dates] ;
   if ($files_per_date {$last_date} < 24)
   {
     &Log ("\nLess than 24 hourly files available for last date ($last_date) -> skip this date, more files may appear later\n") ;
@@ -1017,7 +967,7 @@ sub PhaseBuildDailyFile_SelectFilesToMergeForOneDay
 
 sub PhaseBuildDailyFile_MergeFiles
 {
-  my ($dir_in, $dir_out, $dir_filtered, $date, @files) = @_ ;
+  my ($dir_in, $dir_out, $date, @files) = @_ ;
 
   my ($fn_out_merged_hourly, $fh_out_merged_hourly, $files_in_found_hourly, $files_in_open_hourly, $hours_missing, $lang_prev) ;
 
@@ -1041,7 +991,7 @@ sub PhaseBuildDailyFile_MergeFiles
   undef @invalid_languages ;
   $hours_missing = '' ;
 
-  ($fn_out_merged_hourly, $fh_out_merged_hourly, $fh_out_filtered, $process_day) = &PhaseBuildDailyFile_OpenOutputFiles ($dir_out, $date) ;
+  ($fn_out_merged_hourly, $fh_out_merged_hourly, $process_day) = &PhaseBuildDailyFile_OpenOutputFiles ($dir_out, $date) ;
   return if ! $process_day ;
 
   ($files_in_found_hourly, $msg_files_found_hourly) = &PhaseBuildDailyFile_OpenInputFiles ($date, @files) ;
@@ -1049,7 +999,7 @@ sub PhaseBuildDailyFile_MergeFiles
 
   my $header = &PhaseBuildDailyFile_CreateHeaderDailyFile ($date, $threshold_views_per_day, $msg_files_found_hourly) ;
   print $fh_out_merged_hourly $header ;
-
+  
   $key_low_prev = "" ;
   while ($files_in_open_hourly > 0)
   {
@@ -1063,7 +1013,6 @@ sub PhaseBuildDailyFile_MergeFiles
         { $key_low = $fs_key_hourly [$hour] ; }
       }
     }
-
     # debug
     # if (($key_low =~ /^nov/) || ($key_low_prev =~ /^nov/))
     # { &Log ("key_low '$key_low' (key_low_prev '$key_low_prev')\n") ; }
@@ -1084,25 +1033,29 @@ sub PhaseBuildDailyFile_MergeFiles
 
           $file = $fh_in_hourly [$hour] ;
           $line = <$file> ;
+          while ($line =~ /^\*/)
+	  { $line = <$file> ; }
 
-          $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
-          $line =~ s/^([\w\-]+) /$1.z /o  ;
-         ($lang,$title,$count,$dummy) = split (' ', $line) ;
+	  # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
+	  # $line =~ s/^([\w\-]+) /$1.z /o  ;
 
-          # during tests fake end of file early on, after some language project has been fully processed
+ 	  ($lang,$title,$count,$dummy) = split (' ', $line) ;
+          $totals_per_lang_in {$lang} += $count ;   
+
+          # during tests fake end of file early on, after a few languages have been fully processed
           if ($line && (($test_max_language eq '') || ($lang le $test_max_language)))
           {
-            $fs_key_hourly [$hour] = "$lang $title" ;
+            if ($fs_key_hourly [$hour] gt "$lang $title")
+	    { &Abort ("Out of sequence on hour $hour:\n'${fs_key_hourly [$hour]}' gt\n'$lang $title'") ; }
+
+      	    $fs_key_hourly [$hour] = "$lang $title" ;
             $count [$hour] = $count ;
 
             $totals_in {$lang} += $count ;
           }
           else
           {
-            if ($job_runs_on_production_server)
-            { close $fh_in_hourly [$hour] ; }
-            else
-            { $fh_in_hourly [$hour] -> close () ; }
+            close $fh_in_hourly [$hour] ; 
 
             $files_in_open_hourly-- ;
             $fs_open_hourly [$hour] = $fs_closed ;
@@ -1124,17 +1077,15 @@ sub PhaseBuildDailyFile_MergeFiles
   # next if &InvalidLanguage ($key_low) ;
 
     &CheckForSequenceError ($key_low_prev, $key_low, $files_in_open_hourly) ;
-
-    $filter_matches = &PhaseBuildDailyFile_WriteCounts ($fh_out_merged_hourly, $fh_out_filtered, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev, $filter_matches) ;
+    &PhaseBuildDailyFile_WriteCounts ($fh_out_merged_hourly, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev) ;
 
     $key_low_prev = $key_low ;
     $lang_prev = $lang ;
   }
 
-  # debug
-  &Log ("\nLines written: $lines, files open after merge: $files_in_open_hourly, first key not written: " . substr ($key_low,0,20) . " [etc]\n") ;
+  &Log ("\nLines written: $lines, files open after merge: $files_in_open_hourly, last key written: " . substr ($key_low_prev,0,20) . " [etc]\n") ;
 
-  &PhaseBuildDailyFile_CloseOutputFiles ($fn_out_merged_hourly, $fh_out_merged_hourly, $fh_out_filtered) ;
+  &PhaseBuildDailyFile_CloseOutputFiles ($fn_out_merged_hourly, $fh_out_merged_hourly) ;
 }
 
 sub MakeOutputDir
@@ -1152,7 +1103,7 @@ sub MakeOutputDir
 sub PhaseBuildDailyFile_OpenOutputFiles
 {
   my ($dir_out, $date) = @_ ;
-  my ($fh_out_merged_hourly, $fh_out_filtered, $process_day) ;
+  my ($fh_out_merged_hourly, $process_day) ;
 
   &Log ("\nOpen Output Files\n\n") ;
 
@@ -1165,42 +1116,25 @@ sub PhaseBuildDailyFile_OpenOutputFiles
   $fn_out_merged_hourly = "$dir_out/pagecounts-$year-$month-$day" . ".~" ; # full day, hourly data, count above $threshold_views_per_day
   &Log ("Write merged hourly files to\n$fn_out_merged_hourly\n") ;
 
-  if ($job_runs_on_production_server)
-  {
   # if ((-e "$fn_out_merged_hourly.7z") || (-e "$fn_out_merged_hourly.bz2") || (-e "$fn_out_merged_hourly.zip") || (-e "$fn_out_merged_hourly.gz"))
   # {
   #   &Log ("\nTarget file '$fn_out_merged_hourly.[7z|bz2|zip|gz]' exists already. Skip this date.\n") ;
   #   return ('', '', ! $process_day) ;
   # }
 
-    open $fh_out_merged_hourly, '>', "$fn_out_merged_hourly" || &Abort ("Output file '$fn_out_merged_hourly' could not be opened.") ;
-    binmode $fh_out_merged_hourly ;
-  }
-  else
-  {
-    $fh_out_merged_hourly = IO::Compress::Gzip->new ($fn_out_merged_hourly) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-    binmode $fh_out_merged_hourly ;
-  }
+  open $fh_out_merged_hourly, '>', "$fn_out_merged_hourly" || &Abort ("Output file '$fn_out_merged_hourly' could not be opened.") ;
+  binmode $fh_out_merged_hourly ;
 
-  $fn_out_filtered = "$dir_filtered/pagecounts-$year-$month-$day.txt" ;
-  &Log ("\nWrite filtered counts to\n$fn_out_filtered\n") ;
-
-  open $fh_out_filtered, '>', $fn_out_filtered ;
-  binmode $fh_out_filtered ;
-
-  return ($fn_out_merged_hourly, $fh_out_merged_hourly, $fh_out_filtered, $process_day) ;
+  return ($fn_out_merged_hourly, $fh_out_merged_hourly, $process_day) ;
 }
 
 sub PhaseBuildDailyFile_CloseOutputFiles
 {
-  ($fn_out_merged_hourly, $fh_out_merged_hourly, $fh_out_filtered) = @_ ;
+  ($fn_out_merged_hourly, $fh_out_merged_hourly) = @_ ;
 
-  &Log ("\nClose Output Files\n\n") ;
+  &Log ("\nClose Daily Output Files\n\n") ;
 
-  if ($job_runs_on_production_server)
-  {
-    close $fh_out_merged_hourly ;
-    close $fh_out_filtered ;
+  close $fh_out_merged_hourly ;
 
 #    $time_start_compression = time ;
 #    $cmd = "bzip2 -9 -v $fn_out_merged_hourly" ;
@@ -1221,12 +1155,6 @@ sub PhaseBuildDailyFile_CloseOutputFiles
 #      # &log ("Delete $fn_out_merged_hourly.7z\n") ;
 #      # unlink "$fn_out_merged_hourly.7z" ;
 #    }
-  }
-  else
-  {
-    $fh_out_merged_hourly->close() ;
-    close $fh_out_filtered ;
-  }
 
   if (! &OutputMatchesInput)
   {
@@ -1234,18 +1162,34 @@ sub PhaseBuildDailyFile_CloseOutputFiles
     return ;
   }
 
-  ($fn_out_merged_hourly_final = $fn_out_merged_hourly) =~ s/\~$// ;
-  rename ($fn_out_merged_hourly, $fn_out_merged_hourly_final) ;
-  $total_bytes_produced_per_cycle = -s $fn_out_merged_hourly_final ;
-  &Log ("File complete: $fn_out_merged_hourly_final (size $total_bytes_produced_per_cycle bytes)\n") ;
+# ezachte wikidev 3.5G Dec  6 19:02 pagecounts-2012-11-01
+# ezachte wikidev 612M Dec  7 12:06 pagecounts-2012-11-01.7
+# ezachte wikidev 623M Dec  6 19:02 pagecounts-2012-11-01.bz2
+# ezachte wikidev 816M Dec  6 19:02 pagecounts-2012-11-01.gz
+# ezachte wikidev 816M Dec  7 11:40 pagecounts-2012-11-01.zip
 
-  &WriteJobStatsPerCycle ($fn_out_merged_hourly) ;
+  ($fn_out_merged_hourly_final = $fn_out_merged_hourly) =~ s/\.\~$// ; # remove suffix for 'temporary file'
+  rename ($fn_out_merged_hourly, $fn_out_merged_hourly_final) ;
+
+  $cmd = "bzip2 -fqv $fn_out_merged_hourly_final" ;
+  $result = `$cmd` ;
+  if ($result ne '')
+  { print "$cmd -> $result\n" ; }
+  $fn_out_merged_hourly_final .= '.bz2' ;
+  
+  $total_bytes_produced_per_cycle = -s $fn_out_merged_hourly_final ;
+  # &Log ("\nFile complete: $fn_out_merged_hourly_final (size $total_bytes_produced_per_cycle bytes)\n") ;
+
+  &WriteJobStatsPerCycle ($fn_out_merged_hourly_final) ;
 }
 
 
 sub PhaseBuildDailyFile_OpenInputFiles
 {
   my ($date,@files) = @_ ;
+
+  undef %totals_per_lang_in ;   
+  undef %totals_per_lang_out ;   
 
   $total_files_processed_per_cycle = 0 ;
   $total_bytes_processed_per_cycle = 0 ;
@@ -1259,24 +1203,48 @@ sub PhaseBuildDailyFile_OpenInputFiles
   for ($hour = 0 ; $hour < 24 ; $hour++)
   { $fs_open_hourly [$hour] = $fs_missing ; }
 
+  $cmd = "rm $dir_temp/pagecounts*" ;
+  `$cmd` ;
 
+  my ($file_in, $file_sorted) ;
   foreach $file_in (@files)
   {
     next if $file_in eq "" ;
 
     ($hour = $file_in) =~ s/^.*?pagecounts-\d+-(\d\d)\d+\.gz$/$1/ ;
     $hour += 0 ; # force numeric
-    &Log ("File found '$file_in'\n") ;
-
-    if ($job_runs_on_production_server)
-    { open $fh_in_hourly [$hour], "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; }
-    else
-    { $fh_in_hourly [$hour] = IO::Uncompress::Gunzip->new ($file_in) || &Abort ("IO::Uncompress::Gunzip failed for '$file_in': $GunzipError\n") ; }
-
+    my $file_name = $file_in ; 
+    $file_name =~ s/^.*pagecounts/pagecounts/ ;
+    $file_name =~ s/\.gz// ;
+    $file_patched = "$dir_temp/$file_name~patched" ;
+    $file_sorted  = "$dir_temp/$file_name~sorted" ;
+    
     $total_files_processed_per_cycle ++ ;
     $total_bytes_processed_per_cycle += -s $file_in ;
     $total_files_processed_overall ++ ;
     $total_bytes_processed_overall += -s $file_in ;
+    
+    my $time_start_patch_sort = time ;
+    open $fh_in, "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; 
+    open $fh_patched, '>', $file_patched || &Abort ("Could not write '$file_patched'") ; 
+    while ($line = <$fh_in>)
+    {
+      # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix, test for field delimited string without dot 
+      $line =~ s/^([^\.\s]+)2 /$1.y /o  ;
+      $line =~ s/^([^\.\s]+) /$1.z /o  ;
+      print $fh_patched $line ;
+    }
+    close $fh_in ;
+    close $fh_patched ;
+    # print "Writing $file_sorted took " . (time - $time_start_edit_input) . " secs, size " . (-s $file_in) . " -> " . (-s $file_sorted) . "\n"  ; 
+   
+    my $time_start_sort = time ;
+    $cmd = "sort $file_patched -o $file_sorted" ;
+    $result = `$cmd` ;
+    
+    &Log ("File found '$file_in', patch/sort to '$file_sorted' in " . (time - $time_start_patch_sort) . " secs.\n") ;
+
+    open $fh_in_hourly [$hour], "<", $file_sorted || &Abort ("Sorted file '" . $file_sorted . "' could not be opened.") ; 
 
     binmode $fh_in_hourly [$hour] ;
 
@@ -1286,23 +1254,27 @@ sub PhaseBuildDailyFile_OpenInputFiles
 
     $file = $fh_in_hourly [$hour] ;
     $line = <$file> ;
-    while ($line !~ /^[0-9a-zA-Z]/)
-    {
-      chomp $line ;
-      &Log ("Skip malformed line '" . substr ($line, 0, 20) . "' [etc]\n") ;
-      $line = <$file> ;
-    }
+    while ($line =~ /^\*/)
+    { $line = <$file> ; }
 
-    $line =~ s/^(\w+)2 /$1.y /o  ;# project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
-    $line =~ s/^(\w+) /$1.z /o  ;
+  # while ($line !~ /^[0-9a-zA-Z]/)
+  # {
+  #   chomp $line ;
+  #   &Log ("Skip malformed line '" . substr ($line, 0, 20) . "' [etc]\n") ;
+  #   $line = <$file> ;
+  # }
+
+    # $line =~ s/^(\w+)2 /$1.y /o  ;# project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
+    # $line =~ s/^(\w+) /$1.z /o  ;
 
     ($lang,$title,$count,$dummy) = split (' ', $line) ;
+    $totals_per_lang_in {$lang} += $count ;   
 
     $fs_key_hourly [$hour] = "$lang $title" ;
     $count [$hour] = $count ;
     $totals_in {$lang} += $count ;
   }
-
+  
   if ($files_in_found < 24)
   {
     for ($hour = 0 ; $hour < 24 ; $hour++)
@@ -1343,7 +1315,8 @@ sub PhaseBuildDailyFile_CreateHeaderDailyFile
 # q:wikiquote,
 # s:wikisource,
 # v:wikiversity,
-# z:wikipedia (z added by compaction script: wikipedia happens to be sorted last in dammit.lt files, but without suffix)
+# wo:wikivoyage,
+# z:wikipedia (z added by merge script: wikipedia happens to be sorted last in dammit.lt files, but without suffix)
 #
 # Counts format: only hours with page view count > 0 (or data missing) are represented,
 #
@@ -1362,13 +1335,15 @@ $header .= $msg_files_found ;
 
 sub PhaseBuildDailyFile_WriteCounts
 {
-  my ($fh_out_merged_hourly, $fh_out_filtered, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev, $filter_matches) = @_ ;
+  my ($fh_out_merged_hourly, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev) = @_ ;
+
+  my ($lang) = split (' ', $key_low) ;
+  $totals_per_lang_out {$lang} += $total ;
 
 # test only: introduce mismatch between totals read and totals written -> produces error and temp file stays
 # return if $total % 23 != 0 ;
 
   ($lang,$title) = split (' ', $key_low) ;
-
 # $title =~ s/\%20/_/g ;
 # $title =~ s/\%3A/:/gi ;
 # $title =~ s/%([a-fA-F0-9]{2})/chr(hex($1))/seg;
@@ -1378,22 +1353,42 @@ sub PhaseBuildDailyFile_WriteCounts
   if (($files_in_found_hourly < 24) && ($files_in_found_hourly > 0)) # always > 0 actually
   { $total = sprintf ("%.0f",($total / $files_in_found_hourly) * 24) ; }
 
-  if (($lang ne $lang_prev) && ($lang_prev ne ""))
-  {
-    $filter_matches = $lang =~ $reg_exp_filter ;
-    if ($filter_matches)
-    { &Log ("F $lang\n") ; }
-    # else
-    # { &Log ("- $lang\n") ; }
-  }
-
-  if ($filter_matches)
-  { print $fh_out_filtered "$key_low $total $counts\n" ; }
-
   if ($total >= $threshold_views_per_day)
   { print $fh_out_merged_hourly "$key_low $total $counts\n" ; }
 
-  return ($filter_matches) ;
+  return ;
+}
+
+sub ValidateCounts
+{
+  &Log ("\nValidateCounts\n") ;
+	
+  my ($date_or_month) = @_ ; 
+  my %keys ;
+
+  foreach $key (keys %totals_per_lang_in)
+  { $keys {$key} ++ ; }  
+  foreach $key (keys %totals_per_lang_out)
+  { $keys {$key} ++ ; }  
+
+  my $mismatch_found = $false ;
+  foreach $key (sort keys %keys)
+  {
+    my $in  = 0 + $totals_per_lang_in  {$key} ;
+    my $out = 0 + $totals_per_lang_out {$key} ;
+    
+    if (($in != $out) && 
+	(($test_max_language eq '') ||  
+	 ($key lt $test_max_language))) # do not cry wolf when partial file is processed for tests, for cut-off language  
+    { 
+      print "\n" if ! $mismatch_found ;
+      print "Mismatch for $date_or_month, key '$key': in $in, out $out\n" ;
+      $mismatch_found = $true ; 
+    }
+  }
+  print "\n" ;
+
+  &Abort ("Mismatch found between counts read and counts written") if $mismatch_found ;
 }
 
 # if both max_age (-a) and date range (-d) have been specified both criteria will have to be fulfilled, allows e.g. to (re)process only files for first three months of year
@@ -1407,12 +1402,7 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
   &Log ("\nPhaseBuildDailyFile_CollectMonthsToProcess\n") ;
 
   if ($verbose)
-  {
-    &Log ("\nList last $max_file_age_in_months months (-a ..) before current month,") ;
-    if ($date_range ne '')
-    { &Log (" filtered by date range '$date_range' (-d ..),") ; }
-    &Log (" for which no consolidated monthly file exists yet.\n") ;
-  }
+  { &Log ("\nList last $max_file_age_in_months months (-a ..) before current month,\nfor which no consolidated monthly file exists yet.\n") ; }
 
   &Log ("\n\nRead input files from folder: $dir_in\n\n") ;
 
@@ -1429,17 +1419,6 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
 
     $month = sprintf ("%02d", $month) ;
 
-  # -d argument for monthly processing obsolete, remove code later
-  #
-  # $yyyymm = sprintf ("%04d%02d",$year,$month) ;
-  #
-  # if (($date_range ne '') && ($yyyymm !~ /$date_range/))
-  # {
-  #   if ($verbose)
-  #   { &Log ("Skip year/month $yyyymm, outside date range '$date_range'\n") ; }
-  #   next ;
-  # }
-
     $dn_in_monthly = "$dir_in/$year/$year-$month/" ;
 
     if (! -d $dn_in_monthly)
@@ -1449,14 +1428,14 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
       next ;
     }
 
-    # only for previous month (newest to be processed) check if all input is available
+    # only for previous month (current month will be skipped) check if all input is available
     # only continue when input for last of month is available, if not skip month
     # if input file will never appear (maybe longer server outage, no input data)
     # either use force option (to be implemented) or add 0 byte file
     if ($check_month_complete)
     {
       $day = sprintf ("%02d", &DaysInMonth ($year, $month)) ;
-      $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.gz" ;
+      $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.bz2" ;
 
       if (! -e $fn_in_daily)
       {
@@ -1481,7 +1460,7 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
     for ($day = 1 ; $day <= &DaysInMonth ($year, $month) ; $day++)
     {
       $day = sprintf ("%02d", $day) ;
-      $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.gz" ;
+      $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.bz2" ;
       if (! -e $fn_in_daily)
       {
         $files_missing++ ;
@@ -1508,13 +1487,12 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
 
   my $months_to_process = $#months_to_process + 1 ;
   if ($months_to_process < 1)
-  { &Abort ("\n!! No months found for which files need to be compacted. End processing.\n") ; }
+  { &Abort ("\n!! No months found for which files need to be compacted. End processing.") ; }
 
   # keep list sorted backwards -> process newest month first
   return @months_to_process ;
 }
 
-#qqq
 sub PhaseBuildMonthlyFile_MergeFiles
 {
   my ($dir_in, $dir_out, $year_month) = @_ ;
@@ -1591,8 +1569,9 @@ sub PhaseBuildMonthlyFile_MergeFiles
         # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
         # $line =~ s/^([\w\-]+) /$1.z /o  ;
 
-        chomp $line ;
+          chomp $line ;
          ($lang,$title,$total_daily,$counts_daily) = split (' ', $line) ;
+          $totals_per_lang_in {$lang} += $total_daily ;   
 
           # during tests fake end of file early on, after some language project has been fully processed
           if ($line && (($test_max_language eq '') || ($lang le $test_max_language)))
@@ -1604,10 +1583,7 @@ sub PhaseBuildMonthlyFile_MergeFiles
           }
           else
           {
-            if ($job_runs_on_production_server)
-            { close $fh_in_daily [$day] ; }
-            else
-            { $fh_in_daily [$day] -> close () ; }
+            close $fh_in_daily [$day] ;
 
             $files_in_open_daily-- ;
             $fs_open_daily [$day] = $fs_closed ;
@@ -1630,12 +1606,17 @@ sub PhaseBuildMonthlyFile_MergeFiles
 
   # next if &InvalidLanguage ($key_low) ;
 
-    $filter_matches = &PhaseBuildMonthlyFile_WriteCounts ($fh_out_merged_daily, $total_monthly, $counts_monthly, $days_in_month, $files_in_found_daily, $key_low) ;
+    &CheckForSequenceError ($key_low_prev, $key_low, $files_in_open_hourly) ;
+
+    # if ($niofd_qqq ++ % 10 > 0) # test ValidateCounts 
+    #{ 
+    &PhaseBuildMonthlyFile_WriteCounts ($fh_out_merged_daily, $total_monthly, $counts_monthly, $days_in_month, $files_in_found_daily, $key_low) ; 
+    #}
 
     $key_low_prev = $key_low ;
     $lang_prev = $lang ;
   }
-  &Log ("\nLines written: $lines, files open after merge: $files_in_open_daily, first key not written: " . substr ($key_low,0,20) . " [etc]\n") ;
+  &Log ("\nLines written: $lines, files open after merge: $files_in_open_daily, last key written: " . substr ($key_low_prev,0,20) . " [etc]\n") ;
 
   &PhaseBuildMonthlyFile_CloseOutputFile ($fn_out_merged_daily, $fh_out_merged_daily) ;
 }
@@ -1651,6 +1632,9 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
   $total_bytes_processed_per_cycle = 0 ;
   $total_bytes_produced_per_cycle  = 0 ;
 
+  undef %totals_per_lang_in ;   
+  undef %totals_per_lang_out ;   
+  
   my ($files_in_found, $msg_files_found) ;
 
   &Log ("\nOpen Input Files for month $year-$month\n\n") ;
@@ -1663,7 +1647,7 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
     $day = sprintf ("%02d", $day) ;
     $fs_open_daily [$day] = $fs_missing ;
 
-    $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.gz" ;
+    $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.bz2" ;
     if (! -e $fn_in_daily)
     {
       if ($verbose)
@@ -1674,10 +1658,7 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
     if ($verbose)
     { &Log ("File found: $fn_in_daily\n") ; }
 
-    if ($job_runs_on_production_server)
-    { open $fh_in_daily [$day], "-|", "gzip -dc \"$fn_in_daily\"" || &Abort ("Input file '" . $fn_in_daily . "' could not be opened.") ; }
-    else
-    { $fh_in_daily [$day] = IO::Uncompress::Gunzip->new ($fn_in_daily) || &Abort ("IO::Uncompress::Gunzip failed for '$fn_in_daily': $GunzipError\n") ; }
+    open $fh_in_daily [$day], "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("Input file '" . $fn_in_daily . "' could not be opened.") ; 
 
     $total_files_processed_per_cycle ++ ;
     $total_bytes_processed_per_cycle += -s $fn_in_daily ;
@@ -1699,6 +1680,7 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
     if (! $line) { &Abort ("No valid data found in $fn_in_daily") ; }
 
     ($lang,$title,$total_daily,$counts_daily) = split (' ', $line) ;
+    $totals_per_lang_in {$lang} += $total_daily ;   
 
     $fs_key_daily [$day] = "$lang $title" ;
     $counts_daily [$day] = $counts_daily ;
@@ -1746,7 +1728,8 @@ sub PhaseBuildMonthlyFile_CreateHeaderMonthlyFile
 # q:wikiquote,
 # s:wikisource,
 # v:wikiversity,
-# z:wikipedia (z added by compaction script: wikipedia happens to be sorted last in dammit.lt files, but without suffix)
+# wo:wikivoyage,
+# z:wikipedia (z added by merge script: wikipedia happens to be sorted last in dammit.lt files, but without suffix)
 #
 # Counts format: only hours with page view count > 0 (or data missing) are represented,
 #
@@ -1782,6 +1765,7 @@ sub PhaseBuildMonthlyFile_WriteCounts
   $counts_montly =~ s/,$// ;
 
   ($lang,$title) = split (' ', $key_low) ;
+  $totals_per_lang_out {$lang} += $total_monthly ;
 
 # $title =~ s/\%20/_/g ;
 # $title =~ s/\%3A/:/gi ;
@@ -1794,8 +1778,6 @@ sub PhaseBuildMonthlyFile_WriteCounts
 
   if ($total_monthly >= $threshold_views_per_month)
   { print $fh_out_merged_daily "$key_low $total_monthly $counts_monthly\n" ; }
-
-  return ($filter_matches) ;
 }
 
 sub CheckForSequenceError
@@ -1835,30 +1817,18 @@ sub PhaseBuildMonthlyFile_OpenOutputFile
   $process_day = $true ;
 
   if ($threshold_views_per_month > 0)
-  { $fn_ge_threshold = "-ge-$threshold_views_per_month" ; }
+  { $fn_ge_threshold = "-views-ge-$threshold_views_per_month" ; }
 
-  $fn_out_merged_daily = "$dir_out/pagecounts-$year-$month$fn_ge_threshold" . ".bz2~" ; # full month, hourly data
+  $fn_out_merged_daily = "$dir_out/pagecounts-$year-$month$fn_ge_threshold" ; # full month, hourly data
   &Log ("Write merged daily files to\n$fn_out_merged_daily\n") ;
 
-  if ($job_runs_on_production_server)
-  {
   # if ((-e "$fn_out_merged_hourly.7z") || (-e "$fn_out_merged_hourly.bz2") || (-e "$fn_out_merged_hourly.zip") || (-e "$fn_out_merged_hourly.gz"))
   # {
   #   &Log ("\nTarget file '$fn_out_merged_hourly.[7z|bz2|zip|gz]' exists already. Skip this date.\n") ;
   #   return ('', '', ! $process_day) ;
   # }
-
-    open $fh_out_merged_daily, '>', "$fn_out_merged_daily" || &Abort ("Output file '$fn_out_merged_daily' could not be opened.") ;
-    binmode $fh_out_merged_daily ;
-  }
-  else
-  {
-
-  # $fh_out_merged_daily = IO::Compress::Gzip->new ($fn_out_merged_daily) || &Abort ("IO::Compress::Gzip failed: $GzipError\n") ;
-    $fh_out_merged_daily = new IO::Compress::Bzip2 "$fn_out_merged_daily" or die "bzip2 failed for fn_out_merged_daily: $Bzip2Error\n";
-
-    binmode $fh_out_merged_daily ;
-  }
+  open $fh_out_merged_daily, '>', "$fn_out_merged_daily" || &Abort ("Output file '$fn_out_merged_daily' could not be opened.") ;
+  binmode $fh_out_merged_daily ;
 
   return ($fn_out_merged_daily, $fh_out_merged_daily, $process_day) ;
 }
@@ -1867,11 +1837,9 @@ sub PhaseBuildMonthlyFile_CloseOutputFile
 {
   ($fn_out_merged_daily, $fh_out_merged_daily) = @_ ;
 
-  &Log ("\nClose Output File\n\n") ;
+  &Log ("\nClose Monthly Output File\n") ;
 
-  if ($job_runs_on_production_server)
-  {
-    close $fh_out_merged_daily ;
+  close $fh_out_merged_daily ;
 
 #    $time_start_compression = time ;
 #    $cmd = "bzip2 -9 -v $fn_out_merged_hourly" ;
@@ -1892,24 +1860,28 @@ sub PhaseBuildMonthlyFile_CloseOutputFile
 #      # &log ("Delete $fn_out_merged_hourly.7z\n") ;
 #      # unlink "$fn_out_merged_hourly.7z" ;
 #    }
-  }
-  else
-  {
-    $fh_out_merged_daily->close() ;
-  }
 
   if (! &OutputMatchesInput)
   {
-    &Log ("Ouput does not match input ->\nKeep temp file $fn_out_merged_daily 'as is'\nDo not rename and proceed to next month\n")  ;
+    &LogSummary ("Output does not match input. Do not compress output file $fn_out_merged_daily. Proceed to next month\n")  ;
     return ;
   }
-
-  ($fn_out_merged_daily_final = $fn_out_merged_daily) =~ s/\~// ;
+  
+  ($fn_out_merged_daily_final = $fn_out_merged_daily) =~ s/\.\~$// ; # remove suffix for temporary file
   rename ($fn_out_merged_daily, $fn_out_merged_daily_final) ;
-  $total_bytes_produced_per_cycle = -s $fn_out_merged_daily_final ;
-  &Log ("File complete: $fn_out_merged_daily_final (size $total_bytes_produced_per_cycle bytes)\n") ;
 
-  &WriteJobStatsPerCycle ($fn_out_merged_daily) ;
+  $cmd = "bzip2 -fqv $fn_out_merged_daily_final" ;
+  print "\n$cmd\n" ;
+  $result = `$cmd` ;
+  if ($result ne '')
+  { print "$result\n\n" ; }
+  $fn_out_merged_daily_final .= '.bz2' ;
+  print "\n" ;
+
+  $total_bytes_produced_per_cycle = -s $fn_out_merged_daily_final ;
+  # &Log ("\nFile complete: $fn_out_merged_daily_final (size $total_bytes_produced_per_cycle bytes)\n") ;
+
+  &WriteJobStatsPerCycle ($fn_out_merged_daily_final) ;
 }
 
 sub SetFolders
@@ -1928,9 +1900,6 @@ sub SetFolders
   if ($phase_build_monthly_file && ($dir_out eq ''))
   { $dir_out = $dir_in ; }
 
-  if ($dir_filtered !~ /[\/\\]/)
-  { $dir_filtered = "$work/$dir_filtered" ; }
-
   &Log ("Input folder: '$dir_in'\n") ;
   if (! -d $dir_in)
   { &Abort ("Input dir not found: $dir_in") } ;
@@ -1947,17 +1916,6 @@ sub DetectCurrentMonth
   $month_run = sprintf ("%4d-%2d", $year, $month) ;
   &Log ("Current month: $month_run\n") ;
 }
-
-sub SetFilterFoundationWikis
-{
-  print "\nSetFilterFoundationWikis\n" ;
-
-  $filter = "outreach|quality|strategy|usability" ;
-  &Log ("Filter: $filter\n") ;
-  $filter = "^(?:$filter)\.m\$" ;
-  $reg_exp_filter = qr"$filter" ;
-}
-
 
 sub InvalidLanguage
 {
@@ -1998,7 +1956,6 @@ sub OutputMatchesInput
 
   if ($msg_mismatch ne '')
   {
-    &Log        ("\nMismatch between count read and count written:\n$msg_mismatch\n") ;
     &LogSummary ("Mismatch between count read and count written:\n$msg_mismatch") ;
     return ($false) ;
   }
@@ -2013,14 +1970,14 @@ sub WriteJobStatsPerCycle
 
   my $seconds = (time-$time_start_cycle) ;
 
-  my $stats = "Stats: $total_files_processed_per_cycle files consolidated into $file_out, in $seconds sec, " .
+  my $stats = ">> $total_files_processed_per_cycle files consolidated into $file_out, in $seconds sec, " .
               sprintf ("%.0f", $total_bytes_processed_per_cycle / (1024*1024)) . " Mb" .
               " -> " . sprintf ("%.0f", $total_bytes_produced_per_cycle / (1024*1024)) . " Mb" ;
 
   if ($total_bytes_processed_per_cycle > 0)
   {
-    $perc = sprintf ("%.0f", 100 * (1 - $total_bytes_produced_per_cycle / $total_bytes_processed_per_cycle)) ;
-    $stats .= " (= -$perc\%)" ;
+    $perc = sprintf ("%.0f", 100 * ($total_bytes_produced_per_cycle / $total_bytes_processed_per_cycle)) ;
+    $stats .= " (= $perc\%)" ;
   }
 
   if ($seconds > 0)
@@ -2029,7 +1986,6 @@ sub WriteJobStatsPerCycle
     $stats .= ", $Mb_sec Mb/sec" ;
   }
 
-  &Log        ("$stats\n") ;
   &LogSummary ("$stats\n") ;
 }
 
@@ -2079,9 +2035,6 @@ sub Log
 {
   my $msg = shift ;
   print $msg ;
-
-  if ($fn_log != 0)
-  { print $fh_log $msg ; }
 }
 
 sub LogSummary
@@ -2090,17 +2043,13 @@ sub LogSummary
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime (time) ;
   my $time = sprintf ("%02d/%02d/%04d %02d:%02d", $mday, $mon+1, $year+1900, $hour, $min) ;
 
-  open  $fh_log_summary, ">>", "$work/$fn_log_summary" ;
-  print $fh_log_summary "$time $msg" ;
-  close $fh_log_summary ;
+  &Log (">> $time $msg") ;
 }
-
-
 
 sub Abort
 {
-  $msg = shift . "\n" ;
-  &Log ($msg) ;
+  my $msg = shift ;
+  &LogSummary ("$msg -> Abort !!!") ;
   exit ;
 }
 
