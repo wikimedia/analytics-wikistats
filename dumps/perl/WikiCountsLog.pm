@@ -4,7 +4,7 @@ sub OpenLog
 {
   my $job = shift ;
   if ($job eq '')
-  { $job = "WikiCounts" ; }
+  { $job = "WikiCounts" ;  }
 
   my $target = "" ;
   if    ($webalizer)    { $target = "Webalizer" ; }
