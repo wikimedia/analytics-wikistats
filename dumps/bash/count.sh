@@ -1,4 +1,8 @@
 #!/bin/bash
+
+c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
+c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
+
 die () {
     echo >&2 "$@"
     exit 1
@@ -57,7 +61,7 @@ fi
 
 
 trace=-r # trace resources
-# force=-f # force rerun even when dump for last month has already been processed (comment to disable)
+force=-f # force rerun even when dump for last month has already been processed (comment to disable)
 # bz2=-b # comment for default: 7z
 # reverts=-u 1 # uncomment to collect revert history only
 edits_only=-e 
@@ -67,7 +71,7 @@ clear
 cd $perl
 for x in `cat $dblists/$dblist`
 #for x in omwiki
-do perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
+do c1 perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
 done
 
 $bash/zip_csv.sh $project

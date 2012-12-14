@@ -1,4 +1,6 @@
 #!/bin/bash
+c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
+c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
 
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
@@ -17,6 +19,7 @@ log=$dumps/logs/log_report_sh.txt
 interval=0  # only update non-English reports once per 'interval' days 
 force_run_report=1
 projectcode="$1"
+mode_publish="$2"
 
 function echo2 {
   echo $1
@@ -24,18 +27,33 @@ function echo2 {
 }
 
 clear 
+echo2 "exec 'report.sh $1 $2 $3 $4 $5'"
+
+# Validate project code
+if [[ "$projectcode" = "wb" || "$projectcode" = "wk" || "$projectcode" = "wn" || "$projectcode" = "wp" || "$projectcode" = "wq" || "$projectcode" = "ws" || "$projectcode" = "wv" || "$projectcode" = "wx" || "$projectcode" = "wo" ]]
+then
+  echo "Process project code $1"
+else
+  echo "Invalid project code: specify wb (wikibooks), wk (wiktionary), wn (wikinews), wo (wikivoyage), wp (wikipedia), wq (wikiquote), ws (wikisource), wv (wikiversity), wx (wikispecial: commons, meta...)" ; exit
+fi
+
+# Determine publication mode 
+if [[ "$mode_publish" == "final" ]]
+then
+  echo Publish final reports 	
+else
+  echo Publish draft reports 	
+fi	
+
 echo2 ""
 echo2 "========================================================================" 
 echo2 ""
-echo2 "Start report.sh $1 $2"
 date >> $log
 
-# Validate project code
-
-if [ "$1" == "" ] ; then
-  echo2 "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
-  exit
-fi  
+#if [ "$1" == "" ] ; then
+#  echo2 "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
+#  exit
+#fi  
  
 # Abort when 2nd argument specifies a threshold in days, which is not met
 # This prevents costly reporting step when new month has just started and most counting still needs to be done
@@ -74,9 +92,19 @@ echo2 "Generate and publish reports for project $project"
 # for x in it # test
 for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
-
   echo2 ""
-  echo2 "Wiki $projectcode:$x"
+  echo2 ">>> loop with $projectcode:$x"
+  echo2 ""
+
+  if [[ "$x" != "en" ]]
+  then	  
+    if [[ "$mode_publish" != "final" ]]
+    then
+      echo2 "Only process target language in draft mode"
+      echo2 ""    
+      exit	  
+    fi
+  fi  
 
   # Get timestamp last reports for language x
 
@@ -85,7 +113,11 @@ do
 # Set source and destination paths for publishing reports
   out_project=$out/out_$1/$x_upper 
   htdocs_project=$htdocs/$dir/$x_upper
-  
+  if [[ "$mode_publish" != "final" ]]
+  then
+    htdocs_project=$htdocs_project/draft
+  fi
+
   echo2 "Target folder $out_project"
   
   file=$out/out_$1/$x_upper/#index.html	
@@ -107,7 +139,6 @@ do
   echo2 "File $file generated $days_csv days ago"
   
   # Check if reports need to be run now for language x
-
   run_report=0
   if [ $force_run_report -ne 0 ] ; then
     echo2 "Forced run of reports"					
@@ -141,25 +172,34 @@ do
     echo2 "Run reporting for language $x_upper"
     
     cd $perl
-    perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -o $out/out_$1
+    c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -o $out/out_$1
     cd $bash
     
     echo2 ""
     echo2 "Copy new and updated files from $out_project -> $htdocs_project"
   
     if [ "$x" == "en" ] ; then
-      echo "rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
-      rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
+      if [[ "$mode_publish" == "final" ]]
+      then	      
+        echo "Publish final en >> rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
+        rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
   
-      echo2 "List files (except charts) from target folder older than a day"
-      find $htdocs_project/ -mtime +1 | xargs ls -l | grep -P -v 'svg|png' # rather than 'ls -l $htdocs'
+	echo2 "List files (except charts) from target folder older than a day"
+        find $htdocs_project/ -mtime +1 | xargs ls -l | grep -P -v 'svg|png' # rather than 'ls -l $htdocs'
+      else
+        echo "Publish draft en >> rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
+        rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
+      fi	      
     else  
-      echo "rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat"
-      rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat
+      if [[ "$mode_publish" == "final" ]]
+      then	      
+        echo "Publish final $projectcode >> rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat"
+        rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat
+      fi	
     fi
   fi
 
-done;
+done
 
 # Generate category overviews (deactivated, reports became too large)
 # perl $perl/WikiReports.pl -c -m $1 -l en -i $csv/csv_$1/ -o $out/out_$1 

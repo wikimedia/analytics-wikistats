@@ -4,24 +4,27 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
-logs=$dammit/logs
+perl=/home/ezachte/wikistats/dammit.lt/perl # tests
+logs=$dammit/logs 
 
-data=/a/dammit.lt
-pagecounts=$data/pagecounts
+input=/a/dammit.lt/pagecounts/merged # .test
+output=/a/dammit.lt/pagecounts/merged # .test
+temp=/a/dammit.lt/pagecounts/temp
+
+yyyymm=$(date +"%Y_%m")
+logfile=$logs/compact_monthly_$yyyymm.log 
+logfile_summary=$logs/_summary_compact_monthly_jobs.log 
+
+rm $output/2012/*11.gz # tests
 
 cd $perl
-ls -l
-echo "perl $perl"
 
-# dte=$(date +%Y%m)
-# dte=$(date --date "$dte -1 days" +%Y%m)
-# echo "Compact dammit.lt files for one day: $dte"
+mode=-m    # specify -m for monthly combine of daily files, comment line for generating daily files
+verbose=-v # comment for concise output
+maxage=1   # process files for last .. months
 
-# -a is max age of input in months
+echo Consolidate daily pagecount files into one monthly file for last $maxage completed months 
+echo
+nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode $verbose -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
 
-mode=-m # -m is recompress daily compressed files for full month (comment for daily job)
-maxage=2 # process files for last .. months
-
-echo "Compact dammit.lt files for one month"
-nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $pagecounts -o $pagecounts/monthly -l $logs | tee -a $logs/dammit_compact_monthly.log | cat
- 
+#grep ">>" $logs/*.log

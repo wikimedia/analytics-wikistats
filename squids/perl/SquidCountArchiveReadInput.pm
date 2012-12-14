@@ -59,8 +59,9 @@ sub CollectFilesToProcess
     { print "- File not found: $file\n" ; }
     else
     {
-      ($timehead,$timetail) = &GetLogRange ($file, $path_head_tail) ;
+      ($timehead,$timetail) = &GetLogRange($file, $path_head_tail) ;
 
+	#warn "timehead=$timehead\ntimetail=$timetail\ntime_to_start=$time_to_start\ntime_to_stop=$time_to_stop\n";
       if (($timetail ge $time_to_start) && ($timehead le $time_to_stop))
       {
         print "- Include this file\n" ;
@@ -174,9 +175,10 @@ sub ReadSquidLogFiles
     if ($job_runs_on_production_server)
     {
       if ($file_in =~ /\.gz$/o)
-      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g" ; } # http://perldoc.perl.org/functions/open.html
       else
-      { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN,"<$file_in" ; } # http://perldoc.perl.org/functions/open.html
+      
       $fields_expected = 14 ;
     }
     else
