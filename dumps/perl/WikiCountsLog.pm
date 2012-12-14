@@ -95,9 +95,18 @@ sub LogC
 sub LogT
 {
   my $msg  = shift ;
+  
+  my $time = sprintf ("%02d:%02d:%02d", $hh, $mm, $ss) ;
+  if ($time ne $prev_time_logt)
+  { 
+    $msg = "$mode:$language\n$msg" ;
+    $prev_time_logt = $time ;
+  }
+  
   my $msg2 = $msg ;
   my ($ss,$mm,$hh) = (localtime (time))[0,1,2] ;
-  my $time = sprintf ("%02d:%02d:%02d", $hh, $mm, $ss) ;
+  $prev_time_logt = $time ;
+
   $msg2 =~ s/([^\n])\n(.)/$1\n         $2/gs ;
   $msg2 =~ s/(^\n*)/$1$time /s ;
   &Log ($msg2) ;
