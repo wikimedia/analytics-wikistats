@@ -45,6 +45,7 @@ if [[ $project == "wo" ]] ; then
 fi
 if [[ $project == "wp" ]] ; then 	
   dblist=wikipedia.dblist
+  edits_only=-e 
 fi
 if [[ $project == "wq" ]] ; then 	
   dblist=wikiquote.dblist
@@ -64,7 +65,6 @@ trace=-r # trace resources
 force=-f # force rerun even when dump for last month has already been processed (comment to disable)
 # bz2=-b # comment for default: 7z
 # reverts=-u 1 # uncomment to collect revert history only
-edits_only=-e 
 
 clear
 
