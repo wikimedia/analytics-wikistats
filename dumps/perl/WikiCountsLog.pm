@@ -106,7 +106,7 @@ sub LogT
 
   if (substr ($time,0,5) ne substr ($prev_time_logt,0,5)) # one per minute log which wiki this is about
   { 
-    $msg = "$mode:$language\n$msg" ;
+    $msg2 = "$mode:$language\n$msg2" ;
     $prev_time_logt = $time ;
   }
   
