@@ -5,6 +5,7 @@ c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+#perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
 csv=$dumps/csv
 out=$dumps/out

@@ -25,6 +25,7 @@ ulimit -v 8000000
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps                     # folder for scripts and output
 perl=$dumps/perl
+#perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 bash=$dumps/bash
 dblists=$dumps/dblists
@@ -62,7 +63,7 @@ fi
 
 
 trace=-r # trace resources
-force=-f # force rerun even when dump for last month has already been processed (comment to disable)
+#force=-f # force rerun even when dump for last month has already been processed (comment to disable)
 # bz2=-b # comment for default: 7z
 # reverts=-u 1 # uncomment to collect revert history only
 
@@ -70,7 +71,7 @@ clear
 
 cd $perl
 for x in `cat $dblists/$dblist`
-#for x in omwiki
+#for x in wikidatawiki
 do c1 perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
 done
 

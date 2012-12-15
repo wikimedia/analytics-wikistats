@@ -596,6 +596,7 @@ sub CountArticlesPerMonth
     $ndx_article = &bbbb2i (substr ($event,0,4)) ;
 
     my $count = substr ($event, 9,1) ;
+
     if ($count ne "R")
     {
     # $real_edits ++ ;
