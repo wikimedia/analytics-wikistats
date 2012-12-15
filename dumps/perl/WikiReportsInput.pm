@@ -725,6 +725,7 @@ sub WhiteListLanguages
 
     if ($wp =~ /^(?:dk|tlh|ru_sib)/i) # dk=dumps exist(ed?) but site not, tlh=Klignon, ru-sib=Siberian
     { $wp_ignore_wiki_obsolete {$wp}++ ; next ; }
+
     if ($mode_wk and ($wp eq "als" or $wp eq "tlh"))
     { $wp_ignore_wiki_obsolete {$wp}++ ; next ; }
 
@@ -812,6 +813,9 @@ sub WhiteListLanguages
     }
   }
 
+  if ($mode_wx)
+  { $wp_whitelist {'wikidata'} = 1 ; } # no pageviews for this yet, Q&D add here
+
   # needed in ProcessEditorStats, before ReadMonthlyStats
   my %languages ;
   foreach $wp (sort keys %wp_whitelist)
@@ -866,7 +870,7 @@ sub ReadMonthlyStats
 {
   my ($wp, $day, $month, $year, $days, $m, $prev, $curr, $forecast, @fc) ;
 
-  &LogT ("\nReadMonthlyStats $wp\n") ;
+  &LogT ("\nReadMonthlyStats\n") ;
 
   my $md = $dumpmonth_ord ;
   my @oldest_month ;
@@ -1053,7 +1057,8 @@ sub ReadMonthlyStats
       if (($c [$f] =~ /J|K|T/) && (! ($fields  [$f] =~ /\%/))) # T -> V after daily stats are inserted
       {
         my $articles = $MonthlyStats {$wp.$m.$c[4]} ;
-        if ($articles != 0)
+        
+	if ($articles != 0)
         {
           $fields [$f] = 100 * ($fields [$f]  / $articles) ;
           # > 100 can happen on V where categorized articles can include articles without link? -> check
@@ -1446,7 +1451,7 @@ if ($false)
           $MonthlyStatsHighMonth {$wp.$c[$f]} = $m ;
         }
       }
-#qqq #########################################################################################################
+##########################################################################################################
     }
 
     $wp = "zz" ;

@@ -1798,7 +1798,10 @@ sub CollectArticleCounts
     { $article_type = "R" ; }
     else
     { $article_type = "+" ; }
-
+    
+    if ($language eq 'wikidata') # count all pages
+    { $article_type = '+' ; }
+    
     $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb (0) . &i2bbbb (0) .
              &i2bb (0) . &i2b (0) . &i2b (0) . &i2b (0) . &i2b (0) .
              &i2bbb (0) . &i2bbbb ($userid) . "\n" ;
@@ -2117,6 +2120,9 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
 # { @days_of_year {sprintf("%02d",$month).sprintf("%02d",$day)}++ ; }
 
   my $start_collect_articlecounts4 = code_started() if $record_time_collect_article_counts ;
+
+  if ($language eq 'wikidata') # count all pages
+  { $article_type = '+' ; }
 
   $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb ($size) . &i2bbbb ($size2) .
            &i2bb ($links) . &i2b ($wikilinks) . &i2b ($imagelinks) . &i2b ($categorylinks) . &i2b ($externallinks) .
