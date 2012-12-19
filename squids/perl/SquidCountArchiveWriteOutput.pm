@@ -1,8 +1,7 @@
  #!/usr/bin/perl
 
-
-  use lib $cfg_liblocation ;
-  use EzLib ;
+use lib $cfg_liblocation ;
+use EzLib ;
 
 sub WriteOutputIpFrequencies
 {
@@ -626,12 +625,27 @@ sub WriteOutputSquidLogs
   &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "SunOS") ;
   &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "SymbianOS") ;
   &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "Windows") ;
-  print OUT2 sprintf ("%6d",$total_operating_systems_printed) . "=" . sprintf ("%5.2f",(100*$total_operating_systems_printed/$total_operating_systems)) . "% : Total\n\n" ;
 
-  @LinuxVersions = split (',', 'Android,Xubuntu,Kubuntu,Ubuntu,Gentoo,PCLinuxOS,CentOS,Oracle,Mandriva,Red Hat,Mandriva,openSUSE,SUSE,Fedora,Epiphany,Mint,Mips,Arch,Debian,Slackware,Motor,Other') ;
+
+  use Data::Dumper;
+  print Dumper \%operating_systems;
+  warn "$total_operating_systems_printed  \/ $total_operating_systems";
+
+  my $percentage_operating_systems_printed = 0;
+  if($total_operating_systems != 0 ) {
+    $percentage_operating_systems_printed =
+      (100*$total_operating_systems_printed/$total_operating_systems);
+  } else {
+    $percentage_operating_systems_printed = 0.0000;
+  };
+
+  print OUT2 sprintf ("%6d",$total_operating_systems_printed) . "=" . sprintf ("%5.2f",$percentage_operating_systems_printed) . "% : Total\n\n" ;
+
+  @LinuxVersions = qw/Android Xubuntu Kubuntu Ubuntu Gentoo PCLinuxOS CentOS Oracle Mandriva Red Hat Mandriva openSUSE SUSE Fedora Epiphany Mint Mips Arch Debian Slackware Motor Other/;
 
   &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "Mac Intel") ;
   &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "Mac PowerPC") ;
+
 
   foreach $LinuxVersion (@LinuxVersions)
   { &WriteOutputLineToCsvSharePerOs  ($total_operating_systems, "Linux $LinuxVersion") ; }

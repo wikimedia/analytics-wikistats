@@ -97,8 +97,14 @@ default_argv $cfg_default_argv ;
   $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
   $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile|Wikipedia Mobile" ;
 
-  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|Symbian|UP\.Browser|Vodafone|WAP|webOS|HTC[^P]|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise XP|Sunrise/|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech|MeeGo|Tizen" ;
-  $tags_tablet       = "iPad|Android 3|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|Tablet|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
+  # UPDATE( we are treating some of these different now in SquidCountArchiveProcessLogRecord.pm starting at line 364
+  # Special cases we need to treat separately
+  # Opera , Opera Tablet
+  # Android, Android; Tablet
+  # iPad/iPhone
+  $tags_mobile         = "BlackBerry|Windows CE|DoCoMo|iPod|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|Symbian|UP\.Browser|Vodafone|WAP|webOS|HTC[^P]|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise XP|Sunrise/|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech|MeeGo|Tizen" ;
+  $tags_tablet         = "Tablet PC|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
+
   $tags_mobile_upd  = "March 2012" ;
   &ReadMobileDeviceInfo ;
 
@@ -575,6 +581,9 @@ sub ProcessPhase1 # collect IP frequencies, needed for filtering probable bots i
 
   $scan_ip_frequencies = $true ;
   $scan_all_fields     = $false ;
+
+  use Data::Dumper;
+  my $dbg_str = Dumper(\@files);
 
   my $data_read = &ReadSquidLogFiles ($path_out, $time_to_start, $time_to_stop, @files) ;
   return if not $data_read ;
