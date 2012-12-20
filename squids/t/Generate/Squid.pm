@@ -113,7 +113,7 @@ sub __increase_day  {
   #takes into account the milliseconds at the end
 
   # Reset HMS of date
-  $self->{current_datetime} =~ s/T.*$/T00:00:00.000/g;
+  $self->{current_datetime} =~ s/T.*$/T00:00:01.000/g;
   my $tp_object = $self->__parse_self_current_datetime;
   #ADDS ONE DAY
   $tp_object+=24 * 3600;

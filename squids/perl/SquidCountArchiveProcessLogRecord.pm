@@ -7,6 +7,10 @@ sub ProcessLine
 
   my $line = shift ;
 
+
+  #warn "[DBG] $line";
+  #confess "[DBG] stacktrace ";
+
   $version=""; #reset version
 
   $time = $fields [2] ;
@@ -221,7 +225,7 @@ sub ProcessLine
   $agent2 =~ s/\(\s*\)//go ;
 
   # e.g. BlackBerry8310/4.2.2 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/102 -> BlackBerry8310/4.2.2
-  if ($agent2 =~ BlackBerry)
+  if ($agent2 =~ /BlackBerry/)
   { $agent2 =~ s/^.*?BlackBerry\d+\/([^\s]*).*$/BlackBerry\/$1/io ; } # keep
 
   $agent2 =~ s/Android (\d)/Android\/$1/o ;
@@ -361,8 +365,31 @@ sub ProcessLine
   { $mobile = 'M' ; }
   elsif ($agent2 =~ /(?:$tags_wiki_mobile)/io)
   { $mobile = 'W' ; }
-  elsif ($agent2 =~ /(?:$tags_tablet)/io)
-  { $mobile = 'T' ; }
+  elsif ($agent2 =~ /($tags_tablet)/io)
+  { $mobile = 'T' ; } 
+  else {
+    my $capture = "";
+    if(      $agent2 =~ /iPad/) {
+      $mobile = 'T';
+    } elsif( $agent2 =~ /iPhone/) {
+      $mobile = 'M';
+    } elsif( $agent2 =~ /Opera Tablet/) {
+      $mobile = 'T';
+    } elsif( ($capture) = 
+             $agent2 =~ /((?:Android)(?:\s|;\s)?(?:Tablet|Mobile)?)/) {
+      if($capture eq "Android" || $capture eq "Opera") {
+        #warn "[DBG] A/O MOBILE!!";
+        #use Data::Dumper;
+        #my $dbg_str = Dumper(\@-);
+        #$dbg_str =~ s/^/[DBG]/g;
+        #$dbg_str =~ s/\n/\n[DBG]/g;
+        #warn $dbg_str;
+        $mobile = 'M';
+      } else {
+        $mobile = 'T';
+      };
+    };
+  };
 
 
 
@@ -711,6 +738,7 @@ sub ProcessLine
     if ($os =~ /playstation/io)
     { $version = "NetFront (PlayStation)" ; }
 
+    #warn "[DBG] $mobile,$version,$mimecat";
     $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
@@ -967,7 +995,8 @@ sub ProcessLine
   $mobile2 =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
 
   if( ($mobile2 eq "-" || $mobile eq "-") && $os =~ /iPad|BlackBerry|iPhone|iPod/io) {
-    warn "ERROR2, exiting";
+    #warn "[DBG] ERROR2, exiting";
+    #warn "[DBG]";
     exit 0;
   };
 
@@ -1488,20 +1517,13 @@ sub ProcessUploadPath
 
 sub ReadMobileDeviceInfo
 {
-  @mobile_devices = () ;
-  my $mobile_device_csv = 'MobileDeviceTypes.csv' ;
-  if (! -e $mobile_device_csv)
-  {
-    print "No mobile devices file found; all mobile devices will be counted as unknown\n" ;
-    return
-  }
-  open CSV_MOBILE_DEVICES, '<', $mobile_device_csv ;
-  while ($line = <CSV_MOBILE_DEVICES>)
-  {
-    chomp $line ;
-    push( @mobile_devices, $line ) ;
-  }
-  close CSV_MOBILE_DEVICES ;
+  my $path_to_mobiledevicecsv = "$cfg_path_root_production/meta/MobileDeviceTypes.csv";
+  if(!-e $path_to_mobiledevicecsv) {
+    print "No mobile devices csv found\n";
+    exit(-1);
+  };
+  open CSV_MOBILE_DEVICES,'<',$path_to_mobiledevicecsv; 
+  @mobile_devices= map { $a=$_; $a=~s/\r\n$//; $a; } <CSV_MOBILE_DEVICES>;
 }
 
 1;
