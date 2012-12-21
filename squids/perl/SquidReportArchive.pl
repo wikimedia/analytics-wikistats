@@ -2637,10 +2637,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if isMobile($mobile);
-
-
-
+    next if $mobile ne '-' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2736,7 +2733,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if !isMobile($mobile);
+    next if $mobile ne 'M' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2867,7 +2864,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if isMobile($rectype); # group
+    next if $rectype ne '-' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -2917,7 +2914,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if !isMobile($rectype) ; # group
+    next if $rectype ne 'M' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -3004,7 +3001,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if isMobile($mobile);
+    next if $mobile ne '-' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3076,7 +3073,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if !isMobile($mobile);
+    next if $mobile ne 'M' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3178,7 +3175,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if isMobile($rectype); # group
+    next if $rectype ne '-' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -3220,7 +3217,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if !isMobile($rectype); # group
+    next if $rectype ne 'M' && $rectype ne 'W' && rectype ne 'T' && rectype ne 'P'; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -3289,7 +3286,10 @@ sub WriteReportClients
     if (($engine2 ne $engine_prev) && ($engine_prev ne ""))
     {
       $total_engine = $total_engines {$engine_prev} ;
-      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
+      $perc_engine = 
+                    ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile) != 0
+                    ? sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile))
+                    : 0;
       $total_engine = &FormatCount ($total_engine) ;
       $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
     }
@@ -3837,8 +3837,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if isMobile($rectype,$os) ; # group
-
+    next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3856,7 +3855,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if !isMobile($rectype,$os) ; # group
+    next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3912,7 +3911,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if isMobile($rectype,$os); # group
+    next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3930,7 +3929,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if !isMobile($rectype,$os); # group
+    next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
