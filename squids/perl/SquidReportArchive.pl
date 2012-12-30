@@ -2268,7 +2268,13 @@ sub CalcPercentages
   warn "[DBG] total_clients_html_only          = $total_clients_html_only";
 
   foreach $key (keys %opsys) { 
-    $opsys_perc{$key} = sprintf("%.2f",(100*$opsys{$key}/$total_opsys)) . "%" ; 
+    my $percentage_opsys = 0 ;
+    if($total_opsys == 0) {
+      $percentage_opsys = 0.0000;
+    } else {
+      $percentage_opsys = (100*$opsys{$key}/$total_opsys);
+    }; 
+    $opsys_perc{$key} = sprintf("%.2f",$percentage_opsys) . "%" ; 
   };
 
   foreach $key (keys %opsys_html_only) { 
@@ -2631,10 +2637,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if isMobile($mobile);
-
-
-
+    next if $mobile ne '-' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2648,8 +2651,7 @@ sub WriteReportClients
 
     $perc_total_nonmobile += $perc ;
     $perc_total_html_only_nonmobile += $perc_html_only ;
-  };
-
+  }
 
   $perc = ".." ;
   $count = $clientgroups_other {'-'} ;
@@ -2731,7 +2733,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if !isMobile($mobile);
+    next if $mobile ne 'M' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2862,7 +2864,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if isMobile($rectype); # group
+    next if $rectype ne '-' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -2912,7 +2914,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if !isMobile($rectype) ; # group
+    next if $rectype ne 'M' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -2999,7 +3001,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if isMobile($mobile);
+    next if $mobile ne '-' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3048,11 +3050,17 @@ sub WriteReportClients
 
   $count = $clientgroups_other {'T'} ;
   $total = &FormatCount ($total_clientgroups {'T'}) ;
-  $perc = sprintf ("%.2f", 100 * $count / $total_all_clientgroups) ;
+
+  $perc = $total_all_clientgroups != 0
+            ? sprintf ("%.2f", 100 * $count / $total_all_clientgroups) 
+            : 0;
 
   $count_html_only = $clientgroups_other_html_only {'T'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'T'}) ;
-  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups)) ;
+
+  $perc_html_only = $total_all_clientgroups != 0
+                    ? sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups))
+                    : 0;
 
   $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_tablet\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_tablet\%</th></tr>\n" ;
@@ -3065,7 +3073,7 @@ sub WriteReportClients
     next if $count == 0 ;
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
-    next if !isMobile($mobile);
+    next if $mobile ne 'M' ;
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3078,11 +3086,16 @@ sub WriteReportClients
 
   $count = $clientgroups_other {'M'} ;
   $total = &FormatCount ($total_clientgroups {'M'}) ;
-  $perc = sprintf ("%.2f", 100 * $count / $total_all_clientgroups) ;
+  $perc = $total_all_clientgroups != 0
+          ? sprintf ("%.2f", 100 * $count / $total_all_clientgroups)
+          : 0;
 
   $count_html_only = $clientgroups_other_html_only {'M'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'M'}) ;
-  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups)) ;
+
+  $perc_html_only = $total_all_clientgroups != 0
+                    ? sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups))
+                    : 0;
 
   $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_mobile\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_mobile\%</th></tr>\n" ;
@@ -3108,11 +3121,15 @@ sub WriteReportClients
 
   $count = $clientgroups_other {'P'} ;
   $total = &FormatCount ($total_clientgroups {'P'}) ;
-  $perc = sprintf ("%.2f", 100 * $count / $total_all_clientgroups) ;
+  $perc = $total_all_clientgroups != 0
+          ? sprintf ("%.2f", 100 * $count / $total_all_clientgroups)
+          : 0;
 
   $count_html_only = $clientgroups_other_html_only {'P'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'P'}) ;
-  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups)) ;
+  $perc_html_only = $total_all_clientgroups != 0
+                    ? sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups))
+                    : 0;
 
   $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_wap\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_wap\%</th></tr>\n" ;
@@ -3138,11 +3155,15 @@ sub WriteReportClients
 
   $count = $clientgroups_other {'W'} ;
   $total = &FormatCount ($total_clientgroups {'W'}) ;
-  $perc = sprintf ("%.2f", 100 * $count / $total_all_clientgroups) ;
+  $perc = $total_all_clientgroups != 0
+          ? sprintf ("%.2f", 100 * $count / $total_all_clientgroups)
+          : 0;
 
   $count_html_only = $clientgroups_other_html_only {'W'} ;
   $total_html_only = &FormatCount ($total_clientgroups_html_only {'W'}) ;
-  $perc_html_only = sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups)) ;
+  $perc_html_only = $total_all_clientgroups != 0
+                    ? sprintf ("%.2f", 100 * $count_html_only / ($total_all_clientgroups))
+                    : 0;
 
   $html .= "<tr><td class=l>Other</th>" . &ShowCountTd ($count) . "<td class=r>$perc\%</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only\%</td></tr>\n" ;
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total) . "<th class=r>$perc_total_wiki\%</th>" . &ShowCountTh ($total_html_only) . "<th class=r>$perc_total_html_only_wiki\%</th></tr>\n" ;
@@ -3154,7 +3175,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if isMobile($rectype); # group
+    next if $rectype ne '-' ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -3166,7 +3187,9 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_non_mobile) ;
-  $perc = sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
+  $perc = ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile) != 0
+          ? sprintf ("%.1f",100*$total_clients_non_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile))
+          : 0;
 
   $total_html_only = &FormatCount ($total_clients_non_mobile_html_only) ;
 
@@ -3194,7 +3217,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if !isMobile($rectype); # group
+    next if $rectype ne 'M' && $rectype ne 'W' && rectype ne 'T' && rectype ne 'P'; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -3206,7 +3229,9 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$client</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td>" . &ShowCountTd ($count_html_only) . "<td class=r>$perc_html_only</td></tr>\n" ;
   }
   $total = &FormatCount ($total_clients_mobile) ;
-  $perc = sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
+  $perc = ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)
+          ? sprintf ("%.1f",100*$total_clients_mobile / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile))
+          : 0;
 
   $total_html_only = &FormatCount ($total_clients_mobile_html_only) ;
 
@@ -3261,7 +3286,10 @@ sub WriteReportClients
     if (($engine2 ne $engine_prev) && ($engine_prev ne ""))
     {
       $total_engine = $total_engines {$engine_prev} ;
-      $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
+      $perc_engine = 
+                    ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile) != 0
+                    ? sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile))
+                    : 0;
       $total_engine = &FormatCount ($total_engine) ;
       $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
     }
@@ -3270,7 +3298,9 @@ sub WriteReportClients
     $html .= "<tr><td class=l>$engine</td>" . &ShowCountTd ($total) . "<td class=r>&nbsp;</td></tr>\n" ;
   }
   $total_engine = $total_engines {$engine_prev} ;
-  $perc_engine = sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile)) ;
+  $perc_engine = ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile) != 0
+                 ? sprintf ("%.1f", 100 * $total_engine / ($total_clients_mobile + $total_clients_non_mobile + $total_clients_wiki_mobile))
+                 : 0;
   $total_engine = &FormatCount ($total_engine) ;
   $html .= "<tr><th class=l>Total</th>" . &ShowCountTh ($total_engine) . "<th class=r>$perc_engine\%</th></tr>\n" ;
 
@@ -3741,7 +3771,9 @@ sub WriteReportOpSys
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
   $total_opsys_mobile2 = &FormatCount ($total_opsys_mobile) ;
   $total_opsys_non_mobile2 = &FormatCount ($total_opsys_non_mobile) ;
-  $total_perc_mobile = sprintf ("%.1f", 100 * $total_opsys_mobile / ($total_opsys_mobile + $total_opsys_non_mobile)) ;
+  $total_perc_mobile = ($total_opsys_mobile + $total_opsys_non_mobile) != 0
+                       ? sprintf ("%.1f", 100 * $total_opsys_mobile / ($total_opsys_mobile + $total_opsys_non_mobile))
+                       : 0;
   $total_perc_non_mobile = 100 - $total_perc_mobile ;
   $line_total_all        = "<tr><th class=l>Total</th>" . &ShowCountTh ($total_all2) . "<th class=r>100\%</th></tr>\n" ;
   $line_total_mobile     = "<tr><th class=l>Total</th>" . &ShowCountTh ($total_opsys_mobile2) . "<th class=r>$total_perc_mobile\%</th></tr>\n" ;
@@ -3805,8 +3837,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if isMobile($rectype,$os) ; # group
-
+    next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3824,7 +3855,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if !isMobile($rectype,$os) ; # group
+    next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3880,7 +3911,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if isMobile($rectype,$os); # group
+    next if $rectype ne '-' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3898,7 +3929,7 @@ sub WriteReportOpSys
 
     ($rectype, $os) = split (',', $key,2) ;
 
-    next if !isMobile($rectype,$os); # group
+    next if $rectype ne 'M' ; # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -5235,16 +5266,24 @@ sub UserAgentCsvLine
   $result .= ",$writevalue" ;
   if ($showperc)
   {
-    $perc = 0.1 * $value / $total_count ;
+    $perc = $total_count != 0
+            ? 0.1 * $value / $total_count
+            : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
-    $perc = 100 * $countua {$code, 'M', '.', '.'} * $multiplier / $total_count ;
+    $perc = $total_count != 0
+            ? 100 * $countua {$code, 'M', '.', '.'} * $multiplier / $total_count
+            : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
-    $perc = 100 * $countua {$code, 'W', '.', '.'} * $multiplier / $total_count ;
+    $perc = $total_count != 0
+            ? 100 * $countua {$code, 'W', '.', '.'} * $multiplier / $total_count
+            : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
-    $perc = 100 * $countua {$code, 'X', '.', '.'} * $multiplier / $total_count ;
+    $perc = $total_count != 0
+            ? 100 * $countua {$code, 'X', '.', '.'} * $multiplier / $total_count
+            : 0;
     $perc = sprintf("%.2f", $perc) ;
     $result .= ",$perc" ;
   }

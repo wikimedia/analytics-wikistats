@@ -17,7 +17,7 @@ chomp $hostname;
 our $__CODE_BASE;
 if($hostname eq "gallium") {
   # Running on Jenkins
-  $__CODE_BASE = "/var/lib/jenkins/jobs/wikistats/workspace/squids";
+  $__CODE_BASE = "/var/lib/jenkins/jobs/analytics-wikistats/workspace/squids";
 } elsif($hostname eq "stat1" && $ENV{HOME} eq "/home/ezachte") {
   # Running on Erik's account on stat1
   $__CODE_BASE = "/home/ezachte/wikistats/squids";
