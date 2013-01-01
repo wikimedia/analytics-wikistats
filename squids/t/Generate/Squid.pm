@@ -53,6 +53,8 @@ our @ALL_COUNTRY_CODES          = (@ALL_WIKISTATS_CUSTOM_CODES,@ALL_WIKISTATS_RE
 #  the first with 2300 entries, the second with just one entry, and you will be ready to parse them with wikistats.
 #
 
+
+our $ENTIRE_DAY = 24 * 3600;
 sub new {
   my ($class_name,$params) = @_;
 
@@ -108,6 +110,20 @@ sub __increase_second {
   $self->{current_datetime} = $tp_object->datetime.".000";
 };
 
+sub __increase_month  {
+  my ($self) = @_;
+  my $tp_object = $self->__parse_self_current_datetime;
+  my $month_before = $tp_object->mon;
+
+  # increase day until we reach the next month
+  while($month_before == $tp_object->mon) {
+    $tp_object += $ENTIRE_DAY;
+  };
+
+  $self->{current_datetime} = $tp_object->datetime.".000";
+  $self->{current_datetime} =~ s/\d\dT$/01T/g;
+};
+
 sub __increase_day  {
   my ($self) = @_;
   #takes into account the milliseconds at the end
@@ -116,7 +132,7 @@ sub __increase_day  {
   $self->{current_datetime} =~ s/T.*$/T00:00:01.000/g;
   my $tp_object = $self->__parse_self_current_datetime;
   #ADDS ONE DAY
-  $tp_object+=24 * 3600;
+  $tp_object += $ENTIRE_DAY;
   $self->{current_datetime} = $tp_object->datetime.".000";
 };
 

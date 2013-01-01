@@ -1,0 +1,14 @@
+
+<table>
+  <th>C1</th>
+  <th>C2</th>
+  <th>C3</th>
+  [% FOREACH month IN key %]
+    <tr>
+    [% FOREACH cell IN month %]
+      <td> [% cell %] </td>
+    [% END %] 
+    </tr>
+  [% END %]
+</table>
+

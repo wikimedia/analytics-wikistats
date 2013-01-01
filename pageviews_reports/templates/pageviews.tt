@@ -1,0 +1,3 @@
+[% INCLUDE "pageviews-header.tt" %]
+[% INCLUDE "pageviews-body.tt"   %]
+[% INCLUDE "pageviews-footer.tt" %]
