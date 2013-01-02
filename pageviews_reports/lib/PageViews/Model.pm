@@ -20,6 +20,7 @@ sub process_line {
   my $time    = $fields[2];
   my $url     = $fields[8];
   my $country = $fields[14];
+  return if $country eq "--";
 
   #warn "[DBG] line = $line";
   #warn "[DBG] country = $country";
