@@ -1,5 +1,5 @@
 
-<table border=1>
+<table class="b">
 
   [% headers = data.shift %] 
   [% FOREACH header IN headers %]
@@ -8,9 +8,12 @@
 
   [% WHILE (row = data.shift) %]
     <tr>
-    [% FOREACH cell IN row %]
-      <td> [% cell %] </td>
-    [% END %] 
+    <td> [% row.shift %] </td>
+      <script language='javascript'>
+        [% FOREACH cell IN row %]
+          tdc('#3BFF3B','+49%, 54.81%, 1st','[% cell %]&nbsp;M');
+        [% END %] 
+      </script>
     </tr>
   [% END %]
 
