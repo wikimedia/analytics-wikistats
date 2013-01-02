@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>PageView Reports</title>
+    <script type="text/javascript" src="static/js/WikipediaStatistics14.js"></script>
+    <link rel="stylesheet"  type="text/css"  href="static/css/pageviews.css" />
+  </head>
+  <body>
+    <script type="text/javascript" src="static/js/d3.js" ></script>
+    <script type="text/javascript" src="static/js/d3-draw-chart.js" ></script>
+    <script type="text/javascript" src="static/js/unsampling-data.js" ></script>
+
+
+<script language='javascript'>
+        var colorPowerScale = d3.scale
+                              .pow()
+                              .exponent(.5)
+                              .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
+                              .range(['red','white','green']);
+</script>
+
+[% INCLUDE "color-spectrum-d3.tt" %]
+
+
+  </body>
+</html>

@@ -1,0 +1,75 @@
+
+<script language='javascript'>
+        var colorPowerScale = d3.scale
+                              .pow()
+                              .exponent(.5)
+                              .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
+                              .range(['red','white','green']);
+</script>
+
+<!-- Table with language/month page views -->
+<table class="b">
+
+  [% headers = data.shift %] 
+  <tr>
+    [% FOREACH header IN headers %]
+    <th>[% header %] </th>
+    [% END %]
+  </tr>
+
+  <!-- charts go here -->
+  <tr>
+    <!-- check to see if the header is a language -->
+    <td>Trend last<br/> 24 months</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    [% FOREACH language IN headers %]
+      [% IF chart_data.exists(language) %]
+        [% container_id = 'container-' _ language %]
+        <td>
+            <div align="left" id="[% container_id %]"/>
+            <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
+        </td>
+      [% ELSE %]
+      [% END %]
+    [% END %]
+  </tr>
+  <tr>
+    <td>language<br/>totals</td>
+    <td><script>document.write(unsample_and_format([% big_total_processed %]));</script></td>
+    <td><script>document.write(unsample_and_format([% big_total_discarded %]));</script></td>
+    <td><script>document.write(unsample_and_format([% big_total_bots      %]));</script></td>
+    [% FOREACH language IN headers %]
+      [% IF chart_data.exists(language) %]
+        <td><script>document.write(unsample_and_format([% language_totals.$language %])); </script></td>
+      [% END %]
+    [% END %]
+  </tr>
+
+  [% WHILE ( data.size > 0 ) %]
+    [% row   = data.shift %]
+    [% month = row.shift %]
+    <tr>
+    <!-- month name -->
+    <td> [% month %] </td>
+    <!-- month total -->
+    <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
+    <td> <script>document.write(unsample_and_format([% monthly_discarded_count.$month %]));</script> </td>
+    <td> <script>document.write(unsample_and_format([% monthly_bots_count.$month      %]));</script> </td>
+      <script language='javascript'>
+        [% FOREACH cell IN row %]
+          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
+        [% END %] 
+      </script>
+    </tr>
+  [% END %]
+
+  <tr>
+    [% FOREACH header IN headers %]
+    <td>[% header %] </td>
+    [% END %]
+  </tr>
+
+</table>
+
