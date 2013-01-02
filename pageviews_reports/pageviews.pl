@@ -16,6 +16,9 @@ my $LOG_PREFIX    = "sampled-1000.log-";
 
 my @country_codes = qw/US GB CA FR DE/;
 
+
+# overall_count_delta is the percentage by which counts increased/decreased
+# over the previous month
 my $config = [
   {
     month => "2012-10",
@@ -29,11 +32,11 @@ my $config = [
   },
   {
     month => "2012-11",
-    overall_count_increase => 0.24,
+    overall_count_delta => 0.24,
   },
   {
     month => "2012-12",
-    overall_count_increase => 0.30,
+    overall_count_delta => 0.30,
   },
 ];
 
@@ -66,10 +69,10 @@ my $config = [
         }) for 1..$count;
       };
       $previous_month_counts = $hcount;
-    } elsif ( exists $month_data->{overall_count_increase} ) {
+    } elsif ( exists $month_data->{overall_count_delta} ) {
 
       my $current_month_counts = { };
-      my $mul = 1 + $month_data->{overall_count_increase};
+      my $mul = 1 + $month_data->{overall_count_delta};
       for my $key (keys %$previous_month_counts ) {
         $current_month_counts->{$key} = 
           int( $mul * $previous_month_counts->{$key});
@@ -111,4 +114,5 @@ my $d = $m->get_data();
 warn "[DBG]".Dumper($d);
 my $v = PageViews::View->new($d);
 
-$v->render($d);
+$v->render({ output_path => "/tmp/pageview_reports/" });
+

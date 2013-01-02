@@ -14,9 +14,15 @@ sub new {
 };
 
 sub render {
-  my ($self) = @_;
+  my ($self,$params) = @_;
 
-  my $output_path = "/tmp/pageview_reports/";
+  confess "[ERR]  expected param output_path"
+    unless 
+      exists $params->{output_path} && 
+      -d $params->{output_path};
+
+  my $output_path = $params->{output_path};
+
   `mkdir -p $output_path`;
   my $tt = Template->new({
       INCLUDE_PATH => "./templates",
@@ -27,6 +33,8 @@ sub render {
     $self->{data} ,
     "pageviews.html",
   ) || confess $tt->error();
+
+  `cp -r static/ $output_path`;
 
 };
 

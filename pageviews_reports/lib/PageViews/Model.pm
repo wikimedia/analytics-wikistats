@@ -47,9 +47,39 @@ sub process_files  {
   };
 };
 
+
 sub get_data {
   my ($self) = @_;
-  return $self->{counts};
+
+  # origins are wikipedia languages present
+
+  my $retval = [];
+
+  my $languages_present_uniq = {};
+  my @months_present = sort { $a cmp $b }  keys %{ $self->{counts} };
+
+  for my $month ( @months_present ) {
+    for my $language ( keys %{ $self->{counts}->{$month} } ) {
+      $languages_present_uniq->{$language} = 1;
+    };
+  };
+
+  my @unsorted_languages_present = keys %$languages_present_uniq;
+
+  push @$retval , ['month' , @unsorted_languages_present ];
+
+  for my $month ( @months_present ) {
+    my $new_row = [];
+    push @$new_row, $month;
+    for my $language ( @unsorted_languages_present ) {
+      push @$new_row, $self->{counts}->{$month}->{$language};
+    };
+    push @$retval , $new_row;
+  };
+
+  return {
+    data => $retval
+  };
 };
 
 1;

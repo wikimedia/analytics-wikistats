@@ -1,14 +1,18 @@
 
-<table>
-  <th>C1</th>
-  <th>C2</th>
-  <th>C3</th>
-  [% FOREACH month IN key %]
+<table border=1>
+
+  [% headers = data.shift %] 
+  [% FOREACH header IN headers %]
+  <th>[% header %] </th>
+  [% END %]
+
+  [% WHILE (row = data.shift) %]
     <tr>
-    [% FOREACH cell IN month %]
+    [% FOREACH cell IN row %]
       <td> [% cell %] </td>
     [% END %] 
     </tr>
   [% END %]
+
 </table>
 
