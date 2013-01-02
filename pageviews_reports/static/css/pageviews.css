@@ -1,0 +1,81 @@
+body    {font-family:arial,sans-serif; font-size:12px }
+input   {font-family:arial,sans-serif; font-size:12px }
+h2      {margin:0px 0px 3px 0px; font-size:18px}
+h3      {margin:0px 0px 1px 0px; font-size:15px}
+h4      {margin:0px 0px 9px 0px; font-size:14px}
+hr,form {margin-top:1px;margin-bottom:2px}
+hr.b    {margin-top:1px;margin-bottom:4px}
+
+td   {white-space:nowrap; text-align:right; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px}
+td.c {text-align:center }
+td.l {text-align:left;}
+td.lwrap {white-space:normal; text-align:left; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px}
+
+td.cb    {text-align:center; border: inset 1px #FFFFFF}
+td.cbg   {text-align:center; border: inset 1px #FFFFFF ; color:#808080; }
+td.lb    {text-align:left;   border: inset 1px #FFFFFF}
+td.rb    {text-align:right;  border: inset 1px #FFFFFF}
+td.rbg   {text-align:right;  border: inset 1px #FFFFFF ; color:#808080; }
+td.sigma {color:#400040;     border: inset 1px #FFFFFF}
+td.img   {padding:0px ; margin:0px ; border: inset 1px #FFFFFF}
+
+
+table.b td    {text-align:right;  border: inset 1px #FFFFFF}
+table.b th    {text-align:center; border: none}
+table.b th.l  {text-align:left;   border: none ; vertical-align:top;}
+table.b th.c  {text-align:center; border: none ; vertical-align:top;}
+table.b th.r  {text-align:right;  border: none ; vertical-align:top;}
+table.b td.cb {text-align:center; border: inset 1px #FFFFFF}
+
+tr.c td    {text-align:center}
+
+th.cnb {text-align:center; border:none ; padding:2px 0px 2px 0px ; vertical-align:top;}
+th.lnb {text-align:left;   border:none ; padding:2px 0px 2px 0px ; vertical-align:top;}
+th.rnb {text-align:right;  border:none ; padding:2px 0px 2px 0px ; vertical-align:top;}
+
+th.cb  {text-align:center; padding:2px 0px 2px 0px ; vertical-align:top; border: inset 1px #FFFFFF}
+th.lb  {text-align:left;   padding:2px 0px 2px 0px ; vertical-align:top; border: inset 1px #FFFFFF}
+th.rb  {text-align:right;  padding:2px 0px 2px 0px ; vertical-align:top; border: inset 1px #FFFFFF}
+
+.chart {font-size: 8px; text-align:center; color: #000000; font-family: arial,sans-serif; padding:0px; border: 1px }
+.chart_scale {font-size: 8px; text-align:right; color: #000000; font-family: arial,sans-serif; padding: 0px;}
+.xsmall {font-size: 8px; color: #FF00FF; font-family: arial,sans-serif;}
+xsmall {font-size: 10px; color: #000000; font-family: arial,sans-serif;}
+
+a:link { color:blue;text-decoration:none;  }
+a:visited {color:#0000FF;text-decoration:none; }
+a:active  {color:#0000FF;text-decoration:none;  }
+a:hover   {color:#FF00FF;text-decoration:underline}
+
+ul {border-left:0em ; margin-left:2em ; padding-left:0em}
+li {list-style-type:none}
+
+img {border:0 ; margin:0px; padding:0px}
+img.border { border:1px solid black }
+
+thin {border:none;margin:0px}
+
+img {border:0}
+
+.d1 { font-size:9px;float:left;width:1%}
+.d2 { font-size:12px;font-weight:bold;float:right;width:100%}
+
+.ch1  { color:#BBBB66; font-size:12px; font-weight:normal }
+.ch2  { color:#5555AA; font-size:12px; font-weight:normal }
+.ch3  { color:#0000FF; font-size:12px; font-weight:bold }
+.ch1a { color:#BBBB66; font-size:12px; font-weight:normal ; padding-left:3px ; padding-right:3px }
+.ch2a { color:#5555AA; font-size:12px; font-weight:normal ; padding-left:3px ; padding-right:3px }
+.ch3a { color:#0000FF; font-size:12px; font-weight:bold ;   padding-left:3px ; padding-right:3px }
+.ch1b { color:#BBBB66; font-size:9px;  font-weight:normal ; padding-left:3px ; padding-right:3px }
+.ch2b { color:#5555AA; font-size:11px; font-weight:normal ; padding-left:3px ; padding-right:3px }
+.ch3b { color:#0000FF; font-size:13px; font-weight:normal ; padding-left:3px ; padding-right:3px }
+.ch1c { color:#000044; font-size:9px;  font-weight:normal ; padding-left:2px ; padding-right:2px }
+.ch2c { color:#0000AA; font-size:11px; font-weight:bolder ; padding-left:4px ; padding-right:4px }
+.ch3c { color:#0000FF; font-size:13px; font-weight:bold   ; padding-left:6px ; padding-right:6px }
+
+
+.chart rect {
+  fill: steelblue;
+  stroke: white;
+}
+

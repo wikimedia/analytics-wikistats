@@ -1,0 +1,53 @@
+
+<!-- Debug template to render d3 Color ramp spectrum -->
+[% distinct_colors = 150 %]
+[% increment = ( (max_language_delta - min_language_delta) / distinct_colors ) %]
+<p> </p>
+<script src="static/js/jquery.js"></script>
+<script>
+  $(document).ready(function(){
+    var min = [% min_language_delta %];
+    var max = [% max_language_delta %];
+    var increment = [% increment %];
+    for(var i = min;i<=max;i+=increment) {
+      $("#d3-color-spectrum"  ).append(
+          '<td bgcolor="'                 +
+          colorPowerScale(i)              +
+          '" height="10" width="3"></td>'
+      );
+    };
+  });
+</script>
+
+<p> <b><u> d3 Color Ramp Spectrum(the one we're using)</u> </b> </p>
+
+<!-- In the following table we have two rows, one with values and one with colours 
+     We'll use this to check if the colors are at the places we expect them to be.
+     And if the spectrum doesn't get skewed or distorted.
+-->
+<!-- <table style="border-collapse: collapse; border-width: 0px;"> -->
+<!-- <table border=1> -->
+<table style="border-collapse: collapse; border-width: 0px;">
+  <tr>
+    <td>values</td>
+    <td><b>[% min_language_delta %]<b></td>
+    [% j = min_language_delta + 2 %]
+    [% WHILE ( j < 0 ) %]
+      <td></td>
+      [% j = j + increment %]
+    [% END %]
+    <td>0</td>
+    [% j = 0 %]
+
+    [% WHILE ( j <= ( max_language_delta ) ) %]
+      <td></td>
+      [% j = j + increment %]
+    [% END %]
+
+    <td><b>[% max_language_delta %]</b></td>
+  </tr>
+
+  <tr id="d3-color-spectrum">
+    <td>colors</td>
+  </tr>
+</table>
