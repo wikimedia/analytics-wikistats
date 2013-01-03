@@ -11,7 +11,7 @@
     <td> [% row.shift %] </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
-          tdc('#3BFF3B','+[% cell.monthly_delta %]%, [% cell.percentage_of_monthly_total %]%, 1st','[% cell.monthly_count %]&nbsp;M');
+          tdc('#3BFF3B','[% cell.monthly_delta %], [% cell.percentage_of_monthly_total %], 1st','[% cell.monthly_count %]&nbsp;M');
         [% END %] 
       </script>
     </tr>

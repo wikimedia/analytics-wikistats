@@ -50,6 +50,40 @@ sub process_files  {
 };
 
 
+# safe division, truncate to 2 decimals
+sub safe_division {
+  my ($self,$numerator,$denominator) = @_;
+  my $retval;
+
+  if(defined($numerator) && defined($denominator)) {
+    $retval = 
+      $denominator 
+        ? sprintf("%.2f",($numerator / $denominator))
+        : "--";
+  } else {
+    $retval = "--";
+  };
+
+  return $retval;
+};
+
+
+sub format_percent {
+  my ($self,$val) = @_;
+  if($val ne "--") {
+    my $sign;
+    if(       $val > 0) {
+      $sign = "+";
+    } else {
+      $sign = "";
+    };
+    $val = "$sign$val%";
+  };
+
+  return $val;
+};
+
+
 sub get_data {
   my ($self) = @_;
 
@@ -78,6 +112,8 @@ sub get_data {
   for my $month ( @months_present ) {
     my   $new_row = [];
     push @$new_row, $month;
+
+    # idx_language is the index of the current language inside unsorted_languages_present
     for my $idx_language ( 0..$#unsorted_languages_present ) {
       my $language = $unsorted_languages_present[$idx_language];
       # hash containing actual count, percentage of monthly total, increase over past month
@@ -95,22 +131,20 @@ sub get_data {
         $monthly_count_previous = 0;
       };
       $monthly_count               = $self->{counts}->{$month}->{$language}          // 0;
-      $percentage_of_monthly_total = $month_totals->{$month}
-                                     ? sprintf("%.2f",$monthly_count / $month_totals->{$month} // 0)
-                                     : "--";
+      $percentage_of_monthly_total = $self->safe_division($monthly_count , $month_totals->{$month});
 
       # safety check
       # if we have at least one month to compare to
       # and the previous month has a non-zero count
 
       warn "[DBG] monthly_count_previous = $monthly_count_previous";
-      $monthly_delta               = ( $monthly_count_previous > 0 && @$data > 0 )
-                                     ? sprintf("%.2f",
-                                         ($monthly_count - $monthly_count_previous )/
-                                         $monthly_count_previous 
-                                       )
-                                     : "--";
+      $monthly_delta               = $self->safe_division(
+                                        $monthly_count - $monthly_count_previous,
+                                        $monthly_count_previous 
+                                     );
 
+      $monthly_delta               = $self->format_percent($monthly_delta);
+      $percentage_of_monthly_total = $self->format_percent($percentage_of_monthly_total);
       push @$new_row, {
         monthly_count               => $monthly_count,
         monthly_delta               => $monthly_delta,
@@ -120,6 +154,8 @@ sub get_data {
     push @$data , $new_row;
   };
 
+  # reverse order of months
+  @$data = reverse(@$data);
   # pre-pend headers
   unshift @$data, ['month' , @unsorted_languages_present ];
 
