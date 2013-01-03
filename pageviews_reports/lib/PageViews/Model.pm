@@ -105,6 +105,9 @@ sub get_data {
   my $month_totals    = {};
   my $language_totals = {};
 
+  my $min_language_delta = +999_999;
+  my $max_language_delta = -999_999;
+
   # mark all languages present in a hash
   # calculate monthly  totals
   # calculate language totals
@@ -143,7 +146,6 @@ sub get_data {
 
       if(@$data > 0) {
         warn "[DBG] idx_language = $idx_language";
-        #warn Dumper($data->[-1]->[$idx_language]);
         warn Dumper $data->[-1];
         $monthly_count_previous = $data->[-1]->[$idx_language + $LANGUAGES_COLUMNS_SHIFT]->{monthly_count} // 0;
       } else {
@@ -162,16 +164,24 @@ sub get_data {
                                         $monthly_count_previous 
                                      );
 
+      $min_language_delta = 
+            $monthly_delta <= $min_language_delta 
+             ? $monthly_delta 
+             : $min_language_delta;
+
+      $max_language_delta = 
+            $monthly_delta >= $max_language_delta 
+             ? $monthly_delta 
+             : $max_language_delta;
+
       my $__monthly_delta               = $self->format_percent($monthly_delta);
       my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
       push @$new_row, {
-        monthly_count               => $monthly_count,
-        monthly_delta               => $__monthly_delta,
-        percentage_of_monthly_total => $__percentage_of_monthly_total,
-        place                       => "1st",
-        #color                       => PageViews::WikistatsColorRamp::BgColor("A",$percentage_of_monthly_total),
-        #color                       => PageViews::WikistatsColorRamp::ramp($percentage_of_monthly_total,-100,+100),
-        color                       => PageViews::WikistatsColorRamp::ramp($monthly_delta,-100,+100),
+          monthly_count                 =>   $monthly_count,
+          monthly_delta__               => $__monthly_delta,
+          monthly_delta                 =>  ($monthly_delta eq '--' ? 0 : $monthly_delta),
+          percentage_of_monthly_total__ => $__percentage_of_monthly_total,
+          place                         => "1st",
       };
     };
     push @$data , $new_row;
@@ -183,8 +193,10 @@ sub get_data {
   unshift @$data, ['month' , 'total', @sorted_languages_present ];
 
   return {
-    data     => $data,
-    dbg_ramp => PageViews::WikistatsColorRamp::ramp_spectrum(-110,99),
+    data               => $data,
+    min_language_delta => $min_language_delta,
+    max_language_delta => $max_language_delta,
+    dbg_ramp           => PageViews::WikistatsColorRamp::ramp_spectrum(-110,99),
   };
 };
 

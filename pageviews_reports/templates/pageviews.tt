@@ -1,4 +1,4 @@
 [% INCLUDE "pageviews-header.tt" %]
 [% INCLUDE "pageviews-body.tt"   %]
-[% INCLUDE "debug.tt" %]
+[% INCLUDE "color-spectrum.tt"   %]
 [% INCLUDE "pageviews-footer.tt" %]

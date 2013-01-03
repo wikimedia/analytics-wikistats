@@ -15,8 +15,14 @@
     <!-- month total -->
     <td> [% row.shift %] </td>
       <script language='javascript'>
+        var colorPowerScale = d3.scale
+                              .pow()
+                              .exponent(.5)
+                              .domain([ [% min_language_delta %] , 0 , [% max_language_delta %]  ])
+                              .range(['red','white','green']);
+        
         [% FOREACH cell IN row %]
-          tdc('#[% cell.color %]','[% cell.monthly_delta %], [% cell.percentage_of_monthly_total %], [% cell.place %]','[% cell.monthly_count %]&nbsp;M');
+          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.place %]','[% cell.monthly_count %]&nbsp;M');
         [% END %] 
       </script>
     </tr>
