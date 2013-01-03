@@ -1,4 +1,6 @@
 
+
+<!-- Table with language/month page views -->
 <table class="b">
 
   [% headers = data.shift %] 
@@ -8,6 +10,9 @@
 
   [% WHILE (row = data.shift) %]
     <tr>
+    <!-- month name -->
+    <td> [% row.shift %] </td>
+    <!-- month total -->
     <td> [% row.shift %] </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]

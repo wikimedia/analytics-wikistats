@@ -118,6 +118,9 @@ sub get_data {
 
   my @unsorted_languages_present = keys %$languages_present_uniq;
 
+  # the first columns of @{$data->[]} are not going to be for languages, they're gonna
+  # be some other stuff like month name or monthly total
+  my $LANGUAGES_COLUMNS_SHIFT = 2;
   # sort the order in which language columns are presented
   # based on the totals they have overall
   my @sorted_languages_present = 
@@ -127,6 +130,7 @@ sub get_data {
   for my $month ( @months_present ) {
     my   $new_row = [];
     push @$new_row, $month;
+    push @$new_row, $month_totals->{$month};
 
     # idx_language is the index of the current language inside sorted_languages_present
     for my $idx_language ( 0..$#sorted_languages_present ) {
@@ -141,7 +145,7 @@ sub get_data {
         warn "[DBG] idx_language = $idx_language";
         #warn Dumper($data->[-1]->[$idx_language]);
         warn Dumper $data->[-1];
-        $monthly_count_previous = $data->[-1]->[$idx_language + 1]->{monthly_count} // 0;
+        $monthly_count_previous = $data->[-1]->[$idx_language + $LANGUAGES_COLUMNS_SHIFT]->{monthly_count} // 0;
       } else {
         $monthly_count_previous = 0;
       };
@@ -173,7 +177,7 @@ sub get_data {
   # reverse order of months
   @$data = reverse(@$data);
   # pre-pend headers
-  unshift @$data, ['month' , @sorted_languages_present ];
+  unshift @$data, ['month' , 'total', @sorted_languages_present ];
 
   return {
     data => $data,
