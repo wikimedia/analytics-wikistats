@@ -193,9 +193,13 @@ sub get_data {
   unshift @$data, ['month' , 'total', @sorted_languages_present ];
 
   return {
+    # actual data for each language for each month
     data               => $data,
+    # the following values are used by the color ramps
     min_language_delta => $min_language_delta,
+    mid_language_delta => ($min_language_delta + $max_language_delta)/2,
     max_language_delta => $max_language_delta,
+    # debug data
     dbg_ramp           => PageViews::WikistatsColorRamp::ramp_spectrum(-110,99),
   };
 };

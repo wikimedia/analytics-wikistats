@@ -1,5 +1,14 @@
 
 
+
+<script language='javascript'>
+        var colorPowerScale = d3.scale
+                              .pow()
+                              .exponent(.5)
+                              .domain([ [% min_language_delta %] , [% mid_language_delta %]  , [% max_language_delta %]  ])
+                              .range(['red','white','green']);
+</script>
+
 <!-- Table with language/month page views -->
 <table class="b">
 
@@ -15,12 +24,6 @@
     <!-- month total -->
     <td> [% row.shift %] </td>
       <script language='javascript'>
-        var colorPowerScale = d3.scale
-                              .pow()
-                              .exponent(.5)
-                              .domain([ [% min_language_delta %] , 0 , [% max_language_delta %]  ])
-                              .range(['red','white','green']);
-        
         [% FOREACH cell IN row %]
           tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.place %]','[% cell.monthly_count %]&nbsp;M');
         [% END %] 
