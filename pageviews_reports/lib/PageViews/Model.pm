@@ -58,7 +58,7 @@ sub safe_division {
   if(defined($numerator) && defined($denominator)) {
     $retval = 
       $denominator 
-        ? sprintf("%.2f",($numerator / $denominator))
+        ? sprintf("%.2f",($numerator / $denominator)*100)
         : "--";
   } else {
     $retval = "--";
@@ -84,38 +84,53 @@ sub format_percent {
 };
 
 
+
+#
+# Format data in a nice way so we can pass it to the templating engine
+#
+
 sub get_data {
   my ($self) = @_;
 
-  # origins are wikipedia languages present
-
+  # origins are wikipedia languages present in data
   my $data = [];
 
-  my $languages_present_uniq = {};
-  my @months_present = sort { $a cmp $b }  keys %{ $self->{counts} };
 
-  my $month_totals = {};
+  my $languages_present_uniq = {};
+  my @months_present = 
+    sort 
+    { $a cmp $b }  
+    keys %{ $self->{counts} };
+
+  my $month_totals    = {};
+  my $language_totals = {};
 
   # mark all languages present in a hash
-  # calculate month totals
+  # calculate monthly  totals
+  # calculate language totals
   for my $month ( @months_present ) {
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $languages_present_uniq->{$language} = 1;
-      $month_totals->{$month} += 
-        $self->{counts}->{$month}->{$language};
+      $month_totals->{$month}             += $self->{counts}->{$month}->{$language};
+      $language_totals->{$language}       += $self->{counts}->{$month}->{$language};
     };
   };
 
   my @unsorted_languages_present = keys %$languages_present_uniq;
 
+  # sort the order in which language columns are presented
+  # based on the totals they have overall
+  my @sorted_languages_present = 
+    sort { $language_totals->{$b} <=> $language_totals->{$a} }
+    @unsorted_languages_present;
 
   for my $month ( @months_present ) {
     my   $new_row = [];
     push @$new_row, $month;
 
-    # idx_language is the index of the current language inside unsorted_languages_present
-    for my $idx_language ( 0..$#unsorted_languages_present ) {
-      my $language = $unsorted_languages_present[$idx_language];
+    # idx_language is the index of the current language inside sorted_languages_present
+    for my $idx_language ( 0..$#sorted_languages_present ) {
+      my $language = $sorted_languages_present[$idx_language];
       # hash containing actual count, percentage of monthly total, increase over past month
       my $percentage_of_monthly_total ;
       my $monthly_delta               ;
@@ -130,7 +145,7 @@ sub get_data {
       } else {
         $monthly_count_previous = 0;
       };
-      $monthly_count               = $self->{counts}->{$month}->{$language}          // 0;
+      $monthly_count               = $self->{counts}->{$month}->{$language} // 0;
       $percentage_of_monthly_total = $self->safe_division($monthly_count , $month_totals->{$month});
 
       # safety check
@@ -144,11 +159,12 @@ sub get_data {
                                      );
 
       $monthly_delta               = $self->format_percent($monthly_delta);
-      $percentage_of_monthly_total = $self->format_percent($percentage_of_monthly_total);
+      $percentage_of_monthly_total = "$percentage_of_monthly_total%";
       push @$new_row, {
         monthly_count               => $monthly_count,
         monthly_delta               => $monthly_delta,
         percentage_of_monthly_total => $percentage_of_monthly_total,
+        place                       => "1st",
       };
     };
     push @$data , $new_row;
@@ -157,7 +173,7 @@ sub get_data {
   # reverse order of months
   @$data = reverse(@$data);
   # pre-pend headers
-  unshift @$data, ['month' , @unsorted_languages_present ];
+  unshift @$data, ['month' , @sorted_languages_present ];
 
   return {
     data => $data,
