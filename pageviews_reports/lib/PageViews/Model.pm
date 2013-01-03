@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Time::Piece;
 use Data::Dumper;
-
+use PageViews::WikistatsColorRamp;
 sub new {
   my ($class) = @_;
   my $raw_obj = {
@@ -162,13 +162,14 @@ sub get_data {
                                         $monthly_count_previous 
                                      );
 
-      $monthly_delta               = $self->format_percent($monthly_delta);
-      $percentage_of_monthly_total = "$percentage_of_monthly_total%";
+      my $__monthly_delta               = $self->format_percent($monthly_delta);
+      my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
       push @$new_row, {
         monthly_count               => $monthly_count,
-        monthly_delta               => $monthly_delta,
-        percentage_of_monthly_total => $percentage_of_monthly_total,
+        monthly_delta               => $__monthly_delta,
+        percentage_of_monthly_total => $__percentage_of_monthly_total,
         place                       => "1st",
+        color                       => PageViews::WikistatsColorRamp::BgColor("A",$percentage_of_monthly_total),
       };
     };
     push @$data , $new_row;
