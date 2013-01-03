@@ -38,6 +38,10 @@ my $config = [
     month => "2012-12",
     overall_count_delta => 0.30,
   },
+  {
+    month => "2013-01",
+    overall_count_delta => -0.1,
+  },
 ];
 
 { # Generate a test log file
