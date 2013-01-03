@@ -75,4 +75,55 @@ sub BgColor
 }
 
 
+
+
+# taken from tables_gfx branch
+my @map=(
+    sub{(         0,             0,   $_[0] * 255 )},
+    sub{(         0,     $_[0]*255,           255 )},
+    sub{(         0,           255, (1-$_[0])*255 )},
+    sub{( $_[0]*255,           255,             0 )},
+    sub{(       255, (1-$_[0])*255,             0 )},
+    sub{(       255,             0,     $_[0]*255 )},
+    sub{(       255,     $_[0]*255,           255 )},
+);
+
+sub ramp {
+    my( $v, $vmin, $vmax ) = @_;
+
+    ## Peg $v to $vmax if it is greater than $vmax
+    $v = $vmax if $v > $vmax;
+    ## Or peg $v to $vmin if it is less tahn $vmin.
+    $v = $vmin if $v < $vmin;
+    ## Normalise $v relative to $vmax - $vmin
+    $v = 
+    ( $v    - $vmin ) /
+    ( $vmax - $vmin ) ;
+    ## Scale it to the range 0 .. 1784
+    $v *= 1785;
+
+    my @a = 
+    map { int($_) } 
+    $map[$v/255]->( ($v % 255) / 256 );
+
+    # invert colors
+    #@a = map { 255 - $_ } @a;
+
+    return sprintf( ("%02X" x 3) , @a);
+};
+
+
+sub ramp_spectrum {
+  my ($start,$end) = @_;
+  my @colors = map {  ramp($_,-100,+100)  } ($start..$end);
+  {
+    colors => \@colors,
+    title  => "1785-Color Ramp Spectrum",
+    start  => $start,
+    end    => $end,
+  }
+};
+
+
+
 1;

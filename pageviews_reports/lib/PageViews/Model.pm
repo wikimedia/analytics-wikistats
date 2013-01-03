@@ -169,7 +169,9 @@ sub get_data {
         monthly_delta               => $__monthly_delta,
         percentage_of_monthly_total => $__percentage_of_monthly_total,
         place                       => "1st",
-        color                       => PageViews::WikistatsColorRamp::BgColor("A",$percentage_of_monthly_total),
+        #color                       => PageViews::WikistatsColorRamp::BgColor("A",$percentage_of_monthly_total),
+        #color                       => PageViews::WikistatsColorRamp::ramp($percentage_of_monthly_total,-100,+100),
+        color                       => PageViews::WikistatsColorRamp::ramp($monthly_delta,-100,+100),
       };
     };
     push @$data , $new_row;
@@ -181,7 +183,8 @@ sub get_data {
   unshift @$data, ['month' , 'total', @sorted_languages_present ];
 
   return {
-    data => $data,
+    data     => $data,
+    dbg_ramp => PageViews::WikistatsColorRamp::ramp_spectrum(-110,99),
   };
 };
 

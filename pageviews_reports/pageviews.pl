@@ -114,6 +114,10 @@ my $m = PageViews::Model->new();
 $m->process_files({
     logs_path => $__DATA_BASE,
 });
+
+#$Template::Directive::WHILE_MAX = 9999999;
+
+
 my $d = $m->get_data();
 warn "[DBG]".Dumper($d);
 my $v = PageViews::View->new($d);
