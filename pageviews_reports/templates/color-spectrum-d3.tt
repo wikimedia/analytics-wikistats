@@ -1,4 +1,6 @@
 
+<!-- Debug template to render d3 Color ramp spectrum -->
+
 <script src="static/js/jquery.js"></script>
 <script>
   $(document).ready(function(){
@@ -6,8 +8,8 @@
     var max = [% max_language_delta %];
     for(var i = min;i<=max;i++) {
       $("#d3-color-spectrum"  ).append(
-          '<td bgcolor="' +
-          colorPowerScale(i)+ 
+          '<td bgcolor="'                 +
+          colorPowerScale(i)              +
           '" height="10" width="4"></td>'
       );
     };
@@ -16,15 +18,24 @@
 
 <p> <b><u> d3 Color Ramp Spectrum(the one we're using)</u> </b> </p>
 
+<!-- In the following table we have two rows, one with values and one with colours 
+     We'll use this to check if the colors are at the places we expect them to be.
+-->
 <table style="border-collapse: collapse; border-width: 0px;">
   <tr>
     <td>values</td>
     <td><b>[% min_language_delta %]<b></td>
-    [% j = 1 %]
-    [% WHILE ( j <= (max_language_delta - min_language_delta + 1) - 3) %]
+    [% j = min_language_delta + 2 %]
+    [% WHILE ( j < 0 ) %]
       <td></td>
       [% j = j + 1 %]
     [% END %]
+    <td>0</td>
+    [% WHILE ( j < (max_language_delta - 2) ) %]
+      <td></td>
+      [% j = j + 1 %]
+    [% END %]
+
     <td><b>[% max_language_delta %]</b></td>
   </tr>
 

@@ -1,4 +1,6 @@
 
+<!-- Debug template to render 1785 Color ramp spectrum -->
+
 <p> <b><u>[% dbg_ramp.title %]</u> </b> </p>
 
 <table style="border-collapse: collapse; border-width: 0px;">
