@@ -16,10 +16,10 @@ sub new {
 sub render {
   my ($self,$params) = @_;
 
-  confess "[ERR]  expected param output_path"
-    unless 
-      exists $params->{output_path} && 
-      -d $params->{output_path};
+  confess "[ERR] expected param output_path"
+    unless exists $params->{output_path};
+  confess "[ERR] output_path doesn't exist on disk"
+    unless     -d $params->{output_path};
 
   my $output_path = $params->{output_path};
 

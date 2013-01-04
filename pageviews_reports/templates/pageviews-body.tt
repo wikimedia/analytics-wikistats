@@ -1,6 +1,4 @@
 
-
-
 <script language='javascript'>
         var colorPowerScale = d3.scale
                               .pow()

@@ -5,17 +5,18 @@ use lib "./lib";
 use lib "../squids/t/";
 use PageViews::Model;
 use PageViews::View;
+use PageViews::Generate1;
 use Generate::Squid;
 use CommonConfig;
 use Data::Dumper;
 use Carp;
 
 our $__CODE_BASE;
-our $__DATA_BASE  = "$__CODE_BASE/../pageviews_reports/data";
-my $LOG_PREFIX    = "sampled-1000.log-";
+our $__DATA_BASE        = "$__CODE_BASE/../pageviews_reports/data";
+my  $LOG_PREFIX         = "sampled-1000.log-";
+my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
 
-my @country_codes = qw/US GB CA FR DE/;
-
+`mkdir -p $REPORT_OUTPUT_PATH`;
 
 # overall_count_delta is the percentage by which counts increased/decreased
 # over the previous month
@@ -23,11 +24,11 @@ my $config = [
   {
     month => "2012-10",
     explicit_country_counts => {
-      "US" => 500,
+      "US" => 400,
       "GB" => 300 ,
-      "CA" => 300 ,
-      "FR" => 200 ,
-      "DE" => 190 ,
+      "CA" => 100 ,
+      "FR" => 100 ,
+      "DE" => 100 ,
     },
   },
   {
@@ -44,71 +45,13 @@ my $config = [
   },
 ];
 
-{ # Generate a test log file
-  `
-  rm -f $__DATA_BASE/*.gz;
-  mkdir -p $__DATA_BASE;
-  `;
-  my $o = Generate::Squid->new({
-      start_date => "2012-10-01"         ,
-      prefix     => $LOG_PREFIX  ,
-      output_dir => "$__DATA_BASE",
-    });
+my $g = PageViews::Generate1->new({
+      config     => $config,
+    __DATA_BASE  => $__DATA_BASE,
+      LOG_PREFIX => $LOG_PREFIX,
+});
+$g->generate();
 
-  my $previous_month_counts = {};
-
-  for my $month_data ( @$config ) {
-    my $month_name = $month_data->{month};
-    warn "[DBG] month_name = $month_name";
-
-    $o->generate_line({ geocode=>"--"  });
-    $o->__increase_day; 
-    
-    if( exists $month_data->{explicit_country_counts}) {
-      my $hcount = $month_data->{explicit_country_counts};
-      warn Dumper $hcount;
-      while(my ($country,$count) = each %$hcount ) {
-        $o->generate_line({ 
-            geocode  => $country 
-        }) for 1..$count;
-      };
-      $previous_month_counts = $hcount;
-    } elsif ( exists $month_data->{overall_count_delta} ) {
-
-      my $current_month_counts = { };
-      my $mul = 1 + $month_data->{overall_count_delta};
-      for my $key (keys %$previous_month_counts ) {
-        $current_month_counts->{$key} = 
-          int( $mul * $previous_month_counts->{$key});
-      };
-
-
-      my $hcount = $current_month_counts;
-      use Data::Dumper;
-      warn Dumper $hcount;
-
-      while(my ($country,$count) = each %$hcount ) {
-        $o->generate_line({ 
-            geocode  => $country 
-        }) for 1..$count;
-      };
-      $previous_month_counts = $hcount;
-    } else {
-      confess "[ERR] should never get here. You need to configure $month_name to have a count";
-    };
-
-    $o->__increase_day; 
-    $o->generate_line({ geocode=>"--" });
-    $o->dump_to_disk_and_increase_day;
-    $o->__increase_month;
-    warn "[DBG] time after month increase =>".$o->{current_datetime}; 
-  };
-
-  system(qq{
-  cd $__DATA_BASE;
-  ls | xargs -I{} gzip {};
-  });
-};
 
 my $m = PageViews::Model->new();
 $m->process_files({
@@ -117,10 +60,10 @@ $m->process_files({
 
 #$Template::Directive::WHILE_MAX = 9999999;
 
-
 my $d = $m->get_data();
 warn "[DBG]".Dumper($d);
+
 my $v = PageViews::View->new($d);
 
-$v->render({ output_path => "/tmp/pageview_reports/" });
-
+warn "[DBG] outpath => $REPORT_OUTPUT_PATH";
+$v->render({ output_path => $REPORT_OUTPUT_PATH });
