@@ -46,7 +46,11 @@ my $config = [
   {
     month => "2013-02",
     explicit_country_deltas => {
-      US => -0.9,
+      US => -0.3 ,
+      GB => +0.1 ,
+      DE => +0.2 ,
+      FR => -0.02,
+      CA => +0.031415,
     },
   },
 ];

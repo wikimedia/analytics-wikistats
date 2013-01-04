@@ -25,14 +25,17 @@
     [% FOREACH language IN headers %]
       [% IF chart_data.exists(language) %]
         [% container_id = 'container-' _ language %]
-        <td><div align="left" id="[% container_id %]"/></td>
-        <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
+        <td>
+            <div align="left" id="[% container_id %]"/>
+            <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
+        </td>
       [% ELSE %]
       [% END %]
     [% END %]
   </tr>
 
-  [% WHILE (row = data.shift) %]
+  [% WHILE ( data.size > 0 ) %]
+    [% row = data.shift %]
     <tr>
     <!-- month name -->
     <td> [% row.shift %] </td>
@@ -40,7 +43,7 @@
     <td> [% row.shift %] </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
-          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]','[% cell.monthly_count %]&nbsp;M');
+          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]','[% cell.monthly_count__ %]');
         [% END %] 
       </script>
     </tr>
