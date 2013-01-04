@@ -58,15 +58,15 @@ sub generate {
     my $month_name = $month_data->{month};
     warn "[DBG] month_name = $month_name";
 
-    $o->generate_line({ geocode=>"--"  });
+    $o->generate_line({});
     $o->__increase_day; 
     
     if( exists $month_data->{explicit_country_counts}) {
       my $hcount = $month_data->{explicit_country_counts};
       warn Dumper $hcount;
-      while(my ($country,$count) = each %$hcount ) {
+      while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
-            geocode  => $country 
+            __mobile_url_country => $language 
         }) for 1..$count;
       };
       $previous_month_counts = $hcount;
@@ -85,9 +85,9 @@ sub generate {
       my $hcount = $current_month_counts;
       warn Dumper $hcount;
 
-      while(my ($country,$count) = each %$hcount ) {
+      while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
-            geocode  => $country 
+            __mobile_url_country => $language 
         }) for 1..$count;
       };
       $previous_month_counts = $hcount;
@@ -107,9 +107,9 @@ sub generate {
       my $hcount = $current_month_counts;
       warn Dumper $hcount;
 
-      while(my ($country,$count) = each %$hcount ) {
+      while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
-            geocode  => $country 
+            __mobile_url_country => $language 
         }) for 1..$count;
       };
       $previous_month_counts = $hcount;
@@ -119,7 +119,7 @@ sub generate {
     };
 
     $o->__increase_day; 
-    $o->generate_line({ geocode=>"--" });
+    $o->generate_line({});
     $o->dump_to_disk_and_increase_day;
     $o->__increase_month;
     warn "[DBG] time after month increase =>".$o->{current_datetime}; 

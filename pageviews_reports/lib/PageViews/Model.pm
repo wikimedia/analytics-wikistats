@@ -18,10 +18,14 @@ sub process_line {
   my @fields = split(/\s/,$line);
   #use Data::Dumper;
   #warn Dumper \@fields;
-  my $time    = $fields[2];
-  my $url     = $fields[8];
-  my $country = $fields[14];
-  return if $country eq "--";
+  my $time     = $fields[2];
+  my $url      = $fields[8];
+  my $language ;
+
+  # ignore lines which are not mobile and don't have a language in there
+  if( !(  ($language) = $url =~ m|^http://(.+)\.m\.wikipedia\.|  )) {
+    return;
+  };
 
   #warn "[DBG] line = $line";
   #warn "[DBG] country = $country";
@@ -31,7 +35,7 @@ sub process_line {
   my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.000");
   my $ymd = $tp->year."-".$tp->mon; # = ..
 
-  $self->{counts}->{$ymd}->{$country}++;
+  $self->{counts}->{$ymd}->{$language}++;
 };
 
 sub process_file {
@@ -83,6 +87,19 @@ sub format_percent {
   return $val;
 };
 
+sub format_rank {
+  my ($self,$rank) = @_;
+  if(     $rank == 1) {
+    $rank  = "1st";
+  } elsif($rank == 2) {
+    $rank  = "2nd";
+  } elsif($rank == 3) {
+    $rank  = "3rd";
+  } else {
+    $rank .= "th";
+  };
+  return $rank;
+};
 
 
 
@@ -144,7 +161,6 @@ sub get_data {
 
   # origins are wikipedia languages present in data
   my $data = [];
-
 
   my $__first_pass_retval = $self->first_pass_languages_totals_rankings;
 
@@ -216,18 +232,7 @@ sub get_data {
 
       my $__monthly_delta               = $self->format_percent($monthly_delta);
       my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
-
-      my $rank = $month_rankings->{$month}->{$language};
-      if(     $rank == 1) {
-        $rank = "1st";
-      } elsif($rank == 2) {
-        $rank = "2nd";
-      } elsif($rank == 3) {
-        $rank = "3rd";
-      } else {
-        $rank .= "th";
-      };
-
+      my $rank                          = $self->format_rank( $month_rankings->{$month}->{$language} );
       push @$new_row, {
           monthly_count                 =>   $monthly_count,
           monthly_delta__               => $__monthly_delta,
@@ -242,7 +247,7 @@ sub get_data {
   # reverse order of months
   @$data = reverse(@$data);
   # pre-pend headers
-  unshift @$data, ['month' , 'total', @sorted_languages_present ];
+  unshift @$data, ['month' , '&Sigma;', @sorted_languages_present ];
 
   return {
     # actual data for each language for each month
