@@ -43,6 +43,12 @@ my $config = [
     month => "2013-01",
     overall_count_delta => -0.1,
   },
+  {
+    month => "2013-02",
+    explicit_country_deltas => {
+      US => -0.9,
+    },
+  },
 ];
 
 my $g = PageViews::Generate1->new({
@@ -61,9 +67,9 @@ $m->process_files({
 #$Template::Directive::WHILE_MAX = 9999999;
 
 my $d = $m->get_data();
-warn "[DBG]".Dumper($d);
+#warn "[DBG]".Dumper($d);
 
 my $v = PageViews::View->new($d);
 
-warn "[DBG] outpath => $REPORT_OUTPUT_PATH";
+#warn "[DBG] outpath => $REPORT_OUTPUT_PATH";
 $v->render({ output_path => $REPORT_OUTPUT_PATH });

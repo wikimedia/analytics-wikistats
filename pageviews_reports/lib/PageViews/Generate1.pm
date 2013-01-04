@@ -73,14 +73,16 @@ sub generate {
     } elsif ( exists $month_data->{overall_count_delta} ) {
 
       my $current_month_counts = { };
+
       my $mul = 1 + $month_data->{overall_count_delta};
+
+      warn "[DBG] mul=$mul";
       for my $key (keys %$previous_month_counts ) {
         $current_month_counts->{$key} = 
           int( $mul * $previous_month_counts->{$key});
       };
 
       my $hcount = $current_month_counts;
-      use Data::Dumper;
       warn Dumper $hcount;
 
       while(my ($country,$count) = each %$hcount ) {
@@ -89,6 +91,29 @@ sub generate {
         }) for 1..$count;
       };
       $previous_month_counts = $hcount;
+    } elsif( exists $month_data->{explicit_country_deltas} ) {
+
+      my $current_month_counts = { };
+
+      for my $key (keys %$previous_month_counts ) {
+        if(exists $month_data->{explicit_country_deltas}->{$key}) {
+          my $mul = 1 + $month_data->{explicit_country_deltas}->{$key};
+          $current_month_counts->{$key} = int( $mul * $previous_month_counts->{$key} );
+        } else {
+          $current_month_counts->{$key} = $previous_month_counts->{$key};
+        };
+      };
+
+      my $hcount = $current_month_counts;
+      warn Dumper $hcount;
+
+      while(my ($country,$count) = each %$hcount ) {
+        $o->generate_line({ 
+            geocode  => $country 
+        }) for 1..$count;
+      };
+      $previous_month_counts = $hcount;
+
     } else {
       confess "[ERR] should never get here. You need to configure $month_name to have a count";
     };

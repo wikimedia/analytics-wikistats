@@ -3,7 +3,7 @@
         var colorPowerScale = d3.scale
                               .pow()
                               .exponent(.5)
-                              .domain([ [% min_language_delta %] , [% mid_language_delta %]  , [% max_language_delta %]  ])
+                              .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
                               .range(['red','white','green']);
 </script>
 
