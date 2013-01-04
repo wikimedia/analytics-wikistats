@@ -103,6 +103,7 @@ sub get_data {
     keys %{ $self->{counts} };
 
   my $month_totals    = {};
+  my $month_rankings  = {};
   my $language_totals = {};
 
   my $min_language_delta = +999_999;
@@ -110,14 +111,28 @@ sub get_data {
 
   # mark all languages present in a hash
   # calculate monthly  totals
+  # calculate monthly  rankings
   # calculate language totals
   for my $month ( @months_present ) {
+    # languages sorted for this month
+    my $sorted_languages = [];
+
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $languages_present_uniq->{$language} = 1;
-      $month_totals->{$month}             += $self->{counts}->{$month}->{$language};
-      $language_totals->{$language}       += $self->{counts}->{$month}->{$language};
+      $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
+      $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
+      push @$sorted_languages , [ $language , $self->{counts}->{$month}->{$language} ];
     };
+
+    # compute rankings and store them in $month_rankings
+    my $rankings = {};
+    @$sorted_languages = sort { $b->[1] <=> $a->[1]  } @$sorted_languages;
+    $rankings->{$sorted_languages->[$_]->[0]} = 1+$_
+      for 0..(-1+@$sorted_languages);
+    
+    $month_rankings->{$month} = $rankings;
   };
+
 
   my @unsorted_languages_present = keys %$languages_present_uniq;
 
@@ -176,12 +191,24 @@ sub get_data {
 
       my $__monthly_delta               = $self->format_percent($monthly_delta);
       my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
+
+      my $rank = $month_rankings->{$month}->{$language};
+      if(     $rank == 1) {
+        $rank = "1st";
+      } elsif($rank == 2) {
+        $rank = "2nd";
+      } elsif($rank == 3) {
+        $rank = "3rd";
+      } else {
+        $rank .= "th";
+      };
+
       push @$new_row, {
           monthly_count                 =>   $monthly_count,
           monthly_delta__               => $__monthly_delta,
           monthly_delta                 =>  ($monthly_delta eq '--' ? 0 : $monthly_delta),
           percentage_of_monthly_total__ => $__percentage_of_monthly_total,
-          place                         => "1st",
+          rank                          =>   $rank,
       };
     };
     push @$data , $new_row;
