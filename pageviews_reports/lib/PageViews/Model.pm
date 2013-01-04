@@ -85,29 +85,20 @@ sub format_percent {
 
 
 
-#
-# Format data in a nice way so we can pass it to the templating engine
-#
 
-sub get_data {
+sub first_pass_languages_totals_rankings {
   my ($self) = @_;
 
-  # origins are wikipedia languages present in data
-  my $data = [];
 
-
-  my $languages_present_uniq = {};
   my @months_present = 
     sort 
     { $a cmp $b }  
     keys %{ $self->{counts} };
 
-  my $month_totals    = {};
-  my $month_rankings  = {};
-  my $language_totals = {};
-
-  my $min_language_delta = +999_999;
-  my $max_language_delta = -999_999;
+  my $languages_present_uniq = {};
+  my $month_totals           = {};
+  my $month_rankings         = {};
+  my $language_totals        = {};
 
   # mark all languages present in a hash
   # calculate monthly  totals
@@ -133,6 +124,40 @@ sub get_data {
     $month_rankings->{$month} = $rankings;
   };
 
+  return {
+    months_present          => \@months_present       ,
+    languages_present_uniq  => $languages_present_uniq,
+    month_totals            => $month_totals          ,
+    month_rankings          => $month_rankings        ,
+    language_totals         => $language_totals       ,
+  };
+};
+
+
+
+#
+# Format data in a nice way so we can pass it to the templating engine
+#
+
+sub get_data {
+  my ($self) = @_;
+
+  # origins are wikipedia languages present in data
+  my $data = [];
+
+
+  my $__first_pass_retval = $self->first_pass_languages_totals_rankings;
+
+  my @months_present         = @{ $__first_pass_retval->{months_present} };
+  my $languages_present_uniq =    $__first_pass_retval->{languages_present_uniq};
+  my $month_totals           =    $__first_pass_retval->{month_totals};
+  my $month_rankings         =    $__first_pass_retval->{month_rankings};
+  my $language_totals        =    $__first_pass_retval->{language_totals};
+
+  my $min_language_delta = +999_999;
+  my $max_language_delta = -999_999;
+
+  # TODO: call function here to produce the many hashes
 
   my @unsorted_languages_present = keys %$languages_present_uniq;
 
