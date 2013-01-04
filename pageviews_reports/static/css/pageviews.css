@@ -72,3 +72,10 @@ img {border:0}
 .ch1c { color:#000044; font-size:9px;  font-weight:normal ; padding-left:2px ; padding-right:2px }
 .ch2c { color:#0000AA; font-size:11px; font-weight:bolder ; padding-left:4px ; padding-right:4px }
 .ch3c { color:#0000FF; font-size:13px; font-weight:bold   ; padding-left:6px ; padding-right:6px }
+
+
+.chart rect {
+  fill: steelblue;
+  stroke: white;
+}
+

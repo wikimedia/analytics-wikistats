@@ -116,6 +116,7 @@ sub first_pass_languages_totals_rankings {
   my $month_totals           = {};
   my $month_rankings         = {};
   my $language_totals        = {};
+  my $chart_data             = {};
 
   # mark all languages present in a hash
   # calculate monthly  totals
@@ -127,6 +128,13 @@ sub first_pass_languages_totals_rankings {
 
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $languages_present_uniq->{$language} = 1;
+
+      $chart_data->{$language}->{counts} //= [];
+      $chart_data->{$language}->{months} //= [];
+      push @{ $chart_data->{$language}->{counts} } , $self->{counts}->{$month}->{$language};
+      push @{ $chart_data->{$language}->{months} } , $month;
+
+
       $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
       $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
       push @$sorted_languages , [ $language , $self->{counts}->{$month}->{$language} ];
@@ -147,6 +155,7 @@ sub first_pass_languages_totals_rankings {
     month_totals            => $month_totals          ,
     month_rankings          => $month_rankings        ,
     language_totals         => $language_totals       ,
+    chart_data              => $chart_data            ,
   };
 };
 
@@ -169,6 +178,7 @@ sub get_data {
   my $month_totals           =    $__first_pass_retval->{month_totals};
   my $month_rankings         =    $__first_pass_retval->{month_rankings};
   my $language_totals        =    $__first_pass_retval->{language_totals};
+  my $chart_data             =    $__first_pass_retval->{chart_data};
 
   my $min_language_delta = +999_999;
   my $max_language_delta = -999_999;
@@ -247,11 +257,12 @@ sub get_data {
   # reverse order of months
   @$data = reverse(@$data);
   # pre-pend headers
-  unshift @$data, ['month' , '&Sigma;', @sorted_languages_present ];
+  unshift @$data, ['' , '&Sigma;', @sorted_languages_present ];
 
   return {
     # actual data for each language for each month
     data               => $data,
+    chart_data         => $chart_data,
     # the following values are used by the color ramps
     min_language_delta => $min_language_delta,
     mid_language_delta => ($min_language_delta + $max_language_delta)/2,

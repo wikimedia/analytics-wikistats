@@ -11,9 +11,26 @@
 <table class="b">
 
   [% headers = data.shift %] 
-  [% FOREACH header IN headers %]
-  <th>[% header %] </th>
-  [% END %]
+  <tr>
+    [% FOREACH header IN headers %]
+    <th>[% header %] </th>
+    [% END %]
+  </tr>
+
+  <!-- charts go here -->
+  <tr>
+    <!-- check to see if the header is a language -->
+    <td>Trend last<br/> 24 months</td>
+    <td></td>
+    [% FOREACH language IN headers %]
+      [% IF chart_data.exists(language) %]
+        [% container_id = 'container-' _ language %]
+        <td><div align="left" id="[% container_id %]"/></td>
+        <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
+      [% ELSE %]
+      [% END %]
+    [% END %]
+  </tr>
 
   [% WHILE (row = data.shift) %]
     <tr>
@@ -28,6 +45,12 @@
       </script>
     </tr>
   [% END %]
+
+  <tr>
+    [% FOREACH header IN headers %]
+    <td>[% header %] </td>
+    [% END %]
+  </tr>
 
 </table>
 
