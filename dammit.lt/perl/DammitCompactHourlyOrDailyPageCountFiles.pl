@@ -724,15 +724,26 @@ sub CompactFiles
   {
     @months_to_process = &PhaseBuildMonthlyFile_CollectMonthsToProcess ($dir_in, $max_file_age) ;
 
-    foreach $month (@months_to_process)
+    foreach $year_month (@months_to_process)
     {
       $cycles++ ;
       &Log ("\n" . '=' x 80 . "\n\n") ;
 
       if (! $test_run)
-      { 
-	&PhaseBuildMonthlyFile_MergeFiles ($dir_in, $dir_out, $month) ; 
-	&ValidateCounts ($month) ; 
+      {
+        my $year  = substr ($year_month,0,4) ;
+        my $month = substr ($year_month,5,2) ;
+        if ($threshold_views_per_month > 0)
+        { $fn_ge_threshold = "-views-ge-$threshold_views_per_month" ; }
+        $fn_out_merged_daily = "$dir_out/pagecounts-$year-$month$fn_ge_threshold.bz2" ; 
+
+        if (-e $fn_out_merged_daily)
+	{ print "File already exists: fn_out_merged_daily -> skip.\n" ; } 
+        else
+	{
+          &PhaseBuildMonthlyFile_MergeFiles ($dir_in, $dir_out, $year_month) ; 
+	  &ValidateCounts ($month) ; 
+        }  
       }
     }
   }
@@ -1203,7 +1214,9 @@ sub PhaseBuildDailyFile_OpenInputFiles
   for ($hour = 0 ; $hour < 24 ; $hour++)
   { $fs_open_hourly [$hour] = $fs_missing ; }
 
-  $cmd = "rm $dir_temp/pagecounts*" ;
+  $cmd = "rm $dir_temp/pagecounts-????????-??????~patched" ;
+  `$cmd` ;
+  $cmd = "rm $dir_temp/pagecounts-????????-??????~sorted" ;
   `$cmd` ;
 
   my ($file_in, $file_sorted) ;

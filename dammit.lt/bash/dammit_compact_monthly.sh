@@ -4,7 +4,7 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
-perl=/home/ezachte/wikistats/dammit.lt/perl # tests
+# perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 logs=$dammit/logs 
 
 input=/a/dammit.lt/pagecounts/merged # .test
@@ -14,8 +14,6 @@ temp=/a/dammit.lt/pagecounts/temp
 yyyymm=$(date +"%Y_%m")
 logfile=$logs/compact_monthly_$yyyymm.log 
 logfile_summary=$logs/_summary_compact_monthly_jobs.log 
-
-rm $output/2012/*11.gz # tests
 
 cd $perl
 
