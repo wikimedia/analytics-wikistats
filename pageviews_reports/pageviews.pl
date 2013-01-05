@@ -5,7 +5,6 @@ use lib "./lib";
 use lib "../squids/t/";
 use PageViews::Model;
 use PageViews::View;
-use PageViews::Generate1;
 use Data::Dumper;
 use Carp;
 

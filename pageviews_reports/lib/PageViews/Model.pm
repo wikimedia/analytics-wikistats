@@ -37,7 +37,7 @@ sub process_line {
   #warn "[DBG] url     = $url    ";
   #warn "[DBG] time    = $time   ";
 
-  my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.000");
+  my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
   my $ymd = $tp->year."-".$tp->mon; # = ..
 
   $self->{counts}->{$ymd}->{$language}++;
