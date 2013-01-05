@@ -113,17 +113,4 @@ sub ramp {
 };
 
 
-sub ramp_spectrum {
-  my ($start,$end) = @_;
-  my @colors = map {  ramp($_,-100,+100)  } ($start..$end);
-  {
-    colors => \@colors,
-    title  => "1785-Color Ramp Spectrum",
-    start  => $start,
-    end    => $end,
-  }
-};
-
-
-
 1;
