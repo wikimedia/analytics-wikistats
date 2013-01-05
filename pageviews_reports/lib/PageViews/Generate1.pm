@@ -56,14 +56,14 @@ sub generate {
 
   for my $month_data ( @$config ) {
     my $month_name = $month_data->{month};
-    warn "[DBG] month_name = $month_name";
+    #warn "[DBG] month_name = $month_name";
 
     $o->generate_line({});
     $o->__increase_day; 
     
     if( exists $month_data->{explicit_country_counts}) {
       my $hcount = $month_data->{explicit_country_counts};
-      warn Dumper $hcount;
+      #warn Dumper $hcount;
       while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
             __mobile_url_country => $language 
@@ -83,7 +83,7 @@ sub generate {
       };
 
       my $hcount = $current_month_counts;
-      warn Dumper $hcount;
+      #warn Dumper $hcount;
 
       while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
@@ -105,7 +105,7 @@ sub generate {
       };
 
       my $hcount = $current_month_counts;
-      warn Dumper $hcount;
+      #warn Dumper $hcount;
 
       while(my ($language,$count) = each %$hcount ) {
         $o->generate_line({ 
@@ -122,7 +122,7 @@ sub generate {
     $o->generate_line({});
     $o->dump_to_disk_and_increase_day;
     $o->__increase_month;
-    warn "[DBG] time after month increase =>".$o->{current_datetime}; 
+    #warn "[DBG] time after month increase =>".$o->{current_datetime}; 
   };
 
   $self->gzip_generated_files;

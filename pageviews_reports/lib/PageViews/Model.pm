@@ -22,8 +22,13 @@ sub process_line {
   my $url      = $fields[8];
   my $language ;
 
+  # just get languages with at most 8 chars and only small chars
+  # (TODO: need to find out what the actual restrictions are here)
+  my $re_valid_language = "([a-z\-]{1,8})";
+
   # ignore lines which are not mobile and don't have a language in there
-  if( !(  ($language) = $url =~ m|^http://(.+)\.m\.wikipedia\.|  )) {
+  if( !(  ($language) = $url =~ m|^http://$re_valid_language\.m\.wikipedia|  )) {
+    #warn "[DBG] url=$url";
     return;
   };
 
@@ -114,16 +119,43 @@ sub _simulate_big_numbers {
   };
 };
 
+# gets languages sorted by absolute total
+#
+sub get_totals_sorted_months_present_in_data {
+  my ($self,$languages_present_uniq,$language_totals) = @_;
+  my @unsorted_languages_present = keys %$languages_present_uniq;
+  my @sorted_languages_present = 
+    sort { $language_totals->{$b} <=> $language_totals->{$a} }
+    @unsorted_languages_present;
+
+  return @sorted_languages_present;
+};
+
+# gets temporaly sorted months present in data
+# 
+sub get_time_sorted_months_present_in_data {
+  my ($self) = @_;
+  my @retval =
+    sort 
+      { 
+        my ($Y_a,$m_a) = $a =~ /^(\d+)-(\d+)$/;
+        my ($Y_b,$m_b) = $b =~ /^(\d+)-(\d+)$/;
+        
+        $Y_a <=> $Y_b ||
+        $m_a <=> $m_b  ;
+      }  
+        keys %{ $self->{counts} };
+
+  #warn Dumper \@retval;
+  return @retval;
+};
+
+
 
 sub first_pass_languages_totals_rankings {
   my ($self) = @_;
 
-
-
-  my @months_present = 
-    sort 
-    { $a cmp $b }  
-    keys %{ $self->{counts} };
+  my @months_present = $self->get_time_sorted_months_present_in_data;
 
   my $languages_present_uniq = {};
   my $month_totals           = {};
@@ -137,7 +169,7 @@ sub first_pass_languages_totals_rankings {
   # calculate language totals
   for my $month ( @months_present ) {
     # languages sorted for this month
-    my $sorted_languages = [];
+    my $month_languages_sorted = [];
 
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $languages_present_uniq->{$language} = 1;
@@ -150,14 +182,14 @@ sub first_pass_languages_totals_rankings {
 
       $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
       $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
-      push @$sorted_languages , [ $language , $self->{counts}->{$month}->{$language} ];
+      push @$month_languages_sorted , [ $language , $self->{counts}->{$month}->{$language} ];
     };
 
     # compute rankings and store them in $month_rankings
     my $rankings = {};
-    @$sorted_languages = sort { $b->[1] <=> $a->[1]  } @$sorted_languages;
-    $rankings->{$sorted_languages->[$_]->[0]} = 1+$_
-      for 0..(-1+@$sorted_languages);
+    @$month_languages_sorted = sort { $b->[1] <=> $a->[1]  } @$month_languages_sorted;
+    $rankings->{$month_languages_sorted->[$_]->[0]} = 1+$_
+      for 0..(-1+@$month_languages_sorted);
     
     $month_rankings->{$month} = $rankings;
   };
@@ -201,7 +233,7 @@ sub get_data {
 
   #$self->_simulate_big_numbers();
 
-  my $__first_pass_retval = $self->first_pass_languages_totals_rankings;
+  my $__first_pass_retval    = $self->first_pass_languages_totals_rankings;
 
   my @months_present         = @{ $__first_pass_retval->{months_present} };
   my $languages_present_uniq =    $__first_pass_retval->{languages_present_uniq};
@@ -215,18 +247,17 @@ sub get_data {
 
   # TODO: call function here to produce the many hashes
 
-  my @unsorted_languages_present = keys %$languages_present_uniq;
-
-  # the first columns of @{$data->[]} are not going to be for languages, they're gonna
-  # be some other stuff like month name or monthly total
   my $LANGUAGES_COLUMNS_SHIFT = 2;
-  # sort the order in which language columns are presented
-  # based on the totals they have overall
+
   my @sorted_languages_present = 
-    sort { $language_totals->{$b} <=> $language_totals->{$a} }
-    @unsorted_languages_present;
+    $self->get_totals_sorted_months_present_in_data(
+      $languages_present_uniq,
+      $language_totals
+    );
 
   for my $month ( @months_present ) {
+
+    warn "[DBG] Processing month => $month";
     my   $new_row = [];
     push @$new_row, $month;
     push @$new_row, $month_totals->{$month};
@@ -242,7 +273,7 @@ sub get_data {
 
       if(@$data > 0) {
         warn "[DBG] idx_language = $idx_language";
-        warn Dumper $data->[-1];
+        #warn Dumper $data->[-1];
         $monthly_count_previous = $data->[-1]->[$idx_language + $LANGUAGES_COLUMNS_SHIFT]->{monthly_count} // 0;
       } else {
         $monthly_count_previous = 0;
@@ -254,7 +285,7 @@ sub get_data {
       # if we have at least one month to compare to
       # and the previous month has a non-zero count
 
-      warn "[DBG] monthly_count_previous = $monthly_count_previous";
+      #warn "[DBG] monthly_count_previous = $monthly_count_previous";
       $monthly_delta               = $self->safe_division(
                                         $monthly_count - $monthly_count_previous,
                                         $monthly_count_previous 
@@ -288,6 +319,8 @@ sub get_data {
     push @$data , $new_row;
   };
 
+  #exit -1;
+
   # reverse order of months
   @$data = reverse(@$data);
   # pre-pend headers
@@ -295,7 +328,7 @@ sub get_data {
 
   warn "[DBG] data.length = ".~~(@$data);
 
-  warn Dumper $data;
+  #warn Dumper $data;
 
   return {
     # actual data for each language for each month
