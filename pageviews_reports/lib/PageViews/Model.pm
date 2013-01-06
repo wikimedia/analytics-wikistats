@@ -33,8 +33,9 @@ sub process_line {
 
   # ignore lines which are not mobile and don't have a language in there
   return if( !(  ($language) = $url =~ m|^http://$re_valid_language\.m\.wikipedia|  ));
+  $time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/;
   my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
-  return if( !($tp >= $self->{tp_start} && $tp < $self->{tp_end}) );
+  return if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) );
 
   my $ymd = $tp->year."-".$tp->mon; # = ..
 
@@ -64,7 +65,7 @@ sub get_files_in_interval {
   $params->{end}->{month}   = padding_2($params->{end}->{month});
 
   my $tp_start = Time::Piece->strptime(
-                   sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month}),
+                   sprintf("%s-%s-01T00:00:00",$params->{start}->{year},$params->{start}->{month}),
                    "%Y-%m-%dT%H:%M:%S"
                  );
 
@@ -72,25 +73,29 @@ sub get_files_in_interval {
                    sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month}),
                    "%Y-%m-%dT%H:%M:%S"
                  );
-
-  $self->{tp_start} = $tp_start;
-  $self->{tp_end}   = $tp_end;
   # get the first day of the next month because that's where the data
   # will end
   while($tp_end->mon == $params->{end}->{month}) {
     $tp_end += $ENTIRE_DAY;
   };
 
+  $self->{tp_start} = $tp_start;
+  $self->{tp_end}   = $tp_end;
+
   my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
   for my $log_filename (@all_squid_files) {
     if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
       my $tp_log = Time::Piece->strptime("$y-$m-$d","%Y-%m-%d");
-      if( $tp_log >= $tp_start && $tp_log <= $tp_end) {
+
+      if( $tp_log >= $tp_start && 
+          $tp_log <  $tp_end) {
         push @retval,$log_filename;
       };
     };
   };
 
+  #warn Dumper \@retval;
+  #exit 0;
   return @retval;
 };
 

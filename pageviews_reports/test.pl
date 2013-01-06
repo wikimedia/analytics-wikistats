@@ -62,18 +62,24 @@ my $g = PageViews::Generate1->new({
 });
 $g->generate();
 
-
 my $m = PageViews::Model->new();
 $m->process_files({
-    logs_path => $__DATA_BASE,
+    logs_path   => $__DATA_BASE,
+    logs_prefix => $LOG_PREFIX,
+    start       => {
+      year  => 2012,
+      month => 10,
+    },
+    end         => {
+      year  => 2013,
+      month => 2,
+    },
 });
 
-#$Template::Directive::WHILE_MAX = 9999999;
-
 my $d = $m->get_data();
-#warn "[DBG]".Dumper($d);
+#warn Dumper $d;
+#warn Dumper $m->get_files_in_interval();
+#exit 0;
 
 my $v = PageViews::View->new($d);
-
-#warn "[DBG] outpath => $REPORT_OUTPUT_PATH";
 $v->render({ output_path => $REPORT_OUTPUT_PATH });
