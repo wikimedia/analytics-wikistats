@@ -33,6 +33,15 @@
       [% END %]
     [% END %]
   </tr>
+  <tr id="">
+    <td>language<br/>totals</td>
+    <td></td>
+    [% FOREACH language IN headers %]
+      [% IF chart_data.exists(language) %]
+        <script> document.write("<td>"+unsample_and_format([% language_totals.$language %])+"</td>"); </script>
+      [% END %]
+    [% END %]
+  </tr>
 
   [% WHILE ( data.size > 0 ) %]
     [% row = data.shift %]

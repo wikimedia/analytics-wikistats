@@ -373,6 +373,7 @@ sub get_data {
     min_language_delta => $min_language_delta,
     mid_language_delta => ($min_language_delta + $max_language_delta)/2,
     max_language_delta => $max_language_delta,
+    language_totals    => $language_totals,
   };
 };
 
