@@ -2,8 +2,12 @@ package PageViews::Model;
 use strict;
 use warnings;
 use Time::Piece;
+use File::Basename;
 use Data::Dumper;
 use PageViews::WikistatsColorRamp;
+
+our $ENTIRE_DAY = 24 * 3600;
+
 sub new {
   my ($class) = @_;
   my $raw_obj = {
@@ -26,18 +30,12 @@ sub process_line {
   # (TODO: need to find out what the actual restrictions are here)
   my $re_valid_language = "([a-z\-]{1,8})";
 
+
   # ignore lines which are not mobile and don't have a language in there
-  if( !(  ($language) = $url =~ m|^http://$re_valid_language\.m\.wikipedia|  )) {
-    #warn "[DBG] url=$url";
-    return;
-  };
-
-  #warn "[DBG] line = $line";
-  #warn "[DBG] country = $country";
-  #warn "[DBG] url     = $url    ";
-  #warn "[DBG] time    = $time   ";
-
+  return if( !(  ($language) = $url =~ m|^http://$re_valid_language\.m\.wikipedia|  ));
   my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+  return if( !($tp >= $self->{tp_start} && $tp < $self->{tp_end}) );
+
   my $ymd = $tp->year."-".$tp->mon; # = ..
 
   $self->{counts}->{$ymd}->{$language}++;
@@ -51,9 +49,54 @@ sub process_file {
   };
 };
 
+# adds zero padding for a 2 digit number
+sub padding_2 { 
+    $_[0]<10 ? "0$_[0]" : $_[0];
+};
+
+sub get_files_in_interval {
+  my ($self,$params) = @_;
+  my @retval = ();
+  my $squid_logs_path   = $params->{logs_path};
+  my $squid_logs_prefix = $params->{logs_prefix};
+
+  $params->{start}->{month} = padding_2($params->{start}->{month});
+  $params->{end}->{month}   = padding_2($params->{end}->{month});
+
+  my $tp_start = Time::Piece->strptime(
+                   sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month}),
+                   "%Y-%m-%dT%H:%M:%S"
+                 );
+
+  my $tp_end   = Time::Piece->strptime(
+                   sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month}),
+                   "%Y-%m-%dT%H:%M:%S"
+                 );
+
+  $self->{tp_start} = $tp_start;
+  $self->{tp_end}   = $tp_end;
+  # get the first day of the next month because that's where the data
+  # will end
+  while($tp_end->mon == $params->{end}->{month}) {
+    $tp_end += $ENTIRE_DAY;
+  };
+
+  my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
+  for my $log_filename (@all_squid_files) {
+    if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
+      my $tp_log = Time::Piece->strptime("$y-$m-$d","%Y-%m-%d");
+      if( $tp_log >= $tp_start && $tp_log <= $tp_end) {
+        push @retval,$log_filename;
+      };
+    };
+  };
+
+  return @retval;
+};
+
 sub process_files  {
   my ($self, $params) = @_;
-  for my $gz_logfile (split(/\n/,`ls $params->{logs_path}/*.gz`) ) {
+  for my $gz_logfile ($self->get_files_in_interval($params)) {
     $self->process_file($gz_logfile);
   };
 };
@@ -182,7 +225,8 @@ sub first_pass_languages_totals_rankings {
 
       $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
       $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
-      push @$month_languages_sorted , [ $language , $self->{counts}->{$month}->{$language} ];
+      push @$month_languages_sorted 
+                              , [ $language , $self->{counts}->{$month}->{$language} ];
     };
 
     # compute rankings and store them in $month_rankings
