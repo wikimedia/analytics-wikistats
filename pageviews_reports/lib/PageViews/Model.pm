@@ -6,7 +6,8 @@ use File::Basename;
 use Data::Dumper;
 use PageViews::WikistatsColorRamp;
 
-our $ENTIRE_DAY = 24 * 3600;
+our $ENTIRE_DAY    = 24 * 3600;
+our $SAMPLE_FACTOR = 1000;
 
 sub new {
   my ($class) = @_;
@@ -32,7 +33,10 @@ sub process_line {
 
 
   # ignore lines which are not mobile and don't have a language in there
-  return if( !(  ($language) = $url =~ m|^http://$re_valid_language\.m\.wikipedia|  ));
+  return if( !(  ($language) = $url =~ m|^https?://$re_valid_language\.m\.wikipedia|  ));
+
+  #discard anything else out of time field (we also have milliseconds here and we don't need that
+  #because strptime can't parse it).
   $time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/;
   my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
   return if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) );
@@ -159,9 +163,11 @@ sub _simulate_big_numbers {
   my ($self) = @_;
   for my $month ( keys %{$self->{counts}} ) {
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $self->{counts}->{$month}->{$language} *= 1000;
-      if($self->{counts}->{$month}->{$language} > 300_000) {
-         $self->{counts}->{$month}->{$language} *= 10;
+      #$self->{counts}->{$month}->{$language} *= 1000;
+      if($self->{counts}->{$month}->{$language} <= 300) {
+         $self->{counts}->{$month}->{$language} *= 100;
+      } else {
+         $self->{counts}->{$month}->{$language} *= 1000;
       };
     };
   };
@@ -253,23 +259,6 @@ sub first_pass_languages_totals_rankings {
   };
 };
 
-
-sub format_monthly_count {
-  my ($self,$val) = @_;
-  if(      $val >= 1_000_000 ) {
-    $val /= 1_000_000;
-    $val = int($val);
-    $val = "$val M";
-  } elsif( $val >=   100_000 ) {
-    $val /= 1000;
-    $val = int($val);
-    $val = "$val k";
-  } else {
-  };
-
-  return $val;
-};
-
 #
 # Format data in a nice way so we can pass it to the templating engine
 #
@@ -280,7 +269,7 @@ sub get_data {
   # origins are wikipedia languages present in data
   my $data = [];
 
-  #$self->_simulate_big_numbers();
+  $self->_simulate_big_numbers();
 
   my $__first_pass_retval    = $self->first_pass_languages_totals_rankings;
 
@@ -351,13 +340,11 @@ sub get_data {
              : $max_language_delta;
 
       my $__monthly_delta               =  $self->format_percent($monthly_delta);
-      my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
       my $rank                          =  $self->format_rank( $month_rankings->{$month}->{$language} );
+      my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
 
-      my $__monthly_count = $self->format_monthly_count($monthly_count);
 
       push @$new_row, {
-          monthly_count__               => $__monthly_count,
           monthly_count                 =>   $monthly_count,
           monthly_delta__               => $__monthly_delta,
           monthly_delta                 =>  ($monthly_delta eq '--' ? 0 : $monthly_delta),
@@ -372,12 +359,11 @@ sub get_data {
 
   # reverse order of months
   @$data = reverse(@$data);
+
   # pre-pend headers
   unshift @$data, ['' , '&Sigma;', @sorted_languages_present ];
 
   warn "[DBG] data.length = ".~~(@$data);
-
-  #warn Dumper $data;
 
   return {
     # actual data for each language for each month

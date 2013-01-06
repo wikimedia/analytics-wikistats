@@ -43,7 +43,7 @@
     <td> [% row.shift %] </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
-          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]','[% cell.monthly_count__ %]');
+          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
         [% END %] 
       </script>
     </tr>
