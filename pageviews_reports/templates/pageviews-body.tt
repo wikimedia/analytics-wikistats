@@ -52,8 +52,8 @@
     <!-- month name -->
     <td> [% month %] </td>
     <!-- month total -->
-    <td> <script>document.write(unsample_and_format([% row.shift %]))</script> </td>
-    <td> [% monthly_discarded_count.$month %] </td>
+    <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
+    <td> <script>document.write(unsample_and_format([% monthly_discarded_count.$month %]));</script> </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
           tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
