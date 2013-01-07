@@ -32,7 +32,9 @@ sub process_line {
 
   #discard anything else out of time field (we also have milliseconds here and we don't need that
   #because strptime can't parse it).
-  $time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/;
+  if(!($time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/)) {
+    return;
+  };
   my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
   if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) ) {
     return;
@@ -277,7 +279,7 @@ sub get_data {
   # origins are wikipedia languages present in data
   my $data = [];
 
-  $self->_simulate_big_numbers();
+  #$self->_simulate_big_numbers();
 
   my $__first_pass_retval    = $self->first_pass_languages_totals_rankings;
 
