@@ -29,9 +29,6 @@
   $generate_csv  = $true ;
   $generate_html = $true ;
 
-  # $start_from_language_project = 'en.z' ; # test only
-  # $stop_after_language_project = 'en.z' ; # test only
-
   my $options ;
   getopt ("iomt", \%options) ;
   $true  = 1 ;
@@ -88,7 +85,8 @@ sub FindFirstMonth
       $mm = 12 ;
       $yyyy-- ; 
     }
-  }  
+  } 
+  $mm = sprintf ("%02d", $mm) ; 
   return ($yyyy,$mm) ;
 }
 
@@ -98,11 +96,11 @@ sub ProcessReports
  
   while ($arg_months -- > 0)
   {
-    print "Process month $yyyy-$mm\n" ;
-    $yyyymm = sprintf ("%4d-%2d", $yyyy, $mm) ;
+    $yyyymm = sprintf ("%04d-%02d", $yyyy, $mm) ;
+    print "Process month $yyyymm\n" ;
     $file = "pagecounts-$yyyymm-views-ge-5" ;
 
-    # &PrepInput ($file) ; # qqq
+    &PrepInput ($file) ; # qqq
     &GenerateOutput ($yyyymm, "$file.sorted") ;
 
     $mm++ ;
@@ -124,7 +122,7 @@ sub PrepInput
 
   print "Process $file\n" ;
 
-  unlink $dir_temp/$file.sorted if -s "$dir_temp/$file.sorted" == 0 ; # previous sort failed or was aborted
+  unlink "$dir_temp/$file.sorted" if -s "$dir_temp/$file.sorted" == 0 ; # previous sort failed or was aborted
 
   if (! -e "$dir_temp/$file.sorted")
   {
@@ -150,51 +148,80 @@ sub GenerateOutput
 {
   my ($yyyymm, $file) = @_ ;
 
+  my ($line_counts_sorted, $lang_project_code, $title, $total, $counts) ;
+
+# $start_from_language_project = 'en.z' ; # test only
+# $stop_after_language_project = 'en.z' ; # test only
+
   print "\nGenerate html pages from $file\n\n" ;
 
-  $lang_project_prev  = '' ;
+  $lang_project_code_prev  = '' ;
+
   $lines_read    = 0 ;
   $lines_checked = 0 ;
 
   open COUNTS_SORTED, '<', "$dir_temp/$file" || die "Could not open file $file\n" ;
-  while ($line = <COUNTS_SORTED>)
+  while ($line_counts_sorted = <COUNTS_SORTED>)
   {
-    next if $line =~ /^#/ ;
-    next if $line =~ /^[A-Z]/ ;
+    next if $line_counts_sorted =~ /^#/ ;
+    next if $line_counts_sorted =~ /^\s*$/ ;
+    next if $line_counts_sorted =~ /^[A-Z]/ ;
 
-    chomp $line ;
-    ($lang_project = $line) =~ s/\s.*$// ;
+    chomp $line_counts_sorted ;
+    ($lang_project_code,$title,$total,$counts) = split (' ', $line_counts_sorted) ;
+    $pages_requested += $total ;
+    if ($title =~ /^cache\//i)
+    { $cache_requested += $total ; }
 
-# next if $lang_project =~ /\.z/ ; # qqq
+    next if $lang_project_code =~ /\.mw/ ; # one one line per project with total mobile views (bug?, feature?)
 
     if ($start_from_language_project ne '') # test only
     {
-      next if $lang_project lt $start_from_language_project ;
+      next if $lang_project_code lt $start_from_language_project ;
       $start_from_language_project = '' ;
     }
 
-    if ($lang_project ne $lang_project_prev)
+    if ($lang_project_code ne $lang_project_code_prev)
     {
-      open OUT, '>', $file_titles_checked ;
+      print "lines checked: $lines_checked, api calls +" . ($api_calls - $api_calls_prev) . " (total " . (0+$api_calls) . ")\n" ;
+      $api_calls_prev = $api_calls ;
+
+    # print "XXX3 lang_project_code_prev $lang_project_code_prev\n\n" ;
+
+      open OUT, '>', $file_titles_found ;
       foreach $title (sort keys %articles_found)
       { print OUT "$title\n" ; }
       close OUT ;
-      undef %articles_found ; 
-      last if (($stop_after_language_project ne '') && ($lang_project gt $stop_after_language_project)) ; # test only
+      undef %articles_found ;
+
+
+      open OUT, '>', $file_titles_missing ;
+      foreach $title (sort keys %articles_missing)
+      { print OUT "$title\n" ; }
+      close OUT ;
+      undef %articles_missing ;
+
+      last if (($stop_after_language_project ne '') && ($lang_project_code gt $stop_after_language_project)) ; # test only
     
       # PRINT OUTPUT
-      if (($lang_project_prev ne '') && 
+      if (($lang_project_code_prev ne '') && 
 	  ($#lines >= 0)) # Q&D fix for extra call when skipping some projects
       {
         print "\nProject $project_lang_prev: checked $lines_checked, missing $missing_articles\n" ; 
-        &GenerateFileCsv  ($yyyymm, $project_lang_prev, @lines) ;
-        &GenerateFileHtml ($yyyymm, $project_lang_prev, @lines) ;
+        &GenerateFileCsv  ($yyyymm, $project_lang_prev, $pages_requested, $cache_requested, @lines) ;
+        &GenerateFileHtml ($yyyymm, $project_lang_prev, $pages_requested, $cache_requested, $url_root_prev, @lines) ;
       }
 
       print "\n>>>\n\n" ;
+    # print "XXX0 lang_project_code $lang_project_code\n" ;
 
-      ($lang,$project) = split ('\.', $lang_project) ;
-  
+      ($lang,$project) = split ('\.',$lang_project_code) ;
+
+      $mobile = $false ;
+      if ($project =~ /^mw$/)
+      { $mobile = $true ; }
+
+    # print "XXX1 project $project lang $lang\n" ;
       $project =~ s/^b$/wikibooks/ ;
       $project =~ s/^d$/wiktionary/ ;
       $project =~ s/^n$/wikinews/ ;
@@ -203,17 +230,29 @@ sub GenerateOutput
       $project =~ s/^q$/wikiquote/ ;
       $project =~ s/^s$/wikisource/ ;
       $project =~ s/^v$/wikiversity/ ;
-      $project =~ s/^mw$/wikipedia-mobile/ ;
+      $project =~ s/^m$/wikimedia/ ;
+
+      if ($project =~ /\.\w\w?$/) # project still one/two letter code ?
+      {
+        print "\nSkip $lang_project_code\n\n" ;
+        next ;
+      }
 
       $project_lang = "$project-" . uc ($lang) ;
-      $url_root = "http://$lang.$project.org/wiki" ;
-      
-      $lang_project_prev  = $lang_project ;
-      $project_lang_prev  = $project_lang ;
-      
+    # print "XXX2 project_lang $project_lang\n" ;
+     
+      $url_root_prev = "http://$lang.$project.org/wiki" ;
+      $lang_project_code_prev = $lang_project_code ;
+      $project_lang_prev = $project_lang ;
+      if ($mobile)
+      { $project_lang_prev .= "-mobile" ; }
+
       $missing_articles = 0 ;
       $lines_read       = 0 ;
       $lines_checked    = 0 ;
+      $pages_requested  = 0 ;
+      $cache_requested  = 0 ;
+
       undef @lines ;
 
       if ($project eq 'wikipedia')
@@ -227,17 +266,31 @@ sub GenerateOutput
       {	$max_read_lines = 3000 ; } 
   
       ($dir_in2 = $dir_in) =~ s/\/[^\/]+$// ;
-      $file_titles_checked = "$dir_in2/checked/found-titles-$project_lang.txt" ;
-      print "\nFile titles_checked: $file_titles_checked\n" ;
+      $file_titles_found   = "$dir_in2/checked/found-titles-$project_lang.txt" ;
+      $file_titles_missing = "$dir_in2/checked/missing-titles-$project_lang.txt" ;
+      print "\nFile titles_found  : $file_titles_found\n" ;
+      print "File titles_missing: $file_titles_missing\n\n" ;
   
-      open IN, '<', $file_titles_checked ;
-      while ($line = <IN>)
+      open IN, '<', $file_titles_found ;
+      while (my $line = <IN>)
       {
         chomp $line ;
         next if $line eq '' ;
         $articles_found {$line} ++ ;
       }
       close IN ;
+     
+      # only remember missing titles for short time
+      if (-M $file_titles_missing < 31) # 31 days (lower thtreshold after backlog is done)
+      {
+        open IN, '<', $file_titles_missing ;
+        while (my $line = <IN>)
+        {
+          chomp $line ;
+          next if $line eq '' ;
+          $articles_missing {$line} ++ ;
+        }  
+      }
     }  
 
     # collect first $max_top_articles articles 
@@ -246,42 +299,50 @@ sub GenerateOutput
     if (($lines_checked <= $max_top_articles) ||
        (($missing_articles <= $max_missing_articles) && ($lines_checked < $max_read_lines)))     
     {
-      $line =~ s/^\s+// ;
-     ($lang_project,$title,$total,$counts) = split (' ', $line,4) ;
-
-      next if $lang_project eq '' ; # between wikis
-
-      $lines_checked ++ ;
-
-      $title =~ s/^\/// ; # some pages have preceding slash
-
-      $title =~ s/\%25/\%/g ; # some requests have double encoded url's
-      # $title =~ s/\%([0-9A-F]{2})/chr(hex($1))/ge ;
-      $title =~ s/\%3A/\:/g ; # some requests have double encoded url's
-
-      $url = "$url_root/$title" ;
-
-      # after $max_top_articles has been reached only check namespace 0 titles: titles without semicolon ':'     
-      # this isn't entirely accurate, namespace 0 titles can contain semicolon 
-      # but it takes away need to collect and test for language dependent namespace strings  
-      $exists = $true ;
-    # if (($lines_checked <= $max_top_articles) || ($title !~ /:/)) 
-    # { 
-      ($exists,$result) = &ArticleExists ($project,$lang,$title) ;
-      if (! $exists)	
-      { print "lines checked: $lines_checked, missing articles: $missing_articles $result '$title'\n" ; }
-    # }            
-
-      if (! $exists)
-      {	$missing_articles++ ; }
-
-      # save first $max_top_articles articles and so many more namespace 0 missing article till we have $max_missing_articles 
-      if (($lines_checked <= $max_top_articles) || (! $exists))
+      if (($lines_checked % 1000 == 0) && ($lines_checked > 0))	     
       { 
-	$ch = $exists ? 'Y' : 'N' ;      
-	push @lines, "$lines_checked $ch $line" ; 
+        print "lines checked: $lines_checked, api calls +" . ($api_calls - $api_calls_prev) . " (total " . (0+$api_calls) . ")\n" ;
+        $api_calls_prev = $api_calls ; 
+      }
+
+      $line_counts_sorted =~ s/^\s+// ;
+     ($lang_project_code2,$title,$total,$counts) = split (' ', $line_counts_sorted,4) ;
+
+      if ($lang_project_code2 ne '')
+      { # between wikis
+        $lines_checked ++ ;
+
+        $title =~ s/^\/// ; # some pages have preceding slash
+
+        $title =~ s/\%25/\%/g ; # some requests have double encoded url's
+        # $title =~ s/\%([0-9A-F]{2})/chr(hex($1))/ge ;
+        $title =~ s/\%3A/\:/g ; # some requests have double encoded url's
+
+        $url = "$url_root/$title" ;
+
+        # after $max_top_articles has been reached only check namespace 0 titles: titles without semicolon ':'     
+        # this isn't entirely accurate, namespace 0 titles can contain semicolon 
+        # but it takes away need to collect and test for language dependent namespace strings  
+        $exists = $true ;
+      # if (($lines_checked <= $max_top_articles) || ($title !~ /:/)) 
+      # { 
+        ($exists,$result) = &ArticleExists ($project,$lang,$title) ;
+        #if ((! $exists) && ($result !~ /earlier/))
+        # { print "lines checked: $lines_checked, missing articles: $missing_articles $result '$title'\n" ; }
+      # }            
+
+        if (! $exists)
+        {	$missing_articles++ ; }
+
+        # save first $max_top_articles articles and so many more namespace 0 missing article till we have $max_missing_articles 
+        if (($lines_checked <= $max_top_articles) || (! $exists))
+        { 
+  	  $ch = $exists ? 'Y' : 'N' ;      
+	  push @lines, "$lines_checked $ch $line_counts_sorted" ; 
+        }  
       } 
     }   
+    $line_counts_sorted_prev = $line_counts_sorted ;
   }
 
   # PRINT OUTPUT
@@ -289,13 +350,13 @@ sub GenerateOutput
   if ($#lines >= 0) # Q&D fix for extra call when skipping some projects
   {
     print "\nProject $project_lang_prev: checked $lines_checked, missing $missing_articles\n" ; 
-    &GenerateFileCsv  ($yyyymm, $project_lang_prev, @lines) ;
-    &GenerateFileHtml ($yyyymm, $project_lang_prev, @lines) ;
+    &GenerateFileCsv  ($yyyymm, $project_lang_prev, $pages_requested, $cache_requested, @lines) ;
+    &GenerateFileHtml ($yyyymm, $project_lang_prev, $pages_requested, $cache_requested, $url_root_prev, @lines) ;
   }
 
   unlink "$dir_out/$yyyymm/reports-$yyyymm.zip" ;
 
-  $cmd = "cd $dir_out/$yyyymm/ ; zip reports-$yyyymm.zip  *.csv *.html" ;
+  $cmd = "cd $dir_out/$yyyymm/ ; zip all_reports-$yyyymm.zip  *.csv *.html" ;
   print "\n$cmd\n" ;
   `$cmd` ;
 }
@@ -304,7 +365,7 @@ sub GenerateFileCsv
 {
   return if ! $generate_csv ;
 
-  my ($yyyymm, $project_lang, @lines) = @_ ;
+  my ($yyyymm, $project_lang, $pages_requested, $cache_requested, @lines) = @_ ;
 
   my $dir = "$dir_out/$yyyymm" ;
   if (! -d $dir)
@@ -318,7 +379,7 @@ sub GenerateFileCsv
  
   foreach $line (@lines)
   {
-    ($linecnt,$exists,$lang_project,$title,$total,$counts) = split (' ', $line,6) ;
+    my ($linecnt,$exists,$lang_project_code,$title,$total,$counts) = split (' ', $line,6) ;
   # $line =~ s/^(\S+\s+\S+\s+\S+\s+).*$/$1/ ;
     last if $linecnt > $max_top_articles ; 
     print CSV "$linecnt,$exists,$total,$title\n" ;	  
@@ -331,7 +392,7 @@ sub GenerateFileHtml
 {
   return if ! $generate_html ;
 
-  my ($yyyymm, $project_lang, @lines) = @_ ;
+  my ($yyyymm, $project_lang, $pages_requested, $cache_requested, $url_root, @lines) = @_ ;
 
   my (@lines_missing_ns0, @lines_missing_nsx, @lines_missing_files) ;
   my ($lines_missing_ns0, $lines_missing_nsx, $lines_missing_files) ;
@@ -342,17 +403,28 @@ sub GenerateFileHtml
   if (! -d $dir)
   { mkdir "$dir" || die "Could not create dir '$dir'" ; }
 
-  my $file_csv  = "$dir/most-requested-pages-${yyyymm}_$project_lang.csv" ;
   my $file_html = "$dir/most-requested-pages-${yyyymm}-$project_lang.html" ;
   
-  $url_root = "http://$lang.$project.org/wiki" ;
+  $yyyy = substr ($yyyymm,0,4) ;
+  $mm   = substr ($yyyymm,5,2) ;
+  $mm -- ;
+  if ($mm == 0) { $mm = 12 ; $yyyy-- ; } 
+  $mm = sprintf ("%02d",$mm) ; 
+  my $file_html_prev = "../$yyyy-$mm//most-requested-pages-$yyyy-$mm-$project_lang.html" ;
+
+  $yyyy = substr ($yyyymm,0,4) ;
+  $mm   = substr ($yyyymm,5,2) ;
+  $mm ++ ;
+  if ($mm == 13) { $mm = 1 ; $yyyy++ ; } 
+  $mm = sprintf ("%02d",$mm) ; 
+  my $file_html_next = "../$yyyy-$mm/most-requested-pages-$yyyy-$mm-$project_lang.html" ;
   
   my $month_ord  = ord &yyyymm2b (substr ($yyyymm,0,4),substr ($yyyymm,5,2)) ;
   my $month_prev = &month_year_english_short ($month_ord - 1) ;
   my $month_next = &month_year_english_short ($month_ord + 1) ;
   my $month_now  = &month_year_english_short ($month_ord) ;
 
-  my $url_prev = "http://www.yahoo.com" ;
+  my $url_prev = "" ;
   my $url_next = "" ;
   my $out_button_prev = &btn (" $month_prev ", $url_prev) ;
   my $out_button_next = &btn (" $month_next ", $url_prev) ;
@@ -376,7 +448,8 @@ sub GenerateFileHtml
 # $out_scriptfile = "<script language=\"javascript\" type=\"text/javascript\" src=\"WikipediaStatistics14.js\"></script>\n" ;
 # $out_style      =~ s/td/td {font-size:12px}\nth {font-size:12px}\ntd/ ; # script definition needs clean up
 
-  $out_page_subtitle = "<a href='http://stats.wikimedia.org'>Home</a> | <a href='.'>All wikis</a> | <a href=''>$month_prev</a> | <a href=''>$month_next</a> <font color=888888>(published few days after end of month)</font>" ;
+# $out_page_subtitle = "<a href='http://stats.wikimedia.org'>Home</a> | <a href='.'>All wikis</a> | <a href='$file_html_prev'>$month_prev</a> | <a href='$file_html_next'>$month_next</a> <font color=888888>(published few days after end of month)</font>" ;
+  $out_page_subtitle = "<a href='http://stats.wikimedia.org'>Home</a> | <a href='.'>All wikis</a> | <a href='$file_html_next'>$month_next</a> <font color=888888>(published few days after end of month)</font>" ;
 # $out_options = &opt ("PageViews${project}-$month-ByViews.html", $project) ;
 # foreach $project2 (keys %projects)
 # {
@@ -409,12 +482,12 @@ sub GenerateFileHtml
                "Requests for not existing pages are shown in red.<br>\n" .
 	       "Requests for main and mobile site are reported in separate reports.<br>\n" . 
 	       "Redirects and upper/lower case differences are counted separately.<p>\n" .
-	       "<small>Based on a compacted archive of <a href='http://dumps.wikimedia.org/other/pagecounts-raw/'>page request files</a><br>\n" .
+	       "<small>Based on <a href='http://dumps.wikimedia.org/other/pagecounts-ez/merged/'>highly consolidated archives</a> of <a href='http://dumps.wikimedia.org/other/pagecounts-raw/'>hourly page request files</a><br>\n" .
 	       "This archive only contains articles with 5 or more requests per month</small></td></tr>\n" ;
   $out_html .= "<tr><th class=cb>Rank</th><th class=cb>Requests</th><th class=lb>Title</th></tr>\n" ;
   foreach $line (@lines)
   {
-    ($linecnt,$exists,$lang_project,$title,$total,$counts) = split (' ', $line, 6) ;
+    my ($linecnt,$exists,$lang_project_code,$title,$total,$counts) = split (' ', $line, 6) ;
    
     ($title2 = $title) =~ s/\%([0-9A-F]{2})/chr(hex($1))/ge ;
     $title2 = unicode_to_html ($title2) ;
@@ -504,6 +577,16 @@ sub GenerateFileHtml
   $out_html .= "</td></tr>\n" ; 
   $out_html .= "</table>\n" ;
   
+  $pages_requested =~ s/^(\d+)(\d\d\d)(\d\d\d)(\d\d\d)$/$1,$2,$3,$4/ ;
+  $pages_requested =~ s/^(\d+)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+  $pages_requested =~ s/^(\d+)(\d\d\d)$/$1,$2/ ;
+  $out_html .= "<p><small>Total page requests for full month for pages with 5+ requests: $pages_requested</small>" ; 
+
+  $cache_requested =~ s/^(\d+)(\d\d\d)(\d\d\d)(\d\d\d)$/$1,$2,$3,$4/ ;
+  $cache_requested =~ s/^(\d+)(\d\d\d)(\d\d\d)$/$1,$2,$3/ ;
+  $cache_requested =~ s/^(\d+)(\d\d\d)$/$1,$2/ ;
+  $out_html .= "<br><small>Total cache requests for full month: $cache_requested</small>" ; 
+  
   ($sec,$min,$hour) = gmtime(time);
  
   $out_generated_at = &GetDate (time) . ' ' . sprintf ("%02d:%02d",$hour,$min) ;
@@ -537,14 +620,21 @@ sub ArticleExists
   # print "found earlier: '$title'\n" ;
     return ($true) ; 
   }
+  
+  if ($articles_missing {$title} > 0)
+  { 
+  # print "missed earlier: '$title'\n" ;
+    return ($false,"| missed earlier:") ; 
+  }
 
   if (($project eq '') || ($lang eq ''))
   {
-    print "empty variable(s): project '$project', lang '$lang'\n" ; 
+  # print "empty variable(s): project '$project', lang '$lang'\n" ; 
     return ($false) ;
   }
 
-  print "api calls: $api_calls\n" if ++ $api_calls % 100 == 0 ; 
+  $api_calls ++ ;
+# print "api calls: $api_calls\n" if ++ $api_calls % 100 == 0 ; 
 
   my $url = "http://$lang.$project.org/w/api.php?action=query&titles=$title&format=xml" ;
   ($success,$content) = GetPage ($url) ;
@@ -556,7 +646,7 @@ sub ArticleExists
 
     if (($content =~ /missing=\"\"/) && ($title =~ /\.[a-z]{1,5}$/i)) # (?:gif|png|jpg|jpeg|tif|tiff|svg)$/i))
     {
-      # print "bypass api: '$title'\n" ;
+    # print "bypass api: '$title'\n" ;
       my $url = "http://$lang.$project.org/wiki/$title" ;
       ($success,$content) = GetPage ($url) ;
 
@@ -569,9 +659,12 @@ sub ArticleExists
       else
       { 
       # print "page missing after all: '$title'\n" ;
+        $articles_missing {$title} ++ ;
 	return ($false,"| missing:") ; 
       }
     }
+
+    $articles_missing {$title} ++ ;
 
     if ($content =~ /^\d+$/)
     { return ($false,"| rc $content:") ; }
