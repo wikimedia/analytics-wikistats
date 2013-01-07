@@ -100,7 +100,7 @@ sub get_files_in_interval {
       my $tp_log = Time::Piece->strptime("$y-$m-$d","%Y-%m-%d");
 
       if( $tp_log >= $tp_start && 
-          $tp_log <  $tp_end) {
+          $tp_log <=  $tp_end) {
         push @retval,$log_filename;
       };
     };
