@@ -24,11 +24,12 @@ my $config = [
   {
     month => "2012-10",
     explicit_country_counts => {
-      us => 400,
-      gb => 300 ,
-      ca => 100 ,
-      fr => 100 ,
-      de => 30 ,
+      us                    => 400 ,
+      gb                    => 300 ,
+      ca                    => 100 ,
+      fr                    => 100 ,
+      de                    => 30  ,
+      "invalid-language123" => 100 ,
     },
   },
   {

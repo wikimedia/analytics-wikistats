@@ -4,6 +4,7 @@ use warnings;
 use Time::Piece;
 use File::Basename;
 use Data::Dumper;
+use List::Util qw/sum/;
 use PageViews::WikistatsColorRamp;
 
 our $ENTIRE_DAY    = 24 * 3600;
@@ -27,21 +28,28 @@ sub process_line {
   my $url      = $fields[8];
   my $language ;
 
+
+
+  #discard anything else out of time field (we also have milliseconds here and we don't need that
+  #because strptime can't parse it).
+  $time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/;
+  my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+  if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) ) {
+    return;
+  };
+
+  my $ymd = $tp->year."-".$tp->mon; 
   # just get languages with at most 8 chars and only small chars
   # (TODO: need to find out what the actual restrictions are here)
   my $re_valid_language = "([a-z\-]{1,8})";
 
 
   # ignore lines which are not mobile and don't have a language in there
-  return if( !(  ($language) = $url =~ m|^https?://$re_valid_language\.m\.wikipedia|  ));
-
-  #discard anything else out of time field (we also have milliseconds here and we don't need that
-  #because strptime can't parse it).
-  $time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/;
-  my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
-  return if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) );
-
-  my $ymd = $tp->year."-".$tp->mon; # = ..
+  if( !(  ($language) = $url =~ m|^https?://$re_valid_language\.m\.wikipedia|  )) {
+    $self->{monthly_discarded_count} //= {};
+    $self->{monthly_discarded_count}->{$ymd}++;
+    return;
+  };
 
   $self->{counts}->{$ymd}->{$language}++;
 };
@@ -361,19 +369,25 @@ sub get_data {
   @$data = reverse(@$data);
 
   # pre-pend headers
-  unshift @$data, ['' , '&Sigma;', @sorted_languages_present ];
+  unshift @$data, ['month' , '&Sigma;', 'discarded', @sorted_languages_present ];
 
   warn "[DBG] data.length = ".~~(@$data);
+  my $big_total_processed = sum( values %$language_totals );
+  my $big_total_discarded = sum( values %{$self->{monthly_discarded_count}});
 
+  warn Dumper $self->{monthly_discarded_count};
   return {
     # actual data for each language for each month
-    data               => $data,
-    chart_data         => $chart_data,
+    data                    => $data,
+    chart_data              => $chart_data,
     # the following values are used by the color ramps
-    min_language_delta => $min_language_delta,
-    mid_language_delta => ($min_language_delta + $max_language_delta)/2,
-    max_language_delta => $max_language_delta,
-    language_totals    => $language_totals,
+    min_language_delta      => $min_language_delta,
+    mid_language_delta      => ($min_language_delta + $max_language_delta)/2,
+    max_language_delta      => $max_language_delta,
+    language_totals         => $language_totals,
+    big_total_processed     => $big_total_processed,
+    big_total_discarded     => $big_total_discarded,
+    monthly_discarded_count => $self->{monthly_discarded_count},
   };
 };
 
