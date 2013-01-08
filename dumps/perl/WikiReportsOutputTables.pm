@@ -4172,7 +4172,8 @@ sub GenerateComparisonTable
   # }
 
 
-    $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low, due to server overload.</font> " ;
+    $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+    $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
     $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
     if ($pageviews_mobile)
     { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
@@ -4547,6 +4548,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n" ;
 
   $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+  $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
   $out_html .= blank_text_after ("31/12/2011", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
   $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well) </font>") ;
   if (! $normalized)
