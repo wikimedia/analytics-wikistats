@@ -6,6 +6,7 @@ use Data::Dumper;
 use List::Util qw/sum/;
 use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
+use PageViews::BotDetector;
 
 our $ENTIRE_DAY    = 24 * 3600;
 our $SAMPLE_FACTOR = 1000;
@@ -15,7 +16,12 @@ sub new {
   my $raw_obj = {
     counts                  => {},
     monthly_discarded_count => {},
+    bot_counts              => {},
+    bdetector               => undef,
   };
+  $raw_obj->{bdetector} = PageViews::BotDetector->new;
+  $raw_obj->{bdetector}->load_ip_ranges();
+  $raw_obj->{bdetector}->load_useragent_regex();
   my $obj     = bless $raw_obj,$class;
   init_wikiprojects_map();
   return $obj;
@@ -26,8 +32,10 @@ sub process_line {
   my @fields = split(/\s/,$line);
   #use Data::Dumper;
   #warn Dumper \@fields;
-  my $time     = $fields[2];
-  my $url      = $fields[8];
+  my $time     = $fields[2] ;
+  my $url      = $fields[8] ;
+  my $ip       = $fields[4] ;
+  my $ua       = $fields[13];
 
   my $tp = convert_str_to_epoch1($time);
 
@@ -43,7 +51,20 @@ sub process_line {
     return;
   };
 
-  #warn "[DBG] language=$language";
+  my $bdetector = $self->{bdetector};
+  my $label_ip = undef;
+  eval {
+    $label_ip = $bdetector->match_ip($ip);
+  };
+  if( !$@ && defined($label_ip) ) {
+    $self->{bot_counts}->{$ymd}++;
+    return;
+  };
+
+  if( $bdetector->match_ua($ua) ) {
+    $self->{bot_counts}->{$ymd}++;
+    return;
+  };
 
   $self->{counts}->{$ymd}->{$language}++;
 };

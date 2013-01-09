@@ -7,7 +7,7 @@ use Regexp::Assemble;
 sub new {
   my ($class) = @_;
   my $raw_obj = { };
-  $raw_obj->{pat}      = new Net::Patricia;
+  $raw_obj->{ip_pat}      = new Net::Patricia;
   $raw_obj->{ua_regex} = undef;
   my $obj     = bless $raw_obj,$class;
   return $obj;
@@ -15,7 +15,7 @@ sub new {
 
 sub match_ip {
   my ($self,$ip) = @_;
-  return $self->{pat}->match_string($ip);
+  return $self->{ip_pat}->match_string($ip);
 };
 
 sub match_ua {
@@ -55,7 +55,7 @@ sub load_useragent_regex {
 
 sub load_ip_ranges {
   my ($self) = @_;
-  my $p = $self->{pat};
+  my $p = $self->{ip_pat};
   my $label_google = "Google";
   my $label_yahoo  = "Yahoo";
   #   if (($address_11 ge "064.233.160")     && ($address_11 le "064.233.191"))     { $address = "!google:IP064" ; }
