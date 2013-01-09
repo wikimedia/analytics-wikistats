@@ -5,6 +5,7 @@ use lib "./lib";
 use PageViews::Model;
 use PageViews::View;
 use Data::Dumper;
+use JSON::XS;
 use Carp;
 
 # 
@@ -37,8 +38,14 @@ $m->process_files({
 });
 
 my $d = $m->get_data();
-#print Dumper $d;
-#exit 0;
+
+open my $json_fh,">$REPORT_OUTPUT_PATH"."out.json";
+print   $json_fh JSON::XS->new
+                         ->pretty(1)
+                         ->canonical(1)
+                         ->encode($d);
+close   $json_fh;
+
 my $v = PageViews::View->new($d);
 $v->render({ 
     output_path => $REPORT_OUTPUT_PATH 

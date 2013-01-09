@@ -8,8 +8,6 @@ use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
 
-our $ENTIRE_DAY    = 24 * 3600;
-our $SAMPLE_FACTOR = 1000;
 
 sub new {
   my ($class) = @_;
