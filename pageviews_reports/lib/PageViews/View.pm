@@ -26,7 +26,8 @@ sub render {
   `mkdir -p $output_path`;
   my $tt = Template->new({
       INCLUDE_PATH => "./templates",
-      OUTPUT_PATH  =>  $output_path,
+      OUTPUT_PATH  => $output_path,
+      DEBUG        => 1,
   }); 
   $tt->process(
     "pageviews.tt",

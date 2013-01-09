@@ -24,9 +24,7 @@ my $config = [
   {
     month => "2012-10",
     explicit_country_counts => {
-      us                    => 400 ,
-      gb                    => 300 ,
-      ca                    => 100 ,
+      en                    => 400 ,
       fr                    => 100 ,
       de                    => 30  ,
       "invalid-language123" => 100 ,
@@ -47,11 +45,9 @@ my $config = [
   {
     month => "2013-02",
     explicit_country_deltas => {
-      us => -0.3 ,
-      gb => +0.1 ,
+      en => -0.3 ,
       de => +0.2 ,
       fr => -0.02,
-      ca => +0.031415,
     },
   },
 ];

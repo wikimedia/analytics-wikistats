@@ -1,11 +1,11 @@
 package PageViews::Model;
 use strict;
 use warnings;
-use Time::Piece;
 use File::Basename;
 use Data::Dumper;
 use List::Util qw/sum/;
 use PageViews::WikistatsColorRamp;
+use PageViews::Field::Parser;
 
 our $ENTIRE_DAY    = 24 * 3600;
 our $SAMPLE_FACTOR = 1000;
@@ -13,9 +13,11 @@ our $SAMPLE_FACTOR = 1000;
 sub new {
   my ($class) = @_;
   my $raw_obj = {
-    counts => {},
+    counts                  => {},
+    monthly_discarded_count => {},
   };
   my $obj     = bless $raw_obj,$class;
+  init_wikiprojects_map();
   return $obj;
 };
 
@@ -26,32 +28,22 @@ sub process_line {
   #warn Dumper \@fields;
   my $time     = $fields[2];
   my $url      = $fields[8];
-  my $language ;
 
+  my $tp = convert_str_to_epoch1($time);
 
+  return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
 
-  #discard anything else out of time field (we also have milliseconds here and we don't need that
-  #because strptime can't parse it).
-  if(!($time =~ s/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*$/$1/)) {
-    return;
-  };
-  my $tp    = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
-  if( !($tp >= $self->{tp_start} && $tp <  $self->{tp_end}) ) {
-    return;
-  };
+  my $ymd = $tp->[1]."-".$tp->[2]; 
+  my $language = get_wikiproject_for_url($url);
+  #print "url     =$url\n";
+  #print "language=$language\n";
 
-  my $ymd = $tp->year."-".$tp->mon; 
-  # just get languages with at most 8 chars and only small chars
-  # (TODO: need to find out what the actual restrictions are here)
-  my $re_valid_language = "([a-z\-]{1,8})";
-
-
-  # ignore lines which are not mobile and don't have a language in there
-  if( !(  ($language) = $url =~ m|^https?://$re_valid_language\.m\.wikipedia|  )) {
-    $self->{monthly_discarded_count} //= {};
+  if( !$language ) {
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
+
+  #warn "[DBG] language=$language";
 
   $self->{counts}->{$ymd}->{$language}++;
 };
@@ -62,6 +54,7 @@ sub process_file {
   while( my $line = <IN>) {
     $self->process_line($line);
   };
+  close IN;
 };
 
 # adds zero padding for a 2 digit number
@@ -78,20 +71,15 @@ sub get_files_in_interval {
   $params->{start}->{month} = padding_2($params->{start}->{month});
   $params->{end}->{month}   = padding_2($params->{end}->{month});
 
-  my $tp_start = Time::Piece->strptime(
-                   sprintf("%s-%s-01T00:00:00",$params->{start}->{year},$params->{start}->{month}),
-                   "%Y-%m-%dT%H:%M:%S"
+  my $tp_start = convert_str_to_epoch1(
+                   sprintf("%s-%s-01T00:00:00",$params->{start}->{year},$params->{start}->{month})
                  );
 
-  my $tp_end   = Time::Piece->strptime(
-                   sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month}),
-                   "%Y-%m-%dT%H:%M:%S"
-                 );
-  # get the first day of the next month because that's where the data
-  # will end
-  while($tp_end->mon == $params->{end}->{month}) {
-    $tp_end += $ENTIRE_DAY;
-  };
+  my $tp_end__   = convert_str_to_epoch1(
+                     sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month})
+                   );
+
+  my $tp_end = get_first_day_next_month($tp_end__);
 
   $self->{tp_start} = $tp_start;
   $self->{tp_end}   = $tp_end;
@@ -99,12 +87,10 @@ sub get_files_in_interval {
   my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
   for my $log_filename (@all_squid_files) {
     if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
-      my $tp_log = Time::Piece->strptime("$y-$m-$d","%Y-%m-%d");
+      my $tp_log = convert_str_to_epoch1("$y-$m-$d"."T00:00:00");
 
-      if( $tp_log >= $tp_start && 
-          $tp_log <=  $tp_end) {
-        push @retval,$log_filename;
-      };
+      push @retval,$log_filename
+        if( is_time_in_interval_R($tp_start,$tp_end,$tp_log) );
     };
   };
 
@@ -130,25 +116,28 @@ sub safe_division {
     $retval = 
       $denominator 
         ? sprintf("%.2f",($numerator / $denominator)*100)
-        : "--";
+        : 0;
   } else {
-    $retval = "--";
+    $retval = 0;
   };
 
   return $retval;
 };
 
 
-sub format_percent {
+sub format_delta {
   my ($self,$val) = @_;
-  if($val ne "--") {
+
+  if($val) {
     my $sign;
-    if(       $val > 0) {
+    if(        $val > 0) {
       $sign = "+";
-    } else {
-      $sign = "";
+    } elsif(   $val < 0) {
+      $sign = "-";
     };
     $val = "$sign$val%";
+  } else {
+    $val = "--";
   };
 
   return $val;
@@ -313,6 +302,7 @@ sub get_data {
     # idx_language is the index of the current language inside sorted_languages_present
     for my $idx_language ( 0..$#sorted_languages_present ) {
       my $language = $sorted_languages_present[$idx_language];
+      #warn "language=$language";
       # hash containing actual count, percentage of monthly total, increase over past month
       my $percentage_of_monthly_total ;
       my $monthly_delta               ;
@@ -320,7 +310,7 @@ sub get_data {
       my $monthly_count_previous      ;
 
       if(@$data > 0) {
-        warn "[DBG] idx_language = $idx_language";
+        #warn "[DBG] idx_language = $idx_language";
         #warn Dumper $data->[-1];
         $monthly_count_previous = $data->[-1]->[$idx_language + $LANGUAGES_COLUMNS_SHIFT]->{monthly_count} // 0;
       } else {
@@ -349,7 +339,9 @@ sub get_data {
              ? $monthly_delta 
              : $max_language_delta;
 
-      my $__monthly_delta               =  $self->format_percent($monthly_delta);
+
+
+      my $__monthly_delta               =  $self->format_delta($monthly_delta);
       my $rank                          =  $self->format_rank( $month_rankings->{$month}->{$language} );
       my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
 

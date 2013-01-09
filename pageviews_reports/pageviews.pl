@@ -14,7 +14,8 @@ use Carp;
 #       Add commandline parameter for path to output data
 #
 
-our $__DATA_BASE        = "data";
+#our $__DATA_BASE        = "data";
+our $__DATA_BASE        = "/home/user/wikidata";
 my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
 
 `mkdir -p $REPORT_OUTPUT_PATH`;
@@ -25,15 +26,19 @@ $m->process_files({
     logs_path   => $__DATA_BASE,
     start       => {
       year  => 2012,
-      month => 1,
+      #month => 1,
+      month => 11,
     },
     end         => {
       year  => 2012,
-      month => 12,
+      #month => 12,
+      month => 11,
     },
 });
 
 my $d = $m->get_data();
+#print Dumper $d;
+#exit 0;
 my $v = PageViews::View->new($d);
 $v->render({ 
     output_path => $REPORT_OUTPUT_PATH 
