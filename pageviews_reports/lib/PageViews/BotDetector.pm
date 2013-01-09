@@ -2,21 +2,56 @@ package PageViews::BotDetector;
 use strict;
 use warnings;
 use Net::Patricia;
+use Regexp::Assemble;
 
 sub new {
   my ($class) = @_;
   my $raw_obj = { };
-  $raw_obj->{pat} = new Net::Patricia;
+  $raw_obj->{pat}      = new Net::Patricia;
+  $raw_obj->{ua_regex} = undef;
   my $obj     = bless $raw_obj,$class;
   return $obj;
 };
 
 sub match_ip {
   my ($self,$ip) = @_;
-  warn $ip;
   return $self->{pat}->match_string($ip);
-  #return $self->{pat}->match_exact_string($ip);
 };
+
+sub match_ua {
+  my ($self,$ua) = @_;
+  if($ua =~ $self->{ua_regex}) {
+    return 1;
+  } else {
+    return 0;
+  };
+};
+
+
+# we use Regexp::Assemble to bundle together
+# multiple regexes from Wikistats code into a bigger
+# efficient regex
+sub load_useragent_regex {
+  my ($self) = @_;
+
+  my $ra = Regexp::Assemble->new;
+  $ra->add("Googlebot");
+  $ra->add("FeedFetcher-Google");
+  $ra->add("Google.*?Wireless.*?Transcoder");
+  $ra->add("Google.*?Desktop");
+  $ra->add("GoogleEarth");
+  $ra->add("GoogleToolbar");
+  $ra->add("Google.*?Keyword.*?Tool");
+  $ra->add("GoogleT");
+  $ra->add("translate\.google\.com");
+  $ra->add("parser");
+  $ra->add("crawl");
+  $ra->add("crawler");
+
+  $self->{ua_regex} = $ra->re;
+
+};
+
 
 sub load_ip_ranges {
   my ($self) = @_;
