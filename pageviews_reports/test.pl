@@ -28,6 +28,7 @@ my $config = [
       fr                    => 100 ,
       de                    => 30  ,
       "invalid-language123" => 100 ,
+      bot                   => 200 ,
     },
   },
   {
@@ -74,6 +75,7 @@ $m->process_files({
 });
 
 my $d = $m->get_data();
+warn "BOTS=>".Dumper($d->{monthly_bots_count});
 #warn Dumper $d;
 #warn Dumper $m->get_files_in_interval();
 #exit 0;

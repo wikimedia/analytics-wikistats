@@ -14,12 +14,13 @@ sub new {
   my $raw_obj = {
     counts                  => {},
     monthly_discarded_count => {},
-    bot_counts              => {},
+    monthly_bots_count      => {},
     bdetector               => undef,
   };
   $raw_obj->{bdetector} = PageViews::BotDetector->new;
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
+
   my $obj     = bless $raw_obj,$class;
   init_wikiprojects_map();
   return $obj;
@@ -27,6 +28,7 @@ sub new {
 
 sub process_line {
   my ($self,$line) = @_;
+  my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
   #use Data::Dumper;
   #warn Dumper \@fields;
@@ -45,23 +47,25 @@ sub process_line {
   #print "url     =$url\n";
   #print "language=$language\n";
 
+  my $label_ip = undef;
+  eval {
+    $label_ip = $bdetector->match_ip($ip);
+  };
+  #warn "ip=$ip";
+  #warn "label_ip=$label_ip";
+  if( !$@ && defined($label_ip) ) {
+    $self->{monthly_bots_count}->{$ymd}++;
+    return;
+  };
+
   if( !$language ) {
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
 
-  my $bdetector = $self->{bdetector};
-  my $label_ip = undef;
-  eval {
-    $label_ip = $bdetector->match_ip($ip);
-  };
-  if( !$@ && defined($label_ip) ) {
-    $self->{bot_counts}->{$ymd}++;
-    return;
-  };
 
   if( $bdetector->match_ua($ua) ) {
-    $self->{bot_counts}->{$ymd}++;
+    $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
 
@@ -70,7 +74,7 @@ sub process_line {
 
 sub process_file {
   my ($self,$filename) = @_;
-  open IN, "-|", "gzip -dc $filename";
+  open IN, "-|", "unpigz -c $filename";
   while( my $line = <IN>) {
     $self->process_line($line);
   };
@@ -383,11 +387,12 @@ sub get_data {
   @$data = reverse(@$data);
 
   # pre-pend headers
-  unshift @$data, ['month' , '&Sigma;', 'discarded', @sorted_languages_present ];
+  unshift @$data, ['month' , '&Sigma;', 'discarded', 'bots', @sorted_languages_present ];
 
   warn "[DBG] data.length = ".~~(@$data);
-  my $big_total_processed = sum( values %$language_totals );
-  my $big_total_discarded = sum( values %{$self->{monthly_discarded_count}});
+  my $big_total_processed = 0 + sum( values %$language_totals                  );
+  my $big_total_discarded = 0 + sum( values %{$self->{monthly_discarded_count}});
+  my $big_total_bots      = 0 + sum( values %{$self->{monthly_bots_count}}     );
 
   warn Dumper $self->{monthly_discarded_count};
   return {
@@ -401,6 +406,8 @@ sub get_data {
     language_totals         => $language_totals,
     big_total_processed     => $big_total_processed,
     big_total_discarded     => $big_total_discarded,
+    big_total_bots          => $big_total_bots     ,
+    monthly_bots_count      => $self->{monthly_bots_count},
     monthly_discarded_count => $self->{monthly_discarded_count},
   };
 };

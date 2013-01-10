@@ -4,6 +4,7 @@ use warnings;
 use Data::Dumper;
 use Carp;
 
+our $GOOGLE_BOT_IP = "64.233.161.40";
 
 sub new {
   my ($class,$params) = @_;
@@ -65,6 +66,12 @@ sub generate {
       my $hcount = $month_data->{explicit_country_counts};
       #warn Dumper $hcount;
       while(my ($language,$count) = each %$hcount ) {
+        if($language eq "bot") {
+          $o->generate_line({
+              client_ip => $GOOGLE_BOT_IP
+          }) for 1..$count;
+          next;
+        };
         $o->generate_line({ 
             __mobile_url_country => $language 
         }) for 1..$count;
@@ -86,6 +93,12 @@ sub generate {
       #warn Dumper $hcount;
 
       while(my ($language,$count) = each %$hcount ) {
+        if($language eq "bot") {
+          $o->generate_line({
+              client_ip => $GOOGLE_BOT_IP
+          }) for 1..$count;
+          next;
+        };
         $o->generate_line({ 
             __mobile_url_country => $language 
         }) for 1..$count;
@@ -108,6 +121,12 @@ sub generate {
       #warn Dumper $hcount;
 
       while(my ($language,$count) = each %$hcount ) {
+        if($language eq "bot") {
+          $o->generate_line({
+              client_ip => $GOOGLE_BOT_IP
+          }) for 1..$count;
+          next;
+        };
         $o->generate_line({ 
             __mobile_url_country => $language 
         }) for 1..$count;

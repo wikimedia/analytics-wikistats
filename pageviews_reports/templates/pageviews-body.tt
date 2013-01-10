@@ -23,6 +23,7 @@
     <td>Trend last<br/> 24 months</td>
     <td></td>
     <td></td>
+    <td></td>
     [% FOREACH language IN headers %]
       [% IF chart_data.exists(language) %]
         [% container_id = 'container-' _ language %]
@@ -38,6 +39,7 @@
     <td>language<br/>totals</td>
     <td><script>document.write(unsample_and_format([% big_total_processed %]));</script></td>
     <td><script>document.write(unsample_and_format([% big_total_discarded %]));</script></td>
+    <td><script>document.write(unsample_and_format([% big_total_bots      %]));</script></td>
     [% FOREACH language IN headers %]
       [% IF chart_data.exists(language) %]
         <td><script>document.write(unsample_and_format([% language_totals.$language %])); </script></td>
@@ -54,6 +56,7 @@
     <!-- month total -->
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
     <td> <script>document.write(unsample_and_format([% monthly_discarded_count.$month %]));</script> </td>
+    <td> <script>document.write(unsample_and_format([% monthly_bots_count.$month      %]));</script> </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
           tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
