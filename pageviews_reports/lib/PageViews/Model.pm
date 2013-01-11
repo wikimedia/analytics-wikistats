@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use File::Basename;
 use Data::Dumper;
-use List::Util qw/sum/;
+use List::Util qw/sum max/;
 use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
@@ -75,6 +75,7 @@ sub process_line {
 sub process_file {
   my ($self,$filename) = @_;
   open IN, "-|", "unpigz -c $filename";
+  #open IN, "-|", "gzip -dc $filename";
   while( my $line = <IN>) {
     $self->process_line($line);
   };
@@ -152,16 +153,17 @@ sub safe_division {
 sub format_delta {
   my ($self,$val) = @_;
 
-  if($val) {
+  if(defined($val)) {
     my $sign;
     if(        $val > 0) {
       $sign = "+";
+      $val = "$sign$val%";
     } elsif(   $val < 0) {
       $sign = "-";
+      $val = "$sign$val%";
+    } else {
+      $val = "--";
     };
-    $val = "$sign$val%";
-  } else {
-    $val = "--";
   };
 
   return $val;
@@ -246,7 +248,6 @@ sub first_pass_languages_totals_rankings {
   # calculate language totals
   for my $month ( @months_present ) {
     # languages sorted for this month
-    my $month_languages_sorted = [];
 
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $languages_present_uniq->{$language} = 1;
@@ -259,17 +260,8 @@ sub first_pass_languages_totals_rankings {
 
       $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
       $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
-      push @$month_languages_sorted 
-                              , [ $language , $self->{counts}->{$month}->{$language} ];
     };
 
-    # compute rankings and store them in $month_rankings
-    my $rankings = {};
-    @$month_languages_sorted = sort { $b->[1] <=> $a->[1]  } @$month_languages_sorted;
-    $rankings->{$month_languages_sorted->[$_]->[0]} = 1+$_
-      for 0..(-1+@$month_languages_sorted);
-    
-    $month_rankings->{$month} = $rankings;
   };
 
   return {
@@ -280,6 +272,33 @@ sub first_pass_languages_totals_rankings {
     language_totals         => $language_totals       ,
     chart_data              => $chart_data            ,
   };
+};
+
+sub second_pass_rankings {
+  my ($self,$languages,$months) = @_;
+
+  my $month_rankings = {};
+  for my $month ( @$months ) {
+    # compute rankings and store them in $month_rankings
+    my $rankings = {};
+
+    my $month_languages_sorted = [];
+
+    for my $language ( keys %$languages ) {
+       push @$month_languages_sorted, 
+              [ $language, ($self->{counts}->{$month}->{$language} // 0) ];
+    };
+
+    @$month_languages_sorted = 
+      sort { $b->[1] <=> $a->[1]  } 
+      @$month_languages_sorted;
+
+    $rankings->{$month_languages_sorted->[$_]->[0]} = 1+$_
+      for 0..(-1+@$month_languages_sorted);
+
+    $month_rankings->{$month} = $rankings;
+  };
+  return $month_rankings;
 };
 
 #
@@ -299,9 +318,13 @@ sub get_data {
   my @months_present         = @{ $__first_pass_retval->{months_present} };
   my $languages_present_uniq =    $__first_pass_retval->{languages_present_uniq};
   my $month_totals           =    $__first_pass_retval->{month_totals};
-  my $month_rankings         =    $__first_pass_retval->{month_rankings};
   my $language_totals        =    $__first_pass_retval->{language_totals};
   my $chart_data             =    $__first_pass_retval->{chart_data};
+
+  my $month_rankings         = $self->second_pass_rankings($languages_present_uniq,\@months_present);
+
+
+
 
   my $min_language_delta = +999_999;
   my $max_language_delta = -999_999;
@@ -350,7 +373,7 @@ sub get_data {
       #warn "[DBG] monthly_count_previous = $monthly_count_previous";
       $monthly_delta               = $self->safe_division(
                                         $monthly_count - $monthly_count_previous,
-                                        $monthly_count_previous 
+                                        ($monthly_count_previous // 0) 
                                      );
 
       $min_language_delta = 
@@ -366,7 +389,7 @@ sub get_data {
 
 
       my $__monthly_delta               =  $self->format_delta($monthly_delta);
-      my $rank                          =  $self->format_rank( $month_rankings->{$month}->{$language} );
+      my $rank                          =  $self->format_rank($month_rankings->{$month}->{$language} );
       my $__percentage_of_monthly_total = "$percentage_of_monthly_total%";
 
 
@@ -398,10 +421,10 @@ sub get_data {
   return {
     # actual data for each language for each month
     data                    => $data,
+    # the chart data for each wikiproject
     chart_data              => $chart_data,
     # the following values are used by the color ramps
     min_language_delta      => $min_language_delta,
-    mid_language_delta      => ($min_language_delta + $max_language_delta)/2,
     max_language_delta      => $max_language_delta,
     language_totals         => $language_totals,
     big_total_processed     => $big_total_processed,
@@ -409,6 +432,9 @@ sub get_data {
     big_total_bots          => $big_total_bots     ,
     monthly_bots_count      => $self->{monthly_bots_count},
     monthly_discarded_count => $self->{monthly_discarded_count},
+    debug                   => {
+      month_rankings  => $month_rankings,
+    }
   };
 };
 

@@ -28,12 +28,12 @@ $m->process_files({
     start       => {
       year  => 2012,
       #month => 1,
-      month => 11,
+      month => 10,
     },
     end         => {
       year  => 2012,
       #month => 12,
-      month => 11,
+      month => 12,
     },
 });
 
