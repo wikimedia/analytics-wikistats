@@ -6,8 +6,40 @@ use POSIX ":sys_wait_h";
 
 # add up all the counts from the workers
 sub reduce {
-  my ($self) = @_;
+  my ($self,$json_path) = @_;
   warn "DOING REDUCE";
+
+  my $reduced_monthly_bots_count      = {};
+  my $reduced_monthly_discarded_count = {};
+  my $reduced_counts                  = {};
+
+  # iterate over all children
+  for my $child_output (<$json_path/*.json>) {
+    my $c = decode_json(`cat $child_output`);
+    # take all bot counts, add them up
+    for my $month ( keys %{ $c->{monthly_bots_count} } ) {
+      $reduced_monthly_bots_count->{$month} //= 0;
+      $reduced_monthly_bots_count->{$month}  += $c->{monthly_bots_count}->{$month};
+    };
+    # take all discarded counts, add them up
+    for my $month ( keys %{ $c->{monthly_discarded_count} } ) {
+      $reduced_monthly_discarded_count->{$month} //= 0;
+      $reduced_monthly_discarded_count->{$month}  += $c->{monthly_discarded_count}->{$month};
+    };
+    # take all monthly language counts, add them up
+    for my $month ( keys %{ $c->{counts} } ) {
+      $reduced_counts->{$month} //= {};
+      for my $language ( keys %{ $c->{counts}->{$month} } ) {
+        $reduced_counts->{$month}->{$language} //= 0;
+        $reduced_counts->{$month}->{$language}  += $c->{counts}->{$month}->{$language};
+      };
+    };
+  };
+
+  # put the reduced values back in the model for further computation
+  $self->{monthly_bots_count}       = $reduced_monthly_bots_count;
+  $self->{monthly_discarded_count}  = $reduced_monthly_discarded_count;
+  $self->{counts}                   = $reduced_counts;
 };
 
 sub map    {
@@ -117,7 +149,7 @@ sub process_files {
     last if @{ $self->{active_children_pids} } == 0;
   };
 
-  $self->reduce();
+  $self->reduce($params->{children_output_path});
 };
 
 

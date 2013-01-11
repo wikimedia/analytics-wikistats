@@ -43,16 +43,16 @@ $m->process_files({
     },
 });
 
-#my $d = $m->get_data();
+my $d = $m->get_data();
 
-#open my $json_fh,">$REPORT_OUTPUT_PATH"."out.json";
-#print   $json_fh JSON::XS->new
-                         #->pretty(1)
-                         #->canonical(1)
-                         #->encode($d);
-#close   $json_fh;
+open my $json_fh,">$REPORT_OUTPUT_PATH"."out.json";
+print   $json_fh JSON::XS->new
+                         ->pretty(1)
+                         ->canonical(1)
+                         ->encode($d);
+close   $json_fh;
 
-#my $v = PageViews::View->new($d);
-#$v->render({ 
-    #output_path => $REPORT_OUTPUT_PATH 
-#});
+my $v = PageViews::View->new($d);
+$v->render({ 
+    output_path => $REPORT_OUTPUT_PATH 
+});
