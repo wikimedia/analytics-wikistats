@@ -2,6 +2,7 @@
 <!-- Debug template to render d3 Color ramp spectrum -->
 [% distinct_colors = 150 %]
 [% increment = ( (max_language_delta - min_language_delta) / distinct_colors ) %]
+<p> </p>
 <script src="static/js/jquery.js"></script>
 <script>
   $(document).ready(function(){
@@ -22,6 +23,7 @@
 
 <!-- In the following table we have two rows, one with values and one with colours 
      We'll use this to check if the colors are at the places we expect them to be.
+     And if the spectrum doesn't get skewed or distorted.
 -->
 <!-- <table style="border-collapse: collapse; border-width: 0px;"> -->
 <!-- <table border=1> -->

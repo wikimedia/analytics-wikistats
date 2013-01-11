@@ -138,10 +138,18 @@ sub safe_division {
   my $retval;
 
   if(defined($numerator) && defined($denominator)) {
-    $retval = 
-      $denominator 
-        ? sprintf("%.2f",($numerator / $denominator)*100)
-        : 0;
+    my $percent;
+    if($denominator == 0) {
+      if($numerator == 0) {
+        $percent = 0;
+      } else {
+        $percent = 100;
+      };
+    } else {
+      $percent = ($numerator / $denominator) * 100;
+    };
+
+    $retval = sprintf("%.2f", $percent);
   } else {
     $retval = 0;
   };
@@ -158,11 +166,6 @@ sub format_delta {
     if(        $val > 0) {
       $sign = "+";
       $val = "$sign$val%";
-    } elsif(   $val < 0) {
-      $sign = "-";
-      $val = "$sign$val%";
-    } else {
-      $val = "--";
     };
   };
 
@@ -339,7 +342,8 @@ sub get_data {
       $language_totals
     );
 
-  for my $month ( @months_present ) {
+  for my $idx_month ( 0..$#months_present ) {
+    my $month = $months_present[$idx_month];
 
     warn "[DBG] Processing month => $month";
     my   $new_row = [];
@@ -394,11 +398,11 @@ sub get_data {
 
 
       push @$new_row, {
-          monthly_count                 =>   $monthly_count,
-          monthly_delta__               => $__monthly_delta,
-          monthly_delta                 =>  ($monthly_delta eq '--' ? 0 : $monthly_delta),
-          percentage_of_monthly_total__ => $__percentage_of_monthly_total,
-          rank                          =>   $rank,
+          monthly_count                 =>     $monthly_count,
+          monthly_delta__               =>   ($idx_month == 0 ? "--" : $__monthly_delta),
+          monthly_delta                 =>   ($idx_month == 0 ? 0 : $monthly_delta ),
+          percentage_of_monthly_total__ =>   $__percentage_of_monthly_total,
+          rank                          =>     $rank,
       };
     };
     push @$data , $new_row;
