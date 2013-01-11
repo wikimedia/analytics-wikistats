@@ -2,7 +2,6 @@ package PageViews::ParallelModel;
 use base 'PageViews::Model';
 use JSON::XS;
 use File::Basename;
-use POSIX ":sys_wait_h";
 
 # add up all the counts from the workers
 sub reduce {

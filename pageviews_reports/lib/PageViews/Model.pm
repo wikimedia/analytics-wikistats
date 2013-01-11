@@ -303,6 +303,40 @@ sub second_pass_rankings {
   return $month_rankings;
 };
 
+
+sub scale_months_to_30 {
+  my ($self) = @_;
+
+  my $scaled_monthly_bots_count      = {};
+  my $scaled_monthly_discarded_count = {};
+  my $scaled_counts                  = {};
+
+  for my $month ( keys %{ $self->{monthly_bots_count} } ) {
+    $scaled_monthly_bots_count->{$month} //= 0;
+    $scaled_monthly_bots_count->{$month}  += $self->{monthly_bots_count}->{$month};
+  };
+  # take all discarded counts, add them up
+  for my $month ( keys %{ $self->{monthly_discarded_count} } ) {
+    $scaled_monthly_discarded_count->{$month} //= 0;
+    $scaled_monthly_discarded_count->{$month}  += $self->{monthly_discarded_count}->{$month};
+  };
+  # take all monthly language counts, add them up
+  for my $month ( keys %{ $self->{counts} } ) {
+    $scaled_counts->{$month} //= {};
+    for my $language ( keys %{ $self->{counts}->{$month} } ) {
+      $scaled_counts->{$month}->{$language} //= 0;
+      $scaled_counts->{$month}->{$language}  += $self->{counts}->{$month}->{$language};
+    };
+  };
+
+  # put the reduced values back in the model for further computation
+  $self->{monthly_bots_count}       = $scaled_monthly_bots_count;
+  $self->{monthly_discarded_count}  = $scaled_monthly_discarded_count;
+  $self->{counts}                   = $scaled_counts;
+};
+
+
+
 #
 # Format data in a nice way so we can pass it to the templating engine
 #
