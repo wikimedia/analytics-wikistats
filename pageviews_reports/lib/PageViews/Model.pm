@@ -63,8 +63,7 @@ sub process_line {
     return;
   };
 
-
-  if( $bdetector->match_ua($ua) ) {
+  if( defined($ua) && $bdetector->match_ua($ua) ) {
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
