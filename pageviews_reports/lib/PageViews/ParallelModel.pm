@@ -103,6 +103,7 @@ sub process_files {
 
   warn $params->{children_output_path};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
+    next if ! -f $gz_logfile;
     $self->reset_for_new_child();
     my $child_pid = fork();
     if($child_pid == 0) {

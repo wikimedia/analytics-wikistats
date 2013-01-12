@@ -39,7 +39,7 @@ sub process_line {
 
   my $tp = convert_str_to_epoch1($time);
 
-  return if !(defined($tp) && @$tp != 7);
+  return if !(defined($tp) && @$tp == 7);
   return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
 
   my $ymd = $tp->[1]."-".$tp->[2]; 
