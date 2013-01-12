@@ -31,7 +31,7 @@ rm $csv/csv_$set/WikiCountsRunAborted.txt
 #exit
 
 # auto determine dump file
-x=wikidata
-project=wx
+x=enwikiversity
+project=wv
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 

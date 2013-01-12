@@ -19,5 +19,5 @@ months=1 # last n months
 
 echo Generate monthly reports from dammit.lt monthly consolidated pagecounts files 
 echo
-nice perl DammitReportPageRequests.pl -m $months -i $input -o $reports -t $temp
-#rsync -arv $htdocs/wikimedia/requests/reports $reports/*
+#perl DammitReportPageRequests.pl -m $months -i $input -o $reports -t $temp
+rsync -arv $reports/* $htdocs/wikimedia/pagecounts/reports

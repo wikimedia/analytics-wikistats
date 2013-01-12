@@ -4,7 +4,7 @@ ulimit -v 8000000
 clear
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
-perl=$dumps/prl
+perl=$dumps/perl
 csv=$dumps/csv
 
 log=$dumps/logs/count_merge_editors.log

@@ -52,7 +52,7 @@ sub ParseArguments
   print "ParseArguments\n" ;
   my (@options, $arguments) ;
 
-  getopt ("io", \%options) ;
+  getopt ("iom", \%options) ;
 
   foreach $arg (sort keys %options)
   { $arguments .= " -$arg " . $options {$arg} . "\n" ; }
@@ -72,8 +72,11 @@ sub ParseArguments
     $path_out = $options {"o"} ;
   }
 
+  $yyyymm_run = $options {"m"} ;
+
   die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
   die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
+  die "Specify month as yyyy-mm" if $yyyymm_run !~ /^\d\d\d\d-\d\d$/ ;
 
   print "Input  folder: $path_in\n" ;
   print "Output folder: $path_out\n\n" ;
@@ -168,7 +171,11 @@ sub ReadStatisticsMonthlyForProject
 
     ($month,$day,$year) = split ('\/', $date) ;
     $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
+
+    next if $yyyymm ge $yyyymm_run ; 
+
     $months {$yyyymm} ++ ;
+
 #    print "YYYYMM $yyyymm\n" ;
 
     # data have been collected in WikiCountsProcess.pm and been written in WikiCountsOutput.pm
@@ -274,6 +281,7 @@ sub FindLargestWikis
   foreach $yyyymm (sort keys %months)
   {
     next if $yyyymm lt '2011' ;
+    
     foreach $project_language (keys %largest_projects)
     {
       ($project,$language) = split (',', $project_language) ;

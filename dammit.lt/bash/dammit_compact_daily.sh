@@ -28,7 +28,7 @@ echo Consolidate pagecount files into one daily file for last $maxage completed 
 echo
 c1 perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
 
-echo Consolidate pagecount files for whole month into one monthly file (only finds work to do on first day of new month) 
+echo Consolidate pagecount files for whole month into one monthly file - only finds work to do on first day of new month 
 echo
 c1 ./dammit_compact_monthly.sh 
 

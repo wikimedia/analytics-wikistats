@@ -2,14 +2,16 @@
 
 c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green 
 c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow 
-limit -v 400000
+
+ulimit -v 400000
+
 set -e 
 set -o pipefail
 
 wikistats=/a/wikistats_git
 analytics=$wikistats/analytics
 perl=$analytics/perl
-#perl=/home/ezachte/wikistats/analytics/perl # tests
+perl=/home/ezachte/wikistats/analytics/perl # tests
 csv_rc=$analytics/csv  # rc for report card
 csv_dumps=$wikistats/dumps/csv 
 
@@ -57,8 +59,7 @@ c1 perl AnalyticsPrepComscoreData.pl -r -i $csv_rc/comscore -m /a/wikistats_git/
 # AnalyticsPrepWikiCountsOutput.pl reads a plethora of fields from several csv files from wikistats process
 # - It filters and reorganizes data and produces analytics_in_wikistats.csv, ready for import 
 
-c1 perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm            | tee -a $log | cat
-
+c1 perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat
 c1 perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat
 
 # analytics_in_page_views.csv is written daily as part of WikiCountsSummarizeProjectCounts.pl 
