@@ -307,25 +307,30 @@ sub second_pass_rankings {
 sub scale_months_to_30 {
   my ($self) = @_;
 
+  my $SCALE_FACTOR = 30;
+
   my $scaled_monthly_bots_count      = {};
   my $scaled_monthly_discarded_count = {};
   my $scaled_counts                  = {};
 
   for my $month ( keys %{ $self->{monthly_bots_count} } ) {
-    $scaled_monthly_bots_count->{$month} //= 0;
-    $scaled_monthly_bots_count->{$month}  += $self->{monthly_bots_count}->{$month};
+    my $days_month_has = how_many_days_month_has(split(/-/,$month));
+    $scaled_monthly_bots_count->{$month}  = ($self->{monthly_bots_count}->{$month} / $days_month_has) * $SCALE_FACTOR;
+    $scaled_monthly_bots_count->{$month}  = int($scaled_monthly_bots_count->{$month});
   };
   # take all discarded counts, add them up
   for my $month ( keys %{ $self->{monthly_discarded_count} } ) {
-    $scaled_monthly_discarded_count->{$month} //= 0;
-    $scaled_monthly_discarded_count->{$month}  += $self->{monthly_discarded_count}->{$month};
+    my $days_month_has = how_many_days_month_has(split(/-/,$month));
+    $scaled_monthly_discarded_count->{$month}  = ( $self->{monthly_discarded_count}->{$month} / $days_month_has ) * $SCALE_FACTOR;
+    $scaled_monthly_discarded_count->{$month}  = int($scaled_monthly_discarded_count->{$month});
   };
   # take all monthly language counts, add them up
   for my $month ( keys %{ $self->{counts} } ) {
+    my $days_month_has = how_many_days_month_has(split(/-/,$month));
     $scaled_counts->{$month} //= {};
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $scaled_counts->{$month}->{$language} //= 0;
-      $scaled_counts->{$month}->{$language}  += $self->{counts}->{$month}->{$language};
+      $scaled_counts->{$month}->{$language}  = ( $self->{counts}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
+      $scaled_counts->{$month}->{$language}  = int($scaled_counts->{$month}->{$language});
     };
   };
 
@@ -343,6 +348,8 @@ sub scale_months_to_30 {
 
 sub get_data {
   my ($self) = @_;
+
+  $self->scale_months_to_30;
 
   # origins are wikipedia languages present in data
   my $data = [];

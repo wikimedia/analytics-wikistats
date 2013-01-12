@@ -17,7 +17,12 @@ our $__DATA_BASE        = "$__CODE_BASE/../pageviews_reports/data";
 my  $LOG_PREFIX         = "sampled-1000.log-";
 my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
 
-`mkdir -p $REPORT_OUTPUT_PATH`;
+`
+mkdir -p $REPORT_OUTPUT_PATH
+mkdir -p $REPORT_OUTPUT_PATH/map
+rm    -f $REPORT_OUTPUT_PATH/map/*.json
+rm    -f $REPORT_OUTPUT_PATH/map/*.err
+`;
 
 # overall_count_delta is the percentage by which counts increased/decreased
 # over the previous month

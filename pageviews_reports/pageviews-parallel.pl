@@ -24,6 +24,8 @@ my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
 `
 mkdir -p $REPORT_OUTPUT_PATH
 mkdir -p $REPORT_OUTPUT_PATH/map
+rm    -f $REPORT_OUTPUT_PATH/map/*.json
+rm    -f $REPORT_OUTPUT_PATH/map/*.err
 `;
 
 my $m = PageViews::ParallelModel->new();
