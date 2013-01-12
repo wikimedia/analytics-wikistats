@@ -6,6 +6,7 @@ clear
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+#perl=/home/ezachte/wikistats/dumps/perl # tests 
 csv=$dumps/csv
 php=/a/mediawiki/core/languages
 dumps_public=/mnt/data/xmldatadumps/public
@@ -31,7 +32,7 @@ rm $csv/csv_$set/WikiCountsRunAborted.txt
 #exit
 
 # auto determine dump file
-x=enwikiversity
-project=wv
+x=commonswiki
+project=wx
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 
