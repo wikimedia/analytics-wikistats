@@ -969,7 +969,7 @@ sub GenerateHtmlStartWikipediaReport
   {
     $out_page_subtitle = $out_languages {$wp} ;
 
-    $out_html_title    = $out_statistics . " - " . $pagetype . " - " . $out_page_subtitle ;
+    $out_html_title    = $out_statistics . " - " . $pagetype . " - " . $out_page_subtitle ; 
 
     if ($wp =~ /^zzz?$/)
     { $out_page_subtitle = "<font color='#A00000'>" . $out_page_subtitle . "</font>" ; }
