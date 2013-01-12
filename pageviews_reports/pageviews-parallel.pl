@@ -36,7 +36,7 @@ $m->process_files({
     start       => {
       year  => 2012,
       #month => 1,
-      month => 8,
+      month => 1,
     },
     end         => {
       year  => 2012,

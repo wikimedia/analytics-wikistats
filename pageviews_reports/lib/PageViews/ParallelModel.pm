@@ -99,7 +99,7 @@ sub process_files {
 
   $SIG{CHLD}="IGNORE";
 
-  $self->{MAX_PARALLEL_CHILDREN} = 3;
+  $self->{MAX_PARALLEL_CHILDREN} = 9;
 
   warn $params->{children_output_path};
   for my $gz_logfile ($self->get_files_in_interval($params)) {

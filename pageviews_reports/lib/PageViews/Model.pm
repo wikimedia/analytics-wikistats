@@ -233,7 +233,26 @@ sub get_time_sorted_months_present_in_data {
 
 
 
-sub first_pass_languages_totals_rankings {
+sub third_pass_chart_data {
+  my ($self,$languages,$months) = @_;
+
+  my $chart_data             = {};
+  for my $month ( @$months ) {
+    for my $language ( keys %$languages ) {
+      $chart_data->{$language}->{counts} //= [];
+      $chart_data->{$language}->{months} //= [];
+      push @{ $chart_data->{$language}->{counts} } , ($self->{counts}->{$month}->{$language} // 0);
+      push @{ $chart_data->{$language}->{months} } , $month;
+    };
+  };
+
+  return $chart_data;
+
+};
+
+
+
+sub first_pass_languages_totals {
   my ($self) = @_;
 
   my @months_present = $self->get_time_sorted_months_present_in_data;
@@ -242,7 +261,6 @@ sub first_pass_languages_totals_rankings {
   my $month_totals           = {};
   my $month_rankings         = {};
   my $language_totals        = {};
-  my $chart_data             = {};
 
   # mark all languages present in a hash
   # calculate monthly  totals
@@ -252,14 +270,7 @@ sub first_pass_languages_totals_rankings {
     # languages sorted for this month
 
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $languages_present_uniq->{$language} = 1;
-
-      $chart_data->{$language}->{counts} //= [];
-      $chart_data->{$language}->{months} //= [];
-      push @{ $chart_data->{$language}->{counts} } , $self->{counts}->{$month}->{$language};
-      push @{ $chart_data->{$language}->{months} } , $month;
-
-
+      $languages_present_uniq->{$language}  = 1;
       $month_totals->{$month}              += $self->{counts}->{$month}->{$language}  ;
       $language_totals->{$language}        += $self->{counts}->{$month}->{$language}  ;
     };
@@ -272,7 +283,6 @@ sub first_pass_languages_totals_rankings {
     month_totals            => $month_totals          ,
     month_rankings          => $month_rankings        ,
     language_totals         => $language_totals       ,
-    chart_data              => $chart_data            ,
   };
 };
 
@@ -356,18 +366,15 @@ sub get_data {
 
   #$self->_simulate_big_numbers();
 
-  my $__first_pass_retval    = $self->first_pass_languages_totals_rankings;
+  my $__first_pass_retval    = $self->first_pass_languages_totals;
 
   my @months_present         = @{ $__first_pass_retval->{months_present} };
   my $languages_present_uniq =    $__first_pass_retval->{languages_present_uniq};
   my $month_totals           =    $__first_pass_retval->{month_totals};
   my $language_totals        =    $__first_pass_retval->{language_totals};
-  my $chart_data             =    $__first_pass_retval->{chart_data};
 
-  my $month_rankings         = $self->second_pass_rankings($languages_present_uniq,\@months_present);
-
-
-
+  my $month_rankings         = $self->second_pass_rankings(  $languages_present_uniq , \@months_present );
+  my $chart_data             = $self->third_pass_chart_data( $languages_present_uniq , \@months_present );
 
   my $min_language_delta = +999_999;
   my $max_language_delta = -999_999;
