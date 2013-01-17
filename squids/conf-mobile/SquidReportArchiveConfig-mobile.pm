@@ -16,9 +16,9 @@ $squids                = "/home/spetrea/wikistats/wikistats/squids" ;
 
 # Data configuration
 
-$cfg_path_csv          = "$squids/csv_editors" ;
-$cfg_path_reports      = "$squids/reports_editors" ;
-$cfg_path_log          = "$squids/logs_editors" ;
+$cfg_path_csv          = "$squids/csv_mobile" ;
+$cfg_path_reports      = "$squids/reports_mobile" ;
+$cfg_path_log          = "$squids/logs_mobile" ;
 
 $cfg_path_csv_test     = "W:/# Out Locke" ;      # Erik
 $cfg_path_reports_test = "W:/# Out Test/Locke" ; # Erik

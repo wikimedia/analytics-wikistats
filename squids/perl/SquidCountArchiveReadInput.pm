@@ -155,7 +155,7 @@ sub ReadSquidLogFiles
   {
     open FILE_EDITS_SAVES, '>', "$path_out/$file_edits_saves" ;
 
-    my $file_csv_views_viz2 = $file_csv_views_viz ;
+    my $file_csv_views_viz2 = "$path_out/$file_csv_views_viz";
     my $date = substr ($time_to_start,0,4) . substr ($time_to_start,5,2) . substr ($time_to_start,8,2) ;
     $file_csv_views_viz2 =~ s/date/$date/ ;
     $gz_csv_views_viz = gzopen ($file_csv_views_viz2, "wb") || die "Unable to write $file_csv_views_viz2 $!\n" ;
@@ -258,7 +258,7 @@ sub ReadSquidLogFiles
       {
         $fields_too_few  ++ ;
       # print "invalid field count " . $#fields . "\n" ;
-        print ERR $#fields . " fields: \"$line\"\n" ;
+      # print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
 
@@ -267,7 +267,7 @@ sub ReadSquidLogFiles
         @a = @fields ;
         $fields_too_many ++ ;
       # print "invalid field count " . $#fields . "\n" ;
-        print ERR $#fields . " fields: \"$line\"\n" ;
+      # print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
 
