@@ -30,19 +30,26 @@ sub process_line {
   my ($self,$line) = @_;
   my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
-  #use Data::Dumper;
-  #warn Dumper \@fields;
-  my $time     = $fields[2] ;
-  my $url      = $fields[8] ;
-  my $ip       = $fields[4] ;
-  my $ua       = $fields[13];
+                    
+                        
+  my $time       = $fields[2] ;
+  my $url        = $fields[8] ;
+  my $ip         = $fields[4] ;
+  my $ua         = $fields[13];
+  my $req_status = $fields[5] ;
+  my $mime_type  = $fields[10];
+
+  # 30x or 20x request status
+  return unless $req_status =~ m|[23]0\d$|; 
+  # text/html mime types only
+  return unless $mime_type  =~ m|^text\/html|;
 
   my $tp = convert_str_to_epoch1($time);
-
   return if !(defined($tp) && @$tp == 7);
   return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
-
   my $ymd = $tp->[1]."-".$tp->[2]; 
+
+
   my $language = get_wikiproject_for_url($url);
   #print "url     =$url\n";
   #print "language=$language\n";
@@ -165,6 +172,8 @@ sub format_delta {
     if(        $val > 0) {
       $sign = "+";
       $val = "$sign$val%";
+    } elsif(   $val < 0) {
+      $val = "$val%";
     };
   };
 
