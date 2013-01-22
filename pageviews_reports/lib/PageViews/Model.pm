@@ -39,31 +39,31 @@ sub process_line {
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
 
-  # 30x or 20x request status
-  return unless $req_status =~ m|[23]0\d$|; 
-  # text/html mime types only
-  return unless $mime_type  =~ m|^text\/html|;
-
   my $tp = convert_str_to_epoch1($time);
   return if !(defined($tp) && @$tp == 7);
   return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
   my $ymd = $tp->[1]."-".$tp->[2]; 
 
-
-  my $language = get_wikiproject_for_url($url);
-  #print "url     =$url\n";
-  #print "language=$language\n";
-
-  my $label_ip = undef;
-  eval {
-    $label_ip = $bdetector->match_ip($ip);
+  # text/html mime types only
+  if(!( defined($mime_type)  && index($mime_type,"text/html") != -1 ) ) {
+    $self->{monthly_discarded_count}->{$ymd}++;
+    return;
   };
-  #warn "ip=$ip";
-  #warn "label_ip=$label_ip";
-  if( !$@ && defined($label_ip) ) {
+
+  # 30x or 20x request status
+  if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
+    $self->{monthly_discarded_count}->{$ymd}++;
+    return;
+  };
+
+  my $label_ip = $bdetector->match_ip($ip);
+
+  if( $label_ip ) {
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
+
+  my $language = get_wikiproject_for_url($url);
 
   if( !$language ) {
     $self->{monthly_discarded_count}->{$ymd}++;

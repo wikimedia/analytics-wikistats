@@ -15,7 +15,17 @@ sub new {
 
 sub match_ip {
   my ($self,$ip) = @_;
-  return $self->{ip_pat}->match_string($ip);
+
+  my $label = undef;
+  eval {
+    $label = $self->{ip_pat}->match_string($ip);
+  };
+
+  if( !$@ && defined($label) ) {
+    return $label;
+  } else {
+    return undef;
+  };
 };
 
 sub match_ua {
@@ -49,7 +59,6 @@ sub load_useragent_regex {
   $ra->add("crawler");
 
   $self->{ua_regex} = $ra->re;
-
 };
 
 
@@ -75,10 +84,10 @@ sub load_ip_ranges {
   #elsif (($address    ge "070.089.039.152") && ($address    le "070.089.039.159")) { $address = "!google:IP070" ; }
   #elsif (($address    ge "070.090.219.072") && ($address    le "070.090.219.079")) { $address = "!google:IP070" ; }
   #elsif (($address    ge "070.090.219.048") && ($address    le "070.090.219.055")) { $address = "!google:IP070" ; }
-  $p->add_string("216.239.$_.0/24",$label_google)  for  32..63;
-  $p->add_string("70.89.39.$_",$label_google)      for  152..159;
-  $p->add_string("70.90.219.$_",$label_google)      for  72..79;
-  $p->add_string("70.90.219.$_",$label_google)      for  48..55;
+  $p->add_string(  "216.239.$_.0/24",$label_google)  for  32..63;
+  $p->add_string( "70.89.39.$_"     ,$label_google)  for  152..159;
+  $p->add_string("70.90.219.$_"     ,$label_google)  for  72..79;
+  $p->add_string("70.90.219.$_"     ,$label_google)  for  48..55;
  
   #elsif (($address_11 ge "067.195.000")     && ($address_11 le "067.195.255"))     { $address = "!yahoo:IP067" ;  }
   #elsif (($address_11 ge "072.030.000")     && ($address_11 le "072.030.255"))     { $address = "!yahoo:IP072" ;  }
