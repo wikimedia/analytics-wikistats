@@ -99,7 +99,7 @@ sub process_files {
 
   $SIG{CHLD}="IGNORE";
 
-  $self->{MAX_PARALLEL_CHILDREN} = 9;
+  $self->{MAX_PARALLEL_CHILDREN} = 12;
 
   warn $params->{children_output_path};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
@@ -114,8 +114,8 @@ sub process_files {
       $stderr_file     =~ s/\.gz$/.err/;
       $output_file     =~ s/\.gz$/.json/;
 
-      warn "ERR => $stderr_file";
-      warn "OUT => $output_file";
+      #warn "ERR => $stderr_file";
+      #warn "OUT => $output_file";
 
       open STDERR, ">$stderr_file";
         $self->map($gz_logfile);
@@ -126,25 +126,26 @@ sub process_files {
       #kill(TERM,$$);
       CORE::exit(-1);
     } else {
-      warn "IN PARENT, pushing $child_pid on child list";
+      #warn "IN PARENT, pushing $child_pid on child list";
       push @{ $self->{active_children_pids} }, $child_pid;
 
       # wait for at least one child to finish
       # so we can make another iteration of the for loop
       # and fire up one more child
       while( 1 ) {
-        warn "PARENT CHECKING LOOP STARTED";
+        #warn "PARENT CHECKING LOOP STARTED";
         my $free_slots = $self->update_child_slots;
-        warn "FREE SLOTS = $free_slots";
+        #warn "FREE SLOTS = $free_slots";
         last if $free_slots > 0;
         sleep 1;
-        warn "PARENT CHECKING LOOP SLEPT";
+        #warn "PARENT CHECKING LOOP SLEPT";
       };
     };
   };
 
   while( 1 ) {
     sleep 4;
+    warn "CHECK";
     $self->update_child_slots;
     last if @{ $self->{active_children_pids} } == 0;
   };

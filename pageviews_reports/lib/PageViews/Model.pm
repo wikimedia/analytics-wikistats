@@ -39,19 +39,35 @@ sub process_line {
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
 
-  my $tp = convert_str_to_epoch1($time);
-  return if !(defined($tp) && @$tp == 7);
-  return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
+  my $tp; 
+
+  if($time) {
+    $tp = convert_str_to_epoch1($time);
+    if(!(defined($tp) && @$tp == 7)) {
+      #print "[DBG] discard_time\n";
+      return;
+    };
+  };
+
+  if(!is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp)) {
+    #print "[DBG] interval_discarded\n";
+    return;
+  };
   my $ymd = $tp->[1]."-".$tp->[2]; 
 
   # text/html mime types only
-  if(!( defined($mime_type)  && index($mime_type,"text/html") != -1 ) ) {
+  if(!( 
+      defined($mime_type)  && 
+      ( $mime_type eq '-' || index($mime_type,"text/html") != -1) ) 
+    ) {
+    #print "[DBG] mime_discard\n";
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
 
   # 30x or 20x request status
   if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
+    #print "[DBG] reqstatus_discarded\n";
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
@@ -59,6 +75,7 @@ sub process_line {
   my $label_ip = $bdetector->match_ip($ip);
 
   if( $label_ip ) {
+    #print "[DBG] bots_discarded\n";
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
@@ -66,14 +83,17 @@ sub process_line {
   my $language = get_wikiproject_for_url($url);
 
   if( !$language ) {
+    #print "[DBG] language_discard\n";
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
 
   if( defined($ua) && $bdetector->match_ua($ua) ) {
+    #print "[DBG] bot_ua_discard\n";
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
+
 
   $self->{counts}->{$ymd}->{$language}++;
 };
