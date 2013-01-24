@@ -55,12 +55,12 @@ my $process_files_params = {
     start       => {
       year  => 2012,
       #month => 1,
-      month => 1,
+      month => 6,
     },
     end         => {
       year  => 2012,
       #month => 12,
-      month => 12,
+      month => 8,
     },
 };
 

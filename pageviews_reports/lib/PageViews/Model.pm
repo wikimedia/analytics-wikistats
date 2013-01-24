@@ -8,6 +8,8 @@ use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
 
+my $MINIMUM_EXPECTED_FIELDS = 10;
+
 
 sub new {
   my ($class) = @_;
@@ -30,6 +32,7 @@ sub process_line {
   my ($self,$line) = @_;
   my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
+  return if @fields < $MINIMUM_EXPECTED_FIELDS;
                     
                         
   my $time       = $fields[2] ;
@@ -49,7 +52,7 @@ sub process_line {
     };
   };
 
-  if(!is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp)) {
+  if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
     return;
   };
@@ -108,6 +111,7 @@ sub process_line {
 
 sub process_file {
   my ($self,$filename) = @_;
+  print "[DBG] process_file => $filename\n";
   open IN, "-|", "unpigz -c $filename";
   #open IN, "-|", "gzip -dc $filename";
   while( my $line = <IN>) {
