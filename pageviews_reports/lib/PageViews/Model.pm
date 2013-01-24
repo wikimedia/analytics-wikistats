@@ -80,9 +80,12 @@ sub process_line {
     return;
   };
 
-  my $language = get_wikiproject_for_url($url);
+  # arrayref with 2 values
+  # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
+  # second value is the actual wikiproject
+  my $wikiproject_pair = get_wikiproject_for_url2($url);
 
-  if( !$language ) {
+  if( !defined($wikiproject_pair) ) {
     #print "[DBG] language_discard\n";
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
@@ -94,8 +97,13 @@ sub process_line {
     return;
   };
 
+  my ($pv_type,
+      $pv_wikiproject) = @$wikiproject_pair;
 
-  $self->{counts}->{$ymd}->{$language}++;
+  # counts together /wiki/ and /w/api.php
+  $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
+  # counts /wiki/ separated from /w/api.php
+  $self->{"counts_$pv_type"}->{$ymd}->{$pv_wikiproject}++;
 };
 
 sub process_file {

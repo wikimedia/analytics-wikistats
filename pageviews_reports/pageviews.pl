@@ -13,11 +13,13 @@ use Getopt::Long;
 my  $mode         = "sequential";
 our $INPUT_PATH   = "/home/user/wikidata";
 my  $OUTPUT_PATH  = "/tmp/pageview_reports";
+my  $max_children = 4;
 
 GetOptions(
-  "mode=s"        => \$mode,
-  "input-path=s"  => \$INPUT_PATH,
-  "output-path=s" => \$OUTPUT_PATH,
+  "mode=s"         => \$mode,
+  "input-path=s"   => \$INPUT_PATH,
+  "output-path=s"  => \$OUTPUT_PATH,
+  "max-children=i" => \$max_children,
 );
 
 `
@@ -36,15 +38,15 @@ confess "[ERROR] --input-path argument is not a valid path"
 confess "[ERROR] --output-path argument is not a valid path"
   unless -d $OUTPUT_PATH;
 
+confess "[ERROR] --max-children argument is not a valid integer"
+  unless $max_children =~ /^\d+$/;
 
-
-
-my $m;
+my $model;
 
 if($mode eq "sequential") {
-  $m = PageViews::Model->new();
+  $model = PageViews::Model->new();
 } elsif($mode eq "parallel") {
-  $m = PageViews::ParallelModel->new();
+  $model = PageViews::ParallelModel->new();
 };
 
 my $process_files_params = {
@@ -64,10 +66,11 @@ my $process_files_params = {
 
 if($mode eq "parallel") {
   $process_files_params->{children_output_path} = "$OUTPUT_PATH/map";
+  $process_files_params->{max_children}         = $max_children;
 };
 
-$m->process_files($process_files_params);
-my $d = $m->get_data();
+$model->process_files($process_files_params);
+my $d = $model->get_data();
 
 open my $json_fh,">$OUTPUT_PATH"."out.json";
 print   $json_fh JSON::XS->new
