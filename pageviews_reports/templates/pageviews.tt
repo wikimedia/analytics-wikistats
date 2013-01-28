@@ -1,0 +1,7 @@
+[% INCLUDE "pageviews-header.tt"   %]
+<h2>Pageviews</h2>
+[% INCLUDE "pageviews-body.tt"     %]
+<br/>
+<h2>Color spectrums</h2>
+[% INCLUDE "color-spectrum-d3.tt"  %]
+[% INCLUDE "pageviews-footer.tt"   %]
