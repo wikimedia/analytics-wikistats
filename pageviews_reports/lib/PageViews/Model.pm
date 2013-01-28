@@ -15,6 +15,8 @@ sub new {
   my ($class) = @_;
   my $raw_obj = {
     counts                  => {},
+    counts_wiki             => {},
+    counts_api              => {},
     monthly_discarded_count => {},
     monthly_bots_count      => {},
     bdetector               => undef,
@@ -68,12 +70,12 @@ sub process_line {
     return;
   };
 
-  # 30x or 20x request status
-  if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
-    #print "[DBG] reqstatus_discarded\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
-    return;
-  };
+  ## 30x or 20x request status
+  #if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
+    ##print "[DBG] reqstatus_discarded\n";
+    #$self->{monthly_discarded_count}->{$ymd}++;
+    #return;
+  #};
 
   my $label_ip = $bdetector->match_ip($ip);
 
