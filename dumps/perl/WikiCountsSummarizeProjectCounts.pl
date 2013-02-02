@@ -459,6 +459,7 @@ sub ScanTarFiles
     next if -d $file_in ;
     next if -s $file_in == 0;
 
+    print "Read tar file '$file_in'\n" ;
     $tar->read($file_in);
     @files_tar = $tar->list_files ;
     foreach my $file (@files_tar)
@@ -472,7 +473,7 @@ sub ScanTarFiles
       next if $file ge "projectcounts-20110908-000000" and $file lt "projectcounts-20110915-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20111223-010000" and $file lt "projectcounts-20111226-160000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20120413-000000" and $file lt "projectcounts-20120417-000000" ; # bad measurements on these dates
-      next if $file ge "projectcounts-20121214-000000" and $file lt "projectcounts-20130101-000000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20121214-000000" and $file lt "projectcounts-20130108-000000" ; # bad measurements on these dates
 
       push @files, $file ;
       $file_in_tar {$file} = $file_in ;
@@ -480,16 +481,21 @@ sub ScanTarFiles
       $hour_in = substr ($file, 14, length ($file)-18) ; # ignore minutes and seconds
       $hours_found {$hour_in} ++ ;
 
-# if ($file_in_found++ > 50) { last ; } # test
+      print "Read file '$file' $hour_in\n" ;
+
+      if ($hour_in lt $hour_oldest) { $hour_oldest = $hour_in ; }
+      if ($hour_in gt $hour_newest) { $hour_newest = $hour_in ; }
+
+    # if ($file_in_found++ > 50) { last ; } # test
     }
-
-
-    if ($hour_in lt $hour_oldest) { $hour_oldest = $hour_in ; }
-    if ($hour_in gt $hour_newest) { $hour_newest = $hour_in ; }
   }
   closedir (DIR);
 
   $filecnt = $#files+1 ;
+
+  die "No files to process! Abort" if $filecnt == 0 ;
+
+  &LogT ("All tar files read\n") ;
   &LogT ("Oldest hour: $hour_oldest\n") ;
   &LogT ("Newest hour: $hour_newest\n") ;
   &LogT ("Files found: $filecnt\n\n") ;
@@ -571,8 +577,8 @@ sub AdjustForMissingFilesAndUndercountedMonths
 
   foreach $period (sort keys %{$hours_processed {"month"}})
   {
-    $rescale  = 1 ;
-    $rescale2 = 1 ;
+    $rescale  = 1 ; # compensate for hours which are missing or incomplete in input
+    $rescale2 = 1 ; # compensate for underreporting due to server overload (summer 2010) 
     $processed = $hours_processed {"month"}{$period} ;
     $missing   = $hours_missing   {"month"}{$period} ;
     if ($processed > 0)
@@ -583,7 +589,7 @@ sub AdjustForMissingFilesAndUndercountedMonths
         print "Month $period: $processed processed, $missing missing -> rescale * $rescale\n" ;
       }
 
-      # summer 2010: correct for data loss (percentages derived from widened gaps in squid log sequence numbers)
+      # summer 2010: correct for data loss (percentages derived from how much gaps between squid log sequence numbers exceeded expected 1000)
          if ($period eq '2010/04') { $rescale2 = 1.241 ; }
       elsif ($period eq '2010/05') { $rescale2 = 1.310 ; }
       elsif ($period eq '2010/06') { $rescale2 = 1.328 ; }
@@ -597,14 +603,19 @@ sub AdjustForMissingFilesAndUndercountedMonths
       foreach $wiki (sort keys %wikis_processed)
       {
         ($project,$language) = split (',', $wiki) ;
-        if (defined $totals {"month"} {$project} {"$language,$period"})
-        {
-          $before = $totals {"month"} {$project} {"$language,$period"} ;
-          $totals {"month"} {$project} {"$language,$period"} = sprintf ("%.0f", $totals {"month"} {$project} {"$language,$period"} * $rescale * $rescale2) ;
-          $after = $totals {"month"} {$project} {"$language,$period"} ;
-          if ($language =~ /^(?:de|en)$/)
-          { print "project $project, language $language, period $period: $before -> $after\n" ; }
-        }
+        $before = $totals {"month"} {$project} {"$language,$period"} ;
+	# for all projects first incomplete month is not included (too long ago to care)
+	# except for latest added project wikivoyage (code wo) for which data capture started 17th January 2013
+	# -> multiply by (31 days) / (31-16 days) = 2.067 (and $rescale is not equal 1 for Jan 2013, so recalc will happen anyway)
+	if (($project eq 'wo') && ($period eq '2013/01'))
+	{ $after  = sprintf ("%.0f", $before * 2.067) ; }
+	else
+	{ $after  = sprintf ("%.0f", $before * $rescale * $rescale2) ; }
+
+	$totals {"month"} {$project} {"$language,$period"} = $after ;
+
+	if ($language =~ /^(?:de|en)$/)
+        { print "project $project, language $language, period $period: $before -> $after\n" ; }
       }
     }
   }
@@ -653,6 +664,8 @@ sub AdjustForMissingFilesAndUndercountedMonths
 sub CountPageViews
 {
   &LogT ("CountPageViews\n\n") ;
+
+  $timestart_parse = time ;
 
   foreach $file (@files)
   {
@@ -704,17 +717,19 @@ sub CountPageViews
 
       # translate suffixes used in dammit.lt files into project codes as used in wikistats
 
-         if ($project eq "")   { $project = "wp"; }
-      elsif ($project eq "b")  { $project = "wb"; } # wikibooks
-      elsif ($project eq "d")  { $project = "wk"; } # wiktionary
-      elsif ($project eq "m")  { $project = "wx"; } # wikimedia (meta commons, species, ...)
-      elsif ($project eq "n")  { $project = "wn"; } # wikinews
-      elsif ($project eq "o")  { $project = "wo"; } # wikivoyage
-      elsif ($project eq "q")  { $project = "wq"; } # wikiquote
-      elsif ($project eq "s")  { $project = "ws"; } # wikisource
-      elsif ($project eq "v")  { $project = "wv"; } # wikiversity
-      elsif ($project eq "w")  { $project = "wx"; } # miscellaneous
-      elsif ($project eq "mw") { $project = "wp"; $language .= ".m" } # mobile wikipedia
+         if ($project eq "")    { $project = "wp"; }
+      elsif ($project eq "b")   { $project = "wb"; } # wikibooks
+      elsif ($project eq "d")   { $project = "wk"; } # wiktionary
+      elsif ($project eq "f")   { $project = "wx"; $language = "foundation" ; } # foundation wiki
+      elsif ($project eq "m")   { $project = "wx"; } # wikimedia (meta commons, species, ...)
+      elsif ($project eq "n")   { $project = "wn"; } # wikinews
+      elsif ($project eq "o")   { $project = "wo"; } # wikivoyage
+      elsif ($project eq "voy") { $project = "wo"; } # wikivoyage
+      elsif ($project eq "q")   { $project = "wq"; } # wikiquote
+      elsif ($project eq "s")   { $project = "ws"; } # wikisource
+      elsif ($project eq "v")   { $project = "wv"; } # wikiversity
+      elsif ($project eq "w")   { $project = "wx"; } # miscellaneous
+      elsif ($project eq "mw")  { $project = "wp"; $language .= ".m" } # mobile wikipedia
       else { print ("unexpected project code [$language]$project\n") } ;
 
       # select number of wikipedia's are presented as group wikispecial
@@ -722,7 +737,9 @@ sub CountPageViews
       if (($project eq "wp") && ($language =~ /^(?:commons|meta|species|nostalgia|incubator|sources|foundation|sep11)$/))
       { $project = "wx" ; }
 
-      next if $project eq "wx" and $language !~ /^(?:commons|meta|species|nostalgia|incubator|sources|foundation|sep11)$/ ;
+      # next if $project eq "wx" and $language !~ /^(?:commons|meta|species|nostalgia|incubator|sources|foundation|sep11)$/ ;
+      # Dec 2012 remove meta as Nov/Dec 2012 we had > 10 billion hits on meta due to fundraiser artefact, all to wiki/Special:RecordImpression
+      next if $project eq "wx" and $language !~ /^(?:commons|species|nostalgia|incubator|sources|foundation|sep11)$/ ;
 
       next if $project eq "wx" and $year == 2007 and $month < 6 ;
 
@@ -769,7 +786,13 @@ sub CountPageViews
     # close IN ;
 
     if (++$filesparsed % 500 == 0)
-    { &LogT ("$filesparsed files parsed, last was $file\n") ; }
+    { 
+      $progress = sprintf ("%.0f",100 * $filesparsed / $filecnt) ;
+      if ($progress > 20) # only predict run time from 20% , first months are going fast, only Wikipedia, no mobile views
+      { $time_to_go = mmss ((100 - $progress)* (time - $timestart_parse) / $progress) . " to go" ; }
+
+      &LogT ("$filesparsed/$filecnt files parsed ($progress\%, $time_to_go), last was $file\n") ; 
+    }
   }
 
   &LogT ("All files parsed\n\n") ;
@@ -834,6 +857,7 @@ sub WriteCsvFilesPerPeriod
       { $file_csv =~ s/\.csv/Normalized.csv/ ; }
       &Log ("File out: $file_out\n") ;
 
+      # removal disabled, file is very useful for spotting anomalies, when they start and how they build up
       # if (-e "$dir_out/PageViewsPerHourAll.csv") # huge file, remove for now, reactivate when really used
       # {
       #   print "unlink $dir_out/PageViewsPerHourAll.csv (reactivate when really used)\n" ;
@@ -1427,7 +1451,7 @@ sub WriteCsvHtmlFilesPopularWikis
   }
 }
 
-# rather than using already stored data make this step as islated as possible: it could migrate to another job later
+# rather than using already stored data make this step as isolated as possible: it could migrate to another job later
 
 sub RereadAndCombineCsvFilesPerMonth
 {
@@ -1831,3 +1855,13 @@ sub months_since_2000_01
   return $m ;
 }
 
+sub mmss
+{
+  my $seconds = shift ;
+  my $min = int ($seconds / 60) ;
+  my $sec = $seconds % 60 ;
+
+  $min  = ($min > 0) ? "$min min, " : "" ;
+  $sec  = "$sec sec" ;
+  return ("$min$sec") ;
+}

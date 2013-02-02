@@ -4079,15 +4079,14 @@ sub GenerateComparisonTable
     # http://forum.chromefans.org/problem-with-span-p-and-style-display-none-t389.html
     # $out_html .= "\n<span id='wait'><left><font color='green'><b>" . $out_rendering . "</b></font></left><p></span>\n" ;
 
-    my $coverage ;
     if ($mode_wp)
     {
          if ($region eq '')           { $coverage1 = "<font color=#000080>Wikipedia All Languages, </font>" ; }
       elsif ($region eq 'artificial') { $coverage1 = "<font color=#000080>Wikipedia Artificial Languages, </font>" ; }
       else                            { $coverage1 = "<font color=#000080>Wikipedia " . ucfirst $region . ", </font>" ; }
     }
-    elsif ($mode_wx)                  { $coverage = "<font color=#000080>Other Projects, </font>" ; }
-    else                              { $coverage = "<font color=#000080>$out_publication, </font>" ; }
+    elsif ($mode_wx)                  { $coverage1 = "<font color=#000080>Other Projects, </font>" ; }
+    else                              { $coverage1 = "<font color=#000080>$out_publication, </font>" ; }
 
    #if ($pageviews_mobile)            { $coverage2 = "<font color=#0000FF>Mobile, </font>" ; }
    # elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#0000FF>Non-Mobile, </font>" ; }
@@ -4095,8 +4094,6 @@ sub GenerateComparisonTable
     if ($pageviews_mobile)            { $coverage2 = "Mobile" ; }
     elsif ($pageviews_non_mobile)     { $coverage2 = "Non-Mobile" ; }
     if ($pageviews_combined)          { $coverage2 = "All Platforms" ; }
-
-    ($coverage2b = $coverage) =~ s/<[^>]*>//g ;
 
     if ($normalize_days_per_month)
     {
@@ -4110,7 +4107,6 @@ sub GenerateComparisonTable
     }
 
     $out_html .= "<p><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Site map for all page view reports</a><p>" ;
-
 
     if ($normalize_days_per_month)
     {
@@ -4172,18 +4168,21 @@ sub GenerateComparisonTable
   # }
 
 
-    $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
-    $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
-    $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
-    if ($pageviews_mobile)
-    { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
-    $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
+    if (! $mode_wo) # wikivoyage did not yet exist when following data losses occurred 
+    {  
+      $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+      $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
+      $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
+      if ($pageviews_mobile)
+      { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
+      $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
 
-    $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+      $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
 
                  # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
                  # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
                  # "<hr>" ;
+    }		  
   }
 
   $out_html .= "<table border=1 cellspacing=0 id='table1' class=b style='margin-top:5px; border:solid 1px #000000' summary='Header comparison table'>\n" ;
@@ -4566,7 +4565,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   my ($topic,$id,$html) ;
   $month_lo_pageviews = 999 ;
   # add data for non-mobile projects
-  foreach $code (qw (wb wk wn wp wq ws wv wx)) # in case of wx (wikispecial), file contains only results for commons
+  foreach $code (qw (wb wk wn wp wq ws wv wo wx)) # in case of wx (wikispecial), file contains only results for commons
   {
     $path_in_views = $path_in ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
@@ -4690,7 +4689,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   {
     if ($pageviews_non_mobile)
     {
@@ -4717,7 +4716,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the ;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   {
     if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
@@ -4744,7 +4743,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     { $line_html .= "\n<script language='javascript'>\n" ; }
 
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,$topic,data"} ;
 
@@ -4777,7 +4776,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
     $line_html .= "\n<script language='javascript'>\n" ;
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
@@ -4807,7 +4806,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
     $line_html .= "\n<script language='javascript'>\n" ;
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
@@ -4864,7 +4863,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
   $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
@@ -5565,7 +5564,7 @@ sub GenerateComparisonTableMonthlyData
     if ($first {$wp} < $m0b)
     { $m0b = $first {$wp} ; }
   }
-
+  
   $m0 = $m0b ;
 
   for (my $m = $dumpmonth_ord ; $m >= $m0 ; $m--)
@@ -6593,7 +6592,7 @@ sub GenerateComparisonTableEditPlots
   {
     if ($skip {$wp}) { next ; }
 
-    if ($wp =~ /^z+$/)
+    if (($wp =~ /^z+$/) || $mode_wo)
     { $line_html .= &tdcb ("&nbsp;") ; }
     else
     {
