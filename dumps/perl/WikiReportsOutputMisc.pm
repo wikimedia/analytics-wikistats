@@ -553,13 +553,13 @@ sub GenerateSiteMapNew
     {
       if ($region eq '')
       { $out_html .= &tr (&tdlb   (&w ($out_pageviews)) .
-                          &tdlb2b (&w ("<a href='../EN/TablesPageViewsMonthly.htm'>$out_btn_tables</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>")))) ; }
+                          &tdlb2b (&w ("<a href='../EN/TablesPageViewsMonthlyCombined.htm'>$out_btn_tables</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>")))) ; }
       else
       {
         my $region_uc = ucfirst ($region) ;
         $out_html .= &tr (&tdlb   (&w ($out_pageviews)) .
-                          &tdlb2b (&w ("<a href='../EN/TablesPageViewsMonthly.htm'>All languages</a><br>" .
-                                       "<a href='../EN_$region_uc/TablesPageViewsMonthly.htm'>$region_uc</a>"
+                          &tdlb2b (&w ("<a href='../EN/TablesPageViewsMonthlyCombined.htm'>All languages</a><br>" .
+                                       "<a href='../EN_$region_uc/TablesPageViewsMonthlyCombined.htm'>$region_uc</a>"
                           ))) ;
       }
     }

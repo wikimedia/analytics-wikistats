@@ -826,6 +826,7 @@ sub WhiteListLanguages
   @languages = join (',', sort keys %languages) ;
 
 
+
   &Log ("\nLanguage codes not accepted, but dump processing logged in StatisticsLog.csv:\n\n") ;
   &Log ("- Keyword prohibited: " . join (',', sort keys %wp_ignore_keyword_prohibited) . "\n") ;
   &Log ("- Keyword reserved: "   . join (',', sort keys %wp_ignore_keyword_reserved) . "\n") ;
@@ -959,7 +960,6 @@ sub ReadMonthlyStats
     next if $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
 
     # figures for current month are ignored when month has just begun
-
     $days_in_month = days_in_month ($year, $month) ;
     $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
     $pageviews     {$wp.$m} = $count_normalized ;
@@ -1006,8 +1006,8 @@ sub ReadMonthlyStats
 
       $wp =~ s/\.m// ; # mobile postix is .m
 
-      next if $date eq $oldest_month_pageviews {$wp} ; # skip first month, probably incomplete
-
+      if (! $mode_wo) # temp to see any data in report qqq
+      { next if $date eq $oldest_month_pageviews {$wp} ; } # skip first month, probably incomplete
 
       if ($normalize_days_per_month)
       {
@@ -1144,7 +1144,7 @@ sub ReadMonthlyStats
     }
   }
   close "FILE_IN" ;
-
+  
   foreach $wp (keys %languages)
   {
     if ($mode_wx && (($wp eq "strategy") || ($wp eq "usability") || ($wp eq "outreach"))) # show incomplete month as well
