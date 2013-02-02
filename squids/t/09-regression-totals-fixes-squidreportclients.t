@@ -10,6 +10,22 @@ use lib "./t";
 use Generate::Squid;
 use List::Util qw/sum/;
 
+#
+# What is to be tested and fixed in this test:
+#
+#
+# 1) MSIE 
+# 2) Some totals in Browser Engines(right column , bottom)
+#    are 100+ as percentages
+# 3) Some totals 
+#
+#
+#
+#
+#
+
+
+
 my @UAs = (
 "Mozilla/5.0%20(iPad;%20CPU%20OS%206_0%20like%20Mac%20OS%20X)%20AppleWebKit/536.26%20(KHTML,%20like%20Gecko)%20Version/6.0%20Mobile/10A403%20Safari/8536.25", "Mozilla/5.0%20(iPad;%20CPU%20OS%205_1_1%20like%20Mac%20OS%20X)%20AppleWebKit/534.46%20(KHTML,%20like%20Gecko)%20Version/5.1%20Mobile/9B206%20Safari/7534.48.3",
 "Mozilla/5.0%20(iPad;%20CPU%20OS%205_0_1%20like%20Mac%20OS%20X)%20AppleWebKit/534.46%20(KHTML,%20like%20Gecko)%20Version/5.1%20Mobile/9A405%20Safari/7534.48.3",
@@ -133,7 +149,7 @@ for my $UA (@UAs) {
       geocode           => "CA"             ,
       client_ip         =>'random_ipv4'     ,
       user_agent_header => $UA              ,
-  }) for 1..2;
+  }) for 1..1;
 };
 $o->__increase_day; 
 $o->generate_line({ geocode=>"--" });
@@ -183,5 +199,18 @@ my $wikistats_run_cmd = qq{
 
 my $wikistats_run_cmd_output = `$wikistats_run_cmd`;
 warn $wikistats_run_cmd_output;
+
+
+use HTML::TreeBuilder::XPath;
+my @nodes;
+my $p = HTML::TreeBuilder::XPath->new;
+$p->parse_file("$__DATA_BASE/reports/2012-10/SquidReportClients.htm");
+
+@nodes = map { $_ } 
+         $p->findnodes("//html/body/p[1]/table/tr[2]/td[1]/table/tr[5]");
+
+
+
+
 
 ok(1,"This test always succeeds");

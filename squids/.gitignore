@@ -15,6 +15,9 @@
 !conf-editors
 !conf-editors/
 !conf-editors/*.pm
+!conf-mobile
+!conf-mobile/
+!conf-mobile/*.pm
 
 # documentation
 !docs/
