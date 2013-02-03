@@ -68,8 +68,9 @@ $g->generate();
 
 my $m = PageViews::ParallelModel->new();
 $m->process_files({
-    logs_path   => $__DATA_BASE,
-    logs_prefix => $LOG_PREFIX,
+    logs_path    => $__DATA_BASE,
+    logs_prefix  => $LOG_PREFIX,
+    max_children => 3,
     children_output_path => "$REPORT_OUTPUT_PATH"."map",
     start       => {
       year  => 2012,
@@ -88,7 +89,6 @@ print   $json_fh JSON::XS->new
                          ->canonical(1)
                          ->encode($d);
 close   $json_fh;
-warn "BOTS=>".Dumper($d->{monthly_bots_count});
 #warn Dumper $d;
 #warn Dumper $m->get_files_in_interval();
 #exit 0;

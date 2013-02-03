@@ -70,12 +70,12 @@ sub process_line {
     return;
   };
 
-  ## 30x or 20x request status
-  #if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
-    ##print "[DBG] reqstatus_discarded\n";
-    #$self->{monthly_discarded_count}->{$ymd}++;
-    #return;
-  #};
+  # 30x or 20x request status
+  if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
+    #print "[DBG] reqstatus_discarded\n";
+    $self->{monthly_discarded_count}->{$ymd}++;
+    return;
+  };
 
   my $label_ip = $bdetector->match_ip($ip);
 
@@ -365,6 +365,8 @@ sub scale_months_to_30 {
   my $scaled_monthly_bots_count      = {};
   my $scaled_monthly_discarded_count = {};
   my $scaled_counts                  = {};
+  my $scaled_counts_wiki             = {};
+  my $scaled_counts_api              = {};
 
   for my $month ( keys %{ $self->{monthly_bots_count} } ) {
     my $days_month_has = how_many_days_month_has(split(/-/,$month));
@@ -382,8 +384,12 @@ sub scale_months_to_30 {
     my $days_month_has = how_many_days_month_has(split(/-/,$month));
     $scaled_counts->{$month} //= {};
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $scaled_counts->{$month}->{$language}  = ( $self->{counts}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
-      $scaled_counts->{$month}->{$language}  = int($scaled_counts->{$month}->{$language});
+      $scaled_counts->{$month}->{$language}      = ( $self->{counts}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
+      $scaled_counts->{$month}->{$language}      = int($scaled_counts->{$month}->{$language});
+      $scaled_counts_wiki->{$month}->{$language} = ( $self->{counts_wiki}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
+      $scaled_counts_wiki->{$month}->{$language} = int($scaled_counts_wiki->{$month}->{$language});
+      $scaled_counts_api->{$month}->{$language}  = ( $self->{counts_api}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
+      $scaled_counts_api->{$month}->{$language}  = int($scaled_counts_api->{$month}->{$language});
     };
   };
 
@@ -391,6 +397,8 @@ sub scale_months_to_30 {
   $self->{monthly_bots_count}       = $scaled_monthly_bots_count;
   $self->{monthly_discarded_count}  = $scaled_monthly_discarded_count;
   $self->{counts}                   = $scaled_counts;
+  $self->{counts_wiki}              = $scaled_counts_wiki;
+  $self->{counts_api}               = $scaled_counts_api;
 };
 
 
@@ -488,7 +496,9 @@ sub get_data {
 
 
       push @$new_row, {
-          monthly_count                 =>     $monthly_count,
+          monthly_count                 =>   $monthly_count,
+          monthly_count_wiki            =>   ($self->{counts_wiki}->{$month}->{$language} // 0),
+          monthly_count_api             =>   ($self->{counts_api}->{ $month}->{$language} // 0),
           monthly_delta__               =>   ($idx_month == 0 ? "--" : $__monthly_delta),
           monthly_delta                 =>   ($idx_month == 0 ? 0 : $monthly_delta ),
           percentage_of_monthly_total__ =>   $__percentage_of_monthly_total,
@@ -511,7 +521,6 @@ sub get_data {
   my $big_total_discarded = 0 + sum( values %{$self->{monthly_discarded_count}});
   my $big_total_bots      = 0 + sum( values %{$self->{monthly_bots_count}}     );
 
-  warn Dumper $self->{monthly_discarded_count};
   return {
     # actual data for each language for each month
     data                    => $data,

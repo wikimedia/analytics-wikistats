@@ -1,10 +1,13 @@
 
 <script language='javascript'>
+
         var colorPowerScale = d3.scale
                               .pow()
                               .exponent(.5)
                               .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
                               .range(['red','white','green']);
+
+
 </script>
 
 <!-- Table with language/month page views -->
@@ -59,7 +62,15 @@
     <td> <script>document.write(unsample_and_format([% monthly_bots_count.$month      %]));</script> </td>
       <script language='javascript'>
         [% FOREACH cell IN row %]
-          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
+          tdc(
+              colorPowerScale([% cell.monthly_delta %]),
+              '[% cell.monthly_delta__ %], '+
+              '[% cell.percentage_of_monthly_total__ %], '+
+              '[% cell.rank %]', 
+              unsample_and_format([% cell.monthly_count %])      + ' ' +
+              unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
+              unsample_and_format([% cell.monthly_count_api %])
+             );
         [% END %] 
       </script>
     </tr>
@@ -72,4 +83,12 @@
   </tr>
 
 </table>
+<br/>
+<h3>Table cell anatomy</h3>
 
+<div id="legend"></div>
+
+<script>
+  var legend = new Drawpad("legend");
+  legend.drawEverything();
+</script>

@@ -97,7 +97,10 @@ sub update_child_slots {
 sub write_child_output_to_disk {
   my ($self,$output_path) = @_;
   open my $fh,">$output_path";
-  my $json = encode_json({
+  my $json = JSON::XS->new
+                         ->pretty(1)
+                         ->canonical(1)
+                         ->encode({
     monthly_discarded_count => ( $self->{monthly_discarded_count} // {} ),
     monthly_bots_count      => ( $self->{monthly_bots_count}      // {} ),
     counts                  => ( $self->{counts}                  // {} ),

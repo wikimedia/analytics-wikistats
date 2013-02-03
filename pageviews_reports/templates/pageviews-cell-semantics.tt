@@ -1,0 +1,15 @@
+
+
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    var canvas = document.getElementById('tutorial');
+    if (canvas.getContext){
+      var ctx = canvas.getContext('2d');
+    };
+  });
+</script>
+
+
+<canvas id="tutorial" width="150" height="150"></canvas>
+
