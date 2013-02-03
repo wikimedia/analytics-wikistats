@@ -373,12 +373,14 @@ sub scale_months_to_30 {
     $scaled_monthly_bots_count->{$month}  = ($self->{monthly_bots_count}->{$month} / $days_month_has) * $SCALE_FACTOR;
     $scaled_monthly_bots_count->{$month}  = int($scaled_monthly_bots_count->{$month});
   };
+
   # take all discarded counts, add them up
   for my $month ( keys %{ $self->{monthly_discarded_count} } ) {
     my $days_month_has = how_many_days_month_has(split(/-/,$month));
     $scaled_monthly_discarded_count->{$month}  = ( $self->{monthly_discarded_count}->{$month} / $days_month_has ) * $SCALE_FACTOR;
     $scaled_monthly_discarded_count->{$month}  = int($scaled_monthly_discarded_count->{$month});
   };
+
   # take all monthly language counts, add them up
   for my $month ( keys %{ $self->{counts} } ) {
     my $days_month_has = how_many_days_month_has(split(/-/,$month));
