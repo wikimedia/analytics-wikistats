@@ -9,47 +9,43 @@ sub reduce {
   my ($self,$json_path) = @_;
   warn "DOING REDUCE";
 
-  my $reduced_monthly_bots_count      = {};
-  my $reduced_monthly_discarded_count = {};
-  my $reduced_counts                  = {};
-  my $reduced_counts_wiki             = {};
-  my $reduced_counts_api              = {};
+  my @to_reduce = qw/
+    counts
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+  /;
 
-  # iterate over all children
+  my $reduced = {};
+
+  # iterate over all children output jsons (each child processes 1 day of data) 
   for my $child_output (<$json_path/*.json>) {
     my $c = decode_json(`cat $child_output`);
-    # take all bot counts, add them up
-    for my $month ( keys %{ $c->{monthly_bots_count} } ) {
-      $reduced_monthly_bots_count->{$month} //= 0;
-      $reduced_monthly_bots_count->{$month}  += $c->{monthly_bots_count}->{$month};
-    };
-    # take all discarded counts, add them up
-    for my $month ( keys %{ $c->{monthly_discarded_count} } ) {
-      $reduced_monthly_discarded_count->{$month} //= 0;
-      $reduced_monthly_discarded_count->{$month}  += $c->{monthly_discarded_count}->{$month};
-    };
-    # take all monthly language counts, add them up
     for my $month ( keys %{ $c->{counts} } ) {
-      $reduced_counts->{$month} //= {};
+      # initialize month hash for this property
+      for my $property ( @to_reduce ) {
+        $reduced->{$property}->{$month} //= {};
+      };
       for my $language ( keys %{ $c->{counts}->{$month} } ) {
-        $reduced_counts->{     $month}->{$language} //= 0;
-        $reduced_counts->{     $month}->{$language}  += $c->{counts}->{$month}->{$language};
-
-        $reduced_counts_wiki->{$month}->{$language} //= 0;
-        $reduced_counts_wiki->{$month}->{$language}  += ( $c->{counts_wiki}->{$month}->{$language} // 0 );
-        $reduced_counts_api->{ $month}->{$language} //= 0;
-        $reduced_counts_api->{ $month}->{$language}  += ( $c->{counts_api}->{ $month}->{$language} // 0 );
-
+        for my $property ( @to_reduce ) {
+          $reduced->{$property}->{$month}->{$language} //= 0;
+          $reduced->{$property}->{$month}->{$language}  +=
+                $c->{$property}->{$month}->{$language} // 0;
+        };
       };
     };
   };
 
   # put the reduced values back in the model for further computation
-  $self->{monthly_bots_count}       = $reduced_monthly_bots_count;
-  $self->{monthly_discarded_count}  = $reduced_monthly_discarded_count;
-  $self->{counts}                   = $reduced_counts;
-  $self->{counts_wiki}              = $reduced_counts_wiki;
-  $self->{counts_api}               = $reduced_counts_api;
+  for my $property ( @to_reduce ) {
+    $self->{$property} = $reduced->{$property};
+  };
 };
 
 sub map    {
@@ -63,12 +59,22 @@ sub map    {
 # so each process gets the clean object
 #
 sub reset_for_new_child {
-  $_[0]->{monthly_discarded_count} = {};
-  $_[0]->{monthly_bots_count}      = {};
-  $_[0]->{counts}                  = {};
-  $_[0]->{counts_wiki}             = {};
-  $_[0]->{counts_api}              = {};
-  #$_[0]->{bdetector}               = undef;
+  my ($self) = @_;
+
+  my @to_reset = qw/
+    counts
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+  /;
+
+  $self->{$_} = {} for @to_reset;
 };
 
 #
@@ -96,17 +102,30 @@ sub update_child_slots {
 
 sub write_child_output_to_disk {
   my ($self,$output_path) = @_;
+
+  my @to_serialize = qw/
+    counts
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+  /;
+
   open my $fh,">$output_path";
+
+  my $data_to_serialize = {};
+  $data_to_serialize->{$_} = $self->{$_}
+    for @to_serialize;
+
   my $json = JSON::XS->new
                          ->pretty(1)
                          ->canonical(1)
-                         ->encode({
-    monthly_discarded_count => ( $self->{monthly_discarded_count} // {} ),
-    monthly_bots_count      => ( $self->{monthly_bots_count}      // {} ),
-    counts                  => ( $self->{counts}                  // {} ),
-    counts_wiki             => ( $self->{counts_wiki}             // {} ),
-    counts_api              => ( $self->{counts_api}              // {} )
-  });
+                         ->encode($data_to_serialize);
   print $fh $json;
   close $fh;
 };
@@ -114,6 +133,7 @@ sub write_child_output_to_disk {
 
 sub process_files {
   my ($self,$params) = @_;
+
 
   confess "[ERROR] max_children param invalid"
     unless $params->{max_children} =~ /^\d+$/;

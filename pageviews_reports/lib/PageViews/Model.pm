@@ -1,7 +1,7 @@
 package PageViews::Model;
 use strict;
 use warnings;
-use File::Basename;
+use File::Basename qw/basename/;
 use Data::Dumper;
 use List::Util qw/sum max/;
 use PageViews::WikistatsColorRamp;
@@ -14,12 +14,33 @@ my $MINIMUM_EXPECTED_FIELDS = 10;
 sub new {
   my ($class) = @_;
   my $raw_obj = {
-    counts                  => {},
-    counts_wiki             => {},
-    counts_api              => {},
-    monthly_discarded_count => {},
-    monthly_bots_count      => {},
-    bdetector               => undef,
+    current_file_processed      => undef,
+    # counts is  counts_wiki_basic + counts_wiki_index + counts_api
+    counts                      => {},
+
+    # count for /wiki/
+    counts_wiki_basic           => {},
+    # count for /w/index.php
+    counts_wiki_index           => {},
+    # count for /w/api.php
+    counts_api                  => {},
+
+    bdetector                   => undef,
+
+    last_ymd                    => undef,
+    fh_dbg_bots                 => undef,
+    fh_dbg_url                  => undef,
+    fh_dbg_time                 => undef,
+    fh_dbg_fields               => undef,
+    fh_dbg_status               => undef,
+    fh_dbg_mimetype             => undef,
+
+    counts_discarded_bots       => {},
+    counts_discarded_url        => {},
+    counts_discarded_time       => {},
+    counts_discarded_fields     => {},
+    counts_discarded_status     => {},
+    counts_discarded_mimetype   => {},
   };
   $raw_obj->{bdetector} = PageViews::BotDetector->new;
   $raw_obj->{bdetector}->load_ip_ranges();
@@ -34,8 +55,12 @@ sub process_line {
   my ($self,$line) = @_;
   my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
-  return if @fields < $MINIMUM_EXPECTED_FIELDS;
-                    
+
+  if(@fields < $MINIMUM_EXPECTED_FIELDS) {
+    print { $self->{fh_dbg_fields} } $line;
+    $self->{counts_discarded_fields}->{$self->{last_ymd}}++;
+    return;
+  };
                         
   my $time       = $fields[2] ;
   my $url        = $fields[8] ;
@@ -50,15 +75,20 @@ sub process_line {
     $tp = convert_str_to_epoch1($time);
     if(!(defined($tp) && @$tp == 7)) {
       #print "[DBG] discard_time\n";
+      print { $self->{fh_dbg_time} } $line;
+      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
       return;
     };
   };
 
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
+    print { $self->{fh_dbg_time} } $line;
+    $self->{counts_discarded_time}->{$self->{last_ymd}}++;
     return;
   };
   my $ymd = $tp->[1]."-".$tp->[2]; 
+  $self->{last_ymd} = $ymd;
 
   # text/html mime types only
   if(!( 
@@ -66,14 +96,16 @@ sub process_line {
       ( $mime_type eq '-' || index($mime_type,"text/html") != -1) ) 
     ) {
     #print "[DBG] mime_discard\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
+    print { $self->{fh_dbg_mimetype} } $line;
+    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
     return;
   };
 
   # 30x or 20x request status
   if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
     #print "[DBG] reqstatus_discarded\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
+    print { $self->{fh_dbg_status} } $line;
+    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
     return;
   };
 
@@ -81,7 +113,8 @@ sub process_line {
 
   if( $label_ip ) {
     #print "[DBG] bots_discarded\n";
-    $self->{monthly_bots_count}->{$ymd}++;
+    print { $self->{fh_dbg_bots} } $line;
+    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
     return;
   };
 
@@ -92,13 +125,15 @@ sub process_line {
 
   if( !defined($wikiproject_pair) ) {
     #print "[DBG] language_discard\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
+    print { $self->{fh_dbg_url} } $line;
+    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
   };
 
   if( defined($ua) && $bdetector->match_ua($ua) ) {
     #print "[DBG] bot_ua_discard\n";
-    $self->{monthly_bots_count}->{$ymd}++;
+    print { $self->{fh_dbg_bots} } $line;
+    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
     return;
   };
 
@@ -111,8 +146,56 @@ sub process_line {
   $self->{"counts_$pv_type"}->{$ymd}->{$pv_wikiproject}++;
 };
 
+sub open_dbg_fh {
+  my ($self) = @_;
+  print "[DBG] OPEN_DBG_FH\n";
+  print "[DBG] $self->{current_file_processed} \n";
+  my $path = "/tmp/discarded/".basename($self->{current_file_processed});
+  print "[DBG] $path\n";
+  `mkdir /tmp/discarded` if(! -d "/tmp/discarded");
+
+  my $path_bots      = $path;
+  my $path_url       = $path;
+  my $path_time      = $path;
+  my $path_fields    = $path;
+  my $path_status    = $path;
+  my $path_mimetype  = $path;
+
+  $path_bots      =~ s/\.gz$/.bots.discarded/;
+  $path_url       =~ s/\.gz$/.url.discarded/;
+  $path_time      =~ s/\.gz$/.time.discarded/;
+  $path_fields    =~ s/\.gz$/.fields.discarded/;
+  $path_status    =~ s/\.gz$/.status.discarded/;
+  $path_mimetype  =~ s/\.gz$/.mimetype.discarded/;
+
+  open my $fh_dbg_bots     , ">$path_bots";
+  open my $fh_dbg_url      , ">$path_url";
+  open my $fh_dbg_time     , ">$path_time";
+  open my $fh_dbg_fields   , ">$path_fields";
+  open my $fh_dbg_status   , ">$path_status";
+  open my $fh_dbg_mimetype , ">$path_mimetype";
+
+  $self->{fh_dbg_bots}     = $fh_dbg_bots     ;
+  $self->{fh_dbg_url}      = $fh_dbg_url      ;
+  $self->{fh_dbg_time}     = $fh_dbg_time     ;
+  $self->{fh_dbg_fields}   = $fh_dbg_fields   ;
+  $self->{fh_dbg_status}   = $fh_dbg_status   ;
+  $self->{fh_dbg_mimetype} = $fh_dbg_mimetype ;
+};
+
+sub close_dbg_fh {
+  my ($self) = @_;
+  for my $key (%$self) {
+    next unless $key =~ /^fh_dbg_/;
+    close($self->{$key});
+  };
+};
+
 sub process_file {
   my ($self,$filename) = @_;
+  $self->{current_file_processed} = $filename;
+  $self->open_dbg_fh;
+
   print "[DBG] process_file => $filename\n";
   open IN, "-|", "unpigz -c $filename";
   #open IN, "-|", "gzip -dc $filename";
@@ -120,6 +203,7 @@ sub process_file {
     $self->process_line($line);
   };
   close IN;
+  $self->close_dbg_fh;
 };
 
 # adds zero padding for a 2 digit number
@@ -356,51 +440,54 @@ sub second_pass_rankings {
   return $month_rankings;
 };
 
+sub scale_to_30 {
+  my ($self,$month,$value) = @_;
+  my $SCALE_FACTOR = 30;
+  my $days_month_has = how_many_days_month_has(split(/-/,$month));
+  my $scaled_value = int( ($value / $days_month_has) * $SCALE_FACTOR );
+  return $scaled_value;
+};
+
 
 sub scale_months_to_30 {
   my ($self) = @_;
 
-  my $SCALE_FACTOR = 30;
+  my @to_scale = qw/
+    counts
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+  /;
 
-  my $scaled_monthly_bots_count      = {};
-  my $scaled_monthly_discarded_count = {};
-  my $scaled_counts                  = {};
-  my $scaled_counts_wiki             = {};
-  my $scaled_counts_api              = {};
-
-  for my $month ( keys %{ $self->{monthly_bots_count} } ) {
-    my $days_month_has = how_many_days_month_has(split(/-/,$month));
-    $scaled_monthly_bots_count->{$month}  = ($self->{monthly_bots_count}->{$month} / $days_month_has) * $SCALE_FACTOR;
-    $scaled_monthly_bots_count->{$month}  = int($scaled_monthly_bots_count->{$month});
-  };
-
-  # take all discarded counts, add them up
-  for my $month ( keys %{ $self->{monthly_discarded_count} } ) {
-    my $days_month_has = how_many_days_month_has(split(/-/,$month));
-    $scaled_monthly_discarded_count->{$month}  = ( $self->{monthly_discarded_count}->{$month} / $days_month_has ) * $SCALE_FACTOR;
-    $scaled_monthly_discarded_count->{$month}  = int($scaled_monthly_discarded_count->{$month});
-  };
+  my $scaled = {};
 
   # take all monthly language counts, add them up
   for my $month ( keys %{ $self->{counts} } ) {
-    my $days_month_has = how_many_days_month_has(split(/-/,$month));
-    $scaled_counts->{$month} //= {};
+    # initialized scale hash for this month
+    for my $property ( @to_scale ) {
+      $scaled->{$property}->{$month} //= {};
+    };
+    # scale values
     for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $scaled_counts->{$month}->{$language}      = ( $self->{counts}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
-      $scaled_counts->{$month}->{$language}      = int($scaled_counts->{$month}->{$language});
-      $scaled_counts_wiki->{$month}->{$language} = ( $self->{counts_wiki}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
-      $scaled_counts_wiki->{$month}->{$language} = int($scaled_counts_wiki->{$month}->{$language});
-      $scaled_counts_api->{$month}->{$language}  = ( $self->{counts_api}->{$month}->{$language} / $days_month_has ) * $SCALE_FACTOR;
-      $scaled_counts_api->{$month}->{$language}  = int($scaled_counts_api->{$month}->{$language});
+      for my $property ( @to_scale ) {
+        $self->{$property}->{$month}->{$language} //= 0;
+        my $month_language_value = $self->{$property}->{$month}->{$language};
+        $scaled->{$property}->{$month}->{$language} = $self->scale_to_30($month,$month_language_value);
+      };
     };
   };
 
-  # put the reduced values back in the model for further computation
-  $self->{monthly_bots_count}       = $scaled_monthly_bots_count;
-  $self->{monthly_discarded_count}  = $scaled_monthly_discarded_count;
-  $self->{counts}                   = $scaled_counts;
-  $self->{counts_wiki}              = $scaled_counts_wiki;
-  $self->{counts_api}               = $scaled_counts_api;
+  # place scaled property hashes back into the current object
+
+  for my $property ( @to_scale ) {
+    $self->{$property} = $scaled->{$property};
+  };
 };
 
 
@@ -499,7 +586,10 @@ sub get_data {
 
       push @$new_row, {
           monthly_count                 =>   $monthly_count,
-          monthly_count_wiki            =>   ($self->{counts_wiki}->{$month}->{$language} // 0),
+          monthly_count_wiki            =>   ( 
+                                               ($self->{counts_wiki_basic}->{$month}->{$language} // 0) + 
+                                               ($self->{counts_wiki_index}->{$month}->{$language} // 0)
+                                             ),
           monthly_count_api             =>   ($self->{counts_api}->{ $month}->{$language} // 0),
           monthly_delta__               =>   ($idx_month == 0 ? "--" : $__monthly_delta),
           monthly_delta                 =>   ($idx_month == 0 ? 0 : $monthly_delta ),
@@ -516,14 +606,14 @@ sub get_data {
   @$data = reverse(@$data);
 
   # pre-pend headers
-  unshift @$data, ['month' , '&Sigma;', 'discarded', 'bots', @sorted_languages_present ];
+  unshift @$data, ['month' , '&Sigma;', @sorted_languages_present ];
 
   warn "[DBG] data.length = ".~~(@$data);
   my $big_total_processed = 0 + sum( values %$language_totals                  );
   my $big_total_discarded = 0 + sum( values %{$self->{monthly_discarded_count}});
   my $big_total_bots      = 0 + sum( values %{$self->{monthly_bots_count}}     );
 
-  return {
+  my $retval = {
     # actual data for each language for each month
     data                    => $data,
     # the chart data for each wikiproject
@@ -535,12 +625,22 @@ sub get_data {
     big_total_processed     => $big_total_processed,
     big_total_discarded     => $big_total_discarded,
     big_total_bots          => $big_total_bots     ,
-    monthly_bots_count      => $self->{monthly_bots_count},
-    monthly_discarded_count => $self->{monthly_discarded_count},
-    debug                   => {
-      month_rankings  => $month_rankings,
-    }
   };
+
+  $retval->{$_} = $self->{$_}
+    for qw/
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+    /;
+
+  return $retval;
 };
 
 1;

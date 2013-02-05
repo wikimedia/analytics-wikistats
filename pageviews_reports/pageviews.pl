@@ -55,14 +55,21 @@ my $process_files_params = {
     start       => {
       year  => 2012,
       #month => 1,
-      month => 6,
+      month => 1,
     },
     end         => {
       year  => 2012,
       #month => 12,
-      month => 8,
+      month => 12,
     },
 };
+
+#
+# USAGE example:
+#
+# ./pageviews.pl --input-path /a/squid/archive/sampled-geocoded --mode=parallel --max-children=9
+#
+#
 
 if($mode eq "parallel") {
   $process_files_params->{children_output_path} = "$OUTPUT_PATH/map";
