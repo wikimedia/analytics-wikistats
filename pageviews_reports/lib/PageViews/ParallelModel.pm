@@ -9,11 +9,18 @@ sub reduce {
   my ($self,$json_path) = @_;
   warn "DOING REDUCE";
 
-  my @to_reduce = qw/
+  # we have two classes of data that we want to reduce
+  # HoH-es which are listed in @to_reduce1 (with 2 keys, month and language)
+  # H-es   which are listed in @to_reduce2 (with 1 key , month)
+
+  my @to_reduce1 = qw/
     counts
     counts_wiki_basic
     counts_wiki_index
     counts_api
+  /;
+
+  my @to_reduce2 = qw/
     counts_discarded_bots    
     counts_discarded_url     
     counts_discarded_time    
@@ -29,21 +36,27 @@ sub reduce {
     my $c = decode_json(`cat $child_output`);
     for my $month ( keys %{ $c->{counts} } ) {
       # initialize month hash for this property
-      for my $property ( @to_reduce ) {
-        $reduced->{$property}->{$month} //= {};
-      };
-      for my $language ( keys %{ $c->{counts}->{$month} } ) {
-        for my $property ( @to_reduce ) {
-          $reduced->{$property}->{$month}->{$language} //= 0;
-          $reduced->{$property}->{$month}->{$language}  +=
-                $c->{$property}->{$month}->{$language} // 0;
+      for my $property ( @to_reduce1 , @to_reduce2 ) {
+        if(     $property ~~ @to_reduce2) {
+          # initialize
+          $reduced->{$property}->{$month} //= 0;
+          # reduce
+          $reduced->{$property}->{$month}  += $c->{$property}->{$month} // 0;
+        } elsif($property ~~ @to_reduce1) {
+          # initialize
+          $reduced->{$property}->{$month} //= {};
+          # reduce
+          for my $language ( keys %{ $c->{counts}->{$month} } ) {
+            $reduced->{$property}->{$month}->{$language} //= 0;
+            $reduced->{$property}->{$month}->{$language}  += $c->{$property}->{$month}->{$language} // 0;
+          };
         };
       };
     };
   };
 
   # put the reduced values back in the model for further computation
-  for my $property ( @to_reduce ) {
+  for my $property ( @to_reduce1, @to_reduce2 ) {
     $self->{$property} = $reduced->{$property};
   };
 };

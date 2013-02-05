@@ -452,11 +452,14 @@ sub scale_to_30 {
 sub scale_months_to_30 {
   my ($self) = @_;
 
-  my @to_scale = qw/
+  my @to_scale1 = qw/
     counts
     counts_wiki_basic
     counts_wiki_index
     counts_api
+  /;
+
+  my @to_scale2 = qw/
     counts_discarded_bots    
     counts_discarded_url     
     counts_discarded_time    
@@ -470,22 +473,24 @@ sub scale_months_to_30 {
   # take all monthly language counts, add them up
   for my $month ( keys %{ $self->{counts} } ) {
     # initialized scale hash for this month
-    for my $property ( @to_scale ) {
-      $scaled->{$property}->{$month} //= {};
-    };
-    # scale values
-    for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      for my $property ( @to_scale ) {
-        $self->{$property}->{$month}->{$language} //= 0;
-        my $month_language_value = $self->{$property}->{$month}->{$language};
-        $scaled->{$property}->{$month}->{$language} = $self->scale_to_30($month,$month_language_value);
+    for my $property ( @to_scale1, @to_scale2 ) {
+      if($property ~~ @to_scale1) {
+        $scaled->{$property}->{$month} //= {};
+        for my $language ( keys %{ $self->{counts}->{$month} } ) {
+          $self->{$property}->{$month}->{$language} //= 0;
+          my $month_language_value = $self->{$property}->{$month}->{$language};
+          $scaled->{$property}->{$month}->{$language} = $self->scale_to_30($month,$month_language_value);
+        };
+      } elsif($property ~~ @to_scale2) {
+        $scaled->{$property}->{$month} //= 0;
+        $scaled->{$property}->{$month}  += $self->{$property}->{$month};
       };
     };
   };
 
   # place scaled property hashes back into the current object
 
-  for my $property ( @to_scale ) {
+  for my $property ( @to_scale1, @to_scale2 ) {
     $self->{$property} = $scaled->{$property};
   };
 };
