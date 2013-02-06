@@ -1,0 +1,67 @@
+<html>
+  <script src="d3.min.js"></script>
+  <script src="jquery-1.9.1.min.js"></script>
+  <script src="piechart.js"></script>
+  <body>
+    <table border=1>
+      <tr>
+        <th>c1</th>
+        <th>c2</th>
+        <th>c3</th>
+        <th>c4</th>
+      </tr>
+      <tr>
+        <td id="c11">c11</td>
+        <td>c12</td>
+        <td>c13</td>
+        <td>c14</td>
+      </tr>
+      <tr>
+        <td>c21</td>
+        <td>c22</td>
+        <td>c23</td>
+        <td>c24</td>
+      </tr>
+      <tr>
+        <td>c31</td>
+        <td>c32</td>
+        <td>c33</td>
+        <td>c34</td>
+      </tr>
+    </table>
+
+    <div id="container"></div>
+    <script>
+      $(document).ready(function() {
+        var p = new PieChart({
+          width      : 280,
+          height     : 280,
+          containerId: "container",
+          outerRadiusRatio: 1.0,
+          innerRadiusRatio: 0.23,
+          data:[
+            { label: "/wiki/"       , pageview_count: 300 } ,
+            { label: "/w/index.php" , pageview_count: 100 } ,
+            { label: "/w/api.php"   , pageview_count: 70  } ,
+            { label: "sample"       , pageview_count: 40  } 
+          ]
+        });
+
+        p.drawChart();
+        p.drawLabels();
+
+        $("#c11").hover(
+        function(){ 
+          console.log("hoverIn");
+          $("#container").show(); 
+        },
+        function(){ 
+          console.log("hoverOut");
+          $("#container").hide(); 
+        });
+      });
+    </script>
+  </body>
+
+
+</html>
