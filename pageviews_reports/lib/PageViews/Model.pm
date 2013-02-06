@@ -57,7 +57,7 @@ sub process_line {
   my @fields = split(/\s/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
-    print { $self->{fh_dbg_fields} } $line;
+    #print { $self->{fh_dbg_fields} } $line;
     $self->{counts_discarded_fields}->{$self->{last_ymd}}++;
     return;
   };
@@ -75,7 +75,7 @@ sub process_line {
     $tp = convert_str_to_epoch1($time);
     if(!(defined($tp) && @$tp == 7)) {
       #print "[DBG] discard_time\n";
-      print { $self->{fh_dbg_time} } $line;
+      #print { $self->{fh_dbg_time} } $line;
       $self->{counts_discarded_time}->{$self->{last_ymd}}++;
       return;
     };
@@ -83,7 +83,7 @@ sub process_line {
 
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
-    print { $self->{fh_dbg_time} } $line;
+    #print { $self->{fh_dbg_time} } $line;
     $self->{counts_discarded_time}->{$self->{last_ymd}}++;
     return;
   };
@@ -94,7 +94,7 @@ sub process_line {
   # 30x or 20x request status
   if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
     #print "[DBG] reqstatus_discarded\n";
-    print { $self->{fh_dbg_status} } $line;
+    #print { $self->{fh_dbg_status} } $line;
     $self->{counts_discarded_status}->{$self->{last_ymd}}++;
     return;
   };
@@ -103,7 +103,7 @@ sub process_line {
 
   if( $label_ip ) {
     #print "[DBG] bots_discarded\n";
-    print { $self->{fh_dbg_bots} } $line;
+    #print { $self->{fh_dbg_bots} } $line;
     $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
     return;
   };
@@ -115,14 +115,14 @@ sub process_line {
 
   if( !defined($wikiproject_pair) ) {
     #print "[DBG] language_discard\n";
-    print { $self->{fh_dbg_url} } $line;
+    #print { $self->{fh_dbg_url} } $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
   };
 
   if( defined($ua) && $bdetector->match_ua($ua) ) {
     #print "[DBG] bot_ua_discard\n";
-    print { $self->{fh_dbg_bots} } $line;
+    #print { $self->{fh_dbg_bots} } $line;
     $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
     return;
   };
@@ -141,7 +141,7 @@ sub process_line {
        ) 
     ) {
     #print "[DBG] mime_discard\n";
-    print { $self->{fh_dbg_mimetype} } $line;
+    #print { $self->{fh_dbg_mimetype} } $line;
     $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
     return;
   };
