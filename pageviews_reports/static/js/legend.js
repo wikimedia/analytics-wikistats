@@ -2,6 +2,7 @@
 function Drawpad(divId) {
   var divLegend = document.getElementById(divId);
   this.paper = new Raphael(divLegend);
+  this.paper.canvas.style.zIndex = "-100";
   this.cell  = this.paper.rect(10,10,160,50);
   this.cell.attr({fill: '#00ff00'});
 

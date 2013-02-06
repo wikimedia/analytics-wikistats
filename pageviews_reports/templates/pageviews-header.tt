@@ -12,4 +12,6 @@
     <script type="text/javascript" src="static/js/raphael-min.js" ></script>
     <script type="text/javascript" src="static/js/unsampling-data.js" ></script>
     <script type="text/javascript" src="static/js/legend.js" ></script>
+    <script type="text/javascript" src="static/js/jquery.js" ></script>
+    <script type="text/javascript" src="static/js/piechart.js" ></script>
   

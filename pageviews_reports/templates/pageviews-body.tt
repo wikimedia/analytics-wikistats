@@ -1,13 +1,10 @@
 
 <script language='javascript'>
-
-        var colorPowerScale = d3.scale
-                              .pow()
-                              .exponent(.5)
-                              .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
-                              .range(['red','white','green']);
-
-
+  var colorPowerScale = d3.scale
+                        .pow()
+                        .exponent(.5)
+                        .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
+                        .range(['red','white','green']);
 </script>
 
 <!-- Table with language/month page views -->
@@ -48,10 +45,12 @@
 
   [% WHILE ( data.size > 0 ) %]
     [% row   = data.shift %]
-    [% month = row.shift %]
+    [% month = row.shift  %]
+    [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
+    [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month %]
     <tr>
     <!-- month name -->
-    <td> [% month %] </td>
+    <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div id="[% tooltipContainerDiscardedId %]"></div> </td>
     <!-- month total -->
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
       <script language='javascript'>
@@ -85,4 +84,48 @@
 <script>
   var legend = new Drawpad("legend");
   legend.drawEverything();
+</script>
+
+<script>
+  [% i = 1 %]
+  [% FOREACH month IN months_present %]
+     [% piechartObject = "p" _ i %]
+     [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
+     [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
+
+       var [% piechartObject %] = new TooltipPieChart({
+         width      : 280,
+         height     : 280,
+         containerId: "[% tooltipContainerDiscardedId %]" ,
+         observedId : "[% tooltipObservedDiscardedId  %]" ,
+         outerRadiusRatio: 1.0,
+         innerRadiusRatio: 0.23,
+         titleText  : "Discarded lines report for month [% month %]",
+         data:[
+           [% IF        counts_discarded_bots.$month > 0 %]
+           { label: "bots"      , pageview_count: [%     counts_discarded_bots.$month %] },
+           [% END %]
+           [% IF      counts_discarded_fields.$month > 0 %]
+           { label: "fields"    , pageview_count: [%   counts_discarded_fields.$month %] },
+           [% END %]
+           [% IF         counts_discarded_url.$month > 0 %]
+           { label: "url"       , pageview_count: [%      counts_discarded_url.$month %] },
+           [% END %]
+           [% IF        counts_discarded_time.$month > 0 %]
+           { label: "time"      , pageview_count: [%     counts_discarded_time.$month %] },
+           [% END %]
+           [% IF      counts_discarded_status.$month > 0 %]
+           { label: "status"    , pageview_count: [%   counts_discarded_status.$month %] },
+           [% END %]
+           [% IF    counts_discarded_mimetype.$month > 0 %]
+           { label: "mimetype"  , pageview_count: [% counts_discarded_mimetype.$month %] },
+           [% END %]
+         ]
+       });
+
+       [% piechartObject %].drawChart();
+       [% piechartObject %].drawLabels();
+       [% piechartObject %].init();
+     [% i = i + 1 %]
+  [% END %]
 </script>

@@ -626,6 +626,7 @@ sub get_data {
     # the following values are used by the color ramps
     min_language_delta      => $min_language_delta,
     max_language_delta      => $max_language_delta,
+    months_present          => \@months_present    ,
     language_totals         => $language_totals,
     big_total_processed     => $big_total_processed,
     big_total_discarded     => $big_total_discarded,

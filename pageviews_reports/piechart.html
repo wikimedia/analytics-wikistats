@@ -36,39 +36,25 @@
     <div id="container" style="position: absolute; display: none;"></div>
     <script>
       $(document).ready(function() {
-        var p = new PieChart({
+        var p = new TooltipPieChart({
           width      : 280,
           height     : 280,
           containerId: "container",
+          observedId : "c11",
           outerRadiusRatio: 1.0,
           innerRadiusRatio: 0.23,
           data:[
             { label: "/wiki/"       , pageview_count: 300 } ,
             { label: "/w/index.php" , pageview_count: 100 } ,
             { label: "/w/api.php"   , pageview_count: 70  } ,
-            { label: "sample"       , pageview_count: 40  } 
+            { label: "sample"       , pageview_count: 40  } ,
           ]
         });
 
         p.drawChart();
         p.drawLabels();
+        p.init();
 
-        $("#c11").mousemove(function(e){
-          console.log(e);
-          $("#container").css('top' , e.pageY + 10 );
-          $("#container").css('left', e.pageX + 20 );
-        });
-
-        $("#c11").hover(
-        function(p){ 
-          console.log("hoverIn");
-          $("#container").fadeIn('fast',function(){});
-          console.log(p);
-        },
-        function(){ 
-          console.log("hoverOut");
-          $("#container").fadeOut('fast',function(){});
-        });
       });
     </script>
   </body>
