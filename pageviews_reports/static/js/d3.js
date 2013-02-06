@@ -12,7 +12,7 @@
     };
   }
   d3 = {
-    version: "3.0.2"
+    version: "3.0.4"
   };
   var π = Math.PI, ε = 1e-6, d3_radians = π / 180, d3_degrees = 180 / π;
   function d3_target(d) {
@@ -1689,13 +1689,13 @@
       return value;
     }
     function bind(group, groupData) {
-      var i, n = group.length, m = groupData.length, n0 = Math.min(n, m), n1 = Math.max(n, m), updateNodes = [], enterNodes = [], exitNodes = [], node, nodeData;
+      var i, n = group.length, m = groupData.length, n0 = Math.min(n, m), updateNodes = new Array(m), enterNodes = new Array(m), exitNodes = new Array(n), node, nodeData;
       if (key) {
-        var nodeByKeyValue = new d3_Map(), keyValues = [], keyValue, j = groupData.length;
+        var nodeByKeyValue = new d3_Map(), dataByKeyValue = new d3_Map(), keyValues = [], keyValue;
         for (i = -1; ++i < n; ) {
           keyValue = key.call(node = group[i], node.__data__, i);
           if (nodeByKeyValue.has(keyValue)) {
-            exitNodes[j++] = node;
+            exitNodes[i] = node;
           } else {
             nodeByKeyValue.set(keyValue, node);
           }
@@ -1703,14 +1703,13 @@
         }
         for (i = -1; ++i < m; ) {
           keyValue = key.call(groupData, nodeData = groupData[i], i);
-          if (nodeByKeyValue.has(keyValue)) {
-            updateNodes[i] = node = nodeByKeyValue.get(keyValue);
+          if (node = nodeByKeyValue.get(keyValue)) {
+            updateNodes[i] = node;
             node.__data__ = nodeData;
-            enterNodes[i] = exitNodes[i] = null;
-          } else {
+          } else if (!dataByKeyValue.has(keyValue)) {
             enterNodes[i] = d3_selection_dataNode(nodeData);
-            updateNodes[i] = exitNodes[i] = null;
           }
+          dataByKeyValue.set(keyValue, nodeData);
           nodeByKeyValue.remove(keyValue);
         }
         for (i = -1; ++i < n; ) {
@@ -1725,19 +1724,15 @@
           if (node) {
             node.__data__ = nodeData;
             updateNodes[i] = node;
-            enterNodes[i] = exitNodes[i] = null;
           } else {
             enterNodes[i] = d3_selection_dataNode(nodeData);
-            updateNodes[i] = exitNodes[i] = null;
           }
         }
         for (;i < m; ++i) {
           enterNodes[i] = d3_selection_dataNode(groupData[i]);
-          updateNodes[i] = exitNodes[i] = null;
         }
-        for (;i < n1; ++i) {
+        for (;i < n; ++i) {
           exitNodes[i] = group[i];
-          enterNodes[i] = updateNodes[i] = null;
         }
       }
       enterNodes.update = updateNodes;
@@ -6072,7 +6067,7 @@
       return x = a(x, y), b(x[0], x[1]);
     }
     if (a.invert && b.invert) compose.invert = function(x, y) {
-      return x = b.invert(x, y), a.invert(x[0], x[1]);
+      return x = b.invert(x, y), x && a.invert(x[0], x[1]);
     };
     return compose;
   }
@@ -6164,9 +6159,9 @@
     return interpolate;
   }
   d3.geo.greatArc = function() {
-    var source = d3_source, s, target = d3_target, t, precision = 6 * d3_radians, interpolate;
+    var source = d3_source, source_, target = d3_target, target_, precision = 6 * d3_radians, interpolate;
     function greatArc() {
-      var p0 = s || source.apply(this, arguments), p1 = t || target.apply(this, arguments), i = interpolate || d3.geo.interpolate(p0, p1), t = 0, dt = precision / i.distance, coordinates = [ p0 ];
+      var p0 = source_ || source.apply(this, arguments), p1 = target_ || target.apply(this, arguments), i = interpolate || d3.geo.interpolate(p0, p1), t = 0, dt = precision / i.distance, coordinates = [ p0 ];
       while ((t += dt) < 1) coordinates.push(i(t));
       coordinates.push(p1);
       return {
@@ -6175,18 +6170,18 @@
       };
     }
     greatArc.distance = function() {
-      return (interpolate || d3.geo.interpolate(s || source.apply(this, arguments), t || target.apply(this, arguments))).distance;
+      return (interpolate || d3.geo.interpolate(source_ || source.apply(this, arguments), target_ || target.apply(this, arguments))).distance;
     };
     greatArc.source = function(_) {
       if (!arguments.length) return source;
-      source = _, s = typeof _ === "function" ? null : _;
-      interpolate = s && t ? d3.geo.interpolate(s, t) : null;
+      source = _, source_ = typeof _ === "function" ? null : _;
+      interpolate = source_ && target_ ? d3.geo.interpolate(source_, target_) : null;
       return greatArc;
     };
     greatArc.target = function(_) {
       if (!arguments.length) return target;
-      target = _, t = typeof _ === "function" ? null : _;
-      interpolate = s && t ? d3.geo.interpolate(s, t) : null;
+      target = _, target_ = typeof _ === "function" ? null : _;
+      interpolate = source_ && target_ ? d3.geo.interpolate(source_, target_) : null;
       return greatArc;
     };
     greatArc.precision = function(_) {
@@ -6514,7 +6509,7 @@
     }
     function invert(point) {
       point = projectRotate.invert((point[0] - δx) / k, (δy - point[1]) / k);
-      return [ point[0] * d3_degrees, point[1] * d3_degrees ];
+      return point && [ point[0] * d3_degrees, point[1] * d3_degrees ];
     }
     projection.stream = function(stream) {
       return d3_geo_projectionRadiansRotate(rotate, clip(projectResample(stream)));

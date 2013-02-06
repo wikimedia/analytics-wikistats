@@ -1,7 +1,10 @@
-<html>
-  <script src="d3.min.js"></script>
-  <script src="jquery-1.9.1.min.js"></script>
-  <script src="piechart.js"></script>
+<!DOCTYPE html>
+<meta charset="utf-8">
+  <head>
+  <script src="static/js/d3.js"></script>
+  <script src="static/js/jquery.js"></script>
+  <script src="static/js/piechart.js"></script>
+  </head>
   <body>
     <table border=1>
       <tr>
@@ -30,7 +33,7 @@
       </tr>
     </table>
 
-    <div id="container"></div>
+    <div id="container" style="position: absolute; display: none;"></div>
     <script>
       $(document).ready(function() {
         var p = new PieChart({
@@ -50,14 +53,21 @@
         p.drawChart();
         p.drawLabels();
 
+        $("#c11").mousemove(function(e){
+          console.log(e);
+          $("#container").css('top' , e.pageY + 10 );
+          $("#container").css('left', e.pageX + 20 );
+        });
+
         $("#c11").hover(
-        function(){ 
+        function(p){ 
           console.log("hoverIn");
-          $("#container").show(); 
+          $("#container").fadeIn('fast',function(){});
+          console.log(p);
         },
         function(){ 
           console.log("hoverOut");
-          $("#container").hide(); 
+          $("#container").fadeOut('fast',function(){});
         });
       });
     </script>
