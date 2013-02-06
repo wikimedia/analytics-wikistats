@@ -90,16 +90,6 @@ sub process_line {
   my $ymd = $tp->[1]."-".$tp->[2]; 
   $self->{last_ymd} = $ymd;
 
-  # text/html mime types only
-  if(!( 
-      defined($mime_type)  && 
-      ( $mime_type eq '-' || index($mime_type,"text/html") != -1) ) 
-    ) {
-    #print "[DBG] mime_discard\n";
-    print { $self->{fh_dbg_mimetype} } $line;
-    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
-    return;
-  };
 
   # 30x or 20x request status
   if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
@@ -139,6 +129,22 @@ sub process_line {
 
   my ($pv_type,
       $pv_wikiproject) = @$wikiproject_pair;
+
+
+
+  # text/html mime types only
+  # (mimetype filtering only occurs for regular pageviews, not for the API ones) 
+  if( ($pv_type eq "wiki_basic" || $pv_type eq "wiki_index" ) && 
+       !( 
+         defined($mime_type)  && 
+        ( $mime_type eq '-' || index($mime_type,"text/html") != -1) 
+       ) 
+    ) {
+    #print "[DBG] mime_discard\n";
+    print { $self->{fh_dbg_mimetype} } $line;
+    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
+    return;
+  };
 
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;

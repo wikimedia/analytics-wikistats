@@ -11,7 +11,7 @@ function TooltipPieChart(params) {
   this.radius           = Math.min(this.width, this.height) / 2;
   
   
-  var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h3 align="center">'+this.titleText+'</h3><div>';
+  var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h2 align="center">'+this.titleText+'</h2><div>';
   $("#"+this.containerId).html(titleDivContent);
 };
 
