@@ -94,11 +94,12 @@
      [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
 
        var [% piechartObject %] = new TooltipPieChart({
-         width      : 280,
-         height     : 280,
+         width      : 550,
+         height     : 350,
+         radius     : 120,
          containerId: "[% tooltipContainerDiscardedId %]" ,
          observedId : "[% tooltipObservedDiscardedId  %]" ,
-         outerRadiusRatio: 1.0,
+         outerRadiusRatio: 1.00,
          innerRadiusRatio: 0.23,
          titleText  : "Discarded lines report for month [% month %]",
          data:[

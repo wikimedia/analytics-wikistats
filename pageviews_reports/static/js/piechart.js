@@ -9,8 +9,15 @@ function TooltipPieChart(params) {
   this.innerRadiusRatio = params.innerRadiusRatio;
   this.titleText        = params.titleText;
   this.radius           = params.radius;
-  
-  
+
+  for(var i = 0;i < this.data.length ; i++) {
+    this.data[i].unsampled_count = unsample_and_format(this.data[i].pageview_count);
+  };
+
+  this.data.sort(function(a,b){
+    return b.pageview_count - a.pageview_count;
+  });
+
   var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h2 align="center">'+this.titleText+'</h2></div>';
   $("#"+this.containerId).html(titleDivContent);
 };
@@ -69,8 +76,8 @@ TooltipPieChart.prototype.drawChart = function() {
   .append("g")
   .attr("transform", 
         "translate(" + 
-          (this.width ) / 2 + "," + 
-          (this.height) / 2 + 
+          ( (this.width ) / 2 - 100 ) + "," + 
+          ( (this.height) / 2 -  40 ) + 
         ")"
        );
 
@@ -132,7 +139,7 @@ TooltipPieChart.prototype.drawLabels = function() {
   .append("rect")
   .attr( "x", this.radius + 30  )
   .attr( "y", function(d, i){ 
-    console.log(i);
+    //console.log(i);
     return ((i) *  20) - 115;})
   .attr( "width" , 10)
   .attr( "height", 10)
@@ -151,8 +158,9 @@ TooltipPieChart.prototype.drawLabels = function() {
   .attr("x", this.radius + 50)
   .attr("y", function(d, i){ return ((i+1) *  20)  - 125;})
   .text(function(d) {
-    return  d.pageview_count + " - " + d.label;
-  });
+    return  d.unsampled_count + " - " + d.label;
+  })
+  .style("font-size", "18");
      
 
 /*
