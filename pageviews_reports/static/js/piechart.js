@@ -93,27 +93,37 @@ TooltipPieChart.prototype.drawLabels = function() {
   .attr("d", self.arc)
   .style("fill", function(d) { return self.color(d.data.label); });
 
+  /*
+   *var force = d3.layout.force()
+   *.charge(-120)
+   *.linkDistance(this.radius+10)
+   *.size([self.width, self.height]);
+   */
 
-  var placedLabels = new Array;
-
-
-  self.g.append("text")
-  .attr("transform", function(d) { 
-
-    //console.log(d);
-    var pos  = self.arc.centroid(d);
-    var x    = pos[0];
-    var y    = pos[1];
-    var h    = Math.sqrt(x*x + y * y);
-
-    var labelx = x / h * (self.radius+10);
-    var labely = y / h * (self.radius+10);
-
-    return "translate(" + labelx + "," + labely + ")"; 
-  }) 
-  .attr("dy", ".10em")
-  .style("text-anchor", "middle")
-  .text(function(d) { return d.data.pageview_count; });
+/*
+ *  self
+ *  .g
+ *  .append("text")
+ *  //.attr("class","around-pie")
+ *  .attr("transform", function(d) { 
+ *
+ *    //console.log(d);
+ *    var pos  = self.arc.centroid(d);
+ *    var x    = pos[0];
+ *    var y    = pos[1];
+ *    var h    = Math.sqrt(x*x + y * y);
+ *
+ *    var labelx = x / h * (self.radius+30);
+ *    var labely = y / h * (self.radius+30);
+ *    //var labely = self.height - 400;
+ *
+ *    return "translate(" + labelx + "," + labely + ")"; 
+ *  }) 
+ *  .attr("dy", ".10em")
+ *  .style("text-anchor", "middle")
+ *  .text(function(d) { return d.data.pageview_count; })
+ *  .call(force.drag);
+ */
 
     
   // TODO:  
@@ -143,10 +153,18 @@ TooltipPieChart.prototype.drawLabels = function() {
   .attr("x", this.radius + 50)
   .attr("y", function(d, i){ return ((i+1) *  20)  - 125;})
   .text(function(d) {
-    return d.label;
+    return  d.pageview_count + " - " + d.label;
   });
      
 
-
-  //console.log(self.g);
+/*
+ *  var aroundThePieLabels = self.g.selectAll(".around-pie");
+ *
+ *  force.on("tick",function(){ 
+ *     aroundThePieLabels.attr("x", function(d) { return d.x; })
+ *                       .attr("y", function(d) { return d.y; })
+ *  }); 
+ *
+ *  force.nodes(aroundThePieLabels).start();
+ */
 };
