@@ -88,7 +88,8 @@ TooltipPieChart.prototype.drawLabels = function() {
 
   var self = this;
 
-  self.g.append("path")
+  self.g
+  .append("path")
   .attr("d", self.arc)
   .style("fill", function(d) { return self.color(d.data.label); });
 
@@ -99,7 +100,7 @@ TooltipPieChart.prototype.drawLabels = function() {
   self.g.append("text")
   .attr("transform", function(d) { 
 
-    console.log(d);
+    //console.log(d);
     var pos  = self.arc.centroid(d);
     var x    = pos[0];
     var y    = pos[1];
@@ -114,51 +115,38 @@ TooltipPieChart.prototype.drawLabels = function() {
   .style("text-anchor", "middle")
   .text(function(d) { return d.data.pageview_count; });
 
-
-
-
     
-  self.g.selectAll('rect')
-  .data(this.data)
-  .enter()
+  // TODO:  
+  // positions fine-tuned, need to fix this
+  self
+  .g
+  .data(self.data)
   .append("rect")
-  .attr("x", 65)
-  .attr("y", function(d, i){ return i *  20;})
-  .attr("width", 10)
-  .attr("height", 10)
-  .style("fill", function(d) { 
-    return self.color(d);
+  .attr( "x", this.radius + 30  )
+  .attr( "y", function(d, i){ 
+    console.log(i);
+    return ((i) *  20) - 115;})
+  .attr( "width" , 10)
+  .attr( "height", 10)
+  .style("fill" , function(d,i) { 
+    return self.color(d.label);
   });
-       
-     /*
-      *legend.selectAll('text')
-      *  .data(dataset)
-      *  .enter()
-      *  .append("text")
-      *.attr("x", w - 52)
-      *  .attr("y", function(d, i){ return i *  20 + 9;})
-      *.text(function(d) {
-      *    var text = color_hash[dataset.indexOf(d)][0];
-      *    return text;
-      *  });
-      */
+
+
+   
+  // TODO:  
+  // positions fine-tuned, need to fix this
+  self
+  .g
+  .data(self.data)
+  .append("text")
+  .attr("x", this.radius + 50)
+  .attr("y", function(d, i){ return ((i+1) *  20)  - 125;})
+  .text(function(d) {
+    return d.label;
+  });
      
 
 
-
-
-  /*
-   *self.g.append("text")
-   *.attr("transform", function(d) { 
-   *  return "translate(" + self.arc.centroid(d) + ")"; 
-   *}) 
-   *.attr("dy", ".95em")
-   *.style("text-anchor", "middle")
-   *.text(function(d) { 
-   *  return d.data.pageview_count; 
-   *});
-   */
-
-  console.log(self.g);
-
+  //console.log(self.g);
 };
