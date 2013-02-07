@@ -1,4 +1,8 @@
 
+
+
+
+
 <script language='javascript'>
   var colorPowerScale = d3.scale
                         .pow()
@@ -46,8 +50,10 @@
   [% WHILE ( data.size > 0 ) %]
     [% row   = data.shift %]
     [% month = row.shift  %]
-    [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
-    [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month %]
+    [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month            %]
+    [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month            %]
+    [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ language _ month %]
+    [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ language _ month %]
     <tr>
     <!-- month name -->
     <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div id="[% tooltipContainerDiscardedId %]"></div> </td>
@@ -57,15 +63,18 @@
         [% FOREACH cell IN row %]
           tdc(
               colorPowerScale([% cell.monthly_delta %]),
-              '[% cell.monthly_delta__ %], '+
+              '[% cell.monthly_delta__ %], '              +
               '[% cell.percentage_of_monthly_total__ %], '+
               '[% cell.rank %]', 
               unsample_and_format([% cell.monthly_count %])      + ' ' +
               unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
-              unsample_and_format([% cell.monthly_count_api %])
+              unsample_and_format([% cell.monthly_count_api %]),
+              "[%  tooltipObservedBreakdownId %]",
+              "[% tooltipContainerBreakdownId %]"
              );
         [% END %] 
       </script>
+          
     </tr>
   [% END %]
 
@@ -129,4 +138,6 @@
        [% piechartObject %].init();
      [% i = i + 1 %]
   [% END %]
+
+
 </script>

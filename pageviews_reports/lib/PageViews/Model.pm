@@ -596,6 +596,7 @@ sub get_data {
 
 
       push @$new_row, {
+          language                      =>   $language,
           monthly_count                 =>   $monthly_count,
           monthly_count_wiki            =>   ( 
                                                ($self->{counts_wiki_basic}->{$month}->{$language} // 0) + 
@@ -626,17 +627,18 @@ sub get_data {
 
   my $retval = {
     # actual data for each language for each month
-    data                    => $data,
+    data                    => $data                            ,
     # the chart data for each wikiproject
-    chart_data              => $chart_data,
+    chart_data              => $chart_data                      ,
     # the following values are used by the color ramps
-    min_language_delta      => $min_language_delta,
-    max_language_delta      => $max_language_delta,
-    months_present          => \@months_present    ,
-    language_totals         => $language_totals,
-    big_total_processed     => $big_total_processed,
-    big_total_discarded     => $big_total_discarded,
-    big_total_bots          => $big_total_bots     ,
+    min_language_delta      => $min_language_delta              ,
+    max_language_delta      => $max_language_delta              ,
+    months_present          => \@months_present                 ,
+    languages_present       => [ keys %$languages_present_uniq ],
+    language_totals         => $language_totals                 ,
+    big_total_processed     => $big_total_processed             ,
+    big_total_discarded     => $big_total_discarded             ,
+    big_total_bots          => $big_total_bots                  ,
   };
 
   $retval->{$_} = $self->{$_}
