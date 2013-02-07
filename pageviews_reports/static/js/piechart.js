@@ -59,9 +59,7 @@ TooltipPieChart.prototype.drawChart = function() {
 
   this.color = d3
   .scale
-  .ordinal()
-  .range(["#CFF016","#16DAF0","#16F098","#F0AE16","#F05316","#46D130"]);
-
+  .category20();
 
   this.svg = d3
   .select("#"+this.containerId)
