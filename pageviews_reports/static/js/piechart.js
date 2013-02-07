@@ -8,10 +8,10 @@ function TooltipPieChart(params) {
   this.outerRadiusRatio = params.outerRadiusRatio;
   this.innerRadiusRatio = params.innerRadiusRatio;
   this.titleText        = params.titleText;
-  this.radius           = Math.min(this.width, this.height) / 2;
+  this.radius           = params.radius;
   
   
-  var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h2 align="center">'+this.titleText+'</h2><div>';
+  var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h2 align="center">'+this.titleText+'</h2></div>';
   $("#"+this.containerId).html(titleDivContent);
 };
 
@@ -71,8 +71,8 @@ TooltipPieChart.prototype.drawChart = function() {
   .append("g")
   .attr("transform", 
         "translate(" + 
-          this.width  / 2 + "," + 
-          this.height / 2 + 
+          (this.width ) / 2 + "," + 
+          (this.height) / 2 + 
         ")"
        );
 
@@ -92,26 +92,73 @@ TooltipPieChart.prototype.drawLabels = function() {
   .attr("d", self.arc)
   .style("fill", function(d) { return self.color(d.data.label); });
 
+
+  var placedLabels = new Array;
+
+
   self.g.append("text")
   .attr("transform", function(d) { 
-    console.log(self.arc.centroid(d));
-    return "translate(" + self.arc.centroid(d) + ")"; 
+
+    console.log(d);
+    var pos  = self.arc.centroid(d);
+    var x    = pos[0];
+    var y    = pos[1];
+    var h    = Math.sqrt(x*x + y * y);
+
+    var labelx = x / h * (self.radius+10);
+    var labely = y / h * (self.radius+10);
+
+    return "translate(" + labelx + "," + labely + ")"; 
   }) 
   .attr("dy", ".10em")
   .style("text-anchor", "middle")
-  .text(function(d) { return d.data.label; });
+  .text(function(d) { return d.data.pageview_count; });
 
 
-  self.g.append("text")
-  .attr("transform", function(d) { 
-    var pos = self.arc.centroid(d);
-    pos[1] += 10;
-    return "translate(" + pos + ")"; 
-  }) 
-  .attr("dy", ".95em")
-  .style("text-anchor", "middle")
-  .text(function(d) { 
-    return d.data.pageview_count; 
+
+
+    
+  self.g.selectAll('rect')
+  .data(this.data)
+  .enter()
+  .append("rect")
+  .attr("x", 65)
+  .attr("y", function(d, i){ return i *  20;})
+  .attr("width", 10)
+  .attr("height", 10)
+  .style("fill", function(d) { 
+    return self.color(d);
   });
+       
+     /*
+      *legend.selectAll('text')
+      *  .data(dataset)
+      *  .enter()
+      *  .append("text")
+      *.attr("x", w - 52)
+      *  .attr("y", function(d, i){ return i *  20 + 9;})
+      *.text(function(d) {
+      *    var text = color_hash[dataset.indexOf(d)][0];
+      *    return text;
+      *  });
+      */
+     
+
+
+
+
+  /*
+   *self.g.append("text")
+   *.attr("transform", function(d) { 
+   *  return "translate(" + self.arc.centroid(d) + ")"; 
+   *}) 
+   *.attr("dy", ".95em")
+   *.style("text-anchor", "middle")
+   *.text(function(d) { 
+   *  return d.data.pageview_count; 
+   *});
+   */
+
+  console.log(self.g);
 
 };

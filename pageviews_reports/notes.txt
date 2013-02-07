@@ -1,0 +1,6 @@
+http://stackoverflow.com/questions/13570048/drawing-simple-lines-with-d3js
+http://stackoverflow.com/questions/13654609/draw-d3-simple-line-chart-with-an-array
+http://jsfiddle.net/jaimem/T546B/
+http://stackoverflow.com/questions/13573771/adding-a-chart-legend-in-d3
+http://jsbin.com/ubafur/3
+http://www.verisi.com/resources/d3-tutorial-basic-charts.htm

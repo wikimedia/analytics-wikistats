@@ -14,7 +14,7 @@
         <th>c4</th>
       </tr>
       <tr>
-        <td id="c11">c11</td>
+        <td id="c11">Hover mouse in<br/> this cell</td>
         <td>c12</td>
         <td>c13</td>
         <td>c14</td>
@@ -37,17 +37,22 @@
     <script>
       $(document).ready(function() {
         var p = new TooltipPieChart({
-          width      : 280,
-          height     : 280,
-          containerId: "container",
-          observedId : "c11",
-          outerRadiusRatio: 1.0,
-          innerRadiusRatio: 0.23,
-          data:[
-            { label: "/wiki/"       , pageview_count: 300 } ,
-            { label: "/w/index.php" , pageview_count: 100 } ,
-            { label: "/w/api.php"   , pageview_count: 70  } ,
-            { label: "sample"       , pageview_count: 40  } ,
+          width             :  400,
+          height            :  400,
+          radius            :  120,
+          containerId       :  "container",
+          observedId        :  "c11",
+          titleText         :  "Discarded counts",
+          outerRadiusRatio  :  1.0,
+          innerRadiusRatio  :  0.23,
+          data              : [
+            { label: "/wiki/"         , pageview_count: 300 } ,
+            { label: "/w/index.php"   , pageview_count: 100 } ,
+            { label: "/w/api.php"     , pageview_count: 70  } ,
+            { label: "sample"         , pageview_count: 40  } ,
+            { label: "overlap1"       , pageview_count: 2   } ,
+            { label: "overlap2"       , pageview_count: 2   } ,
+            { label: "overlap3"       , pageview_count: 2   } ,
           ]
         });
 
