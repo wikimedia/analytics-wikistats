@@ -598,6 +598,11 @@ sub get_data {
       push @$new_row, {
           language                      =>   $language,
           monthly_count                 =>   $monthly_count,
+
+          breakdown_count_wiki_basic    =>   ($self->{counts_wiki_basic}->{$month}->{$language} // 0),
+          breakdown_count_wiki_index    =>   ($self->{counts_wiki_index}->{$month}->{$language} // 0),
+          breakdown_count_api           =>   ($self->{counts_api}->{ $month}->{$language}       // 0),
+
           monthly_count_wiki            =>   ( 
                                                ($self->{counts_wiki_basic}->{$month}->{$language} // 0) + 
                                                ($self->{counts_wiki_index}->{$month}->{$language} // 0)

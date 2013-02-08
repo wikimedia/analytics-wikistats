@@ -20,6 +20,7 @@ function TooltipPieChart(params) {
 
   var titleDivContent = '<div style="background-color: yellow; margin-left:auto;margin-right:auto;"><h2 align="center">'+this.titleText+'</h2></div>';
   $("#"+this.containerId).html(titleDivContent);
+
 };
 
 
@@ -44,6 +45,7 @@ TooltipPieChart.prototype.init = function() {
     function(){ $( containerSelector ).show(); },
     function(){ $( containerSelector ).hide(); }
   );
+
 };
 
 TooltipPieChart.prototype.drawChart = function() {
@@ -93,6 +95,28 @@ TooltipPieChart.prototype.drawLabels = function() {
 
   var self = this;
 
+/*
+ *  $("#"+this.containerId).prepend('<div style="position: absolute; z-index: 1;" id="legend"></div>');
+ *
+ *  var legendSupport = 
+ *  d3
+ *  .select("#"+this.containerId)
+ *  .select("#legend")
+ *  .append("svg")
+ *  .attr("width" ,600)
+ *  .attr("height",300)
+ *  .style("position","absolute")
+ *  .append("g")
+ *  .append("rect")
+ *  .style("fill","#ffffff")
+ *  .attr("width" ,180)
+ *  .attr("height",180)
+ *  .attr("x", 350  )
+ *  .attr("y", 40  );
+ */
+
+
+  // draw piechart
   self.g
   .append("path")
   .attr("d", self.arc)
@@ -130,11 +154,14 @@ TooltipPieChart.prototype.drawLabels = function() {
  *  .call(force.drag);
  */
 
+
+
+
+
     
   // TODO:  
   // positions fine-tuned, need to fix this
-  self
-  .g
+  self.g
   .data(self.data)
   .append("rect")
   .attr( "x", this.radius + 30  )
@@ -151,8 +178,7 @@ TooltipPieChart.prototype.drawLabels = function() {
    
   // TODO:  
   // positions fine-tuned, need to fix this
-  self
-  .g
+  self.g
   .data(self.data)
   .append("text")
   .attr("x", this.radius + 50)
@@ -161,7 +187,9 @@ TooltipPieChart.prototype.drawLabels = function() {
     return  d.unsampled_count + " - " + d.label;
   })
   .style("font-size", "18");
-     
+  
+
+
 
 /*
  *  var aroundThePieLabels = self.g.selectAll(".around-pie");

@@ -47,20 +47,24 @@
     [% END %]
   </tr>
 
+  [% i = 1 %]
   [% WHILE ( data.size > 0 ) %]
     [% row   = data.shift %]
     [% month = row.shift  %]
     [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month            %]
     [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month            %]
-    [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ language _ month %]
-    [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ language _ month %]
     <tr>
     <!-- month name -->
     <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div id="[% tooltipContainerDiscardedId %]"></div> </td>
     <!-- month total -->
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
-      <script language='javascript'>
+    
         [% FOREACH cell IN row %]
+          [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ cell.language _ month %]
+          [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ cell.language _ month %]
+
+          <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerBreakdownId %]"></div>
+          <script language='javascript'>
           tdc(
               colorPowerScale([% cell.monthly_delta %]),
               '[% cell.monthly_delta__ %], '              +
@@ -69,11 +73,39 @@
               unsample_and_format([% cell.monthly_count %])      + ' ' +
               unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
               unsample_and_format([% cell.monthly_count_api %]),
-              "[%  tooltipObservedBreakdownId %]",
-              "[% tooltipContainerBreakdownId %]"
+              "[%  tooltipObservedBreakdownId %]"
              );
+
+             [% piechartObject = "p" _ i %]
+             var [% piechartObject %] = new TooltipPieChart({
+               width      : 550,
+               height     : 350,
+               radius     : 120,
+               containerId: "[% tooltipContainerBreakdownId %]" ,
+               observedId : "[%  tooltipObservedBreakdownId  %]" ,
+               outerRadiusRatio: 1.00,
+               innerRadiusRatio: 0.23,
+               titleText  : "Breakdown pageview count for language [% cell.language %] and month [% month %]",
+                 data:[
+                   [% IF        cell.breakdown_count_wiki_basic > 0 %]
+                   { label: "/wiki/" , pageview_count: [% cell.breakdown_count_wiki_basic %] },
+                   [% END %]
+                   [% IF        cell.breakdown_count_wiki_index > 0 %]
+                   { label: "/w/index.php" , pageview_count: [% cell.breakdown_count_wiki_index %] },
+                   [% END %]
+                   [% IF        cell.breakdown_count_api > 0 %]
+                   { label: "/w/api.php" , pageview_count: [% cell.breakdown_count_api %] },
+                   [% END %]
+                 ]
+             });
+             [% piechartObject %].drawChart();
+             [% piechartObject %].drawLabels();
+             [% piechartObject %].init();
+
+             [% i = i + 1 %]
+             </script>
         [% END %] 
-      </script>
+          
           
     </tr>
   [% END %]
@@ -88,12 +120,7 @@
 <br/>
 <h3>Table cell anatomy</h3>
 
-<div id="legend"></div>
 
-<script>
-  var legend = new Drawpad("legend");
-  legend.drawEverything();
-</script>
 
 <script>
   [% i = 1 %]
@@ -140,4 +167,11 @@
   [% END %]
 
 
+</script>
+
+
+<div id="cell-anatomy"></div>
+<script>
+  var legend = new Drawpad("cell-anatomy");
+  legend.drawEverything();
 </script>
