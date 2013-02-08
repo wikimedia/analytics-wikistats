@@ -1044,13 +1044,21 @@ sub PhaseBuildDailyFile_MergeFiles
 
           $file = $fh_in_hourly [$hour] ;
           $line = <$file> ;
-          while ($line =~ /^\*/)
+          
+	  while ($line =~ /^\Q$key_low\E/) # |Q..|E do not interpret special chars like ( and ) in variable 
+	  {
+	    print "\nIgnore duplicate key '$key_low'\n\n" ; # should only occur few days after data stream bug from Jan 31 2013   	  
+            $line = <$fh> ;
+	  }
+	  
+	  while ($line =~ /^\*/)
 	  { $line = <$file> ; }
 
 	  # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
 	  # $line =~ s/^([\w\-]+) /$1.z /o  ;
 
  	  ($lang,$title,$count,$dummy) = split (' ', $line) ;
+
           $totals_per_lang_in {$lang} += $count ;   
 
           # during tests fake end of file early on, after a few languages have been fully processed
@@ -1091,6 +1099,7 @@ sub PhaseBuildDailyFile_MergeFiles
     &PhaseBuildDailyFile_WriteCounts ($fh_out_merged_hourly, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev) ;
 
     $key_low_prev = $key_low ;
+
     $lang_prev = $lang ;
   }
 
@@ -1240,11 +1249,34 @@ sub PhaseBuildDailyFile_OpenInputFiles
     my $time_start_patch_sort = time ;
     open $fh_in, "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; 
     open $fh_patched, '>', $file_patched || &Abort ("Could not write '$file_patched'") ; 
+
+    $lines_read = 0 ;
+    $lines_read_extra_spaces = 0 ;
     while ($line = <$fh_in>)
     {
+      $lines_read ++ ;
       # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix, test for field delimited string without dot 
       $line =~ s/^([^\.\s]+)2 /$1.y /o  ;
       $line =~ s/^([^\.\s]+) /$1.z /o  ;
+
+     ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
+      if ($overflow ne '')  # too many fields, due to spaces in title since Jan 31, 2013, try to fix  
+      {
+        $lines_read_extra_spaces ++ ;
+	      
+	chomp $line ;
+        print "\n!!! Too many fields:\n$line'\n" ;
+        @fields = split (' ', $line) ;
+	print "Fields: " . join ('||',@fields) . "\n" ;
+        $lang  = $fields [0] ;	    
+	$title = $fields [1] ;
+	for (my $j = 2 ; $j < $#fields - 1 ; $j++) 
+	{ $title .= '%20' . $fields [$j] ; } 
+        $count = $fields [$#fields-1] ;
+        # print "lang '$lang', title '$title', count '$count'\n\n" ;
+	$line = "$lang $title $count 0\n" ;
+	print "$line\n\n" ;
+      }
       print $fh_patched $line ;
     }
     close $fh_in ;
@@ -1256,6 +1288,9 @@ sub PhaseBuildDailyFile_OpenInputFiles
     $result = `$cmd` ;
     
     &Log ("File found '$file_in', patch/sort to '$file_sorted' in " . (time - $time_start_patch_sort) . " secs.\n") ;
+
+    if ($lines_read_extra_spaces > 0)
+    { print "Invalid lines with extra spaces: $lines_read_extra_spaces out of $lines_read total\n" ; }
 
     open $fh_in_hourly [$hour], "<", $file_sorted || &Abort ("Sorted file '" . $file_sorted . "' could not be opened.") ; 
 
@@ -1813,7 +1848,7 @@ sub CheckForSequenceError
        else
        { &Log ("hour $hour: file closed, key ${fs_key_hourly [$hour]}\n") ; }
     }
-    &Abort ("Sequence error: '$key_low_prev' eq '$key_low'\n") ;
+    &Abort ("Sequence error: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ;
   }
 }
 
