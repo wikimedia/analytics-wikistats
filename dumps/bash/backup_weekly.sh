@@ -16,15 +16,17 @@ projectcounts=$dammit/projectcounts
 
 dt=$(date +[%Y-%m-%d][%H:%M])
 
-$bash/zip_out.sh wb
-$bash/zip_out.sh wk
-$bash/zip_out.sh wn
-$bash/zip_out.sh wp
-$bash/zip_out.sh wq
-$bash/zip_out.sh ws
-$bash/zip_out.sh wv
-$bash/zip_out.sh wx
-$bash/zip_out.sh wm
+$bash/zip_all.sh # all = all projects ../dumps/csv/csv_* and ..dumps/out/out_*
+
+#bash/zip_out.sh wb
+#bash/zip_out.sh wk
+#bash/zip_out.sh wn
+#bash/zip_out.sh wp
+#bash/zip_out.sh wq
+#bash/zip_out.sh ws
+#bash/zip_out.sh wv
+#bash/zip_out.sh wx
+#bash/zip_out.sh wm
 
 cd $out/zip_all
 zip $backup/out_all_english_$dt.zip out*.zip
