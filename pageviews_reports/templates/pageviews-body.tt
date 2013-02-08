@@ -1,8 +1,4 @@
 
-
-
-
-
 <script language='javascript'>
   var colorPowerScale = d3.scale
                         .pow()
@@ -55,7 +51,7 @@
     [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month            %]
     <tr>
     <!-- month name -->
-    <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div id="[% tooltipContainerDiscardedId %]"></div> </td>
+    <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerDiscardedId %]"></div> </td>
     <!-- month total -->
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
     
