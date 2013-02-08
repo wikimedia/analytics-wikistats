@@ -22,7 +22,7 @@ logfile_summary=$logs/_summary_compact_daily_jobs.log
 cd $perl
 
 # mode=-m # specify -m for monthly combine of daily files, comment line for generating daily files
-maxage=7 # process files for last .. completed days (runs daily, so should have one day of work to do)
+maxage=14 # process files for last .. completed days (runs daily, so should have one day of work to do)
 
 echo Consolidate pagecount files into one daily file for last $maxage completed days 
 echo
