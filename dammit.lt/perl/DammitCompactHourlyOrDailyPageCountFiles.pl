@@ -1227,7 +1227,7 @@ sub PhaseBuildDailyFile_PrepInputFiles
   $total_bytes_produced_per_cycle  = 0 ;
 
   $max_count_overflow = 0 ;
-  $max_count_overflow_lang_$title = '' ;
+  $max_count_overflow_lang_title = '' ;
 
   my ($files_in_found, $msg_files_found) ;
 
@@ -1295,7 +1295,7 @@ sub PhaseBuildDailyFile_PrepInputFiles
 	if ($count > $max_count_overflow)
 	{ 
           $max_count_overflow = $count ; 
-	  $max_count_overflow_lang_$title = "hour $hour: $lang $title $count\n" ;
+	  $max_count_overflow_lang_title = "hour $hour: $lang $title $count\n" ;
         }  
 
 	if ($lang eq 'ar.z') { print "lang '$lang', title '$title', count '$count'\n\n" ; }
@@ -1351,8 +1351,8 @@ sub PhaseBuildDailyFile_PrepInputFiles
   }
   
 
-  if ($max_count_overflow_lang_$title ne '')
-  { print "Max count on faulty records (extra spaces): $max_count_overflow_lang_$title\n" ; }
+  if ($max_count_overflow_lang_title ne '')
+  { print "Max count on faulty records (extra spaces): $max_count_overflow_lang_title\n" ; }
   
   if ($files_in_found < 24)
   {
