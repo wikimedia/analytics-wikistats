@@ -41,13 +41,24 @@ sub new {
     counts_discarded_fields     => {},
     counts_discarded_status     => {},
     counts_discarded_mimetype   => {},
+
+    mimetype_before_14dec       => {},
+    mimetype_after__14dec       => {},
   };
   $raw_obj->{bdetector} = PageViews::BotDetector->new;
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
 
+
+
   my $obj     = bless $raw_obj,$class;
   init_wikiprojects_map();
+
+
+  $obj->{dec_2012_01} = convert_str_to_epoch1("2012-12-01T00:00:00");
+  $obj->{dec_2012_14} = convert_str_to_epoch1("2012-12-14T00:00:00");
+  $obj->{dec_2012_31} = convert_str_to_epoch1("2012-12-31T00:00:00");
+
   return $obj;
 };
 
@@ -80,7 +91,7 @@ sub process_line {
       return;
     };
   };
-
+  
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
     #print { $self->{fh_dbg_time} } $line;
@@ -144,6 +155,12 @@ sub process_line {
     #print { $self->{fh_dbg_mimetype} } $line;
     $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
     return;
+  };
+
+  if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
+    $self->{mimetype_before_14dec}->{$mime_type}++;
+  } elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
+    $self->{mimetype_after__14dec}->{$mime_type}++;
   };
 
   # counts together /wiki/ and /w/api.php
@@ -215,6 +232,20 @@ sub process_file {
 # adds zero padding for a 2 digit number
 sub padding_2 { 
     $_[0]<10 ? "0$_[0]" : $_[0];
+};
+
+sub get_mimetypes_present_for_december {
+  my ($self) = @_;
+
+  my $h = {};
+
+  $h->{$_} = 1 for keys %{$self->{mimetype_before_14dec}};
+  $h->{$_} = 1 for keys %{$self->{mimetype_after__14dec}};
+
+  my $retval = [];
+  @$retval = keys %$h;
+
+  return $retval;
 };
 
 sub get_files_in_interval {
@@ -632,18 +663,19 @@ sub get_data {
 
   my $retval = {
     # actual data for each language for each month
-    data                    => $data                            ,
+    data                     => $data                            ,
     # the chart data for each wikiproject
-    chart_data              => $chart_data                      ,
+    chart_data               => $chart_data                      ,
     # the following values are used by the color ramps
-    min_language_delta      => $min_language_delta              ,
-    max_language_delta      => $max_language_delta              ,
-    months_present          => \@months_present                 ,
-    languages_present       => [ keys %$languages_present_uniq ],
-    language_totals         => $language_totals                 ,
-    big_total_processed     => $big_total_processed             ,
-    big_total_discarded     => $big_total_discarded             ,
-    big_total_bots          => $big_total_bots                  ,
+    min_language_delta       => $min_language_delta              ,
+    max_language_delta       => $max_language_delta              ,
+    months_present           => \@months_present                 ,
+    languages_present        => [ keys %$languages_present_uniq ],
+    language_totals          => $language_totals                 ,
+    big_total_processed      => $big_total_processed             ,
+    big_total_discarded      => $big_total_discarded             ,
+    big_total_bots           => $big_total_bots                  ,
+    mimetypes_december_chart => $self->get_mimetypes_present_for_december,
   };
 
   $retval->{$_} = $self->{$_}
@@ -657,6 +689,9 @@ sub get_data {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
+
+    mimetype_before_14dec
+    mimetype_after__14dec
     /;
 
   return $retval;
