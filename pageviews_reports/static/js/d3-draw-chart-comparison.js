@@ -29,7 +29,7 @@ function drawMimeTypeComparisonChart(data, containerId) {
       };
     };
 
-    return sumA - sumB;
+    return sumB - sumA;
   });
 
   // get only top #10 
@@ -42,7 +42,7 @@ function drawMimeTypeComparisonChart(data, containerId) {
    bottom : 30,
    left   : 40,
   },
-  width  = 960 - margin.left - margin.right ,
+  width  = 550 - margin.left - margin.right ,
   height = 500 - margin.top  - margin.bottom;
 
   var x0 = 
@@ -57,7 +57,7 @@ function drawMimeTypeComparisonChart(data, containerId) {
   d3
   .scale
   .linear()
-  .range([height, 0]);
+  .range([height, 50]);
 
   var color = 
   d3
@@ -91,12 +91,12 @@ function drawMimeTypeComparisonChart(data, containerId) {
   var mimetypeNames = d3.keys(data[0]).filter(function(key) { return key !== "mimetype"; });
 
   data.forEach(function(d) {
-    d.ages = mimetypeNames.map(function(name) { return {name: name, value: +d[name]}; });
+    d.mimetypeDensities = mimetypeNames.map(function(name) { return {name: name, value: +d[name]}; });
   });
 
   x0.domain(data.map(function(d) { return d.mimetype; }));
   x1.domain(mimetypeNames).rangeRoundBands([0, x0.rangeBand()]);
-  y.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+  y.domain([0, d3.max(data, function(d) { return d3.max(d.mimetypeDensities, function(d) { return d.value; }); })]);
 
   svg.append("g")
   .attr("class", "x axis")
@@ -120,7 +120,7 @@ function drawMimeTypeComparisonChart(data, containerId) {
   .attr("transform", function(d) { return "translate(" + x0(d.mimetype) + ",0)"; });
 
   mimetype.selectAll("rect")
-  .data(function(d) { return d.ages; })
+  .data(function(d) { return d.mimetypeDensities; })
   .enter().append("rect")
   .attr("width", x1.rangeBand())
   .attr("x", function(d) { return x1(d.name); })
