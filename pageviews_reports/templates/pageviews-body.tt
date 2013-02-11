@@ -172,7 +172,7 @@
   legend.drawEverything();
 </script>
 
-<h3>Comparative chart with counts 1-14dec and 14dec-31dec 2012</h3>
+<h3>Comparative mimetype density (1-14dec and 14dec-31dec 2012)</h3>
 
 <div id="mimetype-chart-dec"></div>
 <script>
