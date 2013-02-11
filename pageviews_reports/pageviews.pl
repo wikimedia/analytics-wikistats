@@ -55,7 +55,7 @@ my $process_files_params = {
     start       => {
       year  => 2012,
       #month => 1,
-      month => 1,
+      month => 12,
     },
     end         => {
       year  => 2012,
@@ -79,7 +79,7 @@ if($mode eq "parallel") {
 $model->process_files($process_files_params);
 my $d = $model->get_data();
 
-open my $json_fh,">$OUTPUT_PATH"."out.json";
+open my $json_fh,">$OUTPUT_PATH/out.json";
 print   $json_fh JSON::XS->new
                          ->pretty(1)
                          ->canonical(1)

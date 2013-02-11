@@ -189,3 +189,20 @@
   var legend = new Drawpad("cell-anatomy");
   legend.drawEverything();
 </script>
+
+<h3>Comparative mimetype density (1-14dec and 14dec-31dec 2012)</h3>
+
+<div id="mimetype-chart-dec"></div>
+<script>
+  var data = [
+    [% FOR k IN mimetypes_december_chart %]
+      { 
+        "mimetype": "[% k %]",
+        "<  14dec": "[% mimetype_before_14dec.$k %]",
+        ">= 14dec": "[% mimetype_after__14dec.$k %]"
+      },
+    [% END %]
+  ];
+  drawMimeTypeComparisonChart(data,"mimetype-chart-dec");
+</script>
+

@@ -8,6 +8,7 @@
   <body>
     <script type="text/javascript" src="static/js/d3.js" ></script>
     <script type="text/javascript" src="static/js/d3-draw-chart.js" ></script>
+    <script type="text/javascript" src="static/js/d3-draw-chart-comparison.js" ></script>
     <script type="text/javascript" src="static/js/util.js"></script>
     <script type="text/javascript" src="static/js/raphael-min.js" ></script>
     <script type="text/javascript" src="static/js/unsampling-data.js" ></script>

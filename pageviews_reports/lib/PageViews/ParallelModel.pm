@@ -29,7 +29,16 @@ sub reduce {
     counts_discarded_mimetype
   /;
 
+  my @to_reduce_custom = qw/
+    mimetype_before_14dec
+    mimetype_after__14dec
+  /;
+
   my $reduced = {};
+
+  $reduced->{mimetype_before_14dec} = {};
+  $reduced->{mimetype_after__14dec} = {};
+
 
   # iterate over all children output jsons (each child processes 1 day of data) 
   for my $child_output (<$json_path/*.json>) {
@@ -53,10 +62,20 @@ sub reduce {
         };
       };
     };
+
+    for(keys %{ $c->{mimetype_before_14dec} }) {
+      print "[DBG] mimetype $_\n";
+      $reduced->{mimetype_before_14dec}->{$_} += $c->{mimetype_before_14dec}->{$_};
+    };
+    for(keys %{ $c->{mimetype_after__14dec} }) {
+      print "[DBG] mimetype $_\n";
+      $reduced->{mimetype_after__14dec}->{$_} += $c->{mimetype_after__14dec}->{$_};
+    };
   };
 
+
   # put the reduced values back in the model for further computation
-  for my $property ( @to_reduce1, @to_reduce2 ) {
+  for my $property ( @to_reduce1, @to_reduce2 , @to_reduce_custom ) {
     $self->{$property} = $reduced->{$property};
   };
 };
@@ -85,6 +104,9 @@ sub reset_for_new_child {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
+
+    mimetype_before_14dec
+    mimetype_after__14dec
   /;
 
   $self->{$_} = {} for @to_reset;
@@ -127,6 +149,9 @@ sub write_child_output_to_disk {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
+    mimetypes_december_chart
+    mimetype_before_14dec
+    mimetype_after__14dec
   /;
 
   open my $fh,">$output_path";
