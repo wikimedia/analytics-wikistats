@@ -1,4 +1,106 @@
 
+<!-- The table_cell block
+     parameters received in this one are
+     i     -- which is used to label the TooltipPieChart objects
+     cell  -- which is a hash containing all the data for a cell inside the table
+     month -- the current month being processed(we could put that in cell)
+ -->
+[% BLOCK table_cell %]
+  [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ cell.language _ month %]
+  [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ cell.language _ month %]
+
+  <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerBreakdownId %]"></div>
+  <script language='javascript'>
+  tdc(
+      colorPowerScale([% cell.monthly_delta %]),
+      '[% cell.monthly_delta__ %], '              +
+      '[% cell.percentage_of_monthly_total__ %], '+
+      '[% cell.rank %]', 
+      unsample_and_format([% cell.monthly_count      %]) + ' ' +
+      unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
+      unsample_and_format([% cell.monthly_count_api  %]),
+      "[%  tooltipObservedBreakdownId %]"
+     );
+
+     [% piechartObject = "p" _ i %]
+     var [% piechartObject %] = new TooltipPieChart({
+       width      : 550,
+       height     : 350,
+       radius     : 120,
+       containerId: "[% tooltipContainerBreakdownId %]" ,
+       observedId : "[%  tooltipObservedBreakdownId  %]" ,
+       outerRadiusRatio: 1.00,
+       innerRadiusRatio: 0.23,
+       titleText  : "Breakdown pageview count for language [% cell.language %] and month [% month %]",
+         data:[
+           [% IF        cell.breakdown_count_wiki_basic > 0 %]
+           { label: "/wiki/" , pageview_count: [% cell.breakdown_count_wiki_basic %] },
+           [% END %]
+           [% IF        cell.breakdown_count_wiki_index > 0 %]
+           { label: "/w/index.php" , pageview_count: [% cell.breakdown_count_wiki_index %] },
+           [% END %]
+           [% IF        cell.breakdown_count_api > 0 %]
+           { label: "/w/api.php" , pageview_count: [% cell.breakdown_count_api %] },
+           [% END %]
+         ]
+     });
+     [% piechartObject %].drawChart();
+     [% piechartObject %].drawLabels();
+     [% piechartObject %].init();
+
+     [% i = i + 1 %]
+     </script>
+[% END %]
+
+<!-- The discarded_pie_chart block
+     i     -- used to label the piechart objects
+     month -- the current month
+     all the other data used is coming to the template already processed
+  -->
+[% BLOCK discarded_pie_chart %]
+     [% piechartObject = "p" _ i %]
+     [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
+     [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
+
+       var [% piechartObject %] = new TooltipPieChart({
+         width      : 550,
+         height     : 350,
+         radius     : 120,
+         containerId: "[% tooltipContainerDiscardedId %]" ,
+         observedId : "[% tooltipObservedDiscardedId  %]" ,
+         outerRadiusRatio: 1.00,
+         innerRadiusRatio: 0.23,
+         titleText  : "Discarded lines report for month [% month %]",
+         data:[
+           [% IF        counts_discarded_bots.$month > 0 %]
+           { label: "bots"      , pageview_count: [%     counts_discarded_bots.$month %] },
+           [% END %]
+           [% IF      counts_discarded_fields.$month > 0 %]
+           { label: "fields"    , pageview_count: [%   counts_discarded_fields.$month %] },
+           [% END %]
+           [% IF         counts_discarded_url.$month > 0 %]
+           { label: "url"       , pageview_count: [%      counts_discarded_url.$month %] },
+           [% END %]
+           [% IF        counts_discarded_time.$month > 0 %]
+           { label: "time"      , pageview_count: [%     counts_discarded_time.$month %] },
+           [% END %]
+           [% IF      counts_discarded_status.$month > 0 %]
+           { label: "status"    , pageview_count: [%   counts_discarded_status.$month %] },
+           [% END %]
+           [% IF    counts_discarded_mimetype.$month > 0 %]
+           { label: "mimetype"  , pageview_count: [% counts_discarded_mimetype.$month %] },
+           [% END %]
+         ]
+       });
+
+       [% piechartObject %].drawChart();
+       [% piechartObject %].drawLabels();
+       [% piechartObject %].init();
+     [% i = i + 1 %]
+[% END %]
+
+
+
 <script language='javascript'>
   var colorPowerScale = d3.scale
                         .pow()
@@ -56,52 +158,8 @@
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
     
         [% FOREACH cell IN row %]
-          [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ cell.language _ month %]
-          [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ cell.language _ month %]
-
-          <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerBreakdownId %]"></div>
-          <script language='javascript'>
-          tdc(
-              colorPowerScale([% cell.monthly_delta %]),
-              '[% cell.monthly_delta__ %], '              +
-              '[% cell.percentage_of_monthly_total__ %], '+
-              '[% cell.rank %]', 
-              unsample_and_format([% cell.monthly_count %])      + ' ' +
-              unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
-              unsample_and_format([% cell.monthly_count_api %]),
-              "[%  tooltipObservedBreakdownId %]"
-             );
-
-             [% piechartObject = "p" _ i %]
-             var [% piechartObject %] = new TooltipPieChart({
-               width      : 550,
-               height     : 350,
-               radius     : 120,
-               containerId: "[% tooltipContainerBreakdownId %]" ,
-               observedId : "[%  tooltipObservedBreakdownId  %]" ,
-               outerRadiusRatio: 1.00,
-               innerRadiusRatio: 0.23,
-               titleText  : "Breakdown pageview count for language [% cell.language %] and month [% month %]",
-                 data:[
-                   [% IF        cell.breakdown_count_wiki_basic > 0 %]
-                   { label: "/wiki/" , pageview_count: [% cell.breakdown_count_wiki_basic %] },
-                   [% END %]
-                   [% IF        cell.breakdown_count_wiki_index > 0 %]
-                   { label: "/w/index.php" , pageview_count: [% cell.breakdown_count_wiki_index %] },
-                   [% END %]
-                   [% IF        cell.breakdown_count_api > 0 %]
-                   { label: "/w/api.php" , pageview_count: [% cell.breakdown_count_api %] },
-                   [% END %]
-                 ]
-             });
-             [% piechartObject %].drawChart();
-             [% piechartObject %].drawLabels();
-             [% piechartObject %].init();
-
-             [% i = i + 1 %]
-             </script>
+          [% PROCESS table_cell cell=cell month=month i=i  %]
         [% END %] 
-          
           
     </tr>
   [% END %]
@@ -121,48 +179,8 @@
 <script>
   [% i = 1 %]
   [% FOREACH month IN months_present %]
-     [% piechartObject = "p" _ i %]
-     [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
-     [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
-
-       var [% piechartObject %] = new TooltipPieChart({
-         width      : 550,
-         height     : 350,
-         radius     : 120,
-         containerId: "[% tooltipContainerDiscardedId %]" ,
-         observedId : "[% tooltipObservedDiscardedId  %]" ,
-         outerRadiusRatio: 1.00,
-         innerRadiusRatio: 0.23,
-         titleText  : "Discarded lines report for month [% month %]",
-         data:[
-           [% IF        counts_discarded_bots.$month > 0 %]
-           { label: "bots"      , pageview_count: [%     counts_discarded_bots.$month %] },
-           [% END %]
-           [% IF      counts_discarded_fields.$month > 0 %]
-           { label: "fields"    , pageview_count: [%   counts_discarded_fields.$month %] },
-           [% END %]
-           [% IF         counts_discarded_url.$month > 0 %]
-           { label: "url"       , pageview_count: [%      counts_discarded_url.$month %] },
-           [% END %]
-           [% IF        counts_discarded_time.$month > 0 %]
-           { label: "time"      , pageview_count: [%     counts_discarded_time.$month %] },
-           [% END %]
-           [% IF      counts_discarded_status.$month > 0 %]
-           { label: "status"    , pageview_count: [%   counts_discarded_status.$month %] },
-           [% END %]
-           [% IF    counts_discarded_mimetype.$month > 0 %]
-           { label: "mimetype"  , pageview_count: [% counts_discarded_mimetype.$month %] },
-           [% END %]
-         ]
-       });
-
-       [% piechartObject %].drawChart();
-       [% piechartObject %].drawLabels();
-       [% piechartObject %].init();
-     [% i = i + 1 %]
+    [% PROCESS discarded_pie_chart i=i month=month %]
   [% END %]
-
-
 </script>
 
 

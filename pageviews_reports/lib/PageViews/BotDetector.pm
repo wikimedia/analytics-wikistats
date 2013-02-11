@@ -45,18 +45,11 @@ sub load_useragent_regex {
   my ($self) = @_;
 
   my $ra = Regexp::Assemble->new;
-  $ra->add("Googlebot");
-  $ra->add("FeedFetcher-Google");
-  $ra->add("Google.*?Wireless.*?Transcoder");
-  $ra->add("Google.*?Desktop");
-  $ra->add("GoogleEarth");
-  $ra->add("GoogleToolbar");
-  $ra->add("Google.*?Keyword.*?Tool");
-  $ra->add("GoogleT");
-  $ra->add("translate\.google\.com");
-  $ra->add("parser");
-  $ra->add("crawl");
+  $ra->add("bot");
+  $ra->add("spider");
   $ra->add("crawler");
+  $ra->add("http");
+  $ra->add("google");
 
   $self->{ua_regex} = $ra->re;
 };
