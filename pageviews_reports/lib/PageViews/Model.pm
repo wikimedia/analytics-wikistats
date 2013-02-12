@@ -100,7 +100,9 @@ sub process_line {
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
     #print { $self->{fh_dbg_time} } $line;
-    $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+    if($self->{last_ymd}) {
+      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+    };
     return;
   };
   my $ymd = $tp->[1]."-".$tp->[2]; 

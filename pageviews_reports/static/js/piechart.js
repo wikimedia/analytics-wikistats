@@ -1,14 +1,20 @@
 
 function TooltipPieChart(params) {
-  this.width            = params.width;
-  this.height           = params.height;
-  this.data             = params.data;
-  this.containerId      = params.containerId;
-  this.observedId       = params.observedId;
-  this.outerRadiusRatio = params.outerRadiusRatio;
-  this.innerRadiusRatio = params.innerRadiusRatio;
-  this.titleText        = params.titleText;
-  this.radius           = params.radius;
+  this.width                   = params.width;
+  this.height                  = params.height;
+  this.data                    = params.data;
+  this.containerId             = params.containerId;
+  this.observedId              = params.observedId;
+  this.outerRadiusRatio        = params.outerRadiusRatio;
+  this.innerRadiusRatio        = params.innerRadiusRatio;
+  this.titleText               = params.titleText;
+  this.radius                  = params.radius;
+
+  /* -- hideWindowAttribute
+   * If this is set, then the piechart will first check for window[this.hideWindowAttribute] to see
+   * it should be displayed or not.
+   */
+  this.hideWindowAttribute     = params.hideWindowAttribute;
 
   for(var i = 0;i < this.data.length ; i++) {
     this.data[i].unsampled_count = unsample_and_format(this.data[i].pageview_count);
@@ -27,6 +33,7 @@ function TooltipPieChart(params) {
 TooltipPieChart.prototype.init = function() {
   // hide Piechart and install callbacks for mouse over
 
+  var self = this;
   var containerSelector = "#"+this.containerId;
   var observedSelector  = "#"+this.observedId;
 
@@ -42,8 +49,14 @@ TooltipPieChart.prototype.init = function() {
      *function(){ $( containerSelector ).fadeIn( "fast",function(){  debugger;  }); },
      *function(){ $( containerSelector ).fadeOut("fast",function(){  debugger;  }); }
      */
-    function(){ $( containerSelector ).show(); },
-    function(){ $( containerSelector ).hide(); }
+    function(){ 
+      if(!self.hideWindowAttribute || (self.hideWindowAttribute && window[self.hideWindowAttribute])) { 
+        $( containerSelector ).show(); 
+      }; 
+    },
+    function(){ 
+      $( containerSelector ).hide(); 
+    }
   );
 
 };
@@ -95,69 +108,11 @@ TooltipPieChart.prototype.drawLabels = function() {
 
   var self = this;
 
-/*
- *  $("#"+this.containerId).prepend('<div style="position: absolute; z-index: 1;" id="legend"></div>');
- *
- *  var legendSupport = 
- *  d3
- *  .select("#"+this.containerId)
- *  .select("#legend")
- *  .append("svg")
- *  .attr("width" ,600)
- *  .attr("height",300)
- *  .style("position","absolute")
- *  .append("g")
- *  .append("rect")
- *  .style("fill","#ffffff")
- *  .attr("width" ,180)
- *  .attr("height",180)
- *  .attr("x", 350  )
- *  .attr("y", 40  );
- */
-
-
   // draw piechart
   self.g
   .append("path")
   .attr("d", self.arc)
   .style("fill", function(d) { return self.color(d.data.label); });
-
-  /*
-   *var force = d3.layout.force()
-   *.charge(-120)
-   *.linkDistance(this.radius+10)
-   *.size([self.width, self.height]);
-   */
-
-/*
- *  self
- *  .g
- *  .append("text")
- *  //.attr("class","around-pie")
- *  .attr("transform", function(d) { 
- *
- *    //console.log(d);
- *    var pos  = self.arc.centroid(d);
- *    var x    = pos[0];
- *    var y    = pos[1];
- *    var h    = Math.sqrt(x*x + y * y);
- *
- *    var labelx = x / h * (self.radius+30);
- *    var labely = y / h * (self.radius+30);
- *    //var labely = self.height - 400;
- *
- *    return "translate(" + labelx + "," + labely + ")"; 
- *  }) 
- *  .attr("dy", ".10em")
- *  .style("text-anchor", "middle")
- *  .text(function(d) { return d.data.pageview_count; })
- *  .call(force.drag);
- */
-
-
-
-
-
     
   // TODO:  
   // positions fine-tuned, need to fix this
@@ -173,8 +128,6 @@ TooltipPieChart.prototype.drawLabels = function() {
   .style("fill" , function(d,i) { 
     return self.color(d.label);
   });
-
-
    
   // TODO:  
   // positions fine-tuned, need to fix this
@@ -187,18 +140,5 @@ TooltipPieChart.prototype.drawLabels = function() {
     return  d.unsampled_count + " - " + d.label;
   })
   .style("font-size", "18");
-  
 
-
-
-/*
- *  var aroundThePieLabels = self.g.selectAll(".around-pie");
- *
- *  force.on("tick",function(){ 
- *     aroundThePieLabels.attr("x", function(d) { return d.x; })
- *                       .attr("y", function(d) { return d.y; })
- *  }); 
- *
- *  force.nodes(aroundThePieLabels).start();
- */
 };

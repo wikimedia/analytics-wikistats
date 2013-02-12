@@ -1,4 +1,34 @@
 
+<div style="border-style:solid ;border-width: thin thin thin thin;display: block; float: right;">
+  <h3>Display options:</h3>
+  <input id="show-optional-values"            type="checkbox"> show separate wiki and api counts in table cells                      </input> <br/>
+  <input id="show-discarded-breakdown-charts" type="checkbox"> show breakdown and discarded piecharts upon hovering on table's cells </input> <br/>
+  <script>
+  $(document).ready(function(){
+
+    $("#show-optional-values").click(function(){
+      if($(this).is(':checked')) {
+        $(".table-cell-optional-values").css("display", "inline" );
+      } else {
+        $(".table-cell-optional-values").css("display",   "none" );
+      };
+    });
+
+    $("#show-discarded-breakdown-charts").click(function(){
+      if($(this).is(':checked')) {
+        window.showBreakdownAndDiscardedPiecharts = true;
+      } else {
+        window.showBreakdownAndDiscardedPiecharts = false;
+      };
+
+    });
+
+  });
+  </script>
+</div>
+
+
+
 <!-- The table_cell block
      parameters received in this one are
      i     -- which is used to label the TooltipPieChart objects
@@ -16,7 +46,7 @@
       '[% cell.monthly_delta__ %], '              +
       '[% cell.percentage_of_monthly_total__ %], '+
       '[% cell.rank %]', 
-      unsample_and_format([% cell.monthly_count      %]) + ' ' +
+      unsample_and_format([% cell.monthly_count      %]) + ' ' ,
       unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
       unsample_and_format([% cell.monthly_count_api  %]),
       "[%  tooltipObservedBreakdownId %]"
@@ -24,6 +54,7 @@
 
      [% piechartObject = "p" _ i %]
      var [% piechartObject %] = new TooltipPieChart({
+       hideWindowAttribute : "showBreakdownAndDiscardedPiecharts",
        width      : 550,
        height     : 350,
        radius     : 120,
@@ -63,6 +94,7 @@
      [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
 
        var [% piechartObject %] = new TooltipPieChart({
+         hideWindowAttribute : "showBreakdownAndDiscardedPiecharts",
          width      : 550,
          height     : 350,
          radius     : 120,
@@ -205,4 +237,6 @@
   ];
   drawMimeTypeComparisonChart(data,"mimetype-chart-dec");
 </script>
+
+
 

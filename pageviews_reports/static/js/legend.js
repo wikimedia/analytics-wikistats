@@ -49,30 +49,38 @@ Drawpad.prototype.drawEverything = function() {
   this.textDelta                        = this.createText(-60 , 0  , 11,"+8.13%, ");
   this.textPercentOfMonth               = this.createText(  0 , 0  , 11,"19.2%, ");
   this.textMonthlyRanking               = this.createText( 60 , 0  , 11,"3rd");
-  this.textMonthlyPageviewCount         = this.createText(  0 , 20 , 13,"430 M");
+  this.textMonthlyPageviewCount         = this.createText(-40 , 20 , 11,"430 M");
+  this.textMonthlyPageviewCount_wiki    = this.createText(  0 , 20 , 11,"410 M");
+  this.textMonthlyPageviewCount_api     = this.createText( 35 , 20 , 11,"20 M");
 
   this.textMonthlyPageviewCount.attr({"font-weight": "bold" });
+  this.textMonthlyPageviewCount_wiki.attr({"font-weight": "bold" });
+  this.textMonthlyPageviewCount_api.attr({"font-weight": "bold" });
 
-  this.textDeltaComment                 = this.createComment(150 ,     150 , 14 , "Delta between\n previous and current month");
-  this.textMonthlyPageviewCountComment  = this.createComment(150 ,     110 , 14 , "Monthly Pageview count");
-  this.textPercentOfMonthComment        = this.createComment(150 ,      71 , 14 , "Percentage of monthly\n pageviews");
-  this.textMonthlyRankingComment        = this.createComment(150 ,      30 , 14 , "Ranking within \nthe current month");
+  this.textDeltaComment                      = this.createComment( 30 ,     250 , 14 , "Delta between\n previous and current month");
+  this.textMonthlyPageviewCountComment       = this.createComment( 40 ,     200 , 14 , "Monthly Pageview count");
+  this.textMonthlyPageviewCountComment_wiki  = this.createComment(100 ,     160 , 14 , "Monthly Pageview count for /wiki/ + /w/index.php (optional)");
+  this.textMonthlyPageviewCountComment_api   = this.createComment(130 ,     120 , 14 , "Monthly Pageview count for /w/api.php (optional)");
+  this.textPercentOfMonthComment             = this.createComment(150 ,      51 , 14 , "Percentage of monthly\n pageviews");
+  this.textMonthlyRankingComment             = this.createComment(150 ,      10 , 14 , "Ranking within \nthe current month");
 
-  this.arrow(this.textDeltaComment                ,  this.textDelta);
-  this.arrow(this.textPercentOfMonthComment       ,  this.textPercentOfMonth);
-  this.arrow(this.textMonthlyRankingComment       ,  this.textMonthlyRanking);
-  this.arrow(this.textMonthlyPageviewCountComment ,  this.textMonthlyPageviewCount);
+  this.arrow(this.textDeltaComment                     ,  this.textDelta                     , 0.2);
+  this.arrow(this.textPercentOfMonthComment            ,  this.textPercentOfMonth            , 0.2);
+  this.arrow(this.textMonthlyRankingComment            ,  this.textMonthlyRanking            , 0.2);
+  this.arrow(this.textMonthlyPageviewCountComment      ,  this.textMonthlyPageviewCount      , 0.2);
+  this.arrow(this.textMonthlyPageviewCountComment_wiki ,  this.textMonthlyPageviewCount_wiki , 0.2);
+  this.arrow(this.textMonthlyPageviewCountComment_api  ,  this.textMonthlyPageviewCount_api  , 0.2);
 };
 
-Drawpad.prototype.arrow = function(from,to) {
+Drawpad.prototype.arrow = function(from,to,yBend) {
   var arrowHeadSize = 8;
   var x1 = from.getBBox().x ;
   var y1 = from.getBBox().y + (from.getBBox().height/2);
   var x2 =   to.getBBox().x + (to.getBBox().width  / 2);
   var y2 =   to.getBBox().y + (to.getBBox().height / 2) + 6;
 
-  var midX = Math.floor( x1 + ( (x2-x1) *  0.3 ) );
-  var midY = Math.floor( y1 + ( (y2-y1) * -0.2 ) );
+  var midX  = Math.floor( x1 + ( (x2-x1) *  0.3  ) );
+  var midY  = Math.floor( y1 + ( (y2-y1) * yBend ) );
 
   var arrowBody = this.paper.path(
     "M" + x1   + "," + y1 +
@@ -85,10 +93,10 @@ Drawpad.prototype.arrow = function(from,to) {
 
   console.log("angle="+angleOrientationArrowHead);
   var arrowHead = this.paper.path(
-  "M"  +  x2  + " " + y2  + 
+  "M"  +  x2  + " "                   +  y2  + 
   " L" + (x2  - arrowHeadSize)  + " " + (y2  - arrowHeadSize) + 
   " L" + (x2  - arrowHeadSize)  + " " + (y2  + arrowHeadSize) + 
-  " L" +  x2  + " " + y2 
+  " L" +  x2  + " "                   +  y2 
   ).attr("fill","black")
    .rotate(angleOrientationArrowHead,x2,y2);
 
