@@ -165,14 +165,16 @@ sub process_line {
 
   if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
     if($mime_type eq "-") {
-      open my $fh, ">>/tmp/before-14dec-mimetype-$ymd.txt";
+      my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
+      open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
       print $fh $line;
       close $fh;
     };
     $self->{mimetype_before_14dec}->{$mime_type}++;
   } elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
     if($mime_type eq "-") {
-      open my $fh, ">>/tmp/after--14dec-mimetype-$ymd.txt";
+      my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
+      open my $fh, ">>/tmp/after--14dec-mimetype-$t.txt";
       print $fh $line;
       close $fh;
     };
