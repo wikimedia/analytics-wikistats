@@ -42,7 +42,7 @@ function drawMimeTypeComparisonChart(data, containerId) {
    bottom : 30,
    left   : 40,
   },
-  width  = 550 - margin.left - margin.right ,
+  width  = 600 - margin.left - margin.right ,
   height = 500 - margin.top  - margin.bottom;
 
   var x0 = 

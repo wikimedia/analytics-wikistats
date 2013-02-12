@@ -32,13 +32,13 @@ sub reduce {
   my @to_reduce_custom = qw/
     mimetype_before_14dec
     mimetype_after__14dec
+    counts_mimetype
   /;
 
   my $reduced = {};
 
   $reduced->{mimetype_before_14dec} = {};
   $reduced->{mimetype_after__14dec} = {};
-
 
   # iterate over all children output jsons (each child processes 1 day of data) 
   for my $child_output (<$json_path/*.json>) {
@@ -61,6 +61,13 @@ sub reduce {
           };
         };
       };
+
+
+      for my $mimetype(keys %{ $c->{counts_mimetype}->{$month} }) {
+        $reduced->{counts_mimetype}->{$month} //= {};
+        $reduced->{counts_mimetype}->{$month}->{$mimetype} += $c->{counts_mimetype}->{$month}->{$mimetype};
+      };
+
     };
 
     for(keys %{ $c->{mimetype_before_14dec} }) {

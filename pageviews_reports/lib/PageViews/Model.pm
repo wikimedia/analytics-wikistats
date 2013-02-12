@@ -44,6 +44,7 @@ sub new {
 
     mimetype_before_14dec       => {},
     mimetype_after__14dec       => {},
+    counts_mimetype             => {},
   };
   $raw_obj->{bdetector} = PageViews::BotDetector->new;
   $raw_obj->{bdetector}->load_ip_ranges();
@@ -87,10 +88,14 @@ sub process_line {
     if(!(defined($tp) && @$tp == 7)) {
       #print "[DBG] discard_time\n";
       #print { $self->{fh_dbg_time} } $line;
-      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+      if($self->{last_ymd}) {
+        $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+      };
       return;
     };
   };
+
+
   
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
@@ -100,6 +105,8 @@ sub process_line {
   };
   my $ymd = $tp->[1]."-".$tp->[2]; 
   $self->{last_ymd} = $ymd;
+
+  $self->{counts_mimetype}->{$ymd}->{$mime_type}++;
 
 
   # 30x or 20x request status
@@ -158,8 +165,18 @@ sub process_line {
   };
 
   if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
+    if($mime_type eq "-") {
+      open my $fh, ">>/tmp/before_14dec_lines_dash_mimetype.txt";
+      print $fh $line;
+      close $fh;
+    };
     $self->{mimetype_before_14dec}->{$mime_type}++;
   } elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
+    if($mime_type eq "-") {
+      open my $fh, ">>/tmp/after_14dec_lines_dash_mimetype.txt";
+      print $fh $line;
+      close $fh;
+    };
     $self->{mimetype_after__14dec}->{$mime_type}++;
   };
 
@@ -477,14 +494,13 @@ sub second_pass_rankings {
   return $month_rankings;
 };
 
-sub scale_to_30 {
+sub scale_m_to_30 {
   my ($self,$month,$value) = @_;
   my $SCALE_FACTOR = 30;
   my $days_month_has = how_many_days_month_has(split(/-/,$month));
   my $scaled_value = int( ($value / $days_month_has) * $SCALE_FACTOR );
   return $scaled_value;
 };
-
 
 sub scale_months_to_30 {
   my ($self) = @_;
@@ -516,13 +532,17 @@ sub scale_months_to_30 {
         for my $language ( keys %{ $self->{counts}->{$month} } ) {
           $self->{$property}->{$month}->{$language} //= 0;
           my $month_language_value = $self->{$property}->{$month}->{$language};
-          $scaled->{$property}->{$month}->{$language} = $self->scale_to_30($month,$month_language_value);
+          $scaled->{$property}->{$month}->{$language} = $self->scale_m_to_30($month,$month_language_value);
         };
       } elsif($property ~~ @to_scale2) {
         $scaled->{$property}->{$month} //= 0;
         $scaled->{$property}->{$month}  += $self->{$property}->{$month};
       };
     };
+  };
+
+  for my $mimetype ( keys %{ $self->{mimetype_after__14dec} } ) {
+    $scaled->{mimetype_after__14dec}->{$mimetype} = int( ($scaled->{mimetype_after__14dec}->{$mimetype} / 18) * 14 );
   };
 
   # place scaled property hashes back into the current object
