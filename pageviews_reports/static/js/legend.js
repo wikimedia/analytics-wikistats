@@ -62,7 +62,7 @@ Drawpad.prototype.drawEverything = function() {
   this.textMonthlyPageviewCountComment_wiki  = this.createComment(100 ,     160 , 14 , "Monthly Pageview count for /wiki/ + /w/index.php (optional)");
   this.textMonthlyPageviewCountComment_api   = this.createComment(130 ,     120 , 14 , "Monthly Pageview count for /w/api.php (optional)");
   this.textPercentOfMonthComment             = this.createComment(150 ,      51 , 14 , "Percentage of monthly\n pageviews");
-  this.textMonthlyRankingComment             = this.createComment(150 ,      10 , 14 , "Ranking within \nthe current month");
+  this.textMonthlyRankingComment             = this.createComment(150 ,      0 , 14 , "Ranking within \nthe current month");
 
   this.arrow(this.textDeltaComment                     ,  this.textDelta                     , 0.2);
   this.arrow(this.textPercentOfMonthComment            ,  this.textPercentOfMonth            , 0.2);

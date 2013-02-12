@@ -50,11 +50,8 @@ sub new {
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
 
-
-
   my $obj     = bless $raw_obj,$class;
   init_wikiprojects_map();
-
 
   $obj->{dec_2012_01} = convert_str_to_epoch1("2012-12-01T00:00:00");
   $obj->{dec_2012_14} = convert_str_to_epoch1("2012-12-14T00:00:00");
@@ -80,6 +77,7 @@ sub process_line {
   my $ua         = $fields[13];
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
+  my $referer    = $fields[11];
 
   my $tp; 
 
@@ -94,8 +92,6 @@ sub process_line {
       return;
     };
   };
-
-
   
   if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
     #print "[DBG] interval_discarded\n";
@@ -105,6 +101,7 @@ sub process_line {
     };
     return;
   };
+
   my $ymd = $tp->[1]."-".$tp->[2]; 
   $self->{last_ymd} = $ymd;
 
@@ -168,14 +165,14 @@ sub process_line {
 
   if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
     if($mime_type eq "-") {
-      open my $fh, ">>/tmp/before_14dec_lines_dash_mimetype.txt";
+      open my $fh, ">>/tmp/before-14dec-mimetype-$ymd.txt";
       print $fh $line;
       close $fh;
     };
     $self->{mimetype_before_14dec}->{$mime_type}++;
   } elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
     if($mime_type eq "-") {
-      open my $fh, ">>/tmp/after_14dec_lines_dash_mimetype.txt";
+      open my $fh, ">>/tmp/after--14dec-mimetype-$ymd.txt";
       print $fh $line;
       close $fh;
     };
