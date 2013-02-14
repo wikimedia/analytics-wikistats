@@ -1,5 +1,5 @@
 
-<div style="border-style:solid ;border-width: thin thin thin thin;display: block; float: right;">
+<div style="border-style:solid ;border-width: thin thin thin thin;display: block; position: fixed; right: 0;">
   <h3>Display options:</h3>
   <input id="show-optional-values"            type="checkbox"> show separate wiki and api counts in table cells                      </input> <br/>
   <input id="show-discarded-breakdown-charts" type="checkbox"> show breakdown and discarded piecharts upon hovering on table's cells </input> <br/>
@@ -27,6 +27,8 @@
   </script>
 </div>
 
+<!-- spacer to avoid the options menu overlapping with the other content -->
+<div style="height: 150px;"></div>
 
 
 <!-- The table_cell block
@@ -160,7 +162,7 @@
       [% IF chart_data.exists(language) %]
         [% container_id = 'container-' _ language %]
         <td>
-            <div align="left" id="[% container_id %]"/>
+            <div align="left" id="[% container_id %]"></div>
             <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
         </td>
       [% ELSE %]
