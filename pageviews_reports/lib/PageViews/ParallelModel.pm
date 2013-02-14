@@ -71,11 +71,9 @@ sub reduce {
     };
 
     for(keys %{ $c->{mimetype_before_14dec} }) {
-      print "[DBG] mimetype $_\n";
       $reduced->{mimetype_before_14dec}->{$_} += $c->{mimetype_before_14dec}->{$_};
     };
     for(keys %{ $c->{mimetype_after__14dec} }) {
-      print "[DBG] mimetype $_\n";
       $reduced->{mimetype_after__14dec}->{$_} += $c->{mimetype_after__14dec}->{$_};
     };
   };
