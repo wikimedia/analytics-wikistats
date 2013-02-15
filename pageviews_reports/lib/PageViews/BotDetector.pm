@@ -52,7 +52,7 @@ sub load_useragent_regex {
   $ra->add("google");
 
   my $re_str = $ra->as_string();
-  $self->{ua_regex} = /$re_str/i;
+  $self->{ua_regex} = qr/$re_str/i;
 };
 
 
