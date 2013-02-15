@@ -51,7 +51,8 @@ sub load_useragent_regex {
   $ra->add("http");
   $ra->add("google");
 
-  $self->{ua_regex} = $ra->re;
+  my $re_str = $ra->as_string();
+  $self->{ua_regex} = /$re_str/i;
 };
 
 
