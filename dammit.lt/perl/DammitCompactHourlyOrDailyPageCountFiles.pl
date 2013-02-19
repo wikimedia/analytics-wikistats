@@ -1955,8 +1955,17 @@ sub PhaseBuildMonthlyFile_CloseOutputFile
   if ($result ne '')
   { print "$result\n\n" ; }
   $fn_out_merged_daily_final .= '.bz2' ;
-  print "\n" ;
+# print "\n" ;
 
+  $fn_out_merged_daily_final_totals = $fn_out_merged_daily_final ;
+  $fn_out_merged_daily_final_totals =~ s/\.bz2/_totals.bz2/ ;
+
+  $cmd = "bzgrep -v '^#' $fn_out_merged_daily_final | awk '{print \$1\" \"\$2\" \"\$3}' | bzip2 > $fn_out_merged_daily_final_totals" ;
+  print "\n$cmd\n" ;
+  $result = `$cmd` ;
+  if ($result ne '')
+  { print "$result\n\n" ; }
+  
   $total_bytes_produced_per_cycle = -s $fn_out_merged_daily_final ;
   # &Log ("\nFile complete: $fn_out_merged_daily_final (size $total_bytes_produced_per_cycle bytes)\n") ;
 
