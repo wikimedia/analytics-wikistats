@@ -369,9 +369,9 @@ else
 #  if (! -d $path_timelines)
 #  { abort ("Output directory '" . $path_timelines . "' not found and could not be created") ; }
   $file_timelines                 = $path_out_timelines . "IndexTimelines.htm" ;
-# $file_animation_projects_growth = $path_out . "AnimationProjectsGrowth.js" ;
-  $file_animation_projects_growth    = "W:/@ Visualizations/Animation Projects Growth/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
-  $file_animation_size_and_community = "W:/@ Visualizations/Animation Size And Community/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
+  $file_animation_projects_growth = $path_out . "AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
+# $file_animation_projects_growth    = "W:/@ Visualizations/Animation Projects Growth/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
+# $file_animation_size_and_community = "W:/@ Visualizations/Animation Size And Community/AnimationProjectsGrowthInit".ucfirst($mode).".js" ;
 
 # if ($pageviews)
 # {
