@@ -178,7 +178,6 @@
     &ReadMonthlyStats ;
     &LogT ("\nGenerate Animation Input") ;
     &GenerateAnimationsInputProjectsGrowth ;
-    &GenerateAnimationsInputSizeAndCommunity ;
     &LogT ("Ready\n") ;
     close "FILE_LOG" ;
     exit ;
