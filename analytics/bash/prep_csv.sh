@@ -14,6 +14,7 @@ perl=$analytics/perl
 perl=/home/ezachte/wikistats/analytics/perl # tests
 csv_rc=$analytics/csv  # rc for report card
 csv_dumps=$wikistats/dumps/csv 
+# unmerged=-u # uncomment to use legacy method of counting editors (unmerged, excluding commons)
 
 clear
 
@@ -24,7 +25,12 @@ clear
 yyyymm=$(date -d "1 month ago" +"%Y-%m")
 yyyymm2=$(date -d "2 month ago" +"%Y-%m")
 #yyyymm=2012-08 # !!!!!!  yyyymm "1 month ago" on 31 July gives 2012-07 !!!1 
-yyyymmdd=$(date +"%Y_%m_%d")
+
+#hard coded until auto set is more robust (day 21-31 use previous month, day 1-20 use two months ago)
+yyyymm=2013-01
+yyyymm2=2012-12
+yyyymm_rc=2013-03 # rc is month of RC meeting
+
 echo process data up to $yyyymm and write to rc-$yyyymm.zip
 log=$analytics/logs/prep_csv_$yyyymmdd.log 
 
@@ -59,8 +65,8 @@ c1 perl AnalyticsPrepComscoreData.pl -r -i $csv_rc/comscore -m /a/wikistats_git/
 # AnalyticsPrepWikiCountsOutput.pl reads a plethora of fields from several csv files from wikistats process
 # - It filters and reorganizes data and produces analytics_in_wikistats.csv, ready for import 
 
-c1 perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat
-c1 perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm | tee -a $log | cat
+c1 perl AnalyticsPrepWikiCountsOutputMisc.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm           | tee -a $log | cat
+c1 perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m $yyyymm $unmerged | tee -a $log | cat
 
 # analytics_in_page_views.csv is written daily as part of WikiCountsSummarizeProjectCounts.pl 
 # part of (/home/ezachte/pageviews_monthly.sh job) 
@@ -80,6 +86,6 @@ c2 perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 
 # set +x # do not show commands
 
 cd $csv_rc/$yyyymm
-zip rc-$yyyymm.zip wikilytics*.csv comparison*.txt
+zip rc-$yyyymm_rc.zip wikilytics*.csv comparison*.txt
 
 echo -e "\n>>> ready <<<"

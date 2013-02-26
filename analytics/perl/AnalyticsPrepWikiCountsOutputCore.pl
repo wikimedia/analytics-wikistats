@@ -1,5 +1,11 @@
 #!/usr/local/bin/perl
 
+#   Input:                                       # Fields used:
+# A StatisticsMonthly.csv                        # 1 new editors, 4 articles, 6 new articles, 11 edits 
+# B StatisticsUserActivitySpread.csv             # 2 editors with edits >= 5 , 7 editors with edits >= 100
+# C StatisticsUserActivitySpreadAllProjects.csv  # same
+#   For editor totals either use (arg -u) legacy B: unmerged editor totals (commons) or (default) C: merged editor totals 
+
 # use lib "/home/ezachte/lib" ; # moved to ../perl folder 
   use EzLib ;
 # $trace_on_exit_concise = $true ;
@@ -15,6 +21,8 @@
 
 # $file_regions_UV    = "Multi-Country Media Trend, UVs by region (July 2008 - September 2009)_27290.csv" ;
 # $file_regions_Reach = "Multi-Country Media Trend, % reach by region (July 2008 - September 2009)_10786.csv" ;
+
+  $all_projects = '*' ;
 
   $maxpopularwikis = 25 ;
   @projects = ('wb','wk','wn','wo','wp','wq','ws','wv','wx','commons','*') ;
@@ -49,6 +57,7 @@ sub ParseArguments
   ($path_in  = $options {"i"}) =~ s/\%20/ /g ; ;
   ($path_out = $options {"o"}) =~ s/\%20/ /g ; ; ;
   $yyyy_mm  = $options {"m"} ;
+  $use_old_unmerged_editor_totals = defined $options {"u"} ;
 
   die "Input folder '$path_in' does not exist"   if (! -d $path_in) ;
   die "Output folder '$path_out' does not exist" if (! -d $path_out) ;
@@ -69,6 +78,11 @@ sub ParseArguments
   $m_last     = &months_since_2000_01 ($year_last,  $month_last) ;
   $m_last_12  = $m_last - 12 ;
   $m_last_1   = $m_last - 1 ;
+
+  if ($use_old_unmerged_editor_totals)
+  { print "Use unmerged (legacy) editor totals excluding commons, based on StatisticsUserActivitySpread.csv\n" ; }
+  else
+  { print "Use merged editor totals, based on StatisticsUserActivitySpreadAllProjects.csv\n" ; }
 
   print "Input  folder: $path_in\n" ;
   print "Output folder: $path_out\n" ;
@@ -97,7 +111,8 @@ sub ReadStatisticsMonthly
   &ReadStatisticsMonthlyForProject ("wv") ;
   &ReadStatisticsMonthlyForProject ("wx") ;
 
-  &ReadStatisticsMonthlyAllProjects ;
+  if (! $use_old_unmerged_editor_totals)
+  { &ReadStatisticsMonthlyAllProjects ; }
 
   &ReadStatisticsPerBinariesExtensionCommons ;
 }
@@ -105,8 +120,6 @@ sub ReadStatisticsMonthly
 sub ReadStatisticsMonthlyForProject
 {
   my $project = shift;
-
-  $all_projects = "*" ;
 
   my $file_csv_in_1 = "$path_in/csv_$project/StatisticsMonthly.csv" ;
   my $file_csv_in_2 = "$path_in/csv_$project/StatisticsUserActivitySpread.csv" ;
@@ -157,13 +170,10 @@ sub ReadStatisticsMonthlyForProject
       {
         foreach $f (1,4,6,11) # new editors, articles, new articles, edits
         {
-          $values           {"$f,$m"} {"$project,$language"}  = $fields [$f] ;
-
-          $totals           {"$f,$m"}                        += $fields [$f] ;
-
-          $totals_project   {"$f,$m"} {$project}             += $fields [$f] ;
-
-          $totals_project   {"$f,$m"} {$all_projects}        += $fields [$f] ;
+          $values          {"$f,$m"} {"$project,$language"}  = $fields [$f] ;
+          $totals          {"$f,$m"}                        += $fields [$f] ;
+          $totals_project  {"$f,$m"} {$project}             += $fields [$f] ;
+          $totals_project  {"$f,$m"} {$all_projects}        += $fields [$f] ;
 
         #  print "TOTALS $f $m = . " . $totals {"$f,$m"} . "\n" ;
         }
@@ -177,7 +187,6 @@ sub ReadStatisticsMonthlyForProject
             $values         {"$f,$m"} {"$project,$language"}  = $fields [$f] ;
             $totals         {"$f,$m"}                        += $fields [$f] ;
           }
-
 
           # ignore editor count on commons for totals, most editors are already counted for other project
           # (even for several projects, to be tuned after centralauth dump is available)
@@ -194,14 +203,13 @@ sub ReadStatisticsMonthlyForProject
         }
         foreach $f (6,11)
         {
-          $totals_project {"$f,$m"} {$all_projects}        += $fields [$f] ;
+          $totals_project {"$f,$m"} {$all_projects} += $fields [$f] ;
           if ($language eq 'commons')
           { $totals_project {"$f,$m"} {'commons'}          += $fields [$f] ; }
           else
           { $totals_project {"$f,$m"} {$project}           += $fields [$f] ; }
         #  print "TOTALS $f $m = . " . $totals {"$f,$m"} . "\n" ;
         }
-
       }
     }
   }
@@ -254,24 +262,26 @@ sub ReadStatisticsMonthlyForProject
 
       foreach $f (2,3) # editors_gt_5, editors_gt_100
       {
+        my $count ;
         # count user with over x edits
         # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
         # thresholds = 1,3,5,10,25,32,50,100,etc
-        if ($f == 2) { $f2 = 2 ; }
-        if ($f == 3) { $f2 = 7 ; }
+        #              0 1 2  3  4  5  6   7    
+        if ($f == 2) { $count = $fields [2] ; }
+        if ($f == 3) { $count = $fields [7] ; }
 
-        $values {"$f,$m"} {"$project,$language"}  = $fields [$f2] ;
-        $totals {"$f,$m"} += $fields [$f2] ;
+        $values {"$f,$m"} {"$project,$language"}  = $count ;
+        $totals {"$f,$m"} += $count ;
 
         # ignore editor count on commons for totals, most editors are already counted for other project
         # (even for several projects, to be tuned after centralauth dump is available)
         if (($f <= 3) && ($language ne 'commons'))  # 0 = Contributors, 1 = New Wikimedians, 2 = Active Editors (5+ edits), 3 = Very Active Editors (100+ edits),
-        { $totals_project {"$f,$m"} {$all_projects} += $fields [$f2] ; }
+        { $totals_project {"$f,$m"} {$all_projects} += $count ; }
 
         if ($language eq 'commons')
-        { $totals_project {"$f,$m"} {'commons'}  += $fields [$f2] ; }
+        { $totals_project {"$f,$m"} {'commons'}  += $count ; }
         else
-        { $totals_project {"$f,$m"} {$project}   += $fields [$f2] ; }
+        { $totals_project {"$f,$m"} {$project}   += $count ; }
       }
     }
   }
@@ -386,7 +396,7 @@ sub WriteMonthlyData
     $output .= "\n,${out_report_descriptions [$f]} - Absolute - Per Wiki\n" ;
     $output .= "$csv_recent_months,%inc year, %inc month\n" ;
 
-    if ($f != 2 and $f != 3)
+    if (($f != 2 and $f != 3) || $use_old_unmerged_editor_totals)
     {
       $line = ",Total," ;
       for ($m = $m_start ; $m <= $m_last ; $m++)
@@ -413,7 +423,7 @@ sub WriteMonthlyData
       $output .= "$line\n" ;
     }
 
-    if ($f == 2 or $f == 3)
+    if (($f == 2 or $f == 3) && (! $use_old_unmerged_editor_totals))
     {
     # $line = ",Total after removing double counts," ;
       $line = ",Total," ;
@@ -511,14 +521,18 @@ sub WriteMonthlyData
     foreach $project (sort {$totals_project {"$f,$m_last"} {$b} <=> $totals_project {"$f,$m_last"} {$a}} @projects)
     {
 #     next if $project eq 'commons' and ($f ==2 or $f == 3) ; # (very) active editors no longer counted for commons
-
       if ($project eq 'commons')
       { $line = ",Commons," ; }
       else
       { $line = "," . &GetProjectName ($project) . "," ; }
 
       for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $totals_project {"$f,$m"} {$project} . ","  ; }
+      { 
+        if (($project eq '*') && (! $use_old_unmerged_editor_totals))
+	{ $line .= $totals_project_edits_merged {"zz,$f,$m"} . ","  ; }
+        else 
+	{ $line .= $totals_project {"$f,$m"} {$project} . ","  ; } 
+      }
 
       if ($totals_project {"$f,$m_last_12"} {$project} != 0)
       { $line .= sprintf ("%.1f", 100 * ($totals_project {"$f,$m_last"} {$project} / $totals_project {"$f,$m_last_12"} {$project}) - 100). "%,"  ; }
@@ -608,7 +622,6 @@ if ($f == 2)
     }
     $output .= "\n," . '=' x 150 . "\n" ;
   }
-
   print CSV_OUT $output ;
 
   $output  = "\n,Binaries per month - Absolute\n" ;

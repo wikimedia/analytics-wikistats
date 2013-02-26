@@ -940,9 +940,11 @@ sub WriteCsvFilesPerPeriod
     while ($line = <CSV_IN>)
     {
       chomp $line ;
+      ($project,$lang,$month,$non_normalized_non_mobile,$non_normalized_mobile,$normalized_non_mobile,$normalized_mobile) = split (',', $line) ;
+
       $csv_analytics_chk_months   {$month}++ ;
       $csv_analytics_chk_projects {$project}++ ;
-      ($project,$lang,$month,$non_normalized_non_mobile,$non_normalized_mobile,$normalized_non_mobile,$normalized_mobile) = split (',', $line) ;
+
       $csv_analytics_chk_page_views_non_normalized_non_mobile {"$month,$project"} += $non_normalized_non_mobile ;
       $csv_analytics_chk_page_views_non_normalized_mobile     {"$month,$project"} += $non_normalized_mobile ;
       $csv_analytics_chk_page_views_normalized_non_mobile     {"$month,$project"} += $normalized_non_mobile ;
@@ -1445,7 +1447,12 @@ sub WriteCsvHtmlFilesPopularWikis
     open CSV_IN,  '<', $file_csv ;
     open CSV_OUT, '>', "$dir_out/wikilytics_in_pageviews.csv" ;
     while ($line = <CSV_IN>)
-    { print CSV_OUT $line ; }
+    { 
+      # QD hack, replace zeroes by spaces
+      $line =~ s/\,0\,/,,/g ;
+      $line =~ s/\,0\,/,,/g ;
+      print CSV_OUT $line ; 
+    }
     close CSV_IN ;
     close CSV_OUT ;
   }
@@ -1464,6 +1471,7 @@ sub GetProjectName
 
      if ($project eq "wp") { $project_name = "Wp"; }
   elsif ($project eq "wb") { $project_name = "Wb"; }
+  elsif ($project eq "wd") { $project_name = "Wd"; }
   elsif ($project eq "wk") { $project_name = "Wk"; }
   elsif ($project eq "wx") { $project_name = ""; }
   elsif ($project eq "wn") { $project_name = "Wn"; }
@@ -1481,6 +1489,7 @@ sub GetProjectName2
   my $project = shift ;
 
   $project =~ s/Wb/Wikibooks/i ;
+  $project =~ s/Wd/Wikidata/i ;
   $project =~ s/Wk/Wiktionary/i ;
   $project =~ s/Ws/Wikisource/i ;
   $project =~ s/Wn/Wikinews/i ;
