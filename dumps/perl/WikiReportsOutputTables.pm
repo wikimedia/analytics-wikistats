@@ -1534,7 +1534,7 @@ sub GenerateTablesPerWiki
   if ($mode_wp) { $t0 = time ; }
   &GenerateTableMonthlyStats ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableMonthlyStats"} += $t1 - $t0 ; $t0 = $t1 ; }
-  &GenerateTableEditActivityLevels ($wp) ;
+  &GenerateTableEditActivityLevels ($wp,$false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   if ($mode_wx)
   {
@@ -1586,7 +1586,7 @@ sub GenerateTablesPerWiki
 
 sub GenerateTablesAllProjects
 {
-  $show_all_months = $true ;
+  my $show_all_months = $true ;
 
   $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpreadAllProjects.csv" ;
 
@@ -1615,29 +1615,48 @@ sub GenerateTablesAllProjects
   $MonthlyStatsWpStart {'zz'}    = $MonthlyStatsWpStart {'zz*'} ;
   $MonthlyStatsWpStop  {'zz'}    = $MonthlyStatsWpStop  {'zz*'} ;
 
+  ##########################################################################################
   # report activity levels for editors and uploaders where upload is equal to any other edit
+  $out_page_subtitle = "Also: <a href='TablesWikimediaAllProjects_AllMonths.htm'>Unabridged version</a> (all months)" ;
   &GenerateHtmlStart ('Wikimedia Stats For All Projects',  '',  $out_options,
                       'Wikimedia Stats For All Projects',  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
 
-  &GenerateTableEditActivityLevels ('zz*') ;
+  &GenerateTableEditActivityLevels ('zz*', $false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   &GenerateColophon ($false, $false) ;
   $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
   $file_html = $path_out . "TablesWikimediaAllProjects.htm" ;
+  open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
+  print FILE_OUT &AlignPerLanguage ($out_html) ;
+  close "FILE_OUT" ;
+
+  ##########################################################################################
+  $out_page_subtitle = "Also: <a href='TablesWikimediaAllProjects.htm'>Abridged version</a> (older history every 3rd month))" ;
+  &GenerateHtmlStart ('Wikimedia Stats For All Projects',  '',  $out_options,
+                      'Wikimedia Stats For All Projects',  $out_page_subtitle, $out_explanation,
+                      $out_button_prev, $out_button_next,   $out_button_switch,
+                      $out_crossref,    $out_msg) ;
+
+  &GenerateTableEditActivityLevels ('zz*', $true) ; # $true = show all months
+
+  &GenerateColophon ($false, $false) ;
+  $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
+  $file_html = $path_out . "TablesWikimediaAllProjects_AllMonths.htm" ;
 
   open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
   print FILE_OUT &AlignPerLanguage ($out_html) ;
   close "FILE_OUT" ;
 
+  ##########################################################################################
   # report activity levels for editors and uploaders where upload is equal to 5 edits
   &GenerateHtmlStart ('Wikimedia Stats For All Projects, Weighted Activity (Experimental)',  '',  $out_options,
                       'Wikimedia Stats For All Projects, Weighted Activity (Experimental)',  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
 
-  &GenerateTableEditActivityLevels ('zz*w') ;
+  &GenerateTableEditActivityLevels ('zz*w',! $false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   &GenerateColophon ($false, $false) ;
   $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
@@ -2126,7 +2145,11 @@ sub TableMonthlyStatsForecast
 # Count users with over x edits
 sub GenerateTableEditActivityLevels
 {
-  my $wp = shift ;
+  my ($wp,$show_all_months) = @_ ;
+  
+  if ($show_all_months_special)
+  { $show_all_months = $true ; }
+
   my $all_projects = $false ;
   if ($wp =~ '^zz*')
   { $all_projects = $true ; }
@@ -2143,10 +2166,6 @@ sub GenerateTableEditActivityLevels
 
   my %namespaces ;
   my %usertypes ;
-
-  $show_all_months = $false ; # test only
-  if ($show_all_months_special)
-  { $show_all_months = $true ; }
 
   $namespaces {'A'} = "&nbsp;Articles&nbsp;" ;
   $namespaces {'T'} = "&nbsp;Talk&nbsp;" ;
@@ -2605,7 +2624,6 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
   if ($wp =~ /^zzz?$/)
   { return ; }
 
-#===============================================================================================
   &ReadFileCsv ($file_csv_users, $wp) ;
 
   if ($#csv < 100)
@@ -2615,11 +2633,9 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
   my $bins = 15 ;
   my $users_tot = 0 ;
   my $edits_tot = 0 ;
-# my (%edits_min, %edits, %users) ;
   my (@edits_min, @edits, @users) ;
   $j = 1 ;
   for ($i = 0 ; $i < $bins ; $i++)
-# { $edits_min {$i} = $j - 0.01 ; $j *= $sqrt10 ; }
   { $edits_min [$i] = $j - 0.01 ; $j *= $sqrt10 ; }
 
   foreach $line (@csv)
@@ -2630,24 +2646,20 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
     for ($i = 0 ; $i < $bins ; $i++)
     {
-#     if ($edits_min {$i} <= $edits_namespace_a)
       if ($edits_min [$i] <= $edits_namespace_a)
       {
-#       $users {$i} ++ ;
         $users [$i] ++ ;
-#       $edits {$i} += $edits_namespace_a ;
         $edits [$i] += $edits_namespace_a ;
       }
     }
   }
 
-#===============================================================================================
-
-#  $out_htmlx .= "<br><a id='wikipedians' name='wikipedians'>&nbsp;</a><hr><p>" . &b($out_tbl1_intro) ;
-#  if (defined ($out_tbl1_intro2))
-#  { $out_html .= "<br><small>" . $out_tbl1_hdr9 . ": " . $out_tbl1_intro2 . "</small>" ; }
-#  if (defined ($out_tbl1_intro3))
-#  { $out_html .= "<br><small>" . $out_tbl1_intro3 . "</small>" ; }
+  #===============================================================================================
+  #  $out_htmlx .= "<br><a id='wikipedians' name='wikipedians'>&nbsp;</a><hr><p>" . &b($out_tbl1_intro) ;
+  #  if (defined ($out_tbl1_intro2))
+  #  { $out_html .= "<br><small>" . $out_tbl1_hdr9 . ": " . $out_tbl1_intro2 . "</small>" ; }
+  #  if (defined ($out_tbl1_intro3))
+  #  { $out_html .= "<br><small>" . $out_tbl1_intro3 . "</small>" ; }
 
   $out_html .= "\n\n<br><a id='editdistribution' name='editdistribution'>&nbsp;</a><hr><p>" . &b($out_tbl8_intro) . "<br><small>$out_tbl1_intro2</small>" ;
   $out_html .= "<p>1 : 3 : 10 : 32 : 100 : 316 : 1000 ... = 1 : &radic;10 : 10 : 10&radic;10 : 100 : 100&radic;10 : 1000 ... " ;
@@ -2663,18 +2675,12 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
   for ($i = 0 ; $i < $bins ; $i++)
   {
-#   if (@users {$i} == 0) { last ; }
     if ($users [$i] == 0) { last ; }
 
-#    $out_html .= &tr (&tdrb (sprintf ("%.0f", $edits_min {$i})).
     $out_html .= &tr (&tdrb (sprintf ("%.0f", $edits_min [$i])).
-#                     &tdrb ($users {$i}).
                       &tdrb ($users [$i]).
-#                     &tdrb (sprintf ("%.1f\%", 100 * ($users {$i} / $users_tot))) .
                       &tdrb (sprintf ("%.1f\%", 100 * ($users [$i] / $users_tot))) .
-#                     &tdrb ($edits {$i}).
                       &tdrb ($edits [$i]).
-#                     &tdrb (sprintf ("%.1f\%", 100 * ($edits {$i} / $edits_tot)))) ;
                       &tdrb (sprintf ("%.1f\%", 100 * ($edits [$i] / $edits_tot)))) ;
   }
   $out_html .= "</table>\n" ;
