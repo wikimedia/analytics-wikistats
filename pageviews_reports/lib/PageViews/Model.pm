@@ -7,6 +7,7 @@ use List::Util qw/sum max/;
 use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
+use Time::Piece;
 
 my $MINIMUM_EXPECTED_FIELDS = 9;
 my $ONE_DAY = 86_400;
