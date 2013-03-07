@@ -8,7 +8,7 @@ use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
 
-my $MINIMUM_EXPECTED_FIELDS = 10;
+my $MINIMUM_EXPECTED_FIELDS = 9;
 
 
 sub new {
