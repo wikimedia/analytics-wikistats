@@ -66,28 +66,7 @@ sub build_accepted_url_map {
   my ($self) = @_;
   my $h = {};
   my @languages = (
-    "aa","ab","ace","af","ak","als","am","an","ang","ar","arc","arz","as",
-    "ast","av","ay","az","ba","bar","bat-smg","bcl","be","be","be","bg","bh",
-    "bi","bm","bn","bo","bpy","br","bs","bug","bxr","ca","cbk-zam","cdo","ce",
-    "ceb","ch","ckb","cho","chr","chy","co","cr","crh","cs","csb","cv","cv",
-    "cy","da","de","diq","dk","dsb","dv","dz","ee","el","eml","en","eo",
-    "es","et","eu","ext","fa","ff","fi","fiu-vro","fj","fo","fr","frp","fur",
-    "fy","ga","gan","gay","gd","gl","glk","gn","got","gu","gv","ha","hak",
-    "haw","he","hi","hif","ho","hr","hsb","ht","hu","hy","hz","ia","iba",
-    "id","ie","ig","ii","ik","ilo","io","is","it","iu","ja","jbo","jv",
-    "ka","kaa","ka","kaw","kg","ki","kj","kk","kl","km","kn","ko","kr",
-    "ks","ksh","ku","kv","kw","ky","la","lad","lb","lbe","lg","li","lij",
-    "lmo","ln","lo","ls","lt","lv","mad","mak","map-bms","mdf","mg","mh","mhr",
-    "mi","min","minnan","mk","ml","mn","mo","mr","ms","mt","mus","mwl","my",
-    "myv","mzn","na","nah","nap","nds","nds-nl","ne","new","ng","nl","nov","nrm",
-    "nn","no","nv","ny","oc","om","or","os","pa","pag","pam","pap","pdc",
-    "pi","pih","pl","pms","pnb","pnt","ps","pt","qu","rm","rmy","rn","ro",
-    "roa-rup","roa-tara","ru","ru-sib","ru-sib","rw","sa","sah","sc","scn","sco","sd","se",
-    "sg","sh","si","simple","sk","sl","sm","sn","so","sq","sr","srn","ss",
-    "st","stq","su","sv","sw","szl","ta","te","test","tet","tg","th","ti",
-    "tk","tl","tlh","tn","to","tokipona","tpi","tr","ts","tt","tum","turn","tw",
-    "ty","udm","ug","uk","ur","uz","ve","vec","vi","vls","vo","wa","war",
-    "wo","wuu","xal","xh","yi","yo","za","zea","zh","zh-min-nan","zh-classical","zh-yue","zu"
+    'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te', 'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is', 'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms', 'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af', 'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als', 'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu', 'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah', 'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa', 'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro', 'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw', 'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig', 'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', '(closed)', 'so', 'kab', 'ks', 'stq', 'ce', 'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got', 'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti', 'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz', 'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr', 'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii', 'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
   );
   for(@languages) {
     $h->{ "http://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
