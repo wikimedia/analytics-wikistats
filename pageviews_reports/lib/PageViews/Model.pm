@@ -9,7 +9,7 @@ use PageViews::Field::Parser;
 use PageViews::BotDetector;
 
 my $MINIMUM_EXPECTED_FIELDS = 9;
-
+my $ONE_DAY = 86_400;
 
 sub new {
   my ($class) = @_;
@@ -96,30 +96,21 @@ sub process_line {
   my $mime_type  = $fields[10];
   my $referer    = $fields[11];
 
-  my $tp; 
+  my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
-  if($time) {
-    $tp = convert_str_to_epoch1($time);
-    if(!(defined($tp) && @$tp == 7)) {
-      #print "[DBG] discard_time\n";
-      #print { $self->{fh_dbg_time} } $line;
-      if($self->{last_ymd}) {
-        $self->{counts_discarded_time}->{$self->{last_ymd}}++;
-      };
-      return;
-    };
+
+  if(!$tp) {
+    return;
   };
   
-  if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
-    #print "[DBG] interval_discarded\n";
-    #print { $self->{fh_dbg_time} } $line;
+  if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
     if($self->{last_ymd}) {
       $self->{counts_discarded_time}->{$self->{last_ymd}}++;
     };
     return;
   };
 
-  my $ymd = $tp->[1]."-".$tp->[2]; 
+  my $ymd = $tp->year."-".$tp->mon; 
   $self->{last_ymd} = $ymd;
 
   #$self->{counts_mimetype}->{$ymd}->{$mime_type}++;
@@ -301,26 +292,28 @@ sub get_files_in_interval {
   $params->{start}->{month} = padding_2($params->{start}->{month});
   $params->{end}->{month}   = padding_2($params->{end}->{month});
 
-  my $tp_start = convert_str_to_epoch1(
-                   sprintf("%s-%s-01T00:00:00",$params->{start}->{year},$params->{start}->{month})
-                 );
-
-  my $tp_end__   = convert_str_to_epoch1(
-                     sprintf("%s-%s-01T00:00:00",$params->{end}->{year},$params->{end}->{month})
-                   );
-
-  my $tp_end = get_first_day_next_month($tp_end__);
+  my $time_start    = $params->{start}->{year}."-".$params->{start}->{month}."-01T00:00:00";
+  my $time_end      =   $params->{end}->{year}."-"  .$params->{end}->{month}."-01T00:00:00";
+  my $tp_start      = Time::Piece->strptime($time_start,"%Y-%m-%dT%H:%M:%S"); 
+  my $tp_end1       = Time::Piece->strptime(  $time_end,"%Y-%m-%dT%H:%M:%S");
+  my $lday          = $tp_end1->month_last_day;
+  my $tp_end        = Time::Piece->strptime($params->{end}->{year}."-".$params->{end}->{month}."-".$lday."T00:00:00","%Y-%m-%dT%H:%M:%S");
+  $tp_end          += $ONE_DAY;
 
   $self->{tp_start} = $tp_start;
   $self->{tp_end}   = $tp_end;
 
+  print "start=>$tp_start\n";
+  print "  end=>$tp_end\n";
   my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
   for my $log_filename (@all_squid_files) {
     if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
-      my $tp_log = convert_str_to_epoch1("$y-$m-$d"."T00:00:00");
+      my $tp_log =  Time::Piece->strptime( "$y-$m-$d"."T00:00:00" ,"%Y-%m-%dT%H:%M:%S"); 
 
-      push @retval,$log_filename
-        if( is_time_in_interval_R($tp_start,$tp_end,$tp_log) );
+      if( $tp_log >= $tp_start && $tp_log < $tp_end ) {
+        print "fn=>$log_filename\n";
+        push @retval,$log_filename;
+      };
     };
   };
 
