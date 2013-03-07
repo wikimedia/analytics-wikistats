@@ -97,7 +97,7 @@ sub process_line {
   my $mime_type  = $fields[10];
   my $referer    = $fields[11];
 
-  my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.MMM");
+  my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.000");
 
 
   if(!$tp) {
