@@ -100,7 +100,7 @@ sub process_line {
   my $tp;
   
   eval {
-    $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+    $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.MMM");
   };
 
 
