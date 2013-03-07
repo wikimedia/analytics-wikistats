@@ -89,7 +89,7 @@ print   $json_fh JSON::XS->new
                          ->canonical(1)
                          ->encode($d);
 close   $json_fh;
-#warn Dumper $d;
+warn Dumper $d;
 #warn Dumper $m->get_files_in_interval();
 #exit 0;
 

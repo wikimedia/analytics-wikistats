@@ -50,15 +50,53 @@ sub new {
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
 
+
   my $obj     = bless $raw_obj,$class;
-  init_wikiprojects_map();
+  #init_wikiprojects_map();
 
   $obj->{dec_2012_01} = convert_str_to_epoch1("2012-12-01T00:00:00");
   $obj->{dec_2012_14} = convert_str_to_epoch1("2012-12-14T00:00:00");
   $obj->{dec_2012_31} = convert_str_to_epoch1("2012-12-31T00:00:00");
 
+  $obj->{accept_re} = $obj->build_accepted_url_map();
   return $obj;
 };
+
+sub build_accepted_url_map {
+  my ($self) = @_;
+  my $h = {};
+  my @languages = (
+    "aa","ab","ace","af","ak","als","am","an","ang","ar","arc","arz","as",
+    "ast","av","ay","az","ba","bar","bat-smg","bcl","be","be","be","bg","bh",
+    "bi","bm","bn","bo","bpy","br","bs","bug","bxr","ca","cbk-zam","cdo","ce",
+    "ceb","ch","ckb","cho","chr","chy","co","cr","crh","cs","csb","cv","cv",
+    "cy","da","de","diq","dk","dsb","dv","dz","ee","el","eml","en","eo",
+    "es","et","eu","ext","fa","ff","fi","fiu-vro","fj","fo","fr","frp","fur",
+    "fy","ga","gan","gay","gd","gl","glk","gn","got","gu","gv","ha","hak",
+    "haw","he","hi","hif","ho","hr","hsb","ht","hu","hy","hz","ia","iba",
+    "id","ie","ig","ii","ik","ilo","io","is","it","iu","ja","jbo","jv",
+    "ka","kaa","ka","kaw","kg","ki","kj","kk","kl","km","kn","ko","kr",
+    "ks","ksh","ku","kv","kw","ky","la","lad","lb","lbe","lg","li","lij",
+    "lmo","ln","lo","ls","lt","lv","mad","mak","map-bms","mdf","mg","mh","mhr",
+    "mi","min","minnan","mk","ml","mn","mo","mr","ms","mt","mus","mwl","my",
+    "myv","mzn","na","nah","nap","nds","nds-nl","ne","new","ng","nl","nov","nrm",
+    "nn","no","nv","ny","oc","om","or","os","pa","pag","pam","pap","pdc",
+    "pi","pih","pl","pms","pnb","pnt","ps","pt","qu","rm","rmy","rn","ro",
+    "roa-rup","roa-tara","ru","ru-sib","ru-sib","rw","sa","sah","sc","scn","sco","sd","se",
+    "sg","sh","si","simple","sk","sl","sm","sn","so","sq","sr","srn","ss",
+    "st","stq","su","sv","sw","szl","ta","te","test","tet","tg","th","ti",
+    "tk","tl","tlh","tn","to","tokipona","tpi","tr","ts","tt","tum","turn","tw",
+    "ty","udm","ug","uk","ur","uz","ve","vec","vi","vls","vo","wa","war",
+    "wo","wuu","xal","xh","yi","yo","za","zea","zh","zh-min-nan","zh-classical","zh-yue","zu"
+  );
+  for(@languages) {
+    $h->{ "http://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
+    $h->{"https://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
+  };
+
+  return $h;
+}
+
 
 sub process_line {
   my ($self,$line) = @_;
@@ -105,30 +143,34 @@ sub process_line {
   my $ymd = $tp->[1]."-".$tp->[2]; 
   $self->{last_ymd} = $ymd;
 
-  $self->{counts_mimetype}->{$ymd}->{$mime_type}++;
+  #$self->{counts_mimetype}->{$ymd}->{$mime_type}++;
 
 
   # 30x or 20x request status
-  if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
-    #print "[DBG] reqstatus_discarded\n";
-    #print { $self->{fh_dbg_status} } $line;
-    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
-    return;
-  };
+  #if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
+    ##print "[DBG] reqstatus_discarded\n";
+    ##print { $self->{fh_dbg_status} } $line;
+    #$self->{counts_discarded_status}->{$self->{last_ymd}}++;
+    #return;
+  #};
 
-  my $label_ip = $bdetector->match_ip($ip);
+  #my $label_ip = $bdetector->match_ip($ip);
 
-  if( $label_ip ) {
-    #print "[DBG] bots_discarded\n";
-    #print { $self->{fh_dbg_bots} } $line;
-    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    return;
-  };
+  #if( $label_ip ) {
+    ##print "[DBG] bots_discarded\n";
+    ##print { $self->{fh_dbg_bots} } $line;
+    #$self->{counts_discarded_bots}->{$self->{last_ymd}}++;
+    #return;
+  #};
 
   # arrayref with 2 values
   # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
   # second value is the actual wikiproject
-  my $wikiproject_pair = get_wikiproject_for_url2($url);
+
+  my @url_captures = $url =~ m|^(https?://[^\/]+\.m\.wikipedia.org/wiki/)|;
+  my $h_key = $url_captures[0];
+  #print "$h_key\n" if $h_key;
+  my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
   if( !defined($wikiproject_pair) ) {
     #print "[DBG] language_discard\n";
@@ -137,49 +179,50 @@ sub process_line {
     return;
   };
 
-  if( defined($ua) && $bdetector->match_ua($ua) ) {
-    #print "[DBG] bot_ua_discard\n";
-    #print { $self->{fh_dbg_bots} } $line;
-    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    return;
-  };
+  #if( defined($ua) && $bdetector->match_ua($ua) ) {
+    ##print "[DBG] bot_ua_discard\n";
+    ##print { $self->{fh_dbg_bots} } $line;
+    #$self->{counts_discarded_bots}->{$self->{last_ymd}}++;
+    #return;
+  #};
 
   my ($pv_type,
       $pv_wikiproject) = @$wikiproject_pair;
 
 
+  #print "$pv_wikiproject\n";
 
-  # text/html mime types only
-  # (mimetype filtering only occurs for regular pageviews, not for the API ones) 
-  if( ($pv_type eq "wiki_basic" || $pv_type eq "wiki_index" ) && 
-       !( 
-         defined($mime_type)  && 
-        ( $mime_type eq '-' || index($mime_type,"text/html") != -1) 
-       ) 
-    ) {
-    #print "[DBG] mime_discard\n";
-    #print { $self->{fh_dbg_mimetype} } $line;
-    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
-    return;
-  };
+  ## text/html mime types only
+  ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
+  #if( ($pv_type eq "wiki_basic" || $pv_type eq "wiki_index" ) && 
+       #!( 
+         #defined($mime_type)  && 
+        #( $mime_type eq '-' || index($mime_type,"text/html") != -1) 
+       #) 
+    #) {
+    ##print "[DBG] mime_discard\n";
+    ##print { $self->{fh_dbg_mimetype} } $line;
+    #$self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
+    #return;
+  #};
 
-  if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
-    if($mime_type eq "-") {
-      my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
-      open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
-      print $fh $line;
-      close $fh;
-    };
-    $self->{mimetype_before_14dec}->{$mime_type}++;
-  } elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
-    if($mime_type eq "-") {
-      my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
-      open my $fh, ">>/tmp/after--14dec-mimetype-$t.txt";
-      print $fh $line;
-      close $fh;
-    };
-    $self->{mimetype_after__14dec}->{$mime_type}++;
-  };
+  #if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
+    #if($mime_type eq "-") {
+      #my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
+      #open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
+      #print $fh $line;
+      #close $fh;
+    #};
+    #$self->{mimetype_before_14dec}->{$mime_type}++;
+  #} elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
+    #if($mime_type eq "-") {
+      #my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
+      #open my $fh, ">>/tmp/after--14dec-mimetype-$t.txt";
+      #print $fh $line;
+      #close $fh;
+    #};
+    #$self->{mimetype_after__14dec}->{$mime_type}++;
+  #};
 
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
@@ -678,9 +721,9 @@ sub get_data {
   unshift @$data, ['month' , '&Sigma;', @sorted_languages_present ];
 
   warn "[DBG] data.length = ".~~(@$data);
-  my $big_total_processed = 0 + sum( values %$language_totals                  );
-  my $big_total_discarded = 0 + sum( values %{$self->{monthly_discarded_count}});
-  my $big_total_bots      = 0 + sum( values %{$self->{monthly_bots_count}}     );
+  my $big_total_processed = sum( values %$language_totals                  ) // 0;
+  my $big_total_discarded = sum( values %{$self->{monthly_discarded_count}}) // 0;
+  my $big_total_bots      = sum( values %{$self->{monthly_bots_count}}     ) // 0;
 
   my $retval = {
     # actual data for each language for each month
