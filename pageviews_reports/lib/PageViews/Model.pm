@@ -169,6 +169,10 @@ sub process_line {
 
   my @url_captures = $url =~ m|^(https?://[^\/]+\.m\.wikipedia.org/wiki/)|;
   my $h_key = $url_captures[0];
+  if( !defined($h_key) ) {
+    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
+    return;
+  };
   #print "$h_key\n" if $h_key;
   my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
