@@ -68,11 +68,14 @@ sub build_accepted_url_map {
   my @languages = (
     'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te', 'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is', 'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms', 'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af', 'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als', 'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu', 'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah', 'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa', 'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro', 'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw', 'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig', 'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', '(closed)', 'so', 'kab', 'ks', 'stq', 'ce', 'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got', 'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti', 'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz', 'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr', 'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii', 'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
   );
-  for(@languages) {
-    $h->{ "http://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
-    $h->{"https://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
-    $h->{ "http://www.$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
-    $h->{"https://www.$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
+  for my $l(@languages) {
+    for my $p1 ("http","https") {
+      for my $p2 ("","www") {
+        for my $p3 ("m","zero") {
+          $h->{ "$p1://$p2$l.$p3.wikipedia.org/"} = ["wiki_basic",$_];
+        };
+      };
+    };
   };
 
   return $h;
@@ -101,9 +104,7 @@ sub process_line {
 
   my $tp;
   
-  eval {
-    $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S.MMM");
-  };
+  $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
 
   if(!$tp) {
@@ -146,9 +147,10 @@ sub process_line {
   # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
   # second value is the actual wikiproject
 
-  my @url_captures = $url =~ m|^(https?://[^\/]+\.m\.wikipedia.org/wiki/)|;
+  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/)};
   my $h_key = $url_captures[0];
   if( !defined($h_key) ) {
+    #print "$url\n";
     print {$self->{fh_dbg_discarded}} $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
@@ -299,6 +301,7 @@ sub get_files_in_interval {
 
   $self->{tp_start} = $tp_start;
   $self->{tp_end}   = $tp_end;
+
 
   #print "start=>$tp_start\n";
   #print "  end=>$tp_end\n";
