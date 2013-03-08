@@ -29,12 +29,8 @@ sub new {
     bdetector                   => undef,
 
     last_ymd                    => undef,
-    fh_dbg_bots                 => undef,
-    fh_dbg_url                  => undef,
-    fh_dbg_time                 => undef,
-    fh_dbg_fields               => undef,
-    fh_dbg_status               => undef,
-    fh_dbg_mimetype             => undef,
+    fh_dbg_accepted             => undef,
+    fh_dbg_discarded            => undef,
 
     counts_discarded_bots       => {},
     counts_discarded_url        => {},
@@ -60,6 +56,9 @@ sub new {
   $obj->{dec_2012_31} = convert_str_to_epoch1("2012-12-31T00:00:00");
 
   $obj->{accept_re} = $obj->build_accepted_url_map();
+
+  
+  #open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
   return $obj;
 };
 
@@ -84,6 +83,7 @@ sub process_line {
   my @fields = split(/\s/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
+    print {$self->{fh_dbg_discarded}} $line;
     #print { $self->{fh_dbg_fields} } $line;
     $self->{counts_discarded_fields}->{$self->{last_ymd}}++;
     return;
@@ -105,10 +105,12 @@ sub process_line {
 
 
   if(!$tp) {
+    print {$self->{fh_dbg_discarded}} $line;
     return;
   };
   
   if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
+    print {$self->{fh_dbg_discarded}} $line;
     if($self->{last_ymd}) {
       $self->{counts_discarded_time}->{$self->{last_ymd}}++;
     };
@@ -145,6 +147,7 @@ sub process_line {
   my @url_captures = $url =~ m|^(https?://[^\/]+\.m\.wikipedia.org/wiki/)|;
   my $h_key = $url_captures[0];
   if( !defined($h_key) ) {
+    print {$self->{fh_dbg_discarded}} $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
   };
@@ -152,6 +155,7 @@ sub process_line {
   my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
   if( !defined($wikiproject_pair) ) {
+    print {$self->{fh_dbg_discarded}} $line;
     #print "[DBG] language_discard\n";
     #print { $self->{fh_dbg_url} } $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
@@ -203,6 +207,8 @@ sub process_line {
     #$self->{mimetype_after__14dec}->{$mime_type}++;
   #};
 
+
+  print {$self->{fh_dbg_accepted}} $line;
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
   # counts /wiki/ separated from /w/api.php
@@ -217,33 +223,17 @@ sub open_dbg_fh {
   print "[DBG] $path\n";
   `mkdir /tmp/discarded` if(! -d "/tmp/discarded");
 
-  my $path_bots      = $path;
-  my $path_url       = $path;
-  my $path_time      = $path;
-  my $path_fields    = $path;
-  my $path_status    = $path;
-  my $path_mimetype  = $path;
+  my $path_accepted   = $path;
+  my $path_discarded  = $path;
 
-  $path_bots      =~ s/\.gz$/.bots.discarded/;
-  $path_url       =~ s/\.gz$/.url.discarded/;
-  $path_time      =~ s/\.gz$/.time.discarded/;
-  $path_fields    =~ s/\.gz$/.fields.discarded/;
-  $path_status    =~ s/\.gz$/.status.discarded/;
-  $path_mimetype  =~ s/\.gz$/.mimetype.discarded/;
+  $path_accepted             =~ s/\.gz$/.accepted/;
+  $path_discarded            =~ s/\.gz$/.discarded/;
 
-  open my $fh_dbg_bots     , ">$path_bots";
-  open my $fh_dbg_url      , ">$path_url";
-  open my $fh_dbg_time     , ">$path_time";
-  open my $fh_dbg_fields   , ">$path_fields";
-  open my $fh_dbg_status   , ">$path_status";
-  open my $fh_dbg_mimetype , ">$path_mimetype";
+  open my $fh_dbg_accepted   , ">$path_accepted" ;
+  open my $fh_dbg_discarded  , ">$path_discarded";
 
-  $self->{fh_dbg_bots}     = $fh_dbg_bots     ;
-  $self->{fh_dbg_url}      = $fh_dbg_url      ;
-  $self->{fh_dbg_time}     = $fh_dbg_time     ;
-  $self->{fh_dbg_fields}   = $fh_dbg_fields   ;
-  $self->{fh_dbg_status}   = $fh_dbg_status   ;
-  $self->{fh_dbg_mimetype} = $fh_dbg_mimetype ;
+  $self->{fh_dbg_accepted}   = $fh_dbg_accepted  ;
+  $self->{fh_dbg_discarded}  = $fh_dbg_discarded ;
 };
 
 sub close_dbg_fh {
