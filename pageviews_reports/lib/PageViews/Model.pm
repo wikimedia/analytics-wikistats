@@ -71,6 +71,8 @@ sub build_accepted_url_map {
   for(@languages) {
     $h->{ "http://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
     $h->{"https://$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
+    $h->{ "http://www.$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
+    $h->{"https://www.$_.m.wikipedia.org/wiki/"} = ["wiki_basic",$_];
   };
 
   return $h;
