@@ -88,7 +88,7 @@ sub process_line {
   my @fields = split(/\s/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
-    print {$self->{fh_dbg_discarded}} $line;
+    #print {$self->{fh_dbg_discarded}} $line;
     #print { $self->{fh_dbg_fields} } $line;
     $self->{counts_discarded_fields}->{$self->{last_ymd}}++;
     return;
@@ -108,12 +108,12 @@ sub process_line {
 
 
   if(!$tp) {
-    print {$self->{fh_dbg_discarded}} $line;
+    #print {$self->{fh_dbg_discarded}} $line;
     return;
   };
   
   if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
-    print {$self->{fh_dbg_discarded}} $line;
+    #print {$self->{fh_dbg_discarded}} $line;
     if($self->{last_ymd}) {
       $self->{counts_discarded_time}->{$self->{last_ymd}}++;
     };
@@ -151,7 +151,7 @@ sub process_line {
   my $h_key = $url_captures[0];
   if( !defined($h_key) ) {
     #print "$url\n";
-    print {$self->{fh_dbg_discarded}} $line;
+    #print {$self->{fh_dbg_discarded}} $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
   };
@@ -159,7 +159,7 @@ sub process_line {
   my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
   if( !defined($wikiproject_pair) ) {
-    print {$self->{fh_dbg_discarded}} $line;
+    #print {$self->{fh_dbg_discarded}} $line;
     #print "[DBG] language_discard\n";
     #print { $self->{fh_dbg_url} } $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
@@ -212,7 +212,7 @@ sub process_line {
   #};
 
 
-  print {$self->{fh_dbg_accepted}} $line;
+  #print {$self->{fh_dbg_accepted}} $line;
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
   # counts /wiki/ separated from /w/api.php
