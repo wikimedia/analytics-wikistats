@@ -72,7 +72,7 @@ sub build_accepted_url_map {
     for my $p1 ("http","https") {
       for my $p2 ("","www") {
         for my $p3 ("m","zero") {
-          $h->{ "$p1://$p2$l.$p3.wikipedia.org/"} = ["wiki_basic",$_];
+          $h->{ "$p1://$p2$l.$p3.wikipedia.org/"} = ["wiki_basic",$l];
         };
       };
     };
