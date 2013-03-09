@@ -72,7 +72,7 @@ sub build_accepted_url_map {
     for my $p1 ("http","https") {
       for my $p2 ("","www") {
         for my $p3 ("m","zero") {
-          $h->{ "$p1://$p2$l.$p3.wikipedia.org/"} = ["wiki_basic",$l];
+          $h->{ "$p1://$p2$l.$p3.wikipedia.org/wiki/"} = ["wiki_basic",$l];
         };
       };
     };
@@ -145,7 +145,7 @@ sub process_line {
   # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
   # second value is the actual wikiproject
 
-  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/)};
+  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/wiki/)};
   my $h_key = $url_captures[0];
   if( !defined($h_key) ) {
     #print "$url\n";
