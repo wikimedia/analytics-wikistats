@@ -156,7 +156,7 @@ sub process_line {
   #print "$h_key\n" if $h_key;
   my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
-  if( !defined($wikiproject_pair) ) {
+  if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
     #print {$self->{fh_dbg_discarded}} $line;
     #print "[DBG] language_discard\n";
     #print { $self->{fh_dbg_url} } $line;
