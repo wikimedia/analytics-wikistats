@@ -94,7 +94,7 @@ sub process_line {
     return;
   };
                         
-  my $time       = $fields[2] ;
+  my $time       = substr($fields[2],0,19) ;
   my $url        = $fields[8] ;
   my $ip         = $fields[4] ;
   my $ua         = $fields[13];
@@ -102,9 +102,7 @@ sub process_line {
   my $mime_type  = $fields[10];
   my $referer    = $fields[11];
 
-  my $tp;
-  
-  $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+  my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
 
   if(!$tp) {
