@@ -5,6 +5,7 @@ clear
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 
 log=$dumps/logs/count_merge_editors.log
@@ -16,6 +17,7 @@ echo . > $log
 perl WikiCounts.pl -m wb -i $csv/csv_wb -o $csv/csv_wb/ -y | tee -a $log | cat
 perl WikiCounts.pl -m wk -i $csv/csv_wk -o $csv/csv_wk/ -y | tee -a $log | cat
 perl WikiCounts.pl -m wn -i $csv/csv_wn -o $csv/csv_wn/ -y | tee -a $log | cat
+perl WikiCounts.pl -m wo -i $csv/csv_wo -o $csv/csv_wo/ -y | tee -a $log | cat
 perl WikiCounts.pl -m wp -i $csv/csv_wp -o $csv/csv_wp/ -y | tee -a $log | cat
 perl WikiCounts.pl -m wq -i $csv/csv_wq -o $csv/csv_wq/ -y | tee -a $log | cat
 perl WikiCounts.pl -m ws -i $csv/csv_ws -o $csv/csv_ws/ -y | tee -a $log | cat
