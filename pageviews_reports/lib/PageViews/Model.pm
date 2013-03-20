@@ -4,7 +4,6 @@ use warnings;
 use File::Basename qw/basename/;
 use Data::Dumper;
 use List::Util qw/sum max/;
-use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
 use Time::Piece;
@@ -95,6 +94,7 @@ sub process_line {
   };
                         
   my $time       = substr($fields[2],0,19) ;
+  my $method     = $fields[7] ;
   my $url        = $fields[8] ;
   my $ip         = $fields[4] ;
   my $ua         = $fields[13];
@@ -124,13 +124,13 @@ sub process_line {
   #$self->{counts_mimetype}->{$ymd}->{$mime_type}++;
 
 
-  # 30x or 20x request status
-  #if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
-    ##print "[DBG] reqstatus_discarded\n";
-    ##print { $self->{fh_dbg_status} } $line;
-    #$self->{counts_discarded_status}->{$self->{last_ymd}}++;
-    #return;
-  #};
+  #302 304 and 20x
+  if(!( defined($req_status) && $req_status =~ m{20\d|30[24]}  )) {
+    #print "[DBG] reqstatus_discarded\n";
+    #print { $self->{fh_dbg_status} } $line;
+    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
+    return;
+  };
 
   #my $label_ip = $bdetector->match_ip($ip);
 
@@ -157,9 +157,6 @@ sub process_line {
   my $wikiproject_pair = $self->{accept_re}->{$h_key};
 
   if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
-    #print {$self->{fh_dbg_discarded}} $line;
-    #print "[DBG] language_discard\n";
-    #print { $self->{fh_dbg_url} } $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
     return;
   };
@@ -179,38 +176,17 @@ sub process_line {
 
   ## text/html mime types only
   ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
-  #if( ($pv_type eq "wiki_basic" || $pv_type eq "wiki_index" ) && 
-       #!( 
-         #defined($mime_type)  && 
-        #( $mime_type eq '-' || index($mime_type,"text/html") != -1) 
-       #) 
-    #) {
-    ##print "[DBG] mime_discard\n";
-    ##print { $self->{fh_dbg_mimetype} } $line;
-    #$self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
-    #return;
-  #};
+  if( $mime_type !~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
+    #print "[DBG] mime_discard\n";
+    #print { $self->{fh_dbg_mimetype} } $line;
+    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
+    return;
+  };
 
-  #if(      is_time_in_interval_R($self->{dec_2012_01},$self->{dec_2012_14},$tp)) {
-    #if($mime_type eq "-") {
-      #my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
-      #open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
-      #print $fh $line;
-      #close $fh;
-    #};
-    #$self->{mimetype_before_14dec}->{$mime_type}++;
-  #} elsif( is_time_in_interval(  $self->{dec_2012_14},$self->{dec_2012_31},$tp)) {
-    #if($mime_type eq "-") {
-      #my $t = $tp->[1].'-'.$tp->[2].'-'.$tp->[3];
-      #open my $fh, ">>/tmp/after--14dec-mimetype-$t.txt";
-      #print $fh $line;
-      #close $fh;
-    #};
-    #$self->{mimetype_after__14dec}->{$mime_type}++;
-  #};
+  if( $method ne 'GET' ) {
+    return;
+  };
 
-
-  #print {$self->{fh_dbg_accepted}} $line;
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
   # counts /wiki/ separated from /w/api.php
