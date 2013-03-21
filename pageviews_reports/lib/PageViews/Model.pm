@@ -54,7 +54,7 @@ sub new {
   $obj->{dec_2012_14} = convert_str_to_epoch1("2012-12-14T00:00:00");
   $obj->{dec_2012_31} = convert_str_to_epoch1("2012-12-31T00:00:00");
 
-  $obj->{accept_re} = $obj->build_accepted_url_map();
+  $obj->{accept_hash} = $obj->build_accepted_url_map();
 
   
   #open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
@@ -65,7 +65,26 @@ sub build_accepted_url_map {
   my ($self) = @_;
   my $h = {};
   my @languages = (
-    'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te', 'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is', 'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms', 'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af', 'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als', 'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu', 'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah', 'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa', 'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro', 'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw', 'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig', 'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', '(closed)', 'so', 'kab', 'ks', 'stq', 'ce', 'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got', 'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti', 'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz', 'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr', 'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii', 'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
+    'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 
+    'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 
+    'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te',
+    'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is',
+    'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms',
+    'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af',
+    'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als',
+    'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu',
+    'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah',
+    'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa',
+    'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro',
+    'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw',
+    'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig',
+    'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', '(closed)', 'so', 'kab', 'ks', 'stq', 'ce',
+    'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got',
+    'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti',
+    'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz',
+    'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr',
+    'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii',
+    'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
   );
   for my $l(@languages) {
     for my $p1 ("http","https") {
@@ -81,9 +100,110 @@ sub build_accepted_url_map {
 }
 
 
+
+sub discard_rule_time {
+  my ($self,$tp) = @_;
+  if(!$tp) {
+    return 1;
+  };
+  
+  if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
+    #print {$self->{fh_dbg_discarded}} $line;
+    if($self->{last_ymd}) {
+      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+    };
+    return 1;
+  };
+
+  return 0;
+}
+
+sub discard_rule_bot_ua {
+  my ($self,$ua) = @_;
+  my $bdetector = $self->{bdetector};
+  if( defined($ua) && $bdetector->match_ua($ua) ) {
+    #print "[DBG] bot_ua_discard\n";
+    #print { $self->{fh_dbg_bots} } $line;
+    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
+    return 1;
+  };
+
+  return 0;
+}
+
+sub discard_rule_status_code {
+  my ($self,$req_status) = @_;
+  #302 304 and 20x
+  if(!( defined($req_status) && $req_status =~ m{20\d|30[24]}  )) {
+    #print "[DBG] reqstatus_discarded\n";
+    #print { $self->{fh_dbg_status} } $line;
+    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
+    return 1;
+  };
+  return 0;
+}
+
+sub discard_rule_bot_ip {
+  my ($self,$ip) = @_;
+  my $bdetector = $self->{bdetector};
+  my $label_ip = $bdetector->match_ip($ip);
+
+  if( $label_ip ) {
+    $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
+    return 1;
+  };
+  return 0;
+}
+
+sub discard_rule_wikiproject {
+  my ($self,$url) = @_;
+  # arrayref with 2 values
+  # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
+  # second value is the actual wikiproject
+
+  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/wiki/)};
+  my $h_key = $url_captures[0];
+  if( !defined($h_key) ) {
+    #print "$url\n";
+    #print {$self->{fh_dbg_discarded}} $line;
+    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
+    return 1;
+  };
+  #print "$h_key\n" if $h_key;
+  my $wikiproject_pair = $self->{accept_hash}->{$h_key};
+
+  if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
+    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
+    return 1;
+  };
+
+  return 0;
+}
+
+sub discard_rule_method {
+  my ($self,$method) = @_;
+  if( $method ne 'GET' ) {
+    return 1;
+  };
+
+  return 0;
+}
+
+sub discard_rule_mimetype {
+  my ($self,$mime_type) = @_;
+  ## text/html mime types only
+  ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
+  if( $mime_type !~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
+    #print "[DBG] mime_discard\n";
+    #print { $self->{fh_dbg_mimetype} } $line;
+    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
+    return 1;
+  };
+  return 0;
+}
+
 sub process_line {
   my ($self,$line) = @_;
-  my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
@@ -92,7 +212,8 @@ sub process_line {
     $self->{counts_discarded_fields}->{$self->{last_ymd}}++;
     return;
   };
-                        
+   
+  # get time in format YYYY-MM-DDTHH:MM:SS (without milliseconds)  
   my $time       = substr($fields[2],0,19) ;
   my $method     = $fields[7] ;
   my $url        = $fields[8] ;
@@ -105,87 +226,20 @@ sub process_line {
   my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
 
-  if(!$tp) {
-    #print {$self->{fh_dbg_discarded}} $line;
-    return;
-  };
-  
-  if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
-    #print {$self->{fh_dbg_discarded}} $line;
-    if($self->{last_ymd}) {
-      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
-    };
-    return;
-  };
-
   my $ymd = $tp->year."-".$tp->mon; 
   $self->{last_ymd} = $ymd;
 
-  #$self->{counts_mimetype}->{$ymd}->{$mime_type}++;
 
-
-  #302 304 and 20x
-  if(!( defined($req_status) && $req_status =~ m{20\d|30[24]}  )) {
-    #print "[DBG] reqstatus_discarded\n";
-    #print { $self->{fh_dbg_status} } $line;
-    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
-    return;
-  };
-
-  #my $label_ip = $bdetector->match_ip($ip);
-
-  #if( $label_ip ) {
-    ##print "[DBG] bots_discarded\n";
-    ##print { $self->{fh_dbg_bots} } $line;
-    #$self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    #return;
-  #};
-
-  # arrayref with 2 values
-  # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
-  # second value is the actual wikiproject
-
-  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/wiki/)};
-  my $h_key = $url_captures[0];
-  if( !defined($h_key) ) {
-    #print "$url\n";
-    #print {$self->{fh_dbg_discarded}} $line;
-    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return;
-  };
-  #print "$h_key\n" if $h_key;
-  my $wikiproject_pair = $self->{accept_re}->{$h_key};
-
-  if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
-    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return;
-  };
-
-  #if( defined($ua) && $bdetector->match_ua($ua) ) {
-    ##print "[DBG] bot_ua_discard\n";
-    ##print { $self->{fh_dbg_bots} } $line;
-    #$self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    #return;
-  #};
+  return if $self->discard_rule_time($tp);
+  return if $self->discard_rule_status_code($req_status);
+  return if $self->discard_rule_bot_ip($ip);
+  return if $self->discard_rule_bot_ua($ua);
+  return if (my $wikiproject_pair = $self->discard_rule_wikiproject($url));
+  return if $self->discard_rule_method($method);
+  return if $self->discard_rule_mimetype($mime_type);
 
   my ($pv_type,
       $pv_wikiproject) = @$wikiproject_pair;
-
-
-  #print "$pv_wikiproject\n";
-
-  ## text/html mime types only
-  ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
-  if( $mime_type !~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
-    #print "[DBG] mime_discard\n";
-    #print { $self->{fh_dbg_mimetype} } $line;
-    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
-    return;
-  };
-
-  if( $method ne 'GET' ) {
-    return;
-  };
 
   # counts together /wiki/ and /w/api.php
   $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
@@ -255,6 +309,9 @@ sub get_mimetypes_present_for_december {
 
   return $retval;
 };
+
+
+
 
 sub get_files_in_interval {
   my ($self,$params) = @_;
@@ -557,7 +614,6 @@ sub get_data {
 
   $self->scale_months_to_30;
 
-  # origins are wikipedia languages present in data
   my $data = [];
 
   #$self->_simulate_big_numbers();
