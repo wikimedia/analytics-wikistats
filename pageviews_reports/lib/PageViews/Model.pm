@@ -309,7 +309,11 @@ sub get_files_in_interval {
 
   #print "start=>$tp_start\n";
   #print "  end=>$tp_end\n";
-  my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
+  my @all_squid_files =
+  sort {
+    ($a=~/(\d{8})/)[0] <=>
+    ($b=~/(\d{8})/)[0]
+  } <$squid_logs_path/$squid_logs_prefix*.gz>;
   for my $log_filename (@all_squid_files) {
     if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
       my  $tp_log  =  Time::Piece->strptime( "$y-$m-$d"."T00:00:00" ,"%Y-%m-%dT%H:%M:%S"); 
