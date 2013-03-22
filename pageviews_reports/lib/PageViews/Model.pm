@@ -11,58 +11,7 @@ use Time::Piece;
 my $MINIMUM_EXPECTED_FIELDS = 9;
 my $ONE_DAY = 86_400;
 
-sub new {
-  my ($class) = @_;
-  my $raw_obj = {
-    current_file_processed      => undef,
-    # counts is  counts_wiki_basic + counts_wiki_index + counts_api
-    counts                      => {},
-
-    # count for /wiki/
-    counts_wiki_basic           => {},
-    # count for /w/index.php
-    counts_wiki_index           => {},
-    # count for /w/api.php
-    counts_api                  => {},
-
-    bdetector                   => undef,
-
-    last_ymd                    => undef,
-    fh_dbg_accepted             => undef,
-    fh_dbg_discarded            => undef,
-
-    counts_discarded_bots       => {},
-    counts_discarded_url        => {},
-    counts_discarded_time       => {},
-    counts_discarded_fields     => {},
-    counts_discarded_status     => {},
-    counts_discarded_mimetype   => {},
-
-    mimetype_before_14dec       => {},
-    mimetype_after__14dec       => {},
-    counts_mimetype             => {},
-  };
-  $raw_obj->{bdetector} = PageViews::BotDetector->new;
-  $raw_obj->{bdetector}->load_ip_ranges();
-  $raw_obj->{bdetector}->load_useragent_regex();
-
-
-  my $obj     = bless $raw_obj,$class;
-  #init_wikiprojects_map();
-
-  $obj->{dec_2012_01} = convert_str_to_epoch1("2012-12-01T00:00:00");
-  $obj->{dec_2012_14} = convert_str_to_epoch1("2012-12-14T00:00:00");
-  $obj->{dec_2012_31} = convert_str_to_epoch1("2012-12-31T00:00:00");
-
-  $obj->{accept_hash} = $obj->build_accepted_url_map();
-
-  
-  #open my $fh, ">>/tmp/before-14dec-mimetype-$t.txt";
-  return $obj;
-};
-
 sub build_accepted_url_map {
-  my ($self) = @_;
   my $h = {};
   my @languages = (
     'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 
@@ -99,6 +48,46 @@ sub build_accepted_url_map {
   return $h;
 }
 
+
+sub new {
+  my ($class) = @_;
+  my $raw_obj = {
+    current_file_processed      => undef,
+    # counts is  counts_wiki_basic + counts_wiki_index + counts_api
+    counts                      => {},
+
+    # count for /wiki/
+    counts_wiki_basic           => {},
+    # count for /w/index.php
+    counts_wiki_index           => {},
+    # count for /w/api.php
+    counts_api                  => {},
+
+    bdetector                   => PageViews::BotDetector->new(),
+
+    last_ymd                    => undef,
+    fh_dbg_accepted             => undef,
+    fh_dbg_discarded            => undef,
+
+    counts_discarded_bots       => {},
+    counts_discarded_url        => {},
+    counts_discarded_time       => {},
+    counts_discarded_fields     => {},
+    counts_discarded_status     => {},
+    counts_discarded_mimetype   => {},
+
+    mimetype_before_14dec       => {},
+    mimetype_after__14dec       => {},
+    counts_mimetype             => {},
+    accept_hash                 => build_accepted_url_map(),
+  };
+  $raw_obj->{bdetector}->load_ip_ranges();
+  $raw_obj->{bdetector}->load_useragent_regex();
+
+  my $obj     = bless $raw_obj,$class;
+
+  return $obj;
+};
 
 
 sub discard_rule_time {
@@ -161,7 +150,7 @@ sub discard_rule_wikiproject {
   # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
   # second value is the actual wikiproject
 
-  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m|zero)\.wikipedia.org/wiki/)};
+  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m)\.wikipedia.org/wiki/)};
   my $h_key = $url_captures[0];
   if( !defined($h_key) ) {
     #print "$url\n";
@@ -204,7 +193,8 @@ sub discard_rule_mimetype {
 
 sub process_line {
   my ($self,$line) = @_;
-  my @fields = split(/\s/,$line);
+  # after 2013-02-01 the logs changed to having tab-separated fields instead of space separated
+  my @fields = split(/\s|\t/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
     #print {$self->{fh_dbg_discarded}} $line;
@@ -306,7 +296,7 @@ sub get_files_in_interval {
   $params->{end}->{month}   = padding_2($params->{end}->{month});
 
   my $time_start    = $params->{start}->{year}."-".$params->{start}->{month}."-01T00:00:00";
-  my $time_end      =   $params->{end}->{year}."-"  .$params->{end}->{month}."-01T00:00:00";
+  my $time_end      = $params->{end}->{year}."-"  .$params->{end}->{month}."-01T00:00:00";
   my $tp_start      = Time::Piece->strptime($time_start,"%Y-%m-%dT%H:%M:%S"); 
   my $tp_end1       = Time::Piece->strptime(  $time_end,"%Y-%m-%dT%H:%M:%S");
   my $lday          = $tp_end1->month_last_day;
@@ -322,8 +312,7 @@ sub get_files_in_interval {
   my @all_squid_files = sort { $a cmp $b } <$squid_logs_path/$squid_logs_prefix*.gz>;
   for my $log_filename (@all_squid_files) {
     if(my ($y,$m,$d) = $log_filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/) {
-      my $tp_log =  Time::Piece->strptime( "$y-$m-$d"."T00:00:00" ,"%Y-%m-%dT%H:%M:%S"); 
-
+      my  $tp_log  =  Time::Piece->strptime( "$y-$m-$d"."T00:00:00" ,"%Y-%m-%dT%H:%M:%S"); 
       if( $tp_log >= $tp_start && $tp_log < $tp_end ) {
         #print "fn=>$log_filename\n";
         push @retval,$log_filename;
