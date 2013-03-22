@@ -46,9 +46,7 @@ if($config->{mode} eq "parallel") {
 };
 
 
-`mkdir -p $config->{"output-path"}`
-  or confess "[ERROR] could not create output-path ".$config->{"output-path"};
-
+`mkdir -p $config->{"output-path"}`;
 
 my $model;
 my $view ;
