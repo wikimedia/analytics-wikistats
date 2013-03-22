@@ -177,21 +177,20 @@ sub write_child_output_to_disk {
 sub process_files {
   my ($self,$params) = @_;
 
-
   confess "[ERROR] max_children param invalid"
-    unless $params->{max_children} =~ /^\d+$/;
+    unless $params->{"max-children"} =~ /^\d+$/;
 
   $SIG{CHLD}="IGNORE";
-  $self->{MAX_PARALLEL_CHILDREN} = $params->{max_children};
+  $self->{MAX_PARALLEL_CHILDREN} = $params->{"max-children"};
 
-  warn $params->{children_output_path};
+  warn $params->{"children-output-path"};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
     next if ! -f $gz_logfile;
     $self->reset_for_new_child();
     my $child_pid = fork();
     if($child_pid == 0) {
       my $gz_basename  = basename($gz_logfile);
-      my $full_gz_path = $params->{children_output_path}."/$gz_basename";
+      my $full_gz_path = $params->{"children-output-path"}."/$gz_basename";
       my $output_file  = $full_gz_path;
       my $stderr_file  = $full_gz_path;
       $stderr_file     =~ s/\.gz$/.err/;
@@ -233,7 +232,7 @@ sub process_files {
     last if @{ $self->{active_children_pids} } == 0;
   };
 
-  $self->reduce($params->{children_output_path});
+  $self->reduce($params->{"children-output-path"});
 };
 
 

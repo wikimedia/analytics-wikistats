@@ -10,76 +10,59 @@ use JSON::XS;
 use Carp;
 use Getopt::Long;
 
-my  $mode         = "sequential";
-our $INPUT_PATH   = "/home/user/wikidata";
-my  $OUTPUT_PATH  = "/tmp/pageview_reports";
-my  $max_children = 4;
+if(@ARGV < 2) {
+  confess "[ERROR] you need to pass a config json as argument";
+};
 
-GetOptions(
-  "mode=s"         => \$mode,
-  "input-path=s"   => \$INPUT_PATH,
-  "output-path=s"  => \$OUTPUT_PATH,
-  "max-children=i" => \$max_children,
-);
+confess "[ERROR] config file does not exist"
+  unless -f $ARGV[1];
+
+my $config = decode_json(`cat $ARGV[1]`);
+
+
+confess "[ERROR] mode is supposed to be parallel or sequential"
+  unless $config->{mode} eq "sequential" || $config->{mode} eq "parallel";
+
+confess "[ERROR] input-path argument is not a valid path"
+  unless -d $config->{"input-path"};
+
+confess "[ERROR] output-path argument is not a valid path"
+  unless -d $config->{"output-path"};
+
+confess "[ERROR] max-children argument is not a valid integer"
+  unless $config->{"max-children"} =~ /^\d+$/;
 
 `
-mkdir -p $OUTPUT_PATH
-mkdir -p $OUTPUT_PATH/map
-rm    -f $OUTPUT_PATH/map/*.json
-rm    -f $OUTPUT_PATH/map/*.err
+mkdir -p $config->{"output-path"}
+mkdir -p $config->{"output-path"}/map
+rm    -f $config->{"output-path"}/map/*.json
+rm    -f $config->{"output-path"}/map/*.err
 `;
 
-confess "[ERROR] --mode is supposed to be parallel or sequential"
-  unless $mode eq "sequential" || $mode eq "parallel";
-
-confess "[ERROR] --input-path argument is not a valid path"
-  unless -d $INPUT_PATH;
-
-confess "[ERROR] --output-path argument is not a valid path"
-  unless -d $OUTPUT_PATH;
-
-confess "[ERROR] --max-children argument is not a valid integer"
-  unless $max_children =~ /^\d+$/;
 
 my $model;
 
-if($mode eq "sequential") {
+if(     $config->{mode} eq "sequential") {
   $model = PageViews::Model->new();
-} elsif($mode eq "parallel") {
+} elsif($config->{mode} eq "parallel") {
   $model = PageViews::ParallelModel->new();
 };
 
-my $process_files_params = {
-    logs_prefix => "sampled-1000.log-",
-    logs_path   => $INPUT_PATH,
-    start       => {
-      year  => 2012,
-      #month => 1,
-      month => 11,
-    },
-    end         => {
-      year  => 2012,
-      #month => 12,
-      month => 12,
-    },
+
+if($config->{mode} eq "parallel") {
+  if(!$config->{"children-output-path"}) {
+      confess "[ERROR] mode set to parallel but children-output-path not present";
+  } else {
+    if(!-d $config->{"children-output-path"}) {
+      confess "[ERROR] mode set to parallel but children-output-path doesn't exist";
+    };
+  };
 };
 
-#
-# USAGE example:
-#
-# ./pageviews.pl --input-path /a/squid/archive/sampled-geocoded --mode=parallel --max-children=9
-#
-#
-
-if($mode eq "parallel") {
-  $process_files_params->{children_output_path} = "$OUTPUT_PATH/map";
-  $process_files_params->{max_children}         = $max_children;
-};
-
-$model->process_files($process_files_params);
+$model->process_files($config);
 my $d = $model->get_data();
 
-open my $json_fh,">$OUTPUT_PATH/out.json";
+open my $json_fh,">",$config->{"output-path"}."/out.json";
 print   $json_fh JSON::XS->new
                          ->pretty(1)
                          ->canonical(1)
@@ -87,6 +70,4 @@ print   $json_fh JSON::XS->new
 close   $json_fh;
 
 my $v = PageViews::View->new($d);
-$v->render({ 
-    output_path => $OUTPUT_PATH 
-});
+$v->render($config);

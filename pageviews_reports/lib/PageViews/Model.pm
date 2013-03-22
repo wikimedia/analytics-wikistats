@@ -296,28 +296,11 @@ sub padding_2 {
     $_[0]<10 ? "0$_[0]" : $_[0];
 };
 
-sub get_mimetypes_present_for_december {
-  my ($self) = @_;
-
-  my $h = {};
-
-  $h->{$_} = 1 for keys %{$self->{mimetype_before_14dec}};
-  $h->{$_} = 1 for keys %{$self->{mimetype_after__14dec}};
-
-  my $retval = [];
-  @$retval = keys %$h;
-
-  return $retval;
-};
-
-
-
-
 sub get_files_in_interval {
   my ($self,$params) = @_;
   my @retval = ();
-  my $squid_logs_path   = $params->{logs_path};
-  my $squid_logs_prefix = $params->{logs_prefix};
+  my $squid_logs_path   = $params->{"input-path"};
+  my $squid_logs_prefix = $params->{"logs-prefix"};
 
   $params->{start}->{month} = padding_2($params->{start}->{month});
   $params->{end}->{month}   = padding_2($params->{end}->{month});
@@ -745,7 +728,6 @@ sub get_data {
     big_total_processed      => $big_total_processed             ,
     big_total_discarded      => $big_total_discarded             ,
     big_total_bots           => $big_total_bots                  ,
-    mimetypes_december_chart => $self->get_mimetypes_present_for_december,
   };
 
   $retval->{$_} = $self->{$_}
