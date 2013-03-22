@@ -167,17 +167,17 @@ sub discard_rule_wikiproject {
     #print "$url\n";
     #print {$self->{fh_dbg_discarded}} $line;
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return 1;
+    return 0;
   };
   #print "$h_key\n" if $h_key;
   my $wikiproject_pair = $self->{accept_hash}->{$h_key};
 
   if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
     $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return 1;
+    return 0;
   };
 
-  return 0;
+  return $wikiproject_pair;
 }
 
 sub discard_rule_method {
@@ -234,7 +234,7 @@ sub process_line {
   return if $self->discard_rule_status_code($req_status);
   return if $self->discard_rule_bot_ip($ip);
   return if $self->discard_rule_bot_ua($ua);
-  return if (my $wikiproject_pair = $self->discard_rule_wikiproject($url));
+  return if !(my $wikiproject_pair = $self->discard_rule_wikiproject($url));
   return if $self->discard_rule_method($method);
   return if $self->discard_rule_mimetype($mime_type);
 

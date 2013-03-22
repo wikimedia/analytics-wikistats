@@ -10,14 +10,14 @@ use JSON::XS;
 use Carp;
 use Getopt::Long;
 
-if(@ARGV < 2) {
+if(@ARGV < 1) {
   confess "[ERROR] you need to pass a config json as argument";
 };
 
 confess "[ERROR] config file does not exist"
-  unless -f $ARGV[1];
+  unless -f $ARGV[0];
 
-my $config = decode_json(`cat $ARGV[1]`);
+my $config = decode_json(`cat $ARGV[0]`);
 
 
 confess "[ERROR] mode is supposed to be parallel or sequential"
@@ -26,11 +26,16 @@ confess "[ERROR] mode is supposed to be parallel or sequential"
 confess "[ERROR] input-path argument is not a valid path"
   unless -d $config->{"input-path"};
 
-confess "[ERROR] output-path argument is not a valid path"
-  unless -d $config->{"output-path"};
-
 confess "[ERROR] max-children argument is not a valid integer"
   unless $config->{"max-children"} =~ /^\d+$/;
+
+
+if($config->{mode} eq "parallel") {
+  if(!$config->{"children-output-path"}) {
+      confess "[ERROR] mode set to parallel but children-output-path not present";
+  };
+};
+
 
 `
 mkdir -p $config->{"output-path"}
@@ -49,15 +54,6 @@ if(     $config->{mode} eq "sequential") {
 };
 
 
-if($config->{mode} eq "parallel") {
-  if(!$config->{"children-output-path"}) {
-      confess "[ERROR] mode set to parallel but children-output-path not present";
-  } else {
-    if(!-d $config->{"children-output-path"}) {
-      confess "[ERROR] mode set to parallel but children-output-path doesn't exist";
-    };
-  };
-};
 
 $model->process_files($config);
 my $d = $model->get_data();
