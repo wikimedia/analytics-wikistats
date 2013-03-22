@@ -1,4 +1,4 @@
-package PageViews::Model;
+package PageViews::Model::Sequential;
 use strict;
 use warnings;
 use File::Basename qw/basename/;

@@ -1,5 +1,5 @@
-package PageViews::ParallelModel;
-use base 'PageViews::Model';
+package PageViews::Model::Parallel;
+use base 'PageViews::Model::Sequential';
 use JSON::XS;
 use File::Basename;
 use Carp;

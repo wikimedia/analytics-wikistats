@@ -2,9 +2,11 @@
 use strict;
 use warnings;
 use lib "./lib";
-use PageViews::ParallelModel;
-use PageViews::Model;
-use PageViews::View;
+use PageViews::Model::Sequential;
+use PageViews::Model::Parallel;
+use PageViews::View::WikiReport;
+use PageViews::View::Web;
+use PageViews::View::Limn;
 use Data::Dumper;
 use JSON::XS;
 use Carp;
@@ -19,9 +21,11 @@ confess "[ERROR] config file does not exist"
 
 my $config = decode_json(`cat $ARGV[0]`);
 
+confess "[ERROR] invalid mode"
+  unless $config->{mode} ~~ ["sequential","parallel"];
 
-confess "[ERROR] mode is supposed to be parallel or sequential"
-  unless $config->{mode} eq "sequential" || $config->{mode} eq "parallel";
+confess "[ERROR] invalid output-format"
+  unless $config->{"output-format"} ~~ ["web","wikireport","limn"];
 
 confess "[ERROR] input-path argument is not a valid path"
   unless -d $config->{"input-path"};
@@ -34,36 +38,45 @@ if($config->{mode} eq "parallel") {
   if(!$config->{"children-output-path"}) {
       confess "[ERROR] mode set to parallel but children-output-path not present";
   };
+  `
+  mkdir -p $config->{"output-path"}/map
+  rm    -f $config->{"output-path"}/map/*.json
+  rm    -f $config->{"output-path"}/map/*.err
+  `
 };
 
 
-`
-mkdir -p $config->{"output-path"}
-mkdir -p $config->{"output-path"}/map
-rm    -f $config->{"output-path"}/map/*.json
-rm    -f $config->{"output-path"}/map/*.err
-`;
+`mkdir -p $config->{"output-path"}`
+  or confess "[ERROR] could not create output-path ".$config->{"output-path"};
 
 
 my $model;
+my $view ;
 
 if(     $config->{mode} eq "sequential") {
-  $model = PageViews::Model->new();
+  $model = PageViews::Model::Sequential->new();
 } elsif($config->{mode} eq "parallel") {
-  $model = PageViews::ParallelModel->new();
+  $model = PageViews::Model::Parallel->new();
 };
 
-
+if(      $config->{"output-format"} eq "web") {
+  $view = PageViews::View::Web->new();
+} elsif( $config->{"output-format"} eq "wikireport") {
+  $view = PageViews::View::WikiReport->new();
+} elsif( $config->{"output-format"} eq "limn") {
+  $view = PageViews::View::Limn->new();
+};
 
 $model->process_files($config);
-my $d = $model->get_data();
+
+my $model_processed_data = $model->get_data();
 
 open my $json_fh,">",$config->{"output-path"}."/out.json";
 print   $json_fh JSON::XS->new
                          ->pretty(1)
                          ->canonical(1)
-                         ->encode($d);
+                         ->encode($model_processed_data);
 close   $json_fh;
 
-my $v = PageViews::View->new($d);
-$v->render($config);
+$view->set_data($model_processed_data);
+$view->render($config);

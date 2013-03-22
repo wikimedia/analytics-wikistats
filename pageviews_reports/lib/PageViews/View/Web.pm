@@ -1,4 +1,4 @@
-package PageViews::View;
+package PageViews::View::Web;
 use strict;
 use warnings;
 use Template;
@@ -6,11 +6,14 @@ use Carp;
 
 sub new {
   my ($class,$data) = @_;
-  my $raw_obj = {
-    data => $data,
-  };
+  my $raw_obj = {};
   my $obj     = bless $raw_obj,$class;
   return $obj;
+};
+
+sub set_data {
+  my ($self,$data) = @_;
+  $self->{data} = $data;
 };
 
 sub render {
