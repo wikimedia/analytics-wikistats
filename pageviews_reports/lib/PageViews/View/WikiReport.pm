@@ -7,6 +7,10 @@ sub new {
   return bless {}, $class;
 }
 
+sub padding_2 { 
+    $_[0]<10 ? "0$_[0]" : $_[0];
+};
+
 sub get_data_from_model {
   my ($self,$model) = @_;
 
@@ -45,9 +49,11 @@ sub get_data_for_csv {
       for my $day ( @days_sorted ) {
         my $value  = $self->{counts}->{$day}->{$language};
         my $lang   = lc($language);
-        my $date   = $day;
         next unless defined($value) && $value > 0;
-        $date      =~ s/-/\//;
+        my ($y,$m,$d) = $day =~ /(\d+)-(\d+)-(\d+)/;
+        $m = padding_2($m);
+        $d = padding_2($d);
+        my $date   = "$y/$m/$d";
         $buffer   .= "$lang.m,$date,$value\n";
       };
     };
