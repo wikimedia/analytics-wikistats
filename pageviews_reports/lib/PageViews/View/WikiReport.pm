@@ -1,13 +1,10 @@
 package PageViews::View::WikiReport;
+use strict;
+use warnings;
 
 sub new {
   my ($class) = @_;
   return bless {}, $class;
-}
-
-sub set_data {
-  my ($self,$data) = @_;
-  $self->{data} = $data;
 }
 
 sub get_data_from_model {

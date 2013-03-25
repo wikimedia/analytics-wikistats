@@ -7,10 +7,10 @@ use PageViews::Model::Parallel;
 use PageViews::View::WikiReport;
 use PageViews::View::Web;
 use PageViews::View::Limn;
+use PageViews::View::JSON;
 use Data::Dumper;
 use JSON::XS;
 use Carp;
-use Getopt::Long;
 
 if(@ARGV < 1) {
   confess "[ERROR] you need to pass a config json as argument";
@@ -65,14 +65,6 @@ $model->process_files($config);
 for my $format ( @{ $config->{"output-formats"} }) {
 
   if( $format eq "web") {
-    #my $json_path = $config->{"output-path"}."/out.json";
-    #print "[DBG] json_path = $json_path\n";
-    #open my $json_fh,">",$json_path;
-    #print   $json_fh JSON::XS->new
-    #->pretty(1)
-    #->canonical(1)
-    #->encode($model_processed_data);
-    #close   $json_fh;
     $view = PageViews::View::Web->new();
     $view->get_data_from_model($model);
     $view->render($config);
@@ -82,6 +74,10 @@ for my $format ( @{ $config->{"output-formats"} }) {
     $view->render($config);
   } elsif( $format eq "limn") {
     $view = PageViews::View::Limn->new();
+  } elsif( $format eq "json") {
+    $view = PageViews::View::JSON->new();
+    $view->get_data_from_model($model);
+    $view->render($config);
   } else {
     confess "[ERROR] Something's wrong";
   };
