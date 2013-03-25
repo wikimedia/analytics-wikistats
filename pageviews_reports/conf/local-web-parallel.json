@@ -4,7 +4,7 @@
   "input-path"           : "/home/user/wikidata/bumpdata_small",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",
-  "output-format"        : "wikireport",
+  "output-formats"       : ["wikireport","web"],
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,
