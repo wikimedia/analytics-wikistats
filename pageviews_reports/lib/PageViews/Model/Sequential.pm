@@ -11,6 +11,11 @@ use Time::Piece;
 my $MINIMUM_EXPECTED_FIELDS = 9;
 my $ONE_DAY = 86_400;
 
+#
+# Generate all possible valid urls for mobile pages and make a hash with those as keys.
+# The values will indicate what kind of url it is.
+#
+
 sub build_accepted_url_map {
   my $h = {};
   my @languages = (
@@ -76,8 +81,6 @@ sub new {
     counts_discarded_status     => {},
     counts_discarded_mimetype   => {},
 
-    mimetype_before_14dec       => {},
-    mimetype_after__14dec       => {},
     counts_mimetype             => {},
     accept_hash                 => build_accepted_url_map(),
   };
@@ -216,7 +219,7 @@ sub process_line {
   my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
 
-  my $ymd = $tp->year."-".$tp->mon; 
+  my $ymd = $tp->year."-".$tp->mon.'-'.$tp->mday; 
   $self->{last_ymd} = $ymd;
 
 
@@ -568,10 +571,6 @@ sub scale_months_to_30 {
     };
   };
 
-  for my $mimetype ( keys %{ $self->{mimetype_after__14dec} } ) {
-    $scaled->{mimetype_after__14dec}->{$mimetype} = int( ($scaled->{mimetype_after__14dec}->{$mimetype} / 18) * 14 );
-  };
-
   # place scaled property hashes back into the current object
 
   for my $property ( @to_scale1, @to_scale2 ) {
@@ -580,14 +579,103 @@ sub scale_months_to_30 {
 };
 
 
+# 
+# 
+# 
+# 
+
+sub get_data_view_wikireport {
+  my ($self)    = @_;
+  my $lang_uniq = {};
+  my $buffer    = "";
+  for my $day ( keys $self->{counts}) {
+    for my $language ( keys $self->{counts}->{$day} ) {
+      $lang_uniq->{$language} = 1;
+    };
+  };
+  my @days_sorted = sort { $a cmp $b } (keys %{ $self->{counts} } );
+  my @lang_sorted = sort { $a cmp $b } (keys %$lang_uniq );
+
+  for my $day ( @days_sorted ) {
+    for my $language (@lang_sorted) {
+      for my $day ( @days_sorted ) {
+        my $value  = $self->{counts}->{$day}->{$language};
+        my $lang   = lc($language);
+        my $date   = $day;
+        next unless defined($value) && $value > 0;
+        $date      =~ s/-/\//;
+        $buffer   .= "$lang.m,$date,$value\n";
+      };
+    };
+  };
+
+  return $buffer;
+}
+
+
+
+#
+# Group the counts from days to months
+# (basically adding everything as needed)
+#
+
+sub compact_days_to_months {
+  my ($self) = @_;
+  my @to_compact1 = qw/
+    counts
+    counts_wiki_basic
+    counts_wiki_index
+    counts_api
+  /;
+
+  my @to_compact2 = qw/
+    counts_discarded_bots    
+    counts_discarded_url     
+    counts_discarded_time    
+    counts_discarded_fields  
+    counts_discarded_status  
+    counts_discarded_mimetype
+  /;
+
+  my $compact = {};
+
+  my $month;
+  # take all monthly language counts, add them up
+  for my $day ( keys %{ $self->{counts} } ) {
+    ($month) = $day =~ /^(\d{4}-\d{2})/;
+    # initialized scale hash for this month
+    for my $property ( @to_compact1, @to_compact2 ) {
+      $compact->{$property}->{$month} //= {};
+      for my $language ( keys %{ $self->{counts}->{$day} } ) {
+        if($property ~~ @to_compact1) {
+          $compact->{$property}->{$month}->{$language} //= 0;
+          $compact->{$property}->{$month}->{$language}  += 
+             $self->{$property}->{$day}->{$language};
+        };
+        if($property ~~ @to_compact2) {
+          $compact->{$property}->{$month} //= 0;
+          $compact->{$property}->{$month}  += 
+             $self->{$property}->{$day};
+        };
+      };
+    };
+  };
+
+  for my $property ( @to_compact1, @to_compact2 ) {
+    $self->{$property} = $compact->{$property};
+  };
+}
+
 
 #
 # Format data in a nice way so we can pass it to the templating engine
+# (for PageViews::View::Web
 #
 
-sub get_data {
+sub get_data_view_web {
   my ($self) = @_;
 
+  $self->compact_days_to_months;
   $self->scale_months_to_30;
 
   my $data = [];
@@ -734,9 +822,6 @@ sub get_data {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
-
-    mimetype_before_14dec
-    mimetype_after__14dec
     /;
 
   return $retval;

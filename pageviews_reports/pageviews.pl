@@ -59,22 +59,31 @@ if(     $config->{mode} eq "sequential") {
 
 if(      $config->{"output-format"} eq "web") {
   $view = PageViews::View::Web->new();
+  $model->process_files($config);
+  print "[DBG] web rendering\n";
+  my $model_processed_data = $model->get_data_view_web();
+  #print Dumper $model_processed_data;
+
+  my $json_path = $config->{"output-path"}."/out.json";
+  print "[DBG] json_path = $json_path\n";
+  open my $json_fh,">",$json_path;
+    print   $json_fh JSON::XS->new
+      ->pretty(1)
+      ->canonical(1)
+      ->encode($model_processed_data);
+  close   $json_fh;
+
+  $view->set_data($model_processed_data);
+  $view->render($config);
 } elsif( $config->{"output-format"} eq "wikireport") {
+  $model->process_files($config);
+  my $model_processed_data = $model->get_data_view_wikireport();
   $view = PageViews::View::WikiReport->new();
+  $view->set_data($model_processed_data);
+  $view->render($config);
 } elsif( $config->{"output-format"} eq "limn") {
   $view = PageViews::View::Limn->new();
+} else {
+  confess "[ERROR] Something's wrong";
 };
 
-$model->process_files($config);
-
-my $model_processed_data = $model->get_data();
-
-open my $json_fh,">",$config->{"output-path"}."/out.json";
-print   $json_fh JSON::XS->new
-                         ->pretty(1)
-                         ->canonical(1)
-                         ->encode($model_processed_data);
-close   $json_fh;
-
-$view->set_data($model_processed_data);
-$view->render($config);
