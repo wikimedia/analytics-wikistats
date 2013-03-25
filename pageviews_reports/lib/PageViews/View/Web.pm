@@ -291,9 +291,10 @@ sub compact_days_to_months {
   my $month;
   # take all monthly language counts, add them up
   for my $day ( keys %{ $self->{counts} } ) {
-    ($month) = $day =~ /^(\d{4}-\d{2})/;
+    ($month) = $day =~ /^(\d{4}-\d+)-/;
     # initialized scale hash for this month
     for my $property ( @to_compact1, @to_compact2 ) {
+      $compact->{$property}           //= {};
       $compact->{$property}->{$month} //= {};
       for my $language ( keys %{ $self->{counts}->{$day} } ) {
         if($property ~~ @to_compact1) {

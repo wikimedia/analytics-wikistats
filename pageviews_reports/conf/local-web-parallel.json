@@ -1,7 +1,7 @@
 {
   "mode"                 : "parallel",
-  "max-children"         : 4,
-  "input-path"           : "/home/user/wikidata/bumpdata_small",
+  "max-children"         : 8,
+  "input-path"           : "/home/user/wikidata",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",
   "output-formats"       : ["wikireport","web"],
