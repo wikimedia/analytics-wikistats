@@ -1246,7 +1246,7 @@ sub CollectActiveUsersPerMonthsAllWikis
   print "\n" ;
   foreach $wp (sort { $file_sizes {$a} <=> $file_sizes {$b} } keys %file_sizes)
   {
-  # next if $wp eq 'commons' ; # do not merge in yet
+    # next if $wp eq 'commons' ; # do not merge in yet 
 
     # next if $wp !~ /^(?:ab|ak)$/ ; # test only, use few files for speed
     # next if $wp !~ /^a/ ; # test only, use few files for speed

@@ -81,7 +81,7 @@
   $fs_closed  = 'C' ;
 
   $test_max_lines_output = 0 ;    # if $test_max_lines_output > 0 break after $test_max_lines_output lines output
-# $test_max_language     = 'ad' ; # if $test_max_language ne '', treat input line starting with language code gt $test_max_language as end of file
+# $test_max_language     = 'at' ; # if $test_max_language ne '', treat input line starting with language code gt $test_max_language as end of file
 
   $threshold_views_per_day   = 0 ; # while merging hourly files, omit titles with less views than ..
   $threshold_views_per_month = 5 ; # while merging daily files, omit titles with less views than ..
@@ -1005,7 +1005,7 @@ sub PhaseBuildDailyFile_MergeFiles
   ($fn_out_merged_hourly, $fh_out_merged_hourly, $process_day) = &PhaseBuildDailyFile_OpenOutputFiles ($dir_out, $date) ;
   return if ! $process_day ;
 
-  ($files_in_found_hourly, $msg_files_found_hourly) = &PhaseBuildDailyFile_OpenInputFiles ($date, @files) ;
+  ($files_in_found_hourly, $msg_files_found_hourly) = &PhaseBuildDailyFile_PrepInputFiles ($date, @files) ;
   $files_in_open_hourly = $files_in_found_hourly ;
 
   my $header = &PhaseBuildDailyFile_CreateHeaderDailyFile ($date, $threshold_views_per_day, $msg_files_found_hourly) ;
@@ -1044,13 +1044,21 @@ sub PhaseBuildDailyFile_MergeFiles
 
           $file = $fh_in_hourly [$hour] ;
           $line = <$file> ;
-          while ($line =~ /^\*/)
+          
+	  while ($line =~ /^\Q$key_low\E /) # |Q..|E do not interpret special chars like ( and ) in variable 
+	  {
+	    print "\nIgnore duplicate key '$key_low'\n\n" ; # should only occur few days after data stream bug from Jan 31 2013   	  
+            $line = <$file> ;
+	  }
+	  
+	  while ($line =~ /^\*/)
 	  { $line = <$file> ; }
 
 	  # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
 	  # $line =~ s/^([\w\-]+) /$1.z /o  ;
 
  	  ($lang,$title,$count,$dummy) = split (' ', $line) ;
+
           $totals_per_lang_in {$lang} += $count ;   
 
           # during tests fake end of file early on, after a few languages have been fully processed
@@ -1068,7 +1076,10 @@ sub PhaseBuildDailyFile_MergeFiles
           {
             close $fh_in_hourly [$hour] ; 
 
-            $files_in_open_hourly-- ;
+            if ($line)
+	    { print "EOF hour $hour, lang $lang, test_max_language $test_max_language\n" ; } 
+
+	    $files_in_open_hourly-- ;
             $fs_open_hourly [$hour] = $fs_closed ;
             $fs_key_hourly  [$hour] = "\xFF\xFF";
           }
@@ -1081,9 +1092,17 @@ sub PhaseBuildDailyFile_MergeFiles
     if (++$lines % 100000 == 0)
     { &Log ("$lines: $key_low\n") ; }
 
-    last if $test_max_lines_output > 0 and $lines > $test_max_lines_output ;
+    if ($test_max_lines_output > 0 and $lines > $test_max_lines_output)
+    {
+      print "LAST, lines $lines, test_max_lines_output $test_max_lines_output\n" ;
+      last ;	    
+    } 
 
-    last if $key_low eq "\xFF\xFF" ;
+    if ($key_low eq "\xFF\xFF") 
+    {
+      print "LAST, key $key, key_low $key_low\n" ;
+      last ; 
+    }
 
   # next if &InvalidLanguage ($key_low) ;
 
@@ -1091,6 +1110,7 @@ sub PhaseBuildDailyFile_MergeFiles
     &PhaseBuildDailyFile_WriteCounts ($fh_out_merged_hourly, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev) ;
 
     $key_low_prev = $key_low ;
+
     $lang_prev = $lang ;
   }
 
@@ -1194,8 +1214,8 @@ sub PhaseBuildDailyFile_CloseOutputFiles
   &WriteJobStatsPerCycle ($fn_out_merged_hourly_final) ;
 }
 
-
-sub PhaseBuildDailyFile_OpenInputFiles
+# qqq test patch for broken input 
+sub PhaseBuildDailyFile_PrepInputFiles
 {
   my ($date,@files) = @_ ;
 
@@ -1205,6 +1225,9 @@ sub PhaseBuildDailyFile_OpenInputFiles
   $total_files_processed_per_cycle = 0 ;
   $total_bytes_processed_per_cycle = 0 ;
   $total_bytes_produced_per_cycle  = 0 ;
+
+  $max_count_overflow = 0 ;
+  $max_count_overflow_lang_title = '' ;
 
   my ($files_in_found, $msg_files_found) ;
 
@@ -1240,11 +1263,47 @@ sub PhaseBuildDailyFile_OpenInputFiles
     my $time_start_patch_sort = time ;
     open $fh_in, "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; 
     open $fh_patched, '>', $file_patched || &Abort ("Could not write '$file_patched'") ; 
+
+    $lines_read = 0 ;
+    $lines_read_extra_spaces = 0 ;
     while ($line = <$fh_in>)
     {
+      $lines_read ++ ;
       # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix, test for field delimited string without dot 
       $line =~ s/^([^\.\s]+)2 /$1.y /o  ;
       $line =~ s/^([^\.\s]+) /$1.z /o  ;
+
+     ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
+      if ($overflow ne '')  # too many fields, due to spaces in title since Jan 31, 2013, try to fix  
+      {
+        $lines_read_extra_spaces ++ ;
+	      
+	chomp $line ;
+	
+	if ($lang eq 'ar.z') { print "\n!!! Too many fields: overflow: '$overflow'\n$line'\n" ; }
+
+        @fields = split (' ', $line) ;
+	
+	if ($lang eq 'ar.z') { print "Fields: " . join ('||',@fields) . "\n" ; }
+        
+	$lang  = $fields [0] ;	    
+	$title = $fields [1] ;
+	for (my $j = 2 ; $j < $#fields - 1 ; $j++) 
+	{ $title .= '%20' . $fields [$j] ; } 
+        $count = $fields [$#fields-1] ;
+
+	if ($count > $max_count_overflow)
+	{ 
+          $max_count_overflow = $count ; 
+	  $max_count_overflow_lang_title = "hour $hour: $lang $title $count\n" ;
+        }  
+
+	if ($lang eq 'ar.z') { print "lang '$lang', title '$title', count '$count'\n\n" ; }
+
+	$line = "$lang $title $count 0\n" ;
+
+	if ($lang eq 'ar.z') { print "$line\n\n" ; }
+      }
       print $fh_patched $line ;
     }
     close $fh_in ;
@@ -1256,6 +1315,9 @@ sub PhaseBuildDailyFile_OpenInputFiles
     $result = `$cmd` ;
     
     &Log ("File found '$file_in', patch/sort to '$file_sorted' in " . (time - $time_start_patch_sort) . " secs.\n") ;
+
+    if ($lines_read_extra_spaces > 0)
+    { print "Invalid lines with extra spaces: $lines_read_extra_spaces out of $lines_read total\n" ; }
 
     open $fh_in_hourly [$hour], "<", $file_sorted || &Abort ("Sorted file '" . $file_sorted . "' could not be opened.") ; 
 
@@ -1287,6 +1349,10 @@ sub PhaseBuildDailyFile_OpenInputFiles
     $count [$hour] = $count ;
     $totals_in {$lang} += $count ;
   }
+  
+
+  if ($max_count_overflow_lang_title ne '')
+  { print "Max count on faulty records (extra spaces): $max_count_overflow_lang_title\n" ; }
   
   if ($files_in_found < 24)
   {
@@ -1813,7 +1879,7 @@ sub CheckForSequenceError
        else
        { &Log ("hour $hour: file closed, key ${fs_key_hourly [$hour]}\n") ; }
     }
-    &Abort ("Sequence error: '$key_low_prev' eq '$key_low'\n") ;
+    &Abort ("Sequence error: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ;
   }
 }
 
@@ -1889,8 +1955,17 @@ sub PhaseBuildMonthlyFile_CloseOutputFile
   if ($result ne '')
   { print "$result\n\n" ; }
   $fn_out_merged_daily_final .= '.bz2' ;
-  print "\n" ;
+# print "\n" ;
 
+  $fn_out_merged_daily_final_totals = $fn_out_merged_daily_final ;
+  $fn_out_merged_daily_final_totals =~ s/\.bz2/_totals.bz2/ ;
+
+  $cmd = "bzgrep -v '^#' $fn_out_merged_daily_final | awk '{print \$1\" \"\$2\" \"\$3}' | bzip2 > $fn_out_merged_daily_final_totals" ;
+  print "\n$cmd\n" ;
+  $result = `$cmd` ;
+  if ($result ne '')
+  { print "$result\n\n" ; }
+  
   $total_bytes_produced_per_cycle = -s $fn_out_merged_daily_final ;
   # &Log ("\nFile complete: $fn_out_merged_daily_final (size $total_bytes_produced_per_cycle bytes)\n") ;
 

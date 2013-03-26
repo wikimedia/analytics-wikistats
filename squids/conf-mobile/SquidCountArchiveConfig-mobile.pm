@@ -19,17 +19,17 @@ $squids                = "/home/spetrea/wikistats/wikistats/squids" ;
 
 
 # Data configuration
-$cfg_path_root_production = "$squids/csv_editors" ; 
+$cfg_path_root_production = "$squids/csv_mobile" ; 
 if( ! -d $cfg_path_root_production ) {
 	print "!!!!!!!!! path $cfg_path_root_production doesn't exist";
 	exit(-1);
 };
 $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
 
-$cfg_dir_in_production = "/a/squid/archive/edits-geocoded" ;
+$cfg_dir_in_production = "/a/squid/archive/mobile-geocoded" ;
 $cfg_dir_in_test = "?" ; # Erik
 
-$cfg_logname = "edits.log" ;
+$cfg_logname = "mobile.log" ;
   
 $cfg_default_argv = "-d 2011/10/16-2011/10/16" ; #set default arguments for test on local machine
 

@@ -1534,7 +1534,7 @@ sub GenerateTablesPerWiki
   if ($mode_wp) { $t0 = time ; }
   &GenerateTableMonthlyStats ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableMonthlyStats"} += $t1 - $t0 ; $t0 = $t1 ; }
-  &GenerateTableEditActivityLevels ($wp) ;
+  &GenerateTableEditActivityLevels ($wp,$false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   if ($mode_wx)
   {
@@ -1586,7 +1586,7 @@ sub GenerateTablesPerWiki
 
 sub GenerateTablesAllProjects
 {
-  $show_all_months = $true ;
+  my $show_all_months = $true ;
 
   $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpreadAllProjects.csv" ;
 
@@ -1615,29 +1615,48 @@ sub GenerateTablesAllProjects
   $MonthlyStatsWpStart {'zz'}    = $MonthlyStatsWpStart {'zz*'} ;
   $MonthlyStatsWpStop  {'zz'}    = $MonthlyStatsWpStop  {'zz*'} ;
 
+  ##########################################################################################
   # report activity levels for editors and uploaders where upload is equal to any other edit
+  $out_page_subtitle = "Also: <a href='TablesWikimediaAllProjects_AllMonths.htm'>Unabridged version</a> (all months)" ;
   &GenerateHtmlStart ('Wikimedia Stats For All Projects',  '',  $out_options,
                       'Wikimedia Stats For All Projects',  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
 
-  &GenerateTableEditActivityLevels ('zz*') ;
+  &GenerateTableEditActivityLevels ('zz*', $false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   &GenerateColophon ($false, $false) ;
   $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
   $file_html = $path_out . "TablesWikimediaAllProjects.htm" ;
+  open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
+  print FILE_OUT &AlignPerLanguage ($out_html) ;
+  close "FILE_OUT" ;
+
+  ##########################################################################################
+  $out_page_subtitle = "Also: <a href='TablesWikimediaAllProjects.htm'>Abridged version</a> (older history every 3rd month))" ;
+  &GenerateHtmlStart ('Wikimedia Stats For All Projects',  '',  $out_options,
+                      'Wikimedia Stats For All Projects',  $out_page_subtitle, $out_explanation,
+                      $out_button_prev, $out_button_next,   $out_button_switch,
+                      $out_crossref,    $out_msg) ;
+
+  &GenerateTableEditActivityLevels ('zz*', $true) ; # $true = show all months
+
+  &GenerateColophon ($false, $false) ;
+  $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
+  $file_html = $path_out . "TablesWikimediaAllProjects_AllMonths.htm" ;
 
   open "FILE_OUT", ">", $file_html || abort ("Output file " . $file_html . " could not be opened.") ;
   print FILE_OUT &AlignPerLanguage ($out_html) ;
   close "FILE_OUT" ;
 
+  ##########################################################################################
   # report activity levels for editors and uploaders where upload is equal to 5 edits
   &GenerateHtmlStart ('Wikimedia Stats For All Projects, Weighted Activity (Experimental)',  '',  $out_options,
                       'Wikimedia Stats For All Projects, Weighted Activity (Experimental)',  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
 
-  &GenerateTableEditActivityLevels ('zz*w') ;
+  &GenerateTableEditActivityLevels ('zz*w',! $false) ; # false = do not show all months, just last 24 and every 3rd for the rest
 
   &GenerateColophon ($false, $false) ;
   $out_html .= "\n$out_script_embedded\n</body>\n</html>" ;
@@ -2126,7 +2145,11 @@ sub TableMonthlyStatsForecast
 # Count users with over x edits
 sub GenerateTableEditActivityLevels
 {
-  my $wp = shift ;
+  my ($wp,$show_all_months) = @_ ;
+  
+  if ($show_all_months_special)
+  { $show_all_months = $true ; }
+
   my $all_projects = $false ;
   if ($wp =~ '^zz*')
   { $all_projects = $true ; }
@@ -2143,10 +2166,6 @@ sub GenerateTableEditActivityLevels
 
   my %namespaces ;
   my %usertypes ;
-
-  $show_all_months = $false ; # test only
-  if ($show_all_months_special)
-  { $show_all_months = $true ; }
 
   $namespaces {'A'} = "&nbsp;Articles&nbsp;" ;
   $namespaces {'T'} = "&nbsp;Talk&nbsp;" ;
@@ -2544,7 +2563,7 @@ sub GenerateTableEditActivityLevels
   $out_html .= $lines_html_monthly_counts ;
   if (! $show_all_months)
   {
-    $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>" ;
+    $out_html .= "<tr bgcolor=#ffdead><td colspan=333 class=lb><img src='../black.gif' width='1' height='4' alt=''></td></tr>\n\n" ;
     $out_html .= $lines_html_quarterly_counts ;
   }
   $out_html .= "</table>\n" ;
@@ -2605,7 +2624,6 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
   if ($wp =~ /^zzz?$/)
   { return ; }
 
-#===============================================================================================
   &ReadFileCsv ($file_csv_users, $wp) ;
 
   if ($#csv < 100)
@@ -2615,11 +2633,9 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
   my $bins = 15 ;
   my $users_tot = 0 ;
   my $edits_tot = 0 ;
-# my (%edits_min, %edits, %users) ;
   my (@edits_min, @edits, @users) ;
   $j = 1 ;
   for ($i = 0 ; $i < $bins ; $i++)
-# { $edits_min {$i} = $j - 0.01 ; $j *= $sqrt10 ; }
   { $edits_min [$i] = $j - 0.01 ; $j *= $sqrt10 ; }
 
   foreach $line (@csv)
@@ -2630,24 +2646,20 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
     for ($i = 0 ; $i < $bins ; $i++)
     {
-#     if ($edits_min {$i} <= $edits_namespace_a)
       if ($edits_min [$i] <= $edits_namespace_a)
       {
-#       $users {$i} ++ ;
         $users [$i] ++ ;
-#       $edits {$i} += $edits_namespace_a ;
         $edits [$i] += $edits_namespace_a ;
       }
     }
   }
 
-#===============================================================================================
-
-#  $out_htmlx .= "<br><a id='wikipedians' name='wikipedians'>&nbsp;</a><hr><p>" . &b($out_tbl1_intro) ;
-#  if (defined ($out_tbl1_intro2))
-#  { $out_html .= "<br><small>" . $out_tbl1_hdr9 . ": " . $out_tbl1_intro2 . "</small>" ; }
-#  if (defined ($out_tbl1_intro3))
-#  { $out_html .= "<br><small>" . $out_tbl1_intro3 . "</small>" ; }
+  #===============================================================================================
+  #  $out_htmlx .= "<br><a id='wikipedians' name='wikipedians'>&nbsp;</a><hr><p>" . &b($out_tbl1_intro) ;
+  #  if (defined ($out_tbl1_intro2))
+  #  { $out_html .= "<br><small>" . $out_tbl1_hdr9 . ": " . $out_tbl1_intro2 . "</small>" ; }
+  #  if (defined ($out_tbl1_intro3))
+  #  { $out_html .= "<br><small>" . $out_tbl1_intro3 . "</small>" ; }
 
   $out_html .= "\n\n<br><a id='editdistribution' name='editdistribution'>&nbsp;</a><hr><p>" . &b($out_tbl8_intro) . "<br><small>$out_tbl1_intro2</small>" ;
   $out_html .= "<p>1 : 3 : 10 : 32 : 100 : 316 : 1000 ... = 1 : &radic;10 : 10 : 10&radic;10 : 100 : 100&radic;10 : 1000 ... " ;
@@ -2663,18 +2675,12 @@ sub GenerateTableDistributionActiveUsers_OldObsoleteRemove
 
   for ($i = 0 ; $i < $bins ; $i++)
   {
-#   if (@users {$i} == 0) { last ; }
     if ($users [$i] == 0) { last ; }
 
-#    $out_html .= &tr (&tdrb (sprintf ("%.0f", $edits_min {$i})).
     $out_html .= &tr (&tdrb (sprintf ("%.0f", $edits_min [$i])).
-#                     &tdrb ($users {$i}).
                       &tdrb ($users [$i]).
-#                     &tdrb (sprintf ("%.1f\%", 100 * ($users {$i} / $users_tot))) .
                       &tdrb (sprintf ("%.1f\%", 100 * ($users [$i] / $users_tot))) .
-#                     &tdrb ($edits {$i}).
                       &tdrb ($edits [$i]).
-#                     &tdrb (sprintf ("%.1f\%", 100 * ($edits {$i} / $edits_tot)))) ;
                       &tdrb (sprintf ("%.1f\%", 100 * ($edits [$i] / $edits_tot)))) ;
   }
   $out_html .= "</table>\n" ;
@@ -4079,15 +4085,14 @@ sub GenerateComparisonTable
     # http://forum.chromefans.org/problem-with-span-p-and-style-display-none-t389.html
     # $out_html .= "\n<span id='wait'><left><font color='green'><b>" . $out_rendering . "</b></font></left><p></span>\n" ;
 
-    my $coverage ;
     if ($mode_wp)
     {
          if ($region eq '')           { $coverage1 = "<font color=#000080>Wikipedia All Languages, </font>" ; }
       elsif ($region eq 'artificial') { $coverage1 = "<font color=#000080>Wikipedia Artificial Languages, </font>" ; }
       else                            { $coverage1 = "<font color=#000080>Wikipedia " . ucfirst $region . ", </font>" ; }
     }
-    elsif ($mode_wx)                  { $coverage = "<font color=#000080>Other Projects, </font>" ; }
-    else                              { $coverage = "<font color=#000080>$out_publication, </font>" ; }
+    elsif ($mode_wx)                  { $coverage1 = "<font color=#000080>Other Projects, </font>" ; }
+    else                              { $coverage1 = "<font color=#000080>$out_publication, </font>" ; }
 
    #if ($pageviews_mobile)            { $coverage2 = "<font color=#0000FF>Mobile, </font>" ; }
    # elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#0000FF>Non-Mobile, </font>" ; }
@@ -4095,8 +4100,6 @@ sub GenerateComparisonTable
     if ($pageviews_mobile)            { $coverage2 = "Mobile" ; }
     elsif ($pageviews_non_mobile)     { $coverage2 = "Non-Mobile" ; }
     if ($pageviews_combined)          { $coverage2 = "All Platforms" ; }
-
-    ($coverage2b = $coverage) =~ s/<[^>]*>//g ;
 
     if ($normalize_days_per_month)
     {
@@ -4110,7 +4113,6 @@ sub GenerateComparisonTable
     }
 
     $out_html .= "<p><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Site map for all page view reports</a><p>" ;
-
 
     if ($normalize_days_per_month)
     {
@@ -4172,18 +4174,22 @@ sub GenerateComparisonTable
   # }
 
 
-    $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
-    $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
-    $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
-    if ($pageviews_mobile)
-    { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
-    $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
+    if (! $mode_wo) # wikivoyage did not yet exist when following data losses occurred 
+    {  
+      $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+      $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
+      $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
+	$out_html .= "<p><b><font color=#FF0000>Warning: These counts include bot/crawler requests.</b><br>Actually 'page requests' for now would be more a accurate report title than 'page views'.</font><br>Filtering these bot requests is planned, but awaits a solution that doesn't overload our servers.<br>Overall about <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>15% of pages served</a> on all Wikimedia wikis combined are due to bots requests. On less popular wikis the share of bot requests will be higher.</font>" ;
+      if ($pageviews_mobile)
+      { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
+      $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
 
-    $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+      $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
 
                  # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
                  # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
                  # "<hr>" ;
+    }		  
   }
 
   $out_html .= "<table border=1 cellspacing=0 id='table1' class=b style='margin-top:5px; border:solid 1px #000000' summary='Header comparison table'>\n" ;
@@ -4566,7 +4572,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   my ($topic,$id,$html) ;
   $month_lo_pageviews = 999 ;
   # add data for non-mobile projects
-  foreach $code (qw (wb wk wn wp wq ws wv wx)) # in case of wx (wikispecial), file contains only results for commons
+  foreach $code (qw (wb wk wn wp wq ws wv wo wx)) # in case of wx (wikispecial), file contains only results for commons
   {
     $path_in_views = $path_in ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
@@ -4690,7 +4696,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   {
     if ($pageviews_non_mobile)
     {
@@ -4717,7 +4723,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the ;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   {
     if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
     if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
@@ -4744,7 +4750,7 @@ sub GenerateComparisonTablePageviewsAllProjects
     { $line_html .= "\n<script language='javascript'>\n" ; }
 
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,$topic,data"} ;
 
@@ -4777,7 +4783,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
     $line_html .= "\n<script language='javascript'>\n" ;
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
@@ -4807,7 +4813,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
     $line_html .= "\n<script language='javascript'>\n" ;
   # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+    foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
     {
       $cell_html = $html_pageviews_all_projects {"$code,monthly,data_$m"} ;
       if ($cell_html eq '')
@@ -4864,7 +4870,7 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   $line_html = &the;
 # foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
-  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wx))
+  foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   { $line_html .= &th('&nbsp;'. ucfirst($project_names {$code}).'&nbsp;') ; }
   $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
@@ -5565,7 +5571,7 @@ sub GenerateComparisonTableMonthlyData
     if ($first {$wp} < $m0b)
     { $m0b = $first {$wp} ; }
   }
-
+  
   $m0 = $m0b ;
 
   for (my $m = $dumpmonth_ord ; $m >= $m0 ; $m--)
@@ -6593,7 +6599,7 @@ sub GenerateComparisonTableEditPlots
   {
     if ($skip {$wp}) { next ; }
 
-    if ($wp =~ /^z+$/)
+    if (($wp =~ /^z+$/) || $mode_wo)
     { $line_html .= &tdcb ("&nbsp;") ; }
     else
     {

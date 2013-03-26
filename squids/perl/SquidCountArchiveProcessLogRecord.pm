@@ -994,12 +994,6 @@ sub ProcessLine
   $mobile2 = $mobile;
   $mobile2 =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
 
-  if( ($mobile2 eq "-" || $mobile eq "-") && $os =~ /iPad|BlackBerry|iPhone|iPod/io) {
-    #warn "[DBG] ERROR2, exiting";
-    #warn "[DBG]";
-    exit 0;
-  };
-
 
   $records {"$mobile2,$mimecat"} += $count_event ;
   $records {"*,$mimecat"}       += $count_event ;
