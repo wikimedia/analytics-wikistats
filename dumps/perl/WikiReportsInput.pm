@@ -1172,6 +1172,11 @@ sub ReadMonthlyStats
       {
         ($lang2 = $lang) =~ s/-/_/g ;
         $PageViewsPerHour {$lang2} = $count / (24 * $day) ;
+
+	# add count for non-mobile (input from csv_sp only has mobile stats)
+	$lang2 =~ s/\.m// ;
+	if (! defined $PageViewsPerHour {$lang2})
+	{ $PageViewsPerHour {$lang2} = $count / (24 * $day) ; }
       }
     }
     # if ($mode_wp)
