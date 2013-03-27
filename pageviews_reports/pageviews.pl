@@ -2,77 +2,44 @@
 use strict;
 use warnings;
 use lib "./lib";
-use PageViews::ParallelModel;
 use PageViews::Model;
 use PageViews::View;
 use Data::Dumper;
 use JSON::XS;
 use Carp;
-use Getopt::Long;
 
-my  $mode         = "sequential";
-our $INPUT_PATH   = "/home/user/wikidata";
-my  $OUTPUT_PATH  = "/tmp/pageview_reports";
-my  $max_children = 4;
+# 
+# TODO: Add code to parse commandline parameters to
+#       select the period on which you want the report done
+#
+#       Add commandline parameter for path to output data
+#
 
-GetOptions(
-  "mode=s"         => \$mode,
-  "input-path=s"   => \$INPUT_PATH,
-  "output-path=s"  => \$OUTPUT_PATH,
-  "max-children=i" => \$max_children,
-);
+#our $__DATA_BASE        = "data";
+our $__DATA_BASE        = "/home/user/wikidata";
+my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
 
-`
-mkdir -p $OUTPUT_PATH
-mkdir -p $OUTPUT_PATH/map
-rm    -f $OUTPUT_PATH/map/*.json
-rm    -f $OUTPUT_PATH/map/*.err
-`;
+`mkdir -p $REPORT_OUTPUT_PATH`;
 
-confess "[ERROR] --mode is supposed to be parallel or sequential"
-  unless $mode eq "sequential" || $mode eq "parallel";
-
-confess "[ERROR] --input-path argument is not a valid path"
-  unless -d $INPUT_PATH;
-
-confess "[ERROR] --output-path argument is not a valid path"
-  unless -d $OUTPUT_PATH;
-
-confess "[ERROR] --max-children argument is not a valid integer"
-  unless $max_children =~ /^\d+$/;
-
-my $model;
-
-if($mode eq "sequential") {
-  $model = PageViews::Model->new();
-} elsif($mode eq "parallel") {
-  $model = PageViews::ParallelModel->new();
-};
-
-my $process_files_params = {
+my $m = PageViews::Model->new();
+$m->process_files({
     logs_prefix => "sampled-1000.log-",
-    logs_path   => $INPUT_PATH,
+    logs_path   => $__DATA_BASE,
     start       => {
       year  => 2012,
       #month => 1,
-      month => 6,
+      month => 10,
     },
     end         => {
       year  => 2012,
       #month => 12,
-      month => 8,
+      month => 12,
     },
-};
+});
 
-if($mode eq "parallel") {
-  $process_files_params->{children_output_path} = "$OUTPUT_PATH/map";
-  $process_files_params->{max_children}         = $max_children;
-};
+my $d = $m->get_data();
 
-$model->process_files($process_files_params);
-my $d = $model->get_data();
-
-open my $json_fh,">$OUTPUT_PATH"."out.json";
+open my $json_fh,">$REPORT_OUTPUT_PATH"."out.json";
 print   $json_fh JSON::XS->new
                          ->pretty(1)
                          ->canonical(1)
@@ -81,5 +48,5 @@ close   $json_fh;
 
 my $v = PageViews::View->new($d);
 $v->render({ 
-    output_path => $OUTPUT_PATH 
+    output_path => $REPORT_OUTPUT_PATH 
 });

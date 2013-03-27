@@ -2,7 +2,6 @@ package PageViews::ParallelModel;
 use base 'PageViews::Model';
 use JSON::XS;
 use File::Basename;
-use Carp;
 
 # add up all the counts from the workers
 sub reduce {
@@ -12,8 +11,6 @@ sub reduce {
   my $reduced_monthly_bots_count      = {};
   my $reduced_monthly_discarded_count = {};
   my $reduced_counts                  = {};
-  my $reduced_counts_wiki             = {};
-  my $reduced_counts_api              = {};
 
   # iterate over all children
   for my $child_output (<$json_path/*.json>) {
@@ -32,14 +29,8 @@ sub reduce {
     for my $month ( keys %{ $c->{counts} } ) {
       $reduced_counts->{$month} //= {};
       for my $language ( keys %{ $c->{counts}->{$month} } ) {
-        $reduced_counts->{     $month}->{$language} //= 0;
-        $reduced_counts->{     $month}->{$language}  += $c->{counts}->{$month}->{$language};
-
-        $reduced_counts_wiki->{$month}->{$language} //= 0;
-        $reduced_counts_wiki->{$month}->{$language}  += ( $c->{counts_wiki}->{$month}->{$language} // 0 );
-        $reduced_counts_api->{ $month}->{$language} //= 0;
-        $reduced_counts_api->{ $month}->{$language}  += ( $c->{counts_api}->{ $month}->{$language} // 0 );
-
+        $reduced_counts->{$month}->{$language} //= 0;
+        $reduced_counts->{$month}->{$language}  += $c->{counts}->{$month}->{$language};
       };
     };
   };
@@ -48,8 +39,6 @@ sub reduce {
   $self->{monthly_bots_count}       = $reduced_monthly_bots_count;
   $self->{monthly_discarded_count}  = $reduced_monthly_discarded_count;
   $self->{counts}                   = $reduced_counts;
-  $self->{counts_wiki}              = $reduced_counts_wiki;
-  $self->{counts_api}               = $reduced_counts_api;
 };
 
 sub map    {
@@ -66,8 +55,6 @@ sub reset_for_new_child {
   $_[0]->{monthly_discarded_count} = {};
   $_[0]->{monthly_bots_count}      = {};
   $_[0]->{counts}                  = {};
-  $_[0]->{counts_wiki}             = {};
-  $_[0]->{counts_api}              = {};
   #$_[0]->{bdetector}               = undef;
 };
 
@@ -98,11 +85,9 @@ sub write_child_output_to_disk {
   my ($self,$output_path) = @_;
   open my $fh,">$output_path";
   my $json = encode_json({
-    monthly_discarded_count => ( $self->{monthly_discarded_count} // {} ),
-    monthly_bots_count      => ( $self->{monthly_bots_count}      // {} ),
-    counts                  => ( $self->{counts}                  // {} ),
-    counts_wiki             => ( $self->{counts_wiki}             // {} ),
-    counts_api              => ( $self->{counts_api}              // {} )
+    monthly_discarded_count => $self->{monthly_discarded_count},
+    monthly_bots_count      => $self->{monthly_bots_count},
+    counts                  => $self->{counts},
   });
   print $fh $json;
   close $fh;
@@ -112,11 +97,9 @@ sub write_child_output_to_disk {
 sub process_files {
   my ($self,$params) = @_;
 
-  confess "[ERROR] max_children param invalid"
-    unless $params->{max_children} =~ /^\d+$/;
-
   $SIG{CHLD}="IGNORE";
-  $self->{MAX_PARALLEL_CHILDREN} = $params->{max_children};
+
+  $self->{MAX_PARALLEL_CHILDREN} = 9;
 
   warn $params->{children_output_path};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
@@ -131,8 +114,8 @@ sub process_files {
       $stderr_file     =~ s/\.gz$/.err/;
       $output_file     =~ s/\.gz$/.json/;
 
-      #warn "ERR => $stderr_file";
-      #warn "OUT => $output_file";
+      warn "ERR => $stderr_file";
+      warn "OUT => $output_file";
 
       open STDERR, ">$stderr_file";
         $self->map($gz_logfile);
@@ -143,26 +126,25 @@ sub process_files {
       #kill(TERM,$$);
       CORE::exit(-1);
     } else {
-      #warn "IN PARENT, pushing $child_pid on child list";
+      warn "IN PARENT, pushing $child_pid on child list";
       push @{ $self->{active_children_pids} }, $child_pid;
 
       # wait for at least one child to finish
       # so we can make another iteration of the for loop
       # and fire up one more child
       while( 1 ) {
-        #warn "PARENT CHECKING LOOP STARTED";
+        warn "PARENT CHECKING LOOP STARTED";
         my $free_slots = $self->update_child_slots;
-        #warn "FREE SLOTS = $free_slots";
+        warn "FREE SLOTS = $free_slots";
         last if $free_slots > 0;
         sleep 1;
-        #warn "PARENT CHECKING LOOP SLEPT";
+        warn "PARENT CHECKING LOOP SLEPT";
       };
     };
   };
 
   while( 1 ) {
     sleep 4;
-    warn "CHECK";
     $self->update_child_slots;
     last if @{ $self->{active_children_pids} } == 0;
   };

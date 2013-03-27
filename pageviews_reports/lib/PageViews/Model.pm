@@ -8,8 +8,6 @@ use PageViews::WikistatsColorRamp;
 use PageViews::Field::Parser;
 use PageViews::BotDetector;
 
-my $MINIMUM_EXPECTED_FIELDS = 10;
-
 
 sub new {
   my ($class) = @_;
@@ -32,7 +30,6 @@ sub process_line {
   my ($self,$line) = @_;
   my $bdetector = $self->{bdetector};
   my @fields = split(/\s/,$line);
-  return if @fields < $MINIMUM_EXPECTED_FIELDS;
                     
                         
   my $time       = $fields[2] ;
@@ -42,76 +39,47 @@ sub process_line {
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
 
-  my $tp; 
+  # 30x or 20x request status
+  return unless $req_status =~ m|[23]0\d$|; 
+  # text/html mime types only
+  return unless $mime_type  =~ m|^text\/html|;
 
-  if($time) {
-    $tp = convert_str_to_epoch1($time);
-    if(!(defined($tp) && @$tp == 7)) {
-      #print "[DBG] discard_time\n";
-      return;
-    };
-  };
-
-  if(!(defined($tp) && is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp))) {
-    #print "[DBG] interval_discarded\n";
-    return;
-  };
+  my $tp = convert_str_to_epoch1($time);
+  return if !(defined($tp) && @$tp == 7);
+  return if !is_time_in_interval_R($self->{tp_start},$self->{tp_end},$tp);
   my $ymd = $tp->[1]."-".$tp->[2]; 
 
-  # text/html mime types only
-  if(!( 
-      defined($mime_type)  && 
-      ( $mime_type eq '-' || index($mime_type,"text/html") != -1) ) 
-    ) {
-    #print "[DBG] mime_discard\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
-    return;
+
+  my $language = get_wikiproject_for_url($url);
+  #print "url     =$url\n";
+  #print "language=$language\n";
+
+  my $label_ip = undef;
+  eval {
+    $label_ip = $bdetector->match_ip($ip);
   };
-
-  # 30x or 20x request status
-  if(!( defined($req_status) && $req_status =~ m|[23]0\d$|  )) {
-    #print "[DBG] reqstatus_discarded\n";
-    $self->{monthly_discarded_count}->{$ymd}++;
-    return;
-  };
-
-  my $label_ip = $bdetector->match_ip($ip);
-
-  if( $label_ip ) {
-    #print "[DBG] bots_discarded\n";
+  #warn "ip=$ip";
+  #warn "label_ip=$label_ip";
+  if( !$@ && defined($label_ip) ) {
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
 
-  # arrayref with 2 values
-  # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
-  # second value is the actual wikiproject
-  my $wikiproject_pair = get_wikiproject_for_url2($url);
-
-  if( !defined($wikiproject_pair) ) {
-    #print "[DBG] language_discard\n";
+  if( !$language ) {
     $self->{monthly_discarded_count}->{$ymd}++;
     return;
   };
 
   if( defined($ua) && $bdetector->match_ua($ua) ) {
-    #print "[DBG] bot_ua_discard\n";
     $self->{monthly_bots_count}->{$ymd}++;
     return;
   };
 
-  my ($pv_type,
-      $pv_wikiproject) = @$wikiproject_pair;
-
-  # counts together /wiki/ and /w/api.php
-  $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
-  # counts /wiki/ separated from /w/api.php
-  $self->{"counts_$pv_type"}->{$ymd}->{$pv_wikiproject}++;
+  $self->{counts}->{$ymd}->{$language}++;
 };
 
 sub process_file {
   my ($self,$filename) = @_;
-  print "[DBG] process_file => $filename\n";
   open IN, "-|", "unpigz -c $filename";
   #open IN, "-|", "gzip -dc $filename";
   while( my $line = <IN>) {
