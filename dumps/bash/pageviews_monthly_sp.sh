@@ -3,7 +3,7 @@
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl # tests
+# perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 out=$dumps/out
 report=$dumps/logs/log_pageviews_monthly_sp.txt

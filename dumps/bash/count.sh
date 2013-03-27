@@ -63,7 +63,7 @@ fi
 
 
 trace=-r # trace resources
-#force=-f # force rerun even when dump for last month has already been processed (comment to disable)
+force=-f # force rerun even when dump for last month has already been processed (comment to disable)
 # bz2=-b # comment for default: 7z
 # reverts=-u 1 # uncomment to collect revert history only
 
