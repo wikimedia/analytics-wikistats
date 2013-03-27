@@ -65,6 +65,7 @@ sub get_data_for_csv {
         my $value  = $self->{counts}->{$month}->{$language};
         my $lang   = lc($language);
         next unless defined($value) && $value > 0;
+        $value    *= 1000;
         my ($y,$m) = $month =~ /(\d+)-(\d+)/;
         $m         = sprintf("%02d",$m);
         my $d      = how_many_days_month_has($y,$m);
