@@ -1,15 +1,19 @@
 package PageViews::View::WikiReport;
 use strict;
 use warnings;
+use PageViews::Util;
+
+{
+  no strict  'refs';
+  *{__PACKAGE__."::how_many_days_month_has"} = \&PageViews::Util::how_many_days_month_has;
+  *{__PACKAGE__."::compact_days_to_months" } = \&PageViews::Util::compact_days_to_months ;
+  use strict 'refs';
+};
 
 sub new {
   my ($class) = @_;
   return bless {}, $class;
 }
-
-sub padding_2 { 
-    $_[0]<10 ? "0$_[0]" : $_[0];
-};
 
 sub get_data_from_model {
   my ($self,$model) = @_;
@@ -32,27 +36,38 @@ sub get_data_from_model {
 };
 
 
+
+
 sub get_data_for_csv {
   my ($self)    = @_;
+
+  $self->compact_days_to_months;
+
   my $lang_uniq = {};
   my $buffer    = "";
-  for my $day ( keys $self->{counts}) {
-    for my $language ( keys $self->{counts}->{$day} ) {
+
+  for my $month ( keys $self->{counts}) {
+    for my $language ( keys $self->{counts}->{$month} ) {
       $lang_uniq->{$language} = 1;
     };
   };
-  my @days_sorted = sort { $a cmp $b } (keys %{ $self->{counts} } );
-  my @lang_sorted = sort { $a cmp $b } (keys %$lang_uniq );
+  my @months_sorted = sort { 
+    my @A = split(/-/,$a);
+    my @B = split(/-/,$b);
+    return $A[0] <=> $B[0] ||
+           $A[1] <=> $B[1]  ;
+  } (keys %{ $self->{counts} } );
+  my @lang_sorted   = sort { $a cmp $b } (keys %$lang_uniq );
 
-  for my $day ( @days_sorted ) {
+  for my $month ( @months_sorted ) {
     for my $language (@lang_sorted) {
-      for my $day ( @days_sorted ) {
-        my $value  = $self->{counts}->{$day}->{$language};
+      for my $month ( @months_sorted ) {
+        my $value  = $self->{counts}->{$month}->{$language};
         my $lang   = lc($language);
         next unless defined($value) && $value > 0;
-        my ($y,$m,$d) = $day =~ /(\d+)-(\d+)-(\d+)/;
-        $m = padding_2($m);
-        $d = padding_2($d);
+        my ($y,$m) = $month =~ /(\d+)-(\d+)/;
+        $m         = sprintf("%02d",$m);
+        my $d      = how_many_days_month_has($y,$m);
         my $date   = "$y/$m/$d";
         $buffer   .= "$lang.m,$date,$value\n";
       };
@@ -68,7 +83,7 @@ sub render {
 
   my $data = $self->get_data_for_csv();
 
-  my $output_path = $params->{"output-path"}."/PageViewsPerDayAll.csv";
+  my $output_path = $params->{"output-path"}."/PageViewsPerMonthAll.csv";
   open my $fh,">",$output_path;
 
   print $fh $data;

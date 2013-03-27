@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use File::Basename qw/basename/;
 use Data::Dumper;
-use PageViews::Field::Parser;
 use PageViews::BotDetector;
 use Time::Piece;
 

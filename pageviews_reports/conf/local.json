@@ -1,10 +1,11 @@
 {
-  "mode"                 : "parallel",
+  "model"                : "json",
   "max-children"         : 8,
-  "input-path"           : "/home/user/wikidata/bumpdata_small",
+  "-input-path"           : "/home/user/wikidata/bumpdata_small",
+  "input-path"           : "/tmp/pageviews",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",
-  "output-formats"       : ["wikireport","web","json"],
+  "output-formats"       : ["wikireport"],
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,

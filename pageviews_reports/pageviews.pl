@@ -4,6 +4,7 @@ use warnings;
 use lib "./lib";
 use PageViews::Model::Sequential;
 use PageViews::Model::Parallel;
+use PageViews::Model::JSON;
 use PageViews::View::WikiReport;
 use PageViews::View::Web;
 use PageViews::View::Limn;
@@ -21,8 +22,8 @@ confess "[ERROR] config file does not exist"
 
 my $config = decode_json(`cat $ARGV[0]`);
 
-confess "[ERROR] invalid mode"
-  unless $config->{mode} ~~ ["sequential","parallel"];
+confess "[ERROR] invalid model"
+  unless $config->{model} ~~ ["sequential","parallel","json"];
 
 confess "[ERROR] output-formats key must be defined"
   unless defined($config->{"output-formats"});
@@ -37,9 +38,9 @@ confess "[ERROR] max-children argument is not a valid integer"
   unless $config->{"max-children"} =~ /^\d+$/;
 
 
-if($config->{mode} eq "parallel") {
+if($config->{model} eq "parallel") {
   if(!$config->{"children-output-path"}) {
-      confess "[ERROR] mode set to parallel but children-output-path not present";
+      confess "[ERROR] model set to parallel but children-output-path not present";
   };
   `
   mkdir -p $config->{"output-path"}/map
@@ -54,17 +55,19 @@ if($config->{mode} eq "parallel") {
 my $model;
 my $view ;
 
-if(     $config->{mode} eq "sequential") {
+if(     $config->{model} eq "sequential") {
   $model = PageViews::Model::Sequential->new();
-} elsif($config->{mode} eq "parallel") {
+} elsif($config->{model} eq "parallel") {
   $model = PageViews::Model::Parallel->new();
+} elsif($config->{model} eq "json") {
+  $model = PageViews::Model::JSON->new();
 };
 
 $model->process_files($config);
 
 for my $format ( @{ $config->{"output-formats"} }) {
 
-  if( $format eq "web") {
+  if(      $format eq "web") {
     $view = PageViews::View::Web->new();
     $view->get_data_from_model($model);
     $view->render($config);
