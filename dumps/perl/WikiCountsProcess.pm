@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+  use WikiCountsConversions ;
+
   $qr_csvkey_lang_date = qr/([^,]*,)(\d\d).(\d\d).(\d\d\d\d).*$/ ;
 
   # count user with over x edits
@@ -1534,7 +1536,7 @@ sub CollectActiveUsersPerMonth
 
 # merge files generated in CollectActiveUsersPerMonthsAllWikis for al projects
 # based on CollectActiveUsersPerMonthsAllWikis (some more common code to be split off)
-sub CollectActiveUsersPerMonthsAllProjects
+sub CollectActiveUsersPerMonthAllProjects
 {
   my (@files, %file_sizes, %file_names, %file_ages, $file_csv_add, $file_csv_from, $file_csv_to, $time_start_step, $time_start_job) ;
 
@@ -1917,6 +1919,133 @@ if ($qqq)
   }
   &WriteFileCsv ($file_csv_users_activity_spread_all) ;
 
+}
+
+sub CountActiveWikisPerMonthAllProjects 
+{
+  &LogPhase ("CountActiveWikisPerMonthAllProjects") ;
+
+  chdir $path_in ;
+  chdir ".." ;
+
+  print "Input folder is " . cwd () . "\n" ;
+  print "Output folder is " . cwd () . "/csv_wp\n" ;
+
+  my $filename_csv_in  = "StatisticsUserActivitySpread.csv" ;
+# my $file_out_sorted = $file_out ;
+# $file_out_sorted =~ s/\.csv/_sorted.csv/ ;
+
+  my (%active_wikis, %dates, 
+      $count_5, $count_100, 
+      $date,$dd,$mm,$yyyy,
+      $wp, $reguser_bot, $ns_group, $counts, @counts) ;
+
+  foreach $project (qw (wb wk wn wo wp wq ws wv wx))
+  {
+    my $file = cwd () . "/csv_$project/$filename_csv_in" ;
+    open CSV_IN, '<', $file ;
+    binmode CSV_IN ;
+    while ($line = <CSV_IN>)
+    {
+      next if $line =~ /^#/ ; 
+
+      chomp ($line) ;
+      my ($wp, $date, $reguser_bot, $ns_group, $counts) = split (",", $line,5) ;
+      next if $wp =~ /^zz/ ;        # totals for all languages
+      next if $reguser_bot ne "R" ; # R: registered user, B: bot
+      next if $ns_group    ne "A" ; # A: articles, T: talk pages, O: other
+      
+      # why those strange levels 3, 32, 316, 3162, etc?
+      # these are SQRT(10), 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10),
+      # for finer evenly spaced level in charts (316/100 is 1000/316)
+      # thresholds =1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,etc
+      
+      @counts = split (',', $counts) ;
+      $count_5   = $counts [2] ;
+
+      $mm   = substr ($date,0,2) ;
+      $dd   = substr ($date,3,2) ;
+      $yyyy = substr ($date,6,4) ;
+      $date = sprintf ("%04d%02d%02d",$yyyy,$mm,$dd) ; # dd/mm/yyyy -> yyyy/mm/dd
+
+      next if $dd != days_in_month ($yyyy,$mm) ; # incomplete month
+      next if $count_5 == 0 ;                    # nothing to count
+
+      if ($yyyy == 2001)  ;                                                         # did wp:ar and wp:zh really start Jan 2001? Don't think so.  
+      { print "[$line] project:$project date:$date 5:$count_5 100:$count_100\n" ; } # we need to screen for these outliers and remove them from stats. 
+
+      $active_wikis {"1,$project,$date"} ++ ; 
+      $active_wikis {"1,*,$date"} ++ ; 
+      if ($count_5 >= 5) 
+      { 
+        $active_wikis {"5,$project,$date"} ++ ; 
+        $active_wikis {"5,*,$date"} ++ ; 
+      }
+
+      $dates {$date} ++ ;
+    }
+    close CSV_IN ;
+  }
+  
+  my $filename_csv_out = "ActiveWikisPerProject.csv" ;
+  my $file_out = cwd () . "/csv_mw/$filename_csv_out" ;
+  
+  open CSV_OUT, '>', $file_out ;
+  binmode CSV_OUT ;
+  print CSV_OUT "# date,project (wb=wikibooks;wk=wiktionary;wn=wikinews;wo=wikivoyage;wp=wikipedia;wq=wikiquote;ws=wikisource;wv=wikiversity;wx=wikispecial),wikis with at least one active editor (5+ edits),wikis with at least five active editors (5+ edits)\n" ; 
+  
+  foreach $date (sort keys %dates)
+  {
+    my $date2 = substr ($date,4,2) . '/' . substr ($date,6,2) . '/'  . substr ($date,0,4) ; # yyyymmdd -> dd/mm/yyyy
+    foreach $project (qw (wb wk wn wo wp wq ws wv wx))
+    {
+      next if $active_wikis {"1,$project,$date"} == 0 ;
+      print CSV_OUT "$date2,$project," . (0 + $active_wikis {"1,$project,$date"}) . ',' .  (0 + $active_wikis {"5,$project,$date"}) . "\n" ;
+    }
+  }
+
+  close CSV_OUT ;
+
+  my $filename_csv_out = "ActiveWikisPerProjectExcel.csv" ;
+  my $file_out = cwd () . "/csv_mw/$filename_csv_out" ;
+  
+  open CSV_OUT, '>', $file_out ;
+  binmode CSV_OUT ;
+  print CSV_OUT "1+ active editors,,,,,,,,,,,," ; 
+  print CSV_OUT "5+ active editors\n" ; 
+  print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
+  print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects\n" ; 
+  
+  foreach $date (sort keys %dates)
+  {
+    my $date_excel = "\"=date(" . substr ($date,0,4) . ',' . substr ($date,4,2) . ','  . substr ($date,6,2) . ")\"" ;
+
+    print CSV_OUT "$date_excel" ;
+    print CSV_OUT ',' . $active_wikis {"1,*,$date"} ; 
+    foreach $project (qw (wb wn wp wq ws wv wo wk wx))
+    { print CSV_OUT ',' . $active_wikis {"1,$project,$date"} ; }
+    
+    print CSV_OUT ",,$date_excel" ;
+    print CSV_OUT ',' . $active_wikis {"5,*,$date"} ; 
+    foreach $project (qw (wb wn wp wq ws wv wo wk wx))
+    { print CSV_OUT ',' . $active_wikis {"5,$project,$date"} ; }
+
+    print CSV_OUT "\n" ;
+  }
+
+  close CSV_OUT ;
+
+  exit ;
+}
+
+sub CollectActiveUsersWikiLovesMonuments
+{
+  &LogPhase ("CollectActiveUsersWikiLovesMonuments") ;
+
+  chdir $path_in ;
+  chdir ".." ;
+
+  exit ;
 }
 
 sub CollectActiveUsersWikiLovesMonuments

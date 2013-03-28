@@ -155,7 +155,8 @@
     unlink "$path_out/EditsBreakdownPerUserPerMonthAllProjects.csv" ;
     &ReadBotNames ;
     &CollectActiveUsersWikiLovesMonuments ;
-    &CollectActiveUsersPerMonthsAllProjects ;
+    &CollectActiveUsersPerMonthAllProjects ;
+    &CountActiveWikisPerMonthAllProjects ;
     exit ;
   }
 

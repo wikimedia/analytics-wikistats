@@ -339,6 +339,12 @@ sub csvkey_date_size
   return (substr ($date,6,2) . substr ($date,0,2) . substr ($date,3,2) . $sort_languages {$language}) ;
 }
 
+sub csvkey_date
+{
+  my $date = shift ; # dd/mm/yyyy
+  return (substr ($date,6,4) . substr ($date,0,2) . substr ($date,3,2)) ;
+}
+
 sub abort
 {
   my $msg = shift ;
