@@ -38,8 +38,13 @@ for file_path in $INPUT_DIR*.gz
 	echo "Started  processing $file_path"
 	file_name=`basename $file_path`
 	# add geocoded inside filename
-	geocoded_file_name=$(echo $file_name | sed -e 's/.gz/'.geocode.gz'/')
-	zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
-	echo "Finished processing $file_path"
+	# geocoded_file_name=$(echo $file_name | sed -e 's/.gz/'.geocode.gz'/') # obsolete? has not been used for ../sampled-geocoded right now
+	geocoded_file_name=$file_name
+	if [ ! -f $OUTPUT_DIR/$geocoded_file_name ]
+	then	
+		echo "zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name"
+		zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
+		echo "Finished processing $file_path"
+	fi	
 
 done
