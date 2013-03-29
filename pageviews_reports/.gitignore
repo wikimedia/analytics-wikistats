@@ -1,0 +1,6 @@
+
+# documentation related
+*.aux
+*.pdf
+*.log
+*.toc
