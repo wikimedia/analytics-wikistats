@@ -59,19 +59,17 @@ sub get_data_for_csv {
   } (keys %{ $self->{counts} } );
   my @lang_sorted   = sort { $a cmp $b } (keys %$lang_uniq );
 
-  for my $month ( @months_sorted ) {
-    for my $language (@lang_sorted) {
-      for my $month ( @months_sorted ) {
-        my $value  = $self->{counts}->{$month}->{$language};
-        my $lang   = lc($language);
-        next unless defined($value) && $value > 0;
-        $value    *= 1000;
-        my ($y,$m) = $month =~ /(\d+)-(\d+)/;
-        $m         = sprintf("%02d",$m);
-        my $d      = how_many_days_month_has($y,$m);
-        my $date   = "$y/$m/$d";
-        $buffer   .= "$lang.m,$date,$value\n";
-      };
+  for my $language (@lang_sorted) {
+    for my $month ( @months_sorted ) {
+      my $value  = $self->{counts}->{$month}->{$language};
+      my $lang   = lc($language);
+      next unless defined($value) && $value > 0;
+      $value    *= 1000;
+      my ($y,$m) = $month =~ /(\d+)-(\d+)/;
+      $m         = sprintf("%02d",$m);
+      my $d      = how_many_days_month_has($y,$m);
+      my $date   = "$y/$m/$d";
+      $buffer   .= "$lang.m,$date,$value\n";
     };
   };
 
