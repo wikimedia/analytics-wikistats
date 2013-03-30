@@ -4,7 +4,35 @@ use JSON::XS;
 use File::Basename;
 use Carp;
 
-# add up all the counts from the workers
+=head1 NAME
+  
+PageViews::Model::Parallel - Model for paralle processing of Squid logfiles.
+
+=cut
+
+
+=head1 DESCRIPTION
+
+This module inherits from B<PageViews::Model::Sequential>.
+
+The main difference is in the way it processes the files. While ::Sequential processes files one-by-one
+::Parallel has a loop where it forks up to B<max-children> worker processes, each working on a different squid log file.
+
+=cut
+
+
+
+=head2 reduce($self,$json_path)
+
+After all worker processes have finished, B<reduce> adds up all the counts from each worker process.
+
+Because there are multiple structures, each different in terms of keys, these are separated into some categories,
+to_reduce1, to_reduce2, and these are reduced separately.
+
+Finally, the reduced counts are replaced inside the model.
+
+=cut
+
 sub reduce {
   my ($self,$json_path) = @_;
   warn "DOING REDUCE";
@@ -102,6 +130,16 @@ sub reset_for_new_child {
   $self->{$_} = {} for @to_reset;
 };
 
+
+
+=head2 update_child_slots()
+
+This method checks to see which of the PIDs of the worker processes in the attribute B<active_children_pids>
+are still active. It then updates the array.
+
+This method returns the number of workers workers still allowed to be started(up to the max-children limit).
+
+=cut
 #
 # updates the active_children_pids and returns
 # the number of free slots
@@ -124,6 +162,12 @@ sub update_child_slots {
   return $max - @$child_pids;
 };
 
+
+=head2 write_child_output_to_disk($output_path)
+
+This method writes to disk the counts a worker has processed.
+
+=cut
 
 sub write_child_output_to_disk {
   my ($self,$output_path) = @_;
@@ -154,6 +198,19 @@ sub write_child_output_to_disk {
   print $fh $json;
   close $fh;
 };
+
+
+=head2 process_files($params)
+
+The B<process_files> method receives as parameter the config hash read from the configuration file.
+
+It then forks up to B<max-children>. A check is made to see how many children are active, if there are
+fewer than B<max-children> some more are started until the limit is reached.
+
+The initial process that calls B<process_files> effectively waits for the children to finish. After they
+have finished, it reduces(adds) all the counts and stores them inside the class.
+
+=cut
 
 
 sub process_files {

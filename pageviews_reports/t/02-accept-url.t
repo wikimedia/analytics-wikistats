@@ -27,6 +27,3 @@ ok(@c4==5,"u4 test has 5 captures");
 
 #print Dumper \@c3;
 
-
-
-

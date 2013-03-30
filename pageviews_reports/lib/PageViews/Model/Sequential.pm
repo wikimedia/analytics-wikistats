@@ -6,9 +6,20 @@ use Data::Dumper;
 use PageViews::BotDetector;
 use Time::Piece;
 
+
+=head1 NAME
+
+PageViews::Model::Sequential - Processing squid log lines one file at a time
+
+=cut
+
+
+
 my $MINIMUM_EXPECTED_FIELDS = 9;
 # seconds in a day
 our $ONE_DAY = 86_400;
+
+# a list of all wikiprojects
 my @accept_lang_array = (
   'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 
   'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 
@@ -31,6 +42,8 @@ my @accept_lang_array = (
   'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii',
   'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
 );
+
+# a list of accepted suffixes for the domain
 my @accept_domain_suffixes = (
   'wikibooks',
   'wikidata',
@@ -45,11 +58,27 @@ my @accept_domain_suffixes = (
   'wikimediafoundation',
 );
 
+# a list of accepted prefixes for the url path
 my @accept_path_fragments = (
-  "wiki/",
-  "w/index.php",
+  "wiki[/\\?]",
+  "w/index.php[\\?/]",
   "w/api.php\\?.*action=(?:mobile)?view"
 );
+
+
+=head2 build_accepted_url_regex1()
+
+=begin html
+
+This is not a method. It is just a function. It creates a (rather big) regex that has 5 captures.
+
+This regex matches the url decision step <a href="https://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.png"> described in this document</a> (you can see it in the appendix).
+
+=end html
+
+=cut
+
+
 
 sub build_accepted_url_regex1 {
   my $g1 = "(http|https)";
@@ -64,9 +93,8 @@ sub build_accepted_url_regex1 {
             join("|",(@accept_path_fragments))
             .")";
 
- #my $re = "^$g1://$g2$g3\.$g4\.org/$g5";
   my $re = "^$g1://$g2$g3\.m\.$g4\.org/$g5";
-  return $re;
+  return qr/$re/;
 }
 
 
@@ -74,25 +102,6 @@ sub build_accepted_url_regex1 {
 # Generate all possible valid urls for mobile pages and make a hash with those as keys.
 # The values will indicate what kind of url it is.
 #
-
-sub build_accepted_url_map {
-  my $h = {};
-  for my $p1 ("http","https") {
-    for my $p2 ("","www.") {
-      for my $l(@accept_lang_array) {
-        for my $d (@accept_domain_suffixes) {
-          $h->{"$p1://$p2$l.m.$d.org/wiki/"}                        = ["wiki_basic",$l];
-          $h->{"$p1://$p2$l.m.$d.org/w/index.php"}                  = ["wiki_index",$l];
-          $h->{"$p1://$p2$l.m.$d.org/w/api.php\?action=mobile"}     = ["api"       ,$l];
-          $h->{"$p1://$p2$l.m.$d.org/w/api.php\?action=mobileview"} = ["api"       ,$l];
-        };
-      };
-    };
-  };
-  return $h;
-}
-
-
 
 sub build_accepted_url_regex2 {
   my $ra = Regexp::Assemble->new();
@@ -108,12 +117,13 @@ sub build_accepted_url_regex2 {
       };
     };
   };
-  return $ra->as_string();
+  return $ra->re();
 }
 
 
 sub new {
   my ($class) = @_;
+
   my $raw_obj = {
     current_file_processed      => undef,
     # counts is  counts_wiki_basic + counts_wiki_index + counts_api
@@ -126,7 +136,6 @@ sub new {
     # count for /w/api.php
     counts_api                  => {},
 
-    bdetector                   => PageViews::BotDetector->new(),
 
     last_ymd                    => undef,
     fh_dbg_accepted             => undef,
@@ -140,7 +149,8 @@ sub new {
     counts_discarded_mimetype   => {},
 
     counts_mimetype             => {},
-    accept_hash                 => build_accepted_url_map(),
+    bdetector                   => PageViews::BotDetector->new(),
+    accept_re                   => build_accepted_url_regex1(),
   };
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
@@ -151,13 +161,13 @@ sub new {
 };
 
 
-sub discard_rule_time {
+sub accept_rule_time {
   my ($self,$tp) = @_;
   if(!$tp) {
-    return 1;
+    return 0;
   };
   
-  if(!(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end}) )) {
+  if(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end})) {
     #print {$self->{fh_dbg_discarded}} $line;
     if($self->{last_ymd}) {
       $self->{counts_discarded_time}->{$self->{last_ymd}}++;
@@ -168,23 +178,23 @@ sub discard_rule_time {
   return 0;
 }
 
-sub discard_rule_bot_ua {
+sub accept_rule_bot_ua {
   my ($self,$ua) = @_;
   my $bdetector = $self->{bdetector};
   if( defined($ua) && $bdetector->match_ua($ua) ) {
     #print "[DBG] bot_ua_discard\n";
     #print { $self->{fh_dbg_bots} } $line;
     $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    return 1;
+    return 0;
   };
 
-  return 0;
+  return 1;
 }
 
-sub discard_rule_status_code {
+sub accept_rule_status_code {
   my ($self,$req_status) = @_;
   #302 304 and 20x
-  if(!( defined($req_status) && $req_status =~ m{20\d|30[24]}  )) {
+  if(defined($req_status) && $req_status =~ m{20\d|30[24]}) {
     #print "[DBG] reqstatus_discarded\n";
     #print { $self->{fh_dbg_status} } $line;
     $self->{counts_discarded_status}->{$self->{last_ymd}}++;
@@ -193,59 +203,63 @@ sub discard_rule_status_code {
   return 0;
 }
 
-sub discard_rule_bot_ip {
+sub accept_rule_bot_ip {
   my ($self,$ip) = @_;
   my $bdetector = $self->{bdetector};
   my $label_ip = $bdetector->match_ip($ip);
 
   if( $label_ip ) {
     $self->{counts_discarded_bots}->{$self->{last_ymd}}++;
-    return 1;
+    return 0;
   };
-  return 0;
+  return 1;
 }
 
-sub discard_rule_referer {
+sub accept_rule_referer {
   my ($self,$referer) = @_;
-  my @url_captures = $referer =~ m{^(https?://[^\.]+\.(?:m)\.wikipedia.org/wiki/)};
+  my @c = $referer =~ $self->{accept_re};
+  if(@c == 5) {
+    my $wikiproject   = $c[2];
+    my $path_fragment = $c[4];
+    return ($wikiproject,
+            $path_fragment);
+  };
 
+  return undef;
 }
 
-sub discard_rule_wikiproject {
+
+sub accept_rule_url {
   my ($self,$url) = @_;
-  # arrayref with 2 values
-  # first  value is one of "wiki" or "api" depending on whether it is a /wiki/ request or a /w/api.php
-  # second value is the actual wikiproject
-
-  my @url_captures = $url =~ m{^(https?://[^\.]+\.(?:m)\.wikipedia.org/wiki/)};
-  my $h_key = $url_captures[0];
-  if( !defined($h_key) ) {
-    #print "$url\n";
-    #print {$self->{fh_dbg_discarded}} $line;
-    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return 0;
-  };
-  #print "$h_key\n" if $h_key;
-  my $wikiproject_pair = $self->{accept_hash}->{$h_key};
-
-  if( !(defined($wikiproject_pair) && @$wikiproject_pair ==2 ) ) {
-    $self->{counts_discarded_url}->{$self->{last_ymd}}++;
-    return 0;
+  my @c = $url =~ $self->{accept_re};
+  if(@c == 5) {
+    my $wikiproject   = $c[2];
+    my $path_fragment = $c[4];
+    my $pageview_type        ;
+    if(     index($path_fragment,"wiki"        ,0)==0) {
+      $pageview_type = "wiki_basic";
+    }elsif( index($path_fragment,"w/index.php" ,0)==0) {
+      $pageview_type = "wiki_index";
+    }elsif( index($path_fragment,"w/api.php"   ,0)==0) {
+      $pageview_type = "api";
+    };
+    return ($wikiproject,
+            $pageview_type);
   };
 
-  return $wikiproject_pair;
-}
+  return undef;
+};
 
-sub discard_rule_method {
+
+sub accept_rule_method {
   my ($self,$method) = @_;
-  if( $method ne 'GET' ) {
+  if( $method !~ /GET/i ) {
     return 1;
   };
-
   return 0;
 }
 
-sub discard_rule_mimetype {
+sub accept_rule_mimetype {
   my ($self,$mime_type) = @_;
   ## text/html mime types only
   ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
@@ -257,6 +271,30 @@ sub discard_rule_mimetype {
   };
   return 0;
 }
+
+=head2 process_line($self,$line)
+
+=begin html
+
+This method takes a log line as argument. It splits it by space and tab into fields.
+
+Afterwards a series of filters are applied for each filter.
+
+These filters are:
+
+<ul>
+  <li>minimum field count constraint
+  <li>accept_rule_time
+  <li>accept_rule_status_code
+  <li>accept_rule_method
+  <li>accept_rule_mimetype
+  <li>accept_rule_url
+  <li>accept_rule_referer
+</ul>
+
+=end html
+
+=cut
 
 sub process_line {
   my ($self,$line) = @_;
@@ -287,21 +325,19 @@ sub process_line {
   $self->{last_ymd} = $ymd;
 
 
-  return if $self->discard_rule_time($tp);
-  return if $self->discard_rule_status_code($req_status);
-  #return if $self->discard_rule_bot_ip($ip);
-  #return if $self->discard_rule_bot_ua($ua);
-  return if !(my $wikiproject_pair = $self->discard_rule_wikiproject($url));
-  return if $self->discard_rule_method($method);
-  return if $self->discard_rule_mimetype($mime_type);
+  return if !($self->accept_rule_time($tp));
+  return if !($self->accept_rule_status_code($req_status));
+ #return if !($self->accept_rule_bot_ip($ip));
+ #return if !($self->accept_rule_bot_ua($ua));
+  return if !($self->accept_rule_method($method));
+  return if !($self->accept_rule_mimetype($mime_type));
+  return if !(my @url_info     = $self->accept_rule_url($url));
+  return if !(my @referer_info = $self->accept_rule_referer($url));
 
-  my ($pv_type,
-      $pv_wikiproject) = @$wikiproject_pair;
-
-  # counts together /wiki/ and /w/api.php
-  $self->{"counts"         }->{$ymd}->{$pv_wikiproject}++;
-  # counts /wiki/ separated from /w/api.php
-  $self->{"counts_$pv_type"}->{$ymd}->{$pv_wikiproject}++;
+  # counts
+  $self->{"counts"             }->{$ymd}->{$url_info[0]}++;
+  # counts separated /w/index.php , /w/api.php , /wiki/
+  $self->{"counts_$url_info[1]"}->{$ymd}->{$url_info[0]}++;
 };
 
 sub open_dbg_fh {
@@ -348,10 +384,14 @@ sub process_file {
   $self->close_dbg_fh;
 };
 
-# adds zero padding for a 2 digit number
-sub padding_2 { 
-    $_[0]<10 ? "0$_[0]" : $_[0];
-};
+=head2 get_files_in_interval($self,$params)
+
+This method reads from the hash it is being passed(the configuration file parsed from json=>perl data structures).
+
+It reads the start and end date, it then selects the files which are in the B<input-path> and match the B<logs-prefix>,
+it sorts them and returns them as a list.
+
+=cut
 
 sub get_files_in_interval {
   my ($self,$params) = @_;
@@ -359,8 +399,8 @@ sub get_files_in_interval {
   my $squid_logs_path   = $params->{"input-path"};
   my $squid_logs_prefix = $params->{"logs-prefix"};
 
-  $params->{start}->{month} = padding_2($params->{start}->{month});
-  $params->{end}->{month}   = padding_2($params->{end}->{month});
+  $params->{start}->{month} = sprintf("%02d",$params->{start}->{month});
+  $params->{end}->{month}   = sprintf("%02d",$params->{end}->{month});
 
   my $time_start    = $params->{start}->{year}."-".$params->{start}->{month}."-01T00:00:00";
   my $time_end      = $params->{end}->{year}."-"  .$params->{end}->{month}."-01T00:00:00";
@@ -396,6 +436,14 @@ sub get_files_in_interval {
   return @retval;
 };
 
+
+=head2 process_files($params)
+
+The files which need to be processed are determined through B<get_files_in_interval> and then processing
+commences, one file at a time.
+
+=cut
+
 sub process_files  {
   my ($self, $params) = @_;
   for my $gz_logfile ($self->get_files_in_interval($params)) {
@@ -403,6 +451,14 @@ sub process_files  {
   };
 };
 
+=head1 APPENDIX
 
+=begin html
+
+<img width="640" height="800" src="https://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.png"/>
+
+=end html
+
+=cut
 
 1;

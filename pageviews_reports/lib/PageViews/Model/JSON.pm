@@ -4,17 +4,42 @@ use warnings;
 use Carp;
 use JSON::XS;
 
+=head1 NAME
 
-# 
-# Getting data from a previous run and formatting it to
-# our needs
-# 
+  PageViews::Model::JSON - Model which has a json file as data source
+
+=cut
+
+
+=head1 DESCRIPTION
+
+Because currently a run on 7 months takes around 6hours, it's best to have the results
+of all computations stored on disk, so if some tweaks need to be done to the rendering of
+the data, these can be done afterwards without the need to rerun the counting.
+
+This module is mainly intended for reusing the data.json produced by a previous run.
+
+=cut
+
 
 sub new {
   my ($class) = @_;
   return bless {},$class;
 }
 
+
+=head2 process_files($hash)
+
+The parameter to this method is a hash. This hash contains the configuration with which this
+module is run.
+
+There are multiple such configuration which can be found in the conf/ sub-directory of this
+project.
+
+This method finds the data.json in the input-path, parses the json file and stores the needed
+keys in the class.
+
+=cut
 
 sub process_files {
   my ($self,$params) = @_;
