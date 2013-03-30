@@ -51,6 +51,7 @@ sub process_files {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  

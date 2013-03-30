@@ -56,12 +56,13 @@ my @accept_domain_suffixes = (
   'wikimedia',
   'mediawiki',
   'wikimediafoundation',
+  'wiktionary',
 );
 
 # a list of accepted prefixes for the url path
 my @accept_path_fragments = (
   "wiki[/\\?]",
-  "w/index.php[\\?/]",
+  "w/index.php",
   "w/api.php\\?.*action=(?:mobile)?view"
 );
 
@@ -94,7 +95,7 @@ sub build_accepted_url_regex1 {
             .")";
 
   my $re = "^$g1://$g2$g3\.m\.$g4\.org/$g5";
-  return qr/$re/;
+  return qr{$re};
 }
 
 
@@ -143,6 +144,7 @@ sub new {
 
     counts_discarded_bots       => {},
     counts_discarded_url        => {},
+    counts_discarded_referer    => {},
     counts_discarded_time       => {},
     counts_discarded_fields     => {},
     counts_discarded_status     => {},
@@ -150,8 +152,8 @@ sub new {
 
     counts_mimetype             => {},
     bdetector                   => PageViews::BotDetector->new(),
-    accept_re                   => build_accepted_url_regex1(),
   };
+  $raw_obj->{accept_re} = build_accepted_url_regex1(),
   $raw_obj->{bdetector}->load_ip_ranges();
   $raw_obj->{bdetector}->load_useragent_regex();
 
@@ -164,17 +166,16 @@ sub new {
 sub accept_rule_time {
   my ($self,$tp) = @_;
   if(!$tp) {
-    return 0;
+    return 1;
   };
-  
   if(defined($tp) && ($tp >= $self->{tp_start} && $tp < $self->{tp_end})) {
     #print {$self->{fh_dbg_discarded}} $line;
-    if($self->{last_ymd}) {
-      $self->{counts_discarded_time}->{$self->{last_ymd}}++;
-    };
     return 1;
   };
 
+  if($self->{last_ymd}) {
+    $self->{counts_discarded_time}->{$self->{last_ymd}}++;
+  };
   return 0;
 }
 
@@ -197,9 +198,9 @@ sub accept_rule_status_code {
   if(defined($req_status) && $req_status =~ m{20\d|30[24]}) {
     #print "[DBG] reqstatus_discarded\n";
     #print { $self->{fh_dbg_status} } $line;
-    $self->{counts_discarded_status}->{$self->{last_ymd}}++;
     return 1;
   };
+  $self->{counts_discarded_status}->{$self->{last_ymd}}++;
   return 0;
 }
 
@@ -217,7 +218,8 @@ sub accept_rule_bot_ip {
 
 sub accept_rule_referer {
   my ($self,$referer) = @_;
-  my @c = $referer =~ $self->{accept_re};
+  my $re = $self->{accept_re};
+  my @c  = $referer =~ $re;
   if(@c == 5) {
     my $wikiproject   = $c[2];
     my $path_fragment = $c[4];
@@ -225,13 +227,15 @@ sub accept_rule_referer {
             $path_fragment];
   };
 
+  $self->{counts_discarded_referer}->{$self->{last_ymd}}++;
   return undef;
 }
 
 
 sub accept_rule_url {
   my ($self,$url) = @_;
-  my @c = $url =~ $self->{accept_re};
+  my $re = $self->{accept_re};
+  my (@c)  = $url =~ $re;
   if(@c == 5) {
     my $wikiproject   = $c[2];
     my $path_fragment = $c[4];
@@ -247,15 +251,17 @@ sub accept_rule_url {
             $pageview_type];
   };
 
+  $self->{counts_discarded_url}->{$self->{last_ymd}}++;
   return undef;
 };
 
 
 sub accept_rule_method {
   my ($self,$method) = @_;
-  if( $method !~ /GET/i ) {
+  if( $method =~ /GET/i ) {
     return 1;
   };
+
   return 0;
 }
 
@@ -263,12 +269,12 @@ sub accept_rule_mimetype {
   my ($self,$mime_type) = @_;
   ## text/html mime types only
   ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
-  if( $mime_type !~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
+  if( $mime_type =~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
     #print "[DBG] mime_discard\n";
     #print { $self->{fh_dbg_mimetype} } $line;
-    $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
     return 1;
   };
+  $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
   return 0;
 }
 
@@ -316,7 +322,7 @@ sub process_line {
   my $ua         = $fields[13];
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
-  my $referer    = $fields[11];
+  my $referer    = $fields[12];
 
   my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
 
@@ -332,8 +338,9 @@ sub process_line {
   return if !($self->accept_rule_method($method));
   return if !($self->accept_rule_mimetype($mime_type));
   return if !(my $url_info     = $self->accept_rule_url($url));
-  return if !(my $referer_info = $self->accept_rule_referer($url));
+  return if !(my $referer_info = $self->accept_rule_referer($referer));
 
+  print "$url\n";
   # counts
   $self->{"counts"             }->{$ymd}->{$url_info->[0]}++;
   # counts separated /w/index.php , /w/api.php , /wiki/

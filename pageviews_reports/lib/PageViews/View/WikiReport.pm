@@ -27,6 +27,7 @@ sub get_data_from_model {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -46,8 +47,8 @@ sub get_data_for_csv {
   my $lang_uniq = {};
   my $buffer    = "";
 
-  for my $month ( keys $self->{counts}) {
-    for my $language ( keys $self->{counts}->{$month} ) {
+  for my $month ( keys %{ $self->{counts} } ) {
+    for my $language ( keys %{ $self->{counts}->{$month} } ) {
       $lang_uniq->{$language} = 1;
     };
   };

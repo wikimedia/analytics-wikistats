@@ -1,6 +1,6 @@
 {
   "model"                : "parallel",
-  "max-children"         : 5,
+  "max-children"         : 8,
   "input-path"           : "/home/user/wikidata/raw_gzips",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",

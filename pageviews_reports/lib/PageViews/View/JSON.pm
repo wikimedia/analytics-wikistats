@@ -21,6 +21,7 @@ sub get_data_from_model {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -42,6 +43,7 @@ sub render {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  

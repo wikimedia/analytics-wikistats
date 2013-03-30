@@ -51,6 +51,7 @@ sub reduce {
   my @to_reduce2 = qw/
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -121,6 +122,7 @@ sub reset_for_new_child {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -179,6 +181,7 @@ sub write_child_output_to_disk {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  

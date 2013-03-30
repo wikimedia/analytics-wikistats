@@ -205,10 +205,6 @@ sub second_pass_rankings {
   return $month_rankings;
 };
 
-sub padding_2 { 
-    $_[0]<10 ? "0$_[0]" : $_[0];
-};
-
 sub scale_m_to_30 {
   my ($self,$month,$value) = @_;
   my $SCALE_FACTOR = 30;
@@ -230,6 +226,7 @@ sub scale_months_to_30 {
   my @to_scale2 = qw/
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -251,7 +248,8 @@ sub scale_months_to_30 {
         };
       } elsif($property ~~ @to_scale2) {
         $scaled->{$property}->{$month} //= 0;
-        $scaled->{$property}->{$month}  += $self->{$property}->{$month};
+        my $month_value = $self->{$property}->{$month} // 0;
+        $scaled->{$property}->{$month} = $self->scale_m_to_30($month,$month_value);
       };
     };
   };
@@ -418,6 +416,7 @@ sub get_data_for_template {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  
@@ -440,6 +439,7 @@ sub get_data_from_model {
     counts_api
     counts_discarded_bots    
     counts_discarded_url     
+    counts_discarded_referer     
     counts_discarded_time    
     counts_discarded_fields  
     counts_discarded_status  

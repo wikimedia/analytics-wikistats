@@ -13,17 +13,20 @@ my $u1 = "http://en.m.wikipedia.org/wiki/Mr.T";
 my $u2 = "http://de.m.wikibooks.org/w/index.php/Mr.T";
 my $u3 = "http://ja.m.wikinews.org/w/api.php?action=mobileview";
 my $u4 = "http://ja.m.wikinews.org/w/api.php?action=view";
+my $u5 = "http://en.m.wiktionary.org/wiki/Special:MobileOptions";
 
 
 my @c1 = $u1 =~ $re;
 my @c2 = $u2 =~ $re;
 my @c3 = $u3 =~ $re;
 my @c4 = $u4 =~ $re;
+my @c5 = $u5 =~ $re;
 
 ok(@c1==5,"u1 test has 5 captures");
 ok(@c2==5,"u2 test has 5 captures");
 ok(@c3==5,"u3 test has 5 captures");
 ok(@c4==5,"u4 test has 5 captures");
+ok(@c5==5,"u5 test has 5 captures");
 
 #print Dumper \@c3;
 
