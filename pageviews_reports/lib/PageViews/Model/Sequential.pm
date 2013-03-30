@@ -221,8 +221,8 @@ sub accept_rule_referer {
   if(@c == 5) {
     my $wikiproject   = $c[2];
     my $path_fragment = $c[4];
-    return ($wikiproject,
-            $path_fragment);
+    return [$wikiproject,
+            $path_fragment];
   };
 
   return undef;
@@ -243,8 +243,8 @@ sub accept_rule_url {
     }elsif( index($path_fragment,"w/api.php"   ,0)==0) {
       $pageview_type = "api";
     };
-    return ($wikiproject,
-            $pageview_type);
+    return [$wikiproject,
+            $pageview_type];
   };
 
   return undef;
@@ -331,13 +331,13 @@ sub process_line {
  #return if !($self->accept_rule_bot_ua($ua));
   return if !($self->accept_rule_method($method));
   return if !($self->accept_rule_mimetype($mime_type));
-  return if !(my @url_info     = $self->accept_rule_url($url));
-  return if !(my @referer_info = $self->accept_rule_referer($url));
+  return if !(my $url_info     = $self->accept_rule_url($url));
+  return if !(my $referer_info = $self->accept_rule_referer($url));
 
   # counts
-  $self->{"counts"             }->{$ymd}->{$url_info[0]}++;
+  $self->{"counts"             }->{$ymd}->{$url_info->[0]}++;
   # counts separated /w/index.php , /w/api.php , /wiki/
-  $self->{"counts_$url_info[1]"}->{$ymd}->{$url_info[0]}++;
+  $self->{"counts_$url_info->[1]"}->{$ymd}->{$url_info->[0]}++;
 };
 
 sub open_dbg_fh {
