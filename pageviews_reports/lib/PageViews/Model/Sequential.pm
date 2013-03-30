@@ -340,7 +340,7 @@ sub process_line {
   return if !(my $url_info     = $self->accept_rule_url($url));
   return if !(my $referer_info = $self->accept_rule_referer($referer));
 
-  print "$url\n";
+  #print "$url\n";
   # counts
   $self->{"counts"             }->{$ymd}->{$url_info->[0]}++;
   # counts separated /w/index.php , /w/api.php , /wiki/
