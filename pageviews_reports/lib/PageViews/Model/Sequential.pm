@@ -7,7 +7,68 @@ use PageViews::BotDetector;
 use Time::Piece;
 
 my $MINIMUM_EXPECTED_FIELDS = 9;
-my $ONE_DAY = 86_400;
+# seconds in a day
+our $ONE_DAY = 86_400;
+my @accept_lang_array = (
+  'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 
+  'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 
+  'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te',
+  'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is',
+  'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms',
+  'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af',
+  'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als',
+  'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu',
+  'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah',
+  'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa',
+  'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro',
+  'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw',
+  'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig',
+  'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', 'closed', 'so', 'kab', 'ks', 'stq', 'ce',
+  'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got',
+  'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti',
+  'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz',
+  'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr',
+  'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii',
+  'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
+);
+my @accept_domain_suffixes = (
+  'wikibooks',
+  'wikidata',
+  'wikinews',
+  'wikipedia',
+  'wikiquote',
+  'wikisource',
+  'wikiversity',
+  'wikivoyage',
+  'wikimedia',
+  'mediawiki',
+  'wikimediafoundation',
+);
+
+my @accept_path_fragments = (
+  "wiki/",
+  "w/index.php",
+  "w/api.php\\?.*action=(?:mobile)?view"
+);
+
+sub build_accepted_url_regex1 {
+  my $g1 = "(http|https)";
+  my $g2 = "(www\.|)";
+  my $g3 = "(".
+            (join("|",@accept_lang_array))
+            .")";
+  my $g4 = "(".
+            join("|",@accept_domain_suffixes)
+            .")";
+  my $g5 = "(".
+            join("|",(@accept_path_fragments))
+            .")";
+
+ #my $re = "^$g1://$g2$g3\.$g4\.org/$g5";
+  my $re = "^$g1://$g2$g3\.m\.$g4\.org/$g5";
+  return $re;
+}
+
 
 #
 # Generate all possible valid urls for mobile pages and make a hash with those as keys.
@@ -16,39 +77,38 @@ my $ONE_DAY = 86_400;
 
 sub build_accepted_url_map {
   my $h = {};
-  my @languages = (
-    'en', 'de', 'fr', 'nl', 'it', 'pl', 'es', 'ru', 'ja', 'pt', 'sv', 'zh', 'uk', 'ca', 
-    'no', 'fi', 'cs', 'hu', 'tr', 'ro', 'ko', 'vi', 'da', 'ar', 'eo', 'sr', 'id', 'lt', 
-    'vo', 'sk', 'he', 'fa', 'bg', 'sl', 'eu', 'war', 'lmo', 'et', 'hr', 'new', 'te',
-    'nn', 'th', 'gl', 'el', 'ceb', 'simple', 'ms', 'ht', 'bs', 'bpy', 'lb', 'ka', 'is',
-    'sq', 'la', 'br', 'hi', 'az', 'bn', 'mk', 'mr', 'sh', 'tl', 'cy', 'io', 'pms',
-    'lv', 'ta', 'su', 'oc', 'jv', 'nap', 'nds', 'scn', 'be', 'ast', 'ku', 'wa', 'af',
-    'be-x-old', 'an', 'ksh', 'szl', 'fy', 'frr', 'yue', 'ur', 'ia', 'ga', 'yi', 'sw', 'als',
-    'hy', 'am', 'roa-rup', 'map-bms', 'bh', 'co', 'cv', 'dv', 'nds-nl', 'fo', 'fur', 'glk', 'gu',
-    'ilo', 'kn', 'pam', 'csb', 'kk', 'km', 'lij', 'li', 'ml', 'gv', 'mi', 'mt', 'nah',
-    'ne', 'nrm', 'se', 'nov', 'qu', 'os', 'pi', 'pag', 'ps', 'pdc', 'rm', 'bat-smg', 'sa',
-    'gd', 'sco', 'sc', 'si', 'tg', 'roa-tara', 'tt', 'to', 'tk', 'hsb', 'uz', 'vec', 'fiu-vro',
-    'wuu', 'vls', 'yo', 'diq', 'zh-min-nan', 'zh-classical', 'frp', 'lad', 'bar', 'bcl', 'kw', 'mn', 'haw',
-    'ang', 'ln', 'ie', 'wo', 'tpi', 'ty', 'crh', 'jbo', 'ay', 'zea', 'eml', 'ky', 'ig',
-    'or', 'mg', 'cbk-zam', 'kg', 'arc', 'rmy', 'gn', '(closed)', 'so', 'kab', 'ks', 'stq', 'ce',
-    'udm', 'mzn', 'pap', 'cu', 'sah', 'tet', 'sd', 'lo', 'ba', 'pnb', 'iu', 'na', 'got',
-    'bo', 'dsb', 'chr', 'cdo', 'hak', 'om', 'my', 'sm', 'ee', 'pcd', 'ug', 'as', 'ti',
-    'av', 'bm', 'zu', 'pnt', 'nv', 'cr', 'pih', 'ss', 've', 'bi', 'rw', 'ch', 'arz',
-    'xh', 'kl', 'ik', 'bug', 'dz', 'ts', 'tn', 'kv', 'tum', 'xal', 'st', 'tw', 'bxr',
-    'ak', 'ab', 'ny', 'fj', 'lbe', 'ki', 'za', 'ff', 'lg', 'sn', 'ha', 'sg', 'ii',
-    'cho', 'rn', 'mh', 'chy', 'ng', 'kj', 'ho', 'mus', 'kr', 'hz', 'mwl', 'pa', 'xmf', 'lez'
-  );
-  for my $l(@languages) {
-    for my $p1 ("http","https") {
-      for my $p2 ("","www") {
-        for my $p3 ("m","zero") {
-          $h->{ "$p1://$p2$l.$p3.wikipedia.org/wiki/"} = ["wiki_basic",$l];
+  for my $p1 ("http","https") {
+    for my $p2 ("","www.") {
+      for my $l(@accept_lang_array) {
+        for my $d (@accept_domain_suffixes) {
+          $h->{"$p1://$p2$l.m.$d.org/wiki/"}                        = ["wiki_basic",$l];
+          $h->{"$p1://$p2$l.m.$d.org/w/index.php"}                  = ["wiki_index",$l];
+          $h->{"$p1://$p2$l.m.$d.org/w/api.php\?action=mobile"}     = ["api"       ,$l];
+          $h->{"$p1://$p2$l.m.$d.org/w/api.php\?action=mobileview"} = ["api"       ,$l];
         };
       };
     };
   };
-
   return $h;
+}
+
+
+
+sub build_accepted_url_regex2 {
+  my $ra = Regexp::Assemble->new();
+  for my $p1 ("http","https") {
+    for my $p2 ("","www.") {
+      for my $l(@accept_lang_array) {
+        for my $d (@accept_domain_suffixes) {
+          $ra->add("$p1://$p2$l.m.$d.org/wiki/");
+          $ra->add("$p1://$p2$l.m.$d.org/w/index.php");
+          $ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobile");
+          $ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobileview");
+        };
+      };
+    };
+  };
+  return $ra->as_string();
 }
 
 
@@ -145,6 +205,12 @@ sub discard_rule_bot_ip {
   return 0;
 }
 
+sub discard_rule_referer {
+  my ($self,$referer) = @_;
+  my @url_captures = $referer =~ m{^(https?://[^\.]+\.(?:m)\.wikipedia.org/wiki/)};
+
+}
+
 sub discard_rule_wikiproject {
   my ($self,$url) = @_;
   # arrayref with 2 values
@@ -223,8 +289,8 @@ sub process_line {
 
   return if $self->discard_rule_time($tp);
   return if $self->discard_rule_status_code($req_status);
-  return if $self->discard_rule_bot_ip($ip);
-  return if $self->discard_rule_bot_ua($ua);
+  #return if $self->discard_rule_bot_ip($ip);
+  #return if $self->discard_rule_bot_ua($ua);
   return if !(my $wikiproject_pair = $self->discard_rule_wikiproject($url));
   return if $self->discard_rule_method($method);
   return if $self->discard_rule_mimetype($mime_type);
