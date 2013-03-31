@@ -1,6 +1,6 @@
 {
-  "mode"                 : "parallel",
-  "max-children"         : 9,
+  "model"                : "parallel",
+  "max-children"         : 10,
   "input-path"           : "/a/squid/archive/sampled",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",
