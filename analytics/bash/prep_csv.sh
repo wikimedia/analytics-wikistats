@@ -11,7 +11,7 @@ set -o pipefail
 wikistats=/a/wikistats_git
 analytics=$wikistats/analytics
 perl=$analytics/perl
-perl=/home/ezachte/wikistats/analytics/perl # tests
+#perl=/home/ezachte/wikistats/analytics/perl # tests
 csv_rc=$analytics/csv  # rc for report card
 csv_dumps=$wikistats/dumps/csv 
 # unmerged=-u # uncomment to use legacy method of counting editors (unmerged, excluding commons)
