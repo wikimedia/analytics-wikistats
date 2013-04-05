@@ -2,8 +2,8 @@
   "model"                : "parallel",
   "max-children"         : 10,
   "input-path"           : "/a/squid/archive/sampled",
-  "children-output-path" : "/tmp/pageviews/map",
-  "output-path"          : "/tmp/pageviews",
+  "children-output-path" : "/tmp/pageviews-full/map",
+  "output-path"          : "/tmp/pageviews-full",
   "output-formats"       : ["wikireport","web","json"],
   "logs-prefix"          : "sampled",
   "start"    : {
