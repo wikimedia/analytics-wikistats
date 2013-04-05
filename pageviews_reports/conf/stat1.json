@@ -6,6 +6,7 @@
   "output-path"          : "/tmp/pageviews",
   "output-formats"       : ["wikireport","web","json"],
   "logs-prefix"          : "sampled",
+  "month-days-to-process": [3,4],
   "start"    : {
     "year"   : 2012,
     "month"  : 8

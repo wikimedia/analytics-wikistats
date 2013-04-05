@@ -6,6 +6,10 @@
   "output-path"          : "/tmp/pageviews",
   "output-formats"       : ["web","json","wikireport"],
   "logs-prefix"          : "sampled",
+  "restrictions"         : {
+    "days-of-each-month"   : [2,3],
+    "lines-for-each-day"   : 100000
+  },
   "start"    : {
     "year"   : 2012,
     "month"  : 8

@@ -5,7 +5,6 @@ use JSON::XS;
 
 sub new {
   my ($class) = @_;
-
   return bless {},$class;
 }
 
@@ -26,6 +25,7 @@ sub get_data_from_model {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
+    __config
     /;
 
 };

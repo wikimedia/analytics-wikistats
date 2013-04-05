@@ -4,6 +4,32 @@ use warnings;
 use Net::Patricia;
 use Regexp::Assemble;
 
+
+
+
+=head1 NAME
+
+
+PageViews::BotDetector -- Web Bot detection based on ip and ua
+
+=cut
+
+
+=head1 DESCRIPTION
+
+=begin html
+This module provides functionality for detecting bots. 
+
+It uses a Net::Patricia object (<a href="http://en.wikipedia.org/wiki/Radix%5Ftree">Patricia tree</a>) to
+do a fast lookup on a list of pre-defined ip ranges for bots.
+
+This list of pre-defined ip ranges were taken from the <a href="https://github.com/wikimedia/analytics-wikistats">wikistats project</a>.
+ 
+
+=end html
+
+=cut
+
 sub new {
   my ($class) = @_;
   my $raw_obj = { };

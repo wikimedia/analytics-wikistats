@@ -103,8 +103,8 @@ sub reduce {
 };
 
 sub map    {
-  my ($self,$file) = @_;
-  $self->process_file($file);
+  my ($self,$file,$restrictions) = @_;
+  $self->process_file($file,$restrictions);
 };
 
 
@@ -218,6 +218,8 @@ have finished, it reduces(adds) all the counts and stores them inside the class.
 
 sub process_files {
   my ($self,$params) = @_;
+  $self->{__config} = $params;
+  my $restrictions = $params->{restrictions};
 
   confess "[ERROR] max_children param invalid"
     unless $params->{"max-children"} =~ /^\d+$/;
@@ -242,7 +244,7 @@ sub process_files {
       #warn "OUT => $output_file";
 
       open STDERR, ">$stderr_file";
-        $self->map($gz_logfile);
+        $self->map($gz_logfile,$restrictions);
         $self->write_child_output_to_disk($output_file);
       close STDERR;
 

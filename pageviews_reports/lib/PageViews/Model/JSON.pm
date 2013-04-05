@@ -43,6 +43,7 @@ keys in the class.
 
 sub process_files {
   my ($self,$params) = @_;
+  $self->{__config} = $params;
 
   my @json_keys = qw/
     counts

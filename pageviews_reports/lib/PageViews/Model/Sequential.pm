@@ -13,8 +13,6 @@ PageViews::Model::Sequential - Processing squid log lines one file at a time
 
 =cut
 
-
-
 my $MINIMUM_EXPECTED_FIELDS = 9;
 # seconds in a day
 our $ONE_DAY = 86_400;
@@ -61,9 +59,9 @@ my @accept_domain_suffixes = (
 
 # a list of accepted prefixes for the url path
 my @accept_path_fragments = (
-  "wiki[/\\?]",
-  "w/index.php",
-  "w/api.php\\?.*action=(?:mobile)?view"
+  "wiki[/\\?]", # wiki/ or wiki?
+  "w/index.php", # w/index.php
+  "w/api.php\\?.*action=(?:mobile)?view.*",
 );
 
 
@@ -80,21 +78,15 @@ This regex matches the url decision step <a href="https://raw.github.com/wikimed
 =cut
 
 
-
 sub build_accepted_url_regex1 {
   my $g1 = "(http|https)";
   my $g2 = "(www\.|)";
-  my $g3 = "(".
-            (join("|",@accept_lang_array))
-            .")";
-  my $g4 = "(".
-            join("|",@accept_domain_suffixes)
-            .")";
-  my $g5 = "(".
-            join("|",(@accept_path_fragments))
-            .")";
+  my $g3 = "(".join("|",@accept_lang_array)     .")";
+  my $g4 = "(".join("|",@accept_domain_suffixes).")";
+  my $g5 = "(".join("|",@accept_path_fragments) .")";
 
-  my $re = "^$g1://$g2$g3\.m\.$g4\.org/$g5";
+  # we have 6 captures
+  my $re = "^$g1://($g2$g3\.m\.$g4\.org)/$g5";
   return qr{$re};
 }
 
@@ -216,42 +208,44 @@ sub accept_rule_bot_ip {
   return 1;
 }
 
-sub accept_rule_referer {
-  my ($self,$referer) = @_;
-  my $re = $self->{accept_re};
-  my @c  = $referer =~ $re;
-  if(@c == 5) {
-    my $wikiproject   = $c[2];
-    my $path_fragment = $c[4];
-    return [$wikiproject,
-            $path_fragment];
-  };
-
-  $self->{counts_discarded_referer}->{$self->{last_ymd}}++;
-  return undef;
-}
-
-
 sub accept_rule_url {
   my ($self,$url) = @_;
   my $re = $self->{accept_re};
   my (@c)  = $url =~ $re;
-  if(@c == 5) {
-    my $wikiproject   = $c[2];
-    my $path_fragment = $c[4];
-    my $pageview_type        ;
-    if(     index($path_fragment,"wiki"        ,0)==0) {
-      $pageview_type = "wiki_basic";
-    }elsif( index($path_fragment,"w/index.php" ,0)==0) {
-      $pageview_type = "wiki_index";
-    }elsif( index($path_fragment,"w/api.php"   ,0)==0) {
-      $pageview_type = "api";
+  if(@c == 6) {
+    my $retval        = {
+      "language"      => $c[3],
+      "project"       => $c[4],
+      "domain"        => $c[1],
     };
-    return [$wikiproject,
-            $pageview_type];
+    my $language      = $c[3];
+    my $path_fragment = $c[5];
+    my $pageview_type        ;
+    if(     index($path_fragment,"wiki/"        ,0)!=-1) {
+      $retval->{"pageview-type"} = "wiki_basic";
+    }elsif( index($path_fragment,"w/index.php" ,0)!=-1) {
+      $retval->{"pageview-type"} = "wiki_index";
+    }elsif( index($path_fragment,"w/api.php"   ,0)!=-1) {
+      $retval->{"title"}         = ($c[5] =~ /title=(.*?)(&|$)/)[0];
+      $retval->{"pageview-type"} = "api";
+    };
+
+    return $retval;
   };
 
   $self->{counts_discarded_url}->{$self->{last_ymd}}++;
+  return undef;
+};
+
+sub accept_rule_url_and_referer {
+  my ($self,$url_info,$referer_info,$referer) = @_;
+  return 1 if $referer eq '-';
+  return 1 if $url_info->{"pageview-type"} ne 'api';
+  if( $url_info->{"pageview-type"} eq $referer_info->{"pageview-type"} &&
+      $url_info->{"domain"}        eq $referer_info->{"domain"} &&
+      $url_info->{"title"}         eq $referer_info->{"title"} ) {
+      return 1;
+  };
   return undef;
 };
 
@@ -270,8 +264,6 @@ sub accept_rule_mimetype {
   ## text/html mime types only
   ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
   if( $mime_type =~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
-    #print "[DBG] mime_discard\n";
-    #print { $self->{fh_dbg_mimetype} } $line;
     return 1;
   };
   $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;
@@ -295,7 +287,7 @@ These filters are:
   <li>accept_rule_method
   <li>accept_rule_mimetype
   <li>accept_rule_url
-  <li>accept_rule_referer
+  <li>accept_rule_url_and_referer
 </ul>
 
 =end html
@@ -304,7 +296,7 @@ These filters are:
 
 sub process_line {
   my ($self,$line) = @_;
-  # after 2013-02-01 the logs changed to having tab-separated fields instead of space separated
+  # after 2013-02-01 the logs changed to tab-separated fields instead of space separated
   my @fields = split(/\s|\t/,$line);
 
   if(@fields < $MINIMUM_EXPECTED_FIELDS) {
@@ -330,21 +322,24 @@ sub process_line {
   my $ymd = $tp->year."-".$tp->mon.'-'.$tp->mday; 
   $self->{last_ymd} = $ymd;
 
-
   return if !($self->accept_rule_time($tp));
   return if !($self->accept_rule_status_code($req_status));
  #return if !($self->accept_rule_bot_ip($ip));
  #return if !($self->accept_rule_bot_ua($ua));
   return if !($self->accept_rule_method($method));
   return if !($self->accept_rule_mimetype($mime_type));
+
+  # language, type of pageview (wiki_basic,wiki_index,api) , title
   return if !(my $url_info     = $self->accept_rule_url($url));
-  return if !(my $referer_info = $self->accept_rule_referer($referer));
+  # language, type of pageview (wiki_basic,wiki_index,api) , title
+  my $referer_info = $self->accept_rule_url($referer);
+  return if !($self->accept_rule_url_and_referer($url_info,$referer_info,$referer));
 
   #print "$url\n";
   # counts
-  $self->{"counts"             }->{$ymd}->{$url_info->[0]}++;
+  $self->{"counts"}->{$ymd}->{$url_info->{language}}++;
   # counts separated /w/index.php , /w/api.php , /wiki/
-  $self->{"counts_$url_info->[1]"}->{$ymd}->{$url_info->[0]}++;
+  $self->{"counts_".$url_info->{project}}->{$ymd}->{$url_info->{language}}++;
 };
 
 sub open_dbg_fh {
@@ -377,12 +372,29 @@ sub close_dbg_fh {
 };
 
 sub process_file {
-  my ($self,$filename) = @_;
+  my ($self,$filename,$restrictions) = @_;
   $self->{current_file_processed} = $filename;
   $self->open_dbg_fh;
 
+  my $cmd = "unpigz -c $filename ";
+  if($restrictions) {
+    if(exists $restrictions->{"days-of-each-month"}) {
+      my $days_to_process = $restrictions->{"days-of-each-month"};
+      my ($y,$m,$d) = $filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/;
+      if(!($d ~~ $days_to_process)) {
+        $self->close_dbg_fh;
+        return;
+      };
+    };
+    if(exists $restrictions->{"lines-for-each-day"}) {
+      my $L = $restrictions->{"lines-for-each-day"};
+      $cmd .= " | head -$L";
+    };
+  };
+
   print "[DBG] process_file => $filename\n";
-  open IN, "-|", "unpigz -c $filename";
+  # zcat
+  open IN, "-|", $cmd;
   #open IN, "-|", "gzip -dc $filename";
   while( my $line = <IN>) {
     $self->process_line($line);
@@ -414,7 +426,9 @@ sub get_files_in_interval {
   my $tp_start      = Time::Piece->strptime($time_start,"%Y-%m-%dT%H:%M:%S"); 
   my $tp_end1       = Time::Piece->strptime(  $time_end,"%Y-%m-%dT%H:%M:%S");
   my $lday          = $tp_end1->month_last_day;
-  my $tp_end        = Time::Piece->strptime($params->{end}->{year}."-".$params->{end}->{month}."-".$lday."T00:00:00","%Y-%m-%dT%H:%M:%S");
+  my $tp_end        = Time::Piece->strptime($params->{end}->{year}."-".
+                                            $params->{end}->{month}."-".$lday."T00:00:00",
+                                            "%Y-%m-%dT%H:%M:%S");
   $tp_end          += $ONE_DAY;
 
   $self->{tp_start} = $tp_start;
@@ -453,18 +467,15 @@ commences, one file at a time.
 
 sub process_files  {
   my ($self, $params) = @_;
+  $self->{__config} = $params;
+  my $restrictions = $params->{restrictions};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
-    $self->process_file($gz_logfile);
+    $self->process_file($gz_logfile,$restrictions);
   };
 };
 
 =head1 APPENDIX
 
-=begin html
-
-<img width="640" height="800" src="https://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.png"/>
-
-=end html
 
 =cut
 

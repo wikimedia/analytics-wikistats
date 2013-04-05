@@ -2,11 +2,17 @@ package PageViews::View::WikiReport;
 use strict;
 use warnings;
 use PageViews::Util;
+use Storable;
+
+my $SQUID_SAMPLING_FACTOR = 1000;
 
 {
   no strict  'refs';
-  *{__PACKAGE__."::how_many_days_month_has"} = \&PageViews::Util::how_many_days_month_has;
-  *{__PACKAGE__."::compact_days_to_months" } = \&PageViews::Util::compact_days_to_months ;
+  *{__PACKAGE__."::how_many_days_month_has"    } = \&PageViews::Util::how_many_days_month_has    ;
+  *{__PACKAGE__."::compact_days_to_months"     } = \&PageViews::Util::compact_days_to_months     ;
+  *{__PACKAGE__."::sorted_months_in_counts"    } = \&PageViews::Util::sorted_months_in_counts    ;
+  *{__PACKAGE__."::sorted_languages_in_counts" } = \&PageViews::Util::sorted_languages_in_counts ;
+  *{__PACKAGE__."::extrapolate"                } = \&PageViews::Util::extrapolate                ;
   use strict 'refs';
 };
 
@@ -32,40 +38,48 @@ sub get_data_from_model {
     counts_discarded_fields  
     counts_discarded_status  
     counts_discarded_mimetype
+    __config
     /;
 
 };
 
 
+=head2 get_data_for_csv($self)
+
+=begin html
+
+The csv file for wikistats( PageViewsPerMonthAll.csv ) requires a csv file
+with the following columns:
+
+<ul>
+  <li> language
+  <li> date
+  <li> pageview count
+</ul>
+
+The date column must be the last day of the month in Y/M/D format.
+
+=end html
+
+This method produces the necessary csv and returns it as a string
+
+
+=cut
 
 
 sub get_data_for_csv {
   my ($self)    = @_;
-
   $self->compact_days_to_months;
-
-  my $lang_uniq = {};
   my $buffer    = "";
-
-  for my $month ( keys %{ $self->{counts} } ) {
-    for my $language ( keys %{ $self->{counts}->{$month} } ) {
-      $lang_uniq->{$language} = 1;
-    };
-  };
-  my @months_sorted = sort { 
-    my @A = split(/-/,$a);
-    my @B = split(/-/,$b);
-    return $A[0] <=> $B[0] ||
-           $A[1] <=> $B[1]  ;
-  } (keys %{ $self->{counts} } );
-  my @lang_sorted   = sort { $a cmp $b } (keys %$lang_uniq );
+  my @lang_sorted   = $self->sorted_languages_in_counts;
+  my @months_sorted = $self->sorted_months_in_counts;
+  my $D             = $self->extrapolate($SQUID_SAMPLING_FACTOR);
 
   for my $language (@lang_sorted) {
     for my $month ( @months_sorted ) {
-      my $value  = $self->{counts}->{$month}->{$language};
-      my $lang   = lc($language);
+      my $value  = $D->{counts}->{$month}->{$language};
       next unless defined($value) && $value > 0;
-      $value    *= 1000;
+      my $lang   = lc($language);
       my ($y,$m) = $month =~ /(\d+)-(\d+)/;
       $m         = sprintf("%02d",$m);
       my $d      = how_many_days_month_has($y,$m);

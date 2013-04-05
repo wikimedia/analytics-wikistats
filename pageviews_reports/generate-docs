@@ -1,0 +1,116 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Pod::Simple::XHTML;
+use File::Find::Rule;
+use Data::Dumper;
+use File::Basename;
+use Time::Piece;
+
+
+##############################################
+# In order to generate the documentation you
+# will need the following:
+#
+#   * Pod::Simple::XHTML module
+#   * File::Find::Rule   module
+#   * pandoc             package
+#   * graphviz           package
+#   * texlive-base       package
+#
+##############################################
+
+
+
+##############################################
+# Iterate over all .pm files and convert POD
+# documentation to html
+##############################################
+
+my $out = "pod-docs";
+
+`
+mkdir  $out/ 2>/dev/null;
+rm -rf $out/*;
+`;
+
+my @modules = File::Find::Rule->file()
+		->name( '*.pm' )
+		->in("./");
+
+my @html = ();
+for my $module_path (@modules) {
+  print "Processing $module_path ...\n";
+  my ($f_name,$f_path,$f_suffix) = fileparse($module_path);
+  #print Dumper [$f_name,$f_path,$f_suffix];
+  $f_name =~ s/\.pm$/\.html/;
+  my $psx = Pod::Simple::XHTML->new;
+  my $html = "";
+  my $out_path = "$out/$f_path";
+  `mkdir -p $out_path 2>/dev/null`;
+  $psx->output_string(\$html);
+  $psx->parse_file($module_path);
+  my $h = "$out_path/$f_name";
+  open my $fh, '>', $h or die "Cannot open 'out.html': $!\n";
+  print $fh $html;
+  close $fh;
+  push @html, $h;
+};
+
+
+##############################################
+# Collect all pod documenation in html format 
+# and convert it into a manual
+##############################################
+
+
+my $fh;
+# write header.tex
+open    $fh,">","$out/header.tex";
+print   $fh "\\usepackage[margin=0.5in]{geometry}";
+#print   $fh '\let\stdsection\section';
+#print   $fh '\renewcommand\section{\newpage\stdsection}';
+close   $fh;
+
+
+# write partial manual.tex
+open    $fh,">>","$out/manual.tex";
+print   $fh "\\usepackage[margin=0.5in]{geometry}\n";
+print   $fh "\\title{New mobile pageviews reports -- Documentation}\n";
+print   $fh "\\maketitle\n";
+print   $fh "\\setcounter{tocdepth}{2}\n";
+close   $fh;
+
+
+# aggregate every html pod into manual.tex
+my $first_iter = 1;
+for my $h (@html) {
+  my $partial_tex;
+  my ($a,$b,$c) =  fileparse($h);
+  $a =~ s/\.html//;
+  $b =~ s/^.*lib\///;
+  $b =~ s/\/$//;
+  my $module_name = $b.$a;
+  $module_name =~ s/\//::/g;
+  print "[PDF] Aggregating $module_name\n";
+  $partial_tex = `cat $h | pandoc -f html -t latex`;
+  $partial_tex =~ s/\\([a-z]*section)/\\sub$1/g;
+  #$partial_tex = '\noindent\makebox[\linewidth]{\rule{\paperwidth}{1pt}}'."\n$partial_tex";
+  $partial_tex = "\n\n\\section{$module_name}\n$partial_tex";
+  open my $fh,">>","$out/manual.tex";
+  print   $fh $partial_tex;
+  close   $fh;
+  $first_iter = 0;
+}
+
+my $date = localtime->ymd("-");
+
+# create the manual.pdf
+system("pandoc                                     \\
+               -V date:$date                       \\
+               -V documentclass:article            \\
+               --include-in-header $out/header.tex \\
+               --toc                               \\
+               -s $out/manual.tex                  \\
+               -o $out/manual.pdf");
+
