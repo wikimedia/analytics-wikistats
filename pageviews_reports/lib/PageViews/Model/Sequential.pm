@@ -377,12 +377,29 @@ sub close_dbg_fh {
 };
 
 sub process_file {
-  my ($self,$filename) = @_;
+  my ($self,$filename,$restrictions) = @_;
   $self->{current_file_processed} = $filename;
   $self->open_dbg_fh;
 
+  my $cmd = "unpigz -c $filename ";
+  if($restrictions) {
+    if(exists $restrictions->{"days-of-each-month"}) {
+      my $days_to_process = $restrictions->{"days-of-each-month"};
+      my ($y,$m,$d) = $filename =~ /(\d{4})(\d{2})(\d{2})\.gz$/;
+      if(!($d ~~ $days_to_process)) {
+        $self->close_dbg_fh;
+        return;
+      };
+    };
+    if(exists $restrictions->{"lines-for-each-day"}) {
+      my $L = $restrictions->{"lines-for-each-day"};
+      $cmd .= " | head -$L";
+    };
+  };
+
   print "[DBG] process_file => $filename\n";
-  open IN, "-|", "unpigz -c $filename";
+  # zcat
+  open IN, "-|", $cmd;
   #open IN, "-|", "gzip -dc $filename";
   while( my $line = <IN>) {
     $self->process_line($line);
@@ -453,8 +470,10 @@ commences, one file at a time.
 
 sub process_files  {
   my ($self, $params) = @_;
+  $self->{__config} = $params;
+  my $restrictions = $params->{restrictions};
   for my $gz_logfile ($self->get_files_in_interval($params)) {
-    $self->process_file($gz_logfile);
+    $self->process_file($gz_logfile,$restrictions);
   };
 };
 
