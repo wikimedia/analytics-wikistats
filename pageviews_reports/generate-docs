@@ -75,6 +75,7 @@ close   $fh;
 
 # write partial manual.tex
 open    $fh,">>","$out/manual.tex";
+print   $fh "\\usepackage{indentfirst}";
 print   $fh "\\usepackage[margin=0.5in]{geometry}\n";
 print   $fh "\\title{New mobile pageviews reports -- Documentation}\n";
 print   $fh "\\maketitle\n";
