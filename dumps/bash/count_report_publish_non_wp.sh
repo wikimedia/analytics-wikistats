@@ -5,7 +5,7 @@ ulimit -v 8000000
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 bash=$dumps/bash
-bash=/home/ezachte/wikistats/dumps/bash # tests
+# bash=/home/ezachte/wikistats/dumps/bash # tests
 log=$dumps/logs/log_count_report_publish_non_wp.txt
 
 cd $bash
