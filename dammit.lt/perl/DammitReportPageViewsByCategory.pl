@@ -19,8 +19,8 @@
   our $mirror = $false ; # no RTL languages support yet
 
   # -i "w:\! perl\dammit\dammit page requests per category\scan_categories_views_per_article.csv" -o "scan_categories_views_per_article.html"
-  our ($file_csv, $file_html) = &ParseArguments ;
-  &WriteReport ($file_csv, $file_html) ;
+  our ($file_csv, $file_html, $view_threshold) = &ParseArguments ;
+  &WriteReport ($file_csv, $file_html, $view_threshold) ;
 
   print "\n\nReady\n\n" ;
   exit ;
@@ -29,23 +29,30 @@
 sub ParseArguments
 {
   my %options ;
-  getopt ("io", \%options) ;
+  getopt ("iov", \%options) ;
 
-  $file_csv  = $options {"i"} ;
-  $file_html = $options {"o"} ;
+  my $file_csv       = $options {"i"} ;
+  my $file_html      = $options {"o"} ;
+  my $view_threshold = $options {"v"} ;
 
   die "Specify -i [input file]"  if $options {"i"} eq '' ;
   die "Specify -o [output file]" if $options {"o"} eq '' ;
+  if (! defined $view_threshold) 
+  {
+    $view_threshold = 20 ;
+    print "View threshold not specified, use default 20\n" ;    
+  }
+  die "Specify -v [numeric]" if $view_threshold !~ /^\d+$/ ;
 
   die "Input file '$file_csv' not found!" if ! -e $file_csv ;
 
-  return ($file_csv, $file_html) ;
+  return ($file_csv, $file_html, $view_threshold) ;
 }
 
 sub WriteReport
 {
-  my ($file_csv, $file_html) = @_ ;
-  my ($line, $msg_month, $msg_wiki, $msg_category, $msg_depth, $line_html, $html, $url, $rows) ;
+  my ($file_csv, $file_html, $view_threshold) = @_ ;
+  my ($line, $msg_month, $msg_wiki, $msg_category, $msg_depth, $line_html, $html, $url, $rows, %row) ;
 
   open FILE_CSV,  '<', $file_csv  || die "Could not open input file '$file_csv'\n" ;
 
@@ -87,7 +94,10 @@ sub WriteReport
         ($url = $msg_wiki) =~ s/.*?(\w+\.\w+\.\w+).*$/$1/ ;
       }
       if ($line =~ /category/)
-      { $msg_category = $line ; }
+      { 
+        $msg_category = $line ; 
+	$msg_category =~ s/category:\s*// ;
+      }
       if ($line =~ /depth/)
       { $msg_depth = $line ; }
       next ;
@@ -95,6 +105,8 @@ sub WriteReport
 
     chomp $line ;
     my ($project_code, $title, $count, $category) = split (' ', $line) ;
+
+    next if $count < $view_threshold ;
 
     (my $title2 = $title) =~ s/_/ /g ;
     (my $category2 = $category) =~ s/_/ /g ;
@@ -104,23 +116,31 @@ sub WriteReport
     $line_html = "<tr><td class=r>$count</td>" . 
                      "<td class=l><a href='http://$url/wiki/$title'>$title2</td>" . 
 		     "<td class=l><a href='http://$url/wiki/category:$category'>$category2</td></tr>\n" ;
-
-		     $html .= $line_html ;
+    $row {$line_html} = $count ;
     $rows++ ;
   }
+
+  my $key ;
+  for $key (sort {$row {$b} <=> $row {$a}} keys %row)
+  { $html .= $key ; }
+  
   $html .= "</tbody>\n" ;
   $html .= "</table>" ;
-  $html .= "$rows pages found" ;
+  $html .= "$rows pages found<p>" ;
+  $html .= "Views are number of times the article has been requested in the given month.<br>" ;
+  $html .= "This includes a small amount (+/-10?) requests by search engines (crawlers).<br>" ;
+  $html .= "Articles with less than $view_threshold requests have been omitted.<p>" ;
+  
+  $html .= &Colophon ;
+
   $html .= "</body>\n" ;
   $html .= &ScriptSorterInvoke ;
   $html .= "</html>\n" ;
   close FILE_CSV ;
 
-  $html =~ s/TITLE/Page views in $msg_category on $msg_wiki/ ;
-  $html =~ s/HEADER/Page views in $msg_category on $msg_wiki/ ;
+  $html =~ s/TITLE/Page views in category $msg_category on $msg_wiki/ ;
+  $html =~ s/HEADER/Page views in category <font color=#080>$msg_category<\/font> on <font color=#080>$msg_wiki<\/font>/ ;
   $html =~ s/DESCRIPTION/$msg_month/ ;
-
-  $html .= &Colophon ;
 
   open  FILE_HTML, '>', $file_html || die "Could not open output file '$file_html'\n" ;
   print FILE_HTML $html ;
@@ -292,14 +312,19 @@ return $script ;
 
 sub Colophon
 {
+  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
+  my $now = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
+
 my $html = <<__COLOPHON__ ;
-Author Erik Zachte
-  <font color=#606060>
-  <small>Author:Erik Zachte (<a href='http://infodisiac.com/'><font color=#6060FF>web site</font></a>, <a href='http://infodisiac.com/blog'>blog</a>, <a href='http://twitter.com/infodisiac'>twitter</a>)<br>
-  Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
-  For documentation, scripts and data see <a href='http://stats.wikimedia.org/index.html#fragment-14'>About page</a>.<br>
-  See also  <a href='http://infodisiac.com/blog'><font color=#6060FF>Blog on Wikimedia Statistics</font></a></small>
-  </font>
+<font color=#606060>
+<small>Author:Erik Zachte (<a href='http://infodisiac.com/'><font color=#6060FF>web site</font></a>, <a href='http://twitter.com/infodisiac'>twitter</a>)<br>
+Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
+Script used: <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dammit.lt'>dammit_list_views_by_category.sh</a><br>
+Data used: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/merged/'>monthly page view archive</a><br>
+See also  <a href='http://infodisiac.com/blog'><font color=#6060FF>Blog on Wikimedia Statistics</font></a><p>
+Page generated: $now GMT (server time) (dd-mm-yyyy)
+</font>
+</small>
 __COLOPHON__
 
 return $html ;
