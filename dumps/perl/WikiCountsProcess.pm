@@ -1971,7 +1971,7 @@ sub CountActiveWikisPerMonthAllProjects
       next if $dd != days_in_month ($yyyy,$mm) ; # incomplete month
       next if $count_5 == 0 ;                    # nothing to count
 
-      if ($yyyy == 2001)  ;                                                         # did wp:ar and wp:zh really start Jan 2001? Don't think so.  
+      if ($yyyy == 2001)                                                            # did wp:ar and wp:zh really start Jan 2001? Don't think so.  
       { print "[$line] project:$project date:$date 5:$count_5 100:$count_100\n" ; } # we need to screen for these outliers and remove them from stats. 
 
       $active_wikis {"1,$project,$date"} ++ ; 
