@@ -20,6 +20,8 @@ This module inherits from B<PageViews::Model::Sequential>.
 The main difference is in the way it processes the files. While ::Sequential processes files one-by-one
 ::Parallel has a loop where it forks up to B<max-children> worker processes, each working on a different squid log file.
 
+=head1 METHODS
+
 =cut
 
 

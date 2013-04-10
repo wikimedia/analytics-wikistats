@@ -19,6 +19,8 @@ the data, these can be done afterwards without the need to rerun the counting.
 
 This module is mainly intended for reusing the data.json produced by a previous run.
 
+=head1 METHODS
+
 =cut
 
 

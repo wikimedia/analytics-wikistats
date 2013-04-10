@@ -28,6 +28,9 @@ This list of pre-defined ip ranges were taken from the <a href="https://github.c
 
 =end html
 
+
+=head1 METHODS
+
 =cut
 
 sub new {

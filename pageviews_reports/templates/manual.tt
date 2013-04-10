@@ -29,8 +29,9 @@
 \pdfimageresolution=300
 \pagestyle{fancy}
 \fancyhead{}
-\fancyfoot{}
-\fancyfoot[LE,RO]{Message of the day}
+\fancyfoot{\vspace{-0.4cm}\hrule}
+\fancyfoot[RE,LO]{\textbf{Page \thepage}}
+\fancyfoot[LE,RO]{Wikimedia Foundation Analytics Team}
 %\setromanfont[Mapping=tex-text]{Linux Libertine}
 \begin{document}
 \title{\underline{New mobile pageviews reports -- Documentation}}

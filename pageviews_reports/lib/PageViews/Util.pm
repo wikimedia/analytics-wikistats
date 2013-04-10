@@ -16,6 +16,8 @@ use Carp;
 This is a role consumed by the classes which need methods from it.
 Methods are imported into the classes selectively, as needed.
 
+=head1 METHODS
+
 =cut
 
 =head2 how_many_days_month_has($y,$m)

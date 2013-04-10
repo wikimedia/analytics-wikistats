@@ -12,6 +12,8 @@ use Carp;
 
 PageViews::Model::Sequential - Processing squid log lines one file at a time
 
+=head1 METHODS
+
 =cut
 
 my $MINIMUM_EXPECTED_FIELDS = 9;

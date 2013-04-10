@@ -41,7 +41,6 @@ cd $out;
 echo "Pulling Images ...";
 cp ../static/img/accept-regex-example.png .;
 wget http://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.dot 2>/dev/null ;
-perl -pi -e 's/digraph G {/digraph G { rankdir=LR; size="60,100"; /' pageview_definition.dot;
 dot -Tpng pageview_definition.dot > p1.png 2>/dev/null;
 |);
 
@@ -52,26 +51,36 @@ my @modules = File::Find::Rule->file()
 		->in("./");
 
 
+##########################################################
+# pod_to_html converts a document which contains pod
+##########################################################
+                
+sub pod_to_html {
+  my ($module_dir,$input,$output) = @_;
+  my $html = "";
+  `mkdir -p $out/$module_dir 2>/dev/null`;
+  my $psx = Pod::Simple::XHTML->new;
+  $psx->output_string(\$html);
+  $psx->parse_file($input);
+  open my $fh, '>', $output or die "Cannot open 'out.html': $!\n";
+  print $fh $html;
+  close $fh;
+};
+
 
 
 my @html = ();
 for my $module_path (@modules) {
   print "Processing $module_path ...\n";
   my ($f_name,$f_path,$f_suffix) = fileparse($module_path);
-  #print Dumper [$f_name,$f_path,$f_suffix];
+  my $input_path  = "$f_path/$f_name";
   $f_name =~ s/(\.pm|\.pod)$/\.html/;
-  my $psx = Pod::Simple::XHTML->new;
-  my $html = "";
-  my $out_path = "$out/$f_path";
-  `mkdir -p $out_path 2>/dev/null`;
-  $psx->output_string(\$html);
-  $psx->parse_file($module_path);
-  my $h = "$out_path/$f_name";
-  open my $fh, '>', $h or die "Cannot open 'out.html': $!\n";
-  print $fh $html;
-  close $fh;
-  push @html, $h;
+  my $output_path = "$out/$f_path$f_name";
+  pod_to_html($f_path,$input_path,$output_path);
+  print "Output     $output_path ...\n";
+  push @html, $output_path;
 };
+
 
 my $date = localtime->ymd("-");
 my $data = {
@@ -81,20 +90,22 @@ my $data = {
 
 # aggregate every html pod into manual.tex
 
-my $first_iter = 1;
 for my $h (@html) {
   my $partial_tex;
   my ($a,$b,$c) =  fileparse($h);
   $a =~ s/\.html//;
   $b =~ s/^.*lib\///;
   $b =~ s/\/$//;
-  my $module_name = $b.$a;
+  my $module_name = $b."::".$a;
   $module_name =~ s/\//::/g;
   print "[PDF] Aggregating $module_name\n";
+
+  #cleaning up after pandoc because pandoc's not perfect :|
   $partial_tex = `cat $h | pandoc -f html -t latex`;
   $partial_tex =~ s{\\includegraphics}{\\includegraphics\[width=\\textwidth,height=\\textheight,keepaspectratio\]}g;
   $partial_tex =~ s/\\([a-z]*section)/\\sub$1/g;
-  $first_iter = 0;
+
+  $module_name =~ s/^.*overview.*$/Overview/;
   push @{ $data->{sections} }, {
     title   => $module_name,
     content => $partial_tex
