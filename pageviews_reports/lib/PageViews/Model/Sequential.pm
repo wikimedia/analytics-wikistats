@@ -5,6 +5,7 @@ use File::Basename qw/basename/;
 use Data::Dumper;
 use PageViews::BotDetector;
 use Time::Piece;
+use Carp;
 
 
 =head1 NAME
@@ -59,19 +60,19 @@ my @accept_domain_suffixes = (
 
 # a list of accepted prefixes for the url path
 my @accept_path_fragments = (
-  "wiki[/\\?]", # wiki/ or wiki?
-  "w/index.php", # w/index.php
-  "w/api.php\\?.*action=(?:mobile)?view.*",
+  "wiki[/\\?](.*)\$", # wiki/ or wiki?
+  "w/index.php[/\\?](.*)\$", # w/index.php
+  "w/api.php\\?(.*)\$",
 );
 
 
 =head2 build_accepted_url_regex1()
 
+This is not a method. It is just a function. It creates a (rather big) regex that has 8 captures.
+
 =begin html
 
-This is not a method. It is just a function. It creates a (rather big) regex that has 5 captures.
-
-This regex matches the url decision step <a href="https://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.png"> described in this document</a> (you can see it in the appendix).
+<img src="accept-regex-example.png" width="100%" />
 
 =end html
 
@@ -211,23 +212,38 @@ sub accept_rule_bot_ip {
 sub accept_rule_url {
   my ($self,$url) = @_;
   my $re = $self->{accept_re};
+  #captures
   my (@c)  = $url =~ $re;
-  if(@c == 6) {
+  #print "AAAA=>".Dumper(\@c);
+  if(@c == 9) {
     my $retval        = {
       "language"      => $c[3],
       "project"       => $c[4],
       "domain"        => $c[1],
+      "pageview-type" => "",
+      "action"        => $c[7],
+      "title"         => "",
     };
     my $language      = $c[3];
     my $path_fragment = $c[5];
     my $pageview_type        ;
-    if(     index($path_fragment,"wiki/"        ,0)!=-1) {
+    if(     index($path_fragment,"wiki/"       ,0)!=-1) {
+      $retval->{"title"}         = $c[6];
       $retval->{"pageview-type"} = "wiki_basic";
     }elsif( index($path_fragment,"w/index.php" ,0)!=-1) {
       $retval->{"pageview-type"} = "wiki_index";
     }elsif( index($path_fragment,"w/api.php"   ,0)!=-1) {
-      $retval->{"title"}         = ($c[5] =~ /title=(.*?)(&|$)/)[0];
+      my $url_params    = { split(/&|=/,$c[8]) };
       $retval->{"pageview-type"} = "api";
+      $retval->{action}  = $url_params->{action};
+      $retval->{"title"} = $url_params->{page}  || 
+                           $url_params->{title} ||
+                           $url_params->{titles} ;
+      $retval->{"title"} =~ s/\+/_/g;
+      return undef
+        unless $url_params->{action} ~~ ["view","mobileview","query"];
+    } else {
+      return undef;
     };
 
     return $retval;
@@ -237,16 +253,77 @@ sub accept_rule_url {
   return undef;
 };
 
+=head2 accept_case1($self,$u,$r)
+
+This method takes B<url_info> and B<referer_info> in the format returned by B<accept_rule_url>.
+
+It treats the case where both the url and the referer have the same title, in which case it discards.
+
+Otherwise it accepts because this means the request was not caused by the same page as the url.
+
+=cut
+
+sub accept_case1 {
+  my ($self,$u,$r) = @_;
+  if($u->{"pageview-type"} eq "api"          &&
+     $r->{"pageview-type"} eq "api"          &&
+     $r->{"action"}        =~ "view"         &&
+     $u->{"action"}        =~ "view"         &&
+     $u->{"domain"}        eq $r->{"domain"} &&
+     $u->{"title"}         eq $r->{"title"} 
+   ) {
+     return 0;
+  };
+  return 1;
+};
+
+=head2 accept_case2($self,$u,$r)
+
+This method takes B<url_info> and B<referer_info> in the format returned by B<accept_rule_url>.
+
+This is a case which stemmed from feedback with the Mobile Team.
+
+It treats the case where the title should be different although the referer and url are /wiki/ and /w/api.php links.
+
+=cut
+
+sub accept_case2 {
+  my ($self,$u,$r) = @_;
+
+  #print Dumper $u;
+  #print Dumper $r;
+  if($u->{"pageview-type"} eq "api"          &&
+     $r->{"pageview-type"} eq "wiki_basic"   &&
+     $u->{"domain"}        eq $r->{"domain"} &&
+     $u->{"title"}         eq $r->{"title"} 
+   ) {
+
+     return 0;
+
+   };
+
+   return 1;
+}
+
+
+=head2 accept_rule_url_and_referer
+
+This is one of the main parts of the logic in the pageview definition.
+
+It uses accept_case1 and accept_case2 to deal with some of the cases.
+
+All other edge-cases will be put in methods with the name B<accept_caseX> where X will be a number.
+
+So we are currently treating cases where the url and referer are api urls, and also the case where the url is a wiki url and the referer is a wiki url.
+
+=cut
+
 sub accept_rule_url_and_referer {
   my ($self,$url_info,$referer_info,$referer) = @_;
   return 1 if $referer eq '-';
-  return 1 if $url_info->{"pageview-type"} ne 'api';
-  if( $url_info->{"pageview-type"} eq $referer_info->{"pageview-type"} &&
-      $url_info->{"domain"}        eq $referer_info->{"domain"} &&
-      $url_info->{"title"}         eq $referer_info->{"title"} ) {
-      return 1;
-  };
-  return undef;
+  return 0 if !$self->accept_case1($url_info,$referer_info);
+  return 0 if !$self->accept_case2($url_info,$referer_info);
+  return 1;
 };
 
 
@@ -473,10 +550,5 @@ sub process_files  {
     $self->process_file($gz_logfile,$restrictions);
   };
 };
-
-=head1 APPENDIX
-
-
-=cut
 
 1;

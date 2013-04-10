@@ -7,6 +7,38 @@ use List::Util qw/sum max/;
 use Carp;
 
 
+=head1 NAME
+
+PageViews::View::Web -- Formatting the report in HTML format
+
+=cut
+
+
+
+=head1 DESCRIPTION
+
+This module creates the pageviews.html file. The data is taken from a model and then, some computations are made
+
+=begin html
+
+<ul>
+  <li>compacting daily pageviews into monthly pageviews
+  <li>scaling each month to a 30-day period so that months with more/less days can be compared
+  <li>finding out rankings for each month
+  <li>calculating totals 
+</ul>
+
+=end html
+
+All the data mentioned above is then put in some data structures and they are passed to the templating engine(Template Toolkit) 
+in order to turn them into html code.
+
+
+
+=cut
+
+
+
 {
   no strict  'refs';
   *{__PACKAGE__."::how_many_days_month_has"} = \&PageViews::Util::how_many_days_month_has;
@@ -20,6 +52,14 @@ sub new {
   my $obj     = bless $raw_obj,$class;
   return $obj;
 };
+
+
+=head2 safe_division($self,$numerator,$denominator)
+
+This method performs safe division between two numbers.
+
+=cut
+
 
 # safe division, truncate to 2 decimals
 sub safe_division {
@@ -47,6 +87,13 @@ sub safe_division {
 };
 
 
+=head2 format($self,$val)
+
+This method formats a percentage so that it can be displayed in the table cells.
+
+=cut
+
+
 sub format_delta {
   my ($self,$val) = @_;
 
@@ -62,6 +109,13 @@ sub format_delta {
 
   return $val;
 };
+
+
+=head2 format_rank($self,$rank)
+
+This method formats a rank name.
+
+=cut
 
 sub format_rank {
   my ($self,$rank) = @_;
@@ -104,6 +158,14 @@ sub get_totals_sorted_months_present_in_data {
   return @sorted_languages_present;
 };
 
+
+=head2 get_time_sorted_months_present_in_data($self)
+
+This method provides returns the months in YYYY-MM format sorted chronologically
+
+=cut
+
+
 # gets temporaly sorted months present in data
 # 
 sub get_time_sorted_months_present_in_data {
@@ -122,6 +184,24 @@ sub get_time_sorted_months_present_in_data {
   #warn Dumper \@retval;
   return @retval;
 };
+
+
+
+=head2 third_pass_chart_data($self,$languages,$months)
+
+This method takes as parameter the languages present and the months.
+
+It returns a structure of the following form that can be used by the charts inside the html page(we currently use d3.js to render those).
+
+    {
+      "en": {
+        "counts" : [ 40      , 50        , 60         ],
+        "months" : [ "2012-9", "2012-10" , "2012-11"  ]
+      }
+    }
+
+=cut
+
 
 
 
@@ -476,5 +556,7 @@ sub render {
   `cp -r static/ $output_path`;
 
 };
+
+
 
 1;

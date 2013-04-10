@@ -1,0 +1,1 @@
+(http|https):\/\/((www.|)(en|de|pt|fr|nl|be|\.\.\.)\.m\.(wikibooks|wikidata|wikinews|wikipedia|wikiquote|wikisource|wikiversity|wikivoyage|wikimedia|mediawiki|wikimediafoundation|wiktionary).org)\/(wiki[\/\?](.*)$|w\/index\.php(.*)$|w\/api\.php\?(.*)$) 

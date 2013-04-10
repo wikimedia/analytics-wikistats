@@ -1,17 +1,17 @@
-=head1 New Mobile Pageviews Reports - Documentation 
+=head1 Overview
 
+=head2 The Configuration
 
+We start with an example configuration
 
-=cut
+=head2 The PageView definition
 
-=head2 Models
-
+Test 
 
 =begin html
 
-  <a href=""> 
+<img src="p1.png" width="100%" />
 
-  test
 =end html
 
 =cut

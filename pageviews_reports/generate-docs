@@ -6,6 +6,7 @@ use File::Find::Rule;
 use Data::Dumper;
 use File::Basename;
 use Time::Piece;
+use Template;
 
 
 ##############################################
@@ -14,12 +15,15 @@ use Time::Piece;
 #
 #   * Pod::Simple::XHTML module
 #   * File::Find::Rule   module
+#   * the Template       module
+#   * wget               package
 #   * pandoc             package
 #   * graphviz           package
 #   * texlive-base       package
+#   * texlive-latex-base package
+#   * imagemagick        package
 #
 ##############################################
-
 
 
 ##############################################
@@ -29,21 +33,33 @@ use Time::Piece;
 
 my $out = "pod-docs";
 
-`
-mkdir  $out/ 2>/dev/null;
-rm -rf $out/*;
-`;
+system(qq|
+rm    -rf $out/*    2>/dev/null;
+mkdir     $out/     2>/dev/null;
+mkdir -p "$out/img" 2>/dev/null;
+cd $out;
+echo "Pulling Images ...";
+cp ../static/img/accept-regex-example.png .;
+wget http://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.dot 2>/dev/null ;
+perl -pi -e 's/digraph G {/digraph G { rankdir=LR; size="60,100"; /' pageview_definition.dot;
+dot -Tpng pageview_definition.dot > p1.png 2>/dev/null;
+|);
+
+
 
 my @modules = File::Find::Rule->file()
-		->name( '*.pm' )
+		->name( '*.pm' , '*.pod' )
 		->in("./");
+
+
+
 
 my @html = ();
 for my $module_path (@modules) {
   print "Processing $module_path ...\n";
   my ($f_name,$f_path,$f_suffix) = fileparse($module_path);
   #print Dumper [$f_name,$f_path,$f_suffix];
-  $f_name =~ s/\.pm$/\.html/;
+  $f_name =~ s/(\.pm|\.pod)$/\.html/;
   my $psx = Pod::Simple::XHTML->new;
   my $html = "";
   my $out_path = "$out/$f_path";
@@ -57,33 +73,14 @@ for my $module_path (@modules) {
   push @html, $h;
 };
 
-
-##############################################
-# Collect all pod documenation in html format 
-# and convert it into a manual
-##############################################
-
-
-my $fh;
-# write header.tex
-open    $fh,">","$out/header.tex";
-print   $fh "\\usepackage[margin=0.5in]{geometry}";
-#print   $fh '\let\stdsection\section';
-#print   $fh '\renewcommand\section{\newpage\stdsection}';
-close   $fh;
-
-
-# write partial manual.tex
-open    $fh,">>","$out/manual.tex";
-print   $fh "\\usepackage{indentfirst}";
-print   $fh "\\usepackage[margin=0.5in]{geometry}\n";
-print   $fh "\\title{New mobile pageviews reports -- Documentation}\n";
-print   $fh "\\maketitle\n";
-print   $fh "\\setcounter{tocdepth}{2}\n";
-close   $fh;
-
+my $date = localtime->ymd("-");
+my $data = {
+  date     => $date,
+  sections => [],
+};
 
 # aggregate every html pod into manual.tex
+
 my $first_iter = 1;
 for my $h (@html) {
   my $partial_tex;
@@ -95,23 +92,34 @@ for my $h (@html) {
   $module_name =~ s/\//::/g;
   print "[PDF] Aggregating $module_name\n";
   $partial_tex = `cat $h | pandoc -f html -t latex`;
+  $partial_tex =~ s{\\includegraphics}{\\includegraphics\[width=\\textwidth,height=\\textheight,keepaspectratio\]}g;
   $partial_tex =~ s/\\([a-z]*section)/\\sub$1/g;
-  #$partial_tex = '\noindent\makebox[\linewidth]{\rule{\paperwidth}{1pt}}'."\n$partial_tex";
-  $partial_tex = "\n\n\\section{$module_name}\n$partial_tex";
-  open my $fh,">>","$out/manual.tex";
-  print   $fh $partial_tex;
-  close   $fh;
   $first_iter = 0;
+  push @{ $data->{sections} }, {
+    title   => $module_name,
+    content => $partial_tex
+  };
 }
 
-my $date = localtime->ymd("-");
+my $tt = Template->new({
+    INCLUDE_PATH => "./templates",
+    OUTPUT_PATH  => "./$out",
+    DEBUG        => 1,
+}); 
 
-# create the manual.pdf
-system("pandoc                                     \\
-               -V date:$date                       \\
-               -V documentclass:article            \\
-               --include-in-header $out/header.tex \\
-               --toc                               \\
-               -s $out/manual.tex                  \\
-               -o $out/manual.pdf");
+$tt->process(
+  "manual.tt",
+  $data,
+  "manual.tex"
+);
+
+system(qq{
+  cd $out; 
+  echo "Compiling Manual ...";
+  latex -interaction=nonstopmode manual.tex;
+  pdflatex manual.tex;
+  echo "Done";
+});
+
+
 

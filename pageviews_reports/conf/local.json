@@ -1,10 +1,10 @@
 {
-  "model"                : "json",
+  "model"                : "parallel",
   "max-children"         : 8,
-  "input-path"           : "/tmp/pageviews",
+  "input-path"           : "/home/user/wikidata/raw_gzips",
   "children-output-path" : "/tmp/pageviews/map",
   "output-path"          : "/tmp/pageviews",
-  "output-formats"       : ["wikireport"],
+  "output-formats"       : ["web","json","wikireport"],
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,
