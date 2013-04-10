@@ -33,6 +33,7 @@
 \fancyfoot[RE,LO]{\textbf{Page \thepage}}
 \fancyfoot[LE,RO]{Wikimedia Foundation Analytics Team}
 %\setromanfont[Mapping=tex-text]{Linux Libertine}
+\date{\large SHA1: [% sha1 %]\\ \today}
 \begin{document}
 \title{\underline{New mobile pageviews reports -- Documentation}}
 \maketitle

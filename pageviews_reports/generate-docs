@@ -82,9 +82,12 @@ for my $module_path (@modules) {
 };
 
 
+my $sha1 = `git rev-parse --verify HEAD`;
+chomp $sha1;
 my $date = localtime->ymd("-");
 my $data = {
   date     => $date,
+  sha1     => $sha1,
   sections => [],
 };
 
