@@ -6,7 +6,7 @@ use JSON::XS;
 
 =head1 NAME
 
-  PageViews::Model::JSON - Model which has a json file as data source
+PageViews::Model::JSON - Model which has a json file as data source
 
 =cut
 

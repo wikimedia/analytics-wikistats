@@ -11,13 +11,13 @@ use Carp;
 
 PageViews::View::Web -- Formatting the report in HTML format
 
-=cut
-
-
-
 =head1 DESCRIPTION
 
-This module creates the pageviews.html file. The data is taken from a model and then, some computations are made
+This module creates the pageviews.html file. 
+The data is taken from a model and then, it is normalized and totals, rankings and deltas are calculated.
+All the data in this form is passed to a templating engine(Template Toolkit) and the reports are rendered.
+
+The templates are in the C<templates/> directory. 
 
 =begin html
 

@@ -42,6 +42,13 @@ sub new {
   return $obj;
 };
 
+
+=head2 match_ip($self,$ip)
+
+Does a fast lookup(using the patricia tree) to decide if the ip is in the ranges that bots are in.
+
+=cut
+
 sub match_ip {
   my ($self,$ip) = @_;
 
@@ -56,6 +63,13 @@ sub match_ip {
     return undef;
   };
 };
+
+
+=head2 match_ua($self,$ip)
+
+Does pattern matching on the user-agent with a given list of keywords that bots are known to have.
+
+=cut
 
 sub match_ua {
   my ($self,$ua) = @_;

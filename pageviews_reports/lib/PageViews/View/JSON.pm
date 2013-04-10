@@ -3,6 +3,25 @@ use strict;
 use warnings;
 use JSON::XS;
 
+
+=head1 NAME
+
+PageViews::View::JSON -- renders the pageview counts in a JSON file
+
+=head1 DESCRIPTION
+
+This module formats the data in JSON format and writes it to disk.
+
+The Git SHA1 is also included in this JSON file as well as the actual configuration which was used for that particular run.
+
+This is useful in the case that further updates need to be made on the way the data should be rendered, they can be rendered
+by using the PageViews::Model::JSON without having to re-run the counting again.
+
+The SHA1 is useful in order to compare different revisions of the code to see what changes produced differences in the final
+counts.
+
+=cut
+
 sub new {
   my ($class) = @_;
   return bless {},$class;
