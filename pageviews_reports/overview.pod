@@ -35,7 +35,13 @@ The output formats are also present.
 
 =head1 PageView definition
 
-Test 
+It's not trivial to pinpoint exactly what a pageview is so we believe it's important
+to document what it means. 
+
+To this end, we've made a flowchart of the criteria through which we decide if a request which is found in the squid logs
+is or isn't a pageview.
+
+This is subject to change.
 
 =begin html
 
