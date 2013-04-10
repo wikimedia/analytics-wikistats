@@ -146,8 +146,13 @@ sub _simulate_big_numbers {
   };
 };
 
-# gets languages sorted by absolute total
-#
+
+=head2 get_totals_sorted_months_present_in_data($self,$languages_present_uniq,$language_totals)
+
+Returns a list of languages sorted by absolute total(total over all months).
+
+=cut
+
 sub get_totals_sorted_months_present_in_data {
   my ($self,$languages_present_uniq,$language_totals) = @_;
   my @unsorted_languages_present = keys %$languages_present_uniq;
@@ -165,9 +170,6 @@ This method provides returns the months in YYYY-MM format sorted chronologically
 
 =cut
 
-
-# gets temporaly sorted months present in data
-# 
 sub get_time_sorted_months_present_in_data {
   my ($self) = @_;
   my @retval =
@@ -203,8 +205,6 @@ It returns a structure of the following form that can be used by the charts insi
 =cut
 
 
-
-
 sub third_pass_chart_data {
   my ($self,$languages,$months) = @_;
 
@@ -222,6 +222,24 @@ sub third_pass_chart_data {
 
 };
 
+
+=head2 first_pass_languages_totals($self)
+
+Returns a hash with the following keys, also calculates totals for each month and each language.
+
+=begin html
+
+<ul>
+  <li>months_present        
+  <li>languages_present_uniq
+  <li>month_totals          
+  <li>language_totals
+</ul>
+
+=end html
+
+
+=cut
 
 
 sub first_pass_languages_totals {
@@ -258,6 +276,23 @@ sub first_pass_languages_totals {
   };
 };
 
+
+=head2 second_pass_rankings($self,$languages,$months)
+
+Returns the month rankings in a hash of the form:
+
+    {
+      "2012-08": {
+        "en": 1,
+        "ja": 2,
+        "de": 3,
+        ...
+      },
+      ...
+    }
+
+=cut
+
 sub second_pass_rankings {
   my ($self,$languages,$months) = @_;
 
@@ -285,6 +320,15 @@ sub second_pass_rankings {
   return $month_rankings;
 };
 
+
+=head2 scale_m_to_30($month,$value)
+
+Receives a year and month and a value.
+
+Returns the value scaled to a 30-day month.
+
+=cut
+
 sub scale_m_to_30 {
   my ($self,$month,$value) = @_;
   my $SCALE_FACTOR = 30;
@@ -292,6 +336,13 @@ sub scale_m_to_30 {
   my $scaled_value = int( ($value / $days_month_has) * $SCALE_FACTOR );
   return $scaled_value;
 };
+
+
+=head2 scale_months_to_30($self)
+
+Replaces all the pageview counts in the current object with scaled values of themselves.
+
+=cut
 
 sub scale_months_to_30 {
   my ($self) = @_;
@@ -344,11 +395,16 @@ sub scale_months_to_30 {
 
 
 
+=head2 get_data_for_template
 
-#
-# Format data in a nice way so we can pass it to the templating engine
-# (for PageViews::View::Web
-#
+Calculates deltas, rankings, totals. Provides data about discarded lines, how many they are, and the reasons
+for which they were discarded.
+
+Formats the data from the model in the way that the templates expect it to be.
+
+=cut
+
+
 
 sub get_data_for_template {
   my ($self) = @_;
@@ -507,6 +563,12 @@ sub get_data_for_template {
 };
 
 
+=head2 get_data_from_model($self,$model)
+
+Copies all the needed data from the model in order to proceed with the rendering.
+
+=cut
+
 sub get_data_from_model {
   my ($self,$model) = @_;
 
@@ -528,6 +590,15 @@ sub get_data_from_model {
     /;
 
 };
+
+
+=head2 render($self,$params)
+
+Receives as parameter a hash of parameters (which is read from the configuration).
+
+Uses Template::Toolkit to render the template for this view.
+
+=cut
 
 sub render {
   my ($self,$params) = @_;
@@ -557,6 +628,16 @@ sub render {
 
 };
 
+
+=head1 SEE ALSO
+
+=begin html
+<ul>
+  <li><a href="http://search.cpan.org/~abw/Template-Toolkit-2.24/lib/Template.pm">Template Toolkit on CPAN</a>
+  <li><a href="http://www.template-toolkit.org/docs/index.html">Template Toolkit Manual</a>
+=end html
+
+=cut
 
 
 1;

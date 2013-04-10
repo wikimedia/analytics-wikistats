@@ -418,7 +418,7 @@ sub process_line {
   # counts
   $self->{"counts"}->{$ymd}->{$url_info->{language}}++;
   # counts separated /w/index.php , /w/api.php , /wiki/
-  $self->{"counts_".$url_info->{project}}->{$ymd}->{$url_info->{language}}++;
+  $self->{"counts_".$url_info->{"pageview-type"}}->{$ymd}->{$url_info->{language}}++;
 };
 
 sub open_dbg_fh {
