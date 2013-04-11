@@ -38,8 +38,9 @@ digraph G {
 
   view_web          -> file_pageviews_html;
   view_json         -> file_data_json;
+  file_data_json    -> model_json       [style="dotted", label="through another run\n without counting"];
   view_wikireport   -> wikireports_csv;
-  wikireports_csv   -> wikireports_bash [style="dashed"];
+  wikireports_csv   -> wikireports_bash [style="dashed", label="indirect. first we place the csv\n in dumps dumps/csv/csv_sp/ and then we run the bash script\n"];
   wikireports_bash  -> wikireports_pl;
   wikireports_pl    -> wikireports_report;
 
