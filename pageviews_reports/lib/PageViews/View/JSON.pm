@@ -20,6 +20,8 @@ by using the PageViews::Model::JSON without having to re-run the counting again.
 The SHA1 is useful in order to compare different revisions of the code to see what changes produced differences in the final
 counts.
 
+=head1 METHODS
+
 =cut
 
 sub new {

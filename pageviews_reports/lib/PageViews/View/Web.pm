@@ -34,6 +34,7 @@ All the data mentioned above is then put in some data structures and they are pa
 in order to turn them into html code.
 
 
+=head1 METHODS
 
 =cut
 
