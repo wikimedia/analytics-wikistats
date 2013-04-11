@@ -134,8 +134,8 @@ $tt->process(
 system(qq{
   cd $out; 
   echo "Compiling Manual ...";
-  latex -interaction=nonstopmode manual.tex;
-  pdflatex manual.tex;
+  latex -interaction=nonstopmode manual.tex >/dev/null 2>/dev/null;
+  pdflatex manual.tex >/dev/null 2>/dev/null;
   echo "Done";
 });
 
