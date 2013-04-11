@@ -42,6 +42,8 @@ echo "Pulling Images ...";
 cp ../static/img/accept-regex-example.png .;
 wget http://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.dot 2>/dev/null ;
 dot -Tpng pageview_definition.dot > p1.png 2>/dev/null;
+cp ../overview.dot .;
+dot -Tpng overview.dot            > overview.png 2>/dev/null;
 |);
 
 
@@ -93,8 +95,9 @@ my $data = {
 
 # aggregate every html pod into manual.tex
 
+my $partial_tex;
+my $mediawiki_buffer;
 for my $h (@html) {
-  my $partial_tex;
   my ($a,$b,$c) =  fileparse($h);
   $a =~ s/\.html//;
   $b =~ s/^.*lib\///;
@@ -104,9 +107,10 @@ for my $h (@html) {
   print "[PDF] Aggregating $module_name\n";
 
   #cleaning up after pandoc because pandoc's not perfect :|
-  $partial_tex = `cat $h | pandoc -f html -t latex`;
-  $partial_tex =~ s{\\includegraphics}{\\includegraphics\[width=\\textwidth,height=\\textheight,keepaspectratio\]}g;
-  $partial_tex =~ s/\\([a-z]*section)/\\sub$1/g;
+  $partial_tex       = `cat $h | pandoc -f html -t latex`;
+  $partial_tex       =~ s{\\includegraphics}{\\includegraphics\[width=\\textwidth,height=\\textheight,keepaspectratio\]}g;
+  $partial_tex       =~ s/\\([a-z]*section)/\\sub$1/g;
+  $mediawiki_buffer .= `cat $h | pandoc -f html -t mediawiki`;
 
   $module_name =~ s/^.*overview.*$/Overview/;
   push @{ $data->{sections} }, {
@@ -135,5 +139,8 @@ system(qq{
   echo "Done";
 });
 
+open my $fh,">","$out/manual.wiki";
+print $fh $mediawiki_buffer;
+close;
 
 
