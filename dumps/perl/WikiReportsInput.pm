@@ -1234,7 +1234,9 @@ sub ReadMonthlyStats
 
       if ($normalize_days_per_month)
       {
-        if ($count_normalized > $pageviews_max {$wp})
+if ($wp eq 'es')	      
+{ print "$wp $m $count_normalized\n" ; }
+      	      if ($count_normalized > $pageviews_max {$wp})
         {
           $pageviews_max       {$wp} = $count_normalized ;
           $pageviews_month_max {$wp} = $m ;
@@ -1242,7 +1244,10 @@ sub ReadMonthlyStats
           $MonthlyStatsHigh {$wp.$c[0]} = $count_normalized ;
           $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
         }
-	elsif ($count_raw > $pageviews_max {$wp})
+      }	
+      else
+      {
+	if ($count_raw > $pageviews_max {$wp})
         {
           $pageviews_max       {$wp} = $count_raw ;
           $pageviews_month_max {$wp} = $m ;
