@@ -2,6 +2,8 @@
 /* General workflow */
 
 digraph G {
+
+
   //size="100,10";
   //page="27,27";
   //rankdir=LR;
@@ -19,8 +21,9 @@ digraph G {
   wikireports_bash    [label="pageviews_monthly.sh"                   ];
   wikireports_report  [label="TablesPageViewsMonthlyMobilePetrea.htm" ];
 
-  pageviews         -> model_parallel;
-  pageviews         -> model_sequential;
+//pageviews         -> model_parallel [label=<<TABLE><TR><TD><IMG SRC="static/img/basic-clock-small.png"/></TD></TR></TABLE>> ];
+  pageviews         -> model_parallel   [rotate=30,label=<<TABLE BORDER="0"><TR><TD><IMG SRC="static/img/clock-icon-small.png"/></TD><TD>1h/month</TD></TR></TABLE>> ];
+  pageviews         -> model_sequential  ;
   pageviews         -> model_json;
 
   model_parallel    -> view_json;
@@ -42,6 +45,6 @@ digraph G {
   view_wikireport   -> wikireports_csv;
   wikireports_csv   -> wikireports_bash [style="dashed", label="indirect. first we place the csv\n in dumps dumps/csv/csv_sp/ and then we run the bash script\n"];
   wikireports_bash  -> wikireports_pl;
-  wikireports_pl    -> wikireports_report;
+  wikireports_pl    -> wikireports_report  [label=<<TABLE BORDER="0"><TR><TD>25m</TD><TD><IMG SRC="static/img/clock-icon-small.png"/></TD></TR></TABLE>> ];
 
 };
