@@ -90,8 +90,8 @@ perl $perl/WikiCountsSummarizeProjectCounts.pl -i $projectcounts -o $csv -w $pro
 # -o = output folder
 # -n = normalized (all months -> 30 days)
 # -r = region
-
-# -v n = views non-mobile
+# -v = views (n:non-mobile, m:mobile, c:combined)
+# -s = source (s:squids, d:dammit) for page views only -s d = default
 
 date | tee -a $report | cat
 

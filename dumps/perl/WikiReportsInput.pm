@@ -164,8 +164,9 @@ sub ParseArguments
     &Log ("Process region " . ucfirst ($region) . "\nLanguages $languages_region\n\n") ;
   }
 
-  $langcode = uc ($language) ;
-  $testmode = ((defined $options {"t"}) ? $true : $false) ;
+  $langcode  = uc ($language) ;
+  $testmode  = ((defined $options {"t"}) ? $true : $false) ;
+  $squidslog = ((defined $options {"q"}) ? $true : $false) ;
 
   if ($testmode)
   { print "Test mode\n" ; }

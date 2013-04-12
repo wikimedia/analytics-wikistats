@@ -4023,9 +4023,14 @@ sub GenerateComparisonTable
   my $content = &GenerateHtmlStartComparisonTables ($f, $normalize_days_per_month) ;
 
   if ($pageviews)
-  {
+  { 
     if ($pageviews_mobile)
     {
+      if ($squidslog)	  
+      { $content .= " based on squids log" ; } 
+      else
+      { $content .= " based on dammit files" ; } 
+   
       $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
       $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
     }
@@ -4039,6 +4044,10 @@ sub GenerateComparisonTable
       $href_normalized     = 'TablesPageViewsMonthlyCombined.htm' ;
       $href_not_normalized = 'TablesPageViewsMonthlyOriginalCombined.htm' ;
     }
+
+    ($href_normalized_squids     = $href_normalized)     =~ s/Monthly/MonthlySquids/ ;
+    ($href_not_normalized_squids = $href_not_normalized) =~ s/Monthly/MonthlySquids/ ;
+
     $href_normalized2     = 'TablesPageViewsMonthly.htm' ;
     $href_not_normalized2 = 'TablesPageViewsMonthlyOriginal.htm' ;
 
@@ -4116,13 +4125,47 @@ sub GenerateComparisonTable
 
     if ($normalize_days_per_month)
     {
-      $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
-      $href_current_file =  $href_normalized ;
+      if ($pageviews_mobile and $mode_wp)
+      {
+	if ($squidslog)
+	{ 
+          $out_html .= "<p>Switch to <a href='${href_normalized}'>same report based on dammit files</a>" ;
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized_squids'>${coverage2}/Raw Data</a>" ; 
+        }
+	else
+	{ 
+          $out_html .= "<p>Switch to <a href='${href_normalized_squids}'>same report based on squid logs</a>" ; 
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ; 
+        }
+	$href_current_file =  $href_normalized ;
+      }	
+      else
+      {
+        $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
+        $href_current_file =  $href_normalized ;
+      }	
     }
     else
     {
-      $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
-      $href_current_file =  $href_not_normalized ;
+      if ($pageviews_mobile and $mode_wp)
+      {
+	if ($squidslog)
+        { 
+          $out_html .= "<p>Switch to <a href='${href_not_normalized}'>same report based on dammit files</a>" ;
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized_squids'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
+        }
+	else
+	{ 
+          $out_html .= "<p>Switch to <a href='${href_not_normalized_squids}'>same report based on squid logs</a>" ; 
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
+        }
+        $href_current_file =  $href_not_normalized ;
+      }	
+      else
+      {
+        $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
+        $href_current_file =  $href_not_normalized ;
+      }	
     }
 
     if ($mode_wp)
@@ -4131,11 +4174,16 @@ sub GenerateComparisonTable
       { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
                      "<a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       elsif ($pageviews_non_mobile)
-      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a>, " .
+      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on dammit files), " .
+                     " <a href='TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " . 
+		     blank_text_after ("31/07/2013", "<font color=#008000>New</font>") . "(based on squid logs), " .
                      " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       else
       { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
-                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a>" ; }
+                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on dammit files), " .
+                     " <a href='TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " .
+		     blank_text_after ("31/07/2013", "<font color=#008000>New</font>") . "(based on squid logs)" ;
+      }
     }
 
     if ($mode_wp)
@@ -4152,7 +4200,10 @@ sub GenerateComparisonTable
       if ($region ne 'oceania')    { $out_html .= "<a href='$root/EN_Oceania/$href_current_file'>Oceania</a>, " ; }
       if ($region ne 'artificial') { $out_html .= "<a href='$root/EN_Artificial/$href_current_file'>Artificial Languages</a>" ; }
       $out_html =~ s/, $// ;
-      $out_html .= " ($coverage2/${raw_or_not})" ;
+      if ($pageviews_mobile)
+      { $out_html .= " ($coverage2/${raw_or_not}, based on dammit files)" ; }
+      else
+      { $out_html .= " ($coverage2/${raw_or_not})" ; }
     }
 
   # if ($pageviews_non_mobile)
@@ -4174,17 +4225,42 @@ sub GenerateComparisonTable
   # }
 
 
-    if (! $mode_wo) # wikivoyage did not yet exist when following data losses occurred 
-    {  
-      $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
-      $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
-      $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
-	$out_html .= "<p><b><font color=#FF0000>Warning: These counts include bot/crawler requests.</b><br>Actually 'page requests' for now would be more a accurate report title than 'page views'.</font><br>Filtering these bot requests is planned, but awaits a solution that doesn't overload our servers.<br>Overall about <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>15% of pages served</a> on all Wikimedia wikis combined are due to bots requests. On less popular wikis the share of bot requests will be higher.</font>" ;
-      if ($pageviews_mobile)
-      { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
-      $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
+    if ($squidslog)
+    {
+      $out_html .= "<p><a href='http://www.mediawiki.org/wiki/User:Spetrea/New_mobile_pageviews_documentation'>Documentation</a> " .
+                   "(contains details on how to run this report, patches welcome, " . 
+		   "source code is <a href='https://github.com/wikimedia/analytics-wikistats/tree/localdev/pageviews_reports/'>here</a> " . 
+		   "and <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>here</a>)<p>" ;
+    }
 
-      $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+    if (! $mode_wo)  # wikivoyage did not yet exist when following data losses occurred 
+    { 
+      if (! $squidslog)
+      {      
+        $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
+        $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). " . 
+                     "Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
+        $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. " . 
+	             "These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
+      }		     
+
+      $out_html .= "<p><b><font color=#FF0000>Warning: These counts include bot/crawler requests.</b><br>" . 
+                   "Actually 'page requests' for now would be more a accurate report title than 'page views'.</font><br>" . 
+ 	           "Filtering these bot requests is planned, but awaits a solution that doesn't overload our servers.<br>" . 
+	  	   "Overall about <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>15% of pages served</a> " . 
+	  	   "on all Wikimedia wikis combined are due to bots requests. On less popular wikis the share of bot requests will be higher.</font>" ;
+
+      if ($pageviews_mobile)
+      { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites " . 
+		     "was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic). This has been corrected Dec 08.</font>") ; }
+      $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. " . 
+	           "Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
+
+      if (! $squidslog)	   
+      {
+        $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . 
+                     "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+      }		     
 
                  # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
                  # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
