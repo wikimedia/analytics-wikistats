@@ -268,12 +268,15 @@ Otherwise it accepts because this means the request was not caused by the same p
 
 sub accept_case1 {
   my ($self,$u,$r) = @_;
-  if($u->{"pageview-type"} eq "api"          &&
+  if(
+     defined($r->{"action"})                 &&
+     defined($u->{"action"})                 &&
+     $u->{"pageview-type"} eq "api"          &&
      $r->{"pageview-type"} eq "api"          &&
-     $r->{"action"}        =~ "view"         &&
-     $u->{"action"}        =~ "view"         &&
      $u->{"domain"}        eq $r->{"domain"} &&
-     $u->{"title"}         eq $r->{"title"} 
+     $u->{"title"}         eq $r->{"title"}  &&
+     (($r->{"action"} eq       "view" && $u->{"action"} eq       "view" ) || 
+      ($r->{"action"} eq "mobileview" && $u->{"action"} eq "mobileview" ))
    ) {
      return 0;
   };
@@ -295,7 +298,10 @@ sub accept_case2 {
 
   #print Dumper $u;
   #print Dumper $r;
-  if($u->{"pageview-type"} eq "api"          &&
+  if(
+     defined($u->{title}) &&
+     defined($r->{title}) &&
+     $u->{"pageview-type"} eq "api"          &&
      $r->{"pageview-type"} eq "wiki_basic"   &&
      $u->{"domain"}        eq $r->{"domain"} &&
      $u->{"title"}         eq $r->{"title"} 
