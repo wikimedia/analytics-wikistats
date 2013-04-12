@@ -241,7 +241,8 @@ sub accept_rule_url {
       $retval->{"title"} = $url_params->{page}  || 
                            $url_params->{title} ||
                            $url_params->{titles} ;
-      $retval->{"title"} =~ s/\+/_/g;
+      $retval->{"title"} =~ s/\+/_/g
+        if $retval->{"title"};
       return undef
         unless $url_params->{action} ~~ ["view","mobileview","query"];
     } else {
