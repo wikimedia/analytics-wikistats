@@ -959,13 +959,13 @@ sub ReadMonthlyStats
 
     next if $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
 
-    # figures for current month are ignored when month has just begun
+    # figures for current month are ignored when month has just begun # qqq
     $days_in_month = days_in_month ($year, $month) ;
     $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
     $pageviews     {$wp.$m} = $count_normalized ;
     $pageviews_raw {$wp.$m} = $count ;
 
-    $pageviews_monthly_totals_raw        {"$year-$month"} += $count ;
+    $pageviews_monthly_totals_raw        {"$year-$month"} += $count ; # qqq
     $pageviews_monthly_totals_normalized {"$year-$month"} += $count_normalized ;
 
 #   do this below, and remove code in next version
@@ -1006,7 +1006,7 @@ sub ReadMonthlyStats
 
       $wp =~ s/\.m// ; # mobile postix is .m
 
-      if (! $mode_wo) # temp to see any data in report qqq
+      if (! $mode_wo) # temp to see any data in report 
       { next if $date eq $oldest_month_pageviews {$wp} ; } # skip first month, probably incomplete
 
       if ($normalize_days_per_month)
@@ -1080,7 +1080,7 @@ sub ReadMonthlyStats
       {
         if ($fields [$f] > $MonthlyStatsHigh {$wp.$c[$f]})
         {
-          $MonthlyStatsHigh {$wp.$c[$f]} = $fields [$f] ;
+          $MonthlyStatsHigh {$wp.$c[$f]} = $fields [$f] ; # qqq
           $MonthlyStatsHighMonth {$wp.$c[$f]} = $m ;
         }
       }
@@ -1232,13 +1232,24 @@ sub ReadMonthlyStats
         $count_raw        = $pageviews_raw {$wp.$m} + $pageviews_raw {"$wp.m".$m} ;
       }
 
-      if ($count_normalized > $pageviews_max {$wp})
+      if ($normalize_days_per_month)
       {
-        $pageviews_max       {$wp} = $count_normalized ;
-        $pageviews_month_max {$wp} = $m ;
+        if ($count_normalized > $pageviews_max {$wp})
+        {
+          $pageviews_max       {$wp} = $count_normalized ;
+          $pageviews_month_max {$wp} = $m ;
 
-        $MonthlyStatsHigh {$wp.$c[0]} = $count_raw ;
-        $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
+          $MonthlyStatsHigh {$wp.$c[0]} = $count_normalized ;
+          $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
+        }
+	elsif ($count_raw > $pageviews_max {$wp})
+        {
+          $pageviews_max       {$wp} = $count_raw ;
+          $pageviews_month_max {$wp} = $m ;
+
+          $MonthlyStatsHigh {$wp.$c[0]} = $count_raw ;
+          $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
+        }
       }
     }
   }
