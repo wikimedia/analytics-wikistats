@@ -68,6 +68,9 @@ sub WritePageViewsMonthly
     { $file_html = $path_out . "TablesPageViewsMonthlyOriginalCombined.htm" ; }
   }
 
+  if ($squidslog)
+  { $file_html =~ s/Monthly/MonthlySquids/ ; }
+
   print "\n\nFILE HTML '$file_html'\n\n" ;
 
   open "FILE_OUT", ">", $file_html || die "File '$file_html' could not be opened" ;
