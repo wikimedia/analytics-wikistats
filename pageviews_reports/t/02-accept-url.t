@@ -15,10 +15,10 @@ my $re_str = PageViews::Model::Sequential::build_accepted_url_regex1();
 my $re = qr/$re_str/;
 
 my $u1 = "http://en.m.wikipedia.org/wiki/Mr.T";
-my $u2 = "http://de.m.wikibooks.org/w/index.php/Mr.T";
-my $u3 = "http://ja.m.wikinews.org/w/api.php?action=mobileview";
-my $u4 = "http://ja.m.wikinews.org/w/api.php?action=view";
-my $u5 = "http://en.m.wiktionary.org/wiki/Special:MobileOptions";
+my $u2 = "http://de.m.wikipedia.org/w/index.php/Mr.T";
+my $u3 = "http://ja.m.wikipedia.org/w/api.php?action=mobileview";
+my $u4 = "http://ja.m.wikipedia.org/w/api.php?action=view";
+my $u5 = "http://en.m.wikipedia.org/wiki/Special:MobileOptions";
 
 # After receiving feedback from Mobile team on 08-April-2012
 my $u6 = "https://en.m.wikipedia.org/w/api.php?format=json&action=query&prop=langlinks&llurl=true&lllimit=max&titles=Tropical+cyclone";
@@ -53,7 +53,7 @@ ok(@c8==9,"u8 test has 8 captures");
 #######################################
 
 {
-  my $u = "http://ja.m.wikinews.org/w/api.php?action=view&title=Radix_tree";
+  my $u = "http://ja.m.wikipedia.org/w/api.php?action=view&title=Radix_tree";
   my $o = PageViews::Model::Sequential->new;
   $o->{last_ymd} = "2013-2";
   my $a = $o->accept_rule_url($u);
@@ -84,7 +84,7 @@ ok(@c8==9,"u8 test has 8 captures");
 #########################################
 
 {
-  my $u = "http://de.m.wikibooks.org/w/index.php/Mr.T";
+  my $u = "http://de.m.wikipedia.org/w/index.php/Mr.T";
   my $o = PageViews::Model::Sequential->new;
   $o->{last_ymd} = "2013-2";
   my $a = $o->accept_rule_url($u);
@@ -103,22 +103,22 @@ ok(@c8==9,"u8 test has 8 captures");
   my $o = PageViews::Model::Sequential->new;
   $o->{last_ymd} = "2013-2";
 
-  my $u1 = "http://ja.m.wikinews.org/w/api.php?action=mobileview&page=Radix_tree";
-  my $r1 = "http://ja.m.wikinews.org/w/api.php?action=mobileview&page=Radix_tree";
+  my $u1 = "http://ja.m.wikipedia.org/w/api.php?action=mobileview&page=Radix_tree";
+  my $r1 = "http://ja.m.wikipedia.org/w/api.php?action=mobileview&page=Radix_tree";
 
   my $U1 = $o->accept_rule_url($u1);
   my $R1 = $o->accept_rule_url($r1);
 
   ok(!$o->accept_rule_url_and_referer($U1,$R1,$r1),"Rule url_and_referer works");
 
-  my $u2 = "http://ja.m.wikinews.org/w/api.php?page=Radix_tree&action=mobileview";
-  my $r2 = "http://ja.m.wikinews.org/w/api.php?action=mobileview&page=Radix_tree";
+  my $u2 = "http://ja.m.wikipedia.org/w/api.php?page=Radix_tree&action=mobileview";
+  my $r2 = "http://ja.m.wikipedia.org/w/api.php?action=mobileview&page=Radix_tree";
   my $U2 = $o->accept_rule_url($u2);
   my $R2 = $o->accept_rule_url($r2);
   ok(!$o->accept_rule_url_and_referer($U2,$R2,$r2),"Rule url_and_referer works for arbitrary parameter order");
 
-  my $u3 = "http://ja.m.wikinews.org/w/api.php?page=Radix_tree&action=mobileview&param=true";
-  my $r3 = "http://ja.m.wikinews.org/w/api.php?action=mobileview&page=Radix_tree&param=true";
+  my $u3 = "http://ja.m.wikipedia.org/w/api.php?page=Radix_tree&action=mobileview&param=true";
+  my $r3 = "http://ja.m.wikipedia.org/w/api.php?action=mobileview&page=Radix_tree&param=true";
   my $U3 = $o->accept_rule_url($u3);
   my $R3 = $o->accept_rule_url($r3);
 

@@ -46,18 +46,18 @@ my @accept_lang_array = (
 
 # a list of accepted suffixes for the domain
 my @accept_domain_suffixes = (
-  'wikibooks',
-  'wikidata',
-  'wikinews',
+  #'wikibooks',
+  #'wikidata',
+  #'wikinews',
   'wikipedia',
-  'wikiquote',
-  'wikisource',
-  'wikiversity',
-  'wikivoyage',
-  'wikimedia',
-  'mediawiki',
-  'wikimediafoundation',
-  'wiktionary',
+  #'wikiquote',
+  #'wikisource',
+  #'wikiversity',
+  #'wikivoyage',
+  #'wikimedia',
+  #'mediawiki',
+  #'wikimediafoundation',
+  #'wiktionary',
 );
 
 # a list of accepted prefixes for the url path
