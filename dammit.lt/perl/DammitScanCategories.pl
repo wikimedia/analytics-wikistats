@@ -10,6 +10,7 @@
   use CGI::Carp qw(fatalsToBrowser);
   use Time::Local ;
   use Net::Domain qw (hostname);
+  use URI::Escape ;
 
   $callsmax     = 10000 ;
   $callsmaxtest = 10000 ;
@@ -30,7 +31,7 @@
 sub ParseArguments
 {
   my $options ;
-  getopt ("cdow", \%options) ;
+  getopt ("cdowh", \%options) ;
 
   foreach $key (keys %options)
   {
@@ -47,11 +48,15 @@ sub ParseArguments
   abort ("Specify wiki as e.g.: '-w nl.wikipedia.org'") if (! defined ($options {"w"})) ;
   abort ("Specify output folder as : '-o [folder]'") if (! -d $options {"o"}) ;
   
-  $category = $options {"c"} ;
-  $depth    = $options {"d"} ;
-  $path_out = $options {"o"} ;
-  $wiki     = $options {"w"} ;
+  $category    = $options {"c"} ;
+  $depth       = $options {"d"} ;
+  $path_out    = $options {"o"} ;
+  $path_html   = $options {"h"} ;
+  $wiki        = $options {"w"} ;
   $projectcode = $wiki ;
+
+  $category    = uri_unescape ($category) ;
+  $path_html   = uri_unescape ($path_html) ;
 
   &ValidateCategory ;
 
@@ -82,14 +87,15 @@ sub ParseArguments
   if (! -d $path_out)
   { abort ("Output directory '" . $path_out . "' not found and could not be created") ; }
 
-  $file_log        = "$path_out/scan_categories.log" ;
-  $file_csv        = "$path_out/scan_categories_found_articles.csv" ;
-  $file_categories = "$path_out/scan_categories_found_tree.txt" ;
+  $file_log             = "$path_out/scan_categories.log" ;
+  $file_csv             = "$path_out/scan_categories_found_articles.csv" ;
+  $file_categories      = "$path_out/scan_categories_found_tree.txt" ;
 
   print "\n" ;
-  print "Log $file_log\n" ;
-  print "Csv $file_csv\n" ;
-  print "Txt $file_categories\n" ;
+  print "Log  $file_log\n" ;
+  print "Csv  $file_csv\n" ;
+  print "Txt  $file_categories\n" ;
+  print "Html $path_html\n" ;
 }
 
 #sub LogArguments
@@ -104,6 +110,7 @@ sub ValidateCategory
 {
   $url = "http://$wiki/w/api.php?action=query&format=xml&list=categorymembers&cmtitle=Category:$category&cmlimit=1" ;
   ($result, $content) = &GetPage ($category, $level, $url, $true) ;
+  print "Test url '$url'\n" ;
   if ($content =~ /<categorymembers \/>/)
   {
     print "Category '$category' not found or empty on wiki '$wiki'\n" ;
@@ -114,12 +121,21 @@ sub ValidateCategory
 sub ScanCategories
 {
   &OpenLog ;
-  open FILE_CSV,        '>', "$file_csv" ;
-  open FILE_CATEGORIES, '>', "$file_categories" ;
+  open FILE_CSV,             '>', $file_csv ;
+  open FILE_CATEGORIES,      '>', $file_categories ;
+  open FILE_CATEGORIES_HTML, '>', $path_html ;
+
+  print FILE_CATEGORIES_HTML &HtmlHeader ;
 
   &Log ("\nFetch pages from $wiki ($projectcode) for category $category, max $maxlevel levels deep.\n\n") ;
   print FILE_CATEGORIES "Fetch pages from $wiki for category $category, max $maxlevel levels deep.\n\n" ;
   print FILE_CATEGORIES "s = subcategories, a = articles\n\n" ;
+
+  ($path_pageviews = $path_html) =~ s/categories/pageviews/ ;
+  $path_pageviews =~ s/^.*\/// ;
+  print FILE_CATEGORIES_HTML "Fetch pages from $wiki for category $category, max $maxlevel levels deep:<p>\n" ;
+  print FILE_CATEGORIES_HTML "Switch to <a href='$path_pageviews'>page views report</a><p>\n" ;
+# print FILE_CATEGORIES_HTML "s = subcategories, a = articles<p>" ;
 
   &FetchCategoryMembers ($category, 1) ;
 
@@ -128,16 +144,23 @@ sub ScanCategories
   print FILE_CSV "# depth:$maxlevel\n" ;
   print FILE_CSV "# job:$job\n" ;
 
-  foreach $article_category (sort keys %results)
+  foreach $article (sort keys %results)
   {
     $articles_found ++ ;
-    print FILE_CSV "$projectcode,$article_category\n" ;
+    $categories = $results {$article} ;
+    $categories =~ s/\|$// ;
+    print FILE_CSV "$projectcode,$article,$categories\n" ;
   }
 
   $duration = time - $timestart ;
-  print FILE_CATEGORIES "\n$categories_scanned unique categories scanned, with in total $articles_found unique articles (namespace 0), in $duration seconds.\n" ;
-  close FILE_CSV ;
+  print FILE_CATEGORIES      "\n$categories_scanned unique categories scanned, with in total $articles_found unique articles (namespace 0), in $duration seconds.\n" ;
+  print FILE_CATEGORIES_HTML "\n<p>$categories_scanned unique categories scanned, with in total $articles_found unique articles (namespace 0), in $duration seconds.\n" ;
   close FILE_CATEGORIES ;
+
+  print FILE_CATEGORIES_HTML &HtmlFooter ;
+  close FILE_CATEGORIES_HTML ;
+
+  close FILE_CSV ;
   close FILE_LOG ;
 }
 
@@ -145,7 +168,8 @@ sub FetchCategoryMembers
 {
   my $category = shift ;
   my $level    = shift ;
-  $indent  = "  " x ($level-1) ;
+  $indent       = "  " x ($level-1) ;
+  $indent_html  = "&nbsp;&nbsp;&nbsp; " x ($level-1) ;
 
   if ($level > $maxlevel) { return ; }
 
@@ -154,8 +178,11 @@ sub FetchCategoryMembers
 
   if ($queried {$category})
   {
-    $indent = "  " x  ($level-1) ;
-    print FILE_CATEGORIES "$indent $level '$category2' -> already queried\n" ;
+    $indent       = "  " x  ($level-1) ;
+    $indent_html  = "&nbsp;&nbsp;&nbsp; " x ($level-1) ;
+    print FILE_CATEGORIES      "$indent $level '$category2' -> already queried\n" ;
+  # print FILE_CATEGORIES_HTML "$indent_html $level '$category2' -> already queried<br>\n" ;
+    print FILE_CATEGORIES_HTML "$indent_html $level <a href='http://$wiki/wiki/category:$category2'>$category2</a> -> already queried<br>\n" ;
     return ;
   }
 
@@ -211,7 +238,8 @@ sub FetchCategoryMembers
         $article  =~ s/ /_/g ;
         $category =~ s/,/\%2C/g ;
         $category =~ s/ /_/g ;
-        $results {"$article,$category"}++ ;
+      # $results {"$article,$category"}++ ;
+	$results {$article} .= "$category|" ; 
       }
     }
     else
@@ -220,7 +248,24 @@ sub FetchCategoryMembers
     $continueprev = $continue ;
   }
 
-  print FILE_CATEGORIES "$indent $level '$category2' -> subcats:" . ($#categories+1) . " articles:" . ($#articles+1) . "\n" ;
+  my $subcats ;
+  print FILE_CATEGORIES      "$indent $level '$category2' -> subcats:" . ($#categories+1) . " articles:" . ($#articles+1) . "\n" ;
+  
+  if ($#categories < 0) 
+  { $subcats = '' ; } 
+  elsif ($#categories == 0) 
+  { $subcats = "1 subcat, " ; }
+  else
+  { $subcats = ($#categories+1) . " subcats, " ; }
+  
+  if ($#articles < 0) 
+  { $articles = 'no articles' ; } 
+  elsif ($#articles == 0) 
+  { $articles = "1 article" ; }
+  else
+  { $articles = ($#articles+1) . " articles" ; }
+
+  print FILE_CATEGORIES_HTML "$indent_html $level <a href='http://$wiki/wiki/category:$category2'>$category2</a> -> $subcats$articles<br>\n" ;
   foreach $subcategory (sort @categories)
   {
     if (($level < $maxlevel) && ($subcategory !~ /(?:National_Inventors_Hall_of_Fame_inductees|Inventors|Directors)/))
@@ -265,8 +310,9 @@ sub GetPage
 
   for ($attempts = 1 ; ($attempts <= 2) && (! $succes) ; $attempts++)
   {
-    if ($requests++ % 2 == 2)
-    { sleep (1) ; }
+    # pacer not needed? 	  
+    # if ($requests++ % 2 == 2)
+    # { sleep (1) ; }
 
     my $response = $ua->request($req);
     if ($response->is_error())
@@ -333,9 +379,52 @@ sub GetArticles
   my @articles ;
   $members =~ s/<cm[^>]*? ns="\d+" title="([^"]+)".*?>/(push @articles, $1)/ge ;
   foreach $article (@articles)
-  { $article =~ s/\&\#039;/'/g ; }
+  { 
+    $article =~ s/\&\#039;/'/g ; 
+    $article =  uri_escape ($article) ;
+    $article =~ s/\%20/_/g ;
+    $article =~ s/\%28/(/g ;
+    $article =~ s/\%29/)/g ;
+    $article =~ s/\%2F/\//g ;
+    $article =~ s/\%3A/:/g ;
+  }
   return (@articles) ;
 }
+
+sub HtmlHeader
+{
+my $html = <<__HTML_HEADER__ ;
+<html>
+<header>
+<title>Subcategories $wiki $category</title> 
+<style type="text/css">
+<!--
+body    {font-family:arial,sans-serif; font-size:12px }
+
+a:link { color:blue;text-decoration:none;  }
+a:visited {color:#0000FF;text-decoration:none; }
+a:active  {color:#0000FF;text-decoration:none;  }
+a:hover   {color:#FF00FF;text-decoration:underline}
+-->
+</style>
+
+</header>
+<body>
+__HTML_HEADER__
+
+return $html ;
+}
+
+sub HtmlFooter
+{
+my $html = <<__HTML_FOOTER__ ;
+</body>
+</html>
+__HTML_FOOTER__
+
+return $html ;
+}
+
 
 sub ConvertDate
 {

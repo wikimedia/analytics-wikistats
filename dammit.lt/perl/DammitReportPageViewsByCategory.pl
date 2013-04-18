@@ -3,6 +3,7 @@
   use CGI::Carp qw(fatalsToBrowser);
   use Time::Local ;
   use Getopt::Std ;
+  use URI::Escape ;
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
@@ -19,8 +20,10 @@
   our $mirror = $false ; # no RTL languages support yet
 
   # -i "w:\! perl\dammit\dammit page requests per category\scan_categories_views_per_article.csv" -o "scan_categories_views_per_article.html"
-  our ($file_csv, $file_html, $view_threshold) = &ParseArguments ;
-  &WriteReport ($file_csv, $file_html, $view_threshold) ;
+# our ($file_csv, $file_html_in, $file_html_out, , $view_threshold, $msg_month) = &ParseArguments ;
+  my ($file_csv, $file_html_out, , $view_threshold, $msg_month, $abbr, $yyyy_mm) = &ParseArguments ;
+# &WriteReport ($file_csv, $file_html_in, $file_html_out, $view_threshold, $msg_month) ;
+  &WriteReport ($file_csv, $file_html_out, $view_threshold, $msg_month, $abbr, $yyyy_mm) ;
 
   print "\n\nReady\n\n" ;
   exit ;
@@ -29,31 +32,42 @@
 sub ParseArguments
 {
   my %options ;
-  getopt ("iov", \%options) ;
+  getopt ("iovmha", \%options) ;
 
   my $file_csv       = $options {"i"} ;
-  my $file_html      = $options {"o"} ;
+# my $file_html_in   = $options {"h"} ;
+  my $file_html_out  = $options {"o"} ;
   my $view_threshold = $options {"v"} ;
+  my $abbr           = $options {"a"} ;
+  my $yyyy_mm        = $options {"m"} ;
 
-  die "Specify -i [input file]"  if $options {"i"} eq '' ;
-  die "Specify -o [output file]" if $options {"o"} eq '' ;
+  die "Specify -i [input file]"            if $options {"i"} eq '' ;
+  die "Specify -o [output file]"           if $options {"o"} eq '' ;
+# die "Specify -h [categeories html file]" if $options {"h"} eq '' ;
   if (! defined $view_threshold) 
   {
     $view_threshold = 20 ;
     print "View threshold not specified, use default 20\n" ;    
   }
   die "Specify -v [numeric]" if $view_threshold !~ /^\d+$/ ;
+  die "Specify -m [yyyy-mm]" if $yyyy_mm        !~ /^\d\d\d\d-\d\d$/ ;
 
   die "Input file '$file_csv' not found!" if ! -e $file_csv ;
+# die "Categories html file '$file_html_in' not found!" if ! -e $file_html_in ;
 
-  return ($file_csv, $file_html, $view_threshold) ;
+  $msg_month = "year " . substr ($yyyy_mm,0,4) . " month " . substr ($yyyy_mm,5,2) ;
+# return ($file_csv, $file_html_in, $file_html_out, $view_threshold, $msg_month) ;
+  return ($file_csv, $file_html_out, $view_threshold, $msg_month, $abbr, $yyyy_mm) ;
 }
 
 sub WriteReport
 {
-  my ($file_csv, $file_html, $view_threshold) = @_ ;
-  my ($line, $msg_month, $msg_wiki, $msg_category, $msg_depth, $line_html, $html, $url, $rows, %row) ;
-
+# my ($file_csv, $file_html_in, $file_html_out, $view_threshold, $msg_month) = @_ ;
+  my ($file_csv, $file_html_out, $view_threshold, $msg_month, $abbr, $yyyy_mm) = @_ ;
+  my ($line, $msg_wiki, $msg_category, $msg_depth, $line_html, $html, $html2, $url, $rows, $rows2, %row, $category, $category2, $chars) ;
+  my ($yyyy, $mm, $yyyy_mm_prev, $yyyy_mm_next, $file_html_out_no_path, $file_html_out_older, $file_html_out_newer, $file_html_out_longer) ; 
+  my $file_html_categories = $file_html_out ;
+  
   open FILE_CSV,  '<', $file_csv  || die "Could not open input file '$file_csv'\n" ;
 
 
@@ -62,12 +76,49 @@ sub WriteReport
   $html .= "<body>\n" ;
   $html .= "<h3>HEADER</h3>\n" ;
   $html .= "<b>DESCRIPTION</b>&nbsp;<p>\n" ;
+  $html .= "<b>Some top ranking titles in this list may seem out of place.</b><br>" ;
+# $html .= "The assigned ategory which makes an article appear in this list may not explain why that article is viewed so often.</b><br>" ;
+# $html .= "<b>In some occasions a listed entry may be totally irrelevant to the topcategory on which this list is based</b><br>" .
+#          " (a list of pages about politicians may feature a page about a music album, just because a famous musician happened to be also a minor politician).<p>" ;
+  $html .= "Please note that any Wikipedia article can have tens of categories assigned to it.<br>" .
+           "A popular article will rank high in any list where it's featured, regardless of the category under review.<br>" . 
+	   "Thus a well-known singer may be top ranking in a list about politicians, because he/she also played a minor or brief role in politics.<p>" ;
   $html .= "Click arrow in header to sort on that column. Shift+click to add column as secondary sort order. " ;
   $html .= "E.g. first on category, secondary on views.<br>" ;
-  $html .= "On huge tables sort will take a while, please be patient." ;
+  $html .= "On huge tables sort will take a while, please be patient.<p>" ;
+
+  $file_html_categories =~ s/pageviews/categories/ ;
+  $file_html_categories =~ s/^.*\/// ; # remove path
+  $html .= "<a href='$file_html_categories'>Categories included</a> / Other reports: " ;
+  
+  $html .= "<a href='../..'>start</a> / " ;
+  $html .= "<a href='..'>$abbr</a> / " ;
+  $html .= "<a href='.'>$yyyy_mm</a> / " ;
+
+  $yyyy = substr ($yyyy_mm,0,4) ;
+  $mm   = substr ($yyyy_mm,5,2) ;
+  if ($mm > 0)  { $mm -- ; } else { $mm = 12 ; $yyyy-- ; }
+  $yyyy_mm_prev = sprintf ("%4d-%02d",$yyyy,$mm) ;
+  if ($mm < 12) { $mm ++ ; } else { $mm =  1 ; $yyyy++ ; }
+  if ($mm < 12) { $mm ++ ; } else { $mm =  1 ; $yyyy++ ; }
+  $yyyy_mm_next = sprintf ("%4d-%02d",$yyyy,$mm) ;
+
+  $html .= "Other version: " ;
+
+  $file_html_out_no_path = $file_html_out ;
+  $file_html_out_no_path =~ s/^.*\//.\// ;
+  ($file_html_out_older  = $file_html_out_no_path) =~ s/$yyyy_mm/$yyyy_mm_prev/g ;
+  ($file_html_out_longer = $file_html_out_no_path) =~ s/\.html/_huge\.html/ ;
+
+  if ($yyyy_mm gt '2013-01')
+  { $html .= "<a href='../$yyyy_mm_prev/$file_html_out_older'>older</a> / " ; }
+  ($file_html_out_newer = $file_html_out_no_path) =~ s/$yyyy_mm/$yyyy_mm_next/g ;
+  $html .= "<a href='../$yyyy_mm_next/$file_html_out_newer'>newer</a> <font color=#A0A0A0>(published after month is complete)</font> " ; 
+  $html .= "##LONG##" ; 
+  
   $html .= "<table border='1' id='table1' class='tablesorter'>\n" ;
   $html .= "<thead>\n" ;
-  $html .= "<tr><th>Views&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Page title</th><th>Category</th></tr>\n" ;
+  $html .= "<tr><th>Views&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><th>Page title</th><th>Category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th></tr>\n" ;
   $html .= "</thead>\n" ;
   $html .= "<tbody>\n" ;
   while ($line = <FILE_CSV>)
@@ -76,11 +127,11 @@ sub WriteReport
     {
       $line =~ s/[^\#]*#\s*// ;
       $line =~ s/:/: / ;
-      if ($line =~ /page request counts for /)
-      {
-        $line =~ s/.*?page request counts for // ;
-        $msg_month = $line ;
-      }
+      #if ($line =~ /page request counts for /)
+      #{
+      #  $line =~ s/.*?page request counts for // ;
+      #  $msg_month = $line ;
+      #}
       next ;
     }
     if ($line =~ /^titles:/) # these lines come from file with page titles produced by DammitScanCategories.pl
@@ -104,33 +155,70 @@ sub WriteReport
     }
 
     chomp $line ;
-    my ($project_code, $title, $count, $category) = split (' ', $line) ;
+    my ($project_code, $title, $count, $categories) = split (' ', $line, 4) ;
 
     next if $count < $view_threshold ;
 
+    $title = uri_unescape ($title) ;
     (my $title2 = $title) =~ s/_/ /g ;
-    (my $category2 = $category) =~ s/_/ /g ;
+    $title = uri_escape ($title) ;
+    if (length ($title2) > 60)
+    { $title2 = substr ($title2,0,60) . '..' ; }
     $title2    = &EncodeHtml ($title2) ;
-    $category2 = &EncodeHtml ($category2) ;
 
-    $line_html = "<tr><td class=r>$count</td>" . 
-                     "<td class=l><a href='http://$url/wiki/$title'>$title2</td>" . 
-		     "<td class=l><a href='http://$url/wiki/category:$category'>$category2</td></tr>\n" ;
+    my @categories = split ('\|', $categories) ;
+    $categories = '' ;
+    $chars = 0 ;
+    foreach $category (@categories)
+    {
+      $category =~ s/^\s*// ;
+      $category =~ s/\s*$// ;
+      $category2 = $category ;
+      $category2 =~ s/_/ /g ;
+      $category2 = &EncodeHtml ($category2) ;
+      $category2 =~ s/\%2C/,/g ;
+
+      $chars += length ($category) ;
+      if ($chars > 100)
+      { 
+	$categories .= "<br>" ; 
+        $chars = length ($category) ;
+      }
+      $categories .= "<a href='http://$url/wiki/category:$category'>$category2</a>, " ;      
+    } 
+    $categories =~ s/, $// ;
+
+    $line_html = "<tr><td class=r valign=top>$count</td>\n" . 
+                     "<td class=l valign=top><a href='http://$url/wiki/$title'>$title2</a></td>\n" . 
+		     "<td class=l>$categories</td></tr>\n" ;
     $row {$line_html} = $count ;
-    $rows++ ;
   }
 
   my $key ;
+  $rows = 0 ;
   for $key (sort {$row {$b} <=> $row {$a}} keys %row)
-  { $html .= $key ; }
+  { 
+    $rows++ ;	  
+    if ($rows <= 10000)
+    { $html .= $key ; }
+    if ($rows == 2500)
+    { $html .= "##2500##" ; }
+  }
+  $html .= "##999999##" ;
   
   $html .= "</tbody>\n" ;
   $html .= "</table>" ;
-  $html .= "$rows pages found<p>" ;
+  $html .= "##PAGES##<p>" ;
   $html .= "Views are number of times the article has been requested in the given month.<br>" ;
   $html .= "This includes a small amount (+/-10?) requests by search engines (crawlers).<br>" ;
   $html .= "Articles with less than $view_threshold requests have been omitted.<p>" ;
-  
+ 
+# $html .= "<a name=categories id=categories></a><small>" ;
+#  open HTML_IN, '<', $file_html_in ;
+#  while ($line = <HTML_IN>)
+#  { $html .= $line ; }   
+#  $html .= "</small><p>" ;
+
   $html .= &Colophon ;
 
   $html .= "</body>\n" ;
@@ -142,8 +230,56 @@ sub WriteReport
   $html =~ s/HEADER/Page views in category <font color=#080>$msg_category<\/font> on <font color=#080>$msg_wiki<\/font>/ ;
   $html =~ s/DESCRIPTION/$msg_month/ ;
 
-  open  FILE_HTML, '>', $file_html || die "Could not open output file '$file_html'\n" ;
-  print FILE_HTML $html ;
+  $file_html_out = uri_escape ($file_html_out) ;
+  $file_html_out =~ s/\%2D/-/g ;
+  $file_html_out =~ s/\%5F/_/g ;
+  $file_html_out =~ s/\%2F/\//g ;
+  
+  $html2 = $html ;
+
+  if ($rows > 3500) # except slighly 'concise' file if ful list is less than 1000 lines more than concise list
+  {
+    $html2 =~ s/\#\#2500\#\#.*\#\#999999\#\#//s ;
+    $html2 =~ s/##999999##// ; # if ##2500## not found
+    $html2 =~ s/##PAGES##/$rows pages found, showing top 2500/ ;
+    if ($rows <= 10000)
+    { $html2 =~ s/##LONG##/\/ <a href='$file_html_out_longer'>all $rows pages<\/a><p>/ ; }
+    else
+    { $html2 =~ s/##LONG##/\/ <a href='$file_html_out_longer'>top 10,000 pages<\/a><p>/ ; }
+  }
+  else
+  {
+    $html2 =~ s/##2500##// ;
+    $html2 =~ s/##999999##// ;
+    $html2 =~ s/##PAGES##/$rows pages found/ ;
+    $html2 =~ s/##LONG##// ; 
+  }
+  
+  # write concise list (or full list if less than 3500)
+  print "Write html file $file_html_out\n" ;
+  open  FILE_HTML, '>', $file_html_out || die "Could not open output file '$file_html_out'\n" ;
+  print FILE_HTML $html2 ;
+  close FILE_HTML ;
+
+  # write full list
+  if ($rows > 3500)
+  {
+    $html =~ s/##2500##// ;
+    $html =~ s/##999999##// ;
+    ($rows2 = $rows) =~ s/(\d\d\d)$/,$1/ ;
+    if ($rows <= 10000)
+    { $html =~ s/##PAGES##/$rows2 pages found/ ; }
+    else
+    { $html =~ s/##PAGES##/$rows2 pages found, showing top 10,000/ ; }
+    $html =~ s/##LONG##/\/ <a href='$file_html_out'>top 2500 pages<\/a><p>/ ; 
+
+    $file_html_out =~ s/\.html/_huge.html/ ;
+    print "Write html file $file_html_out\n" ;
+    open  FILE_HTML, '>', $file_html_out || die "Could not open output file '$file_html_out'\n" ;
+    print FILE_HTML $html ;
+    close FILE_HTML ;
+  }  
+
 # print FILE_HTML &AlignPerLanguage ($html) ; # to do: support RTL languages, 
 
   close FILE_HTML ;
@@ -321,7 +457,7 @@ my $html = <<__COLOPHON__ ;
 Mail:ezachte@### (no spam: ### = wikimedia.org)<br>
 Script used: <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dammit.lt'>dammit_list_views_by_category.sh</a><br>
 Data used: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/merged/'>monthly page view archive</a><br>
-See also  <a href='http://infodisiac.com/blog'><font color=#6060FF>Blog on Wikimedia Statistics</font></a><p>
+See also  <a href='http://infodisiac.com/blog'><font color=#6060FF>Blog on Wikimedia Statistics</font></a> and <a href='http://stats.wikimedia.org'>Wikistats portal</a><p>
 Page generated: $now GMT (server time) (dd-mm-yyyy)
 </font>
 </small>

@@ -6,6 +6,7 @@
   use CGI::Carp qw(fatalsToBrowser);
   use Time::Local ;
   use Getopt::Std ;
+  use URI::Escape ;
 
   our $timestart = time ;
 
@@ -36,6 +37,9 @@ sub ParseArguments
   die "Input file '$file_titles' empty!"     if ! -s $file_titles ;
   die "Views file '$file_views' not found!"  if ! -e $file_views ;
 
+  $file_titles = uri_unescape ($file_titles) ;
+  $file_views  = uri_unescape ($file_views) ;
+
   return ($file_out, $file_titles, $file_views) ;
 }
 
@@ -44,7 +48,7 @@ sub FilterArticles
   my ($file_out, $file_titles, $file_views) = @_ ;
   my ($line_titles, $line_views, $line_cnt_views) ;
   my ($line_titles_key, $line_views_key) ;
-  my ($lang_proj,$title,$category,$count) ;
+  my ($lang_proj,$title,$categories,$count) ;
 
   open FILE_TITLES, '<', $file_titles || die "Could not open titles file '$file_titles'\n" ;
 
@@ -61,10 +65,8 @@ sub FilterArticles
   $line_cnt_views = -1 ;
   while ($line_views = <FILE_VIEWS>)
   {
-    if (++$line_cnt_views % 100000 == 0)
-    { print "$line_cnt_views:\n$line_views\n$line_titles\n\n" ; }
-
-    next if $line_views lt $line_titles_key ;
+    if (++$line_cnt_views % 1000000 == 0)
+    { print "$line_cnt_views:\n$line_views$line_titles\n\n" ; }
 
     if ($line_views =~ /^#/)
     {
@@ -72,10 +74,12 @@ sub FilterArticles
       print          "views: " . $line_views ;
       next ;
     }
+    
+    next if $line_views lt $line_titles_key ;  
 
     chomp $line_views ;
     ($lang_proj,$title,$count) = split (' ', $line_views) ;
-    $line_views_key = "$lang_proj $title" ;
+    $line_views_key = "$lang_proj $title" ; 
 
     while (($line_titles_key lt $line_views_key) and ($line_titles = <FILE_TITLES>))
     {
@@ -86,16 +90,17 @@ sub FilterArticles
         next ;
       }
       chomp $line_titles ;
-      ($lang_proj,$title,$category) = split (',', $line_titles) ;
+      ($lang_proj,$title,$categories) = split (',', $line_titles) ;
       $line_titles_key = "$lang_proj $title" ;
     }
 
     if (! $line_titles) # EOF ?
     { print "EOF line_titles\n" ; last ;}
+    # key titles is either equal or larger than key views
 
     # print "views: $line_views_key\ntitles: $line_titles_key\n\n" ;
     if ($line_views_key eq $line_titles_key)
-    { print FILE_OUT "$line_views_key $count $category\n" ; }
+    {  print FILE_OUT "$line_views_key $count $categories\n" ; }
   }
 
   print "Close files" ;
