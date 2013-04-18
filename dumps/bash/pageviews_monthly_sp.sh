@@ -26,6 +26,16 @@ cd $perl
 perl WikiReports.pl -v m -m wp -l en -q -i $csv/csv_sp/ -o $out/out_sp -n | tee -a $report | cat
 perl WikiReports.pl -v m -m wp -l en -q -i $csv/csv_sp/ -o $out/out_sp    | tee -a $report | cat
 
-rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsMobile.htm          $htdocs/EN/draft/TablesPageViewsMonthlySquidsMobile.htm   
-rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsOriginalMobile.htm  $htdocs/EN/draft/TablesPageViewsMonthlySquidsOriginalMobile.htm    
+#################################################################
+# Cross-reference => The file name in the destination of rsync 
+# must be the same as the $file_html_new_mobile_pageviews inside
+# SquidReportArchive.pl
+#################################################################
+#rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsMobile.htm          $htdocs/wikimedia/squids/TablesPageViewsMonthlySquidsMobile.htm
+
+##########################################
+# Question => What is the Original file ?
+# Why do we need it ?
+##########################################
+#rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsOriginalMobile.htm  $htdocs/wikimedia/squids/TablesPageViewsMonthlySquidsOriginalMobile.htm
 
