@@ -170,6 +170,12 @@ do
   perl WikiReports.pl -v c -m wp -l en -i $csv/csv_wp/ -o $out/out_wp     -r $region | tee -a $report | cat ;
 done;
 
+# step 2e: report for Wikipedia mobile site, based on squids log (arg '-v m' = views mobile)
+cp $csv/csv_wp/LanguageNames*.csv $csv/csv_sp # up to date language names from php sources and Wikipedia
+cp $csv/csv_wp/PageViewsPerMonthAll.csv $csv/csv_sp/PageViewsPerMonthAllCombi.csv # base sort order on non-mobile pageviews
+
+perl WikiReports.pl -v m -m wp -l en -q -i $csv/csv_sp/ -o $out/out_sp -n | tee -a $report | cat
+perl WikiReports.pl -v m -m wp -l en -q -i $csv/csv_sp/ -o $out/out_sp    | tee -a $report | cat
 
 # step 3a: publish regional reports 
 for region in Africa Asia America Europe India Oceania Artificial 
@@ -199,6 +205,10 @@ echo "rsync -av $out/out_wv/EN/TablesPageViewsMonthly*.htm  $htdocs/wikiversity/
       rsync -av $out/out_wv/EN/TablesPageViewsMonthly*.htm  $htdocs/wikiversity/EN  | tee -a $report | cat
 echo "rsync -av $out/out_wx/EN/TablesPageViewsMonthly*.htm  $htdocs/wikispecial/EN" | tee -a $report | cat
       rsync -av $out/out_wx/EN/TablesPageViewsMonthly*.htm  $htdocs/wikispecial/EN  | tee -a $report | cat
+
+      rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsMobile.htm          $htdocs/wikimedia/squids/TablesPageViewsMonthlySquidsMobile.htm
+      rsync -av $out/out_sp/EN/TablesPageViewsMonthlySquidsOriginalMobile.htm  $htdocs/wikimedia/squids/TablesPageViewsMonthlySquidsOriginalMobile.htm
+
 
 # step 3c: zip and publish raw daily counts
 cd $csv/csv_wp

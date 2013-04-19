@@ -325,6 +325,7 @@ else
   $file_csv_language_codes          = $path_in . "LanguageCodes.csv" ;
   $file_csv_zeitgeist               = $path_in . "ZeitGeist.csv" ;
   $file_csv_pageviewsmonthly        = $path_in . "PageViewsPerMonthAll.csv" ;
+  $file_csv_pageviewsmonthly_combi  = $path_in . "PageViewsPerMonthAllCombi.csv" ;
   $file_csv_pageviewsmonthly_totals = $path_in . "PageViewsPerMonthAllTotalled.csv" ;
   $file_csv_edits_per_article       = $path_in . "EditsPerArticle.csv" ;
   $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpread.csv" ;
@@ -1172,12 +1173,12 @@ sub ReadMonthlyStats
       if ($day > 5) # q&d: use most recent month, unless month less than 5 days old
       {
         ($lang2 = $lang) =~ s/-/_/g ;
-        $PageViewsPerHour {$lang2} = $count / (24 * $day) ;
+	$PageViewsPerHour {$lang2} = $count / (24 * $day) ; 
 
 	# add count for non-mobile (input from csv_sp only has mobile stats)
-	$lang2 =~ s/\.m// ;
-	if (! defined $PageViewsPerHour {$lang2})
-	{ $PageViewsPerHour {$lang2} = $count / (24 * $day) ; }
+        $lang2 =~ s/\.m// ;
+        if (! defined $PageViewsPerHour {$lang2})
+        { $PageViewsPerHour {$lang2} = $count / (24 * $day) ; }
       }
     }
     # if ($mode_wp)
@@ -1191,9 +1192,33 @@ sub ReadMonthlyStats
     $f = $sort_column ;
   }
 
+  if ($pageviews || $wikimedia)
+  {
+    $sort_pageviews = $true ;
+    if ($squidslog)
+    { &ReadFileCsv ($file_csv_pageviewsmonthly_combi, "") ; }
+    else
+    { &ReadFileCsv ($file_csv_pageviewsmonthly, "") ; }
+    foreach $line (@csv)
+    {
+      chomp $line ;
+      my ($lang,$date,$count) = split (',', $line) ;
+
+      next if $lang =~ /\.m/ ; # only add count for non-mobile
+
+      my ($year,$month,$day)  = split ('/', $date) ;
+      if ($day > 5) # q&d: use most recent month, unless month less than 5 days old
+      {
+        ($lang2 = $lang) =~ s/-/_/g ;
+	# add count for non-mobile
+	$PageViewsPerHourSort {$lang2} = $count / (24 * $day) ;
+      }
+    }
+  }  
+    # if ($mode_wp)
   if ($sort_pageviews)
   {
-    @languages  = sort { $PageViewsPerHour {&Underscore($b)} <=> $PageViewsPerHour {&Underscore($a)} } keys %languages ;
+    @languages  = sort { $PageViewsPerHourSort {&Underscore($b)} <=> $PageViewsPerHourSort {&Underscore($a)} } keys %languages ;
     # foreach $lang (@languages)
     # { $lang =~ s/-/_/g ; }
     @languages2 = @languages ;

@@ -4029,7 +4029,7 @@ sub GenerateComparisonTable
       if ($squidslog)	  
       { $content .= " based on squids log" ; } 
       else
-      { $content .= " based on dammit files" ; } 
+      { $content .= " based on webstatscollector" ; } 
    
       $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
       $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
@@ -4129,12 +4129,12 @@ sub GenerateComparisonTable
       {
 	if ($squidslog)
 	{ 
-          $out_html .= "<p>Switch to <a href='${href_normalized}'>same report based on dammit files</a>" ;
+          $out_html .= "<p>Switch to <a href='../../EN/${href_normalized}'>same report based on webstatscollector</a>" ;
 	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized_squids'>${coverage2}/Raw Data</a>" ; 
         }
 	else
 	{ 
-          $out_html .= "<p>Switch to <a href='${href_normalized_squids}'>same report based on squid logs</a>" ; 
+          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_normalized_squids}'>same report based on squid logs</a>" ; 
 	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ; 
         }
 	$href_current_file =  $href_normalized ;
@@ -4151,12 +4151,12 @@ sub GenerateComparisonTable
       {
 	if ($squidslog)
         { 
-          $out_html .= "<p>Switch to <a href='${href_not_normalized}'>same report based on dammit files</a>" ;
+          $out_html .= "<p>Switch to <a href='../../EN/${href_not_normalized}'> same report based on webstatscollector</a>" ;
 	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized_squids'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
         }
 	else
 	{ 
-          $out_html .= "<p>Switch to <a href='${href_not_normalized_squids}'>same report based on squid logs</a>" ; 
+          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_not_normalized_squids}'> same report based on squid logs</a>" ; 
 	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
         }
         $href_current_file =  $href_not_normalized ;
@@ -4170,25 +4170,41 @@ sub GenerateComparisonTable
 
     if ($mode_wp)
     {
+      if ($squidslog)
+      { 
+        $root  = "../../EN/" ; 
+        $root2 = "" ; 
+      }
+      else
+      { 
+	$root  = "" ; 
+        $root2 = "../wikimedia/squids/" ; 
+      }
+
       if ($pageviews_mobile)
-      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
-                     "<a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
+      { $out_html .= "<p>Switch to $coverage1 <a href='${root}TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
+                     "<a href='${root}TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       elsif ($pageviews_non_mobile)
-      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on dammit files), " .
-                     " <a href='TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " . 
-		     blank_text_after ("31/07/2013", "<font color=#008000>New</font>") . "(based on squid logs), " .
+      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on webstatscollector), " .
+                     " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " . 
+		     blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs), " .
                      " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
       else
       { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
-                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on dammit files), " .
-                     " <a href='TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " .
-		     blank_text_after ("31/07/2013", "<font color=#008000>New</font>") . "(based on squid logs)" ;
+                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on webstatscollector), " .
+                     " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " .
+		     blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs)" ;
       }
     }
 
     if ($mode_wp)
     {
       $root = $testmode ? ".." : "../.." ;
+
+      if ($squidslog)
+      { $root = "../../EN/$root" ; }
+      else
+      { $root = "../wikimedia/squids/$root" ; }
 
       $out_html .= "<p>Switch to Wikipedia " ;
       if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>All Languages</a>, or Per Region: " ; }
@@ -4201,25 +4217,28 @@ sub GenerateComparisonTable
       if ($region ne 'artificial') { $out_html .= "<a href='$root/EN_Artificial/$href_current_file'>Artificial Languages</a>" ; }
       $out_html =~ s/, $// ;
       if ($pageviews_mobile)
-      { $out_html .= " ($coverage2/${raw_or_not}, based on dammit files)" ; }
+      { $out_html .= " ($coverage2/${raw_or_not}, based on webstatscollector)" ; }
       else
       { $out_html .= " ($coverage2/${raw_or_not})" ; }
     }
 
   # if ($pageviews_non_mobile)
   # {
-      $root = $mode_wp ? ".." : "../.." ;
+      $root = $mode_wp ? "../" : "../../" ;
 
-      $out_xref = "<a href='$root/EN/TablesPageViewsMonthlyAllProjects.htm'>All projects, </a>\n" ;
-      $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='$root/wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
-      $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='$root/wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
-      $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='$root/wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
-      $mode_wo ? ($out_xref .= "Wikivoyage, ")  : ($out_xref .= "<a href='$root/wikivoyage/EN/$href_current_file2'>Wikivoyage, </a>\n") ;
-      $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='$root/EN/$href_current_file2'>Wikipedias, </a>\n") ;
-      $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='$root/wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
-      $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
-      $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='$root/wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
-      $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n") ;
+      if ($squidslog)
+      { $root = "../../EN/$root" ; }
+
+      $out_xref = "<a href='${root}EN/TablesPageViewsMonthlyAllProjects.htm'>All projects, </a>\n" ;
+      $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='${root}wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
+      $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='${root}wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
+      $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='${root}wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
+      $mode_wo ? ($out_xref .= "Wikivoyage, ")  : ($out_xref .= "<a href='${root}wikivoyage/EN/$href_current_file2'>Wikivoyage, </a>\n") ;
+      $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='${root}EN/$href_current_file2'>Wikipedias, </a>\n") ;
+      $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='${root}wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
+      $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='${root}wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
+      $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='${root}wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
+      $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='${root}wikispecial/EN/$href_current_file2'>Wikispecial</a>\n") ;
     # $out_html .= "<p>Switch to All Platforms, $coverage2 " . $out_xref ;
       $out_html .= "<p>Switch to " . $out_xref ;
   # }

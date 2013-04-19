@@ -1528,6 +1528,13 @@ sub GenerateColophon
   ($sec,$min,$hour) = gmtime(time);
   $out_generated_at = &GetDate (time) . ' ' . sprintf ("%02d:%02d",$hour,$min) ;
 
+  if ($squidslog)
+  {
+    $out_myname = "Stefan Petrea" ;
+    $out_mymail = "spetrea@### (no spam: ### = wikimedia.org)" ;
+    $out_mysite = "" ;
+  }  
+
   $out_html .= "<p><small>\n" .
 #              ($wikimedia ? $out_sort_order3 : "") .
                $out_history . "\n" .
