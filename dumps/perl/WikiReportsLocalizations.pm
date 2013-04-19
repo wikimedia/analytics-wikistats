@@ -25,6 +25,11 @@
 
   $refresh_translate_wiki_data           =  1 ;
 
+=head2 Methods
+
+=cut
+
+
 sub TestLanguageTranslations
 {
   print "TestLanguageTranslations language $language\n" ;
@@ -418,6 +423,20 @@ sub UpdateLanguageTranslationsFromWpEn
 
   &CleanUpLanguageTranslationsFromWpEn ;
 }
+
+
+
+=over 12
+
+=item C<GetLanguageNamesFromSVN(str)>
+
+  This method pulls from the SVN mediawiki language files, it then parses them and writes
+  them to disk in a CSV file
+
+=back
+
+=cut
+
 
 sub GetLanguageNamesFromSVN
 {
