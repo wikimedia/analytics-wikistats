@@ -1958,7 +1958,7 @@ sub PhaseBuildMonthlyFile_CloseOutputFile
 # print "\n" ;
 
   $fn_out_merged_daily_final_totals = $fn_out_merged_daily_final ;
-  $fn_out_merged_daily_final_totals =~ s/\.bz2/_totals.bz2/ ;
+  $fn_out_merged_daily_final_totals =~ s/\.bz2/-totals.bz2/ ;
 
   $cmd = "bzgrep -v '^#' $fn_out_merged_daily_final | awk '{print \$1\" \"\$2\" \"\$3}' | bzip2 > $fn_out_merged_daily_final_totals" ;
   print "\n$cmd\n" ;
