@@ -14,6 +14,8 @@ depth=9
 
 #                                   wiki               category                           yyyy_mm    threshold      abbr    depth        
 
+# ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Terrorist_incidents_in_the_United_States_by_year' 2013-03    20   'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Terrorism' 2013-03    20   'wp-en' $depth
 # ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Nederlands_politicus'             2013-01    20             'wp-nl' $depth
 # ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Nederlands_politicus'             2013-02    20             'wp-nl' $depth
 # ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Nederlands_politicus'             2013-03    20             'wp-nl' $depth
@@ -101,7 +103,7 @@ depth=9
 # ./dammit_list_views_by_category.sh 'wikimediafoundation.org' 'English'                   2013-02    $threshold     'wm-wmf' $depth
 # ./dammit_list_views_by_category.sh 'wikimediafoundation.org' 'English'                   2013-03    $threshold     'wm-wmf' $depth
 
-  ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Commons'                     2013-01    $threshold     'wm-commons' $depth
+# ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Commons'                     2013-01    $threshold     'wm-commons' $depth
 # ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Commons'                     2013-02    $threshold     'wm-commons' $depth
 # ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Commons'                     2013-03    $threshold     'wm-commons' $depth
 
@@ -188,4 +190,56 @@ depth=9
 # ./dammit_list_views_by_category.sh 'sv.wikipedia.org' 'Museer_i_Sverige'                 2013-01    $threshold     'wp-sv' $depth
 # ./dammit_list_views_by_category.sh 'sv.wikipedia.org' 'Museer_i_Sverige'                 2013-02    $threshold     'wp-sv' $depth
 # ./dammit_list_views_by_category.sh 'sv.wikipedia.org' 'Museer_i_Sverige'                 2013-03    $threshold     'wp-sv' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Cultuur'                          2013-01   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Cultuur'                          2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Cultuur'                          2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Geschiedenis'                     2013-01   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Geschiedenis'                     2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Geschiedenis'                     2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Heelal'                           2013-01   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Heelal'                           2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Heelal'                           2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Lijsten'                          2013-01   $threshold      'wp-nl' $depth 
+#  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Lijsten'                          2013-02   $threshold      'wp-nl' $depth
+#  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Lijsten'                          2013-03   $threshold      'wp-nl' $depth
+
+#  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Lists'                            2013-01   $threshold      'wp-en' $depth 
+#  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Lists'                            2013-02   $threshold      'wp-en' $depth
+#  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Lists'                            2013-03   $threshold      'wp-en' $depth
+
+#  ./dammit_list_views_by_category.sh 'de.wikipedia.org' 'Liste'                            2013-01   $threshold      'wp-de' $depth 
+#  ./dammit_list_views_by_category.sh 'de.wikipedia.org' 'Liste'                            2013-02   $threshold      'wp-de' $depth
+#  ./dammit_list_views_by_category.sh 'de.wikipedia.org' 'Liste'                            2013-03   $threshold      'wp-de' $depth
+
+#  ./dammit_list_views_by_category.sh 'fr.wikipedia.org' 'Liste'                            2013-01   $threshold      'wp-fr' $depth 
+#  ./dammit_list_views_by_category.sh 'fr.wikipedia.org' 'Liste'                            2013-02   $threshold      'wp-fr' $depth
+#  ./dammit_list_views_by_category.sh 'fr.wikipedia.org' 'Liste'                            2013-03   $threshold      'wp-fr' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Mens_en_maatschappij'             2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Mens_en_maatschappij'             2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Mens_en_maatschappij'             2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Natuur'                           2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Natuur'                           2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Natuur'                           2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Persoon'                          2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Persoon'                          2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Persoon'                          2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Techniek'                         2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Techniek'                         2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Techniek'                         2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wetenschap'                       2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wetenschap'                       2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wetenschap'                       2013-03   $threshold      'wp-nl' $depth
+
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wikipedia'                        2013-01   $threshold      'wp-nl' $depth 
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wikipedia'                        2013-02   $threshold      'wp-nl' $depth
+# ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wikipedia'                        2013-03   $threshold      'wp-nl' $depth
 

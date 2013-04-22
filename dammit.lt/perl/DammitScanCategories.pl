@@ -12,8 +12,8 @@
   use Net::Domain qw (hostname);
   use URI::Escape ;
 
-  $callsmax     = 10000 ;
-  $callsmaxtest = 10000 ;
+  $callsmax     = 100000 ;
+  $callsmaxtest = 100000 ;
   $cmlimit      = 500 ;
   $maxlevel     = 4 ; # default
 
