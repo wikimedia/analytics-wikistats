@@ -1,5 +1,19 @@
 #! /usr/bin/perl
 
+# aggregate stats per squid set per month from hourly stats per squid server
+# collected by SquidCountArchive.pl via SquidCountArchive.sh
+#
+# hourly data per squid found in 
+# /a/wikistats_git/squids/csv/[yyyy-mm]/[yyyy-mm-dd]/SquidDataSequenceNumbersPerSquidHour.csv
+#
+# example:
+# squid,hour,events,tot delta,avg delta 
+# amssq31.esams.wikimedia.org,00,606,636883,1051
+#
+# delta is difference in sequence number beteen consecutive udp messages from same squid
+# should ideally be 1000 in a 1:1000 sampled log, but small fluctuations are normal 
+# avg gap between sequence numbers > 1010: there is probably packet loss  
+ 
   use Time::Local ;
   use Getopt::Std ;
   use File::Path ;
