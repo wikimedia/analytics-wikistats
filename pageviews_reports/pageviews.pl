@@ -9,6 +9,7 @@ use PageViews::View::WikiReport;
 use PageViews::View::Web;
 use PageViews::View::Limn;
 use PageViews::View::JSON;
+use Time::Piece;
 use Data::Dumper;
 use JSON::XS;
 use Carp;
@@ -54,6 +55,27 @@ if($config->{model} eq "parallel") {
 
 my $model;
 my $view ;
+
+
+if($config->{end}->{custom} eq "previous-month") {
+  my $t = localtime;
+  delete $config->{end}->{custom};
+  $config->{end}->{year} = $t->year;
+};
+
+
+confess "[ERROR] Start date invalid"
+  unless $config->{start}->{year}  =~ /\d+/ &&
+         $config->{start}->{month} =~ /\d+/  ;
+        ($config->{start}->{month} >= 1 && $config->{start}->{month} <= 12)
+        ;
+
+confess "[ERROR] End date invalid"
+  unless  $config->{end}->{year}  =~ /\d+/ &&
+          $config->{end}->{month} =~ /\d+/ &&
+         ($config->{end}->{month} >= 1 && $config->{end}->{month} <= 12)
+         ;
+
 
 if(     $config->{model} eq "sequential") {
   $model = PageViews::Model::Sequential->new();
