@@ -16,6 +16,10 @@ my $SQUID_SAMPLING_FACTOR = 1000;
   use strict 'refs';
 };
 
+=head1 METHODS
+
+=cut
+
 sub new {
   my ($class) = @_;
   return bless {}, $class;

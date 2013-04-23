@@ -1,0 +1,50 @@
+
+/* General workflow */
+
+digraph G {
+
+
+  //size="100,10";
+  //page="27,27";
+  //rankdir=LR;
+  pageviews           [label="pageviews.pl"                           ];
+  view_json           [label="PageViews::View::JSON"                  ];
+  view_web            [label="PageViews::View::Web"                   ];
+  view_wikireport     [label="PageViews::View::WikiReport"            ];
+  model_json          [label="PageViews::Model::JSON"                 ];
+  model_parallel      [label="PageViews::Model::Parallel"             ];
+  model_sequential    [label="PageViews::Model::Sequential"           ];
+  file_data_json      [label="data.json"                              ];
+  file_pageviews_html [label="pageviews.html"                         ];
+  wikireports_csv     [label="PageViewsPerMonthAll.csv"               ];
+  wikireports_pl      [label="WikiReports.pl"                         ];
+  wikireports_bash    [label="pageviews_monthly.sh"                   ];
+  wikireports_report  [label="TablesPageViewsMonthlyMobilePetrea.htm" ];
+
+//pageviews         -> model_parallel [label=<<TABLE><TR><TD><IMG SRC="static/img/basic-clock-small.png"/></TD></TR></TABLE>> ];
+  pageviews         -> model_parallel   [rotate=30,label=<<TABLE BORDER="0"><TR><TD><IMG SRC="static/img/clock-icon-small.png"/></TD><TD>1h/month</TD></TR></TABLE>> ];
+  pageviews         -> model_sequential  ;
+  pageviews         -> model_json;
+
+  model_parallel    -> view_json;
+  model_sequential  -> view_json;
+  model_json        -> view_json;
+
+  model_parallel    -> view_web;
+  model_sequential  -> view_web;
+  model_json        -> view_web;
+
+  model_parallel    -> view_wikireport;
+  model_sequential  -> view_wikireport;
+  model_json        -> view_wikireport;
+
+
+  view_web          -> file_pageviews_html;
+  view_json         -> file_data_json;
+  file_data_json    -> model_json       [style="dotted", label="through another run\n without counting"];
+  view_wikireport   -> wikireports_csv;
+  wikireports_csv   -> wikireports_bash [style="dashed", label="indirect. first we place the csv\n in dumps dumps/csv/csv_sp/ and then we run the bash script\n"];
+  wikireports_bash  -> wikireports_pl;
+  wikireports_pl    -> wikireports_report  [label=<<TABLE BORDER="0"><TR><TD>25m</TD><TD><IMG SRC="static/img/clock-icon-small.png"/></TD></TR></TABLE>> ];
+
+};

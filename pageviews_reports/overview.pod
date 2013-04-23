@@ -1,3 +1,25 @@
+=head1 Usage
+
+Using this software package means you just have to do
+
+    ./pageviews.pl conf/stat1.json
+
+Given that you wrote a correct configuration file(see the next section), you will be able to run a report using this.
+
+The running times for this may vary, depending on:
+
+=begin html
+
+  <ul>
+  <li> how many days you're processing
+  <li> the logic in the version you're running
+  <li> the restrictions in your configuration file
+  </ul>
+
+=end html
+
+But, in general a full run on stat1 on 7 months of data should take at most 7 hours.
+
 =head1 Configuration
 
 We start with an example configuration and we'll go through each attribute and values to know what they mean.
@@ -50,3 +72,16 @@ This is subject to change.
 =end html
 
 =cut
+
+
+=head1 General workflow
+
+=begin html
+
+<img src="overview.png" width="100%" />
+
+=end html
+
+=head1 Documentation
+
+This documentation was generated using pandoc.
