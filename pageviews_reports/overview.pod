@@ -1,0 +1,87 @@
+=head1 Usage
+
+Using this software package means you just have to do
+
+    ./pageviews.pl conf/stat1.json
+
+Given that you wrote a correct configuration file(see the next section), you will be able to run a report using this.
+
+The running times for this may vary, depending on:
+
+=begin html
+
+  <ul>
+  <li> how many days you're processing
+  <li> the logic in the version you're running
+  <li> the restrictions in your configuration file
+  </ul>
+
+=end html
+
+But, in general a full run on stat1 on 7 months of data should take at most 7 hours.
+
+=head1 Configuration
+
+We start with an example configuration and we'll go through each attribute and values to know what they mean.
+
+    {
+      "model"                : "parallel",
+      "max-children"         : 8,
+      "input-path"           : "/home/user/wikidata/raw_gzips",
+      "children-output-path" : "/tmp/pageviews/map",
+      "output-path"          : "/tmp/pageviews",
+      "output-formats"       : ["web","json","wikireport"],
+      "logs-prefix"          : "sampled",
+      "restrictions"         : {
+        "days-of-each-month"   : [2,3],
+        "lines-for-each-day"   : 100000
+      },
+      "start"    : {
+        "year"   : 2012,
+        "month"  : 8
+      },
+      "end"      : {
+        "year"   : 2013,
+        "month"  : 2
+      }
+    }
+
+What this says is we want to process only data between August-2012 and February-2013 and we want to restrict ourselves
+to the first 100_000 lines of each file .gz file and only take days 2 and 3 of each month into consideration. 
+
+We're also saying we want files to be processed in parallel (more details in the section about PageViews::Model::Parallel) and that
+we want at most 8 workers (e.g. 8 files) to be processed in parallel.
+
+The output formats are also present. 
+
+
+=head1 PageView definition
+
+It's not trivial to pinpoint exactly what a pageview is so we believe it's important
+to document what it means. 
+
+To this end, we've made a flowchart of the criteria through which we decide if a request which is found in the squid logs
+is or isn't a pageview.
+
+This is subject to change.
+
+=begin html
+
+<img src="p1.png" width="100%" />
+
+=end html
+
+=cut
+
+
+=head1 General workflow
+
+=begin html
+
+<img src="overview.png" width="100%" />
+
+=end html
+
+=head1 Documentation
+
+This documentation was generated using pandoc.

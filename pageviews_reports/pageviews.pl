@@ -2,51 +2,114 @@
 use strict;
 use warnings;
 use lib "./lib";
-use PageViews::Model;
-use PageViews::View;
+use PageViews::Model::Sequential;
+use PageViews::Model::Parallel;
+use PageViews::Model::JSON;
+use PageViews::View::WikiReport;
+use PageViews::View::Web;
+use PageViews::View::Limn;
+use PageViews::View::JSON;
+use Time::Piece;
 use Data::Dumper;
 use JSON::XS;
 use Carp;
 
-# 
-# TODO: Add code to parse commandline parameters to
-#       select the period on which you want the report done
-#
-#       Add commandline parameter for path to output data
-#
+if(@ARGV < 1) {
+  confess "[ERROR] you need to pass a config json as argument";
+};
 
-#our $__DATA_BASE        = "data";
-our $__DATA_BASE        = "/home/user/wikidata";
-my  $REPORT_OUTPUT_PATH = "/tmp/pageview_reports/";
+confess "[ERROR] config file does not exist"
+  unless -f $ARGV[0];
 
-`mkdir -p $REPORT_OUTPUT_PATH`;
+my $config = decode_json(`cat $ARGV[0]`);
 
-my $m = PageViews::Model->new();
-$m->process_files({
-    logs_prefix => "sampled-1000.log-",
-    logs_path   => $__DATA_BASE,
-    start       => {
-      year  => 2012,
-      #month => 1,
-      month => 10,
-    },
-    end         => {
-      year  => 2012,
-      #month => 12,
-      month => 12,
-    },
-});
+confess "[ERROR] invalid model"
+  unless $config->{model} ~~ ["sequential","parallel","json"];
 
-my $d = $m->get_data();
+confess "[ERROR] output-formats key must be defined"
+  unless defined($config->{"output-formats"});
 
-open my $json_fh,">$REPORT_OUTPUT_PATH"."out.json";
-print   $json_fh JSON::XS->new
-                         ->pretty(1)
-                         ->canonical(1)
-                         ->encode($d);
-close   $json_fh;
+confess "[ERROR] output-formats must contain at least one format"
+  unless @{$config->{"output-formats"}} > 0;
 
-my $v = PageViews::View->new($d);
-$v->render({ 
-    output_path => $REPORT_OUTPUT_PATH 
-});
+confess "[ERROR] input-path argument is not a valid path"
+  unless -d $config->{"input-path"};
+
+confess "[ERROR] max-children argument is not a valid integer"
+  unless $config->{"max-children"} =~ /^\d+$/;
+
+
+if($config->{model} eq "parallel") {
+  if(!$config->{"children-output-path"}) {
+      confess "[ERROR] model set to parallel but children-output-path not present";
+  };
+  `
+  mkdir -p $config->{"output-path"}/map
+  rm    -f $config->{"output-path"}/map/*.json
+  rm    -f $config->{"output-path"}/map/*.err
+  `
+};
+
+
+`mkdir -p $config->{"output-path"}`;
+
+my $model;
+my $view ;
+
+
+if($config->{end}->{custom} eq "previous-month") {
+  my $c = localtime;
+  my $p = $c;
+  while($c->mon == $p->mon){
+    $p-=$PageViews::Model::Sequential::ONE_DAY;
+  };
+  delete $config->{end}->{custom};
+  $config->{end}->{year}  = $p->year;
+  $config->{end}->{month} = $p->mon;
+};
+
+
+confess "[ERROR] Start date invalid"
+  unless $config->{start}->{year}  =~ /\d+/ &&
+         $config->{start}->{month} =~ /\d+/ && 
+        ($config->{start}->{month} >= 1 && $config->{start}->{month} <= 12)
+        ;
+
+confess "[ERROR] End date invalid"
+  unless  $config->{end}->{year}  =~ /\d+/ &&
+          $config->{end}->{month} =~ /\d+/ &&
+         ($config->{end}->{month} >= 1 &&  $config->{end}->{month} <= 12)
+         ;
+
+
+if(     $config->{model} eq "sequential") {
+  $model = PageViews::Model::Sequential->new();
+} elsif($config->{model} eq "parallel") {
+  $model = PageViews::Model::Parallel->new();
+} elsif($config->{model} eq "json") {
+  $model = PageViews::Model::JSON->new();
+};
+
+$model->process_files($config);
+
+for my $format ( @{ $config->{"output-formats"} }) {
+
+  if(      $format eq "web") {
+    $view = PageViews::View::Web->new();
+    $view->get_data_from_model($model);
+    $view->render($config);
+  } elsif( $format eq "wikireport") {
+    $view = PageViews::View::WikiReport->new();
+    $view->get_data_from_model($model);
+    $view->render($config);
+  } elsif( $format eq "limn") {
+    $view = PageViews::View::Limn->new();
+  } elsif( $format eq "json") {
+    $view = PageViews::View::JSON->new();
+    $view->get_data_from_model($model);
+    $view->render($config);
+  } else {
+    confess "[ERROR] Something's wrong";
+  };
+
+};

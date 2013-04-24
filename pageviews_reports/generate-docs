@@ -1,0 +1,153 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Pod::Simple::XHTML;
+use File::Find::Rule;
+use Data::Dumper;
+use File::Basename;
+use Time::Piece;
+use Template;
+
+
+##############################################
+# In order to generate the documentation you
+# will need the following:
+#
+#   * Pod::Simple::XHTML module
+#   * File::Find::Rule   module
+#   * the Template       module
+#   * wget               package
+#   * pandoc             package
+#   * graphviz           package
+#   * texlive-base       package
+#   * texlive-latex-base package
+#   * imagemagick        package
+#
+##############################################
+
+
+##############################################
+# Iterate over all .pm files and convert POD
+# documentation to html
+##############################################
+
+my $out = "pod-docs";
+
+system(qq|
+rm    -rf $out/*    2>/dev/null;
+mkdir     $out/     2>/dev/null;
+mkdir -p "$out/img" 2>/dev/null;
+cd $out;
+echo "Pulling Images ...";
+cp ../static/img/accept-regex-example.png .;
+wget http://raw.github.com/wikimedia/metrics/master/pageviews/new_mobile_pageviews_report/pageview_definition.dot 2>/dev/null ;
+dot -Tpng pageview_definition.dot > p1.png 2>/dev/null;
+cp ../overview.dot .;
+dot -Tpng overview.dot            > overview.png 2>/dev/null;
+|);
+
+
+
+my @modules = File::Find::Rule->file()
+		->name( '*.pm' , '*.pod' )
+		->in("./");
+
+
+##########################################################
+# pod_to_html converts a document which contains pod
+##########################################################
+                
+sub pod_to_html {
+  my ($module_dir,$input,$output) = @_;
+  my $html = "";
+  `mkdir -p $out/$module_dir 2>/dev/null`;
+  my $psx = Pod::Simple::XHTML->new;
+  $psx->output_string(\$html);
+  $psx->parse_file($input);
+  open my $fh, '>', $output or die "Cannot open 'out.html': $!\n";
+  print $fh $html;
+  close $fh;
+};
+
+
+
+my @html = ();
+for my $module_path (@modules) {
+  print "Processing $module_path ...\n";
+  my ($f_name,$f_path,$f_suffix) = fileparse($module_path);
+  my $input_path  = "$f_path/$f_name";
+  $f_name =~ s/(\.pm|\.pod)$/\.html/;
+  my $output_path = "$out/$f_path$f_name";
+  pod_to_html($f_path,$input_path,$output_path);
+  print "Output     $output_path ...\n";
+  push @html, $output_path;
+};
+
+
+my $sha1 = `git rev-parse --verify HEAD`;
+chomp $sha1;
+my $date = localtime->ymd("-");
+my $data = {
+  date     => $date,
+  sha1     => $sha1,
+  sections => [],
+};
+
+# aggregate every html pod into manual.tex
+
+my $partial_tex;
+my $partial_mediawiki;
+my $mediawiki_buffer;
+for my $h (@html) {
+  my ($a,$b,$c) =  fileparse($h);
+  $a =~ s/\.html//;
+  $b =~ s/^.*lib\///;
+  $b =~ s/\/$//;
+  my $module_name = $b."::".$a;
+  $module_name =~ s/\//::/g;
+  print "[PDF] Aggregating $module_name\n";
+
+  #cleaning up after pandoc because pandoc's not perfect :|
+  $partial_tex       = `cat $h | pandoc -f html -t latex`;
+  $partial_tex       =~ s{\\includegraphics}{\\includegraphics\[width=\\textwidth,height=\\textheight,keepaspectratio\]}g;
+  $partial_tex       =~ s/\\([a-z]*section)/\\sub$1/g;
+
+  $module_name =~ s/^.*overview.*$/Overview/;
+
+  $mediawiki_buffer .= "\n= $module_name =\n";
+  $partial_mediawiki = `cat $h | pandoc -f html -t mediawiki`;
+  $partial_mediawiki =~ s{^(=+) }{$1= }gxms;
+  $partial_mediawiki =~ s{ (=+)$}{ =$1}gxms;
+
+  $mediawiki_buffer .= $partial_mediawiki ;
+  push @{ $data->{sections} }, {
+    title   => $module_name,
+    content => $partial_tex
+  };
+}
+
+my $tt = Template->new({
+    INCLUDE_PATH => "./templates",
+    OUTPUT_PATH  => "./$out",
+    DEBUG        => 1,
+}); 
+
+$tt->process(
+  "manual.tt",
+  $data,
+  "manual.tex"
+);
+
+system(qq{
+  cd $out; 
+  echo "Compiling Manual ...";
+  latex -interaction=nonstopmode manual.tex >/dev/null 2>/dev/null;
+  pdflatex manual.tex >/dev/null 2>/dev/null;
+  echo "Done";
+});
+
+open my $fh,">","$out/manual.wiki";
+print $fh $mediawiki_buffer;
+close;
+
+

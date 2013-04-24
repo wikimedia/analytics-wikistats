@@ -2,80 +2,64 @@
 use strict;
 use warnings;
 use lib "./lib";
-use PageViews::Model;
+use PageViews::Model::Sequential;
 use Data::Dumper;
 use Test::More qw/no_plan/;
+use Time::Piece;
 
-my $prefix    = "sampled-1000.log-";
-my $logs_path = "data";
-
-sub padding{
-  $_[0]<10 ? "0$_[0]" : $_[0];
+my $test_config = {
+  "model"                => "sequential",
+  "max-children"         => 8,
+  "input-path"           => "/tmp/pageviews-reports-test-02",
+  "children-output-path" => "/tmp/pageviews-reports-test-02/map",
+  "output-path"          => "/tmp/pageviews-reports-test-02",
+  "output-formats"       => ["web"],
+  "logs-prefix"          => "sampled-1000.log-",
+  "start"    => {
+    "year"   => 2012,
+    "month"  => 1
+  },
+  "end"      => {
+    "year"   => 2012,
+    "month"  => 1
+  }
 };
 
-`rm ./data/$prefix*.gz`;
+my $logs_path = $test_config->{"input-path" };
+my $prefix    = $test_config->{"logs-prefix"};
+
+#######################
+# Create dummy logs
+# for 2012
+#######################
+`mkdir -p $logs_path`;
+`rm $logs_path/$prefix*.gz`;
 for my $m(1..12){
   for my $d(1..31){
-    my $date=sprintf("$logs_path/$prefix"."2012%s%s.gz",padding($m),padding($d));
-    `touch $date`;
+    my $M    = sprintf("%02d",$m);
+    my $D    = sprintf("%02d",$d);
+    my $logfile = sprintf("$logs_path/$prefix"."2012%s%s.gz",$M,$D);
+    `touch $logfile 2>/dev/null`;
   };
 };
 
+my $m = PageViews::Model::Sequential->new();
 
-my $m = PageViews::Model->new();
+my @f = $m->get_files_in_interval($test_config);
 
-my @f = $m->get_files_in_interval({
-          logs_prefix => $prefix,
-          logs_path   => $logs_path,
-          start => {
-            year  => 2012,
-            month => 1,
-          },
-          end   => {
-            year  => 2012,
-            month => 1,
-          },
-        });
+my $e_iter = Time::Piece->strptime("2012-01-01","%Y-%m-%d");
+my $e_end  = Time::Piece->strptime("2012-02-02","%Y-%m-%d");
+my @e = ();
 
-my @e = (
-        'data/sampled-1000.log-20120101.gz',
-        'data/sampled-1000.log-20120102.gz',
-        'data/sampled-1000.log-20120103.gz',
-        'data/sampled-1000.log-20120104.gz',
-        'data/sampled-1000.log-20120105.gz',
-        'data/sampled-1000.log-20120106.gz',
-        'data/sampled-1000.log-20120107.gz',
-        'data/sampled-1000.log-20120108.gz',
-        'data/sampled-1000.log-20120109.gz',
-        'data/sampled-1000.log-20120110.gz',
-        'data/sampled-1000.log-20120111.gz',
-        'data/sampled-1000.log-20120112.gz',
-        'data/sampled-1000.log-20120113.gz',
-        'data/sampled-1000.log-20120114.gz',
-        'data/sampled-1000.log-20120115.gz',
-        'data/sampled-1000.log-20120116.gz',
-        'data/sampled-1000.log-20120117.gz',
-        'data/sampled-1000.log-20120118.gz',
-        'data/sampled-1000.log-20120119.gz',
-        'data/sampled-1000.log-20120120.gz',
-        'data/sampled-1000.log-20120121.gz',
-        'data/sampled-1000.log-20120122.gz',
-        'data/sampled-1000.log-20120123.gz',
-        'data/sampled-1000.log-20120124.gz',
-        'data/sampled-1000.log-20120125.gz',
-        'data/sampled-1000.log-20120126.gz',
-        'data/sampled-1000.log-20120127.gz',
-        'data/sampled-1000.log-20120128.gz',
-        'data/sampled-1000.log-20120129.gz',
-        'data/sampled-1000.log-20120130.gz',
-        'data/sampled-1000.log-20120131.gz',
-        'data/sampled-1000.log-20120201.gz'
-        );
-
-my $matched = 0;
-for my $i (0..$#f) {
-  $matched += $e[$i] eq $f[$i];
+my  $ONE_DAY = $PageViews::Model::Sequential::ONE_DAY;
+while($e_iter < $e_end) {
+  my $t = $e_iter->ymd("");
+  my $p = $test_config->{logs_prefix};
+  push @e,"$logs_path/$prefix$t.gz";
+  $e_iter += $ONE_DAY;
 };
 
-ok($matched == @e,"All files expected were found in output of get_files_in_interval() ");
+
+ok(@e == (1+Time::Piece->strptime("2012-01-01","%Y-%m-%d")->month_last_day),
+   "All files expected were found in output of get_files_in_interval() ");
 

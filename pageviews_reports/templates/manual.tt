@@ -1,0 +1,52 @@
+\documentclass{article}
+%\usepackage[margin=0.5in,showframe=true]{geometry}
+\usepackage[margin=0.5in]{geometry}
+
+\usepackage[T1]{fontenc}
+%\usepackage{mathdesign}
+\usepackage{libertine}
+%\usepackage[osf]{xagaramon} 
+%\usepackage{eulervm}
+
+\usepackage{changepage}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{calc}
+\usepackage{hyperref}
+\usepackage{lipsum}
+\usepackage{fancyhdr}
+\makeatletter
+\newenvironment{shiftpar}[1][1.5em]
+  {\list{}{%\listparindent #1%
+    \itemindent\parindent
+    \leftmargin#1
+%    \rightmargin\leftmargin
+    \parsep\z@\@plus\p@}%
+    \item\relax}
+  {\endlist}
+\makeatother
+\setcounter{tocdepth}{3}
+\pdfimageresolution=300
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{\vspace{-0.4cm}\hrule}
+\fancyfoot[RE,LO]{\textbf{Page \thepage}}
+\fancyfoot[LE,RO]{Wikimedia Foundation Analytics Team}
+%\setromanfont[Mapping=tex-text]{Linux Libertine}
+\date{\large SHA1: [% sha1 %]\\ \today}
+\begin{document}
+\title{\underline{New mobile pageviews reports -- Documentation}}
+\maketitle
+\tableofcontents
+
+% Here we have all the sections produced by pandoc
+
+[% FOREACH section IN sections %]
+  \section{[% section.title %]}
+  \hspace*{\fill}
+  \begin{shiftpar}[3em]
+  [% section.content %]
+  \end{shiftpar}
+[% END %]
+
+\end{document}

@@ -1,10 +1,146 @@
 
+<div style="border-style:solid ;border-width: thin thin thin thin;display: block; position: fixed; right: 0;">
+  <h3>Display options:</h3>
+  <input id="show-optional-values"            type="checkbox"> show separate wiki and api counts in table cells                      </input> <br/>
+  <input id="show-discarded-breakdown-charts" type="checkbox"> show breakdown and discarded piecharts upon hovering on table's cells </input> <br/>
+  <script>
+  $(document).ready(function(){
+
+    $("#show-optional-values").click(function(){
+      if($(this).is(':checked')) {
+        $(".table-cell-optional-values").css("display", "inline" );
+      } else {
+        $(".table-cell-optional-values").css("display",   "none" );
+      };
+    });
+
+    $("#show-discarded-breakdown-charts").click(function(){
+      if($(this).is(':checked')) {
+        window.showBreakdownAndDiscardedPiecharts = true;
+      } else {
+        window.showBreakdownAndDiscardedPiecharts = false;
+      };
+
+    });
+
+  });
+  </script>
+</div>
+
+<!-- spacer to avoid the options menu overlapping with the other content -->
+<div style="height: 150px;"></div>
+
+
+<!-- The table_cell block
+     parameters received in this one are
+     i     -- which is used to label the TooltipPieChart objects
+     cell  -- which is a hash containing all the data for a cell inside the table
+     month -- the current month being processed(we could put that in cell)
+ -->
+[% BLOCK table_cell %]
+  [% tooltipContainerBreakdownId = "tooltip-container-breakdown-" _ cell.language _ month %]
+  [%  tooltipObservedBreakdownId =  "tooltip-observed-breakdown-" _ cell.language _ month %]
+
+  <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerBreakdownId %]"></div>
+  <script language='javascript'>
+  tdc(
+      colorPowerScale([% cell.monthly_delta %]),
+      '[% cell.monthly_delta__ %], '              +
+      '[% cell.percentage_of_monthly_total__ %], '+
+      '[% cell.rank %]', 
+      unsample_and_format([% cell.monthly_count      %]) + ' ' ,
+      unsample_and_format([% cell.monthly_count_wiki %]) + ' ' +
+      unsample_and_format([% cell.monthly_count_api  %]),
+      "[%  tooltipObservedBreakdownId %]"
+     );
+
+     [% piechartObject = "p" _ i %]
+     var [% piechartObject %] = new TooltipPieChart({
+       hideWindowAttribute : "showBreakdownAndDiscardedPiecharts",
+       width      : 550,
+       height     : 350,
+       radius     : 120,
+       containerId: "[% tooltipContainerBreakdownId %]" ,
+       observedId : "[%  tooltipObservedBreakdownId  %]" ,
+       outerRadiusRatio: 1.00,
+       innerRadiusRatio: 0.23,
+       titleText  : "Breakdown pageview count for language [% cell.language %] and month [% month %]",
+         data:[
+           [% IF        cell.breakdown_count_wiki_basic > 0 %]
+           { label: "/wiki/" , pageview_count: [% cell.breakdown_count_wiki_basic %] },
+           [% END %]
+           [% IF        cell.breakdown_count_wiki_index > 0 %]
+           { label: "/w/index.php" , pageview_count: [% cell.breakdown_count_wiki_index %] },
+           [% END %]
+           [% IF        cell.breakdown_count_api > 0 %]
+           { label: "/w/api.php" , pageview_count: [% cell.breakdown_count_api %] },
+           [% END %]
+         ]
+     });
+     [% piechartObject %].drawChart();
+     [% piechartObject %].drawLabels();
+     [% piechartObject %].init();
+
+     [% i = i + 1 %]
+     </script>
+[% END %]
+
+<!-- The discarded_pie_chart block
+     i     -- used to label the piechart objects
+     month -- the current month
+     all the other data used is coming to the template already processed
+  -->
+[% BLOCK discarded_pie_chart %]
+     [% piechartObject = "p" _ i %]
+     [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month %]
+     [% tooltipObservedDiscardedId  =  "tooltip-observed-discarded-" _ month %]
+
+       var [% piechartObject %] = new TooltipPieChart({
+         hideWindowAttribute : "showBreakdownAndDiscardedPiecharts",
+         width      : 550,
+         height     : 350,
+         radius     : 120,
+         containerId: "[% tooltipContainerDiscardedId %]" ,
+         observedId : "[% tooltipObservedDiscardedId  %]" ,
+         outerRadiusRatio: 1.00,
+         innerRadiusRatio: 0.23,
+         titleText  : "Discarded lines report for month [% month %]",
+         data:[
+           [% IF        counts_discarded_bots.$month > 0 %]
+           { label: "bots"      , pageview_count: [%     counts_discarded_bots.$month %] },
+           [% END %]
+           [% IF      counts_discarded_fields.$month > 0 %]
+           { label: "fields"    , pageview_count: [%   counts_discarded_fields.$month %] },
+           [% END %]
+           [% IF         counts_discarded_url.$month > 0 %]
+           { label: "url"       , pageview_count: [%      counts_discarded_url.$month %] },
+           [% END %]
+           [% IF        counts_discarded_time.$month > 0 %]
+           { label: "time"      , pageview_count: [%     counts_discarded_time.$month %] },
+           [% END %]
+           [% IF      counts_discarded_status.$month > 0 %]
+           { label: "status"    , pageview_count: [%   counts_discarded_status.$month %] },
+           [% END %]
+           [% IF    counts_discarded_mimetype.$month > 0 %]
+           { label: "mimetype"  , pageview_count: [% counts_discarded_mimetype.$month %] },
+           [% END %]
+         ]
+       });
+
+       [% piechartObject %].drawChart();
+       [% piechartObject %].drawLabels();
+       [% piechartObject %].init();
+     [% i = i + 1 %]
+[% END %]
+
+
+
 <script language='javascript'>
-        var colorPowerScale = d3.scale
-                              .pow()
-                              .exponent(.5)
-                              .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
-                              .range(['red','white','green']);
+  var colorPowerScale = d3.scale
+                        .pow()
+                        .exponent(.5)
+                        .domain([ [% min_language_delta %] , 0  , [% max_language_delta %]  ])
+                        .range(['red','white','green']);
 </script>
 
 <!-- Table with language/month page views -->
@@ -22,13 +158,11 @@
     <!-- check to see if the header is a language -->
     <td>Trend last<br/> 24 months</td>
     <td></td>
-    <td></td>
-    <td></td>
     [% FOREACH language IN headers %]
       [% IF chart_data.exists(language) %]
         [% container_id = 'container-' _ language %]
         <td>
-            <div align="left" id="[% container_id %]"/>
+            <div align="left" id="[% container_id %]"></div>
             <script>drawChart( [ [% chart_data.$language.counts.join(',') %] ] , "[% container_id %]")  </script>
         </td>
       [% ELSE %]
@@ -38,8 +172,6 @@
   <tr>
     <td>language<br/>totals</td>
     <td><script>document.write(unsample_and_format([% big_total_processed %]));</script></td>
-    <td><script>document.write(unsample_and_format([% big_total_discarded %]));</script></td>
-    <td><script>document.write(unsample_and_format([% big_total_bots      %]));</script></td>
     [% FOREACH language IN headers %]
       [% IF chart_data.exists(language) %]
         <td><script>document.write(unsample_and_format([% language_totals.$language %])); </script></td>
@@ -47,21 +179,22 @@
     [% END %]
   </tr>
 
+  [% i = 1 %]
   [% WHILE ( data.size > 0 ) %]
     [% row   = data.shift %]
-    [% month = row.shift %]
+    [% month = row.shift  %]
+    [% tooltipContainerDiscardedId = "tooltip-container-discarded-" _ month            %]
+    [%  tooltipObservedDiscardedId =  "tooltip-observed-discarded-" _ month            %]
     <tr>
     <!-- month name -->
-    <td> [% month %] </td>
+    <td id="[% tooltipObservedDiscardedId %]"> [% month %] <div style="background-color: #ffffff;border-style:solid ;border-width: thin thin thin thin;" id="[% tooltipContainerDiscardedId %]"></div> </td>
     <!-- month total -->
     <td> <script>document.write(unsample_and_format([% row.shift %]));</script> </td>
-    <td> <script>document.write(unsample_and_format([% monthly_discarded_count.$month %]));</script> </td>
-    <td> <script>document.write(unsample_and_format([% monthly_bots_count.$month      %]));</script> </td>
-      <script language='javascript'>
+    
         [% FOREACH cell IN row %]
-          tdc(colorPowerScale([% cell.monthly_delta %]),'[% cell.monthly_delta__ %], [% cell.percentage_of_monthly_total__ %], [% cell.rank %]', unsample_and_format([% cell.monthly_count %]));
+          [% PROCESS table_cell cell=cell month=month i=i  %]
         [% END %] 
-      </script>
+          
     </tr>
   [% END %]
 
@@ -72,4 +205,23 @@
   </tr>
 
 </table>
+<br/>
+<h3>Table cell anatomy</h3>
+
+
+
+<script>
+  [% i = 1 %]
+  [% FOREACH month IN months_present %]
+    [% PROCESS discarded_pie_chart i=i month=month %]
+  [% END %]
+</script>
+
+
+<div id="cell-anatomy"></div>
+<script>
+  var legend = new Drawpad("cell-anatomy");
+  legend.drawEverything();
+</script>
+
 

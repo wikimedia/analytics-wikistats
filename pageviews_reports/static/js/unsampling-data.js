@@ -16,6 +16,9 @@
   var THOUSAND          = 1000;
 
   function unsample_and_format(val) {
+    if(!val) {
+      val = 0;
+    };
     val *= UNSAMPLING_FACTOR;
     if(        val >= MILLION ) {
       val /= MILLION;

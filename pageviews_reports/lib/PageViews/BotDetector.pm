@@ -4,6 +4,35 @@ use warnings;
 use Net::Patricia;
 use Regexp::Assemble;
 
+
+
+
+=head1 NAME
+
+
+PageViews::BotDetector -- Web Bot detection based on ip and ua
+
+=cut
+
+
+=head1 DESCRIPTION
+
+=begin html
+This module provides functionality for detecting bots. 
+
+It uses a Net::Patricia object (<a href="http://en.wikipedia.org/wiki/Radix%5Ftree">Patricia tree</a>) to
+do a fast lookup on a list of pre-defined ip ranges for bots.
+
+This list of pre-defined ip ranges were taken from the <a href="https://github.com/wikimedia/analytics-wikistats">wikistats project</a>.
+ 
+
+=end html
+
+
+=head1 METHODS
+
+=cut
+
 sub new {
   my ($class) = @_;
   my $raw_obj = { };
@@ -13,10 +42,34 @@ sub new {
   return $obj;
 };
 
+
+=head2 match_ip($self,$ip)
+
+Does a fast lookup(using the patricia tree) to decide if the ip is in the ranges that bots are in.
+
+=cut
+
 sub match_ip {
   my ($self,$ip) = @_;
-  return $self->{ip_pat}->match_string($ip);
+
+  my $label = undef;
+  eval {
+    $label = $self->{ip_pat}->match_string($ip);
+  };
+
+  if( !$@ && defined($label) ) {
+    return $label;
+  } else {
+    return undef;
+  };
 };
+
+
+=head2 match_ua($self,$ip)
+
+Does pattern matching on the user-agent with a given list of keywords that bots are known to have.
+
+=cut
 
 sub match_ua {
   my ($self,$ua) = @_;
@@ -35,21 +88,14 @@ sub load_useragent_regex {
   my ($self) = @_;
 
   my $ra = Regexp::Assemble->new;
-  $ra->add("Googlebot");
-  $ra->add("FeedFetcher-Google");
-  $ra->add("Google.*?Wireless.*?Transcoder");
-  $ra->add("Google.*?Desktop");
-  $ra->add("GoogleEarth");
-  $ra->add("GoogleToolbar");
-  $ra->add("Google.*?Keyword.*?Tool");
-  $ra->add("GoogleT");
-  $ra->add("translate\.google\.com");
-  $ra->add("parser");
-  $ra->add("crawl");
+  $ra->add("bot");
+  $ra->add("spider");
   $ra->add("crawler");
+  $ra->add("http");
+  $ra->add("google");
 
-  $self->{ua_regex} = $ra->re;
-
+  my $re_str = $ra->as_string();
+  $self->{ua_regex} = qr/$re_str/i;
 };
 
 
@@ -75,10 +121,10 @@ sub load_ip_ranges {
   #elsif (($address    ge "070.089.039.152") && ($address    le "070.089.039.159")) { $address = "!google:IP070" ; }
   #elsif (($address    ge "070.090.219.072") && ($address    le "070.090.219.079")) { $address = "!google:IP070" ; }
   #elsif (($address    ge "070.090.219.048") && ($address    le "070.090.219.055")) { $address = "!google:IP070" ; }
-  $p->add_string("216.239.$_.0/24",$label_google)  for  32..63;
-  $p->add_string("70.89.39.$_",$label_google)      for  152..159;
-  $p->add_string("70.90.219.$_",$label_google)      for  72..79;
-  $p->add_string("70.90.219.$_",$label_google)      for  48..55;
+  $p->add_string(  "216.239.$_.0/24",$label_google)  for  32..63;
+  $p->add_string( "70.89.39.$_"     ,$label_google)  for  152..159;
+  $p->add_string("70.90.219.$_"     ,$label_google)  for  72..79;
+  $p->add_string("70.90.219.$_"     ,$label_google)  for  48..55;
  
   #elsif (($address_11 ge "067.195.000")     && ($address_11 le "067.195.255"))     { $address = "!yahoo:IP067" ;  }
   #elsif (($address_11 ge "072.030.000")     && ($address_11 le "072.030.255"))     { $address = "!yahoo:IP072" ;  }
