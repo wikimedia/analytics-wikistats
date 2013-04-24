@@ -58,22 +58,27 @@ my $view ;
 
 
 if($config->{end}->{custom} eq "previous-month") {
-  my $t = localtime;
+  my $c = localtime;
+  my $p = $c;
+  while($c->mon == $p->mon){
+    $p-=$PageViews::Model::Sequential::ONE_DAY;
+  };
   delete $config->{end}->{custom};
-  $config->{end}->{year} = $t->year;
+  $config->{end}->{year}  = $p->year;
+  $config->{end}->{month} = $p->mon;
 };
 
 
 confess "[ERROR] Start date invalid"
   unless $config->{start}->{year}  =~ /\d+/ &&
-         $config->{start}->{month} =~ /\d+/  ;
+         $config->{start}->{month} =~ /\d+/ && 
         ($config->{start}->{month} >= 1 && $config->{start}->{month} <= 12)
         ;
 
 confess "[ERROR] End date invalid"
   unless  $config->{end}->{year}  =~ /\d+/ &&
           $config->{end}->{month} =~ /\d+/ &&
-         ($config->{end}->{month} >= 1 && $config->{end}->{month} <= 12)
+         ($config->{end}->{month} >= 1 &&  $config->{end}->{month} <= 12)
          ;
 
 

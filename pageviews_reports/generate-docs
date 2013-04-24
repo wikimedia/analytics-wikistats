@@ -113,19 +113,12 @@ for my $h (@html) {
   $partial_tex       =~ s/\\([a-z]*section)/\\sub$1/g;
 
   $module_name =~ s/^.*overview.*$/Overview/;
+
   $mediawiki_buffer .= "\n= $module_name =\n";
   $partial_mediawiki = `cat $h | pandoc -f html -t mediawiki`;
-  # TODO, get the regex working to replace make the depth of titles +1
-  #$partial_mediawiki =~ s{^==== }{===== }g;
-  #$partial_mediawiki =~ s{^=== }{==== }g;
-  #$partial_mediawiki =~ s{^== }{=== }g;
-  #$partial_mediawiki =~ s{^= }{== }g;
-  #$partial_mediawiki =~ s{\ ====$}{ =====}g;
-  #$partial_mediawiki =~ s{\ ===$}{ ====}g;
-  #$partial_mediawiki =~ s{\ ==$}{ ===}g;
-  #$partial_mediawiki =~ s{\ =$}{ ==}g;
-  print $partial_mediawiki;
-  exit 0;
+  $partial_mediawiki =~ s{^(=+) }{$1= }gxms;
+  $partial_mediawiki =~ s{ (=+)$}{ =$1}gxms;
+
   $mediawiki_buffer .= $partial_mediawiki ;
   push @{ $data->{sections} }, {
     title   => $module_name,
