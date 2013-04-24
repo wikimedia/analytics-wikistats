@@ -2,9 +2,9 @@
   "model"                : "parallel",
   "max-children"         : 10,
   "input-path"           : "/a/squid/archive/sampled",
-  "children-output-path" : "/tmp/pageviews-full/map",
-  "output-path"          : "/tmp/pageviews-full",
-  "output-formats"       : ["wikireport","web","json"],
+  "children-output-path" : "/tmp/pageviews-full-cron/map",
+  "output-path"          : "/tmp/pageviews-full-cron",
+  "output-formats"       : ["wikireport"],
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,

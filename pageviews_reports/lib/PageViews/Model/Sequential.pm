@@ -401,8 +401,14 @@ sub process_line {
   my $req_status = $fields[5] ;
   my $mime_type  = $fields[10];
   my $referer    = $fields[12];
+  my $tp;
 
-  my $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+  # safety eval for invalid time
+  eval {
+    $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
+  };
+  next if($@);
+  undef $@;
 
 
   my $ymd = $tp->year."-".$tp->mon.'-'.$tp->mday; 
