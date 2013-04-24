@@ -57,6 +57,14 @@ sub ParseArguments
 
   $category    = uri_unescape ($category) ;
   $path_html   = uri_unescape ($path_html) ;
+  $path_html   = uri_escape   ($path_html) ;
+  $path_html   =~ s/\%20/_/g ;
+  $path_html   =~ s/\%28/\(/g ;
+  $path_html   =~ s/\%29/\)/g ;
+  $path_html   =~ s/\%2D/-/g ;
+  $path_html   =~ s/\%2F/\//g ;
+  $path_html   =~ s/\%3A/:/g ;
+  $path_html   =~ s/\%5F/_/g ;
 
   &ValidateCategory ;
 
@@ -385,8 +393,10 @@ sub GetArticles
     $article =~ s/\%20/_/g ;
     $article =~ s/\%28/(/g ;
     $article =~ s/\%29/)/g ;
+    $article =~ s/\%2D/-/g ;
     $article =~ s/\%2F/\//g ;
     $article =~ s/\%3A/:/g ;
+    $article =~ s/\%5F/_/g ;
   }
   return (@articles) ;
 }

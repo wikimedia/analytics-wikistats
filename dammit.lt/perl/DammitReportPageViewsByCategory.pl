@@ -231,9 +231,13 @@ sub WriteReport
   $html =~ s/DESCRIPTION/$msg_month/ ;
 
   $file_html_out = uri_escape ($file_html_out) ;
+  $file_html_out =~ s/\%20/_/g ;
+  $file_html_out =~ s/\%28/\(/g ;
+  $file_html_out =~ s/\%29/\)/g ;
   $file_html_out =~ s/\%2D/-/g ;
-  $file_html_out =~ s/\%5F/_/g ;
   $file_html_out =~ s/\%2F/\//g ;
+  $file_html_out =~ s/\%3A/:/g ;
+  $file_html_out =~ s/\%5F/_/g ;
   
   $html2 = $html ;
 

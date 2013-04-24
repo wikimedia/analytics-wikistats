@@ -66,7 +66,7 @@ sub FilterArticles
   while ($line_views = <FILE_VIEWS>)
   {
     if (++$line_cnt_views % 1000000 == 0)
-    { print "$line_cnt_views:\n$line_views$line_titles\n\n" ; }
+    { print "$line_cnt_views:\n$line_views$line_titles_key\n\n" ; }
 
     if ($line_views =~ /^#/)
     {
