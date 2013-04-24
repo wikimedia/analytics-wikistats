@@ -36,6 +36,16 @@
 # and readme's
 !read*
 
+# basic wikistats configuration
+!conf-basic
+!conf-basic/
+!csv_basic
+!csv_basic/
+!reports_basic/
+!logs_basic/
+
+
+
 # advice Linus
 # use add -f to add few files in ignored folders
 # and now you're done - git won't ignore them, since explcitly you told git to track them
