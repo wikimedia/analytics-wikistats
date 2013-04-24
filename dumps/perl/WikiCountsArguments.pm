@@ -40,6 +40,7 @@ sub ParseArguments
   if ($job_runs_on_production_server)
   { $file_log_concise = "$path_log/$file_log_concise" ; }
 
+  $edits_only = $false ;
   if (defined ($options {"e"}))
   {
     $edits_only = $true ;
@@ -120,7 +121,7 @@ sub ParseArguments
   }
   $language =~ s/wiki$// ;
 
-  if (($mode eq "wx") && (($language eq "commons"))) # need full dump for upload stats (e.g. category [[Category:Uploaded with UploadWizard]] )
+  if (($mode eq "wx") && ($language eq "commons")) # need full dump for upload stats (e.g. category [[Category:Uploaded with UploadWizard]] )
   {
     $edits_only = $false ;
     print "commons -> not edits only\n" ;
@@ -239,10 +240,9 @@ sub SetEnvironment
       }
     }
   }
-  else
-  {
-    $edits_only = $false ; # for now only speed up Wikipedia, not other mostly much smaller projects
-  }
+# 23/04/2013: revert to letting cmd line set this 
+# else
+# { $edits_only = $false ; } # for now only speed up Wikipedia, not other mostly much smaller projects
 
   if ($path_in =~ /\/\d{8,8}[\/\\]$/)
   {
@@ -386,7 +386,6 @@ sub SetEnvironment
     }
     else
     {
-
       if ($edits_only)
       {
         &LogT ("\nRun in 'edits only' mode\n") ;
@@ -772,9 +771,15 @@ sub SetDumpDir
     $status = "Check folder $scandir2: " ;
 
     if (! -e "$scandir/status.html")
-    { $status .= "status.html not found\n" ; }
+    { 
+      $status .= "status.html not found\n" ; 
+      &LogT ($status) ; 
+    }
     elsif (! -e "$scandir/index.html")
-    { $status .= "index.html not found\n" ; }
+    { 
+      $status .= "index.html not found\n" ; 
+      &LogT ($status) ; 
+    }
     else
     {
       $usable_dump_folder_found = $false ;
@@ -789,7 +794,7 @@ sub SetDumpDir
       if (($content =~ /<span class='status'>done<\/span> <span class='title'>Creating split stub dumps/) || # obsolete ?
           ($content =~ /<span class='status'>done<\/span> <span class='title'>First-pass for page XML data dumps/))
       {
-        # &Log ("Complete stub dumps found\n") ;
+	# &Log ("Complete stub dumps found\n") ;
         if ($edits_only)
         { $usable_dump_folder_found = $true ; }
         $dumps_usable .= "stub|" ;
@@ -797,7 +802,7 @@ sub SetDumpDir
 
       if ($content =~ /<span class='status'>done<\/span> <span class='title'>All pages with complete edit history.{0,10}?7z/)
       {
-        # &Log ("Complete full archive dumps found (7z)\n") ;
+	# &Log ("Complete full archive dumps found (7z)\n") ;
         if (! $edits_only)
         { $usable_dump_folder_found = $true ; }
         $dumps_usable .= "7z|" ;
@@ -805,21 +810,24 @@ sub SetDumpDir
 
       if ($content =~ /<span class='status'>done<\/span> <span class='title'>All pages with complete page edit history.{0,10}?bz2/)
       {
-        # &Log ("Complete full archive dumps found (bz2)\n") ;
+	# &Log ("Complete full archive dumps found (bz2)\n") ;
         if (! $edits_only)
         { $usable_dump_folder_found = $true ; }
         $dumps_usable .= "bz2|" ;
 
       }
       $dumps_usable =~ s/\|$// ;
-
       if ($usable_dump_folder_found) # means at least stub dump is usable
       {
         $dumpdir = $dir ;
         $status .= "dumps usable '$dumps_usable'\n" ;
       }
       else
-      { $status .= "no usable dumps\n" ; }
+      { 
+	$status .= "no usable dumps\n" ; 
+	if (($dumps_usable =~ /stub/) && (! $edits_only))
+	{ &LogT ("\nStub dump found, but running in 'full archive' mode!!!\n") ; }
+      }
 
 #      open STATUS, '<', "$scandir/status.html" ;
 #      $line = <STATUS> ;
