@@ -4084,7 +4084,7 @@ sub GenerateComparisonTable
 
   # $out_html .= "<h3><span id='wait'>!!! <font color='#800000'>" . $out_rendering . "</font> !!!</span></h3>\n" ;
 
-    if ($mode_wp && ($region eq ''))
+    if ($mode_wp && ($region eq '') && (! $squidslog))
     { $out_html .= " ($msg_perc_mobile)" ; }
 
     # for linear regression

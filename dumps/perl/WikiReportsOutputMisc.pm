@@ -1531,8 +1531,9 @@ sub GenerateColophon
   if ($squidslog)
   {
     $out_myname = "Stefan Petrea" ;
-    $out_mymail = "spetrea@### (no spam: ### = wikimedia.org)" ;
+    $out_mymail = "stefan.petrea@### (no spam: ### = gmail.com)" ;
     $out_mysite = "" ;
+    $out_squidslog = " from 1:1000 sampled squid logs" ;
   }  
 
   $out_html .= "<p><small>\n" .
@@ -1544,7 +1545,8 @@ sub GenerateColophon
 
                $out_generated . $out_generated_at . " " .
 
-               ($dumpdetails ne '' ? "<p>$dumpdetails<p>" : ($pageviews ? $out_pageviewfiles : $out_sqlfiles) . &GetDate ($dumpdate2) . "\n<p>") .
+               ($squidslog ? "$out_squidslog<p>" :
+	       ($dumpdetails ne '' ? "<p>$dumpdetails<p>" : ($pageviews ? $out_pageviewfiles : $out_sqlfiles) . &GetDate ($dumpdate2) . "\n<p>")) .
 
                (! $pageviews ? $out_delay : "") .
                (! $wikimedia ? "$out_no_wikimedia<br>" : "") .
