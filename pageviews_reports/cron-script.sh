@@ -2,8 +2,11 @@
 #env
 #set -x
 USER=`whoami`;
-. /home/$USER/.bashrc;
+#echo $USER >> /tmp/cronlog_1
 eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib);
+export PATH=$PATH:$HOME/local/bin;
+#unpigz --help 2>> /tmp/cronlog_1
+#env > $HOME/cronenv;
 WIKISTATS_DIR=/a/wikistats_git
 MOBILE_PAGEVIEWS_DIR=$WIKISTATS_DIR/pageviews_reports;
 /usr/bin/env perl -V  > /tmp/cperlver;
