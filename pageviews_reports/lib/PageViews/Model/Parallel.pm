@@ -223,6 +223,7 @@ have finished, it reduces(adds) all the counts and stores them inside the class.
 sub process_files {
   my ($self,$params) = @_;
   $self->{__config} = $params;
+  $self->{run_time}->{start} = time();
   my $restrictions = $params->{restrictions};
 
   confess "[ERROR] max_children param invalid"
@@ -281,6 +282,10 @@ sub process_files {
   };
 
   $self->reduce($params->{"children-output-path"});
+  $self->{run_time}->{end} = time();
+  $self->{run_time}->{duration} =
+    $self->{run_time}->{end} - 
+    $self->{run_time}->{start};
 };
 
 

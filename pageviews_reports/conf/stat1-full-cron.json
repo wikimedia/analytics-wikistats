@@ -4,7 +4,7 @@
   "input-path"           : "/a/squid/archive/sampled",
   "children-output-path" : "/tmp/pageviews-full-cron/map",
   "output-path"          : "/tmp/pageviews-full-cron",
-  "output-formats"       : ["wikireport"],
+  "output-formats"       : ["json","web","wikireport"],
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,

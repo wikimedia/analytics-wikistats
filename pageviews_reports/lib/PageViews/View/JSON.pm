@@ -43,6 +43,7 @@ sub get_data_from_model {
   $self->{$_} = $model->{$_}
   for 
     qw/
+    run_time
     counts
     counts_wiki_basic
     counts_wiki_index
@@ -75,6 +76,7 @@ sub render {
   $data->{$_} = $self->{$_} 
   for
   qw/
+    run_time
     counts
     counts_wiki_basic
     counts_wiki_index

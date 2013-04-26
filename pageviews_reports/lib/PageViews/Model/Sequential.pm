@@ -121,6 +121,7 @@ sub new {
   my ($class) = @_;
 
   my $raw_obj = {
+    run_time                    => {},
     current_file_processed      => undef,
     # counts is  counts_wiki_basic + counts_wiki_index + counts_api
     counts                      => {},
@@ -407,7 +408,7 @@ sub process_line {
   eval {
     $tp = Time::Piece->strptime($time,"%Y-%m-%dT%H:%M:%S");
   };
-  next if($@);
+  return if($@);
   undef $@;
 
 
