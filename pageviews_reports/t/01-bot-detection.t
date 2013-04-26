@@ -1,9 +1,21 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More qw/no_plan/;
+use Test::More;
+
+eval { 
+  require Regexp::Assemble; 
+  require Net::Patricia; 
+};
+
+if($@) {
+  plan skip_all => "Regexp::Assemble and Net::Patricia not found";
+} else {
+  plan no_plan => 0;
+};
+
 use lib "./lib";
-use PageViews::BotDetector;
+require PageViews::BotDetector;
 
 my $b = PageViews::BotDetector->new;
 $b->load_ip_ranges();

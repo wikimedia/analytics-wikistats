@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use File::Basename qw/basename/;
 use Data::Dumper;
-use PageViews::BotDetector;
+#use PageViews::BotDetector;
 use Time::Piece;
 use Carp;
 
@@ -99,22 +99,22 @@ sub build_accepted_url_regex1 {
 # The values will indicate what kind of url it is.
 #
 
-sub build_accepted_url_regex2 {
-  my $ra = Regexp::Assemble->new();
-  for my $p1 ("http","https") {
-    for my $p2 ("","www.") {
-      for my $l(@accept_lang_array) {
-        for my $d (@accept_domain_suffixes) {
-          $ra->add("$p1://$p2$l.m.$d.org/wiki/");
-          $ra->add("$p1://$p2$l.m.$d.org/w/index.php");
-          $ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobile");
-          $ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobileview");
-        };
-      };
-    };
-  };
-  return $ra->re();
-}
+#sub build_accepted_url_regex2 {
+  #my $ra = Regexp::Assemble->new();
+  #for my $p1 ("http","https") {
+    #for my $p2 ("","www.") {
+      #for my $l(@accept_lang_array) {
+        #for my $d (@accept_domain_suffixes) {
+          #$ra->add("$p1://$p2$l.m.$d.org/wiki/");
+          #$ra->add("$p1://$p2$l.m.$d.org/w/index.php");
+          #$ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobile");
+          #$ra->add("$p1://$p2$l.m.$d.org/w/api.php\?action=mobileview");
+        #};
+      #};
+    #};
+  #};
+  #return $ra->re();
+#}
 
 
 sub new {
@@ -147,11 +147,11 @@ sub new {
     counts_discarded_mimetype   => {},
 
     counts_mimetype             => {},
-    bdetector                   => PageViews::BotDetector->new(),
+    #bdetector                   => PageViews::BotDetector->new(),
   };
   $raw_obj->{accept_re} = build_accepted_url_regex1(),
-  $raw_obj->{bdetector}->load_ip_ranges();
-  $raw_obj->{bdetector}->load_useragent_regex();
+  #$raw_obj->{bdetector}->load_ip_ranges();
+  #$raw_obj->{bdetector}->load_useragent_regex();
 
   my $obj     = bless $raw_obj,$class;
 
