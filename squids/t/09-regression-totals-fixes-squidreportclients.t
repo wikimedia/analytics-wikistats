@@ -198,7 +198,7 @@ my $wikistats_run_cmd = qq{
 };
 
 my $wikistats_run_cmd_output = `$wikistats_run_cmd`;
-warn $wikistats_run_cmd_output;
+#warn $wikistats_run_cmd_output;
 
 
 use HTML::TreeBuilder::XPath;
