@@ -1,6 +1,11 @@
 # ignore all
 *
 
+
+!meta
+!meta/
+!meta/*.csv
+
 # expect this file
 !.gitignore
 

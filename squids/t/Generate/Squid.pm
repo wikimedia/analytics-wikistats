@@ -224,7 +224,7 @@ sub generate_line {
     referer_header         => "http://en.wikipedia.org/wiki/Phil_of_the_Future",
     x_forwarded_for_header => "-",
     user_agent_header      => "Mozilla/5.0%20(Windows%20NT%206.1;%20WOW64;%20rv:15.0)%20Gecko/20100101%20Firefox/15.0.1",
-    geocode                => "US",
+    geocode                => "--",
   };
 
   my $field_client_ip;
@@ -257,7 +257,11 @@ sub generate_line {
   my $field_referer_header         = $params->{referer_header}         // $default->{referer_header};
   my $field_x_forwarded_for_header = $params->{x_forwarded_for_header} // $default->{x_forwarded_for_header};
   my $field_user_agent_header      = $params->{user_agent_header}      // $default->{user_agent_header};
-  my $field_geocode                = $params->{geocode}                // $default->{geocode};
+
+  my $geocode                      = $params->{geocode}                // $default->{geocode};
+
+  $field_client_ip                .= "|$geocode";
+  
 
   # Currently wikistats accepts 15-field entries, geocode field included (will have to talk to Erik about fields
   # 15 and 16 in the description above because we seem to be dropping those at the 15-field-count-check)
@@ -276,7 +280,6 @@ sub generate_line {
     $field_referer_header        ,
     $field_x_forwarded_for_header,
     $field_user_agent_header     ,
-    $field_geocode               ,
   );
 
   $self->{buffer} .= "$raw_logline\n";

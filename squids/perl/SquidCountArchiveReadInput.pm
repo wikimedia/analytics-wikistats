@@ -182,12 +182,12 @@ sub ReadSquidLogFiles
       else
       { open IN,"<$file_in" ; } # http://perldoc.perl.org/functions/open.html
       
-      $fields_expected = 14 ;
+      $fields_expected = 13 ;
     }
     else
     {
       open IN, '<', $file_in ;
-      $fields_expected = 14 ; # add fake country code
+      $fields_expected = 13 ; # add fake country code
     # $fields_expected = 13 ;
     }
 
@@ -220,7 +220,7 @@ sub ReadSquidLogFiles
 # print "mime " . $fields[10] . "\n" ;
 #next if $fields [9] eq '-' ;
 #next if $fields [9] =~ /NONE/ ;
-     if ($#fields > 14)
+     if ($#fields >= 13)
      {
 	     if (! $scan_ip_frequencies)
 	     {
@@ -228,11 +228,7 @@ sub ReadSquidLogFiles
 # print "fields " . $#fields . "\n$line\n" ;
 	     }
 
-	     $country_code = $fields [$#fields] ;
-	     $fields [$#fields] = '' ;
-	     $line = join (' ', @fields) ;
 	     @fields = split (' ', $line, 14) ;
-	     $fields [14] = $country_code ;
 	     $fields [13] =~ s/ /%20/g ;
 
 	     if (! $scan_ip_frequencies)

@@ -5539,7 +5539,6 @@ sub WriteReportCountriesInfo
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -5647,8 +5646,8 @@ sub WriteReportCountriesInfo
 
   $html_regions = '' ;
 
-foreach $key (qw (N S QP XX    AF AS AU EU CA NA SA OC))
-  #foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+foreach $key (qw (N S QP XX    AF AS EU CA NA SA OC))
+  #foreach $key (qw (N S       AF AS EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -5661,7 +5660,6 @@ foreach $key (qw (N S QP XX    AF AS AU EU CA NA SA OC))
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -5775,7 +5773,6 @@ sub WriteReportCountryOpSys
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -5886,8 +5883,8 @@ sub WriteReportCountryOpSys
 
   $html_regions = '' ;
 
-# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
-  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+# foreach $key (qw (N S QP XX AF AS EU CA NA SA OC))
+  foreach $key (qw (N S       AF AS EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -5900,7 +5897,6 @@ sub WriteReportCountryOpSys
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6017,7 +6013,6 @@ sub WriteReportCountryBrowser
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6128,8 +6123,8 @@ sub WriteReportCountryBrowser
 
   $html_regions = '' ;
 
-# foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
-  foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+# foreach $key (qw (N S QP XX AF AS EU CA NA SA OC))
+  foreach $key (qw (N S       AF AS EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
   {
     $region = $key ;
 
@@ -6142,7 +6137,6 @@ sub WriteReportCountryBrowser
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6839,7 +6833,6 @@ sub WriteReportPerCountryOverview
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6976,7 +6969,7 @@ sub WriteReportPerCountryOverview
 
 
   $html_regions = '' ;
-  foreach $key (qw (N S AF AS AU EU CA NA SA OC))
+  foreach $key (qw (N S AF AS EU CA NA SA OC))
   {
     $region = $key ;
 
@@ -6987,7 +6980,6 @@ sub WriteReportPerCountryOverview
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
-    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;

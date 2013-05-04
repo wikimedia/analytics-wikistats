@@ -134,6 +134,10 @@ ipv6         = $ipv6
 unknown      = $unknown
 ";
 
+ok($world_total  > 2, "world_total  > 2");
+ok($global_south > 2, "globla_south > 2");
+ok($global_north > 2, "globla_north > 2");
+
 warn "world_total - global_north - global_south - ipv6 - unknown = ".($world_total - $global_north - $global_south - $ipv6 - $unknown);
 
 my $country_code_invariant_1 = $world_total - $global_north - $global_south - $ipv6 - $unknown;
