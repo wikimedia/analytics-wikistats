@@ -15,7 +15,8 @@ perl WikiReports.pl -m wm -l en -i $csv/csv_wp/ -o $out/out_wp
 #  rsync -av $out/out_wp/EN/TablesWikimediaAllProjects.htm $htdocs/EN
 
 ## publish draft version:
-   rsync -av $out/out_wp/EN/TablesWikimediaAllProjects.htm $htdocs/EN/draft
+#  rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN/draft
+   rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN
 
 ## publish renamed version:
 #  mv $out/out_wp/EN/TablesWikimediaAllProjects.htm $out/out_wp/EN/TablesWikimediaAllProjectsNoWikivoyage.htm

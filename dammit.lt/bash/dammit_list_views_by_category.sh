@@ -41,4 +41,4 @@ perl DammitFilterMonthlyPageViews.pl -o $work/data/$abbr/$yyyy_mm/$views_filtere
 perl DammitReportPageViewsByCategory.pl -i $work/data/$abbr/$yyyy_mm/$views_filtered -o $work/publish/$abbr/$yyyy_mm/$html_pageviews -v $threshold -a $abbr -m $yyyy_mm
 
 echo Publish result
-rsync -a -r $publish/$abbr $htdocs/wikimedia/pageviews/categorized2
+rsync -a -r $publish/$abbr $htdocs/wikimedia/pageviews/categorized

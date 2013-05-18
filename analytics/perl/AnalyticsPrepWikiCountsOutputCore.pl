@@ -94,7 +94,10 @@ sub ParseArguments
   print CSV_OUT "File name changed for new report card!\nNew name 'wikilytics_in_wikistats_core_metrics.csv'\n" ;
   close CSV_OUT ;
 
-  $file_csv_out = "$path_out/wikilytics_in_wikistats_core_metrics.csv" ;
+  if (! $use_old_unmerged_editor_totals)
+  { $file_csv_out = "$path_out/wikilytics_in_wikistats_core_metrics.csv" ; }
+  else
+  { $file_csv_out = "$path_out/wikistats_core_metrics_editors_unmerged.csv" ; }
 
   &SetComparisonPeriods ;
 }
