@@ -449,7 +449,6 @@ sub SetEnvironment
     $file_csv_monthly_editors       = $path_out . "StatisticsMonthlyEditors.csv" ;
     $file_csv_namespace_stats       = $path_out . "StatisticsPerNamespace.csv" ;
     $file_csv_namespace_edit_stats  = $path_out . "StatisticsEditsPerNamespace.csv" ;
-    $file_csv_content_namespaces    = $path_out . "StatisticsContentNamespaces.csv" ;
     $file_csv_users_activity_spread = $path_out . "StatisticsUserActivitySpread.csv" ;
     $file_csv_weekly_stats          = $path_out . "StatisticsWeekly.csv" ;
     $file_csv_active_users          = $path_out . "StatisticsActiveUsers.csv" ;
@@ -490,6 +489,9 @@ sub SetEnvironment
 
     $file_html_timelines            = $path_out . "Timelines" . uc ($language) . ".htm" ;
     $file_html_timelines_skipped    = $path_out . "TimelinesSkipped" . uc ($language) . ".htm" ;
+    
+    $file_csv_content_namespaces    = $path_out . "StatisticsContentNamespaces.csv" ; 
+    $file_csv_content_namespaces    =~ s/csv_\w\w/csv_mw/ ; # collected in global dir by job 'collect_countable_namespaces.sh'
   }
 
   if ($testmode)

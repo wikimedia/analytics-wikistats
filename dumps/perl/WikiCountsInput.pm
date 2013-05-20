@@ -29,15 +29,20 @@ sub NameSpaceArticle
 {
   my ($language, $namespace) = @_ ;
 
-# if changed, also change WikiReportsOutputTables, find in code string 'NameSpaceArticle'
-  if ($language eq 'strategy')
-  { return (($namespace == 0) || ($namespace == 106)) ; }
-  elsif ($language eq 'commons')
-  { return (($namespace == 0) || ($namespace == 6) || ($namespace == 14)) ; } # + file and category namespaces
-  elsif ($mode_ws) # wikisource wikis
-  { return (($namespace == 0) || ($namespace == 102) || ($namespace == 104) || ($namespace == 106)) ; } # + author, page, index (`100 = portal)
-  else
-  { return ($namespace == 0) ; }
+  if ($base_content_namespaces_on_api)
+  { return ($content_namespace {$namespace} != 0 ) ; }
+  else 
+  {
+  # if changed, also change WikiReportsOutputTables, find in code string 'NameSpaceArticle'
+    if ($language eq 'strategy')
+    { return (($namespace == 0) || ($namespace == 106)) ; }
+    elsif ($language eq 'commons')
+    { return (($namespace == 0) || ($namespace == 6) || ($namespace == 14)) ; } # + file and category namespaces
+    elsif ($mode_ws) # wikisource wikis
+    { return (($namespace == 0) || ($namespace == 102) || ($namespace == 104) || ($namespace == 106)) ; } # + author, page, index (`100 = portal)
+    else
+    { return ($namespace == 0) ; }
+  }  
 }
 
 sub ReadInputXml
@@ -3025,25 +3030,36 @@ sub GetNextReview
 
 sub GetContentNamespaces
 {
-  my ($project,$language) = @_ ;
+  if (! $base_content_namespaces_on_api)
+  {  
+    &LogT ("Use fixed namespaces for counting, not namespaces collected via api\n\n") ; 
+    return ;
+  }
+  &LogT ("GetContentNamespaces\n") ;
+  	
+  my ($mode,$language) = @_ ;
+  my $project ;
 
-     if ($project eq 'wb') { $project = 'wikibooks' ; }
-  elsif ($project eq 'wk') { $project = 'wiktionary' ; }
-  elsif ($project eq 'wn') { $project = 'wikinews' ; }
-  elsif ($project eq 'wo') { $project = 'wikivoyage' ; }
-  elsif ($project eq 'wp') { $project = 'wikipedia' ; }
-  elsif ($project eq 'wq') { $project = 'wikiquote' ; }
-  elsif ($project eq 'ws') { $project = 'wikisource' ; }
-  elsif ($project eq 'wv') { $project = 'wikiversity' ; }
-  elsif ($project eq 'wx') {
-                             if ($language eq 'species')
-                             { $project = 'wikipedia' ; }
-                             else
-                             { $project = 'wikimedia' ; }
-                           }
-  elsif ($project eq 'wm') { return ; }
-  else                     { die "GetContentNamespaces: invalid project code $project" ; }
-
+# disable code to use api directly, always read namespaces from file
+if (0)
+{
+  if    ($mode eq 'wb') { $project = 'wikibooks' ; }
+  elsif ($mode eq 'wk') { $project = 'wiktionary' ; }
+  elsif ($mode eq 'wn') { $project = 'wikinews' ; }
+  elsif ($mode eq 'wo') { $project = 'wikivoyage' ; }
+  elsif ($mode eq 'wp') { $project = 'wikipedia' ; }
+  elsif ($mode eq 'wq') { $project = 'wikiquote' ; }
+  elsif ($mode eq 'ws') { $project = 'wikisource' ; }
+  elsif ($mode eq 'wv') { $project = 'wikiversity' ; }
+  elsif ($mode eq 'wx') {
+                          if ($language eq 'species')
+                          { $project = 'wikipedia' ; }
+                          else
+                          { $project = 'wikimedia' ; }
+                        }
+  elsif ($mode eq 'wm') { return ; }
+  else                  { abort "GetContentNamespaces: invalid mode $mode" ; }
+  
   my $url = "http://$language.$project.org/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
   # &LogT ("\n\nFetch $url'\n\n") ;
   print "$url\n" ;
@@ -3064,11 +3080,41 @@ sub GetContentNamespaces
       $content_namespace {$id} = $true ;
     }
 
+    $content_namespaces_api = $content_namespaces ;
+
     if ($content_namespaces eq '')
     {
       $content_namespaces = "0" ;
       &LogT ("No countable namespaces found via API! Assume namespace 0 is only countable namespace.") ;
     }
+    # force extra content namespaces which may not have been defined in api, but always were countable
+    if ($project eq 'wikisource')
+    {  
+      if ($content_namespaces !~ /102/)
+      { $content_namespaces   .= "\|102" ; }
+      if ($content_namespaces !~ /104/)
+      { $content_namespaces   .= "\|104" ; }
+      if ($content_namespaces !~ /106/)
+      { $content_namespaces   .= "\|106" ; }
+    }
+    if ($project eq 'wikispecial')
+    {  
+      if ($language eq 'strategy')
+      {
+        if ($content_namespaces !~ /106/)
+        { $content_namespaces   .= "\|106" ; }
+      }
+      if ($language eq 'commons')
+      {
+        if ($content_namespaces !~ /6/)
+	{ $content_namespaces   .= "\|6" ; }
+        if ($content_namespaces !~ /14/)
+	{ $content_namespaces   .= "\|14" ; }
+      }
+    }
+
+    if ($content_namespaces ne $content_namespaces_api)
+    { &LogT ("Content namespaces patched: $content_namespaces_api -> $content_namespaces\n") ; }
 
     $content_namespaces =~ s/\|$// ;
     # &LogT ("Content namespaces for language $language: $content_namespaces\n") ;
@@ -3077,22 +3123,37 @@ sub GetContentNamespaces
     push @csv, "$language,$content_namespaces" ;
     &WriteFileCsv ($file_csv_content_namespaces) ;
   }
-  else
-  {
-    &ReadFileCsvOnly ($file_csv_content_namespaces) ;
-    $line = $csv [0] ;
-  # $line = "xx,0|1|2\n" ; # test
-    chomp $line ;
+}  
+# else
+# {
+    if (! -e $file_csv_content_namespaces)
+    { abort ("Namespaces file not found: '$file_csv_content_namespaces'. Run 'collect_countable_namespaces.sh'\n") ; }
 
-    if ($line ne '')
+    $line_content_namespaces = '' ;
+    open FILE_NS, "<", $file_csv_content_namespaces ;
+    while ($line = <FILE_NS>)
     {
-      &LogT ("Reuse content namespaces from previous run: line='$line'\n") ;
-      my ($language,$content_namespaces) = split (',', $line) ;
-      foreach $id (split "\|", $content_namespaces)
-      { $content_namespace {$id} = $true ; }
-      &LogT ("Content namespaces for language $language: $content_namespaces\n") ;
+      if ($line =~ /^$mode\,$language\,/)
+      {
+        chomp ($line) ;
+        $line_content_namespaces = $line ;
+        last ;
+      }
     }
-  }
+    close FILE_NS ;
+
+  # $line_content_namespaces = "xx,0|1|2\n" ; # test
+    if ($line_content_namespaces ne '')
+    {
+      &LogT ("Read content namespaces from file '$file_csv_content_namespaces': line='$line_content_namespaces'\n") ;
+      my ($mode,$language,$content_namespaces) = split (',', $line_content_namespaces) ;
+      foreach $id (split '\|', $content_namespaces)
+      { $content_namespace {$id} = $true ; }
+      &LogT ("Content namespaces for language $language: " . join (',', sort keys %content_namespace) . "\n") ;
+    }
+    else
+    { abort("No entry found in namespaces file '$file_csv_content_namespaces' for $mode $language. Run 'collect_countable_namespaces.sh'\n") ; }
+# }
 }
 
 sub FetchWebPage

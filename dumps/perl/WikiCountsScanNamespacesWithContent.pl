@@ -22,6 +22,7 @@
   $file_namespaces = "$path_csv/csv_mw/StatisticsContentNamespaces.csv" ;
   $file_run_stats  = "StatisticsLog.csv" ;
 
+  # read previous content (so it will be preserved when api call fails) 
   if (-e $file_namespaces)
   {
     open CSV_IN, '<', $file_namespaces || die "Can't open $file_namespaces" ;
@@ -35,7 +36,7 @@
     }
     close CSV_IN ;
   }
-
+  
   &GetNamespaces ('wb','wikibooks') ;
   &GetNamespaces ('wk','wiktionary') ;
   &GetNamespaces ('wn','wikinews') ;
@@ -46,6 +47,7 @@
   &GetNamespaces ('wv','wikiversity') ;
   &GetNamespaces ('wx','wikimedia') ;
 
+  &ForceExtraContentNamespaces ;
   &SaveNamespaces ;
   print "\nReady\n\n" ;
   exit ;
@@ -76,6 +78,7 @@ sub GetNamespaces
       elsif ($lang eq 'sources')    { $url = 'wikisource.org' ; }
       elsif ($lang eq 'mediawiki')  { $url = 'www.mediawiki.org' ; }
       elsif ($lang eq 'foundation') { $url = 'wikimediafoundation.org' ; }
+      elsif ($lang eq 'wikidata')   { $url = 'www.wikidata.org' ; }
     }
     $url .= "/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
 
@@ -98,13 +101,43 @@ sub GetNamespaces
       if ($ns =~ /^\d+$/)
       { $namespaces {"$proj_code,$lang"} .= "$ns\|" ; }
     }
+
     $namespaces {"$proj_code,$lang"} =~ s/\|$// ;
     print "$proj_code,$lang," . $namespaces {"$proj_code,$lang"} . "\n" ;
     # return if $lines++ > 3 ;
   }
-  &SaveNamespaces ;
 }
 
+sub ForceExtraContentNamespaces
+{
+  # force extra content namespaces which may not have been defined in api, but always were countable 
+  foreach $key (sort keys %namespaces)
+  {
+    if ($key =~ /^ws,/)
+    {
+      if ($namespaces {$key} !~ /102/) 
+      { $namespaces   {$key} .= "\|102" ; }
+      if ($namespaces {$key} !~ /104/) 
+      { $namespaces   {$key} .= "\|104" ; }
+      if ($namespaces {$key} !~ /106/) 
+      { $namespaces   {$key} .= "\|106" ; }
+    }
+  }  
+
+  if ($namespaces {"wx,strategy"} !~ /106/) 
+  { $namespaces   {"wx,strategy"} .= "\|106" ; }
+  if ($namespaces {"wx,commons"} !~ /\|6/) 
+  { $namespaces   {"wx,commons"} .= "\|6" ; }
+  if ($namespaces {"wx,commons"} !~ /\|14/) 
+  { $namespaces   {"wx,commons"} .= "\|14" ; }
+
+  foreach $key (sort keys %namespaces)
+  {
+    @namespaces = split ('\|', $namespaces {$key}) ; 
+    @namespaces = sort {$a <=> $b} @namespaces ;
+    $namespaces {$key} = join ('|', @namespaces) ;    
+  }
+}
 
 sub SaveNamespaces
 {
