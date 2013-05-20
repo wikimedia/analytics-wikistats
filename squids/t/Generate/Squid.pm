@@ -156,14 +156,37 @@ sub __generate_random_country {
     $ALL_COUNTRY_CODES[int(rand(@ALL_COUNTRY_CODES))];
 };
 
-
 sub dump_to_disk_and_increase_day {
   my ($self) = @_;
+  $self->dump_to_disk;
+  $self->__increase_day;
+};
 
+sub get_date_current {
+  my ($self) = @_;
   my $tp_object = $self->__parse_self_current_datetime;
   my $filename_date = $tp_object->ymd;
   $filename_date =~ s/-//g;
+  return $filename_date;
+};
 
+sub get_date_previous {
+  my ($self) = @_;
+  my $tp_object = $self->__parse_self_current_datetime;
+  $tp_object-=86_400;
+  my $filename_date = $tp_object->ymd;
+  $filename_date =~ s/-//g;
+  return $filename_date;
+};
+
+sub dump_to_disk_previous {
+  my ($self) = @_;
+  my $filename_date = $self->get_date_previous;
+  $self->_write_to_disk($filename_date);
+}
+
+sub _write_to_disk {
+  my ($self,$filename_date) = @_;
   my $output_dir   =  $self->{output_dir};
   my $log_filename =  $self->{prefix}.$filename_date;  
   my $log_fullpath = "$output_dir/$log_filename";
@@ -175,7 +198,12 @@ sub dump_to_disk_and_increase_day {
   # reset buffer and close filehandle
   close($log_fh);
   $self->{buffer} = "";
-  $self->__increase_day;
+}
+
+sub dump_to_disk {
+  my ($self) = @_;
+  my $filename_date = $self->get_date_current;
+  $self->_write_to_disk($filename_date);
 };
 
 sub __mobile_url_country { "http://$_[0].m.wikipedia.org/wiki/Harry_Potter_and_the_Half-Blood_Prince_(film)" };
