@@ -29,8 +29,11 @@
 !*.sh
 # file specifying line-ending characters
 !.gitattributes
+!testdata
 !testdata/
 !testdata/*
+!testdata/*/*.pm
+!testdata/*/*.txt
 !testdata/*/*.gz
 
 # and readme's
@@ -45,6 +48,7 @@
 !logs_basic/
 
 
+!csv
 
 # advice Linus
 # use add -f to add few files in ignored folders

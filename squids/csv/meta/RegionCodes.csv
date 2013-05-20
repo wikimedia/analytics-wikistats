@@ -30,7 +30,7 @@ AP,AS,S,Asia/Pacific Region
 AR,SA,S,Argentina
 AS,OC,S,American Samoa
 AT,EU,N,Austria
-AU,AU,N,Australia
+AU,OC,N,Australia
 AW,SA,S,Aruba
 AX,EU,N,Aland Islands
 AZ,AS,S,Azerbaijan
@@ -110,7 +110,7 @@ GU,OC,S,Guam
 GW,AF,S,Guinea-Bissau
 GY,SA,S,Guyana
 HK,AS,S,Hong Kong
-HM,AU,N,Heard Island and McDonald Islands
+HM,OC,N,Heard Island and McDonald Islands
 HN,CA,S,Honduras
 HR,EU,N,Croatia
 HT,CA,S,Haiti

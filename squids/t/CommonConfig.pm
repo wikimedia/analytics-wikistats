@@ -12,6 +12,7 @@ use List::Util qw/first/;
 #
 
 my $hostname = `hostname`;
+my $pwd      = `pwd`;
 chomp $hostname;
 
 our $__CODE_BASE;
@@ -24,6 +25,8 @@ if($hostname eq "gallium") {
 } elsif($hostname eq "stat1" && $ENV{HOME} eq "/home/diederik") {
   # Running on Diederik's account on stat1
   $__CODE_BASE = "/home/diederik/wikistats/squids";
+} elsif($pwd   =~ /\/travis\//) {
+  $__CODE_BASE = "/home/travis/build/wsdookadr/analytics-wikistats/squids";
 } else {
   # Anywhere else
   $__CODE_BASE = "/a/wikistats_git/squids";
