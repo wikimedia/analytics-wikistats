@@ -2503,9 +2503,9 @@ sub SortCounts
 
 # ReadInputMethods
   @statusses_sorted_count            = keys_sorted_by_value_num_desc %statusses ;
-  @statusses_sorted_method           = keys_sorted_alpha_desc           %statusses ;
+  @statusses_sorted_method           = keys_sorted_alpha_asc         %statusses ;
   @methods_sorted_count              = keys_sorted_by_value_num_desc %methods ;
-  @methods_sorted_method             = keys_sorted_alpha_desc           %methods ;
+  @methods_sorted_method             = keys_sorted_alpha_asc         %methods ;
 
 # ReadInputMimeTypes
 
@@ -2537,19 +2537,19 @@ sub SortCounts
   @opsys_sorted_count                = keys_sorted_by_value_num_desc %opsys ;
 
 # ReadInputOrigins
-  @origin_int_top_sorted_alpha       = keys_sorted_alpha_desc           %origin_int_top ;
-  @origin_ext_top_sorted_alpha       = keys_sorted_alpha_desc           %origin_ext_top ;
-  @origin_ext_page_top_sorted_alpha  = keys_sorted_alpha_desc           %origin_ext_page_top ;
+  @origin_int_top_sorted_alpha       = keys_sorted_alpha_asc         %origin_int_top ;
+  @origin_ext_top_sorted_alpha       = keys_sorted_alpha_asc         %origin_ext_top ;
+  @origin_ext_page_top_sorted_alpha  = keys_sorted_alpha_asc         %origin_ext_page_top ;
   @origin_int_top_sorted_count       = keys_sorted_by_value_num_desc %origin_int_top ;
   @origin_ext_top_sorted_count       = keys_sorted_by_value_num_desc %origin_ext_top ;
   @origin_ext_page_top_sorted_count  = keys_sorted_by_value_num_desc %origin_ext_page_top ;
 
-  @project_int_top_sorted_alpha      = keys_sorted_alpha_desc           %project_int_top ;
+  @project_int_top_sorted_alpha      = keys_sorted_alpha_asc         %project_int_top ;
   @project_int_top_sorted_count      = keys_sorted_by_value_num_desc %project_int_top ;
 
 # ReadInputScripts
   @parms_sorted_count                = keys_sorted_by_value_num_desc %parms ;
-  @parms_sorted_script               = keys_sorted_alpha_desc        %parms ;
+  @parms_sorted_script               = keys_sorted_alpha_asc         %parms ;
 
   @scripts_php_sorted_count          = keys_sorted_by_value_num_desc %scripts_php ;
   @scripts_php_sorted_script         = keys_sorted_alpha_asc         %scripts_php ;
@@ -2560,10 +2560,10 @@ sub SortCounts
 
 # ReadInputGoogle
   @searches_service_count            = keys_sorted_by_value_num_desc %searches_service ;
-  @searches_service_alpha            = keys_sorted_alpha_desc           %searches_service ;
+  @searches_service_alpha            = keys_sorted_alpha_asc         %searches_service ;
   @searches_toplevel_count           = keys_sorted_by_value_num_desc %searches_toplevel_tld_found ;
-  @searches_toplevel_alpha           = keys_sorted_alpha_asc           %searches_toplevel_tld_found ;
-  @searches_service_matches_alpha    = keys_sorted_alpha_asc           %searches_service_matches ;
+  @searches_toplevel_alpha           = keys_sorted_alpha_asc         %searches_toplevel_tld_found ;
+  @searches_service_matches_alpha    = keys_sorted_alpha_asc         %searches_service_matches ;
 
 # ReadInputSkins
   @skins_sorted_skin  = keys_sorted_alpha_asc %skins ;
