@@ -25,6 +25,7 @@ sub ReadLanguageSettings
 
   # actually $imagetag would now be better named $filetag, since namespace tag IMAGE: became alias for FILE: (don't change though)
   ($encoding, $categorytag, $imagetag, $usertag, $redirtag) = &GetLanguageSettings ;
+
   if ($categorytag !~ /x/) # /^[a-zA-Z0-9]*^/)
   {
      if ($language eq "sr") # still applicable ?
@@ -194,7 +195,7 @@ sub ReadFilePhp
         }
 
         # no provision for commented lines with similar content
-        if ($line =~ /'redirect'\s*=>/)
+        if ($line =~ /'redirect'\s*=>.*array/)
         {
           $line =~ s/^.*?\(// ;
           $line =~ s/\).*$// ;
