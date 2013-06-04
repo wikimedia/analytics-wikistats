@@ -56,8 +56,13 @@ if($config->{model} eq "parallel") {
 my $model;
 my $view ;
 
+# If the $config->{end}->{custom} is "previous-month"
+#
+# then identify the get the current time, chop of days until the previous month is reached
+#
+# and then use that as end month for processing
 
-if($config->{end}->{custom} eq "previous-month") {
+if(defined($config->{end}->{custom}) && $config->{end}->{custom}eq "previous-month") {
   my $c = localtime;
   my $p = $c;
   while($c->mon == $p->mon){

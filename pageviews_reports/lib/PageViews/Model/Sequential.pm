@@ -236,7 +236,9 @@ sub accept_rule_url {
     }elsif( index($path_fragment,"w/index.php" ,0)!=-1) {
       $retval->{"pageview-type"} = "wiki_index";
     }elsif( index($path_fragment,"w/api.php"   ,0)!=-1) {
-      my $url_params    = { split(/&|=/,$c[8]) };
+      my @kv		= split(/&|=/,$c[8]);
+      return undef if(~~@kv % 2 == 1);
+      my $url_params    = { @kv };
       $retval->{"pageview-type"} = "api";
       $retval->{action}  = $url_params->{action};
       $retval->{"title"} = $url_params->{page}  || 
@@ -350,7 +352,7 @@ sub accept_rule_mimetype {
   my ($self,$mime_type) = @_;
   ## text/html mime types only
   ## (mimetype filtering only occurs for regular pageviews, not for the API ones) 
-  if( $mime_type =~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
+  if(defined($mime_type) && $mime_type =~ m{text/html|text/vnd\.wap\.wml|application/json}i ) {
     return 1;
   };
   $self->{counts_discarded_mimetype}->{$self->{last_ymd}}++;

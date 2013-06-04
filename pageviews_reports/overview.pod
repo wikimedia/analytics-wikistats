@@ -82,6 +82,38 @@ This is subject to change.
 
 =end html
 
+
+
 =head1 Documentation
 
-This documentation was generated using pandoc.
+=begin html
+
+This documentation is generated (using pandoc and some custom markup conversion) by <b>generate-docs</b>.
+
+It is generated in 3 formats:
+
+<ul>
+<li> HTML
+<li> PDF
+<li> Mediawiki
+</ul>
+
+=end html
+
+=cut
+
+
+=head1 Cronjob
+
+=begin html
+
+This cron job is being installed by <b>cron-install.sh</b>. At this point the job is run at <b>1st of every month at 07:20</b> on stat1 time.
+
+The cron job runs bashrc and then cleans up an output directory in /tmp/pageviews-full-cron, and after that it runs the pageviews reports produces a csv and copies it
+
+to /a/wikistats_git/dumps/csv_csv/ where we expect this csv to be picked up by a different cronjob (which belongs to wikistats codebase).
+
+=end html
+
+=cut
+

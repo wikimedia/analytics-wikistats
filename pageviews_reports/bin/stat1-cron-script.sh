@@ -14,8 +14,8 @@ MOBILE_PAGEVIEWS_DIR=$WIKISTATS_DIR/pageviews_reports
 /bin/date            >> /tmp/cperlver;
 # Clean up mappers output from previous run
 rm -f $OUTPUT_DIR/map/*;
-/usr/bin/env perl -I$MOBILE_PAGEVIEWS_DIR/lib            \
-                    $MOBILE_PAGEVIEWS_DIR/pageviews.pl   \
+/usr/bin/env perl -I$MOBILE_PAGEVIEWS_DIR/lib                \
+                    $MOBILE_PAGEVIEWS_DIR/bin/pageviews.pl   \
                     $MOBILE_PAGEVIEWS_DIR/conf/stat1-full-cron.json 2>&1 >/tmp/cperlerr;
 cp $OUTPUT_DIR/PageViewsPerMonthAll.csv \
    $WIKISTATS_DIR/dumps/csv/csv_sp/ ;
