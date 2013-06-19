@@ -1100,7 +1100,7 @@ sub PhaseBuildDailyFile_MergeFiles
 
     if ($key_low eq "\xFF\xFF") 
     {
-      print "LAST, key $key, key_low $key_low\n" ;
+      print "LAST, key '$key', key_low '$key_low'\n" ;
       last ; 
     }
 
@@ -1443,31 +1443,36 @@ sub ValidateCounts
   &Log ("\nValidateCounts\n") ;
 	
   my ($date_or_month) = @_ ; 
-  my %keys ;
+  my %languages ;
 
-  foreach $key (keys %totals_per_lang_in)
-  { $keys {$key} ++ ; }  
-  foreach $key (keys %totals_per_lang_out)
-  { $keys {$key} ++ ; }  
+  # collect all languages read and/or written
+  foreach $lang (keys %totals_per_lang_in)
+  { $languages {$lang} ++ ; }  
+  foreach $lang (keys %totals_per_lang_out)
+  { $languages {$lang} ++ ; }  
 
+  # for each of those languages match pageviews: as read from input, as written to output
   my $mismatch_found = $false ;
-  foreach $key (sort keys %keys)
+  foreach $lang (sort keys %languages)
   {
-    my $in  = 0 + $totals_per_lang_in  {$key} ;
-    my $out = 0 + $totals_per_lang_out {$key} ;
+    next if $lang =~ /^\xFF/ ; # found language 'ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.z' in two files, e.g.  20130423-000000
+                               # \xFF is also used as end of file marker  
+
+    my $in  = 0 + $totals_per_lang_in  {$lang} ;
+    my $out = 0 + $totals_per_lang_out {$lang} ;
     
     if (($in != $out) && 
 	(($test_max_language eq '') ||  
-	 ($key lt $test_max_language))) # do not cry wolf when partial file is processed for tests, for cut-off language  
+	 ($lang lt $test_max_language))) # when partial file is processed for tests, do not cry wolf for cut-off language  
     { 
       print "\n" if ! $mismatch_found ;
-      print "Mismatch for $date_or_month, key '$key': in $in, out $out\n" ;
+      print "Mismatch for $date_or_month, lang '$lang': pageviews read $in, pageviews written $out\n" ;
       $mismatch_found = $true ; 
     }
   }
   print "\n" ;
 
-  &Abort ("Mismatch found between counts read and counts written") if $mismatch_found ;
+  &Abort ("Mismatch found between pageviews read and pageviews written") if $mismatch_found ;
 }
 
 # if both max_age (-a) and date range (-d) have been specified both criteria will have to be fulfilled, allows e.g. to (re)process only files for first three months of year
@@ -2036,10 +2041,12 @@ sub OutputMatchesInput
     { &Log ("$key: ${invalid_languages {$key}}\n") ; }
   }
 
-  for $key (sort keys %totals_in)
+  for $lang (sort keys %totals_in)
   {
-    if ($totals_in {$key} != $totals_out {$key})
-    { $msg_mismatch .= "                 $key in: ${totals_in {$key}}, out: ${totals_out {$key}}\n" ; }
+    next if $lang =~ /^\xFF/ ; # found language 'ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ.z' in two files, e.g.  20130423-000000
+                               # \xFF is also used as end of file marker  
+    if ($totals_in {$lang} != $totals_out {$lang})
+    { $msg_mismatch .= "                 $key in: ${totals_in {$lang}}, out: ${totals_out {$lang}}\n" ; }
   }
 
   if ($msg_mismatch ne '')
