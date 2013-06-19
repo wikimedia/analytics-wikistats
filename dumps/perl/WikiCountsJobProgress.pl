@@ -18,6 +18,7 @@
   use Time::Local ;
   use Getopt::Std ;
   use Cwd ;
+  use Time::Piece ;
 
   my %options ;
   getopt ("dipou", \%options) ;
@@ -61,7 +62,9 @@
 
   $file_html         = "$dir_out/out_wm/WikiCountsJobProgress.html" ;
   $file_html_c       = "$dir_out/out_wm/WikiCountsJobProgressCurrent.html" ;
-  
+
+  $file_daily_gain   = "$dir_out/out_wm/WikiCountsJobProgressDaily.txt" ;
+
   &ReadWikiCountsThresholdEditsOnly ;
   # &ReadDammitStats ; # process to process dammit files is no longer in use, new version not yet live
 
@@ -162,9 +165,11 @@
                 "<br><font color=#800000>xx<sup>n</sup></font>: last month processed: $month_minus_4 or older\n" .
                 "<br><font color=#808080>xx<sup>n</sup></font>: wiki is closed\n" .
                 "<br>Bold text: job took an hour or more</small>\n" ;
+
   &WriteHtml ;
   &WriteHtmlCurrent ;
   &WriteHtmlJobRunTimes ;
+  &WriteDailyGain ;
 
   print "Ready in " . (time - $timestart) . " sec\n" ;
   exit;
@@ -531,6 +536,11 @@ sub WriteHtml
     elsif ($months == 0) # wikistats up to date, contains data up to previous month
     { $rgb = "#008000" ; }
 
+    if (($language eq "sep11") || ($months == 0)) 
+    { $done_per_project {$project} ++ ; }
+    else
+    { $todo_per_project {$project} ++ ; }
+    
     $runtime = int ($runtimes {$run} / 60) ;
 
     if (! @dblists {"$project,$language"})
@@ -790,6 +800,25 @@ sub WriteHtmlCurrent
   { $project2 = "<u>$project2</u>" ; }
   print HTML "<p><b>$project2</b> <small>[$languages] $html</small>\n" ;
 
+  if (-e $file_daily_gain)
+  {
+    open TXT, '<', $file_daily_gain ;
+    @lines_daily_gain = <TXT> ;
+    close TXT ;
+  }	  
+  
+  # feed last 7 status lines to html 
+  print HTML "<h3>Progress in last week</h3>\n" ;
+  print HTML "<pre>at end of day still to do:\n" ;
+  $l = $#daily_lines_gain ;
+  for ($l = $#lines_daily_gain >= 6 ? $#lines_daily_gain - 6 : 0 ; $l <= $#lines_daily_gain ; $l++)
+  {
+    last if $l < 0 ;	  
+    print HTML $lines_daily_gain [$l] ; 
+    print "$l " . $lines_daily_gain [$l] ;
+  }
+  print HTML "</pre>\n" ;
+
   if ($reports_total > 0)
   {
     foreach $project (sort {$report_dates {$b} <=> $report_dates {$a}} keys %report_dates)
@@ -892,6 +921,31 @@ sub WriteHtmlJobRunTimes
                    "</td></tr>\n" ;
   }
   print HTML "</table>\n" ;
+}
+
+sub WriteDailyGain 
+{
+  my ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time - 24*3600); # collect stats for end of previous day
+  my $yesterday = sprintf ("%04d-%02d-%02d", $year+1900, $month+1,$mday) ;
+  my ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time); # compare file date with today
+  my $today = sprintf ("%04d-%02d-%02d", $year+1900, $month+1,$mday) ;
+
+  my $todo = '' ;
+  foreach $project (sort keys %projects)
+  { $todo .= "$project:" . (0 + $todo_per_project {$project}) . '/' .  ($done_per_project {$project} + $todo_per_project {$project}) . " " ; }
+
+# print "$today,$done\n" ;
+
+  if (-e $file_daily_gain)
+  { 
+    my $ymd = localtime((stat $file_daily_gain)[9])->ymd;
+    return if $ymd eq $today ; # already line added logged today  
+  # print "today $today / file date $ymd -> add line\n" ;
+  }	  
+
+  open TXT, '>>', $file_daily_gain ;
+  print TXT "$yesterday $todo\n" ;
+  close TXT ;
 }
 
 sub DHM
