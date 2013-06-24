@@ -8,7 +8,7 @@
   "logs-prefix"          : "sampled",
   "start"    : {
     "year"   : 2012,
-    "month"  : 1
+    "month"  : 5
   },
   "end"      : {
     "custom": "previous-month"

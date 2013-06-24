@@ -148,7 +148,6 @@ my $REGEX_MIMETYPES = qr/image\/(?:png|jpeg|gif)/;
 
   $file_log               = "SquidReportArchive.log" ;
 
-  $file_html_new_mobile_pageviews  = "TablesPageViewsMonthlySquidsMobile.htm" ;
   $file_html_crawlers              = "SquidReportCrawlers.htm" ;
   $file_html_methods               = "SquidReportMethods.htm" ;
   $file_html_origins               = "SquidReportOrigins.htm" ;
@@ -630,7 +629,6 @@ sub PrepHtml
   $dummy_countries_devices      = "<font color=#000060>Mobile devices</font>" ;
 
   $link_requests             = "Requests <a href='$file_html_requests'>by destination</a> or " ;
-  $link_new_mobile_pageviews = "<a href='$file_html_new_mobile_pageviews'>New Mobile Pageviews(from squid logs)</a>";
   $link_origins              = "<a href='$file_html_origins'>by origin</a>" ;
   $link_methods              = "<a href='$file_html_methods'>Methods</a>" ;
   $link_scripts              = "<a href='$file_html_scripts'>Scripts</a>" ;
@@ -2598,7 +2596,7 @@ sub WriteReportClients
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
 # test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
@@ -3332,7 +3330,7 @@ sub WriteReportCrawlers
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $link_devices \/ $dummy_browsers \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $link_devices \/ $dummy_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -3508,7 +3506,7 @@ sub WriteReportMethods
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=0>\n" ;
@@ -3767,7 +3765,7 @@ sub WriteReportOpSys
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_devices \/ $link_browsers \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
@@ -3987,7 +3985,7 @@ sub WriteReportOrigins
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests come from. Report 'Requests by destination' shows where requests are serviced.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4603,7 +4601,7 @@ sub WriteReportScripts
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Scripts/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Scripts/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $dummy_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_new_mobile_pageviews \/ $link_new_mobile_pageviews \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $dummy_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4782,7 +4780,7 @@ sub WriteReportGoogle
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_new_mobile_pageviews \/ $dummy_google \/ $link_countries \/ $link_ua_trends/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $dummy_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=500 wrap>\n" ;
