@@ -1243,6 +1243,11 @@ sub CollectActiveUsersPerMonthsAllWikis
   # Amirobot,2011-08,4,4
   # Amirobot,2011-09,3,1
 
+
+  # if this user uploaded to WLM in any year, copy edits to WLM file
+  # after merging such files for all projects, we can find out when user started to contribute
+  # if that is in month of WLM event we assume user joined because of WLM and cheer for that
+  # filtering happens in MergeActiveUsersPerMonthsAllWikisOrProjects 
   open FILE_CSV_WLM, '>', $file_csv_wiki_loves_monuments ; # wlm = Wiki Loves Monuments
 
   print "\n" ;

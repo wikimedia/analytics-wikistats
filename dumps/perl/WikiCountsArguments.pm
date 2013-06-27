@@ -48,7 +48,7 @@ sub ParseArguments
   }
 
   $reverts_sampling = 1 ;
-  if (defined ($options {"u"})) # u for undo
+  if (defined ($options {"u"})) # u for undo (r for revert was already taken)
   {
     $reverts_only = $true ;
     $reverts_sampling = $options {"u"} ;
