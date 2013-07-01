@@ -128,7 +128,9 @@
   use WikiReportsOutputWikibooks ;
   use WikiReportsProcessEditors ;
   use WikiReportsProcessReverts ;
-  use WikiReportsScripts ;
+  use WikiReportsScriptsPloticus ;
+  use WikiReportsScriptsHtml ;
+  use WikiReportsScriptsR ;
 
   no warnings 'uninitialized';
 
@@ -261,22 +263,24 @@
   else
   { &GenerateSiteMap ; }
 
+# &GenerateComparisonTables ;
+
+  if ($language eq "en")
+  {
+     &GenerateYearlyGrowthStats ;
+#  # &TestCompleted ;
+     &ReadEditHistory ;
+     &ReadRevertHistoryGenerateReports ;
+     &GenerateEditHistoryReports ; # wait till R runs on stat1
+# print "TEST !!! end\n" ; # qqq    
+# exit ;                   # qqq
+  }
+
   if (($language eq "en") && (! $mode_wm))
   {
     &LogT ("\nGenerate Summaries Per Wiki\n\n") ;
     &GenerateSummariesPerWiki ;
   }
-
-# &GenerateComparisonTables ;
-
-#  if ($language eq "en")
-#  {
-#    &GenerateYearlyGrowthStats ;
-#  # &TestCompleted ;
-#    &ReadEditHistory ;
-#    &ReadRevertHistoryGenerateReports ;
-#    &GenerateEditHistoryReports ; # wait till R runs on stat1
-#  }
 
 # &GenerateTablesPerWikipedia ("zzz") ;
 # &TestCompleted ;
