@@ -26,6 +26,8 @@ sub ReadRevertHistoryGenerateReports
   foreach $wp (@languages)
   {
     # next if $wp ne "en" ;
+next if $wp ne "fy" ; # qqq
+  &LogT ("\nReadRevertHistoryGenerateReports $wp\n\n") ;
 
     undef %reverts_per_article ;
     undef %reverts_in_non_article_namespaces ;
@@ -39,7 +41,7 @@ sub ReadRevertHistoryGenerateReports
     undef %reverts_per_month_per_usertype ;
 
     undef %reverts_per_year_all ;
-    undef %reverts_per_year_md5 ;
+    undef %reverts_per_year_sha1 ;
     undef %revertstats ;
 
     undef %reverting_revisions ;
@@ -71,11 +73,16 @@ sub ReadRevertHistoryGenerateReports
     }
 
     my $file_reverts = $path_in . "/RevertedEdits" . uc ($wp) . ".csv" ;
+    &LogT ("File not found '$file_reverts', try [..].csv.bz2\n") ;
     # my $file_out = $path_in . "/RevertedEdits2" . uc ($wp) . ".csv" ;
     if (!-e $file_reverts)
     {
       $file_reverts = $path_in . "/RevertedEdits" . uc ($wp) . ".csv.bz2" ;
-      next if ! -e $file_reverts  ;
+      if (! -e $file_reverts) 
+      {
+        &LogT ("File not found '$file_reverts', skip $wp\n") ;
+        next ;
+      }	      
     }
 
     &Log ("\nProcess reverts for $wp\n") ;
@@ -103,7 +110,7 @@ sub ReadRevertHistoryGenerateReports
 
       chomp $line ;
     # print REVERTED_EDITS substr($time,0,6) . ",$revertflags,'$comment'\n" ; }
-    # print REVERTED_EDITS substr($prev_time,0,6) . ",$revertflags,$revert_after_secs_fmt,-$index_md5_33,$prev_revertflags,$prev_namespace,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment" ;
+    # print REVERTED_EDITS substr($prev_time,0,6) . ",$revertflags,$revert_after_secs_fmt,-$index_sha1_33,$prev_revertflags,$prev_namespace,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment" ;
       my ($yyyymm,$revertflags,$namespace,$user,$usertype,$title,$comment,$version_older,$revert_after_secs,$prev_time,$prev_revertflags,$prev_usertype,$prev_user) = split (',', $line) ;
 
       # enormous amounts of false positives, many 'Wikipedia:...' pages are status pages that return to empty page often
@@ -175,7 +182,7 @@ sub ReadRevertHistoryGenerateReports
       # print "$revertflags: $revertstat\n" ;
 
       # print "YYYYMM $yyyymm SECS $revert_after_secs REVERT $revertflags PREV_REVERT $prev_revertflags  NS $namespace TITLE  $title TIME $prev_time USERTYPE $prev_usertype USER $prev_user COMMENT $comment\n" ;
-      next if ($revertflags !~ /^..M/) ; # && ($revertflags !~ /^.C./) ; # continue with md5 matched reverts only
+      next if ($revertflags !~ /^..M/) ; # && ($revertflags !~ /^.C./) ; # continue with sha1 matched reverts only
 
       $yyyy  = substr ($yyyymm,0,4) ;
       $mm    = substr ($yyyymm,4,2) ;
@@ -191,7 +198,7 @@ sub ReadRevertHistoryGenerateReports
       # $reverts_per_reverted_user_per_month {$yyyymm} {$prev_user}++  if $prev_user ne '' ; # memory hog
         $reverts_per_reverting_user {$user}++  if $user ne '' ;
         $reverts_per_month    {$yyyymm}++ ;
-        $reverts_per_year_md5 {$yyyy}++ ;
+        $reverts_per_year_sha1 {$yyyy}++ ;
 
         $reverts_per_article_per_usertype {$prev_usertype} {$title}++ ;
         $reverts_per_month_per_usertype   {$prev_usertype} {$yyyymm}++ ;
@@ -229,6 +236,7 @@ sub ProcessRevertStats
 {
   my $wp = shift ;
   &Log ("ProcessRevertsStats $wp\n") ;
+return if $wp ne 'fy' ; # qqq
 
   undef @top_reverting_users ;
   undef @top_reverted_users ;
@@ -345,7 +353,7 @@ sub WriteReportReverts
 {
   my $wp = shift ;
   &LogT ("WriteReportReverts $wp\n") ;
-
+return if $wp ne 'fy' ; # qqq
   &ReadFileCsv ($file_csv_namespaces) ;
   foreach $line (@csv)
   {
@@ -411,7 +419,7 @@ sub WriteReportReverts
                "low absolute edit counts easily led to high fluctuations in revert ratio.<p>" .
                "<img src='PlotReverts" . uc ($wp) . ".png' border='1' alt='Plot Reverts'>&nbsp;&nbsp;&nbsp;<img src='PlotRevertsTrends" . uc ($wp) . ".png' border='1' alt='Plot Reverts'><p>" .
                "<small>Revert ratio is <i>ratio reverts:edits per class of editors (registered or anonymous users or bots)</i>.<br>" .
-               "Only reverts detected by md5 matching are considered here, not (partial) manual reverts only detectable by edit comment.<p>" .
+               "Only reverts detected by sha1 matching are considered here, not (partial) manual reverts only detectable by edit comment.<p>" .
                "Reverts is less than reverted edits! Sometimes several edits are undone with one revert.<br>" .
                "$out_breakdown_reverting_revisions<p>" .
                "When several revisions were reverted in one action, the oldest reverted revision determines editor class (and coloring):<br>" .
@@ -427,7 +435,7 @@ sub WriteReportReverts
                "<img src='PlotAnons" . uc ($wp) . ".png' border='1' alt='Plot Anons'>&nbsp;&nbsp;&nbsp;<img src='PlotAnonsTrends" . uc ($wp) . ".png' border='1' alt='Plot Anons'><p>" .
                "<small>'All anonymous edits' is same red line from first chart, scaled up vertically<br>" .
                "Put succinctly: red - black = blue + brown + green<br>" .
-               "Only reverts detected by md5 matching are considered here, not (partial) manual reverts only detectable by edit comment.<p>" .
+               "Only reverts detected by sha1 matching are considered here, not (partial) manual reverts only detectable by edit comment.<p>" .
                "Percentages are an approximation, as two simplifying assumptions have been made: <br>" .
                "1) Anonymous edits are reverted only once (in other words edit wars on anon edits are not taken into account).<br>" .
                "2) On each revert only one anonymous edit was undone. A frequency count of <i>multiple revision reverts</i> shows this is a simplification:<br>" .
@@ -452,7 +460,7 @@ sub WriteReportReverts
                  "Projects pages are excluded due to enormous amount of false positives: some status pages are cleared often as normal process<p>" ;
 
     $revertstotal                     = $revertstats {'Article'} + $revertstats {'Other'} ;
-    $revertstotal_article_md5         = $revertstats {'Article'} - $revertstats {'ArticleRevertedEditFromUnknown'} ;
+    $revertstotal_article_sha1         = $revertstats {'Article'} - $revertstats {'ArticleRevertedEditFromUnknown'} ;
                                                                # - $revertstats {'ArticleRevertedEditFromRegUserRevertByRegUserIsSelf'}
                                                                # - $revertstats {'ArticleRevertedEditFromAnonUserRevertByAnonUserIsSelf'}
                                                                # - $revertstats {'ArticleRevertedEditFromBotRevertByBotIsSelf'} ;
@@ -482,7 +490,7 @@ sub WriteReportReverts
     $out_html .= &tr (                                  &RS2 (1,'Anon user', 'Other', 'OtherRevertedEditFromAnonUser')) ;
     $out_html .= &tr (                                  &RS2 (1,'Bot',       'Other', 'OtherRevertedEditFromBot')) ;
     $out_html .= &tr (                                  &RS2 (1,'Unknown',   'Other', 'OtherRevertedEditFromUnknown')) ;
-    $out_html .= &tr ( &tdc99b ("Unknown = comments mentions (partial) revert, but no md5 match")) ;
+    $out_html .= &tr ( &tdc99b ("Unknown = comments mentions (partial) revert, but no sha1 match")) ;
     $out_html .= &tr ( &tdc99b ("Reg = registered, Anon = anonymous")) ;
     $out_html .= "</table>\n" ;
 
@@ -510,7 +518,7 @@ sub WriteReportReverts
     $out_html .= &tr (                                  &RS  (1,'Anon user',          'OtherRevertedEditFromAnonUser')) ;
     $out_html .= &tr (                                  &RS  (1,'Bot',                'OtherRevertedEditFromBot')) ;
     $out_html .= &tr (                                  &RS  (1,'Unknown',            'OtherRevertedEditFromUnknown')) ;
-    $out_html .= &tr ( &tdc99b ("Unknown = comments mentions (partial) revert, but no md5 match")) ;
+    $out_html .= &tr ( &tdc99b ("Unknown = comments mentions (partial) revert, but no sha1 match")) ;
     $out_html .= &tr ( &tdc99b ("Reg = registered, Anon = anonymous")) ;
     $out_html .= "</table>\n" ;
 
@@ -550,13 +558,13 @@ sub WriteReportReverts
 
     $out_html .= "</td></tr>" ;
 
-  # $out_html .= "<tr><td>&nbsp;</td><td colspan=99>Above is distribution of all reverts, detected by md5 matching or specific comments, for all namespaces<br>" .
-  #                                                "Below is distribution of reverts detected by md5 matching, for article namespace only</td></tr>" ;
+  # $out_html .= "<tr><td>&nbsp;</td><td colspan=99>Above is distribution of all reverts, detected by sha1 matching or specific comments, for all namespaces<br>" .
+  #                                                "Below is distribution of reverts detected by sha1 matching, for article namespace only</td></tr>" ;
 
     $out_html .= "<tr><td>&nbsp;</td><td>&nbsp;&nbsp;</td><td valign=top><p>" ;
 
     $out_html .= "<table border=1 cellspacing=0 id=table2 style='' summary='Distribution of Reverts2'>\n" ;
-    $out_html .= &tr (&thlb99 ('&nbsp;Distribution of reverts, like table above, but percentages are share<br>&nbsp;of md5 detected reverts only, for article namespace only')) ;
+    $out_html .= &tr (&thlb99 ('&nbsp;Distribution of reverts, like table above, but percentages are share<br>&nbsp;of sha1 detected reverts only, for article namespace only')) ;
     $out_html .= &tr (&thcb2 ('<font color=\'#FFFFDD\'>Namespace(s)</font>'). &thcb2 ('Reverted editor'). &thcb2 ('Revert by'). &thcb2 ('Self revert')) ;
     $out_html .= &tr (&tdecrsb (2,12) . &RS4 (4,'Reg user',  'ArticleRevertedEditFromRegUser') .  &RS4 (2,'Reg user',  'ArticleRevertedEditFromRegUserRevertByRegUser') .   &RS4 (1,'Self',   'ArticleRevertedEditFromRegUserRevertByRegUserIsSelf')) ;
     $out_html .= &tr (                                                                                                                                    &RS4 (1,'Others', 'ArticleRevertedEditFromRegUserRevertByRegUserNonSelf')) ;
@@ -576,28 +584,28 @@ sub WriteReportReverts
     $out_html .= "</td><td>&nbsp;&nbsp;</td><td valign=top><p>" ;
 
     $out_html .= "<table border=1 cellspacing=0 style='' summary='Distribution of Reverts per Year'>\n" ;
-    $out_html .= &tr (&thlb99 ('&nbsp;Distribution of reverts, like table above, but percentages are<br>&nbsp;share of md5 detected reverts only, for article namespace only')) ;
+    $out_html .= &tr (&thlb99 ('&nbsp;Distribution of reverts, like table above, but percentages are<br>&nbsp;share of sha1 detected reverts only, for article namespace only')) ;
     $line_html = '' ;
     for $yyyy (keys_sorted_alpha_desc %reverts_per_year_all)
     { $line_html .= &thcb ($yyyy) ; }
     $out_html .= &tr ($line_html) ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromRegUserRevertByRegUserIsSelf') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromRegUserRevertByRegUserNonSelf') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromRegUserRevertByAnonUser') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromRegUserRevertByBot') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromAnonUserRevertByRegUser') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromAnonUserRevertByAnonUserIsSelf') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromAnonUserRevertByAnonUserNonSelf') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromAnonUserRevertByBot') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromBotRevertByRegUser') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromBotRevertByAnonUser') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromBotRevertByBotIsSelf') ;
-    $out_html .= &RSyearly_md5 ('ArticleRevertedEditFromBotRevertByBotNonSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromRegUserRevertByRegUserIsSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromRegUserRevertByRegUserNonSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromRegUserRevertByAnonUser') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromRegUserRevertByBot') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromAnonUserRevertByRegUser') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromAnonUserRevertByAnonUserIsSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromAnonUserRevertByAnonUserNonSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromAnonUserRevertByBot') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromBotRevertByRegUser') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromBotRevertByAnonUser') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromBotRevertByBotIsSelf') ;
+    $out_html .= &RSyearly_sha1 ('ArticleRevertedEditFromBotRevertByBotNonSelf') ;
     $out_html .= &tr (&thlb99 ('&nbsp;totals reverts per year')) ;
     $line_html = '' ;
 
     for $yyyy (keys_sorted_alpha_desc %reverts_per_year_all)
-    { $line_html .= &tdcb (&i2KM4 ($reverts_per_year_md5 {$yyyy})) ; }
+    { $line_html .= &tdcb (&i2KM4 ($reverts_per_year_sha1 {$yyyy})) ; }
 
     $out_html .= &tr ($line_html) ;
     $out_html .= "</table>\n" ;
@@ -677,7 +685,7 @@ sub WriteReportReverts
     }
     $out_html .= &tr (&tdc4b ("<small>Bot names are in <font color=#800000>dark red</font></small>") . &tdc99b ("&nbsp;")) ;
     $out_html .= &tr (&tdc99b ("<small>#Rv is <i>revert actions</i>, not <i>reverted revisions</i> (sometimes a revert action undoes several revisions).")) ;
-    $out_html .= &tr (&tdc99b ("<small>Only reverts detected by md5 match are considered here, not (partial) reverts only detectable via comments.")) ;
+    $out_html .= &tr (&tdc99b ("<small>Only reverts detected by sha1 match are considered here, not (partial) reverts only detectable via comments.")) ;
     $out_html .= &tr (&tdc99b ("<small>Projects pages are excluded due to enormous amount of false positives: some status pages are cleared often as normal process")) ;
     $out_html .= "</table>" ;
   }
@@ -767,12 +775,12 @@ sub RSyearly_all
   return (&tr ($line_html)) ;
 }
 
-sub RSyearly_md5
+sub RSyearly_sha1
 {
   my $key = shift ;
   my $line_html = '' ;
   for $yyyy (keys_sorted_alpha_desc %reverts_per_year_all) # use hash ...year_all for keys: in small wikis some year may be missing
-  { $line_html .= &tdcb (&RS3_md5 ($yyyy,$key)) ; }
+  { $line_html .= &tdcb (&RS3_sha1 ($yyyy,$key)) ; }
   return (&tr ($line_html)) ;
 }
 
@@ -791,8 +799,8 @@ sub RS4
   my ($rows,$text,$key) = @_ ;
   my $count = $revertstats {$key} ;
   my $perc = '-' ;
-  if ($revertstotal_article_md5 > 0)
-  { $perc = sprintf ("%.1f", 100 * $count / $revertstotal_article_md5) ; }
+  if ($revertstotal_article_sha1 > 0)
+  { $perc = sprintf ("%.1f", 100 * $count / $revertstotal_article_sha1) ; }
   return (&tdlmr ($rows,"<b>$text</b>") . &tdrmr ($rows,"$perc\%")) ;
 }
 
@@ -824,11 +832,11 @@ sub RS3_all
   return ($perc) ;
 }
 
-sub RS3_md5
+sub RS3_sha1
 {
   my ($yyyy,$key) = @_ ;
   my $count = $revertstats {$key.$yyyy} ;
-  my $peryear = $reverts_per_year_md5 {$yyyy} ;
+  my $peryear = $reverts_per_year_sha1 {$yyyy} ;
   my $perc = '-' ;
   if (($count > 0) && ($peryear > 0))
   {
