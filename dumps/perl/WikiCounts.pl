@@ -201,7 +201,11 @@
     &ReadInputXml ;
 
     if ($reverts_only)
-    { &LogT ("\n\nRevert data collected. Stop further processing.\n\n") ; exit ; }
+    { 
+      &RenameTempCsvFiles ;
+      &LogT ("\n\nRevert data collected. Stop further processing.\n\n") ; exit ; 
+    }
+
 
     if (&TraceJob)
     {
