@@ -12,10 +12,10 @@
 
   use WikiReportsNoWikimedia ;
 
-  if (! $job_runs_on_production_server)
+  if ($job_runs_on_production_server)
   {
-    $refresh_language_files_after_days_php = 365 ;
-    $refresh_language_files_after_days_wp  = 365 ;
+    $refresh_language_files_after_days_php = 999 ; # Q&D path, file does not get updated, investigate later, other pririties now
+    $refresh_language_files_after_days_wp  = 999 ;
   }
   else
   {
@@ -364,12 +364,18 @@ sub UpdateLanguageTranslationsFromPhp
 
   my $get = $false ;
   if (! (-e $file_csv_language_names_php))
-  { $get = $true ; }
+  { 
+    $get = $true ;
+    &Log ("File not found '$file'. Fetch new data.\n") ;
+  }
   else # unless done very recently
   {
     $file_age = -M $file_csv_language_names_php ;
     if ($file_age > $refresh_language_files_after_days_php)
-    { $get = $true ; }
+    { 
+      $get = $true ;
+      &Log ("File age of 'file_csv_language_names_php' ($file_age) > $refresh_language_files_after_days_php. Fetch new data.\n") ;
+    }
   }
 
   if (! $get)
