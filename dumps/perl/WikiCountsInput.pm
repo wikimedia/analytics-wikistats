@@ -177,12 +177,13 @@ sub ReadInputXml
   else
   { &LogT ("Image tags encountered: $line\n\n") ; }
 
-  if ((! $edits_only) && ($reverts_md5_articles > 0))
+  # if ((! $edits_only) && ($reverts_sha1_articles > 0))
+  if ($reverts_sha1_articles > 0)
   {
-    &Log ("\n\n$reverts_md5_articles_bots bot 'reverts' out of $reverts_md5_articles MD5 reverts = " .
-          "-B: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_1 / $reverts_md5_articles) .
-          ", B-: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_2 / $reverts_md5_articles) .
-          ", BB: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_3 / $reverts_md5_articles) .
+    &Log ("\n\n$reverts_sha1_articles_bots bot 'reverts' out of $reverts_sha1_articles SHA1 reverts = " .
+          "-B: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_1 / $reverts_sha1_articles) .
+          ", B-: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_2 / $reverts_sha1_articles) .
+          ", BB: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_3 / $reverts_sha1_articles) .
           "\n\n") ;
 
     &LogT ("Revert flags found\n") ;
@@ -193,9 +194,9 @@ sub ReadInputXml
     &LogT ("\n\nRevert delays:\n") ;
     foreach $yyyymm (sort keys %reverts_after_month)
     {
-      my $avg_secs = sprintf ("%.0f", $reverts_after_month {$yyyymm} / $reverts_after_month_md5 {$yyyymm}) ;
+      my $avg_secs = sprintf ("%.0f", $reverts_after_month {$yyyymm} / $reverts_after_month_sha1 {$yyyymm}) ;
       my $avg_ddhhmmss = ddhhmmss ($avg_secs, "%2d d, %2d h, %2d m, %2ds") ;
-      print "$yyyymm: $avg_ddhhmmss = ${reverts_after_month {$yyyymm}} secs / ${reverts_after_month_md5 {$yyyymm}}\n" ;
+      print "$yyyymm: $avg_ddhhmmss = ${reverts_after_month {$yyyymm}} secs / ${reverts_after_month_sha1 {$yyyymm}}\n" ;
     }
   }
 
@@ -248,27 +249,27 @@ sub ReadFileXml
     binmode EDITS_USER_MONTH_ARTICLE ;
   }
 
-  if (! $edits_only)
-  {
+# if (! $edits_only) # 2013 June: now works with sha1 tag, no longer with self geneated md5, sha1 also in stub dumps
+# {
     open REVERTS_SAMPLE, ">", $file_csv_reverts_sample ;
     open REVERTED_EDITS, ">", $file_csv_reverted_edits ;
 
     print REVERTED_EDITS "# Sampling rate $reverts_sampling\n" ;
     print REVERTED_EDITS "# Fields for reverts only based on comment:\n" ;
     print REVERTED_EDITS "# yyyymm,flags,namespace,comment\n" ;
-    print REVERTED_EDITS "# Fields for reverts detected by MD5 comparisons:\n" ;
+    print REVERTED_EDITS "# Fields for reverts detected by SHA1 comparisons:\n" ;
     print REVERTED_EDITS "# yyyymm,flags,namespace,*edits back,*x secs earlier,*flags,*title,*timestamp,*usertype,user,*user,comment\n" ;
     print REVERTED_EDITS "# * = for reverted revision (oldest if multiple)\n" ;
     print REVERTED_EDITS "# Flags:" ;
     print REVERTED_EDITS "# 1 N/- = article namespace (differs per wiki), often only namespace 0" ;
     print REVERTED_EDITS "# 2 C/- = comment contains revert text (e.g. revert/rv/undo (can differ per language)\n" ;
-    print REVERTED_EDITS "# 3 M/X/- = reverted revision based on comparing MD5 checksums (X: subsequent revisions, hence no change made, not a revert really)\n"  ;
+    print REVERTED_EDITS "# 3 M/X/- = reverted revision based on comparing SHA1 checksums (X: subsequent revisions, hence no change made, not a revert really)\n"  ;
     print REVERTED_EDITS "# 4 B/- = bot ($comment =~ /\brobot\b/i) || ($user =~ /conversion script/i) || ($user =~ /MediaWiki default/i)\n" ;
     print REVERTED_EDITS "# 5 B/- = bot (classified as bot based on bits in MySQL user table, either here or many other wikis (for small wikis with incomplete administration))\n" ;
     print REVERTED_EDITS "# 6 R/A/B = user type Registered user / Anonymous user / Bots (~ same as 5)\n" ;
-    print REVERTED_EDITS "# 7 R/A/B/- = user type for restored revision (-: unknown (no md5 revert)\n" ;
+    print REVERTED_EDITS "# 7 R/A/B/- = user type for restored revision (-: unknown (no sha1 revert)\n" ;
     print REVERTED_EDITS "# 8 S/- = self revert (all reverted revisions by same editor)\n" ;
-  }
+# }
 
   $filesize = -s $file_in ;
   $fileage  = -M $file_in ;
@@ -375,11 +376,12 @@ sub ReadFileXml
   if (! $prescan)
   { close EDITS_USER_MONTH_ARTICLE ; }
 
-  if (! $edits_only)
-  {
+
+# if (! $edits_only) # 2013 June: now works with sha1 tag, no longer with self generated md5, sha1 also in stub dumps
+# {
     close REVERTS_SAMPLE ;
     close REVERTED_EDITS ;
-  }
+# }
 }
 
 sub XmlReadUntil
@@ -676,7 +678,7 @@ sub ReadInputXmlPage
   $time_prev = '' ;
 
   &XmlReadUntil ('<revision>') ;
-  $md5_list = "" ;
+  $sha1_list = "" ;
   undef @edit_history ;
   $revision_cnt = 0 ;
 
@@ -684,7 +686,7 @@ sub ReadInputXmlPage
 
   while ($line =~ /<revision>/)
   {
-    ($article, $time, $user, $usertype, $comment, $md5) = &ReadInputXmlRevision ;
+    ($article, $time, $user, $usertype, $comment, $sha1) = &ReadInputXmlRevision ;
 
 
     my $date = substr ($time,0,8) ;
@@ -729,8 +731,9 @@ sub ReadInputXmlPage
       $page_created_recently = ($days_passed < 30) ;
     }
 
-    if ((! $edits_only) && (! $prescan))
-    { &DetectReverts ($namespace, $time, $user, $usertype, $comment, $md5) ; }
+    # if ((! $edits_only) && (! $prescan))
+    if (! $prescan)
+    { &DetectReverts ($namespace, $time, $user, $usertype, $comment, $sha1) ; }
 
     if ($reverts_only)
     { &XmlReadUntil ('(?:<revision>|<\/page>)') ; next ; }
@@ -1085,12 +1088,13 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
                  sprintf ("%.0f", $size_rev / $Mb) . ": $title\n" ;
   }
 
-  if ((! $edits_only) && (++ $revision_count_report_reverts % 1000000 == 0))
+  # if ((! $edits_only) && (++ $revision_count_report_reverts % 1000000 == 0))
+  if (++ $revision_count_report_reverts % 1000000 == 0)
   {
-    &Log ("\n\n$reverts_md5_articles_bots bot 'reverts' out of $reverts_md5_articles MD5 reverts = " .
-          "-B: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_1 / $reverts_md5_articles) .
-          ", B-: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_2 / $reverts_md5_articles) .
-          ", BB: " . sprintf ("%.1f%", 100 * $reverts_md5_articles_bots_3 / $reverts_md5_articles) .
+    &Log ("\n\n$reverts_sha1_articles_bots bot 'reverts' out of $reverts_sha1_articles SHA1 reverts = " .
+          "-B: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_1 / $reverts_sha1_articles) .
+          ", B-: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_2 / $reverts_sha1_articles) .
+          ", BB: " . sprintf ("%.1f%", 100 * $reverts_sha1_articles_bots_3 / $reverts_sha1_articles) .
           "\n\n") ;
 
     &LogT ("\nRevert flags:\n") ;
@@ -1120,7 +1124,7 @@ sub ReadInputXmlRevision
     &LogT ("\n\nParsing since " . ddhhmmss (time - $timestart_parse). ". Pages read: ${pages_read2}k. Revisions read: ${revisions_read2}k. Per hour $revs_per_hour/hr. Parse duration ~ $hours_total_for_run hrs, $hours_to_go_for_run hrs to go\n") ;
   }
 
-  my ($time, $article, $contributor, $user, $user_id, $md5, $comment) ;
+  my ($time, $article, $contributor, $user, $user_id, $sha1, $comment) ;
 
   &XmlReadUntil ('<timestamp>') ;
   $timestamp = $line ;
@@ -1182,6 +1186,9 @@ sub ReadInputXmlRevision
     $totsize_revisions += length ($article) ;
   }
 
+  &XmlReadUntil ('<sha1>') ;
+  ($sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ;
+
   my $month = substr ($time,0,6) ;
 # @contributing_all_users_per_month {"$month-$user"}++ ;
   my $date  = substr ($time,0,8) ;
@@ -1230,21 +1237,22 @@ sub ReadInputXmlRevision
   $user    =~ s/`/*{|}*/g ;
   $time    =~ s/`/*{|}*/g ;
 
-my $start_process_md5a = code_started() if $record_time_process_md5 ;
+# my $start_process_sha1a = code_started() if $record_time_process_sha1 ;
+# $sha1 = sha1_hex($article) ; # 2013 June: now collect sha1 checksum from xml
+# code_complete ("GenerateSha1PerArticle", $start_process_sha1a) if $record_time_process_sha1 ;
 
-  $md5 = md5_hex($article) ;
+  if ($sha1 eq '')
+  { &Log ("$article $time: sha1 not found\n") ; }
 
-code_complete ("GenerateMd5PerArticle", $start_process_md5a) if $record_time_process_md5 ;
-
-  return ($article, $time, $user, $usertype, $comment, $md5) ;
+  return ($article, $time, $user, $usertype, $comment, $sha1) ;
 }
 
 sub DetectReverts
 {
-  my ($namespace, $time, $user, $usertype, $comment, $md5) = @_ ;
+  my ($namespace, $time, $user, $usertype, $comment, $sha1) = @_ ;
   my ($prev_revert,$prev_namespace,$prev_title,$prev_time,$prev_edits_ago,$prev_usertype,$prev_user,$prev_comment) ;
 
-my $start_process_md5b = code_started() if $record_time_process_md5 ;
+my $start_process_sha1b = code_started() if $record_time_process_sha1 ;
 
   if (&NameSpaceArticle ($language, $namespace))
   { $revert = 'N' ; }
@@ -1263,22 +1271,22 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
   else
   { $revert .= '-' ; }
 
-  # get highest index of $md5 if any, else -1
-  $index_md5 = index ($md5_list, $md5) ;
-  $index_md5_last = $index_md5 ;
-  while ($index_md5 > -1)
+  # get highest index of $sha1 if any, else -1
+  $index_sha1 = index ($sha1_list, $sha1) ;
+  $index_sha1_last = $index_sha1 ;
+  while ($index_sha1 > -1)
   {
-    $index_md5 = index ($md5_list, $md5, $index_md5+1) ;
-    if ($index_md5 > -1)
-    { $index_md5_last = $index_md5 ; }
+    $index_sha1 = index ($sha1_list, $sha1, $index_sha1+1) ;
+    if ($index_sha1 > -1)
+    { $index_sha1_last = $index_sha1 ; }
   }
-  $index_md5 = $index_md5_last ;
+  $index_sha1 = $index_sha1_last ;
 
-  $index_md5_delta = 0 ;
-  if ($index_md5 > -1)
+  $index_sha1_delta = 0 ;
+  if ($index_sha1 > -1)
   {
-    $index_md5_delta = sprintf ("%.0f", (length ($md5_list) - $index_md5) / 33) ; # each entry 32 chars + comma
-    if ($index_md5_delta > 1)
+    $index_sha1_delta = sprintf ("%.0f", (length ($sha1_list) - $index_sha1) / 33) ; # each entry 32 chars + comma
+    if ($index_sha1_delta > 1)
     { $revert .= 'M' ; } # revert based on comparing checksums
     else
     { $revert .= 'X' ; } # revert based on comparing checksums
@@ -1286,9 +1294,9 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
   else
   { $revert .= '-' ; }
 
-  $md5_list .= "$md5," ;
+  $sha1_list .= "$sha1," ;
   if ($revision_cnt++ >= 100)
-  { $md5_list = substr ($md5_list,33) ; }
+  { $sha1_list = substr ($sha1_list,33) ; }
 
   if (($comment =~ /\brobot\b/i) || ($user =~ /conversion script/i) || ($user =~ /MediaWiki default/i))
   { $revert .= 'B' ; } # bot
@@ -1310,9 +1318,9 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
   push @edit_history, "$revert ,$namespace,..,$title2,$time,$usertype,$user2,'$comment2'\n" ;
 
   $revert_after_secs = 0 ;
-  if (($revert =~ /^..M/) && ($index_md5_delta > -1)) # -1 => no changes in last submit (?)
+  if (($revert =~ /^..M/) && ($index_sha1_delta > -1)) # -1 => no changes in last submit (?)
   {
-    ($prev_revert,$prev_namespace,$prev_edits_ago,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment)  = split (',', $edit_history [-$index_md5_delta]) ;
+    ($prev_revert,$prev_namespace,$prev_edits_ago,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment)  = split (',', $edit_history [-$index_sha1_delta]) ;
     $revert .= $prev_usertype ;
 
     $revert_after_secs = yyyymmddhhmmssDiff ($time, $prev_time) ;
@@ -1323,15 +1331,15 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
     $reverts_after_year  {substr ($prev_time,0,4)} += $revert_after_secs ;
     $reverts_after_all                             += $revert_after_secs ;
 
-    $reverts_after_month_md5 {substr ($prev_time,0,6)}++ ;
-    $reverts_after_year_md5  {substr ($prev_time,0,4)}++ ;
-    $reverts_after_all_md5 ++ ;
+    $reverts_after_month_sha1 {substr ($prev_time,0,6)}++ ;
+    $reverts_after_year_sha1  {substr ($prev_time,0,4)}++ ;
+    $reverts_after_all_sha1 ++ ;
 
-    if (-$index_md5_delta == -1)
+    if (-$index_sha1_delta == -1)
     {
       &Log ("\n\n\nNon revert (previous revision is same) $revert,$namespace,$title,$time,$usertype,$user,'$comment'\n\n\n") ;
     }
-    elsif (-$index_md5_delta == -2)
+    elsif (-$index_sha1_delta == -2)
     {
       if ($user eq $prev_user)
       {
@@ -1347,7 +1355,7 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
       $self_revert = 'S' ; # self revert
       # &Log ("\nSelf rev check with $revert,$namespace,$title,$time,$usertype,$user,$comment") ;
 
-      for ($i = -$index_md5_delta ; $i <= -2 ; $i++) # -2 is last revision before revert action (-1 is revert action, is top of list)
+      for ($i = -$index_sha1_delta ; $i <= -2 ; $i++) # -2 is last revision before revert action (-1 is revert action, is top of list)
       {
         my ($prev_revert,$prev_namespace,$prev_edits_ago,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment)  = split (',', $edit_history [$i]) ;
         # &Log ("\nSelf rev check $i\? $prev_revert,$prev_namespace,$prev_title,$prev_time,$prev_usertype,$prev_user,$prev_comment") ;
@@ -1355,8 +1363,8 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
         { $self_revert = '-' ; last ; }
       }
       $revert .= $self_revert ;
-      # if (($self_revert eq 'S') && ($index_md5_delta > 10))
-      # { &Log ("\n\n\nSelf revert B (" . ($index_md5_delta - 1) . " revisions) $revert,$namespace,$title,$time,$usertype,$user,'$comment'\n\n\n") ; }
+      # if (($self_revert eq 'S') && ($index_sha1_delta > 10))
+      # { &Log ("\n\n\nSelf revert B (" . ($index_sha1_delta - 1) . " revisions) $revert,$namespace,$title,$time,$usertype,$user,'$comment'\n\n\n") ; }
     }
   }
   else
@@ -1365,26 +1373,26 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
   if (($revert =~ /^.C/) || ($revert =~ /^..M/))
   {
     if ($revert =~ /^N.M/)
-    { $reverts_md5_articles++ ; }
+    { $reverts_sha1_articles++ ; }
 
     if ($revert =~ /^N.M(?:-B|B-|BB)/)
     {
-      $reverts_md5_articles_bots++ ;
+      $reverts_sha1_articles_bots++ ;
 
       if ($revert =~ /^N.M-B/)
-      { $reverts_md5_articles_bots_1++ ; }
+      { $reverts_sha1_articles_bots_1++ ; }
       elsif ($revert =~ /^N.MB-/)
-      { $reverts_md5_articles_bots_2++ ; }
+      { $reverts_sha1_articles_bots_2++ ; }
       else
-      { $reverts_md5_articles_bots_3++ ; }
+      { $reverts_sha1_articles_bots_3++ ; }
 
-      if ($reverts_md5_articles_bots % 250 == 0)
+      if ($reverts_sha1_articles_bots % 250 == 0)
       {
         # &Log ("\n" . "x" x 80) ;
-        &Log ("\n$reverts_md5_articles_bots bot 'reverts' out of $reverts_md5_articles MD5 reverts = " .
-              "-B: " . sprintf ("%.2f%", 100 * $reverts_md5_articles_bots_1 / $reverts_md5_articles) .
-              ", B-: " . sprintf ("%.2f%", 100 * $reverts_md5_articles_bots_2 / $reverts_md5_articles) .
-              ", BB: " . sprintf ("%.2f%", 100 * $reverts_md5_articles_bots_3 / $reverts_md5_articles) .
+        &Log ("\n$reverts_sha1_articles_bots bot 'reverts' out of $reverts_sha1_articles SHA1 reverts = " .
+              "-B: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_1 / $reverts_sha1_articles) .
+              ", B-: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_2 / $reverts_sha1_articles) .
+              ", BB: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_3 / $reverts_sha1_articles) .
               "\n") ;
         # &Log ("x" x 80 . "\n") ;
       }
@@ -1404,28 +1412,28 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
       if ($revert =~ /^.C-/)
       { print REVERTED_EDITS substr($time,0,6) . ",$revert,$namespace,$user2,$usertype,$title2,'$comment2'\n" ; }
       else
-      { print REVERTED_EDITS substr($time,0,6) . ",$revert,$namespace,$user2,$usertype,$title2,'$comment2',-$index_md5_delta,$revert_after_secs_fmt,$prev_time,$prev_revert,$prev_usertype,$prev_user\n" ; }
+      { print REVERTED_EDITS substr($time,0,6) . ",$revert,$namespace,$user2,$usertype,$title2,'$comment2',-$index_sha1_delta,$revert_after_secs_fmt,$prev_time,$prev_revert,$prev_usertype,$prev_user\n" ; }
     }
 
     if ($reverts_all {$revert} < 50)
     {
-      # revert detected based on (also) MD5 info?
+      # revert detected based on (also) SHA1 info?
       if ($revert =~ /^..M/)
       {
-        &WriteRevertsSample ("$revert,$namespace,-$index_md5_delta,$title2,$time,$usertype,$user2,'$comment2'\n") ;
+        &WriteRevertsSample ("$revert,$namespace,-$index_sha1_delta,$title2,$time,$usertype,$user2,'$comment2'\n") ;
 
         # if just one edit is reverted present details of that edit
-        if (-$index_md5_delta == -2)
+        if (-$index_sha1_delta == -2)
         {
           &WriteRevertsSample ($edit_history [-2]) ;
           &WriteRevertsSample ("Revert after $revert_after_ddhhmmss\n") ;
         }
 
         # present details of that edit that is restored
-        &WriteRevertsSample ($edit_history [-$index_md5_delta-1] . "\n") ;
+        &WriteRevertsSample ($edit_history [-$index_sha1_delta-1] . "\n") ;
       }
       else
-      { &WriteRevertsSample ("$revert,$namespace,$title2,$time,-$index_md5_delta,$usertype,$user2,$comment2\n") ; }
+      { &WriteRevertsSample ("$revert,$namespace,$title2,$time,-$index_sha1_delta,$usertype,$user2,$comment2\n") ; }
     }
   }
 
@@ -1433,7 +1441,7 @@ my $start_process_md5b = code_started() if $record_time_process_md5 ;
   $reverts_year  {substr ($time,0,4).$revert}++ ;
   $reverts_all   {$revert}++ ;
 
-code_complete ("GenerateMd5Results", $start_process_md5b) if $record_time_process_md5 ;
+code_complete ("GenerateSha1Results", $start_process_sha1b) if $record_time_process_sha1 ;
 }
 
 sub WriteRevertsSample
@@ -1542,9 +1550,9 @@ code_complete ("ProcessRevision2", $start_process_revision2) if $record_time_pro
 #      { &CollectTimelines ($namespace, $title, $article, $user, $time_gm); }
 #      else
 #      {
-#        my ($ns_title, $md5) = &ChecksumTimelines ($namespace, $title, $article);
-#        if ($md5 ne "")
-#        { &UpdateTimelineCounts ($ns_title, $md5, $user, $time_gm); }
+#        my ($ns_title, $sha1) = &ChecksumTimelines ($namespace, $title, $article);
+#        if ($sha1 ne "")
+#        { &UpdateTimelineCounts ($ns_title, $sha1, $user, $time_gm); }
 #      }
 #    }
 
@@ -2810,11 +2818,11 @@ sub ProcessSqlBlockComplete
 
 #            if ($mode eq "wp")
 #            {
-#              my ($ns_title, $md5) = &ChecksumTimelines ($namespace, $title, $article);
-#              if ($md5 ne "")
+#              my ($ns_title, $sha1) = &ChecksumTimelines ($namespace, $title, $article);
+#              if ($sha1 ne "")
 #              {
 #                $ns_title =~ s/\,/&comma;/g ;
-#                print OLD_TIMELINES "$recid,$hash,$ns_title,$md5\n" ;
+#                print OLD_TIMELINES "$recid,$hash,$ns_title,$sha1\n" ;
 #                $cnt_file_old_timelines++ ;
 #              }
 #            }
@@ -2953,7 +2961,8 @@ sub TraceFlaggedRevs
         ($time_edit = $line) =~ s/^.*?<timestamp>([^<]*)<.*$/$1/g ;
 
         &XmlReadUntil ('(?:<contributor>|<\/revision>)') ;
-        if ($line =~ /<contributor>/)
+        
+	if ($line =~ /<contributor>/)
         {
           &XmlReadUntil ('(?:<ip>|<username>|<\/revision>)') ;
           $user = '' ;
@@ -2991,6 +3000,10 @@ sub TraceFlaggedRevs
             ($time_review,$title,$id_rev_review,$reviewer,$flags) = &GetNextReview (\@reviews, $ignore_from_date) ;
           }
         }
+        
+	&XmlReadUntil ('<sha1>') ;
+        ($chk_sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ;
+
         &XmlReadUntil ('(?:<revision>|<\/page>)') ;
       }
     }
