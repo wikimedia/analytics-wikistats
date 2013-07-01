@@ -3,6 +3,7 @@
 #set -x
 USER=`whoami`;
 #echo $USER >> /tmp/cronlog_1
+stat1002_new_mobile=stat1002.wikimedia.org::a/wikistats_git/dumps/csv/csv_sp
 eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib);
 export PATH=$PATH:$HOME/local/bin;
 #unpigz --help 2>> /tmp/cronlog_1
@@ -19,3 +20,6 @@ rm -f $OUTPUT_DIR/map/*;
                     $MOBILE_PAGEVIEWS_DIR/conf/stat1-full-cron.json 2>&1 >/tmp/cperlerr;
 cp $OUTPUT_DIR/PageViewsPerMonthAll.csv \
    $WIKISTATS_DIR/dumps/csv/csv_sp/ ;
+
+rsync -av $OUTPUT_DIR/PageViewsPerMonthAll.csv $stat1002_new_mobile/ ;
+
