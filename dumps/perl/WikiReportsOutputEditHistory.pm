@@ -323,7 +323,7 @@ sub GenerateEditHistoryReport
     $out_html .= &tr (&tdc2b (&ww(&b($out_publication))) .
                       &tdc7b (&ww(&b('Edits since start of project'))) .
                       &tdimg2 ("<img src='EditPlot.png'>") .
-                      &tdc7b (&ww(&b('Reverts since start of project (MD5)'))) .
+                      &tdc7b (&ww(&b('Reverts since start of project (SHA1)'))) .
                       &tdimg2 ("<img src='RevertPlot.png'>")) ;
     $out_html .= &tr (&tdlr2b (&ww(&b('Code'))) .
                       &tdlr2b (&ww(&b('Language'))) .
@@ -428,7 +428,7 @@ sub GenerateEditHistoryReport
     $out_html .= "</tbody>\n</table>\n" ;
 
     $out_html .= "<small><p>Revert percentage is ratio reverts:edits per class of editors (registered or anonymous users or bots).<br>" .
-                 "Only reverts detected by md5 matching are considered here, not (partial) manual reverts only detectable by edit comment.<br>" .
+                 "Only reverts detected by sha1 matching are considered here, not (partial) manual reverts only detectable by edit comment.<br>" .
                  "Reverts is less than reverted edits! Sometimes several edits are undone with one revert (see trends report per language).<br>" .
                  "When several revisions were reverted in one action, the oldest reverted revision determines editor class (and coloring):<br>" .
                  "is this a reverted user edit (reg/anon) or a reverted bot edit?</small><p>" ;
@@ -479,7 +479,6 @@ sub GeneratePlotEdits
 
   return if $lang =~ /^zzz?$/ ;
 
-# return if ! $reverts_read {$lang} ;
 #  if ($testmode)
 #  {
 #    my $file_reverts = $path_in . "/RevertedEdits" . uc ($lang) . ".csv" ;
@@ -487,6 +486,9 @@ sub GeneratePlotEdits
 #  }
 
   &LogT ("GeneratePlotEdits $lang\n") ;
+
+  if (! $reverts_read {$lang})
+  { &LogT ("No reverts read. Skip plot.\n") ; return ; }
 
   my $file_csv_input    = $file_edits_per_usertype ;
   my $path_png_raw      = "$path_out_plots\/PlotEdits" . uc($lang) . ".png" ;
@@ -578,11 +580,11 @@ sub GeneratePlotEdits
 
   $cmd = "R CMD BATCH \"$file_script\"" ;
 
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd\n" ; }
+  if ($generate_edit_plots++ < 10)
+  { print "$cmd\n\n" ; }
 
   @result = `$cmd` ;
-#  exit ;
+# exit ; # qqq
 #  exit if $plotsgenerated++ > 10 ;
 }
 
@@ -592,8 +594,6 @@ sub GeneratePlotReverts
 
   return if $lang =~ /^zzz?$/ ;
 
-  return if ! $reverts_read {$lang} ;
-
 #  if ($testmode)
 #  {
 #    my $file_reverts = $path_in . "/RevertedEdits" . uc ($lang) . ".csv" ;
@@ -601,6 +601,9 @@ sub GeneratePlotReverts
 #  }
 
   &LogT ("GeneratePlotReverts $lang\n") ;
+
+  if (! $reverts_read {$lang})
+  { &LogT ("No reverts read. Skip plot.\n"); return ; }
 
   my $sampling_rate = $sampling_rate_reverts {$lang} ;
   if ($sampling_rate == 0)
@@ -698,8 +701,8 @@ sub GeneratePlotReverts
 
   $cmd = "R CMD BATCH \"$file_script\"" ;
 
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd" ; }
+  if ($generate_edit_plots++ < 10)
+  { print "$cmd\n\n" ; }
 
   @result = `$cmd` ;
 }
@@ -709,7 +712,6 @@ sub GeneratePlotAnons
   my $lang = shift ;
 
   return if $lang =~ /^zzz?$/ ;
-  return if ! $reverts_read {$lang} ;
 
 #  if ($testmode)
 #  {
@@ -718,6 +720,9 @@ sub GeneratePlotAnons
 #  }
 
   &LogT ("GeneratePlotAnons $lang\n") ;
+
+  if (! $reverts_read {$lang})
+  { &LogT ("No reverts read. Skip plot.\n") ; return ; }
 
   my $sampling_rate = $sampling_rate_reverts {$lang} ;
   if ($sampling_rate == 0)
@@ -808,8 +813,8 @@ sub GeneratePlotAnons
 
   $cmd = "R CMD BATCH \"$file_script\"" ;
 
-  if ($generate_edit_plots++ == 0)
-  { print "$cmd" ; }
+  if ($generate_edit_plots++ < 10)
+  { print "$cmd\n\n" ; }
 
   @result = `$cmd` ;
 }
