@@ -175,7 +175,7 @@ par(oma=c(0,0,0,0))
 plot (dates,plotdata\$PE_edits_total,type="l", col="black", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
@@ -232,7 +232,7 @@ par(oma=c(0,0,0,0))
 plot (dates,plotdata\$PE_edits_total,type="l", col="black", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
@@ -293,7 +293,7 @@ par(oma=c(0,0,0,0))
 plot (dates,plotdata\$PR_reverts_total,type="l", col="black", lty="solid", lwd=1, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=YLIM_MAX)
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
@@ -402,7 +402,7 @@ plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lw
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
 #axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
-#axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
+axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
 
@@ -459,7 +459,7 @@ par(oma=c(0,0,0,0))
 plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lwd=2, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
 
 axis(2, at=10*c(0:10),labels=10*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format="\b", tck=1, col="#D0D0D0")
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909090", mar=c(4,3,2.5,1))
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
