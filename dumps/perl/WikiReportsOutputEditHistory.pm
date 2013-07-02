@@ -573,19 +573,10 @@ sub GeneratePlotEdits
 
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
 
-  my $file_script = $path_in . "R-PlotEdits.txt" ;
-  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
+  my $file_script_R = $path_in . "R-PlotScriptEdits.R-in" ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 
-  $cmd = "R CMD BATCH \"$file_script\"" ;
-
-  if ($generate_edit_plots++ < 10)
-  { print "$cmd\n\n" ; }
-
-  @result = `$cmd` ;
-# exit ; # qqq
-#  exit if $plotsgenerated++ > 10 ;
+exit ; # qqq
 }
 
 sub GeneratePlotReverts
@@ -694,17 +685,8 @@ sub GeneratePlotReverts
   $reverts_ylim = ceil ($reverts_perc_max/5) * 5 ;
   $out_script_plot =~ s/YLIM/c(0,$reverts_ylim)/g ;
 
-  my $file_script = $path_in . "R-PlotReverts.txt" ;
-  open R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
-
-  $cmd = "R CMD BATCH \"$file_script\"" ;
-
-  if ($generate_edit_plots++ < 10)
-  { print "$cmd\n\n" ; }
-
-  @result = `$cmd` ;
+  my $file_script_R = $path_in . "R-PlotScriptReverts.R-in" ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 sub GeneratePlotAnons
@@ -806,17 +788,8 @@ sub GeneratePlotAnons
 
   $out_script_plot =~ s/YLIM/c(0,$reverts_ylim)/g ;
 
-  my $file_script = $path_in . "R-PlotAnons.txt" ;
-  open  R_SCRIPT, '>', $file_script or die ("file $file_script not found") ; ;
-  print R_SCRIPT $out_script_plot ;
-  close R_SCRIPT ;
-
-  $cmd = "R CMD BATCH \"$file_script\"" ;
-
-  if ($generate_edit_plots++ < 10)
-  { print "$cmd\n\n" ; }
-
-  @result = `$cmd` ;
+  my $file_script_R = $path_in . "R-PlotScriptAnons.R-in" ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 sub WriteEditsPerUserType
