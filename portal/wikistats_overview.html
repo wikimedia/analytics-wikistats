@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+  <meta name="robots" content="index,follow">
+  <link rel="shortcut icon" href="http://wikimediafoundation.org/favicon.ico" />
+  <link rel="apple-touch-icon" href="http://wikimediafoundation.org/favicon.ico" />
+  <title>Wikistats: an overview</title>
+
+  <style type="text/css">
+    body    {font-family:arial,sans-serif; font-size:12px; background-color: #FFFFDD; }
+    h1      {margin:0px 0px 3px 0px; font-size:24px}
+    h2      {margin:0px 0px 3px 0px; font-size:18px}
+    h3      {margin:0px 0px 1px 0px; font-size:15px}
+    h4      {margin:0px 0px 9px 0px; font-size:14px}
+    hr,form {margin-top:1px;margin-bottom:2px}
+    hr.b    {margin-top:1px;margin-bottom:4px}
+    th      {vertical-align:top; text-align:left}
+    td      {vertical-align:top}
+    p       {background-color: #FFFFDD;}
+    dt      {font-weight:bold;}
+    a:link    {color:#0000D0;text-decoration:none}
+    a:visited {color:#0000D0;text-decoration:none}
+    a:active  {color:#0000D0;text-decoration:none}
+    a:hover   {color:#FF00FF;text-decoration:none}
+    a img     {border-color:black}
+    ul { padding-left: 17px }
+  </style>
+</head>
+
+<body>
+
+<table>
+<tr>	
+  <td valign=middle>&nbsp;<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/25px-Wikimedia-logo.svg.png'></td>
+  <td valign=middle align=left><h1>Wikistats Overview</h1></td>
+</tr>
+</table>   
+
+<p>
+This page is a concise overview of Wikimedia stats reports built (almost all) by Erik Zachte, and often referred to as <b>Wikistats</b>.<br>
+This software has its own git repository, see GitHub <b><a href='https://github.com/wikimedia/analytics-wikistats'>analytics-wikistats</a></b>.
+
+<p>
+BTW the term Wikistats is used differently in different contexts. The website <a href='http://stats.wikimedia.org'>stats.wikimedia.org</a> features much more software, developed by other Wikimedia staff and volunteers.
+
+<p>
+Four sets of reports come in (almost) independent clusters.<br>
+
+<table border=1 width=100%>
+	
+<tr>
+  <th>Cluster</th>
+	<td><h3><font color=#080>Dump reports</font></h3></td>
+	<td><h3><font color=#080>Page view reports</font></h3></td>
+	<td><h3><font color=#080>Squid reports</font></h3></td>
+	<td><h3><font color=#080><small>Mail stats</small></font></h3></td>
+</tr>		
+
+<tr>
+  <th>Focus</th>
+	<td>Wiki content and activity</td>
+	<td>Traffic</td>
+	<td>Traffic</td>
+	<td>Mailing list activity</td>
+</tr>		
+
+<tr>
+  <th>Input</th>
+	<td><a href='http://dumps.wikimedia.org/backup-index.html'>Wikimedia dumps</a><br>
+		 <small><font color=#888>Only dumps, which contain all historic revisions.<br>
+		  Mostly <i>stub</i> dumps = meta data only<br> 
+		 	Sometimes <i>full archive</i> dumps (meta data + raw text)</font></small></td>
+	<td>Hourly <a href='http://dumps.wikimedia.org/other/pagecounts-raw/'>page view counts per wiki</a><p>
+	<small><font color=#888>(BTW also aggregated into <a href='http://dumps.wikimedia.org/other/pagecounts-ez/merged/'>daily/monthly dumps</a>)</font></small>
+		</td>
+	<td>Squid logs, 1:1000 sampled</td>
+	<td><a href='https://lists.wikimedia.org/mailman/listinfo'>Master list</a> <br>
+		Mail archive per list</td>
+</tr>		
+
+<tr>
+  <th>Output</th>
+	<td>
+		<ul c>
+			<li>Per project (8, plus misc.) a sitemap, e.g. <a href='http://stats.wikimedia.org/EN/Sitemap.htm'>Wikipedia</a>  (Wp)
+		  <li>For each wiki a report with 10+ tables, e.g. <a href='http://stats.wikimedia.org/EN/TablesWikipediaEN.htm'>English Wp</a><br>
+		  <li>Per project 18 comparison reports, e.g. <a href='http://stats.wikimedia.org/EN/TablesDatabaseEdits.htm'>Edits per month on Wp</a>
+		  <li>Current status all wikis, e.g. <a href='http://stats.wikimedia.org/EN/TablesCurrentStatusVerbose.htm'>Wp</a> 
+		  <li>Bot created/edited articles per wiki per month, e.g. <a href='http://stats.wikimedia.org/EN/BotActivityMatrixEdits.htm'>Wp</a>	
+		  <li>Overview recent months, e.g. <a href='http://stats.wikimedia.org/EN/TablesRecentTrends.htm'>Wp</a>
+		  <li>Largest/most edited articles, e.g. 	
+		</uc>  		
+		  <p>(all in all &plusmn; 800 wiki specific pages, plus 144 comparisons, each in 28 languages -> &plusmn; 25,000 static html pages )
+    </td>
+	<td>
+		<ul c>
+      <li><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Page views per month</a>: per site (mobile, main, combined), per language, raw or normalized, grouped by project/region</a>
+		  <li><a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm'>As above, overview over all projects</a> 
+		<li><small><font color=#888>(unofficial)</font></small> <a href='http://stats.wikimedia.org/wikimedia/pageviews/categorized/'>Page views by article</a> for  a selection of languages, and a selection of category trees  
+	</uc>	
+	<td>
+		<ul c>
+  		<li><a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportsCountriesLanguagesVisitsEdits.htm'>Page views/edits per country and/or per wiki, plus trends</a> <small><font color=#888>(Quarterly/Yearly)</font></small>
+	  	<li><a href='http://stats.wikimedia.org/wikimedia/squids/'>Breakdown of server requests</a> by referrer, target wiki, mime type, browser/app (mobile/non-mobile), operating system (mobile/non-mobile), 
+		  <li><a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportGoogle.htm'>Breakdown of server requests from or via Google search/apps</a>
+		</uc>  		
+ 	</td>
+	<td>
+		<ul c>
+      <li><a href='http://www.infodisiac.com/Wikipedia/ScanMail/Index.html'>Activity per mailing list</a> <br>
+      <li><a href='http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html'>Power posters</a></td>
+	</uc>	
+</tr>		
+
+<tr>
+  <th>Output Languages</th>
+	<td>28 <sup>1</sup></td>
+	<td>English</td>
+	<td>English</td>
+	<td>English</td>
+</tr>		
+
+<tr>
+  <th>Updated</th>
+	<td>Monthly</td>
+	<td>Daily</td>
+	<td>Monthly</td>
+	<td>Daily</td>
+</tr>		
+
+<tr>
+  <th>Runs on</th>
+	<td>WMF server</td>
+	<td>WMF server</td>
+	<td>WMF server</td>
+	<td><a href='http://infodisiac.com'>private server</a></td>
+</tr>		
+
+<tr>
+  <th>Code base</th>
+	<td><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>Dumps</a></td>
+	<td><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>Dumps</a><br><small><font color=#888>it reuses reporting code built for dumps</font></small></td>
+	<td><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/squids'>Squids</a></td>
+	<td><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/mail-lists'>Mail-lists</a></td>
+</tr>		
+
+<tr>
+  <th>Non blank perl lines</th>
+	<td>57,539</td>
+	<td>4,898 <sup>2</sup></td>
+	<td>14,483</td>
+	<td>1,227</td>
+</tr>		
+
+<tr>
+  <th>Dev languages</th>
+	<td>Reports: perl<br>Charts: R<br>Animation: html5+javascript</td>
+	<td>Reports: perl</td>
+	<td>Reports: perl<br>Animation: html5+javascript<br>Geo2ip: MaxMind</td>
+	<td>Reports: perl</td>
+</tr>		
+
+<tr>
+  <th>Feed to <a href='http://reportcard.wmflabs.org/'>Wikimedia Report Card</a>,<br>
+  	 based on <a href='https://github.com/wikimedia/limn'>Limn</a>
+  	 via <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/analytics'>Analytics</a></th>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>No</td>
+</tr>		
+
+<tr>
+  <th>Animations</th>
+	<td>
+		<a href='http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWp.html'><img src='http://stats.wikimedia.org/Animation2009A.jpg' height=50></a>
+    <i><a href='http://stats.wikimedia.org/wikimedia/animations/growth/AnimationProjectsGrowthWp.html'>Bubble charts</a></i> 
+    <small><font color=#888><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/animations/growth'>code</a></font></small>
+			</td>
+	<td>n.a.</td>
+<td><a href='http://stats.wikimedia.org/wikimedia/animations/requests/'><img src='http://stats.wikimedia.org/wikimedia/animations/requests/ScreenshotAnimationNoCities2.png' height=50></a>
+		<i><a href='http://stats.wikimedia.org/wikimedia/animations/requests/'>Interactive map</a></i>
+		<small><font color=#888><a href='https://github.com/wikimedia/analytics-wikistats/tree/master/animations/requests'>code</a></font></small></td>
+	<td>n.a.</td>
+</tr>		
+
+<tr>
+  <th>Monitoring</th>
+	<td>
+		<ul c>
+		  <li>Dumps generation <a href='http://dumps.wikimedia.org/backup-index.html'>official</a> 
+		  <li>Dumps generation <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>concise</a> <small><a href='https://github.com/wikimedia/analytics-wikistats/blob/master/progress/WikimediaDownload.pl'>code</small></a> 
+       <small><font color=#888><small>(slow response)</small></font></small>
+		  <li><a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Dumps processing</a> <small><a href='https://github.com/wikimedia/analytics-wikistats/blob/master/progress/WikiCountsJobProgress.pl'>code</a>
+	  </uc>
+		</td>
+	<td colspan=2>On udp2log level, udp packet loss stats: 
+		<ul c>
+			<li><a href='http://ganglia.wikimedia.org/latest/?r=month&cs=&ce=&tab=v&vn=udp2log-analytics'>Realtime, aggregated</a> 
+		  <li>Realtime, per server, e.g. <a href='http://ganglia.wikimedia.org/latest/graph_all_periods.php?c=Miscellaneous%20eqiad&h=gadolinium.wikimedia.org&v=4.12508676259&m=packet_loss_average&r=hour&z=default&jr=&js=&st=1363815946&vl=%25&z=large'>gadolinium</a>
+			<li><a href='http://stats.wikimedia.org/SquidDataMonthlyPerSquidSet.xls'>Monthly, per server location / server role</a>
+	  </uc>
+	</td>
+	<td>No</td>
+</tr>		
+
+<tr>
+  <th>Examples of charts</th>
+	<td>
+	<!-- 	<a href='http://meta.wikimedia.org/wiki/Template:Wikimedia_Growth'><img src='http://upload.wikimedia.org/wikipedia/meta/timeline/23de5dfacfd97d9818b075ec3ea6cfec.png' height=100 border=1></a>&nbsp; -->
+		<a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'><img src='http://stats.wikimedia.org/summary2.png' height=100></a>	
+		<a href='http://stats.wikimedia.org/EN/PlotsPngEditHistoryTop.htm'><img src='http://stats.wikimedia.org/PlotEdits.png' height=100></a>	
+  </td>
+	<td><a href='http://stats.wikimedia.org/EN/TablesPageViewsMonthlyAllProjects.htm'><img src='http://stats.wikimedia.org/PageViewsNew.png' height=100></a></td>
+	<td><a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryOverview.htm'><img src='http://stats.wikimedia.org/traffic_per_country-regio-500.jpg' height=100></a></td>		
+	<td><a href='http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html'><img src='http://stats.wikimedia.org/PowerPosters.png' height=100></a></td>		
+</tr>		
+
+<tr>
+  <th>Author</th>
+  <td><a href='http://infodisiac.com'</a>Erik Zachte</a> 2003-now</td>
+  <td>Erik Zachte 2008-now<br>
+  	  	Stefan Petrea 2013-now
+  <td>Erik Zachte 2009-now<br>
+  	  Andre Engels 2012<br>
+  	  Stefan Petrea 2012-now
+  </td>
+  <td>Erik Zachte 2005?-now</td>
+</tr>  
+
+<tr>
+  <th>Notes</th>
+  <td colspan=99>
+  	<sup>1</sup> <small>Some reports only in English, most translations are incomplete.</small><br>
+  	<sup>2</sup> <small>For data collecting and archiving. Reporting code is part of dumps scripts.</small>
+  </td>
+</tr>  
+
+</table>
+
+<p>
+<small><font color=#888>Last upd: June 25, 2013</font></small>
+
+
+</body>
+</html>
+
