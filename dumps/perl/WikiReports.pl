@@ -272,8 +272,6 @@
      &ReadEditHistory ;
      &ReadRevertHistoryGenerateReports ;
      &GenerateEditHistoryReports ; # wait till R runs on stat1
-# print "TEST !!! end\n" ; # qqq    
-# exit ;                   # qqq
   }
 
   if (($language eq "en") && (! $mode_wm))

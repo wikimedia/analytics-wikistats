@@ -26,8 +26,8 @@ sub ReadRevertHistoryGenerateReports
   foreach $wp (@languages)
   {
     # next if $wp ne "en" ;
-next if $wp ne "fy" ; # qqq
-  &LogT ("\nReadRevertHistoryGenerateReports $wp\n\n") ;
+  
+    &LogT ("\nReadRevertHistoryGenerateReports $wp\n\n") ;
 
     undef %reverts_per_article ;
     undef %reverts_in_non_article_namespaces ;
@@ -236,7 +236,6 @@ sub ProcessRevertStats
 {
   my $wp = shift ;
   &Log ("ProcessRevertsStats $wp\n") ;
-return if $wp ne 'fy' ; # qqq
 
   undef @top_reverting_users ;
   undef @top_reverted_users ;
@@ -353,7 +352,7 @@ sub WriteReportReverts
 {
   my $wp = shift ;
   &LogT ("WriteReportReverts $wp\n") ;
-return if $wp ne 'fy' ; # qqq
+
   &ReadFileCsv ($file_csv_namespaces) ;
   foreach $line (@csv)
   {
@@ -382,7 +381,9 @@ return if $wp ne 'fy' ; # qqq
 
   my $out_html_title = $out_statistics . " \- " . "Edit and Revert Trends" ;
   my $out_page_title = $out_statistics . " \- " . "Edit and Revert Trends: " ."<a href='" . $out_urls {$wp} . "'>" . $out_languages {$wp} . "</a>" ;
-  my $show_anons = ($editstottype {'A'}{$wp} > 100) ; # only on larger wikis # ($wp =~ /(?:en|de|ja|fr|pl|es|pt|ru|zh|nl|af)/i) ;
+
+# my $show_anons = ($editstottype {'A'}{$wp} > 100) ; # only on larger wikis # ($wp =~ /(?:en|de|ja|fr|pl|es|pt|ru|zh|nl|af)/i) ;
+  my $show_anons = $false ;
 
   if (defined ($dumpdate_hi))
   {

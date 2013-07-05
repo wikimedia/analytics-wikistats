@@ -193,6 +193,11 @@ mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="
 
 $include_script_credits_ez
 $include_script_plot_go
+__SCRIPT_EDIT_PLOT_EDITS__
+
+# PE = Plot Edits Trends (same script, second chart)
+
+$out_script_plot_edits .= <<__SCRIPT_EDIT_PLOT_EDITS_TRENDS__ ;
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:6]
@@ -215,7 +220,7 @@ plotdata = data.frame(date=dates,counts,times_tot_decomposed\$trend,times_anon_d
 plotdata
 attach (plotdata)
 
-$include_script_reverts_cairo
+$include_script_reverts_cairo_trends
 
 r <- as.POSIXct(round(range(dates), "days"))
 
@@ -246,7 +251,7 @@ mtext("100 = max edits in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col
 mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
 $include_script_credits_ez
 $include_script_plot_go
-__SCRIPT_EDIT_PLOT_EDITS__
+__SCRIPT_EDIT_PLOT_EDITS_TRENDS__
 
 #----------------------------------------------------------
 
@@ -297,14 +302,18 @@ mtext("reverted", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
 
 $include_script_credits_ez
 $include_script_plot_go
+__SCRIPT_EDIT_PLOT_REVERTS__
+
+# PR = Plot Reverts Trends (same script, second chart)
+$out_script_plot_reverts .= <<__SCRIPT_EDIT_PLOT_REVERTS_TRENDS__ ;
 
 plotdata <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:22]
 counts   <- plotdata[2:21]
 
 $include_script_dates
 
-times_tot = ts(plotdata\$PR_reverts_total,       start=2001, freq=12)
-times_reg = ts(plotdata\$PR_reverts_reg_users,   start=2001, freq=12)
+times_tot  = ts(plotdata\$PR_reverts_total,      start=2001, freq=12)
+times_reg  = ts(plotdata\$PR_reverts_reg_users,  start=2001, freq=12)
 times_anon = ts(plotdata\$PR_reverts_anon_users, start=2001, freq=12)
 times_bots = ts(plotdata\$PR_reverts_bots,       start=2001, freq=12)
 
@@ -347,7 +356,7 @@ mtext("reverted", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
 
 $include_script_credits_ez
 $include_script_plot_go
-__SCRIPT_EDIT_PLOT_REVERTS__
+__SCRIPT_EDIT_PLOT_REVERTS_TRENDS__
 
 
 #----------------------------------------------------------
@@ -388,6 +397,10 @@ mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="
 
 $include_script_credits_ez
 $include_script_plot_go
+__SCRIPT_EDIT_PLOT_ANONS__
+
+# PA = Plot Anons Trends (same script, second chart)
+$out_script_plot_anons .= <<__SCRIPT_EDIT_PLOT_ANONS_TRENDS__ ;
 
 plotdata  <- read.csv(file="FILE_CSV",head=TRUE,sep=",")[2:26]
 counts    <- plotdata[2:25]
@@ -438,9 +451,8 @@ mtext("100 = max anon edits in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE
 mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
 
 $include_script_credits_ez
-
 $include_script_plot_go
-__SCRIPT_EDIT_PLOT_ANONS__
+__SCRIPT_EDIT_PLOT_ANONS_TRENDS__
 
 # PB = Plot Binaries
 $out_script_plot_binaries = <<__SCRIPT_EDIT_PLOT_BINARIES__ ;

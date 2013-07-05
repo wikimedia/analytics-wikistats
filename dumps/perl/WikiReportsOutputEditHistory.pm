@@ -110,7 +110,7 @@ sub GenerateEditHistoryReports
 #    &WriteEditsPerUserType ('fy') ;
 #    &GeneratePlotEdits     ('fy');
 #    &GeneratePlotReverts   ('fy') ;
-#    &GeneratePlotAnons     ('fy') ;
+#    &GeneratePlotAnons     ('fy') ; # disabled
 #    &GenerateEditHistoryReport ($plots_all, 4, 'Table') ;
 #    return ;
 #  }
@@ -126,7 +126,7 @@ sub GenerateEditHistoryReports
     &WriteEditsPerUserType ($lang) ;
     &GeneratePlotEdits     ($lang) ;
     &GeneratePlotReverts   ($lang) ;
-    &GeneratePlotAnons     ($lang) ;
+  # &GeneratePlotAnons     ($lang) ; # disabled, R code needs debugging, and there is plenty to take in from other charts
 
     $plots_all ++ ;
     $plot_size = -s "$path_out_plots\/PlotEdits" . uc($lang) . ".png" ;
@@ -575,8 +575,6 @@ sub GeneratePlotEdits
 
   my $file_script_R = $path_in . "R-PlotScriptEdits.R-in" ;
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
-
-exit ; # qqq
 }
 
 sub GeneratePlotReverts
@@ -683,7 +681,7 @@ sub GeneratePlotReverts
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
 
   $reverts_ylim = ceil ($reverts_perc_max/5) * 5 ;
-  $out_script_plot =~ s/YLIM/c(0,$reverts_ylim)/g ;
+  $out_script_plot =~ s/YLIM_MAX/c(0,$reverts_ylim)/g ;
 
   my $file_script_R = $path_in . "R-PlotScriptReverts.R-in" ;
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
@@ -691,6 +689,8 @@ sub GeneratePlotReverts
 
 sub GeneratePlotAnons
 {
+  return ; # skip for now, charts difficult to read, and R code needs debugging
+
   my $lang = shift ;
 
   return if $lang =~ /^zzz?$/ ;
@@ -786,7 +786,7 @@ sub GeneratePlotAnons
 
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
 
-  $out_script_plot =~ s/YLIM/c(0,$reverts_ylim)/g ;
+  $out_script_plot =~ s/YLIM_MAX/c(0,$reverts_ylim)/g ;
 
   my $file_script_R = $path_in . "R-PlotScriptAnons.R-in" ;
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
@@ -850,16 +850,18 @@ sub WriteEditsPerUserType
     $month2 = $months {$month} ;
     my ($mm,$dd,$yy) = split ('\/', $month2) ;
     my  $yyyymm = sprintf ("%04d%02d",$yy,$mm) ;
+
+    # needed to get equal number of rows in decomposed R object (which always starts with value for January)
     if ($months++ == 0)
     {
       if ($mm > 2)
       {
-        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", 1,     31, $yy) . ",0,0,0,0\n" ;
-        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", $mm-1, 28, $yy) . ",0,0,0,0\n" ;
+        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", 1,     31, $yy) . ",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" ;
+        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", $mm-1, 28, $yy) . ",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" ;
       }
       elsif ($mm == 2)
       {
-        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", 1,     31, $yy) . ",0,0,0,0\n" ;
+        print EDITS_OUT "$lang," . sprintf ("%02d/%02d/%04d", 1,     31, $yy) . ",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0\n" ;
       }
     }
 
