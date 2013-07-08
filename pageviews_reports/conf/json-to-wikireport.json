@@ -1,0 +1,17 @@
+{
+  "model"                : "json",
+  "max-children"         : 8,
+  "input-path"           : "/home/user/new_mobile_pageviews_data",
+  "children-output-path" : "/home/user/new_mobile_pageviews_data",
+  "output-path"          : "/home/user/new_mobile_pageviews_data",
+  "output-formats"       : ["web"],
+  "logs-prefix"          : "sampled",
+  "start"    : {
+    "year"   : 2012,
+    "month"  : 8
+  },
+  "end"      : {
+    "year"   : 2013,
+    "month"  : 2
+  }
+}
