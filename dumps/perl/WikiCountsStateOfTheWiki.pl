@@ -8,8 +8,6 @@
   use warnings ;
   use strict ;
 
-  our $show_flawed_metric = 0 ;
-
 # my $project = 'wp' ;
 # my $dir_in   = "w:/# out stat1/csv_$project" ;
 
@@ -116,23 +114,6 @@ sub CollectData
 
     $monthly_editors {$lang_yyyy_mm} = $editors ;
 
-    if ($show_flawed_metric)
-    {
-      if (defined $monthly_editors {$lang_yyyy_mm_prev})
-      {
-        if ($monthly_editors {$lang_yyyy_mm_prev} > 0)
-        {
-          $YoY_months {$lang_yyyy}++ ;
-          $YoY_tot    {$lang_yyyy} += $monthly_editors {$lang_yyyy_mm} / $monthly_editors {$lang_yyyy_mm_prev} ;
-          $YoY_avg    {$lang_yyyy} = sprintf ("%.9f", $YoY_tot {$lang_yyyy} / $YoY_months {$lang_yyyy}) ;
-        }
-        else
-        { ; } # not sure if ignoring is better than setting a default value, there was considerable gain, from 0 to some number
-      }       # anyway it will only occur on tiny wikis
-      else
-      { ; }
-    }
-
     $languages {$lang} ++ ; # collect languages codes
     $years     {$yyyy} ++ ; # collect years
 
@@ -195,22 +176,6 @@ sub CollectData
 
       $ratio_size_hi = sprintf ($round, 100 * $ratio_size_hi) . '%' ;
 
-      if ($show_flawed_metric)
-      {
-        if (defined ($YoY_avg {$lang_yyyy}))
-        {
-          $YoY_avg = sprintf ("%0.9f", $YoY_avg {$lang_yyyy}) ;
-             if ($YoY_avg < 1 - $margin) { $delta = 'declining' ; }
-          elsif ($YoY_avg > 1 + $margin) { $delta = 'growing' ; }
-          else                           { $delta = 'steady' ; }
-        }
-        else
-        {
-          $YoY_avg = '-' ;
-          $delta   = '-' ;
-        }
-      }
-
       $editors_avg = $avg_in_year    {$lang_yyyy}  ;
       $editors_hi =  sprintf ("%.1f", $avg_in_year_hi {$yyyy})  ;
 
@@ -218,18 +183,6 @@ sub CollectData
       elsif ($editors_avg > 1)   { $editors_avg = sprintf ("%.1f", $editors_avg) ; }
       elsif ($editors_avg > 0.1) { $editors_avg = sprintf ("%.2f", $editors_avg) ; }
       else                       { $editors_avg = sprintf ("%.3f", $editors_avg) ; }
-
-      if ($show_flawed_metric)
-      {
-        if ($YoY_avg ne '-')
-        {
-          $YoY_avg = 100 * $YoY_avg - 100 ;
-          if (($YoY_avg > 9.9) || ($YoY_avg < -9.9))
-          { $YoY_avg = (sprintf ("%.0f", $YoY_avg)) . '%' ; }
-          else
-          { $YoY_avg = (sprintf ("%.1f", $YoY_avg)) . '%' ; }
-        }
-      }
 
       $delta = '-' ;
       $sort_key = $yyyy . "-0" ; # sort last
@@ -244,18 +197,6 @@ sub CollectData
         $sort_key = $yyyy . '-' . $size_key . '-' . sprintf ("%7d",$YoY_avg2*1000000) ;
 
         $YoY_avg2 = 100 * $YoY_avg2 - 100 ;
-
-        if ($show_flawed_metric)
-        {
-          if ($YoY_avg ne '-')
-          {
-            my $t = $YoY_avg ;
-            $t =~ s/\%// ;
-            $diff = sprintf ("%.1f", $t - $YoY_avg2) ;
-          }
-          else
-          { $diff = '-' ; }
-        }
 
         if (($YoY_avg2 > 9.9) || ($YoY_avg2 < -9.9))
         { $YoY_avg2 = (sprintf ("%.0f", $YoY_avg2)) . '%' ; }
@@ -273,18 +214,8 @@ sub CollectData
 
     # print            "$yyyy,$lang,avg:$editors_avg,hi:$editors_hi,$ratio_size_hi,$size,$YoY_avg,$delta\n" ;
 
-      if ($show_flawed_metric)
-      {
-      # so YoY_avg was: yearly average of monthly YoY's (is flawed, to be removed after everyone has acknowledged, keep till then for demo)
-      #    YoY_avg2 is: YoY of yearly average of monthly data
-        push @data_raw,  "$sort_key,$yyyy,$lang,$editors_avg,$size,$delta,,$ratio_size_hi,$YoY_avg,$YoY_avg2,$diff,$comment\n" ;
-        push @data_raw2, "$lang,$yyyy,$editors_avg,$size,$delta,,$ratio_size_hi,$YoY_avg,$YoY_avg2,$diff,$comment\n" ;
-      }
-      else
-      {
-        push @data_raw,  "$sort_key,$yyyy,$lang,$editors_avg,$ratio_size_hi,\"->\",$size,$YoY_avg2,\"->\",$delta,$comment\n" ;
-        push @data_raw2, "$lang,$yyyy,$editors_avg,$ratio_size_hi,\"->\",$size,$YoY_avg2,\"->\",$delta,$comment\n" ;
-      }
+      push @data_raw,  "$sort_key,$yyyy,$lang,$editors_avg,$ratio_size_hi,\"->\",$size,$YoY_avg2,\"->\",$delta,$comment\n" ;
+      push @data_raw2, "$lang,$yyyy,$editors_avg,$ratio_size_hi,\"->\",$size,$YoY_avg2,\"->\",$delta,$comment\n" ;
 
       $wikis {"$yyyy,$size,$delta"} ++ ;
     }
@@ -326,10 +257,7 @@ sub CollectData
   {
     ($sort_key,$line) = split (',', $line, 2) ;
 
-    if ($show_flawed_metric)
-    { ($yyyy,$lang,$editors,$size,$delta) = split (',', $line) ; }
-    else
-    { ($yyyy,$lang,$editors_avg,$ratio_size_hi,$dummy1,$size,$YoY_avg2,$dummy2,$delta,$comment) = split (',', $line) ; }
+    ($yyyy,$lang,$editors_avg,$ratio_size_hi,$dummy1,$size,$YoY_avg2,$dummy2,$delta,$comment) = split (',', $line) ; 
 
     next if $delta eq '-' ;
 
