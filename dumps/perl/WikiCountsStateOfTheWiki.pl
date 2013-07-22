@@ -11,17 +11,18 @@
 # my $project = 'wp' ;
 # my $dir_in   = "w:/# out stat1/csv_$project" ;
 
-  my ($project_code, $project,$dir_in,$dir_out) = &ParseArguments ;
+  my ($project_code, $project, $edits, $dir_in, $dir_out, $dir_wp) = &ParseArguments ;
 
   # my $file_in           = "$dir_in/StatisticsMonthly.csv" ;
-  my $file_in           = "$dir_in/StatisticsUserActivitySpread.csv" ;
-  my $file_out_raw      = "$dir_out/StateOfTheWikiRaw" . uc($project_code) . ".csv" ;
-  my $file_out_overview = "$dir_out/StateOfTheWikiOverview" . uc($project_code) . ".csv" ;
+  my $file_in             = "$dir_in/StatisticsUserActivitySpread.csv" ;
+  my $file_out_raw        = "$dir_out/StateOfTheWikiRaw" . ucfirst($project) . "_$edits.csv" ;
+  my $file_out_overview   = "$dir_out/StateOfTheWikiOverview" . ucfirst($project) . "_$edits.csv" ;
+  my $file_wp_editors_max = "$dir_wp/StateOfTheWikiMaxPerYearWikipedia_$edits.csv" ; # always use Wikipedia values as reference
 
 
-  &CollectData ($project_code, $project, $file_in, $file_out_raw, $file_out_overview) ;
+  &CollectData ($project_code, $project, $edits, $file_in, $file_out_raw, $file_out_overview, $file_wp_editors_max) ;
 
-  print "\n\nReady\n\n" ;
+  print "\nReady\n\n" ;
   exit ;
 
 sub ParseArguments
@@ -29,21 +30,27 @@ sub ParseArguments
   use Getopt::Std ;
 
   my %options ;
-  getopt ("iop", \%options) ;
+  getopt ("eiopr", \%options) ;
 
   my $project_code = $options {'p'} ;
   my $dir_in       = $options {'i'} ;
+  my $edits        = $options {'e'} ;
   my $dir_out      = lc ($options {'o'}) ;
+  my $dir_wp       = lc ($options {'r'}) ; # for max editors per year on Wikipedia
 
   die "Specify input folder as '-i [folder]'"  if $dir_in eq '' ;
   die "Specify output folder as '-o [folder]'" if $dir_out eq '' ;
+  die "Specify folder for Wikipedia reference file '-r [folder]'" if $dir_wp eq '' ;
   die "Specify project as '-p [wb|wk|wn|wp|wq|wo|ws|wv]'"  if $project_code eq '' or $project_code !~ /^(?:wb|wk|wn|wp|wq|wo|ws|wv)$/ ;
   die "Input folder not found: '$dir_in'"  if ! -e $dir_in ;
   die "Output folder not found: '$dir_out'"  if ! -e $dir_in ;
+  die "Specify edits threshold as '-e [5|100]'" if $edits eq '' or $edits !~ /^5|100$/ ;
 
   print "Input folder: $dir_in\n" ;
   print "Output folder: $dir_out\n" ;
+  print "Wikipedia folder: $dir_wp\n" ;
   print "Project code: $project_code\n" ;
+  print "Edits: $edits\n" ;
 
      if ($project_code eq 'wb') { $project = 'Wikibooks' ; }
   elsif ($project_code eq 'wk') { $project = 'Wiktionary' ; }
@@ -55,16 +62,23 @@ sub ParseArguments
   elsif ($project_code eq 'wv') { $project = 'Wikiversity' ; }
   else  { die ("Invalid project code $project_code") ; }
 
-  return ($project_code, $project, $dir_in, $dir_out) ;
+  return ($project_code, $project, $edits, $dir_in, $dir_out, $dir_wp) ;
 }
 
 sub CollectData
 {
-  my ($project_code, $project, $file_in, $file_out_raw, $file_out_overview) = @_ ;
+  my ($project_code, $project, $edits, $file_in, $file_out_raw, $file_out_overview, $file_wp_editors_max) = @_ ;
 
-  my ($line, $editors, $editors_avg, $editors_hi, $ratio_size_hi, $comment, $lang, $usertype, $contenttype, $delta, $size, $count, $YoY_avg, @details, $margin, $sort_key, $size_key, $round, $diff, $dummy1, $dummy2) ;
+  my ($line, $editors, $editors_avg, $editors_hi, $ratio_size_hi, $comment, $lang, $usertype, $contenttype, $delta, $size, $count, $YoY_avg, @details, $margin, $sort_key, $size_key, $round, $diff, $dummy1, $dummy2, $very, $sizes) ;
   my ($date, $dd, $mm, $yyyy, $yyyy_mm, $yyyy_mm_hi, $yyyy_mm_year_ago, $avg_in_year, $avg_in_year_prev, $lang_yyyy, $lang_yyyy_prev, $lang_yyyy_mm, $lang_yyyy_mm_prev, $YoY_avg2) ;
   my (@data_raw, @data_raw2, %languages, %years, %months_in_year, %total_in_year, %avg_in_year, %avg_in_year_hi, %max_avg_in_year, %YoY, %YoY_tot, %YoY_avg_hi, %YoY_months, %YoY_avg, %YoY_avg_in_year, %wikis, %monthly_editors, %editors_max_per_lang) ;
+
+  $very = '' ;
+  if ($edits == 100)
+  { $very = 'very ' ; }
+
+  if ($project_code ne 'wp')
+  { die "File not found '$file_wp_editors_max'" if ! -e $file_wp_editors_max ; }
 
   die "File not found '$file_in'" if ! -e $file_in ;
   open CSV_IN, '<', $file_in || die "Could not open file '$file_in'" ;
@@ -82,17 +96,19 @@ sub CollectData
     next if $contenttype ne 'A' ; # article
     next if $lang =~ /^zz+/ ; # project wide totals
 
+    # input StatisticsUserActivitySpread shows per language, per month, per type of user (Registered, Anon, Bot), per type of content (Article, Talk, Other): user count with over threshold edits
+    # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
+    # @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
     $editors = 0 ;
-    if (defined $values [2])
+    if ($edits == 5 and defined $values [2])
     { $editors = $values [2] ; } # 5+ edits
+    elsif ($edits == 100 and defined $values [7])
+    { $editors = $values [7] ; } # 100+ edits
 
     next if $project eq "wp" && $lang eq 'commons' ;
 
     if ($lang ne $lang_prev)
-    {
-      $size = '' ; $delta = '' ;
-      push @details, "\n" ;
-    }
+    { $size = '' ; $delta = '' ; }
     $lang_prev = $lang ;
 
     $mm   = substr ($date,0,2) ;
@@ -129,27 +145,59 @@ sub CollectData
   }
   close CSV_IN ;
 
-  foreach $lang (sort keys %languages)
+  if ($project_code eq 'wp')
   {
-    next if $editors_max_per_lang {$lang} == 0;
-
-    foreach $yyyy (sort keys %years)
+    foreach $lang (sort keys %languages)
     {
-      $lang_yyyy = "$lang-$yyyy" ;
-      next if ! defined ($avg_in_year {$lang_yyyy}) ;
+      next if $editors_max_per_lang {$lang} == 0;
 
-      if (! defined $avg_in_year_hi {$yyyy})
-      { $avg_in_year_hi {$yyyy} = $avg_in_year {$lang_yyyy} ; }
-      elsif ($avg_in_year_hi {$yyyy} < $avg_in_year {$lang_yyyy})
-      { $avg_in_year_hi {$yyyy} = $avg_in_year {$lang_yyyy} ; }
+      foreach $yyyy (sort keys %years)
+      {
+        $lang_yyyy = "$lang-$yyyy" ;
+        next if ! defined ($avg_in_year {$lang_yyyy}) ;
+
+        if (! defined $avg_in_year_hi {$yyyy})
+        { $avg_in_year_hi {$yyyy} = $avg_in_year {$lang_yyyy} ; }
+        elsif ($avg_in_year_hi {$yyyy} < $avg_in_year {$lang_yyyy})
+        { $avg_in_year_hi {$yyyy} = $avg_in_year {$lang_yyyy} ; }
+      }
     }
-  }
 
-  my $margin_tiny   = 0.5 ;
-  my $margin_small  = 0.2 ;
-  my $margin_medium = 0.1 ;
-  my $margin_large  = 0.05 ;
-  my $margin_huge   = 0.02 ;
+    open FILE_CSV, '>', $file_wp_editors_max ;
+    foreach $yyyy (sort keys %years)
+    { print FILE_CSV "$yyyy," . $avg_in_year_hi {$yyyy} . "\n" ; }
+    close FILE_CSV ;
+  }  
+  else
+  {
+    open FILE_CSV, '<', $file_wp_editors_max ;
+    while ($line = <FILE_CSV>)
+    {
+      chomp $line ;
+      next if $line !~ /,/ ;      
+      ($yyyy,$editors) = split (',', $line) ;	    
+      $avg_in_year_hi {$yyyy} = $editors ;
+    }
+    close FILE_CSV ;
+  }
+  
+  my ($margin_tiny, $margin_small, $margin_medium, $margin_large, $margin_huge) ;
+  if ($edits == 5)
+  {
+    $margin_tiny   = 0.5 ;
+    $margin_small  = 0.2 ;
+    $margin_medium = 0.1 ;
+    $margin_large  = 0.05 ;
+    $margin_huge   = 0.02 ;
+  }  
+  else
+  {
+    $margin_tiny   = 1;
+    $margin_small  = 0.5 ;
+    $margin_medium = 0.2 ;
+    $margin_large  = 0.1 ;
+    $margin_huge   = 0.05 ;
+  }  
 
   foreach $lang (sort keys %languages)
   {
@@ -167,12 +215,19 @@ sub CollectData
 
       $ratio_size_hi = sprintf ("%0.6f", $avg_in_year {$lang_yyyy} / $avg_in_year_hi {$yyyy}) ;
 
-         if ($ratio_size_hi == 1)     { $size = 'huge' ;   $margin = 0.02 ; $size_key = 5 ; $round = "%.0f" ; }
-      elsif ($ratio_size_hi > 0.1)    { $size = 'huge' ;   $margin = 0.02 ; $size_key = 5 ; $round = "%.1f" ; }
-      elsif ($ratio_size_hi > 0.01)   { $size = 'large' ;  $margin = 0.05 ; $size_key = 4 ; $round = "%.2f" ; }
-      elsif ($ratio_size_hi > 0.001)  { $size = 'medium' ; $margin = 0.1 ;  $size_key = 3 ; $round = "%.3f" ; }
-      elsif ($ratio_size_hi > 0.0001) { $size = 'small' ;  $margin = 0.2 ;  $size_key = 2 ; $round = "%.4f" ; }
-      else                            { $size = 'tiny' ;   $margin = 0.5 ;  $size_key = 1 ; $round = "%.5f" ; }
+      # breakdown active users (5+ edits) into 5 size groups, very active users (100+ edits) into 4
+         if ($ratio_size_hi == 1)     { $size = 'huge' ;   $margin = $margin_huge  ;  $size_key = 5 ; $round = "%.0f" ; }
+      elsif ($ratio_size_hi > 0.1)    { $size = 'huge' ;   $margin = $margin_huge  ;  $size_key = 5 ; $round = "%.1f" ; }
+      elsif ($ratio_size_hi > 0.01)   { $size = 'large' ;  $margin = $margin_large ;  $size_key = 4 ; $round = "%.2f" ; }
+      elsif ($ratio_size_hi > 0.001)  { $size = 'medium' ; $margin = $margin_medium ; $size_key = 3 ; $round = "%.3f" ; }
+      elsif ($ratio_size_hi > 0.0001) { $size = 'small' ;  $margin = $margin_small ;  $size_key = 2 ; $round = "%.4f" ; }
+      else      
+      {
+        if ($edits == 5)	      
+        { $size = 'tiny' ;   $margin = $margin_tiny ;   $size_key = 1 ; $round = "%.5f" ; }
+        else
+	{ $size = 'small' ;  $margin = $margin_small ;  $size_key = 2 ; $round = "%.4f" ; }
+      }	
 
       $ratio_size_hi = sprintf ($round, 100 * $ratio_size_hi) . '%' ;
 
@@ -222,14 +277,11 @@ sub CollectData
   }
 
   @data_raw = sort {$b cmp $a} @data_raw ;
-
+  
   open CSV_OUT_RAW, '>', $file_out_raw || die "Could not open file '$file_out_raw'" ;
-  print CSV_OUT_RAW "All data are about number of active editors (5+ edits per month) in countable namespaces (mostly namespace 0)\n" ;
+  print CSV_OUT_RAW "All data are about number of ${very}active editors ($edits+ edits per month) in countable namespaces (mostly namespace 0)\n" ;
   print CSV_OUT_RAW "All data are about yearly averages of monthly counts of this metric\n\n" ;
-  if ($project_code eq 'wp')
-  { print CSV_OUT_RAW "Size label is based on relative size to largest editor base in that year (for Wikipedia always English Wikipedia)\n" ; }
-  else
-  { print CSV_OUT_RAW "Size label is based on relative size to largest editor base in that year\n" ; }
+  print CSV_OUT_RAW "Size label is based on relative size of editor community compared to largest editor base in that year (always English Wikipedia)\n" ; 
   print CSV_OUT_RAW "huge: relative size > 10%\n" ;
   print CSV_OUT_RAW "large: relative size between 1% and 10%\n" ;
   print CSV_OUT_RAW "medium: relative size between 0.1% and 1%\n" ;
@@ -285,7 +337,7 @@ sub CollectData
     $lang_prev = $lang ;
   }
 
-  $line = "\n\nLanguages which never reached 5+ edits from one user in any month:\n" ;
+  $line = "\n\nLanguages which never reached $edits+ edits from one user in any month:\n" ;
   foreach $lang (sort keys %editors_max_per_lang)
   {
     if ($editors_max_per_lang {$lang} == 0)
@@ -303,50 +355,64 @@ sub CollectData
   my $margin_huge_perc   = $margin_huge   * 100 . "+%" ;
 
   open CSV_OUT_OVERVIEW, '>', $file_out_overview || die "Could not open file '$file_out_overview" ;
-# print CSV_OUT_OVERVIEW "lang,last month in year,editors avg, as ratio of larget language,avg editors in year,size,,delta\n" ;
 
-  my $largest = '' ;
-  if ($project eq 'wp')
-  { $largest = '(always wp:en)' ; }
+  print CSV_OUT_OVERVIEW "Breakdown of wikis by relative size and year over year change (YoY) of editor base\n\n" ;
 
-  print CSV_OUT_OVERVIEW "Breakdown of $project wikis by relative size and year over year (YoY) change in editor base\n\n" ;
-  print CSV_OUT_OVERVIEW "Definitions:\n\n" ;
-  print CSV_OUT_OVERVIEW "Community sizes are yearly averages of active editors (5+ edits) per month\n" ;
-  print CSV_OUT_OVERVIEW "LC = largest community size in that year\n\n" ;
+# print CSV_OUT_OVERVIEW "Definitions:\n\n" ;
+  print CSV_OUT_OVERVIEW "Community sizes are yearly averages of monthly figures for ${very}active editors ($edits+ edits)\n" ;
+  print CSV_OUT_OVERVIEW "LC = largest community size in that year of all Wikimedia wikis (always English Wikipedia)\n\n" ;
   print CSV_OUT_OVERVIEW "Growing community: at least x% larger than the year before\n" ;
   print CSV_OUT_OVERVIEW "Declining community: at least x% smaller than the year before\n" ;
   print CSV_OUT_OVERVIEW "x being dependant on size of community\n\n" ;
 
   print CSV_OUT_OVERVIEW "Data up to $yyyy_mm_hi (data for incomplete year can have seasonal component)\n\n" ;
+  print CSV_OUT_OVERVIEW "$project:,,,(for details check file http://stats.wikimedia.org/wikimedia/editors/StateOfTheWikiRaw${project}_$edits.csv)\n\n" ;
 
-  print CSV_OUT_OVERVIEW "\n\nyear,LC,,\"huge: 10%-100% of LC\",,,,\"large: 1%-10% of LC\",,,,\"medium: 0.1%-1% x LC\",,,,\"small: 0.01%-0.1% of LC\",,,,\"tiny: < 0.01% of LC\"\n" ;
-  print CSV_OUT_OVERVIEW ",,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining\n" ;
-  print CSV_OUT_OVERVIEW ",,,$margin_huge_perc larger,,$margin_huge_perc smaller,,$margin_large_perc larger,,$margin_large_perc smaller,,$margin_medium_perc larger,,$margin_medium_perc smaller,,$margin_small_perc larger,,$margin_small_perc smaller,,$margin_tiny_perc larger,,$margin_tiny_perc smaller\n" ;
+
+  # breakdown active users (5+ edits) into 5 size groups, very active users (100+ edits) into 4
+  if ($edits == 5)
+  {
+    print CSV_OUT_OVERVIEW "year,LC,,\"huge: 10%-100% of LC\",,,,\"large: 1%-10% of LC\",,,,\"medium: 0.1%-1% x LC\",,,,\"small: 0.01%-0.1% of LC\",,,,\"tiny: < 0.01% of LC\"\n" ;
+    print CSV_OUT_OVERVIEW ",,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining\n" ;
+    print CSV_OUT_OVERVIEW ",,,$margin_huge_perc larger,,$margin_huge_perc smaller,,$margin_large_perc larger,,$margin_large_perc smaller,,$margin_medium_perc larger,,$margin_medium_perc smaller,,$margin_small_perc larger,,$margin_small_perc smaller,,$margin_tiny_perc larger,,$margin_tiny_perc smaller\n" ; 
+  }  
+  else
+  { 
+    print CSV_OUT_OVERVIEW "year,LC,,\"huge: 10%-100% of LC\",,,,\"large: 1%-10% of LC\",,,,\"medium: 0.1%-1% x LC\",,,,\"small: 0.01%-0.1% of LC\"\n" ;
+    print CSV_OUT_OVERVIEW ",,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining,,growing,steady,declining\n" ;
+    print CSV_OUT_OVERVIEW ",,,$margin_huge_perc larger,,$margin_huge_perc smaller,,$margin_large_perc larger,,$margin_large_perc smaller,,$margin_medium_perc larger,,$margin_medium_perc smaller,,$margin_small_perc larger,,$margin_small_perc smaller\n" ; 
+  }
+
+
+  # breakdown active users (5+ edits) into 5 size groups, very active users (100+ edits) into 4
+  if ($edits == 5)
+  { $sizes = "huge,large,medium,small,tiny" ; }
+  else
+  { $sizes = "huge,large,medium,small" ; }
 
   my $years = 0 ;
   foreach $yyyy (sort keys %years)
   {
     next if $years++ == 0; # skip earliest year no YoY data
 
-    print "$yyyy," ;
+  # print "$yyyy," ;
     print CSV_OUT_OVERVIEW "$yyyy," . sprintf ("%.0f", $avg_in_year_hi {$yyyy}) . ",," ;
-    foreach $size (split ',', "huge,large,medium,small,tiny")
+    foreach $size (split ',', $sizes)
     {
       foreach $delta (split ',', "growing,steady,declining")
       {
         $count = $wikis {"$yyyy,$size,$delta"} ;
         if (! defined $count)
         { $count = '' ; }
-        print "$count," ;
+      # print "$count," ;
         print CSV_OUT_OVERVIEW "$count," ;
       }
       print CSV_OUT_OVERVIEW "," ;
     }
-    print "\n" ;
+  # print "\n" ;
     print CSV_OUT_OVERVIEW "\n" ;
   }
   print CSV_OUT_OVERVIEW "\n\n"  ;
-  print CSV_OUT_OVERVIEW @details ;
 
   close CSV_OUT_OVERVIEW ;
 }
