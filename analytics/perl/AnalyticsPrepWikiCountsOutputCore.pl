@@ -25,6 +25,8 @@
   $all_projects = '*' ;
 
   $maxpopularwikis = 25 ;
+  $maxextensions   = 14 ; # Q&D actually prints 15 (starts with 0)
+
   @projects = ('wb','wk','wn','wo','wp','wq','ws','wv','wx','commons','*') ;
 
   &LogArguments ;
@@ -374,7 +376,7 @@ sub ReadStatisticsPerBinariesExtensionCommons
   {
     # print "$extndx < ${ext_cnt {-1}{$extndx}} > : ${ext_cnt_mmax {$extndx}}\n" ;
     push @extndxs, $extndx ;
-    if ($extcnt++ >= 9) { last ; }
+    if ($extcnt++ >= $maxextensions) { last ; }
   }
 }
 
@@ -649,8 +651,8 @@ if ($f == 2)
   $output .= "$line\n" ;
 
   $index = 0 ;
-  # feed the 10 extensions with most pages, largest one last (comes on top in Excel chart)
-  for ($e = $#extndxs - 9 ; $e <= $#extndxs ; $e++)
+  # feed the extensions with most pages, largest one last (comes on top in Excel chart)
+  for ($e = $#extndxs - $maxextensions ; $e <= $#extndxs ; $e++)
   {
     $index++ ;
 
@@ -689,8 +691,8 @@ if ($f == 2)
   $output .= "$csv_recent_months\n" ;
 
   $index = 0 ;
-  # feed the 10 extensions with most pages, largest one last (comes on top in Excel chart)
-  for ($e = $#extndxs - 9 ; $e <= $#extndxs ; $e++)
+  # feed the extensions with most pages, largest one last (comes on top in Excel chart)
+  for ($e = $#extndxs - $maxextensions ; $e <= $#extndxs ; $e++)
   {
     $index++ ;
 
