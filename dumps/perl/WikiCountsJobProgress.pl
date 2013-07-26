@@ -932,7 +932,12 @@ sub WriteDailyGain
 
   my $todo = '' ;
   foreach $project (sort keys %projects)
-  { $todo .= "$project:" . (0 + $todo_per_project {$project}) . '/' .  ($done_per_project {$project} + $todo_per_project {$project}) . " " ; }
+  { 
+    next if $todo_per_project {$project} == 0 ;
+    $todo .= "$project:" . (0 + $todo_per_project {$project}) . '/' .  ($done_per_project {$project} + $todo_per_project {$project}) . " " ; 
+  }
+  if ($todo eq '')
+  { $todo = 'all done' ; }
 
 # print "$today,$done\n" ;
 
