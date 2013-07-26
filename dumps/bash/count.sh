@@ -72,7 +72,8 @@ clear
 cd $perl
 for x in `cat $dblists/$dblist`
 #for x in wikidatawiki
-do c1 perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
+#do c1 perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
+do perl WikiCounts.pl $trace $force $reverts $edits_only $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d auto -s $php
 done
 
 # $bash/zip_csv.sh $project # move step to cron, count.sh is invoked too often now
