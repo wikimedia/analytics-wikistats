@@ -10,8 +10,11 @@ wikistats=/a/wikistats_git
 squids=$wikistats/squids
 perl=$squids/perl
 csv=$squids/csv
-
+reports=$squids/reports
 
 cd $perl
 
-nice perl SquidLoadScan.pl -i $csv -o $csv/load
+# -i input
+# -o csv output
+# -h html output
+nice perl SquidLoadScan.pl -i $csv -o $csv/load -h $reports/load
