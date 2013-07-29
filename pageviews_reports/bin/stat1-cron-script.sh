@@ -1,8 +1,9 @@
 #!/bin/bash
 #env
 #set -x
+USER=`whoami`;
 #echo $USER >> /tmp/cronlog_1
-# stat1002_new_mobile=stat1002.wikimedia.org::a/wikistats_git/dumps/csv/csv_sp
+stat1002_new_mobile=stat1002.wikimedia.org::a/wikistats_git/dumps/csv/csv_sp
 eval $(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib);
 export PATH=$PATH:$HOME/local/bin;
 #unpigz --help 2>> /tmp/cronlog_1
@@ -10,28 +11,15 @@ export PATH=$PATH:$HOME/local/bin;
 WIKISTATS_DIR=/a/wikistats_git
 OUTPUT_DIR=/tmp/pageviews-full-cron
 MOBILE_PAGEVIEWS_DIR=$WIKISTATS_DIR/pageviews_reports
-
-mkdir $OUTPUT_DIR;
-/usr/bin/env perl -V  > /tmp/cperlver;
-/bin/date            >> /tmp/cperlver;
-###########################################
+# /usr/bin/env perl -V  > /tmp/cperlver;
+# /bin/date            >> /tmp/cperlver;
 # Clean up mappers output from previous run
-###########################################
 rm -f $OUTPUT_DIR/map/*;
-###########################################
-# Process the data
-###########################################
 /usr/bin/env perl -I$MOBILE_PAGEVIEWS_DIR/lib                \
                     $MOBILE_PAGEVIEWS_DIR/bin/pageviews.pl   \
-                    $MOBILE_PAGEVIEWS_DIR/conf/stat1-full-cron.json 2>&1 >/tmp/cperlerr;
-
-###########################################
-# Copy the CSV so it can be picked up by
-# other cron jobs
-###########################################
+                    $MOBILE_PAGEVIEWS_DIR/conf/stat1-full-cron.json 2>&1 >/tmp/cperlerr2;
 cp $OUTPUT_DIR/PageViewsPerMonthAll.csv \
    $WIKISTATS_DIR/dumps/csv/csv_sp/ ;
 
-#rsync -av $OUTPUT_DIR/PageViewsPerMonthAll.csv $stat1002_new_mobile/ ;
+rsync -av $OUTPUT_DIR/PageViewsPerMonthAll.csv $stat1002_new_mobile/ ;
 
-# test
