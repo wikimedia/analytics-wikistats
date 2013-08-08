@@ -322,7 +322,7 @@ sub ReadFileXml
   &XmlReadUntil ('(?:<page>|<\/mediawiki>)') ;
   while ($line =~ /<page>/)
   {
-# last if $mb_read > 10000 ; # qqq
+  # return if $mb_read > 100 ; # qqq
 
     $pages_read ++ ;
     my $start_readinputxmlpage = code_started() ;

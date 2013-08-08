@@ -94,7 +94,7 @@
   $log_enabled = $false ;
   $skip_on_dumpdate = $false ;
   
-  $base_content_namespaces_on_api = $false ; # use predefined 'content' (=countable) namespaces, or base this on api result ? 
+  $base_content_namespaces_on_api = $true ; # use predefined 'content' (=countable) namespaces, or base this on api result ? 
 
   $weekly_plotdata = $false ;
   if ($weekly_plotdata)
