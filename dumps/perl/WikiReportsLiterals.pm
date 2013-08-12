@@ -362,6 +362,7 @@ sub SetLanguageInfo
   tt=>"http://tt.wikipedia.org Tatar [8,AS]",
   tum=>"http://tum.wikipedia.org Tumbuka [2,AF]",
   turn=>"http://turn.wikipedia.org Turnbuka",
+  tuv=>"http://tuv.wikipedia.org Tuvan [0.265,AS]",
   tw=>"http://tw.wikipedia.org Twi [14.8,AF]",
   ty=>"http://ty.wikipedia.org Tahitian [0.120,OC]",
   udm=>"http://udm.wikipedia.org Udmurt [0.550,AS]",
