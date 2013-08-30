@@ -3142,11 +3142,13 @@ if (0)
     if (! -e $file_csv_content_namespaces)
     { abort ("Namespaces file not found: '$file_csv_content_namespaces'. Run 'collect_countable_namespaces.sh'\n") ; }
 
+    my ($language2 = $language) =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
+
     $line_content_namespaces = '' ;
     open FILE_NS, "<", $file_csv_content_namespaces ;
     while ($line = <FILE_NS>)
     {
-      if ($line =~ /^$mode\,$language\,/)
+      if ($line =~ /^$mode\,$language2\,/)
       {
         chomp ($line) ;
         $line_content_namespaces = $line ;
@@ -3159,7 +3161,7 @@ if (0)
     if ($line_content_namespaces ne '')
     {
       &LogT ("Read content namespaces from file '$file_csv_content_namespaces': line='$line_content_namespaces'\n") ;
-      my ($mode,$language,$content_namespaces) = split (',', $line_content_namespaces) ;
+      my ($dummy_mode,$dummy_language,$content_namespaces) = split (',', $line_content_namespaces) ;
       foreach $id (split '\|', $content_namespaces)
       { $content_namespace {$id} = $true ; }
       &LogT ("Content namespaces for language $language: " . join (',', sort keys %content_namespace) . "\n") ;
