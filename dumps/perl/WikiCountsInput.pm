@@ -3142,7 +3142,8 @@ if (0)
     if (! -e $file_csv_content_namespaces)
     { abort ("Namespaces file not found: '$file_csv_content_namespaces'. Run 'collect_countable_namespaces.sh'\n") ; }
 
-    my ($language2 = $language) =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
+    my $language2 = $language ;
+    $language2 =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
 
     $line_content_namespaces = '' ;
     open FILE_NS, "<", $file_csv_content_namespaces ;
