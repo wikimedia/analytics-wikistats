@@ -183,7 +183,7 @@ sub SetLanguageInfo
   ha=>"http://ha.wikipedia.org Hausa [39,AF]",
   hak=>"http://hak.wikipedia.org Hakka [34,AS,C]",
   haw=>"http://haw.wikipedia.org Hawai'ian [0.027,OC]", # was Hawaiian
-  he=>"http://he.wikipedia.org Hebrew [10,AS]",
+  he=>"http://he.wikipedia.org Hebrew [5.3,AS]",
   hi=>"http://hi.wikipedia.org Hindi [550,AS]",
   hif=>"http://hif.wikipedia.org Fiji Hindi [0.46,OC]",
   ho=>"http://ho.wikipedia.org Hiri Motu",
