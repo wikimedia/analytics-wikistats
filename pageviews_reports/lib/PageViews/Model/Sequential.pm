@@ -471,7 +471,7 @@ sub process_file {
   $self->{current_file_processed} = $filename;
   $self->open_dbg_fh;
 
-  my $cmd = "unpigz -c $filename ";
+  my $cmd = "pigz -d -c $filename ";
   if($restrictions) {
     if(exists $restrictions->{"days-of-each-month"}) {
       my $days_to_process = $restrictions->{"days-of-each-month"};
