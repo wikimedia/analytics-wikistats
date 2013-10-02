@@ -13,7 +13,7 @@ logs=$dammit/logs
 input=/mnt/data/xmldatadumps/public/other/pagecounts-raw
 output=/a/dammit.lt/pagecounts/merged
 temp=/a/dammit.lt/pagecounts/temp
-dataset2=dataset2::pagecounts-ez/merged/
+dataset2=dataset2.wikimedia.org::pagecounts-ez/merged/
 
 yyyymmdd=$(date +"%Y_%m_%d")
 logfile=$logs/compact_daily_$yyyymmdd.log 
