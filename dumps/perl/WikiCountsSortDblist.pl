@@ -2,26 +2,28 @@
 
 use Getopt::Std ;
 
-  getopt ("cds", \%options) ;
+  getopt ("cios", \%options) ;
 
-  die ("Specify dblist file as: -d path") if (! defined (@options {"d"})) ;
+  die ("Specify dblist file in as: -i path")          if (! defined (@options {"i"})) ;
+  die ("Specify dblist file out as: -o path")         if (! defined (@options {"o"})) ;
   die ("Specify path for StatisticsLog.csv: -c path") if (! defined (@options {"c"})) ;
-  die ("Specify suffix: -s suffix") if (! defined (@options {"s"})) ;
+  die ("Specify suffix: -s suffix")                   if (! defined (@options {"s"})) ;
 
-  $file_csv    = @options {"c"} ;
-  $file_dblist = @options {"d"} ;
-  $suffix      = @options {"s"} ;
+  $file_csv        = @options {"c"} ;
+  $file_dblist_in  = @options {"i"} ;
+  $file_dblist_out = @options {"o"} ;
+  $suffix          = @options {"s"} ;
 
 # local test only:
 # $file_csv    = "dblists/StatisticsLog.csv" ;
 # $file_dblist = "dblists/wikinews.dblist" ;
 # $suffix      = "wikinews" ;
 
-  if (! -e $file_csv)    { die "csv file '$file_csv' not found" ; }
-  if (! -e $file_dblist) { die "dblist file '$file_dblist' not found" ; }
+  if (! -e $file_csv)       { die "csv file '$file_csv' not found" ; }
+  if (! -e $file_dblist_in) { die "dblist file '$file_dblist_in' not found" ; }
 
   print "\n\nSort dblist $file_dblist\nProcessing last dump took x seconds:\n\n" ;
-  open DBLIST, '<', $file_dblist ;
+  open DBLIST, '<', $file_dblist_in ;
   @dblist = <DBLIST> ;
   foreach $db (@dblist)
   {
@@ -66,7 +68,7 @@ use Getopt::Std ;
   rename $file_dblist, $file_dblist.".bak" ;
 
   $lines = 0 ;
-  open DBLIST, '>', $file_dblist ;
+  open DBLIST, '>', $file_dblist_out || die "File '$file_dblist_out' could not be written" ;
   foreach $db (@dblist)
   {
     $rank = $wiki_rank {$db} ;
