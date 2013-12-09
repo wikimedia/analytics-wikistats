@@ -568,7 +568,7 @@ sub WriteMonthlyMetricsPerSquidSet
 <p><b>Calculation of msg loss percentage:</b>
 <p>Assume total volume of messages per hour per server is <b>v</b>
 <br>We expect average gap between messages per server is 1000 
-<br>We see avarage gap is <b>g</b>
+<br>We see average gap is <b>g</b>
 <p>Msg received percentage is 100 x actual volume / expected volume 
 <br>Msg loss percentage = 100 - msg rcvd percentage
 <p>Actual volume = v / g
