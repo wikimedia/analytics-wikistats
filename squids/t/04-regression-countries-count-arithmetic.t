@@ -9,6 +9,7 @@ use Carp;
 use lib "./t";
 use Generate::Squid;
 use List::Util qw/sum/;
+use POSIX 'strftime';
 
 
 #
@@ -29,13 +30,41 @@ my $SAMPLE_USER_AGENT_NEXUS  = "Mozilla/5.0%20(Linux;%20U;%20Android%204.1.1;%20
 my $SAMPLE_URL_MOBILE        = "http://en.m.wikipedia.org/wiki/Manhattan_Project";
 my $SAMPLE_URL_MIMETYPE_SVG  = "http://en.wikipedia.org/wiki/File:Great-Lakes-Basin.svg";
 
+
+# We pick a day and simulate country logs for it. The days must not be
+# older than one year, or otherwise SquidCountArchive.pl will
+# complain. So we resort to the 1st, 2nd, ... day of the previous
+# month. That should always work.
+#
+# We're mostly interested in the 2nd day of the month, and filter for
+# that. The 1st day of the month is just needed to simulate
+# boundaries.
+my @date = gmtime(time);
+$date[4]--; # Set month to previous
+if ($date[4] < 0) {
+    # Month underrun. Make up by borrowing from year.
+    $date[4]+=12;
+    $date[5]--;
+}
+
+# First day of month
+$date[3]=1;
+my $day_1_ymd = strftime('%Y-%m-%d', @date);
+
+# Second day of month. This is the day we're interested in.
+$date[3]++;
+my $day_2_ym = strftime('%Y-%m', @date);
+my $day_2_ymd = strftime('%Y-%m-%d', @date);
+my $day_2_ymd_slash = strftime('%Y/%m/%d', @date);
+
+
 ################################
 # Generating data for test
 ################################
 
 warn $__DATA_BASE;
 my $o = Generate::Squid->new({
-   start_date => "2012-09-30"       ,
+   start_date => $day_1_ymd,
    prefix     => "sampled-1000.log-",
    output_dir => $__DATA_BASE,
 });
@@ -48,10 +77,10 @@ my @countries_data =
       { code => "GB" , mobile_pageviews => "100", non_mobile_pageviews => "0" },
     );
 
-# Date is 2012-09-30
+# Date is 1st day of month
 $o->generate_line({ geocode=>"--"  });
 $o->__increase_day; 
-# Date is 2012-10-01
+# Date is 2nd day of month
 for my $country (@countries_data) {
 
   my $mobile_pageviews     = $country->{mobile_pageviews};
@@ -66,7 +95,7 @@ for my $country (@countries_data) {
   $o->generate_line({ geocode           => $country->{code} }) for (1..$non_mobile_pageviews);
 };
 $o->__increase_day;
-# Date is 2012-10-02
+# Date is 3rd day of month
 $o->generate_line({ geocode=>"--"  });
 $o->dump_to_disk_and_increase_day;
 
@@ -112,7 +141,7 @@ my $wikistats_run_cmd = qq{
     nice perl			                  \\
     -I ./perl                                     \\
     perl/SquidCountArchive.pl	                  \\
-    -d 2012/10/01-2012/10/01                      \\
+    -d $day_2_ymd_slash-$day_2_ymd_slash          \\
     -r $__DATA_BASE/SquidCountArchiveConfig.pm    \\
     -p 2>&1;
 
@@ -122,7 +151,7 @@ my $wikistats_run_cmd = qq{
     ########################
     nice perl  perl/SquidReportArchive.pl         \\
     -r $__DATA_BASE/SquidReportArchiveConfig.pm   \\
-    -m 2012-10			                  \\
+    -m $day_2_ym                                  \\
     -p 2>&1;
 };
 
@@ -139,7 +168,7 @@ my $wikistats_run_cmd_output = `$wikistats_run_cmd`;
 my $sum_csv;
 my $sum_planned=sum(map { $_->{non_mobile_pageviews} + $_->{mobile_pageviews} } @countries_data);
 
-open my $countries_views_csv_fh,"<$__DATA_BASE/csv/2012-10/2012-10-01/public/SquidDataCountriesViews.csv";
+open my $countries_views_csv_fh,"<$__DATA_BASE/csv/$day_2_ym/$day_2_ymd/public/SquidDataCountriesViews.csv";
 while(my $line=<$countries_views_csv_fh>) {
   chomp $line;
   my @fields = split(/,/,$line);
@@ -164,7 +193,7 @@ ok(1,"Sample test");
 use HTML::TreeBuilder::XPath;
 use Data::Dumper;
 my $p = HTML::TreeBuilder::XPath->new;
-$p->parse_file("$__DATA_BASE/reports/2012-10/SquidReportRequests.htm");
+$p->parse_file("$__DATA_BASE/reports/$day_2_ym/SquidReportRequests.htm");
 my @table_1_row_header = $p->findnodes("/html/body/p[1]/table/tr[1]/*");
 my @table_1_row_1      = $p->findnodes("/html/body/p[1]/table/tr[3]/*");
 my @table_1_row_total  = $p->findnodes("/html/body/p[1]/table/tr[4]/*");
