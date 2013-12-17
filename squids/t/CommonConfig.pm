@@ -16,10 +16,7 @@ my $pwd      = `pwd`;
 chomp $hostname;
 
 our $__CODE_BASE;
-if($hostname eq "gallium") {
-  # Running on Jenkins
-  $__CODE_BASE = $ENV{WORKSPACE}."/squids";
-} elsif($hostname eq "stat1" && $ENV{HOME} eq "/home/ezachte") {
+if($hostname eq "stat1" && $ENV{HOME} eq "/home/ezachte") {
   # Running on Erik's account on stat1
   $__CODE_BASE = "/home/ezachte/wikistats/squids";
 } elsif($hostname eq "stat1" && $ENV{HOME} eq "/home/diederik") {
@@ -29,7 +26,14 @@ if($hostname eq "gallium") {
   $__CODE_BASE = "/home/travis/build/wsdookadr/analytics-wikistats/squids";
 } else {
   # Anywhere else
-  $__CODE_BASE = "/a/wikistats_git/squids";
+
+  # If WORKSPACE seems to point to a checkout, we use it (Allowing for
+  # easier local testing, and use through Jenkins). Otherwise we fall
+  # back to the usual wmf setup.
+  $__CODE_BASE = $ENV{WORKSPACE}."/squids";
+  if(! -d $__CODE_BASE) {
+    $__CODE_BASE = "/a/wikistats_git/squids";
+  }
 };
 
 

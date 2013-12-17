@@ -95,6 +95,10 @@ my $contents_day_3 = 'ssl4 9094050 ' . $day_3_ymd . 'T00:00:00 0.002 240f:0:0:0:
 
 our $__DATA_BASE;
 
+# Making sure $__DATA_BASE identification worked (i.e.: it is a
+# directory), as otherwise creating files will fail badly and not give
+# much hints what wehn wrong.
+ok(-d $__DATA_BASE, '$__DATA_BASE points to directory');
 
 ################################
 # Creating input for test
