@@ -19,7 +19,7 @@ cd $perl
 
 mode=-m    # specify -m for monthly combine of daily files, comment line for generating daily files
 verbose=-v # comment for concise output
-maxage=1   # process files for last .. months
+maxage=2   # process files for last .. months
 
 echo Consolidate daily pagecount files into one monthly file for last $maxage completed months 
 echo

@@ -36,7 +36,7 @@ mkdir  $work/data/$abbr/$yyyy_mm
 mkdir  $work/publish/$abbr
 mkdir  $work/publish/$abbr/$yyyy_mm
 
-perl DammitScanCategories.pl -o $work/data/$abbr/$yyyy_mm -h $work/publish/$abbr/$yyyy_mm/$html_categories -d $depth -c $category -w $wiki
+perl DammitScanCategories.pl -o $work/data/$abbr/$yyyy_mm -h $work/publish/$abbr/$yyyy_mm/$html_categories -d $depth -c $category -w $wiki -x $work/data/exclude.csv
 perl DammitFilterMonthlyPageViews.pl -o $work/data/$abbr/$yyyy_mm/$views_filtered -t $work/data/$abbr/$yyyy_mm/$titles -v $views
 perl DammitReportPageViewsByCategory.pl -i $work/data/$abbr/$yyyy_mm/$views_filtered -o $work/publish/$abbr/$yyyy_mm/$html_pageviews -v $threshold -a $abbr -m $yyyy_mm
 

@@ -31,7 +31,7 @@
 sub ParseArguments
 {
   my $options ;
-  getopt ("cdowh", \%options) ;
+  getopt ("cdowhx", \%options) ;
 
   foreach $key (keys %options)
   {
@@ -44,16 +44,17 @@ sub ParseArguments
   }
 
   abort ("Specify category as: '-c \"some category\"'")    if (! defined ($options {"c"})) ;
-  abort ("Invalid tree depth specified! Specify tree depth for category scan n (n between 1 and 9) as: '-d n'") if (defined ($options {"d"}) && ($options {"d"} !~ /^[1-9]$/)) ;
+  abort ("Invalid tree depth specified! Specify tree depth for category scan n (n between 1 and 99) as: '-d n'") if (defined ($options {"d"}) && ($options {"d"} !~ /^\d\d*$/)) ;
   abort ("Specify wiki as e.g.: '-w nl.wikipedia.org'") if (! defined ($options {"w"})) ;
   abort ("Specify output folder as : '-o [folder]'") if (! -d $options {"o"}) ;
   
-  $category    = $options {"c"} ;
-  $depth       = $options {"d"} ;
-  $path_out    = $options {"o"} ;
-  $path_html   = $options {"h"} ;
-  $wiki        = $options {"w"} ;
-  $projectcode = $wiki ;
+  $category     = $options {"c"} ;
+  $depth        = $options {"d"} ;
+  $path_out     = $options {"o"} ;
+  $path_html    = $options {"h"} ;
+  $path_exclude = $options {"x"} ;
+  $wiki         = $options {"w"} ;
+  $projectcode  = $wiki ;
 
   $category    = uri_unescape ($category) ;
   $path_html   = uri_unescape ($path_html) ;
@@ -95,6 +96,9 @@ sub ParseArguments
   if (! -d $path_out)
   { abort ("Output directory '" . $path_out . "' not found and could not be created") ; }
 
+  if (! -e $path_exclude)
+  { abort ("File with categories not to expand '" . $path_exclude . "' not found") ; }
+
   $file_log             = "$path_out/scan_categories.log" ;
   $file_csv             = "$path_out/scan_categories_found_articles.csv" ;
   $file_categories      = "$path_out/scan_categories_found_tree.txt" ;
@@ -104,6 +108,38 @@ sub ParseArguments
   print "Csv  $file_csv\n" ;
   print "Txt  $file_categories\n" ;
   print "Html $path_html\n" ;
+
+  print "\nDo not expand categories for wiki '$wiki', root category '$category':\n" ; 
+  open CSV, '<', $path_exclude ;
+  while ($line = <CSV>)
+  {
+    chomp $line ;	  
+    
+    my ($wiki_x,$category_root,$category_exclude) = split ('\|', $line) ;
+    $category_root    = uri_unescape ($category_root) ;
+    $category_exclude = uri_unescape ($category_exclude) ;
+
+    # remove leading and trailing spaces
+    $wiki_x           =~ s/^\s*// ;
+    $wiki_x           =~ s/\s*$// ;
+    $category_root    =~ s/^\s*// ;
+    $category_root    =~ s/\s*$// ;
+    $category_exclude =~ s/^\s*// ;
+    $category_exclude =~ s/\s*$// ;
+    
+    next if $category_exclude eq '' ;
+    next if $wiki_x ne $wiki ;
+    next if $category_root ne $category ;
+    print "'$category_exclude'\n" ;
+    $category_exclude =~ s/\*/.*/g ;
+    if ($category_exclude =~ /\*/)
+    { $regexps_exclude .= "$category_exclude|" ; }
+    $do_not_expand {$category_exclude} ++ ; 
+  }
+  print "\n" ;
+  $regexps_exclude =~ s/\|$// ;
+  print "regexps: $regexps_exclude\n" ; ;
+  close CSV ;
 }
 
 #sub LogArguments
@@ -141,11 +177,25 @@ sub ScanCategories
 
   ($path_pageviews = $path_html) =~ s/categories/pageviews/ ;
   $path_pageviews =~ s/^.*\/// ;
-  print FILE_CATEGORIES_HTML "Fetch pages from $wiki for category $category, max $maxlevel levels deep:<p>\n" ;
-  print FILE_CATEGORIES_HTML "Switch to <a href='$path_pageviews'>page views report</a><p>\n" ;
-# print FILE_CATEGORIES_HTML "s = subcategories, a = articles<p>" ;
 
-  &FetchCategoryMembers ($category, 1) ;
+  print FILE_CATEGORIES_HTML "Switch to <a href=\"$path_pageviews\">page views report</a><p>\n" ;
+  print FILE_CATEGORIES_HTML "<h3>Subcategories on $wiki for category $category, max $maxlevel levels deep:</h3><p>\n" ;
+
+  @do_not_expand = sort keys %do_not_expand ;
+  if ($#do_not_expand > -1)
+  {
+    print FILE_CATEGORIES_HTML "Subcategories which were not expanded as they have too much content outside the topic at hand:<p>\n" ;
+    foreach $subcat (@do_not_expand)
+    {
+      ($subcat2 = $subcat) =~ s/([\x80-\xFF]{2,2})/&UnicodeToAscii($1)/ge ;
+      print FILE_CATEGORIES_HTML "<a href=\"http://$wiki/wiki/category:$subcat2\">$subcat2</a><br>\n" ;
+    }	    
+    print FILE_CATEGORIES_HTML "<br>\n" ;
+  }
+
+# print FILE_CATEGORIES_HTML "s = subcategories, a = articles<p>" ;
+  
+  &FetchCategoryMembers ($category, 1) ; 
 
   print FILE_CSV "# wiki:$wiki\n" ;
   print FILE_CSV "# category:$category\n" ;
@@ -181,16 +231,33 @@ sub FetchCategoryMembers
 
   if ($level > $maxlevel) { return ; }
 
-  ($category2 = $category) =~ s/([\x80-\xFF]{2,})/&UnicodeToAscii($1)/ge ;
+  ($category2 = $category) =~ s/([\x80-\xFF]{2,2})/&UnicodeToAscii($1)/ge ;
   return if $category2 =~ /^\s*$/ ;
+ 
+  if ($do_not_expand {$category})
+  {
+    $indent       = "  " x  ($level-1) ;
+    $indent_html  = "&nbsp;&nbsp;&nbsp; " x ($level-1) ;
+    print FILE_CATEGORIES      "$indent $level '$category2' -> do not expand, on exclusion list\n" ;
+    print FILE_CATEGORIES_HTML "$indent_html $level <a href=\"http://$wiki/wiki/category:$category2\">$category2</a> -> do not expand, on exclusion list<br>\n" ;
+    return ;
+  }
+
+  if ($category =~ /^$regexps_exclude$/i)
+  {
+    $indent       = "  " x  ($level-1) ;
+    $indent_html  = "&nbsp;&nbsp;&nbsp; " x ($level-1) ;
+    print FILE_CATEGORIES      "$indent $level '$category2' -> do not expand, on exclusion list (regexp)\n" ;
+    print FILE_CATEGORIES_HTML "$indent_html $level <a href=\"http://$wiki/wiki/category:$category2\">$category2</a> -> do not expand, on exclusion list<br>\n" ;
+    return ;
+  }
 
   if ($queried {$category})
   {
     $indent       = "  " x  ($level-1) ;
     $indent_html  = "&nbsp;&nbsp;&nbsp; " x ($level-1) ;
     print FILE_CATEGORIES      "$indent $level '$category2' -> already queried\n" ;
-  # print FILE_CATEGORIES_HTML "$indent_html $level '$category2' -> already queried<br>\n" ;
-    print FILE_CATEGORIES_HTML "$indent_html $level <a href='http://$wiki/wiki/category:$category2'>$category2</a> -> already queried<br>\n" ;
+    print FILE_CATEGORIES_HTML "$indent_html $level <a href=\"http://$wiki/wiki/category:$category2\">$category2</a> -> already queried<br>\n" ;
     return ;
   }
 
@@ -273,7 +340,7 @@ sub FetchCategoryMembers
   else
   { $articles = ($#articles+1) . " articles" ; }
 
-  print FILE_CATEGORIES_HTML "$indent_html $level <a href='http://$wiki/wiki/category:$category2'>$category2</a> -> $subcats$articles<br>\n" ;
+  print FILE_CATEGORIES_HTML "$indent_html $level <a href=\"http://$wiki/wiki/category:$category2\">$category2</a> -> $subcats$articles<br>\n" ;
   foreach $subcategory (sort @categories)
   {
     if (($level < $maxlevel) && ($subcategory !~ /(?:National_Inventors_Hall_of_Fame_inductees|Inventors|Directors)/))
@@ -313,7 +380,7 @@ sub GetPage
   $file2 =~ s/^.*?api/api/ ;
   $file2 =~ s/([\x80-\xFF]{2,})/&UnicodeToAscii($1)/ge ;
   (my $category2 = $category) =~ s/([\x80-\xFF]{2,})/\?/g ;
-  print "GET $indent $level $category2" ;
+  print "$categories_scanned $indent $level $category2" ;
   &Log2 ("\n$indent $level $category -> '$file2'") ;
 
   for ($attempts = 1 ; ($attempts <= 2) && (! $succes) ; $attempts++)

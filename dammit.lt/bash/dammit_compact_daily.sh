@@ -7,7 +7,7 @@ c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
-# perl=/home/ezachte/wikistats/dammit.lt/perl # tests
+#perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 logs=$dammit/logs 
 
 input=/mnt/data/xmldatadumps/public/other/pagecounts-raw
@@ -26,14 +26,18 @@ maxage=14 # process files for last .. completed days (runs daily, so should have
 
 echo Consolidate pagecount files into one daily file for last $maxage completed days 
 echo
-c1 perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
+# c1 perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
+     perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
 
 echo Consolidate pagecount files for whole month into one monthly file - only finds work to do on first day of new month 
 echo
-c1 ./dammit_compact_monthly.sh 
+# c1 ./dammit_compact_monthly.sh 
+     ./dammit_compact_monthly.sh 
 
 echo Publish new files 
 echo
-c2 rsync -arv --include=*.bz2 $output/* $dataset2
+# c2 rsync -arv --include=*.bz2 $output/* $dataset2
+     rsync -arv --include=*.bz2 $output/* $dataset2
+
 
 #grep ">>" $logs/*.log

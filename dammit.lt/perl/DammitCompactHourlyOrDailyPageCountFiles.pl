@@ -1,5 +1,13 @@
 #!/usr/local/bin/perl
 
+#$a = "Kentro_(disambiguaton)" ;
+#$b = "Kentrosaurus" ;
+#if ($a gt $b)
+#{ print "a gt b" ; }
+#else
+#{ print "b gt a" ; }
+#exit ;
+
 # Introduction:
 # This script merges and encodes content from hourly unsampled page view files, generated with Domas Mituzas' udp2log script
 # Input files were located for many years on dammit.lt/wikistats (hence 'Dammit' in the script name), now on http://dumps.wikimedia.org/other/pagecounts-raw/
@@ -994,6 +1002,8 @@ sub PhaseBuildDailyFile_MergeFiles
   $time_start_cycle = time ;
   $lines = 0 ;
 
+# open TRACE, '>', "/home/ezachte/trace.txt" ; # debug code
+
   undef @fh_in_hourly ;
   undef %totals_in ;
   undef %totals_out ;
@@ -1028,6 +1038,10 @@ sub PhaseBuildDailyFile_MergeFiles
     # if (($key_low =~ /^nov/) || ($key_low_prev =~ /^nov/))
     # { &Log ("key_low '$key_low' (key_low_prev '$key_low_prev')\n") ; }
 
+    # debug code
+    # if ($key_low gt "Game") # qqq
+    # { $trace_reads = $true ; }
+
     $counts = "" ;
     $total  = 0 ;
     for ($hour = 0 ; $hour < 24 ; $hour++)
@@ -1044,15 +1058,23 @@ sub PhaseBuildDailyFile_MergeFiles
 
           $file = $fh_in_hourly [$hour] ;
           $line = <$file> ;
-          
+          if ($trace_reads)
+	  { print TRACE sprintf ("%02d: ", $hour) . $line ; }
+          	  
 	  while ($line =~ /^\Q$key_low\E /) # |Q..|E do not interpret special chars like ( and ) in variable 
 	  {
 	    print "\nIgnore duplicate key '$key_low'\n\n" ; # should only occur few days after data stream bug from Jan 31 2013   	  
             $line = <$file> ;
+            if ($trace_reads) # qqq
+	    { print TRACE sprintf ("%02d: ", $hour) . $line ; }
 	  }
 	  
 	  while ($line =~ /^\*/)
-	  { $line = <$file> ; }
+	  { 
+            $line = <$file> ; 
+            if ($trace_reads) # qqq
+	    { print TRACE sprintf ("%02d: ", $hour) . $line ; }
+          }
 
 	  # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
 	  # $line =~ s/^([\w\-]+) /$1.z /o  ;
@@ -1065,7 +1087,15 @@ sub PhaseBuildDailyFile_MergeFiles
           if ($line && (($test_max_language eq '') || ($lang le $test_max_language)))
           {
             if ($fs_key_hourly [$hour] gt "$lang $title")
-	    { &Abort ("Out of sequence on hour $hour:\n'${fs_key_hourly [$hour]}' gt\n'$lang $title'") ; }
+	    { 
+              print TRACE "\n\n" ;
+              for ($h = 0 ; $h < 24 ; $h++)
+	      { print TRACE sprintf ("%02d: ", $h) . $fs_key_hourly [$h] . "\n" ; }  
+              for ($h = 0 ; $h < 24 ; $h++)
+	      { print sprintf ("%02d: ", $h) . $fs_key_hourly [$h] . "\n" ; }  
+              &Abort ("Out of sequence on hour $hour:\n'${fs_key_hourly [$hour]}' gt\n'$lang $title'") ; 
+            }
+
 
       	    $fs_key_hourly [$hour] = "$lang $title" ;
             $count [$hour] = $count ;
@@ -1270,16 +1300,16 @@ sub PhaseBuildDailyFile_PrepInputFiles
     {
       $lines_read ++ ;
       # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix, test for field delimited string without dot 
+      chomp $line ;
       $line =~ s/^([^\.\s]+)2 /$1.y /o  ;
       $line =~ s/^([^\.\s]+) /$1.z /o  ;
+      $line =~ s/[\x00-\x1F]+//g ;
 
      ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
       if ($overflow ne '')  # too many fields, due to spaces in title since Jan 31, 2013, try to fix  
       {
         $lines_read_extra_spaces ++ ;
 	      
-	chomp $line ;
-	
 	if ($lang eq 'ar.z') { print "\n!!! Too many fields: overflow: '$overflow'\n$line'\n" ; }
 
         @fields = split (' ', $line) ;
@@ -1304,7 +1334,7 @@ sub PhaseBuildDailyFile_PrepInputFiles
 
 	if ($lang eq 'ar.z') { print "$line\n\n" ; }
       }
-      print $fh_patched $line ;
+      print $fh_patched "$line\n" ;
     }
     close $fh_in ;
     close $fh_patched ;

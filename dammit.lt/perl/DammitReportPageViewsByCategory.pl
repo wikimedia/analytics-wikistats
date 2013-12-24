@@ -86,6 +86,7 @@ sub WriteReport
   $html .= "Click arrow in header to sort on that column. Shift+click to add column as secondary sort order. " ;
   $html .= "E.g. first on category, secondary on views.<br>" ;
   $html .= "On huge tables sort will take a while, please be patient.<p>" ;
+  $html .= "<font color=#FF0000>Please be aware that pageviews per article are not yet captured for Wikipedia's mobile site. Average underreporting will be 15-20%,<br>but may be much higher for languages mostly spoken in the Global South, where a larger share of web access happens via mobile phones.</font><p>" ;
 
   $file_html_categories =~ s/pageviews/categories/ ;
   $file_html_categories =~ s/^.*\/// ; # remove path
