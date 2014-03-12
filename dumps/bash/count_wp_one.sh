@@ -17,7 +17,7 @@ cd $perl
 #bz2=-b # comment to run 7z dump
 date=auto # 20101231 # auto
 edits_only=-e # comment to run full scan
-#trace=-r # comment to not trace rsources
+#trace=-r # comment to not trace resources
 #reverts_only="-u 1" # comment to collect all data (u for undo)
 #date=$1
 
