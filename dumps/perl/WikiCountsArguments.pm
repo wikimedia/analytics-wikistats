@@ -590,12 +590,12 @@ sub SetEnvironment
   if ((! $edits_only) && (-s $file_in_xml_full > $threshold_tie_file))
   { $use_tie = $true ; }
 
-  # profile critical routines agressively, despite overhead ?
+  # profile critical routines aggressively, despite overhead ?
   $record_time_process_revision_main = $true ;
   $record_time_collect_article_counts_main = $true ;
   if (($mode eq "wp") && ($testmode2 || ($language eq "nv")))
   {
-    &LogT ("\nProfile critical routines agressively, despite overhead\n") ;
+    &LogT ("\nProfile critical routines aggressively, despite overhead\n") ;
     $record_time_process_revision = $true ;
     $record_time_collect_article_counts = $true ;
   }

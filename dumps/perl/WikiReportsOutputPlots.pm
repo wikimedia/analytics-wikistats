@@ -3,7 +3,7 @@
 # lijnen bij y = 0 beginnen
 # database size tr loop uit grafiek
 
-$generate_ploticus_plots = 1 ; # no longer update old line charts, refer to newer solutions in hml file
+$generate_ploticus_plots = 1 ; # no longer update old line charts, refer to newer solutions in html file
 
 sub GetWp
 {

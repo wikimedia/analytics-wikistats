@@ -169,7 +169,7 @@
   if (defined ($path_perl))
   { &CheckForNonAscii ; }
 
-  # partial excution for tests only
+  # partial execution for tests only
 #  if (! $job_runs_on_production_server)
 #  {
 #    $language = 'commons' ;
