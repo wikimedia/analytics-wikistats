@@ -74,12 +74,17 @@
   if ($dir_out eq '')
   { Abort ("Specify folder for output file '-o folder'") ; }
 
-  $file_comscore_reach_master     = "history_comscore_reach_regions.csv" ;
-  $file_comscore_reach_update     = "*reach*by*region*csv" ;
-  $file_comscore_uv_region_master = "history_comscore_UV_regions.csv" ;
-  $file_comscore_uv_region_update = "*UVs*by*region*csv" ;
+  $file_comscore_reach_master       = "history_comscore_reach_regions.csv" ;
+  $file_comscore_uv_region_master   = "history_comscore_UV_regions.csv" ;
   $file_comscore_uv_property_master = "history_comscore_UV_properties.csv" ;
-  $file_comscore_uv_property_update = "*UV*trend*csv" ;
+
+# Jan 2014: standardized file names for comScore input
+# $file_comscore_reach_update       = "*reach*by*region*csv" ;
+# $file_comscore_uv_region_update   = "*UVs*by*region*csv" ;
+# $file_comscore_uv_property_update = "*UV*trend*csv" ;
+  $file_comscore_reach_update       = "reach_by_region*.csv" ;
+  $file_comscore_uv_region_update   = "uv_by_region*.csv" ;
+  $file_comscore_uv_property_update = "uv_top1000*.csv" ;
 
   $layout_csv_reach      = 1 ;
   $layout_csv_regions    = 2 ;
@@ -141,6 +146,8 @@ sub ReadMasterComscoreDataReachPerRegion
   {
     chomp $line ;
     $line =~ s/\r//g ;
+
+    $line =~ s/Worldwide/World-Wide/ ; # tag changed Jan 2014
 
     ($yyyymm,@data) = split (',', $line) ;
     if ($lines++ == 0)
@@ -212,6 +219,7 @@ sub ReadMasterComscoreDataVisitorsPerRegion
   {
     chomp $line ;
     $line =~ s/\r//g ;
+    $line =~ s/Worldwide/World-Wide/ ; # tag changed Jan 2014
     $line = &GetNumberOnly ($line) ;
 
     next if $line !~ /(?:yyyymm|\d\d\d\d-\d\d)/ ;
@@ -291,6 +299,7 @@ sub ReadMasterComscoreDataVisitorsPerProperty
   {
     chomp $line ;
     $line =~ s/\r//g ;
+    $line =~ s/Worldwide/World-Wide/ ; # tag changed Jan 2014
 
     ($yyyymm,@data) = split (',', $line) ;
     if ($lines++ == 0)
@@ -419,6 +428,7 @@ sub UpdateMasterFileFromRecentComscoreData
   {
     chomp $line ;
     $line =~ s/\r//g ;
+    $line =~ s/Worldwide/World-Wide/ ; # tag changed Jan 2014
     $line = &GetNumberOnly ($line) ;
 
     if ($line =~ /Jan-\d\d\d\d.*?Feb-\d\d\d\d/) # e.g. 'Location,Location,Jan-2010,Feb-2010,Mar-2010,Apr-2010,...'
