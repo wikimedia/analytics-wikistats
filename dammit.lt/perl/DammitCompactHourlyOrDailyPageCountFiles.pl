@@ -1,13 +1,5 @@
 #!/usr/local/bin/perl
 
-#$a = "Kentro_(disambiguaton)" ;
-#$b = "Kentrosaurus" ;
-#if ($a gt $b)
-#{ print "a gt b" ; }
-#else
-#{ print "b gt a" ; }
-#exit ;
-
 # Introduction:
 # This script merges and encodes content from hourly unsampled page view files, generated with Domas Mituzas' udp2log script
 # Input files were located for many years on dammit.lt/wikistats (hence 'Dammit' in the script name), now on http://dumps.wikimedia.org/other/pagecounts-raw/

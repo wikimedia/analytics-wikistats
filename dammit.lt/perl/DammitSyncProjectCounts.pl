@@ -16,8 +16,8 @@
 
   $dir_tars    = "/a/dammit.lt/projectcounts" ;
   $dir_dumps   = "/mnt/data/xmldatadumps/public/other/pagecounts-raw" ;
-  $dir_archive = "dataset2::pagecounts-ez/projectcounts" ;
-
+  $dir_archive = "dataset1001.wikimedia.org::pagecounts-ez/projectcounts" ;
+  
   if (! -d $dir_tars)
   { &Abort ("Folder not found: '$dir_tars'\n") ; }
   if (! -d $dir_dumps)

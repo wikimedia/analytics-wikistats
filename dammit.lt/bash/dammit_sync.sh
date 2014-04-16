@@ -6,6 +6,7 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
+perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 logs=$dammit/logs
 
 data=/a/dammit.lt
