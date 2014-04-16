@@ -55,9 +55,7 @@
     if ($weeknums {$weeknum} eq '')
     { $weeknums {$weeknum} = $yyyy_mm_dd ; }
     $months {$yyyy_mm} ++ ;
-
-    # next if $yyyy_mm eq "2011-09" and $yyyy_mm_dd ge "2011-09-08" ; # " Sep 2011: varnish bug could not be repaired, as logs were gone when bug was found Dec 2011
-
+    
     $days {$yyyy_mm_dd}++ ; # collect days found
     $dates_ascii {$yyyy_mm_dd} = $yyyy_mm_dd ;
     $dates_excel {$yyyy_mm_dd} = $date_excel ;
@@ -65,6 +63,22 @@
     $dates_excel {$yyyy_mm}    = $date_excel ;
 
     print "$yyyy_mm_dd\n" ;
+
+    # same invalid dates as in WikiCountsSummarizeProjectCounts.pl
+    if (($yyyy_mm_dd ge "2010-06-11" and $yyyy_mm_dd lt "2010-06-17") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2010-06-27" and $yyyy_mm_dd lt "2010-06-28") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2011-09-08" and $yyyy_mm_dd lt "2011-09-15") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2011-12-23" and $yyyy_mm_dd lt "2011-12-26") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2012-04-13" and $yyyy_mm_dd lt "2012-04-17") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2012-07-02" and $yyyy_mm_dd lt "2012-07-03") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2012-11-01" and $yyyy_mm_dd lt "2012-11-02") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2012-12-14" and $yyyy_mm_dd lt "2013-01-08") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2013-07-23" and $yyyy_mm_dd lt "2013-07-24") || # bad measurements on these dates
+        ($yyyy_mm_dd ge "2014-01-05" and $yyyy_mm_dd lt "2014-01-07"))   # bad measurements on these dates
+    {
+      $time += 3600 * 24 ; # next day
+      next ;
+    }   
 
     $folder = "$path_csv_in/$yyyy_mm/$yyyy_mm_dd" ;
 
@@ -77,6 +91,7 @@
     if (-e $file)
     {
       $files {$weeknum} ++ ;
+      $files {$yyyy_mm} ++ ;
 
       open CSV_IN, '<', $file ;
 
@@ -108,9 +123,12 @@
 
         $group = ucfirst (lc ($fields [2])) ;
 
+	if ($group eq 'Safari' or $group eq 'Iphone')
+        { $group = 'Safari;iPhone' ; }
+
         if ($fields [1] eq 'M')
         {
-          if ($group !~ /^(?:safari|android|opera)$/i)
+          if ($group !~ /^(?:safari;iphone|android|opera|mozilla)$/i)
           { $group = 'other' ; }
           $group = "$group (Mobile)" ;
 
@@ -123,7 +141,7 @@
         }
         else
         {
-          if ($group !~ /^(?:msie|firefox|chrome|opera)$/i)
+          if ($group !~ /^(?:msie|firefox|chrome|opera|mozilla)$/i)
           { $group = 'other' ; }
           $group = "$group" ;
 
@@ -180,7 +198,7 @@
     print CSV_OUT_DAILY "\n" ;
   }
 
-  # monthly counts
+  # monthly counts, percentages
   print CSV_OUT_MONTHLY 'date ascii,date,' ;
   for $group (@group_list)
   { print CSV_OUT_MONTHLY "$group," ; }
@@ -201,6 +219,29 @@
     print CSV_OUT_MONTHLY "\n" ;
   }
 
+  # monthly counts, absolute counts
+  print CSV_OUT_MONTHLY 'date ascii,date,' ;
+  for $group (@group_list)
+  { print CSV_OUT_MONTHLY "$group," ; }
+  print CSV_OUT_MONTHLY "\n" ;
+
+  for $month (sort {$a cmp $b} keys %months)
+  {
+    print CSV_OUT_MONTHLY $dates_ascii {$month} . ',' ;
+    print CSV_OUT_MONTHLY $dates_excel {$month} . ',' ;
+
+    last if $totals_monthly {$month} == 0 ;
+
+    $days_valid = $files {$month} ;
+    $days_in_month = &days_in_month ($month) ;
+    for $group (@group_list)
+    {
+      my $total = int (($group_monthly {"$group,$month"} / $days_valid) * $days_in_month + 0.5) ;
+      print CSV_OUT_MONTHLY "$total," ; 
+    }
+
+    print CSV_OUT_MONTHLY "\n" ;
+  }
 
   # weekly counts
   print CSV_OUT_WEEKLY 'date ascii,date,' ;
@@ -249,4 +290,26 @@
 
     print CSV_OUT_WEEKLY "\n" ;
   }
+
+
+sub days_in_month
+{
+  my $yyyy_mm = shift ;
+  my $year  = substr ($yyyy_mm,0,4) ;
+  my $month = substr ($yyyy_mm,5,2) ;
+  my $days = $days_in_month_cached {"$year $month"} ;
+  return $days if $days > 0 ;
+
+  my $month2 = $month+1 ;
+  my $year2  = $year ;
+  if ($month2 > 12)
+  { $month2 = 1 ; $year2++ }
+
+  my $timegm1 = timegm (0,0,0,1,$month-1,$year-1900) ;
+  my $timegm2 = timegm (0,0,0,1,$month2-1,$year2-1900) ;
+  $days = ($timegm2-$timegm1) / (24*60*60) ;
+
+  $days_in_month_cached {"$year $month"} = $days ;
+  return ($days) ;
+}
 
