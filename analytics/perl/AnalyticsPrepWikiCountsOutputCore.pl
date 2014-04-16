@@ -12,6 +12,8 @@
 # $trace_on_exit         = $true ;
   ez_lib_version (15) ; # minimum version of EzLib.pm required
 
+  $null = "+++," ; # temporarily changed to "0," when Limn seemed to not handle missing values
+
   $month_last = sprintf ("%02d", $month_last) ; # 1 -> 01
 
   # set defaults mainly for tests on local machine
@@ -26,7 +28,6 @@
 
   $maxpopularwikis = 25 ;
   $maxextensions   = 14 ; # Q&D actually prints 15 (starts with 0)
-
   @projects = ('wb','wk','wn','wo','wp','wq','ws','wv','wx','commons','*') ;
 
   &LogArguments ;
@@ -407,9 +408,9 @@ sub WriteMonthlyData
       for ($m = $m_start ; $m <= $m_last ; $m++)
       {
         if ($f <= 3) # new editors, editors_gt_5, editors_gt_100,
-        { $line .= $totals_project {"$f,$m"} {$all_projects} . ","  ; }
+        { $line .= chck_null ($totals_project {"$f,$m"} {$all_projects}) . ","  ; }
         else
-        { $line .= $totals {"$f,$m"} . ","  ; }
+        { $line .= chck_null ($totals {"$f,$m"}) . ","  ; }
       }
 
       # growth in one year
@@ -433,7 +434,7 @@ sub WriteMonthlyData
     # $line = ",Total after removing double counts," ;
       $line = ",Total," ;
       for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $totals_project_edits_merged {"zz,$f,$m"} . ","  ; }
+      { $line .= chck_null ($totals_project_edits_merged {"zz,$f,$m"}) . ","  ; }
 
 #     # growth in one year, then month (divide by zero should never happen, we have 10+ years of data)
       if ($totals_project_edits_merged {"zz,$f,$m_last_12"} > 0)
@@ -499,7 +500,7 @@ sub WriteMonthlyData
       { $line = "$index,$language_name," ; } 
 
       for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= $values {"$f,$m"} {$key} . ","  ; }
+      { $line .= chck_null ($values {"$f,$m"} {$key}) . ","  ; }
 
       if ($values {"$f,$m_last_12"} {$key} != 0)
       { $line .= sprintf ("%.1f", 100 * ($values {"$f,$m_last"} {$key} / $values {"$f,$m_last_12"} {$key}) - 100). "%,"  ; }
@@ -536,7 +537,7 @@ sub WriteMonthlyData
         if (($project eq '*') && (! $use_old_unmerged_editor_totals))
 	{ $line .= $totals_project_edits_merged {"zz,$f,$m"} . ","  ; }
         else 
-	{ $line .= $totals_project {"$f,$m"} {$project} . ","  ; } 
+	{ $line .= chck_null ($totals_project {"$f,$m"} {$project}) . ","  ; } 
       }
 
       if ($totals_project {"$f,$m_last_12"} {$project} != 0)
@@ -578,7 +579,7 @@ if ($f == 2)
         if ($value_100 != 0)
         { $line .= sprintf ("%.1f", 100 * ($values {"$f,$m"} {$key} / $value_100)) . ","  ; }
         else
-        { $line .= "," ; }
+        { $line .= 'n.a.,' ; }
       }
       $line =~ s/,$// ;
       $output .= "$line\n" ;
@@ -593,7 +594,7 @@ if ($f == 2)
           if ($total_100 != 0)
           { $line .= sprintf ("%.1f", 100 * ($totals {"$f,$m"} / $total_100)) . ","  ; }
           else
-          { $line .= "," ; }
+          { $line .= 'n.a.,' ; }
         }
         $line .= ",(sorted here to make it top-most line out of 10 in Excel)" ;
         $output .= "$line\n" ;
@@ -620,7 +621,7 @@ if ($f == 2)
         if ($value_100 != 0)
         { $line .= sprintf ("%.1f", 100 * ($totals_project {"$f,$m"} {$project} / $value_100)) . ","  ; }
         else
-        { $line .= "," ; }
+        { $line .= 'n.a.,' ; }
       }
       $line =~ s/,$// ;
       $output .= "$line\n" ;
@@ -660,7 +661,7 @@ if ($f == 2)
     {
       $line = "$index,xxx," ;
       for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= ","  ; }
+      { $line .= $null ; }
     }
     else
     {
@@ -700,7 +701,7 @@ if ($f == 2)
     {
       $line = "$index,xxx," ;
       for ($m = $m_start ; $m <= $m_last ; $m++)
-      { $line .= ","  ; }
+      { $line .= 'n.a.,' ; }
     }
     else
     {
@@ -713,7 +714,7 @@ if ($f == 2)
         if ($ext_cnt_m0 > 0)
         { $line .= sprintf ("%.1f", 100 * ($ext_cnt {$m}{$extndx} / $ext_cnt_m0)). ","  ; }
         else
-        { $line .= ","  ; }
+        { $line .= 'n.a.,'  ; }
       }
     }
 
@@ -842,7 +843,7 @@ sub SetComparisonPeriods
 #      if ($recent_month_0 > 0)
 #      { print CSV sprintf ("%.2f", 100 * $totals {"month"} {$project} {"$language,${recent_months [$m]}"} / $recent_month_0) . "," ; }
 #      else
-#      { print CSV "," ; }
+#      { print CSV $null ; }
 #    }
 
 #    print CSV "\n" ;
@@ -1321,5 +1322,19 @@ sub InitReportNames
   "Visits per day",
   "Overview recent months"
   ) ;
+}
+
+sub chck_null
+{
+  my $value = shift ;
+  if ($value != 0) 
+  { return $value ; }
+  else
+  { 
+    if ($null eq '0,') # can consumer of this file handle empty cells? if not supply zero, but rather not (get plotted) 	  
+    { return '0' ; } 
+    else
+    { return '' ; }
+  }  
 }
 
