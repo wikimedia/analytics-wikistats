@@ -4,7 +4,8 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
-# perl=/home/ezachte/wikistats/dammit.lt/perl # tests
+perl=/home/ezachte/wikistats/dammit.lt/perl # tests
+bash=$perl/../bash
 logs=$dammit/logs 
 
 input=/a/dammit.lt/pagecounts/merged # .test
@@ -23,6 +24,10 @@ maxage=2   # process files for last .. months
 
 echo Consolidate daily pagecount files into one monthly file for last $maxage completed months 
 echo
-nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode $verbose -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat
+
+echo grab semaphore dammit_compact_monthly.semaphore
+cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode $verbose -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat"
+flock -n -e $bash/dammit_compact_monthly.semaphore -c "$cmd" || { echo "Script is already running: lock on ../bash/dammit_compact_monthly.semaphore" ; exit 1 ; } >&2
+
 
 #grep ">>" $logs/*.log
