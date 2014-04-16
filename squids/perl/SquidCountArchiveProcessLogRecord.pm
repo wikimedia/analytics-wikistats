@@ -1,17 +1,8 @@
 # to do: study http://www.zytrax.com/tech/web/mobile_ids.html
-use UA::iPad;
-use Data::Dumper;
 
 sub ProcessLine
 {
-
   my $line = shift ;
-
-
-  #warn "[DBG] $line";
-  #confess "[DBG] stacktrace ";
-
-  $version=""; #reset version
 
   $time = $fields [2] ;
   if ($time !~ /\.\d\d\d/) # for column alignment
@@ -23,14 +14,15 @@ sub ProcessLine
   $url        = lc ($fields [8]) ;
 
   $mime =~ s/;.*// ;
-
-
   
   if ($mime eq '-')
   {
     # no mime type on log records from varnish, assume 'page request' on most, until that stream had been fixed
     if (($url =~ /\.m\..*?\/wiki\//) || ($url =~ /\.m\..*?\/w\/index.php/))
-    { $mime = "text/html" ; }
+    {
+      $mime = "text/html" ;
+      $mime_text_html_assumed_where_dash_found ++ ;
+    }
   }
 
   $count_event = 1 ;
@@ -44,6 +36,8 @@ sub ProcessLine
   if ($scan_ip_frequencies) # phase 1
   {
     return if $line =~ /Banner(?:Cont|List|Load|beheer)/io ;
+    return if $line =~ /Special\:CentralAutoLogin/io ;
+    return if $line =~ /Autonym\.ttf/io ;
 
     if ($mime =~ "text/html")
     {
@@ -81,7 +75,6 @@ sub ProcessLine
   $method     = $fields [7] ;
 
   $referer    = lc ($fields [11]) ;
-
   $xff        = $fields [12] ;
   $agent      = $fields [13] ;
 
@@ -92,13 +85,12 @@ sub ProcessLine
     $url_wikipedia_mobile += $count_event ;
     $status_url_wikipedia_mobile {$status} += $count_event ;
     $status_mime_url_wikipedia_mobile {"$status,$mime"} += $count_event ;
-    if ($status eq "TCP_MISS/302")
+    if (($status eq "TCP_MISS/302") || ($status eq "miss/302"))
     {
       $redirected_to_mobile += $count_event ;
       return ;
     }
-  };
-
+  }
 
   $url =~ s/^http\w?\:\/\///o ;
   $url =~ s/\%3A/:/gio ;
@@ -143,12 +135,46 @@ sub ProcessLine
   else
   { $mimecat = "other" ; }
 
-
-
   if ($job_runs_on_production_server)
   {
     $country = "" ;
-    ($country) = $client_ip =~ /\|(..)$/;
+if (0) # temp disabled for quicker processing qqq
+{
+    @xffparts = split ('%20',$xff) ;
+    foreach $ip (@xffparts)
+    {
+       next if $country ne "" ;
+       if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
+       {
+         $country = $savedipcountry { $ip } ;
+         if ($country eq "")
+         {
+           $country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
+           $country =~ s/.*\s([\w-\(])/$1/ ;
+           $country =~ s/\s//g ;
+           $savedipcountry { $ip } = $country ;
+         }
+         $foundip = $ip ;
+         if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
+         { $country = "" ; }
+       }
+    }
+}    
+    if ($country eq "")
+    {
+      $country = $fields [14] ;
+      $foundip = $client_ip ;
+    }
+    if (($country eq "") || ($country =~ /null/))
+    {
+      $country = "--" ;
+      if ($foundip =~ /:/)
+      {
+        $country = "-P" ;
+      }
+    }
+    if (&IsInternal($foundip))
+    { $country = "-X" ; }
   }
   else
   {
@@ -169,6 +195,10 @@ sub ProcessLine
     return ;
   }
 
+  if (($line =~ /Special\:CentralAutoLogin/io) || # Q&D fix, no counting or reporting
+      ($line =~ /Autonym\.ttf/io))
+  { return ; }
+
   $countries {$country} += $count_event ; ;
 
   $agent2 = $agent ;
@@ -180,7 +210,7 @@ sub ProcessLine
   $agent2 =~ s/\(\s*\)//go ;
 
   # e.g. BlackBerry8310/4.2.2 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/102 -> BlackBerry8310/4.2.2
-  if ($agent2 =~ /BlackBerry/)
+  if ($agent2 =~ BlackBerry)
   { $agent2 =~ s/^.*?BlackBerry\d+\/([^\s]*).*$/BlackBerry\/$1/io ; } # keep
 
   $agent2 =~ s/Android (\d)/Android\/$1/o ;
@@ -190,7 +220,6 @@ sub ProcessLine
   $agent2 =~ s/jig browser (\d)/JigBrowser\/$1/o ;
   $agent2 =~ s/jig browser9 (\d)/JigBrowser\/$1/o ;
   $agent2 =~ s/jig browser web; (\d)/JigBrowser9\/$1/o ;
-
 
   # Remove explanation for KHTML
   $agent2 =~ s/\(KHTML, like Gecko\)/KHTML/o ;
@@ -249,8 +278,16 @@ sub ProcessLine
   { ($browserengine = $agent2) =~ s/^.*?Trident[\/ ]?(\d+\.?\d*).*$/Trident $1/io ; }
   elsif ($agent2 =~ /Presto[\/ ]?\d/io)
   { ($browserengine = $agent2) =~ s/^.*?Presto[\/ ]?(\d+\.?\d*).*$/Presto $1/io ; }
-  elsif ($agent2 =~ /(AppleWebKit|Trident|Presto|KHTML|Gecko)/io)
-  { $browserengine = $1 ; }
+  elsif ($agent2 =~ /AppleWebKit/io)
+  { $browserengine = "AppleWebKit" ; }
+  elsif ($agent2 =~ /Trident/io)
+  { $browserengine = "Trident" ; }
+  elsif ($agent2 =~ /Presto/io)
+  { $browserengine = "Presto" ; }
+  elsif ($agent2 =~ /KHTML/io)
+  { $browserengine = "KHTML" ; }
+  elsif ($agent2 =~ /Gecko/io)
+  { $browserengine = "Gecko" ; }
 
   # APPLEWEBKIT
   #$applewebkit = "" ;
@@ -310,65 +347,22 @@ sub ProcessLine
   #}
 
   # MOBILE
-
-
   $mobile = '-' ;
-
   if (($url =~ /\?seg=/) or ($url =~ /&seg=/)) # Andre, tweede is al in eerste gevat en seg= is wel erg generiek kan ook pageseg= of zoiets zijn  if (($url =~ /\?seg=/) or ($url =~ /&seg=/))
   { $mobile = 'P' ; }
-  elsif ($agent2 =~ /(?:$tags_mobile)/io)
-  { $mobile = 'M' ; }
   elsif ($agent2 =~ /(?:$tags_wiki_mobile)/io)
   { $mobile = 'W' ; }
-  elsif ($agent2 =~ /($tags_tablet)/io)
-  { $mobile = 'T' ; } 
-  else {
-    my $capture = "";
-    if(      $agent2 =~ /iPad/) {
-      $mobile = 'T';
-    } elsif( $agent2 =~ /iPhone/) {
-      $mobile = 'M';
-    } elsif( $agent2 =~ /Opera Tablet/) {
-      $mobile = 'T';
-    } elsif( ($capture) = 
-             $agent2 =~ /((?:Android)(?:\s|;\s)?(?:Tablet|Mobile)?)/) {
-      if($capture eq "Android" || $capture eq "Opera") {
-        #warn "[DBG] A/O MOBILE!!";
-        #use Data::Dumper;
-        #my $dbg_str = Dumper(\@-);
-        #$dbg_str =~ s/^/[DBG]/g;
-        #$dbg_str =~ s/\n/\n[DBG]/g;
-        #warn $dbg_str;
-        $mobile = 'M';
-      } else {
-        $mobile = 'T';
-      };
-    };
-  };
-
-
+  elsif ($agent2 =~ /(?:$tags_tablet)/io)
+  { $mobile = 'T' ; }
+  elsif ($agent2 =~ /(?:$tags_mobile)/io)
+  { $mobile = 'M' ; }
 
   $os = ".." ;
 
-  my $agent2_copy = $agent2;
-
-  my $ipad_data = undef;
   if ($agent2 =~ /CFNetwork/io)         { $os = "iOS/OS X" }
   elsif ($agent2 =~ /BlackBerry/io)     {($os = $agent2) =~ s/^.*?BlackBerry[^\/]*\/(\d+\.\d+).*$/BlackBerry\/$1/io ; } # BlackBerry/8320/4.2 -> BlackBerry/4.2
   elsif ($agent2 =~ /DoCoMo/io)         { $os = "DoCoMo" ; }
-  elsif ($agent2 =~ /iPad/io)           { 
-    $version = "iPad" ;
-    if( ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ) {
-    } else {
-      $ipad_data = ipad_extract_data($agent2);
-      if($ipad_data) {
-        #warn Dumper $ipad_data;
-        #warn "NOT MATCHED{$agent2}\n";
-        $os = "iPad OS ".$ipad_data->{os_version};
-        #warn "os=[$os]";
-      };
-    };
-  }
+  elsif ($agent2 =~ /iPad/io)           { $version = "iPad" ;   ($os = $agent2) =~ s/^.*?(iPad OS \d+\_\d+).*$/$1/io ; }
   elsif ($agent2 =~ /iPod/io)           { $version = "iPod" ;   ($os = $agent2) =~ s/^.*?(iPhone OS \d+\_\d+).*$/$1/io ; }
   elsif ($agent2 =~ /iPhone/io)         { $version = "iPhone" ; ($os = $agent2) =~ s/^.*?(iPhone OS \d+\_\d+).*$/$1/io ; }
   elsif ($agent2 =~ /webOS.* Pre/io)    { $version = "Pre" ;    ($os = $agent2) =~ s/^.*?(webOs\/\d+\.?\d*).*$/$1/io ; } # Palm Pre
@@ -486,12 +480,7 @@ sub ProcessLine
   # iOS APPLICATIONS
   elsif ($agent2 =~ /CFNetwork/io)
   {
-    if($agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io) {
-    } else {
-      if($ipad_data && $ipad_data->{flag_cfnetworks}) {
-        $agent2 = "iOS: ".$ipad_data->{browser};
-      };
-    };
+    $agent2 =~ s/^(.*) CFNetwork.*$/iOS: $1/io ;
     if ($agent2 =~ /Wikipedia Mobile\//io) { $agent2 =~ s/$/ (WMF)/io ; }
     $version = $agent2 ;
   }
@@ -519,7 +508,8 @@ sub ProcessLine
 
     $agent2 =~ s/Windows NT \d\.\d/Windows/o ;
     $agent2 =~ s/X11; Linux [^;]+/Linux/o ;
-    $agent2 =~ s/(Opera Mini\/\d+\.\d+)[^;\) ]+/$1/o ; $agent2 =~ s/J2ME\/MIDP/Java mobile (J2ME)/o ; # J2ME\/MIDP
+    $agent2 =~ s/(Opera Mini\/\d+\.\d+)[^;\) ]+/$1/o ;
+    $agent2 =~ s/J2ME\/MIDP/Java mobile (J2ME)/o ; # J2ME\/MIDP
 
     $agent2 = &ExtractLanguage ($agent2, 'Opera') ;
 
@@ -676,8 +666,6 @@ sub ProcessLine
     $version =~ s/\([^\)]{10}.*$//io ;
   }
 
-
-  $mobile2=$mobile; # reset mobile2
   if ((! $bot) && ($agent ne "-"))
   {
     $engine  =~ s/,/&comma;/go ;
@@ -693,19 +681,12 @@ sub ProcessLine
     if ($os =~ /playstation/io)
     { $version = "NetFront (PlayStation)" ; }
 
-    #warn "[DBG] $mobile,$version,$mimecat";
     $clients {"$mobile,$version,$mimecat"} += $count_event ; ;
 
     $operating_systems =~ s/,/&comma;/go ;
-
-    #warn "mobile=$mobile os=$os";
     ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
-
-    #warn "mobile2=$mobile2 os=$os";
-    $operating_systems{"$mobile2,$os"} += $count_event ;
-  };
-
-
+    $operating_systems {"$mobile2,$os"} += $count_event ; ;
+  }
 
   if ($count_hits_per_ip_range)
   {
@@ -851,7 +832,7 @@ sub ProcessLine
   {
     $tot_referers_external += $count_event ; ;
 
-    ($origin, $toplevel) = &DetectOrigin($client_ip, $referer_original, $agent, $mime, $mimecat, $service, $ext) ;
+    ($origin, $toplevel) = &DetectOrigin ($client_ip, $referer_original, $agent, $mime, $mimecat, $service, $ext) ;
 
     &CountOrigin ("external", $origin, $toplevel, $mimecat) ;
 
@@ -923,7 +904,7 @@ sub ProcessLine
   {
     $tot_mime_html2 += $count_event ;
 
-    if (($ind_bot =~ /N/) and ($ip_frequencies {$client_ip} > 2))
+    if (($ind_bot =~ /N/) and ($ip_frequencies {$client_ip} > $bot_threshold_edits)) 
     { $ind_bot = 'bot=Y' ; }
 
     $countries_views {"$ind_bot,$domain,$country"} += $count_event ; ;
@@ -946,15 +927,11 @@ sub ProcessLine
     }
   }
 
-  $mobile2 = $mobile;
-  $mobile2 =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
-
-
+ ($mobile2 = $mobile) =~ s/[^\-]/M/; # everything except '-' is mobile, use 'M' voor reporting scripts, 'W' etc was introduced for SquidReportClients only
   $records {"$mobile2,$mimecat"} += $count_event ;
   $records {"*,$mimecat"}       += $count_event ;
   $records {"$mobile2,*"}        += $count_event ;
   $records {"*,*"}              += $count_event ;
-
 }
 
 sub ExtractLanguage
@@ -1154,7 +1131,10 @@ sub DetectOrigin
   my $referer_original = $referer ;
   my $origin ;
 
-  $origin = $referer;
+  if ($referer ne '-')
+  { $origin = $referer ; }
+  else
+  { $origin = $client_ip ; }
 
   my $origin_original = $origin ;
 
@@ -1378,7 +1358,6 @@ sub GetTopLevelDomain
   my $domain = shift ;
   $domain =~ s/\:\d+$//o ; # remove port number
 
-
   if ($domain eq '-')
   { $top_level_domain = '-' ; }
   elsif ($domain =~ /!?localhost/o)
@@ -1398,7 +1377,6 @@ sub GetSecondaryDomain
 {
   my $domain = shift ;
   $domain =~ s/\:\d+$//o ; # remove port number
-
 
   if ($domain !~ /\./)
   { return ($domain) ; }
@@ -1464,15 +1442,5 @@ sub ProcessUploadPath
   }
 }
 
-sub ReadMobileDeviceInfo
-{
-  my $path_to_mobiledevicecsv = "$cfg_path_root_production/meta/MobileDeviceTypes.csv";
-  if(!-e $path_to_mobiledevicecsv) {
-    print "No mobile devices csv found\n";
-    exit(-1);
-  };
-  open CSV_MOBILE_DEVICES,'<',$path_to_mobiledevicecsv; 
-  @mobile_devices= map { $a=$_; $a=~s/\r\n$//; $a; } <CSV_MOBILE_DEVICES>;
-}
 
 1;

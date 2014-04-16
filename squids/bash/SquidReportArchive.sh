@@ -1,136 +1,148 @@
-#! /bin/sh
-ulimit -v 4000000
+#! /bin/bash
+ulimit -v 8000000
 
-WIKISTATS=/a/wikistats_git
-SQUIDS=$WIKISTATS/squids
-REPORTS=$SQUIDS/reports
-#PERL=/home/ezachte/wikistats/squids/perl/ # tests
-PERL=$SQUIDS/perl
-CSV=$SQUIDS/csv
-LOGS=$SQUIDS/logs
-cd $PERL
+# todo some day: simplify logging
+# logs are now written twice (with variations?), inside the script to name file and here by tee from stdout
 
-LOG1=$LOGS/SquidCountryScan.log
-LOG2=$LOGS/SquidReportArchive.log
-CONFIG_FILE_SWITCH=""
+wikistats=/a/wikistats_git
+squids=$wikistats/squids
+perl=$squids/perl
+perl=/home/ezachte/wikistats/squids-scripts-2012-10/perl/ # temp
 
-#MONTH=2012-09 # adjust each month 
-#QUARTER=2012Q3
+csv_sampled=$squids/csv               # views and edits, 1:1000 sampled       
+csv_edits_unsampled=$squids/csv_edits # edits only, 1:1 unsampled
 
-RUNTYPE=""
+reports_sampled=$squids/reports
+reports_edits_unsampled=$squids/reports_edits
 
-PROCESSTYPE=""
+logs=$squids/logs
+meta=$csv_sampled/meta # for bots views and edits use these 'meta' files (lookup for country/region codes) 
 
-ARG_MONTH=""
-ARG_QUARTER=""
+htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
 
-while getopts "hsecq:m:" optname
-do
-	case "$optname" in
-		"s")
-			echo "Running SquidCountArchive for sampled log archives";
-			RUNTYPE="sampled"
-			CONFIG_FILE_SWITCH=""
-			LOG="$LOGS/SquidCountArchive.log"
-			;;
-		"e")
-			echo "Running SquidCountArchive for editors log archives";
-			RUNTYPE="editors"
-			CONFIG_FILE_SWITCH="-r ../conf-editors/SquidReportArchiveConfig-editors.pm"
-			LOG="$LOGS/SquidCountArchive-editors.log"
-			;;
-		"m")
-			echo "Running monthly report for $OPTARG"
-			if [ $(echo "$OPTARG" | egrep "^[0-9]{4}-[0-9]{2}$" | wc -l) -ne 1 ]; then
-				echo "[ERROR] Month parameter should be of the form  YYYY-MM";
-				exit 2;
-			fi
-			ARG_MONTH=$OPTARG
-			PROCESSTYPE="monthly"
-			;;
-		"q")
-			echo "Running monthly report for $OPTARG"
-			if [ $(echo "$OPTARG" | egrep "^[0-9]{4}Q[1-4]$" | wc -l) -ne 1 ]; then
-				echo "[ERROR] Month parameter should be of the form  YYYYQ[1-4]";
-				exit 3;
-			fi
-			ARG_QUARTER=$OPTARG
-			PROCESSTYPE="quarter"
-			;;
-		"c")
-			PROCESSTYPE="country-scan"
-			;;
-		"h")  
-			echo "SquidReportArchive.sh script"
-			echo ""
-			echo "USAGE: SquidReportArchive.sh -[se] -[cqm] <args>"
-			echo ""
-			echo " -s           -  Use CSVs resulted from sampled squid   log files"
-			echo " -e           -  Use CSVs resulted from sampled editors log files"
-			echo " -c           -  Country scan "
-			echo " -q <quarter> -  Quarter run with parameter between 1 and 4  "
-			echo " -m <month>   -  Monthly run with parameter of the form YYYY-MM ( ex. 2012-09 )"
-			echo ""
-			exit 0;
-			;;
-		"?")
-			echo "Option not recognized $OPTARG"
-			echo "Please specify either 's' for regular sampled files or 'e' for editor archives"
-			;;
-		":")
-			echo "Argument missing for option $OPTARG"
-			;;
-		*)
-			# Should not occur
-			echo "Unknown error while option processing"
-			echo "Maybe you didn't specify any parameters ?"
-			;;
-	esac
-done
+cd $perl
 
+log=$logs/SquidReportArchive.log
 
-# shows every command run (good for debugging)
-#set -x
+month=2014-03  
+quarter=2013Q4
+quarter2=2013-Q4 # hmm need to remove dash some day 
 
-if [ "$PROCESSTYPE" != "country-scan" -a \( "$RUNTYPE" != "sampled" -a "$RUNTYPE" != "editors" \) ]; then
-	echo "[ERROR] Use -s or -e to specify what kind of run you're doing";
-	exit 4;
+run_collect_country_stats=no
+run_refresh_from_wikipedia=no
+run_monthly_countries_reports=no
+run_quarterly_countries_reports=yes
+run_monthly_non_geo_reports=no
+
+if [ "$run_monthly_countries_reports" == "yes" ] ; then
+  run_collect_country_stats=yes
 fi
+if [ "$run_quarterly_countries_reports" == "yes" ] ; then
+  run_collect_country_stats=yes
+fi
+# run_collect_country_stats=no # speed up repeated tests
 
-case "$PROCESSTYPE" in
-	monthly)
-		echo "Processing $PROCESSTYPE"
-		MONTH=$ARG_MONTH
-		perl    SquidReportArchive.pl	  \
-			-m $MONTH		  \
-			-p | tee -a $LOG2 | cat
-		cd $REPORTS/$MONTH
-		tar -cvf - *.htm | gzip > reports-$MONTH.tar.gz
-		;;
-	quarter)
-		echo "Processing $PROCESSTYPE"
-		;;
-	country-scan)
-		echo "Processing $PROCESSTYPE"
-		perl SquidCountryScan.pl
-		;;
-	*)
-		echo "[ERROR] No processing type was selected (use one of -q -m -c)"
-		exit 6;
-		;;
-esac
+# -c = country reports
+# -v = views
+# -e = edits
+# -s = start month 
+# -i = input folder
+# -o = output folder
+# -a = meta folder (a for about ~ meta)
+# -l = logs folders
+# -w = extra data from English Wikipedia
+# -m = month to process for basic reports
+# -x = sample rate 
+
+args_views_sampled="  -v  -i $csv_sampled         -o $reports_sampled         -a $meta -l $logs -x 1000"
+args_edits_sampled="  -e  -i $csv_sampled         -o $reports_sampled         -a $meta -l $logs -x 1000"
+args_edits_unsampled="-e  -i $csv_edits_unsampled -o $reports_edits_unsampled -a $meta -l $logs -x 1"
 
 # once every so many months refresh meta info from English Wikipedia 
-# perl SquidReportArchive.pl -w | tee -a $log | cat
+# this is not one too often, as Wikipedia page syntax can change anytime, so vetting is needed
+if [ "$refresh_from_wikipedia" == "yes" ] ; then
+  perl SquidReportArchive.pl -w $args_views_sampled | tee -a $log | cat # last run Oct 2013
+fi
 
 # perl SquidReportArchive.pl -m 201007 > $log
 # after further automating SquidScanCountries.sh
 
-# perl SquidCountryScan.pl                  | tee -a $log1 | cat # collect csv data for all months, start in July 2009
-# perl SquidReportArchive.pl -c             | tee -a $log2 | cat # -c for per country reports
-# perl SquidReportArchive.pl -c -q $quarter | tee -a $log2 | cat # -c for per country reports
+# >> COLLECT PER COUNTRY STATS <<
+if [ "$run_collect_country_stats" == "yes" ] ; then
+  echo ">> COLLECT PER COUNTRY STATS <<" >> $log
 
+  # collect per country page view stats for all months, start in July 2009
+  perl SquidCountryScan.pl  -v -s "2009-07" -i $csv_sampled         -l $logs | tee -a $log | cat 
+  # collect per country page edit stats for all months, start in July 2013
+  perl SquidCountryScan.pl  -e -s "2011-11" -i $csv_edits_unsampled -l $logs | tee -a $log | cat 
+fi
+
+# >> WRITE OTHER COUNTRY REPORTS <<
+if [ "$run_monthly_countries_reports" == "yes" ] ; then
+  echo ">> WRITE OTHER COUNTRY REPORTS <<" >> $log 
+
+  cd $perl
+  perl SquidReportArchive.pl -c $args_views_sampled   -m $month | tee -a $log | cat # -c for per country reports
+  perl SquidReportArchive.pl -c $args_edits_unsampled -m $month | tee -a $log | cat # -c for per country reports
+
+      ls -l     $reports_sampled/countries/SquidReport*.htm         
+echo "rsync -av $reports_sampled/countries/SquidReport*.htm         $htdocs/archive/squid_reports_draft/$month"
+      rsync -av $reports_sampled/countries/SquidReport*.htm         $htdocs/archive/squid_reports_draft/$month
+      ls -l     $reports_edits_unsampled/countries/SquidReport*.htm 
+echo "rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports_draft/$month"
+      rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports_draft/$month
+exit
+  rsync -av $reports_sampled/countries/SquidReport*.htm         $htdocs/wikimedia/squids
+  rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports/$month
+  
+  cd $reports_sampled/countries
+  echo "tar -cvf - *.htm | gzip > reports-countries-sampled-$month.tar.gz"
+        tar -cvf - *.htm | gzip > reports-countries_sampled-$month.tar.gz
+  echo "rsync -av *.gz          $htdocs/archive/squid_reports/$month"
+        rsync -av *.gz          $htdocs/archive/squid_reports/$month
+  
+  cd $reports_edits_unsampled/countries
+  echo "tar -cvf - *.htm | gzip > reports-countries-unsampled-$month.tar.gz"
+        tar -cvf - *.htm | gzip > reports-countries-unsampled-$month.tar.gz
+  echo "rsync -av *.gz  $htdocs/archive/squid_reports/$month"
+        rsync -av *.gz  $htdocs/archive/squid_reports/$month
+fi
+
+# >> WRITE QUARTERLY COUNTRY REPORTS <<
+if [ "$run_quarterly_countries_reports" == "yes" ] ; then
+  echo ">> WRITE QUARTERLY COUNTRY REPORTS <<" >> $log
+
+  cd $perl
+# generate page view reports from sampled squid logs  
+  perl SquidReportArchive.pl  -c -q $quarter $args_views_sampled | tee -a $log | cat 
+  rsync -av $reports_sampled/$quarter2/SquidReportPageViewsPerCountryOverview$quarter.htm  $htdocs/wikimedia/squids/SquidReportPageViewsPerCountryOverview$quarter.htm
+
+# obsolete (but kept for reference and fallback): generate page edit reports from sampled squid logs  
+# perl SquidReportArchive.pl  -c -q $quarter $args_edits_sampled | tee -a $log | cat 
+# rsync -av $reports_sampled/$quarter2/SquidReportPageEditsPerCountryOverview$quarter.htm  $htdocs/wikimedia/squids/SquidReportPageEditsPerCountryOverview$quarter.htm
+
+# generate page edit reports from *un*sampled squid logs  
+  perl SquidReportArchive.pl  -c -q $quarter $args_edits_unsampled | tee -a $log | cat 
+  rsync -av $reports_edits_unsampled/$quarter2/SquidReportPageEditsPerCountryOverview$quarter.htm  $htdocs/wikimedia/squids/SquidReportPageEditsPerCountryOverview$quarter.htm
+fi
+
+if [ "$run_monthly_non_geo_reports" == "yes" ] ; then
+  echo ">> WRITE NON-GEO REPORTS <<" >> $log
+
+  cd $perl
+  perl SquidReportArchive.pl -m $month $args_views_sampled | tee -a $log | cat
+
+  cd $reports_sampled/$month
+  echo "tar -cvf - *.htm | gzip > reports-sampled-$month.tar.gz"
+        tar -cvf - *.htm | gzip > reports-sampled-$month.tar.gz
+  echo "rsync -av *.gz   $htdocs/archive/squid_reports/$month"
+        rsync -av *.gz   $htdocs/archive/squid_reports/$month
+  echo "rsync -av *.htm  $htdocs/archive/squid_reports/$month"
+        rsync -av *.htm  $htdocs/archive/squid_reports/$month
+fi
 # after vetting reports are now manually rsynced to 
 # - stat1001/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
 # - stat1001/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
+
+echo Done
 # note: all gif and js files are also needed locally, that should change to shared location  

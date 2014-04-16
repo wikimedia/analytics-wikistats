@@ -33,7 +33,7 @@ while getopts "se" optname
 
 mkdir -p $OUTPUT_DIR
 
-for file_path in $INPUT_DIR*tsv*2013*.gz
+for file_path in $INPUT_DIR*.gz
 	do
 	echo "Started  processing $file_path"
 	file_name=`basename $file_path`
@@ -42,8 +42,8 @@ for file_path in $INPUT_DIR*tsv*2013*.gz
 	geocoded_file_name=$file_name
 	if [ ! -f $OUTPUT_DIR/$geocoded_file_name ]
 	then	
-		echo "zcat $file_path | sed 's/\t/ /g' | udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name"
-		zcat $file_path |  sed 's/\t/ /g' | udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
+		echo "zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name"
+		zcat $file_path |  udp-filter -g -b country | gzip > $OUTPUT_DIR/$geocoded_file_name
 		echo "Finished processing $file_path"
 	fi	
 

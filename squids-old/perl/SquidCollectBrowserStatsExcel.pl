@@ -229,7 +229,6 @@
 
 
   # daily averages from weekly counts, adjusted for missing days
-  print CSV_OUT_WEEKLY "\nDaily averages from weekly counts - adjusted for missing days\n" ;
   print CSV_OUT_WEEKLY "\n\n" ;
   print CSV_OUT_WEEKLY 'date ascii,date,' ;
   for $group (@group_list)

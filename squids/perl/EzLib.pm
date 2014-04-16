@@ -18,7 +18,7 @@ sub ez_lib_version
   { print "EzLib out of date: version $ez_lib_version_required required" ; exit ;}
 }
 
-use lib "/home/ezachte/lib" ;
+#use lib "/home/ezachte/lib" ;
 
 use Time::HiRes ;
 use Time::Local ;
@@ -52,6 +52,19 @@ $path_program = Win32::GetLongPathName ($path_program) if $os_windows ;
 die "Operating system '$os' not supported" if (! $os_linux and ! $os_windows) ;
 
 
+if ($os_linux) #  && (-d "/home/ezachte")) # runs on server, to be refined
+{
+  print "Job runs on production system\n" ; # this is actually old code fomr when most testing happened on Erik's home Windows system
+  $job_runs_on_production_server = $true ;
+  $path_home = "/home/ezachte" ;
+}
+else
+{ 
+  print "Job runs on non Linux (test?) system\n" ; 
+  $path_home = getcwd () ; 
+}
+
+print "\nHome path: '$path_home'\n\n" ;
 
 $trace_on_exit         = $false ; # shorthand for $trace_on_exit_concise
 $trace_on_exit_concise = $false ;
@@ -484,7 +497,6 @@ END
 
   my ($time, $path,$program) ;
 
-
   if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)
   {
     $time_elapsed_total = time - $^T ; # $^T is program start time
@@ -496,9 +508,10 @@ END
 
   # print "\n" . '=' x (length ($msg) -1) . "\n\n$msg\n\n" ;
     print "\n" . '=' x 80 . "\n\n$msg\n\n" ;
+  }
 
-
-
+  if ($trace_on_exit || $trace_on_exit_verbose || $trace_on_exit_concise)
+  {
     print "Prog: $name_program\n" ;
     print "Path: $path_program\n" ;
     if ($job_runs_on_production_server)

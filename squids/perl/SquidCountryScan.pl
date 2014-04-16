@@ -1,9 +1,11 @@
+
 #!/usr/bin/perl
 ## Collect page views stats by country on Locke
 ## sub CollectRawData -> SquidDataCountries.csv
 ## sub ProcessRawData <- SquidDataCountries.csv -> ??
 
   use SquidCountryScanConfig ;
+  print "use EzLib from '$cfg_liblocation'\n" ;
   use lib $cfg_liblocation ;
   use EzLib ;
   $trace_on_exit = $true ;
@@ -14,31 +16,57 @@
   $timestart = time ;
 
   my %options ;
-  getopt ("y", \%options) ;
-  $process_year = $options {"y"} ;
-  if (($process_year !~ /^\d\d\d\d$/) || ($process_year < 2009))
+  getopt ("sil", \%options) ;
+
+  $yyyymm_start = $options {"s"} ;
+  die "Specify start month as '-s yyyy-dd'" if $yyyymm_start !~ /^\d\d\d\d-\d\d$/ ;
+
+  $path_csv     = $options {"i"} ;
+  $path_log     = $options {"l"} ;
+
+  die ("Specify input folder as -i [..]")  if not defined $path_csv ;
+  die ("Specify log folder as -i [..]")  if not defined $path_log ;
+  die ("Input folder not found")  if ! -d $path_csv ;
+  die ("Log folder not found")    if ! -d $path_log ;
+
+  if (! defined ($options {"e"}) && ! defined ($options {"v"}))
   {
-    $process_year = 2009 ;
-  # print "Specify year as '-y nnnn'\n\n" ;
-  # exit ;
+    &Log ("Specify '-e' for edits and/or '-v for views\n") ;
+    exit ;
+ }
+
+# $path_csv = $job_runs_on_production_server ? $cfg_path_csv : $cfg_path_csv_test ;
+# $path_log = $job_runs_on_production_server ? $cfg_path_log : $cfg_path_log_test ;
+  $file_log = "$path_log/SquidCountryScan.log" ;
+
+  if (defined ($options {"v"})) 
+  { 
+    $file_raw_data_monthly_visits        = "$path_csv/SquidDataVisitsPerCountryMonthly.csv" ;
+    $file_raw_data_daily_visits          = "$path_csv/SquidDataVisitsDaily.csv" ;
+    $file_raw_data_daily_visits_wiki     = "$path_csv/SquidDataVisitsPerCountryPerWikiDaily.csv" ;
+    $file_raw_data_daily_visits_project  = "$path_csv/SquidDataVisitsPerCountryPerProjectDaily.csv" ;
+    $file_raw_data_daily_visits_detailed = "$path_csv/SquidDataVisitsPerCountryDailyDetailed.csv" ;
+    $file_per_country_visits             = "public/SquidDataCountriesViews.csv" ;
+    $file_per_country_visits_old         = "SquidDataCountries2.csv" ;
+
+    &CollectRawData ('visits', $file_per_country_visits, $file_per_country_visits_old, 
+	                       $file_raw_data_monthly_visits, $file_raw_data_daily_visits_wiki, $file_raw_data_daily_visits_wiki, $file_raw_data_daily_visits_project, $file_raw_data_daily_visits_detailed) ; 
+  }
+  
+  if (defined ($options {"e"})) 
+  { 
+    $file_raw_data_monthly_saves         = "$path_csv/SquidDataSavesPerCountryMonthly.csv" ;
+    $file_raw_data_daily_saves           = "$path_csv/SquidDataSavesDaily.csv" ;
+    $file_raw_data_daily_saves_wiki      = "$path_csv/SquidDataSavesPerCountryPerWikiDaily.csv" ;
+    $file_raw_data_daily_saves_project   = "$path_csv/SquidDataSavesPerCountryPerProjectDaily.csv" ;
+    $file_raw_data_daily_saves_detailed  = "$path_csv/SquidDataSavesPerCountryDailyDetailed.csv" ;
+    $file_per_country_saves              = "public/SquidDataCountriesSaves.csv" ;
+    $file_per_country_saves_old          = "SquidDataCountriesSaves.csv" ;
+
+    &CollectRawData ('saves',  $file_per_country_saves,  $file_per_country_saves_old,  
+	                       $file_raw_data_monthly_saves, $file_raw_data_daily_saves, $file_raw_data_daily_saves_wiki, $file_raw_data_daily_saves_project, $file_raw_data_daily_saves_detailed) ; 
   }
 
-  $path_csv = $job_runs_on_production_server ? $cfg_path_csv : $cfg_path_csv_test ;
-  $path_log = $job_runs_on_production_server ? $cfg_path_log : $cfg_path_log_test ;
-  $file_log = "SquidCountryScan.log" ;
-
-  $file_raw_data_monthly_visits  = "$path_csv/SquidDataVisitsPerCountryMonthly.csv" ;
-  $file_raw_data_daily_visits    = "$path_csv/SquidDataVisitsPerCountryDaily.csv" ;
-  $file_per_country_visits       = "public/SquidDataCountriesViews.csv" ;
-  $file_per_country_visits_old   = "SquidDataCountries2.csv" ;
-
-  $file_raw_data_monthly_saves   = "$path_csv/SquidDataSavesPerCountryMonthly.csv" ;
-  $file_raw_data_daily_saves     = "$path_csv/SquidDataSavesPerCountryDaily.csv" ;
-  $file_per_country_saves        = "public/SquidDataCountriesSaves.csv" ;
-  $file_per_country_saves_old    = "SquidDataCountriesSaves.csv" ;
-
-  &CollectRawData ('visits', $file_per_country_visits, $file_per_country_visits_old, $file_raw_data_monthly_visits, $file_raw_data_daily_visits) ;
-  &CollectRawData ('saves',  $file_per_country_saves,  $file_per_country_saves_old,  $file_raw_data_monthly_saves,  $file_raw_data_daily_saves) ;
 # &ProcessRawData ;
 
   print "\n\nReady\n\n" ;
@@ -47,20 +75,23 @@
 
 sub CollectRawData
 {
-  my ($mode, $file_per_country, $file_per_country_old, $file_raw_data_monthly, $file_raw_data_daily) = @_ ;
-  my ($visits_wp_total, $visits_total_wp_en) ;
-  my (%visits_monthly, %visits_daily, %visits_wp_yyyymm, %visits_per_project, %visits_per_language, %visits_per_country, %visits_wp_b, %visits_wp_u, %correct_for_missing_days) ;
+  my ($mode, $file_per_country, $file_per_country_old, $file_raw_data_monthly, $file_raw_data_daily, $file_raw_data_daily_wiki, $file_raw_data_daily_project, $file_raw_data_daily_detailed) = @_ ;
+  my ($visits_total, $visits_total_non_bot, $visits_wp_total, $visits_total_wp_en, $visits_per_day, $visits_other, $yyyymmdd, $yyyymm) ;
+  my (%visits_monthly, $visits_monthly_non_bot, %visits_daily, %visits_daily_wiki, %visits_daily_project, %visits_wp_yyyymm, %visits_per_project, %visits_per_language, %visits_per_country, %visits_per_day, %visits_wp_b, %visits_wp_u, %correct_for_missing_days) ;
+  my (%visits_wp_en, %visits_per_project_language_country, %yyyymmdd_found) ;
+  my ($project,$language,$country,$project_language_country,$project_language_country2,$bot,$wiki) ;
+  my ($day,$month,$year,$days_in_month,$days_found) ;
+  my ($dir,$file,$line) ;
+  my ($total, $correction, $total_corrected, $total_corrected_share) ;
 
   print "Collect raw data for $mode\n\n" ;
   print "Input data per country $file_per_country, $file_per_country_old\n" ;
   print "Raw data monthly       $file_raw_data_monthly\n" ;
-  print "Raw data daily         $file_raw_data_daily\n\n" ;
+  print "Raw data daily per country per wiki    $file_raw_data_daily_wiki\n\n" ;
+  print "Raw data daily per country per project $file_raw_data_daily_project\n\n" ;
 
-  $year  = $process_year ;
-  if ($year == 2009)
-  { $month = 7 ; }
-  else
-  { $month = 1 ; }
+  $year  = substr ($yyyymm_start,0,4) ;
+  $month = substr ($yyyymm_start,5,2) ;
 
   while ($true)
   {
@@ -91,6 +122,8 @@ sub CollectRawData
         if (-e $file)
         {
           $days_found++ ;
+
+          $yyyymmdd_found {$yyyymmdd} ++ ;
         # print "File: $file\n" ;
           open IN, '<', $file or die "Couldn't open $file" ;
           while ($line = <IN>)
@@ -112,8 +145,10 @@ sub CollectRawData
           # if ($yyyymm  ne "2009-11") { next ; }
           # if ($language eq "www") { next ; }
 
-            $visits_monthly {"$yyyymm,$project,$language,$country,$bot"} += $count ;
-            $visits_daily   {"$yyyymmdd,$project,$language,$country,$bot"} += $count ;
+            $visits_monthly       {"$yyyymm,$project,$language,$country,$bot"}   += $count ;
+            $visits_daily         {"$yyyymmdd,$bot"}                             += $count ;
+            $visits_daily_wiki    {"$yyyymmdd,$project,$language,$country,$bot"} += $count ;
+            $visits_daily_project {"$yyyymmdd,$project,$country,$bot"}           += $count ;
 
             # following hashes for specific research, not for regular csv files
             if (($project eq "wp") && ($bot eq 'U') && ($country ne "--"))
@@ -133,6 +168,11 @@ sub CollectRawData
               $visits_per_project  {$project} += $count ;
               $visits_per_language {$language} += $count ;
               $visits_per_country  {$country} += $count ;
+
+              $visits_per_day {$yyyymmdd} += $count ;
+
+              $visits_per_project_language_country  {"$project,$language,$country"} += $count ;
+              $visits_total_non_bot += $count ;
             }
 
             $visits_total += $count ;
@@ -237,6 +277,16 @@ sub CollectRawData
   { print CSV_DAILY "$key,${visits_daily{$key}}\n" ; }
   close CSV_DAILY ;
 
+  open CSV_DAILY, '>', $file_raw_data_daily_wiki or die "Can't open $file_raw_data_daily_wiki";
+  foreach $key (sort keys %visits_daily_wiki)
+  { print CSV_DAILY "$key,${visits_daily_wiki{$key}}\n" ; }
+  close CSV_DAILY ;
+
+  open CSV_DAILY, '>', $file_raw_data_daily_project or die "Can't open $file_raw_data_daily_project";
+  foreach $key (sort keys %visits_daily_project)
+  { print CSV_DAILY "$key,${visits_daily_project{$key}}\n" ; }
+  close CSV_DAILY ;
+
   foreach $yyyymm (sort keys %visits_wp_yyyymm)
   {
     $total = $visits_wp_yyyymm {$yyyymm} ;
@@ -245,6 +295,134 @@ sub CollectRawData
     $total_corrected_share = int (100 * $total_corrected / $visits_wp_total) ;
     print "$yyyymm: $total * $correction = $total_corrected / $visits_wp_total = $total_corrected_share\%\n" ;
   }
+
+  my $fraction    = 1/5000 ;
+  my $threshold   = int ($visits_total_non_bot * $fraction) ;
+  my $columns_max = 1000000 ;
+  my $bot_perc    = sprintf ("%.1f", 100 * (1 - $visits_total_non_bot/$visits_total)) ;
+
+  print "\nWrite raw details for projects, countries, wikis with over > $fraction of total views (> $threshold)\n\n" ;
+
+  my ($perc,$perc2,$perc_total,$perc2_total) ;
+  foreach $project (sort keys %visits_per_project)
+  {
+    $perc = sprintf ("%.2f", 100 * ($visits_per_project {$project} / $visits_total_non_bot)) ;
+    $perc_total += $perc ;
+    print "\nproject $project: $perc\% (tot: $perc_total\%)\n\n" ;
+    next if $visits_per_project {$project} < $threshold ;
+    next if $project eq 'xx' ;
+
+    foreach $country (sort keys %visits_per_country)
+    {
+      next if $visits_per_country {$country} < $threshold ;
+      # print "country $country\n" ;
+
+      foreach $language (sort keys %visits_per_language)
+      {
+        next if $visits_per_language {$language} < $threshold ;
+        next if $visits_per_project_language_country  {"$project,$language,$country"} < $threshold ;
+        $perc2= sprintf ("%.2f", 100 * $visits_per_project_language_country  {"$project,$language,$country"}/$visits_total_non_bot) ;
+        $perc2_total += $perc2 ;
+        print "$project,$language,$country: $perc2\% (total: $perc2_total\%)\n" ;
+        push @project_language_country, "$project,$language,$country" ;
+      }
+    }
+  }
+
+  # make sure all days are accounted for
+  @yyyymmdd = sort keys %yyyymmdd_found ;
+  $yyyymmdd_first = $yyyymmdd [0] ;
+  $yyyymmdd_last  = $yyyymmdd [-1] ;
+
+  $yyyy = substr ($yyyymmdd_first,0,4) ;
+  $mm   = substr ($yyyymmdd_first,5,2) ;
+  $dd   = substr ($yyyymmdd_first,8,2) ;
+
+  while ($yyyymmdd_now lt $yyyymmdd_last)
+  {
+    $yyyymmdd_now = sprintf ("%4d-%02d-%02d",$yyyy,$mm,$dd) ;
+    push @yyyymmdd, $yyyymmdd_now ;
+    print "$yyyymmdd_now\n" ;
+    $dd++ ;
+    if ($dd > &DaysInMonth ($yyyy,$mm))
+    {
+      $dd = 1 ;
+      $mm++ ;
+      if ($mm > 12)
+      {
+        $mm = 1 ;
+        $yyyy++ ;
+      }
+    }
+  }
+
+  print "\nShow columns with most page views\n\n" ;
+  @project_language_country = sort {$visits_per_project_language_country {$b} <=> $visits_per_project_language_country  {$a}} @project_language_country ;
+
+  open CSV_DAILY_DETAILED, '>', $file_raw_data_daily_detailed or die "Can't open $file_raw_data_daily_detailed";
+
+  print CSV_DAILY_DETAILED "Wikimedia page $mode per day / based on 1:1000 sampled log server -> multiply all counts by 1000 / $bot_perc\% bot traffic excluded / " .
+                           " each column shows $mode for one project (e.g. wp=Wikipedia) to one language wiki (e.g. en=English) from one country (e.g. US=United States)\n" ;
+  print CSV_DAILY_DETAILED "mob = to mobile site (e.g 'en.m.wikipedia.org') - remainder is to main site (e.g 'en.wikipedia.org') / max columns=$columns_max / threshold=column total > $fraction of overall total\n\n" ;
+
+  print CSV_DAILY_DETAILED ",,,,% of total," ;
+  my $columns = 0 ;
+  foreach $project_language_country (@project_language_country)
+  {
+    $perc = sprintf ("%.2f", 100 * $visits_per_project_language_country {$project_language_country}/ $visits_total_non_bot) ;
+    print CSV_DAILY_DETAILED "$perc\%," ;
+    print "$project_language_country: $perc\n" ;
+    last if ++$columns > $columns_max ;
+  }
+  print CSV_DAILY_DETAILED "\n\n" ;
+
+  print CSV_DAILY_DETAILED "date,date Excel,total $mode,unlisted,% listed ->," ;
+  $columns = 0 ;
+  foreach $project_language_country (@project_language_country)
+  {
+    ($project_language_country2 = $project_language_country) =~ s/,/-/g ;
+    if ($project_language_country2 =~ /\%/)
+    {
+      $project_language_country2 =~ s/\%// ;
+      $project_language_country2 .= '-mob' ;
+    }
+    print CSV_DAILY_DETAILED "$project_language_country2," ;
+    print "$project_language_country2: " . sprintf ("%.2f", 100 * $visits_per_project_language_country {$project_language_country}/ $visits_total_non_bot) . "\%\n" ;
+    last if ++$columns > $columns_max ;
+  }
+  print CSV_DAILY_DETAILED "\n" ;
+
+  my ($perc_included,$cells_csv,$cells_total,$yyyymmdd_excel) ;
+  for $yyyymmdd ( sort @yyyymmdd )
+  {
+    $columns = 0 ;
+    $yyyymmdd_excel = "\"=date(" . substr($yyyymmdd,0,4) . "," . substr($yyyymmdd,5,2) . "," . substr($yyyymmdd,8,2) . ")\"" ;
+
+    $visits_per_day = $visits_per_day {$yyyymmdd} ;
+
+    if ($visits_per_day == 0)
+    {
+      print CSV_DAILY_DETAILED "$yyyymmdd,$yyyymmdd_excel\n" ;
+      next ;
+    }
+
+    $cells_csv   = '' ;
+    $cells_total = 0 ;
+    foreach $project_language_country (@project_language_country)
+    {
+      $count = $visits_daily_wiki {"$yyyymmdd,$project_language_country,U"} ;
+      $cells_csv .= (0 + $count) . "," ; # U = user = no bot
+      $cells_total += $count ;
+     last if ++$columns > $columns_max ;
+    }
+
+    $visits_other = $visits_per_day - $cells_total ;
+    $perc_included = sprintf ("%.1f", 100 *  $cells_total / $visits_per_day) ;
+    print CSV_DAILY_DETAILED "$yyyymmdd,$yyyymmdd_excel,$visits_per_day,$visits_other,$perc_included\%,$cells_csv\n" ;
+  }
+
+  print CSV_DAILY_DETAILED "\nSheet contains $columns columns with basic data\n" ;
+  close CSV_DAILY_DETAILED ;
 }
 
 # not operational, obsolete? Q&D code?
@@ -252,11 +430,16 @@ sub ProcessRawData
 {
   print "\nProcessRawData\n\n" ;
 
+  $bots_edits = 0 ;
+  $bots_saves = 0 ;
+  $user_edits = 0 ;
+  $user_saves = 0 ;
+
   open IN,  '<', $file_raw_data or die "Can't open $file_raw_data";
   open OUT, '>', $file_csv_counts_daily_project or die "Can't open $file_csv_counts_daily_project" ;
 
   $date_prev = "" ;
-
+  $from = '' ;
   while ($line = <IN>)
   {
     $lines++ ;
@@ -287,7 +470,7 @@ sub ProcessRawData
 
     if ($mime ne "text/html")
     {
-      $mime_not_text_html {$mime} ++ ;
+    # $mime_not_text_html {$mime} ++ ;
       next ;
     }
 
@@ -335,7 +518,7 @@ sub ProcessRawData
     if ($bot eq "bot=Y")
     {
       if ($action =~ /action=edit/)
-      {$ bots_edits += $count ; }
+      { $bots_edits += $count ; }
       elsif ($action =~ /action=submit/)
       { $bots_saves += $count ; }
     }

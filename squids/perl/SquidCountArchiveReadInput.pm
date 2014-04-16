@@ -1,12 +1,10 @@
-#!/usr/bin/perl
+ #!/usr/bin/perl
 
 # /usr/local/bin/geoiplogtag uses /usr/share/GeoIP/GeoIP.dat
 # test:
 # echo 125.123.123.123 | /usr/local/bin/geoiplogtag 1
 # refresh: bayes:/usr/share/GeoIP> wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-
-
-
+use SquidCountArchiveConfig ;
 
 sub CollectFilesToProcess
 {
@@ -26,7 +24,7 @@ sub CollectFilesToProcess
 
   my ($date_archived) ;
 
-  $dir_in = $job_runs_on_production_server ? $cfg_dir_in_production : $cfg_dir_in_test ;
+  $dir_in   = $job_runs_on_production_server ? $cfg_dir_in_production : $cfg_dir_in_test ;
 
   $some_files_found = $false ;
   $full_range_found = $false ;
@@ -51,27 +49,21 @@ sub CollectFilesToProcess
     $date_archived = sprintf ("%4d%02d%02d", $year+1900, $month+1, $day) ;
 
     my $file = "$dir_in/$cfg_logname-$date_archived.gz" ;
-
     print "\n- Inspect file saved $days_ago_inspect days ago: $file\n" ;
-
 
     if (! -e $file)
     { print "- File not found: $file\n" ; }
     else
     {
-      ($timehead,$timetail) = &GetLogRange($file, $path_head_tail) ;
+      ($timehead,$timetail) = &GetLogRange ($file, $path_head_tail) ;
 
-	#warn "timehead=$timehead\ntimetail=$timetail\ntime_to_start=$time_to_start\ntime_to_stop=$time_to_stop\n";
       if (($timetail ge $time_to_start) && ($timehead le $time_to_stop))
       {
         print "- Include this file\n" ;
 
-
         $some_files_found = $true ;
         push @files, $file ;
         if ($timehead le $time_to_start) { $head_found = $true ; print "- Head found\n" ; }
-        warn $timetail;
-        warn $time_to_stop;
         if ($timetail ge $time_to_stop)  { $tail_found = $true ; print "- Tail found\n" ; }
       }
 
@@ -155,7 +147,7 @@ sub ReadSquidLogFiles
   {
     open FILE_EDITS_SAVES, '>', "$path_out/$file_edits_saves" ;
 
-    my $file_csv_views_viz2 = "$path_out/$file_csv_views_viz";
+    my $file_csv_views_viz2 = $file_csv_views_viz ;
     my $date = substr ($time_to_start,0,4) . substr ($time_to_start,5,2) . substr ($time_to_start,8,2) ;
     $file_csv_views_viz2 =~ s/date/$date/ ;
     $gz_csv_views_viz = gzopen ($file_csv_views_viz2, "wb") || die "Unable to write $file_csv_views_viz2 $!\n" ;
@@ -178,23 +170,25 @@ sub ReadSquidLogFiles
     if ($job_runs_on_production_server)
     {
       if ($file_in =~ /\.gz$/o)
-      { open IN, "-|", "gzip -dc $file_in | sed s/\\ \\ */\\ /g" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "gzip -dc $file_in | sed 's/\t/ /g;s/\\ \\ */\\ /g' | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
       else
-      { open IN,"<$file_in" ; } # http://perldoc.perl.org/functions/open.html
-      
-      $fields_expected = 13 ;
+      { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      $fields_expected = 14 ;
     }
     else
     {
       open IN, '<', $file_in ;
-      $fields_expected = 13 ; # add fake country code
+      $fields_expected = 14 ; # add fake country code
     # $fields_expected = 13 ;
     }
 
     $line = "" ;
     while ($line = <IN>)
     {
-      $lines_to_process++ ;
+      if ($sample_rate == 1) # input are unsampled edits, only need for those records which save edit in wiki
+      { next if $line !~ /302.*?action=submit.*?text\/html/ ; } # first rought filter, refined filter comes later
+      
+      $lines_to_process ++ ;
 
     # if ($line =~ /fy\.wikipedia\.org/o) # test/debug
     # {
@@ -213,32 +207,35 @@ sub ReadSquidLogFiles
       $line =~ s/; charset/;%20charset/ ; # log lines are space delimited, other spaces should be encoded
 
       @fields = split (' ', $line) ;
-	#print "record with ".(~~@fields)." fields\n";
 # next if $line =~ /upload/ ;
 # next if $line !~ /en\.m\.wikipedia/ ;
 # next if $fields[10] eq '-' ;
 # print "mime " . $fields[10] . "\n" ;
 #next if $fields [9] eq '-' ;
 #next if $fields [9] =~ /NONE/ ;
-     if ($#fields >= 13)
+     if ($#fields > 14)
      {
-	     if (! $scan_ip_frequencies)
-	     {
+if (! $scan_ip_frequencies)
+{
 # print "line $line2\n" ;
 # print "fields " . $#fields . "\n$line\n" ;
-	     }
+}
 
-	     @fields = split (' ', $line, 14) ;
-	     $fields [13] =~ s/ /%20/g ;
+      $country_code = $fields [$#fields] ;
+      $fields [$#fields] = '' ;
+      $line = join (' ', @fields) ;
+      @fields = split (' ', $line, 14) ;
+      $fields [14] = $country_code ;
+ $fields [13] =~ s/ /%20/g ;
 
-	     if (! $scan_ip_frequencies)
-	     {
+if (! $scan_ip_frequencies)
+{
 # print "2 $line\n" ;
 # print "\n\n12: " . $fields [12] . "\n"  ;
 # print "13: " . $fields [13] . "\n"  ;
 # print "14: " . $fields [14] . "\n"  ;
 # print "15: " . $fields [15] . "\n"  ;
-	     }
+}
       }
 
       if (! $scan_ip_frequencies) # phase 2
@@ -254,7 +251,7 @@ sub ReadSquidLogFiles
       {
         $fields_too_few  ++ ;
       # print "invalid field count " . $#fields . "\n" ;
-      # print ERR $#fields . " fields: \"$line\"\n" ;
+        print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
 
@@ -263,7 +260,7 @@ sub ReadSquidLogFiles
         @a = @fields ;
         $fields_too_many ++ ;
       # print "invalid field count " . $#fields . "\n" ;
-      # print ERR $#fields . " fields: \"$line\"\n" ;
+        print ERR $#fields . " fields: \"$line\"\n" ;
         next ;
       }
 
@@ -375,6 +372,9 @@ sub ReadSquidLogFiles
   else
   { print "\nNo mobile urls detected ?!?!\n\n" ; }
 
+  if ($mime_text_html_assumed_where_dash_found > 0)
+  { print "mime 'text/html' assumed where dash only was found on $mime_text_html_assumed_where_dash_found records with url '.m.wikipedia.org'\n\n" ; }
+
   return ($data_read) ;
 }
 
@@ -471,5 +471,21 @@ sub GetTimeIso8601
   $time = timelocal($sec,$min,$hour,$mday,$mon-1,$year-1900);
   return ($time) ;
 }
+
+sub ReadMobileDeviceInfo
+{
+  my $dir_meta = "/a/wikistats_git/squids/csv/meta/" ; # temp hard coded path 
+  my $path_to_mobiledevices = "$dir_meta/MobileDeviceTypes.csv";
+  
+  if (!-e $path_to_mobiledevices) 
+  {
+    print "No mobile devices csv found\n";
+    exit (-1);
+  };
+  
+  open CSV_MOBILE_DEVICES,'<',$path_to_mobiledevices ;
+  @mobile_devices= map { $a=$_; $a=~s/\r\n$//; $a; } <CSV_MOBILE_DEVICES>;
+  close CSV_MOBILE_DEVICES,'<',$path_to_mobiledevices ;
+} 
 
 1;

@@ -1,56 +1,22 @@
-#!/usr/bin/perl
-use Carp;
-use File::Path qw/mkpath/;
+ #!/usr/bin/perl
 
-# all of the following scalars will contain
-# parameters passed through command-line
-my ($date_range,
-    $force_phases,
-    $config_module);
-# a hash with keys being parameter names and values, the values of the params
-my %options ;
+  use SquidCountArchiveConfig ;
+  use lib $cfg_liblocation ;
 
-BEGIN {
-  use Carp;
-  use Getopt::Std;
-  getopt("dfctrp", \%options) ;
-  my $__config_module = $options{"r"} || "SquidCountArchiveConfig.pm";
-  if (exists $options{"c"}) {
-    croak "Config .pm $__config_module passed as parameter but it does not exist"
-      if !-f  $__config_module && 
-         !-f "$__config_module.pm"
-  };
-  require $__config_module;
-  croak "Expected \$cfg_liblocation to be defined inside config   .pm file" if !defined $cfg_liblocation;
-  unshift(@INC,$cfg_liblocation); 
-  #warn "cfg_file_test=$cfg_file_test\n";
-  #exit 0;
-};
+  print "Find EzLib at location $cfg_liblocation\n" ;
 
-$date_range     	       = $options{"d"};
-$force_phases   	       = $options{"f"};
-if(exists $options{"p"}) {
-	$job_runs_on_production_server = $true;
-} else {
-	$job_runs_on_production_server = $false;
-};
+  use EzLib ;
 
+  $trace_on_exit = $true ;
+  ez_lib_version (13) ;
 
+  use Compress::Zlib;
 
+  use SquidCountArchiveProcessLogRecord ;
+  use SquidCountArchiveReadInput ;
+  use SquidCountArchiveWriteOutput ;
 
-
-use EzLib ;
-
-$trace_on_exit = $true ;
-ez_lib_version (13) ;
-
-use Compress::Zlib;
-
-use SquidCountArchiveProcessLogRecord ;
-use SquidCountArchiveReadInput ;
-use SquidCountArchiveWriteOutput ;
-
-default_argv $cfg_default_argv ;
+  default_argv $cfg_default_argv ;
 
 # http://wikitech.wikimedia.org/view/Squid_log_format
 # 1. Hostname
@@ -77,13 +43,19 @@ default_argv $cfg_default_argv ;
 
 # todo: parm -e use unsampled file with all edits and saves
 # todo: parm -r root folder
-#print "cfg_logname: $cfg_logname\n" ;
 
 #print "cfg_logname: $cfg_logname\n" ;
 
   $test = $false  ;
   $test_maxlines = $cfg_test_maxlines ;
   $file_test     = $cfg_file_test ;
+  $sample_rate   = $cfg_sample_rate ;
+
+  if ($sample_rate == 1)
+  { $bot_threshold_edits = 1000 ; }
+  elsif ($sample_rate == 1000)
+  { $bot_threshold_edits = 2 ; }
+  else { die "Unexpected sample rate '$sample_rate'" ; }
 
   if (! $job_runs_on_production_server)
   {
@@ -97,14 +69,8 @@ default_argv $cfg_default_argv ;
   $path_root = $job_runs_on_production_server ? $cfg_path_root_production : $cfg_path_root_test ;
   $tags_wiki_mobile = "CFNetwork|Dalvik|WikipediaMobile|Appcelerator|WiktionaryMobile|Wikipedia Mobile" ;
 
-  # UPDATE( we are treating some of these different now in SquidCountArchiveProcessLogRecord.pm starting at line 364
-  # Special cases we need to treat separately
-  # Opera , Opera Tablet
-  # Android, Android; Tablet
-  # iPad/iPhone
-  $tags_mobile         = "BlackBerry|Windows CE|DoCoMo|iPod|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|Symbian|UP\.Browser|Vodafone|WAP|webOS|HTC[^P]|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise XP|Sunrise/|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech|MeeGo|Tizen" ;
-  $tags_tablet         = "Tablet PC|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
-
+  $tags_mobile      = "Android|BlackBerry|Windows CE|DoCoMo|iPad|iPod|iPhone|HipTop|Kindle|LGE|Linux arm|MIDP|NetFront|Nintendo|Nokia|Obigo|Opera Mini|Opera Mobi|Palm|Playstation|Samsung|SoftBank|SonyEricsson|Symbian|UP\.Browser|Vodafone|WAP|webOS|HTC[^P]|KDDI|FOMA|Polaris|Teleca|Silk|ZuneWP|HUAwei|Sunrise XP|Sunrise/|AUDIOVOX|LG/U|AU-MIC|Motorola|portalmmm|Amoi|GINGERBREAD|Spice|lgtelecom|PlayBook|KYOCERA|Opera Tablet|Windows Phone|UNTRUSTED|Sensation|UCWEB|Nook|XV6975|EBRD1|Rhodium|UPG|Symbian|Pantech|MeeGo|Tizen" ;
+  $tags_tablet       = "iPad|Android 3|SCH-I800|Kindle Fire|Xoom|GT-P|Transformer|SC-01C|pandigital|SPH-P|STM803HC|K080|SGH-T849|CatNova|NookColor|M803HC|A1_|SGH-I987|Ideos S7|SHW-M180|HomeManager|HTC_Flyer|PlayBook|Streak|Kobo Touch|LG-V905R|MID7010|CT704|Silk|MID7024|ARCHM|Iconia|TT101|CT1002|; A510|MID_Serials|ZiiO10|MID7015|001DL|MID Build|PM1152|RBK-490|Tablet|A100 Build|ViewPad|PMP3084|PG41200|; A500|A7EB|A80KSC" ;
   $tags_mobile_upd  = "March 2012" ;
   &ReadMobileDeviceInfo ;
 
@@ -123,9 +89,9 @@ default_argv $cfg_default_argv ;
     { print "\n" . "=" x 80 . "\n" ; }
     ($path_out, $path_out_month) = &SetPathOut ($days_ago) ;
 
-    open OUT,  '>', "$path_out/$file_out" or die "Can't open $path_out/$file_out";
-    open OUT2, '>', "$path_out/$file_out2" or die "Can't open $path_out/$file_out2";
-    open ERR,  '>', "$path_out/$file_err" or die "Can't open $path_out/$file_err";
+    open OUT,  '>', "$path_out/$file_out" ;
+    open OUT2, '>', "$path_out/$file_out2" ;
+    open ERR,  '>', "$path_out/$file_err" ;
   # open FILTER_FY, '>>', "$path_out_month/$file_filter_fy" ;
 
     my $do_phase1 = &CheckProcessPhase1 ($days_ago, $path_out) ; # Collect IP frequencies
@@ -206,7 +172,12 @@ sub ParseArguments
 {
   trace ParseArguments ;
 
+  my %options ;
 
+  getopt ("df", \%options) ;
+
+  $date_range   = $options {"d"} ;
+  $force_phases = $options {"f"} ;
 
   if ($force_phases !~ /^(?:|1|2|12|21)$/)
   { abort "Invalid data for -f parameter: specify which phases to force as -f [1|2|12]\nForce  = execute phase even when already done succesfully earlier\nPhase1 = collect ip counts\nPhase2 = collect other counts\n" ; }
@@ -214,8 +185,6 @@ sub ParseArguments
   if ($date_range eq '')
   { abort "No valid date range specified\n\nSpecify first and last day to process as:\n'-d yyyymmdd[-yyyymmdd]' (yymmdd or yyyy/mm/dd, " .
           "second date defaults to first)\nor\n'-d mmm[-nnn]', where mmm and nnn are days before today (mmm less or equal to nnn), nnn defaults to mmm\n\n" ; }
-
-
 
   if ($date_range =~ m/^\d{4}\/?\d{2}\/?\d{2}(?:\-\d{4}\/?\d{2}\/?\d{2})?$/) # specify daterange as yyyymmdd-yyyymmdd or yyyy/mm/dd-yyyy/mm/dd
   {
@@ -318,8 +287,8 @@ sub ValidateDateAndCalcDaysAgo
   if ($days_ago < 1)
   { abort "$desc '$date' should be before today which is $date_today" ; }
 
-  if ($days_ago > 366)
-  { abort "$desc '$date' should be a year or less ago (but before today: '$date_today')" ; }
+# if ($days_ago > 366)
+# { abort "$desc '$date' should be a year or less ago (but before today: '$date_today')" ; }
 
   return ($days_ago) ;
 }
@@ -393,18 +362,25 @@ sub SetPathOut
   if (! -d $path_out)
   {
   # print "mkdir $path_out\n" ;
-    mkpath ($path_out) || die "Unable to create directory $path_out\n" ;
+    mkdir ($path_out) || die "Unable to create directory $path_out\n" ;
   }
 
   $path_out .= "/" . sprintf ("%04d-%02d-%02d", $year+1900, $month+1, $day) ;
+
   if (! -d $path_out)
   {
-  print "mkdir $path_out\n" ;
-    mkpath ($path_out)           || die "Unable to create directory $path_out\n" ;
-  print "mkdir $path_out/private\n" ;
-    mkpath ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
-  print "mkdir $path_out/public\n" ;
-    mkpath ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
+    print "mkdir $path_out\n" ;
+    mkdir ($path_out)          || die "Unable to create directory $path_out\n" ;
+  }
+  if (! -d "$path_out/private")
+  {
+    print "mkdir $path_out/private\n" ;
+    mkdir ("$path_out/private") || die "Unable to create directory $path_out/private\n" ;
+  }
+  if (! -d "$path_out/public")
+  {
+    print "mkdir $path_out/public\n" ;
+    mkdir ("$path_out/public" ) || die "Unable to create directory $path_out/public\n" ;
   }
 
   # clean up obsolete signal files
@@ -431,13 +407,6 @@ sub SetTimeRangeToProcess
 
   # if ($test)
   # { $time_to_stop  = $date_collect_files . "T00:30:00" ; }
-  
-
-  ##################################################################
-  # The following line will force the window which will be processed
-  # to be 10minutes (comes in handy for debugging)
-  ##################################################################
-  #$time_to_stop  = $date_collect_files . "T00:10:00" ;
 
   return ($date_collect_files, $time_to_start, $time_to_stop) ;
 }
@@ -457,13 +426,13 @@ sub CheckProcessPhase1 # Collect IP frequencies
     if ($force_phases !~ /1/)
     {
       $process = $false ;
-      print "File '[path_out]$file_ready' already exists => skip phase 1 (collecting ip address counts)\n" ;
+      print "File '$path__ready' already exists => skip phase 1 (collecting ip address counts)\n" ;
     }
     else
-    { print "File '[path_out]$file_ready' already exists.\nYet force execute phase 1 (collecting ip address counts), as -f 1 has been specified\n" ; }
+    { print "File '$path_ready' already exists.\nYet force execute phase 1 (collecting ip address counts), as -f 1 has been specified\n" ; }
   }
   else
-  { print "File '[path_out]/$file_ready' not found -> process phase 1\n" ; }
+  { print "File '$path_ready' not found -> process phase 1\n" ; }
 
   return ($process) ;
 }
@@ -483,13 +452,13 @@ sub CheckProcessPhase2 # collect other data
     if ($force_phases !~ /2/)
     {
       $process = $false ;
-      print "File '[path_out]/$file_ready' already exists => skip phase 2 (collecting counts other than ip counts)\n" ;
+      print "File '$path_ready' already exists => skip phase 2 (collecting counts other than ip counts)\n" ;
     }
     else
-    { print "File '[path_out]/$file_ready' already exists.\nYet force execute phase 2 (collecting counts other than ip counts), as -f 2 has been specified\n" ; }
+    { print "File '$path_ready' already exists.\nYet force execute phase 2 (collecting counts other than ip counts), as -f 2 has been specified\n" ; }
   }
   else
-  { print "File '[path_out]/$file_ready' not found -> process phase 2\n" ; }
+  { print "File '$path_ready' not found -> process phase 2\n" ; }
 
   return ($process) ;
 }
@@ -509,6 +478,7 @@ sub InitGlobals # qqq
   undef $lines_in_file ;
   undef $lines_processed ;
   undef $lines_this_day ;
+  undef $mime_text_html_assumed_where_dash_found ;
   undef $newest_time_read ;
   undef $oldest_time_read ;
   undef $statusses_non_tcp ;
@@ -582,9 +552,6 @@ sub ProcessPhase1 # collect IP frequencies, needed for filtering probable bots i
   $scan_ip_frequencies = $true ;
   $scan_all_fields     = $false ;
 
-  use Data::Dumper;
-  my $dbg_str = Dumper(\@files);
-
   my $data_read = &ReadSquidLogFiles ($path_out, $time_to_start, $time_to_stop, @files) ;
   return if not $data_read ;
 
@@ -616,12 +583,13 @@ sub ProcessPhase2 # Collect other data
   { &MoveAndCompressFiles ($path_out, $path_out_month, $date_collect_files) ; }
 
 
-
-  $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
-  `$cmd` ;
-  my $home_dir = $ENV{HOME};
-  $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> $home_dir/SquidCountArchiveLog.txt\n\n" ;
-  `$cmd` ;
+  if ($job_runs_on_production_server)
+  {
+    $cmd = "echo \"Ready in \"" . ddhhmmss (time - $time_start). " > $path_out/\#Ready" ; # use in next run to test whether this day has been completely processed
+   `$cmd` ;
+    $cmd = "echo \"\nReady in \"" . ddhhmmss (time - $time_start). " >> /home/ezachte/SquidCountArchiveLog.txt\n\n" ;
+   `$cmd` ;
+  }
 }
 
 #sub ScanSquidArchive
@@ -951,7 +919,7 @@ sub ProcessSquidSequenceNumbers
   # input has been established for tast three months of data in WriteOutputSquidLogs
   # there for each day per squid and hour of day total event and total gap were established
   # avg gap for all squids combined (per hour and per day) was written to this csv file
-  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' or die "Can't open SquidDataSequenceNumbersAllSquids.csv";
+  open CSV, '<', 'SquidDataSequenceNumbersAllSquids.csv' ;
   while ($line = <CSV>)
   {
     next if $line =~ /\*/o ;
