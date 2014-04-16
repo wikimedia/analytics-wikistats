@@ -247,7 +247,7 @@ $out_tbl7_intro   = "Database records per namespace / Categorised articles<p>" .
 $out_tbl7_hdr_ns  = "Namespace" ; # new
 $out_tbl7_hdr_ca  = "Categorised<br>articles <sup>1</sup>" ; # new
 
-$out_tbl8_intro   = "Distribution of article edits over registered editors, incl. bots"  ; # new
+$out_tbl8_intro   = "Distribution of article edits over registered editors, excl. bots"  ; # new
 
 $out_tbl9_intro   = "[[5]] most edited articles (> 25 edits)"  ; # new
 
