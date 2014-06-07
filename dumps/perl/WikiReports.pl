@@ -217,7 +217,7 @@
   &SetConversionTables ;
 
   &ReadLanguageNames ;
-  &GetTranslateWikiData ;
+# &GetTranslateWikiData ; # temporarily disabled, does not work on new stats server without web access
 
   &ReadDumpDateAndForecastFactors ;
 
@@ -241,8 +241,8 @@
 #    &LogT ("\nExecute temporary test code!") ;
 
 #    &GenerateSiteMapNew ;
-#    &GenerateTablesPerWiki ("commons") ;
-#    exit ;
+# &GenerateTablesPerWiki ("zz") ;
+# exit ;
 #  }
 
   if ($dump_gallery)

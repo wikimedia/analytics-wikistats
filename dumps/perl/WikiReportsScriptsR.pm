@@ -519,13 +519,17 @@ $include_script_plot_data
 $include_script_plot_cairo_640_240
 $include_script_options_summary
 
-plot (dates,plotdata\$count_normalized,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+plot (dates,plotdata\$count_normalized_non_mobile,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
 $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-lines(dates,plotdata\$count_normalized,col="green4", lty="solid", lwd=1.8)
+legend("topleft",c("non mobile ", "mobile ", "total "), lty=1, lwd=1.8, col=c("COLOR_NON_MOBILE","COLOR_MOBILE", "COLOR_TOTAL"), inset=0.02, bg="#E0E0E0")
+
+lines(dates,plotdata\$count_normalized_non_mobile, col="green4", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_normalized_mobile,     col="blue3",  lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_normalized_total,      col="black",  lty="solid", lwd=1.8)
 
 $include_script_plot_top_month
 $include_script_plot_period

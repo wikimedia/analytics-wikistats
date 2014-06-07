@@ -250,7 +250,7 @@ sub Log
   print FILE_LOG $msg ;
 }
 
-sub Log2
+sub LogQ
 {
   $msg = shift ;
   print FILE_LOG $msg ;

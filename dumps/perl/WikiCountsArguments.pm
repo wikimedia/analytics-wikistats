@@ -68,11 +68,15 @@ sub ParseArguments
   if (defined ($options {"y"})) # 'y' as join symbol = merge
   {
     $merge_user_edits_one_project = $true ;
+    $file_csv_content_namespaces  = $path_out . "StatisticsContentNamespaces.csv" ; 
+    $file_csv_content_namespaces  =~ s/csv_\w\w/csv_mw/ ; # collected in global dir by job 'collect_countable_namespaces.sh'
     return ;
   }
   if (defined ($options {"z"}))
   {
     $merge_user_edits_all_projects = $true ;
+    $file_csv_content_namespaces  = $path_out . "StatisticsContentNamespaces.csv" ; 
+    $file_csv_content_namespaces  =~ s/csv_\w\w/csv_mw/ ; # collected in global dir by job 'collect_countable_namespaces.sh'
     return ;
   }
 
@@ -148,18 +152,6 @@ sub SetEnvironment
   else
   { $path_in  =~ s/[\/]*$/\// ; }
 
-  if ($merge_user_edits_one_project || $merge_user_edits_all_projects) # we know enough
-  {
-    $file_csv_user_month_all_wikis      = $path_out . "/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
-    $file_csv_user_month_all_projects   = $path_out . "/EditsBreakdownPerUserPerMonthAllProjects.csv" ;
-    $file_csv_users_activity_spread     = $path_out . "/StatisticsUserActivitySpread.csv" ;
-    $file_csv_users_activity_spread_all = $path_out . "/StatisticsUserActivitySpreadAllProjects.csv" ;
-    $file_csv_monthly_stats             = $path_out . "/StatisticsMonthly.csv" ;
-    $file_csv_bots_all                  = $path_out . "/BotsAll.csv" ;
-    $file_csv_wiki_loves_monuments      = $path_out . "/EditsBreakdownPerUserPerMonthWikiLovesMonumentsUploaders.csv" ;
-    return ;
-  }
-
   if ($path_out =~ /\\/)
   { $path_out =~ s/[\\]*$/\\/ ; }
   else
@@ -181,6 +173,18 @@ sub SetEnvironment
   {
     if (-M $file_aborted > 1) # older than one day
     { unlink $file_aborted ; }
+  }
+
+  if ($merge_user_edits_one_project || $merge_user_edits_all_projects) # we know enough
+  {
+    $file_csv_user_month_all_wikis      = $path_out . "/EditsPerUserPerMonthPerNamespaceAllWikis.csv" ;
+    $file_csv_user_month_all_projects   = $path_out . "/EditsPerUserPerMonthPerNamespaceAllProjects.csv" ;
+    $file_csv_users_activity_spread     = $path_out . "/StatisticsUserActivitySpread.csv" ;
+    $file_csv_users_activity_spread_all = $path_out . "/StatisticsUserActivitySpreadAllProjects.csv" ;
+    $file_csv_monthly_stats             = $path_out . "/StatisticsMonthly.csv" ;
+    $file_csv_bots_all                  = $path_out . "/BotsAll.csv" ;
+    $file_csv_wiki_loves_monuments      = $path_out . "/EditsPerUserPerMonthPerNamespaceWikiLovesMonumentsUploaders.csv" ;
+    return ;
   }
 
 # if ($webalizer)
@@ -231,12 +235,12 @@ sub SetEnvironment
         $edits_only = $true ;
       }
 
-#     if ($edits_only && ($language =~ /^(?:id|jv|sv|ar|pt)$/))
-      if ($edits_only && ($language =~ /^(?:id|jv|sv|ar|commons)$/))
+      if ($edits_only && ($language =~ /^(?:id|jv|sv|sw|ar|commons)$/))
       {
         &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV, 2011-05: special request on SV\n") ;
         &LogT ("Overrule edits only mode for selected wikis, 2012-04: outreach programs: special request by Annie Lin\n") ;
-        $edits_only = $false ;
+        &LogT ("Overrule edits only mode for selected wikis, 2014-03: WikiAfrica program: special request by Heather Ford\n") ;
+        $edits_only = $false ;  # temporarily disable till full dump can be processed again
       }
     }
   }
@@ -459,10 +463,13 @@ sub SetEnvironment
     $file_csv_monthly_reverts       = $path_out . "StatisticsRevertsPerMonth.csv" ;
 #   $file_csv_user                  = $path_out . "StatisticsUsers.csv" ;
     $file_csv_user                  = $path_out . "EditsPerUser" . uc($language) . ".csv" ;
-    $file_csv_user_month            = $path_out . "EditsBreakdownPerUserPerMonth" . uc($language) . ".csv" ;
-    $file_csv_user_month_all_wikis  = $path_out . "EditsBreakdownPerUserPerMonthAllWikis.csv" ;
-    $file_csv_user_month_article    = $path_temp . "EditsPerUserPerMonthPerArticle" . uc($language) . ".csv" ;
-    $file_csv_user_month_article_s  = $path_temp . "EditsPerUserPerMonthPerArticleSorted" . uc($language) . ".csv" ;
+    $file_csv_user_month_namespace  = $path_out . "EditsPerUserPerMonthPerNamespace" . uc($language) . ".csv" ;
+    $file_csv_user_month_all_wikis  = $path_out . "EditsPerUserPerMonthPerNamespaceAllWikis.csv" ;
+
+    # collect edits per user per namespace, when xml is processed, sort and aggregate  
+    $file_csv_user_month_namespace_log   = $path_temp . "EditsPerUserPerMonthPerNamespaceLoggedPerArticle" . uc($language) . ".csv" ;
+    $file_csv_user_month_namespace_log_s = $path_temp . "EditsPerUserPerMonthPerNamespaceLoggedPerArticleSorted" . uc($language) . ".csv" ;
+
     $file_csv_anonymous_users       = $path_out . "StatisticsAnonymousUsers.csv" ;
 #   $file_csv_timelines             = $path_out . "StatisticsTimelines.csv" ;
     $file_events                    = $path_out . "StatisticsEvents.~1" ;
@@ -483,7 +490,7 @@ sub SetEnvironment
     $file_csv_reverts_sample        = $path_out . "RevertsSample" . uc ($language)  . ".csv.tmp" ;
     $file_csv_reverted_edits        = $path_out . "RevertedEdits" . uc ($language)  . ".csv.tmp" ;
     $file_csv_creates               = $path_out . "Creates" . uc ($language)  . ".csv.tmp" ;
-    $file_csv_wlm                   = $path_out . "EditsBreakdownPerUserPerMonthWLM.csv" ;
+    $file_csv_wlm                   = $path_out . "EditsPerUserPerMonthPerNamespaceWLM.csv" ;
     $file_csv_timelines             = $path_out . "Timelines"        . uc ($language) . ".csv" ;
     $file_csv_timelines_skipped     = $path_out . "TimelinesSkipped" . uc ($language) . ".csv" ;
 

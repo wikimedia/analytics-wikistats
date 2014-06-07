@@ -789,16 +789,16 @@ sub UpdateZeitGeist
   foreach $key (sort keys %zeitgeist_reg_users_rank)
   {
     # if (substr ($key,0,6) ne substr ($keyprev,0,6))
-    # { &Log2 ("\n\n") ; }
-    # &Log2 ("$key : " . @zeitgeist_reg_users_rank  {$key} . " - " . @zeitgeist_reg_users_title  {$key} . "\n") ;
+    # { &LogQ ("\n\n") ; }
+    # &LogQ ("$key : " . @zeitgeist_reg_users_rank  {$key} . " - " . @zeitgeist_reg_users_title  {$key} . "\n") ;
     push @csv, "$language," . substr ($key,0,6) . "," . substr ($key,6,2) . ",REG," . @zeitgeist_reg_users_rank  {$key} . "," . @zeitgeist_reg_users_title  {$key} ;
     $keyprev = $key ;
   }
 # foreach $key (sort keys %ZeitGeistAllUsersRank)
 # {
 #   if (substr ($key,0,6) ne substr ($keyprev,0,6))
-#   { &Log2 ("\n\n") ; }
-#   &Log2 ("$key : " . @ZeitGeistAllUsersRank  {$key} . " - " . @ZeitGeistAllUsersTitle  {$key} . "\n") ;
+#   { &LogQ ("\n\n") ; }
+#   &LogQ ("$key : " . @ZeitGeistAllUsersRank  {$key} . " - " . @ZeitGeistAllUsersTitle  {$key} . "\n") ;
 #   push @csv, "$language," . substr ($key,0,6) . "," . substr ($key,6,2) . ",ALL," . @ZeitGeistAllUsersRank  {$key} . "," . @ZeitGeistAllUsersTitle  {$key} ;
 #   $keyprev = $key ;
 # }

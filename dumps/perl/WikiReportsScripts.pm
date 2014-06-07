@@ -93,7 +93,7 @@ par(mar=c(3.5,4,2.5,1.5))
 par(oma=c(0,0,0,0))
 __SCRIPT_PLOT_OPTIONS_SUMMARY__
 
-$out_plot_months_normalized = "mtext(\"metrics have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")" ;
+$out_plot_months_normalized = "mtext(\"metrics have been normalized to months of 30 days (Jan*30/31, Feb*30/(28|29), Mar*30/31, etc)\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")" ;
 
 $out_script_plot_multititle = <<__SCRIPT_PLOT_MULTI_TITLE__ ;
 #multiTitle <- function(...){

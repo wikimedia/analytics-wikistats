@@ -452,7 +452,7 @@ sub WriteReportReverts
   {
 
     foreach $key (sort keys %revertstats)
-    { &Log2 ("$key: ${revertstats{$key}}\n") ; }
+    { &LogQ ("$key: ${revertstats{$key}}\n") ; }
 
     $out_html .= "<hr width=640 align=left><p>" ;
     $out_html .= "<h3>Distribution of reverts</h3>\n" ;

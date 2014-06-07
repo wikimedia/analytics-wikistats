@@ -2,6 +2,8 @@
 
   use WikiReportsNoWikimedia ;
 
+# send to disk, and stdout 
+# (not quite the Linux way, but most of Wikistats was run on Windows for many years)
 sub Log
 {
   my $msg = shift ;
@@ -9,7 +11,8 @@ sub Log
   print FILE_LOG $msg ;
 }
 
-sub Log2
+# send to disk, not to screen
+sub LogQ
 {
   my $msg = shift ;
   print FILE_LOG $msg ;
@@ -62,10 +65,10 @@ sub SpoolPreviousErrors
     if ($#errors != -1)
     {
       &LogT ("Runtime errors on previous run spooled to $file_log.\n") ;
-      &Log2 (">>\n") ;
+      &LogQ (">>\n") ;
       foreach $line (@errors)
-      { &Log2 ($line) ; }
-      &Log2 ("<<\n\n") ;
+      { &LogQ ($line) ; }
+      &LogQ ("<<\n\n") ;
     }
     unlink $file_errors ;
     undef @errors ;
@@ -1535,9 +1538,11 @@ sub GenerateColophon
     $out_mysite = "" ;
     $out_squidslog = " from 1:1000 sampled squid logs" ;
   }  
+  $out_unnormalized = "No data on this page have been normalized to 30 day months (as WMF does on certain traffic reports).<br>" ; 	
 
   $out_html .= "<p><small>\n" .
 #              ($wikimedia ? $out_sort_order3 : "") .
+               $out_unnormalized . "\n" .
                $out_history . "\n" .
                $out_sort_order3 .
                (($sitemap_new_layout) ? $participation {"intro"} : "") .

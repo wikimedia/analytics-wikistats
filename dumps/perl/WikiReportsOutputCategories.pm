@@ -146,10 +146,10 @@ sub GenerateCategoryTree
         $parent = ucfirst ($parent) ;
         if ($category ne $parent) # safety measure
         { $Subcategories {$parent} .= "\|$category" ; }
-        # &Log2 ("Title $title : '$cat' is part of '$catparent'\n") ; # debug
+        # &LogQ ("Title $title : '$cat' is part of '$catparent'\n") ; # debug
       }
       $Supercategories {$category} = $parents ;
-      # &Log2 ("Cat $cat Super $catlist\n") ;
+      # &LogQ ("Cat $cat Super $catlist\n") ;
     }
   }
 
@@ -435,7 +435,7 @@ sub ListSupercategories
   $path =~ s/^\|// ;
 
   my $supercats = $Supercategories {$cat} ;
-# &Log2 ("Depth $depth, Cat '$cat', Supercats '$supercats'\n") ;
+# &LogQ ("Depth $depth, Cat '$cat', Supercats '$supercats'\n") ;
 
   if ($depth > $maxdepth)
   { $supercats = "" ; }
@@ -457,7 +457,7 @@ sub ScanSupercategories
   my $cat    = shift ;
   my $path   = "$cat | " . (shift)   ;
   $path =~ s/^\s*\|\s*// ;
-# &Log2 (" Cat $catorg Depth $depth, Path $path\n") ;
+# &LogQ (" Cat $catorg Depth $depth, Path $path\n") ;
 
   my $supercats = $Supercategories {$cat} ;
 
@@ -472,7 +472,7 @@ sub ScanSupercategories
       $CategoryPathShort  {$catorg} = $path ;
       if ($depth > $CategoryDepthTop {$cat})
       { $CategoryDepthTop {$cat} = $depth ; }
-    # &Log2 (">>> Cat $catorg Depth $depth, Path $path\n") ;
+    # &LogQ (">>> Cat $catorg Depth $depth, Path $path\n") ;
     }
     else
     {
@@ -487,7 +487,7 @@ sub ScanSupercategories
         else
         {
           my $path_circ = "| $supercat | $path" ;
-          # &Log2 ("Circular reference 1: path = '$path_circ', supercat = '$supercat'\n") ;
+          # &LogQ ("Circular reference 1: path = '$path_circ', supercat = '$supercat'\n") ;
           $path_circ =~ s/([^\w\\])/\\$1/g ;
           $supercat  =~ s/([^\w\\])/\\$1/g ;
           $path_circ =~ s/^.*\| ($supercat \| $supercat) \|.*$/$1/ ;
@@ -550,7 +550,7 @@ sub ListSubcategories
 
   if ($CategoriesCircularRefStop {$cat} > 0)
   {
-    # &Log2 ("\nBreak on circular referenced depth $depth path $path\ncategory '$cat' \n") ;
+    # &LogQ ("\nBreak on circular referenced depth $depth path $path\ncategory '$cat' \n") ;
     return ;
   }
   my $subcats = $Subcategories {$cat} ;
@@ -584,7 +584,7 @@ sub ListSubcategories
     my $path_short = $CategoryPathShort   {$subcat} ;
     $path_short    =~ s/\s*\|\s*$// ;
 
-    # &Log2 ("0 '$subcat'\n1 '$path_short'\n2 '$path'\n\n") ;
+    # &LogQ ("0 '$subcat'\n1 '$path_short'\n2 '$path'\n\n") ;
 
     $anchor = "" ;
     if (substr ($path_short, 0, length ($path)) eq $path)
@@ -677,14 +677,14 @@ sub ListSubcategories
         if (index ($path, "| $subcat |") == -1)
         { &ListSubcategories ($wp, "Top", $depth, $subcat, $path) ; }
         #else
-        #{ &Log2 ("Circular reference: path = '$path', cat = '$subcat'\n") ; }
+        #{ &LogQ ("Circular reference: path = '$path', cat = '$subcat'\n") ; }
       }
       else
       {
         if (index ($path, "| $subcat |") == -1)
         { &ListSubcategories ($wp, $mode, $depth, $subcat, $path) ; }
         #else
-        #{ &Log2 ("Circular reference: path = '$path', cat = '$subcat'\n") ; }
+        #{ &LogQ ("Circular reference: path = '$path', cat = '$subcat'\n") ; }
       }
     }
   }

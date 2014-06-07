@@ -191,7 +191,10 @@ sub GetSummaryPerWiki
   # page views
 
   $daysinmonth     = days_in_month (substr ($mmddyyyy,6,4), substr ($mmddyyyy,0,2)) ;
-  $pageviews_month = sprintf ("%.0f", ($PageViewsPerHour {$wp} * 24 * 30)) ; # use normalized count (month always 30 days)
+# $pageviews_month = sprintf ("%.0f", ($PageViewsPerHour {$wp} * 24 * 30)) ; # use normalized count (month always 30 days)
+  
+  $pageviews_month = $pageviews {$wp.$m}    + $pageviews {"$wp.m".$m} ; 
+
   $pageviews_day   = $pageviews_month / 30 ; # $daysinmonth ;
   $pageviews_hour  = $pageviews_day / 24 ;
   $pageviews_min   = $pageviews_day / (24 * 60) ;
@@ -203,7 +206,7 @@ sub GetSummaryPerWiki
 
 # print "$month_year: $daysinmonth days in month, page views $pageviews_month\n" ;
 
-  $metric_PV_data     = &FormatSummary ($this_month) ;
+  $metric_PV_data     = &FormatSummary ($this_month) ; # based on $PageViewsPerHour {$wp} 
 
   $pageviews_month = &format($pageviews_month,'X') ;
   $pageviews_day   = &format($pageviews_day,'X') ;
@@ -326,6 +329,9 @@ sub GetSummaryPerWiki
   { $wiki = $out_language_name ; }
   else
   { $wiki = "$out_language_name $out_publication" ; }
+
+  if ($mode_wp)
+  { $msg_pageviews_mobile_added = blank_text_after ("05/04/2014", "<br><font color=#080>Jan 2014: <b>NEW</b> trend lines have been added for views to mobile site and overall total.</font><br><font color=#666>Earlier this plot only showed views to the non mobile site, without mentioning this explicitly. Our apologies for any confusion caused.</font>") ; }
 
 $html = <<__HTML_SUMMARY__ ;
 <a id='lang_$wp' name='lang_$wp'></a>
@@ -520,7 +526,7 @@ $html_plot_pageviews = <<__HTML_SUMMARY_PLOT_PAGEVIEWS__ ;
     <tr>
       <td class=c colspan=99 width=100%>
       &nbsp;<p><img src='$plot_pageviews'>
-      <br><small><font color=#808080>page views: $pageviews_per_unit</font></small></td>
+      <br><small><font color=#808080>page views: $pageviews_per_unit</font>$msg_pageviews_mobile_added</small></td>
     </tr>
 __HTML_SUMMARY_PLOT_PAGEVIEWS__
 
@@ -1104,13 +1110,23 @@ sub GeneratePlotEditors
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
+# plot normalized (= all months are 30 days) page views from $pageviews {$wp.$m} ($wp=language code, $m=month ndx)
+# which is hash filled in WikiReportsInput.pm from $file_csv_pageviewsmonthly = $path_in . "PageViewsPerMonthAll.csv"
+# which contains for every wiki in the project (e.g. in ../csv_wp for Wikipedia):
+# one line per month for non-mobile (since Jan 2008 for Wikipedia, some months later for other projects) 
+# and one line per month for mobile (since June 2010)
+# format: 'xx,yyyy/mm/dd,count' where xx is language code, (+ postfix .m for mobile)
+# e.g. 
+# en,2013/12/31,6758017229 
+# en.m,2013/12/31,2053305507
+ 
 sub GeneratePlotPageviews
 {
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   my $wp = shift ;
 
-  return if $wp =~ /^z+$/ ;
+  return if $wp =~ /^z+$/ ; # pseudo code for overall totals, zz,zzz are not language codes
 
   if ($pageviews_max {$wp} == 0)
   { print "\nNo pageviews found for wiki $wp!\n\n" ; return ; }
@@ -1137,7 +1153,7 @@ sub GeneratePlotPageviews
   $out_language_name    =~ s/&nbsp;/ /g ;
 
   open PAGEVIEWS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
-  print PAGEVIEWS_OUT "language,month,count_normalized\n" ;
+  print PAGEVIEWS_OUT "language,month,count_normalized_non_mobile,count_normalized_mobile,count_normalized_total\n" ;
 
   ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($pageviews_max) ;
 
@@ -1148,9 +1164,17 @@ sub GeneratePlotPageviews
   for ($m = $pageviews_month_lo ; $m < $pageviews_month_hi {$wp} ; $m++)
   {
     if ($m < $pageviews_month_lo {$wp})
-    { $count_normalized = "" ; }
+    { 
+      $count_normalized_non_mobile = "" ; 
+      $count_normalized_mobile     = "" ; 
+      $count_normalized_total      = "" ; 
+    }
     else
-    { $count_normalized = sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit) ; }
+    { 
+      $count_normalized_non_mobile = sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit) ; 
+      $count_normalized_mobile     = sprintf ("%.0f", $pageviews {"$wp.m".$m} / $metric_unit) ; 
+      $count_normalized_total      = $count_normalized_non_mobile + $count_normalized_mobile ;
+    }
 
     # $days_in_month =  days_in_month (substr($date,6,4),substr($date,0,2)) ;
     # $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
@@ -1163,12 +1187,12 @@ sub GeneratePlotPageviews
     {
       $date = &m2mmddyyyy ($m) ;
       $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
-      print PAGEVIEWS_OUT "$wp,$date,$count_normalized\n" ;
+      print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile,$count_normalized_mobile,$count_normalized_total\n" ;
     }
 
     $date = &m2mmddyyyy ($m+1) ;
     $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
-    print PAGEVIEWS_OUT "$wp,$date,$count_normalized\n" ;
+    print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile,$count_normalized_mobile,$count_normalized_total\n" ;
 
   }
   close PAGEVIEWS_OUT ;
@@ -1196,8 +1220,8 @@ sub GeneratePlotPageviews
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
 
-  $out_script_plot =~ s/COL_DATA/2:3/g ;
-  $out_script_plot =~ s/COL_COUNTS/2:2/g ;
+  $out_script_plot =~ s/COL_DATA/2:5/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:4/g ;
 
   $out_script_plot =~ s/CODE/$code/g ;
 
@@ -1209,6 +1233,9 @@ sub GeneratePlotPageviews
   $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
 
+  $out_script_plot =~ s/COLOR_NON_MOBILE/green4/g ;
+  $out_script_plot =~ s/COLOR_MOBILE/blue3/g ;
+  $out_script_plot =~ s/COLOR_TOTAL/black/g ;
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
@@ -1774,7 +1801,7 @@ sub HtmlLogoProject
      if ($mode_wb) { $html = "<a href='http://stats.wikimedia.org/wikibooks/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/30px-Wikibooks-logo.svg.png' width='30' height='30' border='0'  alt='Wikibooks' border=0 /></a>" ; }
   elsif ($mode_wk) { $html = "<a href='http://stats.wikimedia.org/wiktionary/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/30px-Wiktionary-logo-en.png' width='30' height='30' border='0'  alt='Wiktionary' border=0 /></a>" ; }
   elsif ($mode_wn) { $html = "<a href='http://stats.wikimedia.org/wikinews/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='40' height='24' border='0'  alt='Wikinews' border=0 /></a>" ; }
-  elsif ($mode_wo) { $html = "<a href='http://stats.wikimedia.org/wikivoyage/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Travel_Guide_Logo_-_Proposal_Yiyi.svg/250px-Travel_Guide_Logo_-_Proposal_Yiyi.svg.png' width='30' height='30' border='0'  alt='Wikinews' border=0 /></a>" ; } # tbd
+  elsif ($mode_wo) { $html = "<a href='http://stats.wikimedia.org/wikivoyage/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/b/b7/Wikivoyage-Logo-v3-en-highlight.png' width='35' height='35' border='0'  alt='Wikivoyage' border=0 /></a>" ; } 
   elsif ($mode_wp) { $html = "<a href='http://stats.wikimedia.org/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/30px-Wikipedia-logo.png' width='30' height='30' border='0'  alt='Wikipedia' border=0 /></a>" ; }
   elsif ($mode_wq) { $html = "<a href='http://stats.wikimedia.org/wikiquote/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/30px-Wikiquote-logo.svg.png' width='30' height='30' border='0'  alt='Wikiquote' border=0 /></a>" ; }
   elsif ($mode_ws) { $html = "<a href='http://stats.wikimedia.org/wikisource/EN/Sitemap.htm'><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='40' height='32' border='0'  alt='Wikisource' border=0 /></a>" ; }

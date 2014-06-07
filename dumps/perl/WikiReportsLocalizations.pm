@@ -651,7 +651,7 @@ sub GetLanguageNamesFromWpEn
       { $line =~ s/llcontinue='([^']*)'/($continue = $1)/e ; }
     }
 
-    &Log2 ("\n\n$url\n$result $content\n\n") ;
+    &LogQ ("\n\n$url\n$result $content\n\n") ;
 
     if ($continue ne "")
     {

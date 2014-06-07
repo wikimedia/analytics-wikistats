@@ -55,16 +55,15 @@ sub ParseArguments
   print "- ParseArguments\n" ;	
 
   my %options ; # script arguments
+  getopt ("bonx", \%options) ;   # expect these arguments to come with value 
 
-  getopt ("bcnx", \%options) ;   # expect these arguments to come with value 
-  
   $file_bots  = $options {'b'} ; # input file
-  $path_csv   = $options {'c'} ; # output folder
+  $path_csv   = $options {'o'} ; # output folder
   $file_names = $options {'n'} ; # country names 
   $file_xml   = $options {'x'} ; # input file
 
   die "specify file with bot names as -b [path]"                 if $options {'b'} eq '' ;
-  die "specify output folder (for csv file) as -c [path]"        if $options {'c'} eq '' ;
+  die "specify output folder (for csv file) as -o [path]"        if $options {'o'} eq '' ;
   die "specify country codes->names lookup file as -n [path]"    if $options {'n'} eq '' ;
   die "specify (full archive) xml file as -x [path]"             if $options {'x'} eq '' ;
 
@@ -218,7 +217,6 @@ sub ParseXml
   $titles = 0 ; 
   $title = '' ;
   $namespace = -1 ;
-  $title_prev = '' ;
   $lines = 0 ;
 
   $page_id       = '' ;
@@ -563,7 +561,7 @@ sub ParseXml
     next if $year =~ /^\d\d\d\d$/ and ($country_code =~ /^[\w\-]{2,}$/ or $country_code eq '--') ;
     
     if (defined ($country_names {$country_code}))
-    { $country_name = $country_names {$country} ; }
+    { $country_name = $country_names {$country_code} ; }
     else
     { $country_name = '--' ; }
 

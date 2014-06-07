@@ -86,7 +86,7 @@ sub default_argv
   }
   else
   { $argv = join ' | ', @ARGV ; }
-  print "\nScript $name_program started at " . date_time_english (time) . "\n" ;
+  print "\nScript '$path_program' started at " . date_time_english (time) . "\n" ;
   print "Arguments: $argv\n" ;
   print "\n" . '=' x 80 . "\n\n" ;
   @ARGV_BAK = @ARGV ;

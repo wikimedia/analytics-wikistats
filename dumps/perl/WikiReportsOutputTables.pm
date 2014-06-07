@@ -1428,10 +1428,12 @@ sub GenerateTablesPerWiki
 
   $show_all_months = $false ;
   $total_months = $dumpmonth_ord - $MonthlyStatsWpStart {$wp} + 1 ;
-  if (($total_months <= 24) || ($wp =~ /^zz+$/) || ($wp ne 'commons'))
+  if ($total_months <= 24 or $wp =~ /^zz+$/ or $wp eq 'commons')
   { $show_all_months = $true ; }
   if ($show_all_months_special)
   { $show_all_months = $true ; }
+
+  $show_all_months = $true ; # Jan 2014:show all months always (until underlying csv is published as well)
 
   &ReadLog ($wp) ;
 
@@ -1519,6 +1521,13 @@ sub GenerateTablesPerWiki
     $out_html .= "<p>Metrics have been collected from a <b>partial dump (aka stub dump)</b>, which contains all revisions of every article, meta data, but no page content.<br>" .
                  "Note that article and editor counts for all months are a few percent higher than when a full archive dump had been processed.<br>" .
                  "This is because no page content was available to check for internal or category links." ;
+    if ($mode eq 'wp' && $monthly_stats_full_archive_input {$wp})
+    { 
+      $out_html =~ s/Metrics have been collected/Most metrics have been collected/ ;   	    
+      $out_html .= "<p>" . blank_text_after ("15/07/2014", "<font color=#080><b>New</b> </font>") . 
+      "Some metrics have been collected from the <b>full archive dump</b> which runs on lower frequency than the usual monthly cycle.<br>" . 
+      "These metrics are columns F,I,J,K,M,N,O,P,Q,R from the first table.<p>" ; 
+    }
   }
   elsif ($dumptype eq 'full dump')
   { $out_html .= "<p>Metrics have been collected from a <b>full archive dump</b>, which contains all revisions of every article, meta data and raw content." ; }
@@ -1689,6 +1698,13 @@ sub GenerateTableMonthlyStats
                  "For a more complete breakdown and some trends see second table <a href='#editor_activity_levels'>Edit activity levels of registered users</a>" ; }
 
 
+  if ($wp eq 'commons')
+  { $out_html .= "<p><font color=#F00><a href='https://en.wikipedia.org/wiki/Wiki_Loves_Monuments'>Wiki Loves Monuments</a> contest months:<br>" . 
+	         "Sep 2013 WLM World - 48 countries<br>" . 	 
+		 "Sep 2012 WLM World - 35 countries - over 353,000 new images - over 15,000 participants<br>" .
+		 "Sep 2011 WLM Europe - 18 countries - over 168,000 new images - over 5,000 participants <br>" . 
+	         "Sep 2010 WLM Netherlands - 12,500 new images</font><p>" ; } 
+  
   if ($mode_wp)
   {
     $out_html .= "<table border=1 cellspacing=0 id='table1' style='' summary='Monthly stats'>\n" ;
@@ -1801,9 +1817,15 @@ sub GenerateTableMonthlyStats
   for (my $m = $m1 ; $m >= $MonthlyStatsWpStart {$wp} ; $m--)
   {
     if ($m == $MonthlyStatsWpStop {$wp})
-    { $line_html = &tdrb (&GetDateShort($MonthlyStatsWpDate {$wp}, $false)) ; }
+    { $month = &GetDateShort($MonthlyStatsWpDate {$wp}, $false) ; }
     else
-    { $line_html = &tdrb (&GetDateShort2 ($m)) ; }
+    { $month = &GetDateShort2 ($m) ; }
+    
+    if ($wp eq 'commons' and &WLM_month ($m)) 
+    { $month = "<font color=#F00>$month</font>" ; } # WLM
+  
+    $line_html = &tdrb ($month) ;
+    
 
     for ($f = 0 ; $f <= $fmax ; $f++)
     {
@@ -1816,8 +1838,18 @@ sub GenerateTableMonthlyStats
         #{
           $value = &format($MonthlyStats {$wp.$m.$c[$f]},$c[$f]) ;
 
-          if (($f == 16) && $imagelinks_incomplete)
+          if (($f == 9) | ($f == 10))
+	  { 
+            if (($value !~ /\%/) && ($value =~ /\d/))
+	    { $value = "$value%" ; } 
+	  }
+	  
+	  if (($f == 16) && $imagelinks_incomplete)
           { $value = "($value)" ; }
+      
+	  if ($wp eq 'commons' and &WLM_month ($m)) 
+          { $value = "<font color=#F00>$value</font>" ; } # WLM
+
           $line_html .= &tdrb ($value) ;
         #}
       }
@@ -1830,9 +1862,9 @@ sub GenerateTableMonthlyStats
       if ($months++ < 12)
       { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
-      next if $m % 3 != 1 ;
+      next if $m % 3 != 1 and $wp ne 'commons' ;  
 
-      { $lines_html_quarterly_counts .= &tr ($line_html) ; }
+      $lines_html_quarterly_counts .= &tr ($line_html) ; 
     }
 
     # $out_html .= &tr ($line_html) ;
@@ -2240,8 +2272,13 @@ sub GenerateTableEditActivityLevels
     { $out_explanation .=  "<br>EaM = Editors <b>after</b> Merging, as percentage of Editors <b>before</b> Merging\n" .
                            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Note how number of editors which qualify for some activity level can actually be larger after than before merging." .
                            "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Each editor name will be counted only once. Some editors now reach an edit threshold which they did not reach on any singular wiki." ; }
-  }
+   $out_explanation .= blank_text_after ("15/08/2014",
+	            "<font color=#C00000><b><p>June 3, 2014: bug fix: some anonymous editors (those with ipv6 address) " .
+		             "were incorrectly identified as registered editors. Read <a href='http://infodisiac.com/blog/?p=2487'>more</a>.</b></font>") ;
+	   }
 
+  if ($wp eq 'commons')
+  { $out_explanation .= "<p><font color=#F00>red colored months</font> = <a href='https://en.wikipedia.org/wiki/Wiki_Loves_Monuments'>Wiki Loves Monuments</a><p>" ; }
 
   $hr = '<hr><p>' ;
   if ($mode_wm) # only table so far, no extra hr tag
@@ -2400,11 +2437,16 @@ sub GenerateTableEditActivityLevels
     {
       my $m2 = $MonthlyStatsWpDate {$wp2} ;
       my $dateshort = &GetDateShort($MonthlyStatsWpDate {$wp2}, $false) ;
-      $line_html = &tdrb (&GetDateShort($MonthlyStatsWpDate {$wp2}, $false)) ;
+      $month = &GetDateShort($MonthlyStatsWpDate {$wp2}, $false) ;
     }
     else
-    { $line_html = &tdrb (&GetDateShort2 ($m)) ; }
+    { $month = &GetDateShort2 ($m) ; }
 
+    if ($wp eq 'commons' and &WLM_month ($m)) 
+    { $month = "<font color=#F00>$month</font>" ; } # WLM
+    
+    $line_html = &tdrb ($month) ; 
+  
     $date           = &m2mmddyyyy ($m) ;
     $date_year_ago  = &m2mmddyyyy ($m-12) ;
     $date_month_ago = &m2mmddyyyy ($m-1) ;
@@ -2442,6 +2484,9 @@ sub GenerateTableEditActivityLevels
             # if ($count == 0)
             # { $linepart_html .= &tdrb ('&nbsp;') ; next ; }
 
+            if ($wp eq 'commons' and &WLM_month ($m)) 
+            { $count = "<font color=#F00>$count</font>" ; } # WLM
+  
             if (($n == 0) && ($u == 0) && ($thresholds [$c] =~ /^(?:5|100)$/)) # only for article namespace and registered users
             {
               $linepart_html .= &tdrb ("<font color=#0000A0><b>$count</b></font>") ;
@@ -2539,6 +2584,7 @@ sub GenerateTableEditActivityLevels
       { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
       next if $m % 3 != 1 ;
+      
       $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
 
@@ -2708,6 +2754,9 @@ sub GenerateTableUploadActivityLevels
   $out_html .= "<br><a id='uploader_activity_levels' name='uploader_activity_levels'>&nbsp;</a><hr><p>" .  blank_text_after ("15/09/2012", " <font color=#008000>". &b(ucfirst($out_new).":") . "&nbsp;</font>") .
                "<b>$out_header</b><p>$out_explanation<p>"  ;
 
+  if ($wp eq 'commons')
+  { $out_html .= "<p><font color=#F00>red colored months</font> = <a href='https://en.wikipedia.org/wiki/Wiki_Loves_Monuments'>Wiki Loves Monuments</a><br>" ; }
+
   $cell_cnt_max = 0 ;
   foreach $line (@csv)
   {
@@ -2789,6 +2838,9 @@ sub GenerateTableUploadActivityLevels
     $line_html = '' ;
     $yyyymm = &GetDateShort2 ($m) ;
 
+    if ($wp eq 'commons' and &WLM_month ($m)) 
+    { $yyyymm = "<font color=#F00>$yyyymm</font>" ; } # WLM
+    
     $data = $upload_data {$m} ;
     @cells = split (',', "$data\$") ; # keep meaningful trailing commas
     $#cells-- ;
@@ -2805,6 +2857,10 @@ sub GenerateTableUploadActivityLevels
 
       if ($cell eq '')
       { $cell = '' ; }
+
+      if ($wp eq 'commons' and &WLM_month ($m)) 
+      { $cell = "<font color=#F00>$cell</font>" ; } # WLM
+    
       if (($subcol == 3) || ($subcol == 6))
       { $cell = "<font color=#0000A0><b>$cell</b></font>" ; }
 
@@ -2818,7 +2874,8 @@ sub GenerateTableUploadActivityLevels
     if ($m >= $mq)
     { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
-    next if $m % 3 != 1 ;
+    next if $m % 3 != 1 and $wp ne 'commons' ;
+
     $lines_html_quarterly_counts .= &tr ($line_html) ;
   }
 
@@ -2850,6 +2907,9 @@ sub GenerateTableUploadsByUploadWizard
 
   if ($dumptype eq 'edits only')
   { $out_html .= "<font color=#A00000><b>From partial dump (aka stub dump) counts for uploadwizard can not be collected</b></font><p>" ; }
+  
+  if ($wp eq 'commons')
+  { $out_html .= "<p><font color=#F00>red colored months</font> = <a href='https://en.wikipedia.org/wiki/Wiki_Loves_Monuments'>Wiki Loves Monuments</a><br>" ; }
 
   $out_html .= "<table border=1 cellspacing=0 id='table6' style='' summary='UploadWizard'>\n" ;
 
@@ -2905,6 +2965,10 @@ sub GenerateTableUploadsByUploadWizard
     else
     { $line_html = &tdrb ($date) . &tdrb ($uploads) . &tdrb ($uploads_bot)  . &tdrb ($uploads_user) . &tdrb ($uploads_user_wizard) . &tdrb ($uploads_user_wizard_perc) ; }
   # $out_html .= &tr ($line_html) ;
+  
+    if ($wp eq 'commons' and &WLM_month ($m)) 
+    { $line_html =~ s/>([^>]+)</><font color=#F00>$1<\/font></g ; } # WLM
+    
 
     $upload_data {$m} = $line_html ;
   }
@@ -2914,12 +2978,16 @@ sub GenerateTableUploadsByUploadWizard
     $line_html = '' ;
     $yyyymm = &GetDateShort2 ($m) ;
 
+    if ($wp eq 'commons' and &WLM_month ($m)) 
+    { $yyyymm = "<font color=#F00>$yyyymm</font>" ; } # WLM
+    
     $line_html = $upload_data {$m} ;
 
     if ($m >= $mq)
     { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
-    next if $m % 3 != 1 ;
+    next if $m % 3 != 1 and $wp ne 'commons' ;
+  
     $lines_html_quarterly_counts .= &tr ($line_html) ;
   }
 
@@ -3393,7 +3461,7 @@ sub GenerateTableSizeDistribution
       if ($months++ < 6)
       { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
-      next if $m % 3 != 1 ;
+      next if $m % 3 != 1 and $wp ne 'commons' ;
 
       $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
@@ -3578,7 +3646,7 @@ sub GenerateTableNamespaces
       if ($months++ < 6)
       { $lines_html_monthly_counts .= &tr ($line_html) ; }
 
-      next if $m % 3 != 1 ;
+      next if $m % 3 != 1 and $wp ne 'commons' ;
 
       $lines_html_quarterly_counts .= &tr ($line_html) ;
     }
@@ -4251,6 +4319,11 @@ sub GenerateComparisonTable
 		   "source code is <a href='https://github.com/wikimedia/analytics-wikistats/tree/localdev/pageviews_reports/'>here</a> " . 
 		   "and <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>here</a>)<p>" ;
     }
+
+    $out_html .=  blank_text_after ("31/01/2014", "<p><font color=#008000><b>Dec 5, 2013: Major overreporting in recent months has been fixed today.</b><br>" . 
+                 "A software change around Aug 2013 caused internal housekeeping messages to be counted as page views, leading to a monthly growing overcount" . 
+		 " of up to billions of views per month. We have determined specific urls which caused this and substracted their request counts from the totals." . 
+		 "So stats are completely fixed now.</font>") ;
 
     if (! $mode_wo)  # wikivoyage did not yet exist when following data losses occurred 
     { 
@@ -6771,6 +6844,13 @@ sub RecordTime
   $Invocations {$label} ++ ;
   $TimeSpent   {$label} += Time::HiRes::time - $start ;
 }
+
+sub WLM_month
+{ 
+  my $m = shift ;
+  return $true if $m % 12 == 9 and $m >= 129 and $m <= 165 ;
+  return $false ;
+}	 
 
 1;
 

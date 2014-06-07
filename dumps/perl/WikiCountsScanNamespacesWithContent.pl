@@ -13,11 +13,15 @@
   use Getopt::Std ;
 
   my %options ;
-  getopt ("c", \%options) ;
-  $path_csv = $options {'c'} ;
+  getopt ("cl", \%options) ;
+  $path_csv     = $options {'c'} ;
+  $path_dblists = $options {'l'} ;
+  $path_dblists =~ s/\%20/ /g ;  # to be fixed: folder has space in name, here as underscore
 
   die "specify path to csv files as -c [path]" if ! -d $path_csv ;
   print "Path to csv files: $path_csv\n" ; 
+  die "specify path to dblists as -l [path]" if ! -d $path_dblists ;
+  print "Path to dblist files: $path_dblists\n" ; 
 
   $file_namespaces = "$path_csv/csv_mw/StatisticsContentNamespaces.csv" ;
   $file_run_stats  = "StatisticsLog.csv" ;
@@ -30,6 +34,7 @@
     {
       next if $line !~ /.*?,.*?,/ ;
       chomp $line ;
+      $line =~ s/'500',?//g ; # cleanup invalid content from early bug
       ($proj_code,$lang,$namespaces) = split (',', $line,3) ;
       $namespaces =~ s/,+$// ;
       $namespaces {"$proj_code,$lang"} = $namespaces ;
@@ -56,48 +61,60 @@ sub GetNamespaces
 {
   my ($proj_code,$proj_name) = @_ ;
 
-  $file_csv_in  = "$path_csv/csv_$proj_code/$file_run_stats" ;  
+  $dblist = $proj_name ;
+  if ($dblist eq 'wikimedia')
+  { $dblist = 'special' ; }
+  $file_dblist  = "$path_dblists/$dblist.dblist" ;  
 
-  open CSV_IN, '<', $file_csv_in || die "Can't open $file_csv_in" ;
-  while ($line = <CSV_IN>)
+  open DBLIST, '<', $file_dblist || die "Can't open $file_dblist" ;
+  while ($line = <DBLIST>)
   {
     next if $line !~ /^\w+/ ;
-    ($lang) = split (',', $line) ;
+    
+    chomp $line ;
+
+    if ($line =~ /mediawikiwiki/)
+    { $lang = 'mediawiki' ; }
+    elsif ($line =~ /wikidatawiki/)
+    { $lang = 'wikidata' ; }
+    else
+    { ($lang=$line) =~ s/wik.*$// ; }
+    
     $lang =~ s/_/-/g ;
+
     $url = "http://$lang.$proj_name.org" ;
 
     next if $lang eq 'comcom' ;
     next if $lang eq 'tokipona' ;
+    next if $lang eq 'sep11' ;
 
-    if ($proj_code eq 'wx')
-    {
-       next if $lang eq 'sep11' ;
-       next if $lang eq 'dewikiversity' ;
-
-         if ($lang eq 'species')    { $url = 'species.wikipedia.org' ; }
-      elsif ($lang eq 'sources')    { $url = 'wikisource.org' ; }
-      elsif ($lang eq 'mediawiki')  { $url = 'www.mediawiki.org' ; }
-      elsif ($lang eq 'foundation') { $url = 'wikimediafoundation.org' ; }
-      elsif ($lang eq 'wikidata')   { $url = 'www.wikidata.org' ; }
-    }
+       if ($lang eq 'species')    { $url = 'species.wikipedia.org' ; }
+    elsif ($lang eq 'sources')    { $url = 'wikisource.org' ; }
+    elsif ($lang eq 'mediawiki')  { $url = 'www.mediawiki.org' ; }
+    elsif ($lang eq 'foundation') { $url = 'wikimediafoundation.org' ; }
+    elsif ($lang eq 'wikidata')   { $url = 'www.wikidata.org' ; }
+    
     $url .= "/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
 
     ($success,$content) = GetPage ($url) ;
+    
+    next if ! $success ;
+    
     if ($content =~ /^\d\d\d$/)
     {
       if ($namespaces {"$proj_code,$lang"} eq '')
       { $namespaces {"$proj_code,$lang"} = "'$content'" ; }
     }
-    next if ! $success ;
 
     # print $content ;
     @lines = split "\n", $content ;
-    $namespaces {"$proj_code,$lang"} = '' ;
+    $namespaces {"$proj_code,$lang"} = "0\|" ; # always add ns 0 (api call may fail, e.g. on incubator wiki (e.g. Feb 2014: kr.wikibooks.org) 
     foreach $line (@lines)
     {
       next if $line !~ /ns id=/ ;
       next if $line !~ /content=&quot;&quot;/ ;
       ($ns = $line) =~ s/^.*id=&quot;(\d+)&quot;.*$/$1/ ;
+      next if $ns == 0 ; # already added
       if ($ns =~ /^\d+$/)
       { $namespaces {"$proj_code,$lang"} .= "$ns\|" ; }
     }

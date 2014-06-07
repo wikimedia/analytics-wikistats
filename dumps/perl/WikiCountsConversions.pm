@@ -385,12 +385,23 @@ sub IpAddress
       ($user =~ /Rob.Mocking/i))        # exception  on qo: (non Wikimedia)
   { return ($false) ; }
 
-  if (($user =~ m/[^\.]{2,}\.[^\.]{2,}\.[^\.]{2,4}$/) ||
-      ($user =~ m/^\d+\.\d+\.\d+\./) ||
+  if (($user =~ m/[^\.]{2,}\.[^\.]{2,}\.[^\.]{2,4}$/o) || # ipv4
+      ($user =~ m/^\d+\.\d+\.\d+\./o) || # ipv4
       ($user =~ m/\.com$/i))
   { return ($true) ; }
+
+  if ($user =~ m/^[0-9a-fA-F]{0,4}(\:[0-9a-fA-F]{0,4}){3,7}$/) # ipv6
+  {
+    # print "YYY user $user\n" ;
+    return ($true) ;
+  }
   else
-  { return ($false) ; }
+  {
+    # if ($user =~ m/^.*:.*:.*:.*:.*/)
+    # { print "XXX user $user\n" ; }
+
+    return ($false) ;
+  }
 }
 
   %wikipedias = (

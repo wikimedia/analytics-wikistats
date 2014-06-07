@@ -475,6 +475,7 @@ sub ScanTarFiles
       next if $file ge "projectcounts-20120413-000000" and $file lt "projectcounts-20120417-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20121214-000000" and $file lt "projectcounts-20130108-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20130723-000000" and $file lt "projectcounts-20130724-000000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20140105-000000" and $file lt "projectcounts-20140107-000000" ; # bad measurements on these dates
 
       push @files, $file ;
       $file_in_tar {$file} = $file_in ;

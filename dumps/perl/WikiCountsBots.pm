@@ -145,7 +145,7 @@ sub ReadStoredBots
     $line = "" ;
     $list_previous_bots = " \n" ;
 
-    &Log2 ("\n\nPreviously registered bots on all projects:\n") ;
+    &LogQ ("\n\nPreviously registered bots on all projects:\n") ;
     foreach $name (@bots2)
     {
       $list_entry = "$name, " ;
@@ -170,11 +170,12 @@ sub ReadStoredBots
 sub ReadBotNames
 {
   &LogT ("ReadBotNames\n") ;
+  
   undef (%bots_mentioned) ;
 
   # read all bots names (explicitly defined by 'bot bit', and implicity by bot name)
   my $languages = 0 ;
-  print "\nRead file $file_csv_bots_all\n" ;
+  &LogT ("\nRead file $file_csv_bots_all\n") ;
   &ReadFileCsv ($file_csv_bots_all) ;
   foreach $line (@csv)
   {
@@ -190,7 +191,7 @@ sub ReadBotNames
     }
   }
   @bot_names = keys %bots_mentioned ;
-  print $#bot_names . "\n unique bot names found for $languages languages\n\n" ;
+  &LogT ($#bot_names . " unique bot names found for $languages languages\n\n") ;
 }
 
 # when a user is registered as bot on 10+ wikis it is probably a bot here as well
@@ -232,7 +233,7 @@ sub AssumeBots
   $threshold_bots = 10 ;
   if ($#botnames > -1)
   {
-    &Log2 ("\n\nPreviously registered bots on all projects:\n") ;
+    &LogQ ("\n\nPreviously registered bots on all projects:\n") ;
     foreach $name (@botnames)
     {
       if ($bots3 {$name} < $threshold_bots) { last ; } # occurs on 10 or more wikis ?

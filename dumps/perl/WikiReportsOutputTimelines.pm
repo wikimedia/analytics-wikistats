@@ -230,7 +230,7 @@ sub MoveTimelinePages
       $file_in  = $path_in_timelines  . "/" . $file ;
       $file_out = $path_out_timelines . "/" . $file ;
 
-      &Log2 ("\nMove $file_in") ;
+      &LogQ ("\nMove $file_in") ;
 
       open FILE_TIMELINE, "<", $file_in ;
       @timeline = <FILE_TIMELINE> ;

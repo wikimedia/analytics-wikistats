@@ -19,6 +19,20 @@ sub OpenLog
   elsif ($mode eq "wv") { $target = "Wikiversity" ; }
   else                  { $target = "???" ; }
 
+  &ShrinkLogFile ;
+
+  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+  $log_enabled = $true ;
+
+  &LogT ("\n\n===== $job / " . &GetDateTime(time) . " / $target / project $job_code_uc =====\n\n") ;
+
+  &LogPreviousRunTime ;
+  &LogFlushBuffer ;
+}
+
+# to be changed: use Linux cmd 'tail' 
+sub ShrinkLogFile
+{
   $fileage  = -M $file_log ;
   if ($fileage > 5)
   {
@@ -34,18 +48,25 @@ sub OpenLog
     }
     close "FILE_LOG" ;
   }
-  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  $log_enabled = $true ;
+}
 
-  &LogT ("\n\n===== $job / " . &GetDateTime(time) . " / $target / project $job_code_uc =====\n\n") ;
-
+# only for large wikis, show how long processing took on last run  
+sub LogPreviousRunTime
+{
   if ($edits_total_previous_run > 100000)
   { &LogT ("Previous run took $runtime_previous_run for " . i2KM ($edits_total_previous_run) . " edits\n\n") ; }
+}
 
+# flush log buffer 
+sub LogFlushBuffer
+{
+  &Log ("\n" . "==================== buffered log >>> " . "\n") ;
   &Log ($log_buffer) ;
+  &Log ("\n" . "==================== <<< buffered log " . "\n\n") ;
   $log_buffer = "" ;
 }
 
+# print to screen+file or, if log file not yet open, to buffer
 sub Log
 {
   $msg = encode_non_ascii(shift) ;
@@ -58,7 +79,8 @@ sub Log
   { $log_buffer .= $msg ; }
 }
 
-sub Log2
+# print to file only or, if log file not yet open, to buffer
+sub LogQ # log 'quiet'
 {
   $msg = encode_non_ascii(shift) ;
   if ($log_enabled)
@@ -67,6 +89,7 @@ sub Log2
   { $log_buffer .= $msg ; }
 }
 
+# log processing phase to WikiCountsLogConcise.txt 
 sub LogPhase
 {
   $msg = encode_non_ascii(shift) ;
@@ -81,7 +104,8 @@ sub LogPhase
   close FILE_LOG_CONCISE ;
 }
 
-sub LogC
+# log highlights to WikiCountsLogConcise.txt 
+sub LogC # log 'concise'
 {
   $msg = encode_non_ascii(shift) ;
   $msg2 = $msg ;
@@ -92,7 +116,10 @@ sub LogC
   close FILE_LOG_CONCISE ;
 }
 
-sub LogT
+# log a message preceded by timestamp 
+# once per minute add wiki id (project+language)
+# for wp:en also be more verbose on WikiCountsLogConcise.txt (used in status html file)
+sub LogT # log 'time'
 {
   my $msg  = shift ;
   
@@ -104,15 +131,21 @@ sub LogT
   $msg2 =~ s/([^\n])\n(.)/$1\n         $2/gs ;
   $msg2 =~ s/(^\n*)/$1$time /s ;
 
-  if (substr ($time,0,5) ne substr ($prev_time_logt,0,5)) # one per minute log which wiki this is about
+  if (substr ($time,0,5) ne substr ($prev_time_logt,0,5)) # one per minute log which wiki this is about (project+language)
   { 
-    $msg2 = "$mode:$language\n$msg2" ;
+    if ($edits_only)
+    { $msg2 = "[$mode:$language stub dump]\n$msg2" ; }
+    else
+    { $msg2 = "[$mode:$language full dump]\n$msg2" ; }
+
     $prev_time_logt = $time ;
   }
   
   &Log ($msg2) ;
 
-  if (($mode eq "wp") && (($language eq "en") || ($language eq "nv")) && (length ($msg) > 12))
+  # for wp:en also be more verbose on WikiCountsLogConcise.txt (used in frequently updated status file
+  # stats.wikimedia.org/WikiCountsJobProgressCurrent.html
+  if (($mode eq "wp") && ($language eq "en") && (length ($msg) > 12))
   {
     my $msg3 = $msg ;
     $msg3 =~ s/\n//g ;
@@ -140,6 +173,7 @@ sub LogTime
   }
 }
 
+# log run time errors from previous run (from captured stderr)\n") ;
 sub SpoolPreviousErrors
 {
   if (-e $file_errors)
@@ -150,10 +184,10 @@ sub SpoolPreviousErrors
     if ($#errors != -1)
     {
       &LogT ("Log run time errors from previous run (from captured stderr)\n") ;
-      &Log2 (">>\n") ;
+      &LogQ (">>\n") ;
       foreach $line (@errors)
-      { &Log2 ($line) ; }
-      &Log2 ("<<\n\n") ;
+      { &LogQ ($line) ; }
+      &LogQ ("<<\n\n") ;
     }
     unlink $file_errors ;
     undef @errors ;
@@ -187,6 +221,8 @@ sub WriteJobRunStats
   close "FILE_RUNSTATS";
 }
 
+# create or append to file $file_report, which signals to reporting step there is new input to process  
+# (not used right now)
 sub SignalReportingToDo
 {
   &LogT ("SignalReportingToDo\n") ;
@@ -205,7 +241,7 @@ sub SignalReportingToDo
   close "FILE_REPORTING";
 }
 
-sub UpdateLog
+sub UpdateJobStats
 {
   &TraceMem ;
 
@@ -214,6 +250,7 @@ sub UpdateLog
 
   my $fraction_5   = 0 ;
   my $fraction_100 = 0 ;
+
 # if ($forecast_partial_month)
 # {
 #   my $months_5    = 0 ;
@@ -224,7 +261,7 @@ sub UpdateLog
 #     if ($month == 0)
 #     { $month = 12 ; $year -- ; }
 #     $yymm = sprintf ("%02d%02d", $year-2000, $month) ;
-
+#
 #     if ($active_users_per_month {"A,5,$yymm"} > 0)
 #     {
 #       $months_5++ ;
@@ -242,7 +279,7 @@ sub UpdateLog
 #   { $fraction_5 = "1.00" ; }
 #   else
 #   { $fraction_5 = sprintf ("%.2f", $fraction_5 / $months_5) ; }
-
+#
 #   if ($months_100 == 0)
 #   { $fraction_100 = "1.00" ; }
 #   else
@@ -435,6 +472,9 @@ sub TraceRelease
   &Log ("$msg") ;
 }
 
+# only at certain points (e.g. once a minute) intersperse long list of processed MB's with special messages
+# 1 write $tracemsg is not empty 
+# 2 start with timestamp on a new line 
 sub WriteTraceBuffer
 {
   if ($tracemsg ne "")
@@ -447,10 +487,10 @@ sub WriteTraceBuffer
   { &LogT ("\n- ") ; }
 }
 
-sub WriteDiskStatus
+sub LogDiskStatus
 {
   &Log ("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++") ;
-  if (($path_in !~ /\\/) && (-d $path_temp)) # Windows ?
+  if (($path_in !~ /\\/) && (-d $path_temp)) # only when not in Windows ?
   {
     $text = `df -h $path_temp` ;
     &Log ("\nDisk free: \n$text") ;

@@ -202,7 +202,7 @@ sub GenerateWikibookReport
     $book     =~ s/&comma;/\,/g ;
     $book     =~ s/&star;/\*/g ;
 
-    # &Log2 ("== Book '$book' ==\n\n") ;
+    # &LogQ ("== Book '$book' ==\n\n") ;
 
     @chapters = split ('\|', $chapterlist) ;
 
@@ -493,8 +493,8 @@ sub FindSubBooks
         $posspace   = 9999 ;
       }
 
-      # &Log2 ("\nChapter $pass '$chapter2'\n") ;
-      # &Log2 ("colon $poscolon slash $posslash hyphen $poshyphen bracket $posbracket num $posnum space $posspace\n") ;
+      # &LogQ ("\nChapter $pass '$chapter2'\n") ;
+      # &LogQ ("colon $poscolon slash $posslash hyphen $poshyphen bracket $posbracket num $posnum space $posspace\n") ;
 
       if (($poscolon < 9999) && ($poscolon < $posslash) && ($poscolon < $poshyphen))
       {
@@ -514,42 +514,42 @@ sub FindSubBooks
       elsif ($posbracket < 9999)
       {
         # if ($pass == 1)
-        # { &Log2 ("posbracket $posbracket $chapter\n") ; }
+        # { &LogQ ("posbracket $posbracket $chapter\n") ; }
         $booktitle =~ s/^.*\(([^\)]+)\).*$/$1/ ;
         $chapter2  =~ s/^(.*)\([^\)]+\)(.*)$/$1 $2/ ;
         # if ($pass == 1)
-        # { &Log2 ("'$booktitle' '$chapter2'\n") ; }
+        # { &LogQ ("'$booktitle' '$chapter2'\n") ; }
       }
       elsif ($posnum < 9999)
       {
         # if ($pass == 1)
-        # { &Log2 ("posnum $posnum $chapter\n") ; }
+        # { &LogQ ("posnum $posnum $chapter\n") ; }
         $booktitle = substr ($chapter2, 0, $posnum)  ;
         $chapter2  = substr ($chapter2, $posnum) ;
         # if ($pass == 1)
-        # { &Log2 ("'$booktitle' '$chapter2'\n") ; }
+        # { &LogQ ("'$booktitle' '$chapter2'\n") ; }
       }
       elsif ($posspace < 9999)
       {
-        # &Log2 ("\n\nPosSpace '$booktitle'\n") ;
+        # &LogQ ("\n\nPosSpace '$booktitle'\n") ;
         my @words = split ('\_', $booktitle) ;
         $booktitle = shift (@words) ;
-        # &Log2 ("Booktitle '$booktitle'\n") ;
+        # &LogQ ("Booktitle '$booktitle'\n") ;
         while ($#words >= 0)
         {
           my $matches = 0 ;
           $testtitle = $booktitle . '_' . shift (@words) ;
-          # &Log2 ("Testtitle '$testtitle'\n") ;
+          # &LogQ ("Testtitle '$testtitle'\n") ;
           foreach $testchapter (@chapters)
           {
             if (substr ($testchapter, 0, length ($testtitle)) eq $testtitle)
             {
-              # &Log2 ("Match with '$testchapter'\n") ;
+              # &LogQ ("Match with '$testchapter'\n") ;
               $matches ++ ;
               if ($matches > 2) { last ; }
             }
           }
-          # &Log2 ("Matches '$matches'\n") ;
+          # &LogQ ("Matches '$matches'\n") ;
           if ($matches < 2) { last ; }
           $booktitle = $testtitle ;
 
@@ -558,7 +558,7 @@ sub FindSubBooks
         { $booktitle = $chapter2 ; }
         else
         { $chapter2  = substr ($chapter2, length ($booktitle)) ; }
-        # &Log2 ("Booktitle '$booktitle' Chapter '$chapter2'\n") ;
+        # &LogQ ("Booktitle '$booktitle' Chapter '$chapter2'\n") ;
       }
       else
       {
@@ -610,7 +610,7 @@ sub FindSubBooks
   {
     if ($book {$chapter} eq chr(255))
     { $book {$chapter} = '' ; }
-    # &Log2 ("book " . @book {$chapter} . ": chapter: " . @showchapter {$chapter} . "\n") ;
+    # &LogQ ("book " . @book {$chapter} . ": chapter: " . @showchapter {$chapter} . "\n") ;
   }
 }
 

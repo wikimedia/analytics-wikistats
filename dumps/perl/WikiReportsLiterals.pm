@@ -165,7 +165,7 @@ sub SetLanguageInfo
   fiu_vro=>"http://fiu-vro.wikipedia.org Voro [0.07,EU]",
   fj=>"http://fj.wikipedia.org Fijian [0.55,OC]",
   fo=>"http://fo.wikipedia.org Faroese [0.07,EU]", # was Faeroese
-  fr=>"http://fr.wikipedia.org French [200,EU,NA,AF,OC]",
+  fr=>"http://fr.wikipedia.org French [200,EU,NA,SA,AS,AF,OC]",
   frp=>"http://frp.wikipedia.org Arpitan [0.113,EU]",
   frr=>"http://frr.wikipedia.org North Frisian [0.01,EU]",
   fur=>"http://fur.wikipedia.org Friulian [0.794,EU]",
@@ -253,7 +253,7 @@ sub SetLanguageInfo
   mh=>"http://mh.wikipedia.org Marshallese [0.0439,OC]",
   mhr=>"http://mhr.wikipedia.org Eastern Mari [0.3,EU]",
   mi=>"http://mi.wikipedia.org Maori [0.157,OC]",
-  min=>"http://min.wikipedia.org Minangkabau [6.5]",
+  min=>"http://min.wikipedia.org Minangkabau [6.5,AS]",
   minnan=>"http://minnan.wikipedia.org Minnan",
   mk=>"http://mk.wikipedia.org Macedonian [2.7,EU]",
   ml=>"http://ml.wikipedia.org Malayalam [37,AS,I]",

@@ -64,11 +64,14 @@
 
 # for CountUsersPerWeek
 
-sub SortAndCompactEditsUserMonth
+
+# edits per user per month per namespace were collected on per article basis  
+# now sort and aggregate, so that there is total count per user per month per article   
+sub SortAndCompactEditsUserMonthPerNamespace
 {
   my $timestartsort = time ;
 
-  &LogPhase ("SortAndCompactEditsUserMonth") ;
+  &LogPhase ("SortAndCompactEditsUserMonthPerNamespace") ;
   &TraceMem ;
 
   if (! $job_runs_on_production_server)
@@ -77,33 +80,39 @@ sub SortAndCompactEditsUserMonth
     return ;
   }
 
-  $filesize_in = &i2KbMb (-s $file_csv_user_month_article) ;
-  $cmd = "sort $file_csv_user_month_article -o $file_csv_user_month_article_s -T $path_temp" ;
+  $filesize_in = &i2KbMb (-s $file_csv_user_month_namespace_log) ;
+  $cmd = "sort $file_csv_user_month_namespace_log -o $file_csv_user_month_namespace_log_s -T $path_temp" ;
   $result = `$cmd` ;
   &LogT ("Cmd $cmd -> result '$result'\n") ;
   &LogT ("Sort took " . ddhhmmss (time - $timestartsort). ".\n") ;
-# unlink $file_csv_user_month_article ;
+# unlink $file_csv_user_month_namespace ;
 
   &TraceMem ;
 
   &LogT ("Compact into $file_csv_user_month\n") ;
-  open    EDITS_USER_MONTH_ARTICLE, "<", $file_csv_user_month_article_s ;
-  open    EDITS_USER_MONTH,         ">", $file_csv_user_month ;
-  binmode EDITS_USER_MONTH_ARTICLE ;
-  binmode EDITS_USER_MONTH ;
+  open    EDITS_USER_MONTH_NAMESPACE_LOGGED_PER_ARTICLE, "<", $file_csv_user_month_namespace_log_s ;
+  open    EDITS_USER_MONTH_NAMESPACE,                    ">", $file_csv_user_month_namespace ;
+  binmode EDITS_USER_MONTH_NAMESPACE_LOGGED_PER_ARTICLE ;
+  binmode EDITS_USER_MONTH_NAMESPACE ;
 
-  print EDITS_USER_MONTH "# Edit counts per registered user per month per namespace, produced by monthly wikistats job\n" ;
-  print EDITS_USER_MONTH "# user, month, namespace, edits in whole month, edits in first 28 days (for normalized trends with equal length partial months)\n" ;
+  print EDITS_USER_MONTH_NAMESPACE "# Edit counts per registered user per month per namespace, produced by monthly wikistats job\n" ;
+  print EDITS_USER_MONTH_NAMESPACE "# user, userid, month, namespace, edits in whole month, edits in first 28 days (for normalized trends with equal length partial months)\n" ;
   $user_month_ns_prev = '' ;
   my ($count_all, $count_all_28) ;
-  while ($line = <EDITS_USER_MONTH_ARTICLE>)
+  while ($line = <EDITS_USER_MONTH_NAMESPACE_LOGGED_PER_ARTICLE>)
   {
     chomp $line ;
-    my ($user,$month,$namespace,$count,$count_28) = split (',', $line) ;
+    my ($user,$userid,$month,$namespace,$count,$count_28) = split (',', $line) ;
+  # debug code
+  # print "EDITS_USER_MONTH_NAMESPACE user $user, userid $userid, namespace $namespace, count $count\n" ;
+  
+  # if ($user =~ /^\s*\?\s*$/)
+  # { print "User '$user'" ; exit ; }
+
     $namespace += 0 ; # remove leading zeroes, used to influence sort order
-    if (("$user,$month,$namespace" ne $user_month_ns_prev) &&  ($user_month_ns_prev ne ''))
+    if (("$user,$userid,$month,$namespace" ne $user_month_ns_prev) &&  ($user_month_ns_prev ne ''))
     {
-      print EDITS_USER_MONTH "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
+      print EDITS_USER_MONTH_NAMESPACE "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
       $count_all    = $count ;
       $count_all_28 = $count_28 ;
     }
@@ -113,17 +122,17 @@ sub SortAndCompactEditsUserMonth
       $count_all_28 += $count_28 ;
     }
 
-    $user_month_ns_prev = "$user,$month,$namespace" ;
+    $user_month_ns_prev = "$user,$userid,$month,$namespace" ;
   }
-  print EDITS_USER_MONTH "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
-  close EDITS_USER_MONTH ;
-  close EDITS_USER_MONTH_ARTICLE ;
+  print EDITS_USER_MONTH_NAMESPACE "$user_month_ns_prev,$count_all," . ($count_all_28+0) . "\n" ; # only second count can be zero
+  close EDITS_USER_MONTH_NAMESPACE ;
+  close EDITS_USER_MONTH_NAMESPACE_LOGGED_PER_ARTICLE ;
 
   $filesize_out = &i2KbMb (-s $file_csv_user_month) ;
   &LogT ("File '$file_csv_user_month' ($filesize_in -> $filesize_out))\n") ;
 
   &TraceMem ;
-# unlink $file_csv_user_month_article_s ;
+# unlink $file_csv_user_month_namespace_s ;
   &TraceMem ;
 }
 
@@ -1147,25 +1156,41 @@ sub CollectActiveUsersPerMonthsAllWikis
   print "Output folder is $path_out\n" ;
   chdir $path_in ;
 
-  # collect basic data for relevant input files, names EditsBreakdownPerUserPerMonthXX.csv (XX language code)
+  # collect basic data for relevant input files, names EditsPerUserPerMonthPerNamespaceXX.csv (XX language code)
   # cleanup temp files
   @files = <*>;
   foreach $file (@files)
   {
-    next if $file !~ /^EditsBreakdownPerUserPerMonth.*?[A-Z]\.csv/ ;
-    if ($file =~ /^EditsBreakdownPerUserPerMonth.*?Temp.*?.csv/)
+    if ($file =~ /^EditsBreakdownPerUserPerMonth.*?Temp.*?.csv/) # old name
+    { unlink $file ; next ; }
+    
+    next if $file !~ /^EditsPerUserPerMonthPerNamespace.*?[A-Z]\.csv/ ;
+    
+    if ($file =~ /^EditsPerUserPerMonthPerNamespace.*?Temp.*?.csv/)
     { unlink $file ; next ; }
 
-   ($wp = $file) =~ s/^EditsBreakdownPerUserPerMonth(.*?)\.csv$/$1/ ;
+   ($wp = $file) =~ s/^EditsPerUserPerMonthPerNamespace(.*?)\.csv$/$1/ ;
     $wp = lc $wp ;
+
+#   next if $wp eq 'en' ; # temp patch: skip English to arrive at totals minus English for Economist
+#   next if $wp ne 'commons' ; # temp patch: Commons only for Economist
+#   next if $wp ne 'wikidata' ; # temp patch: Wikidata only for Economist
 
     next if $wp eq 'xx' ; # some code for aggregates from earlier
     next if $wp eq 'commons' and $path_in !~ /wx/ ; # leftover in project wikipedia, contains counts for commons as well
     next if $wp eq 'nostalgia' ; # restored and renamed copy of old english wikipedia
+#   next if $wp eq 'wikidata' ; 
+
+    my $file_age = -M $file ;
+    if ($file_age > 60)
+    {
+      &Log ("Skip language $wp: file older than 60 days (" . sprintf ("%.0f", $file_age) . "), probably obsolete: '$file'\n") ; 	    
+      next ;	    
+    }
 
     $file_sizes {$wp} = -s $file ;
     $file_names {$wp} = $file ;
-    $file_ages  {$wp} = -M $file ;
+    $file_ages  {$wp} = $file_age ;
   }
 
   # check if 25 largest files are more recent than merged data
@@ -1263,13 +1288,32 @@ sub CollectActiveUsersPerMonthsAllWikis
     $file_csv_to  =~ s/\.csv/"Temp_" . ($files_merged++). uc ("_$wp") . ".csv"/e ;
 
     $time_start_step = time ;
-    print "Merge\n$file_csv_add \&\n$file_csv_from=>\n$file_csv_to\n\n" ;
+   
+    $file_size_add  = i2KbMb (-s $file_csv_add) ;
+    $file_size_from = i2KbMb (-s $file_csv_from) ;
+    
+    print "--\nMerge\nin 1: $file_csv_add ($file_size_add)\&\nin 2: $file_csv_from ($file_size_from)=>\nout:  $file_csv_to\n\n" ;
+
+    if (! -e $file_csv_add)
+    {
+      print "File not found: '$file_csv_add'\n" ; 
+      next ;
+    }	     
+    if (-s $file_csv_add == 0)
+    {
+      print "File empty: '$file_csv_add'\n" ; 
+      next ;
+    }	     
 
     &MergeActiveUsersPerMonthsAllWikisOrProjects ($wp, $file_csv_add, $file_csv_from, $file_csv_to, ($merge_namespaces = $true), $month_last) ;
 
-    $file_size_add  = sprintf ("%.1f", (-s $file_csv_add)  / 1000000) . 'Mb' ;
-    $file_size_from = sprintf ("%.1f", (-s $file_csv_from) / 1000000) . 'Mb' ;
-    $file_size_to   = sprintf ("%.1f", (-s $file_csv_to)   / 1000000) . 'Mb' ;
+    # $file_size_add  = sprintf ("%.1f", (-s $file_csv_add)  / 1000000) . 'Mb' ;
+    # $file_size_from = sprintf ("%.1f", (-s $file_csv_from) / 1000000) . 'Mb' ;
+    # $file_size_to   = sprintf ("%.1f", (-s $file_csv_to)   / 1000000) . 'Mb' ;
+    
+    $file_size_add  = i2KbMb (-s $file_csv_add) ;
+    $file_size_from = i2KbMb (-s $file_csv_from) ;
+    $file_size_to   = i2KbMb (-s $file_csv_to) ;
 
     print "Merge in " .  ddhhmmss (time - $time_start_job) . " / " .ddhhmmss (time - $time_start_step) . ": $file_size_add \& $file_size_from => $file_size_to\n\n" ;
 
@@ -1278,7 +1322,7 @@ sub CollectActiveUsersPerMonthsAllWikis
 
   close FILE_CSV_WLM ;
 
-  # rename resulting file to EditsBreakdownPerUserPerMonthAllWikis.csv
+  # rename resulting file to EditsPerUserPerMonthPerNamespaceAllWikis.csv
   print "Rename $file_csv_to to $file_csv_user_month_all_wikis\n" ;
   print "All files merged\n\n" ;
 
@@ -1296,7 +1340,7 @@ sub CollectActiveUsersPerMonthsAllWikis
   # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
   @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
 
-  # now read back EditsBreakdownPerUserPerMonthAllWikis.csv
+  # now read back EditsPerUserPerMonthPerNamespaceAllWikis.csv
   # aggregate edits per user/month to hash files: editors per month with x+ edits (x = many levels)
   # (again full month and first 28 days)
   open FILE_CSV_ALL, '<', $file_csv_user_month_all_wikis ;
@@ -1432,6 +1476,7 @@ sub CollectActiveUsersPerMonth
     {
       $edits = $edits_per_user_per_month {$yymm_user_nscat} ;
       ($yymm,$user,$usertype,$nscat) = split (',', $yymm_user_nscat) ;
+
 #     if ($nscat ne "A") { next ; } # for now count only nscat 'A' = namespace a (0 and other 'article' namespaces, depends on wiki)
 
       for ($t = 0 ; $t < $#thresholds ; $t++)
@@ -1552,12 +1597,13 @@ sub CollectActiveUsersPerMonthAllProjects
   chdir $path_in ;
   chdir ".." ;
 
-  print "Input folder is " . cwd () . "\n" ;
-  print "Output folder is " . cwd () . "/csv_wp\n" ;
+  &LogT ("Input folder is " . cwd () . "\n") ;
+  &LogT ("Output folder is " . cwd () . "/csv_wp\n") ;
 
   foreach $wp (qw (wb wk wn wo wp wq ws wv wx))
+# foreach $wp (qw (wx)) # qqq temp for Economist
   {
-    $file = "csv_$wp/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
+    $file = "csv_$wp/EditsPerUserPerMonthPerNamespaceAllWikis.csv" ;
     $file_sizes {$wp} = -s $file ;
     $file_names {$wp} = $file ;
     $file_ages  {$wp} = -M $file ;
@@ -1580,13 +1626,13 @@ if ($qqq)
     my $file_age_merged_data = -M $file_csv_user_month_all_projects ;
     if ($file_age_low > $file_age_merged_data)
     {
-      print "\nMerged project counts is more recent than any csv_../EditsBreakdownPerUserPerMonthAllWikis.csv. No need to merge.\n" ;
+      &LogT ("\nMerged project counts is more recent than any csv_../EditsPerUserPerMonthPerNamespaceAllWikis.csv. No need to merge.\n") ;
       return ;
     }
   }
 
   # ok, we will continue to merge
-  print "\nOne or more ..AllWikis.csv is newer, merge all into ..AllProjects.csv.\n\n" ;
+  &LogT ("\nOne or more ..AllWikis.csv is newer, merge all into ..AllProjects.csv.\n\n") ;
 
   # sort files by size, then from smallest to largest merge one at a time
   # in merge routine prep each file
@@ -1604,12 +1650,12 @@ if ($qqq)
   # Amirobot,2011-08,4,4
   # Amirobot,2011-09,3,1
 
-  print "\n" ;
+  &Log ("\n") ;
   foreach $wp (sort { $file_sizes {$a} <=> $file_sizes {$b} } keys %file_sizes)
   {
     if (! -e $file_names {$wp})
     {
-      print "File not found " . $file_names {$wp} . "\n" ;
+      &LogT ("File not found " . $file_names {$wp} . "\n") ;
       next ;
     }
 
@@ -1618,7 +1664,7 @@ if ($qqq)
     $file_csv_to  =~ s/\.csv/"Temp_" . ($files_merged++). uc ("_$wp") . ".csv"/e ;
 
     $time_start_step = time ;
-    print "Merge\n$file_csv_add \&\n$file_csv_from=>\n$file_csv_to\n\n" ;
+    &LogT ("Merge\n$file_csv_add \&\n$file_csv_from=>\n$file_csv_to\n\n") ;
 
     &MergeActiveUsersPerMonthsAllWikisOrProjects ($wp, $file_csv_add, $file_csv_from, $file_csv_to, ($merge_namespaces = $false)) ;
 
@@ -1626,14 +1672,14 @@ if ($qqq)
     $file_size_from = sprintf ("%.1f", (-s $file_csv_from) / 1000000) . 'Mb' ;
     $file_size_to   = sprintf ("%.1f", (-s $file_csv_to)   / 1000000) . 'Mb' ;
 
-    print "Merge in " .  ddhhmmss (time - $time_start_job) . " / " .ddhhmmss (time - $time_start_step) . ": $file_size_add \& $file_size_from => $file_size_to\n\n" ;
+    &LogT ("Merge in " .  ddhhmmss (time - $time_start_job) . " / " .ddhhmmss (time - $time_start_step) . ": $file_size_add \& $file_size_from => $file_size_to\n\n") ;
 
     $file_csv_from = $file_csv_to ;
   }
 
-  # rename resulting file to EditsBreakdownPerUserPerMonthAllProjects.csv
-  print "Rename $file_csv_to to $file_csv_user_month_all_projects\n" ;
-  print "All files merged\n\n" ;
+  # rename resulting file to EditsPerUserPerMonthPerNamespaceAllProjects.csv
+  &LogT ("Rename $file_csv_to to $file_csv_user_month_all_projects\n") ;
+  &LogT ("All files merged\n\n") ;
   rename $file_csv_to, $file_csv_user_month_all_projects ;
 
   undef %active_users_per_month_all_wikis ;
@@ -1644,8 +1690,8 @@ if ($qqq)
   # again merge with Commons, add namespace 6 edits (file uploads) as new columns
   # all usernames and months should already be in FILE_CSV_ALL
 
-  $file_csv_commons   = "csv_wx/EditsBreakdownPerUserPerMonthCOMMONS.csv" ;
-  $file_csv_commons_6 = "csv_wx/EditsBreakdownPerUserPerMonthCOMMONS_NS6.csv" ;
+  $file_csv_commons   = "csv_wx/EditsPerUserPerMonthPerNamespaceCOMMONS.csv" ;
+  $file_csv_commons_6 = "csv_wx/EditsPerUserPerMonthPerNamespaceCOMMONS_NS6.csv" ;
 
   abort ("$file_csv_commons missing!") if ! -e $file_csv_commons ;
 
@@ -1657,7 +1703,7 @@ if ($qqq)
   while ($line = <COMMONS>)
   {
     chomp $line ;
-    ($user,$month,$namespace,$edit,$edits28) = split (',', $line) ;
+    ($user,$userid,$month,$namespace,$edit,$edits28) = split (',', $line) ;
     next if $namespace != 6 ;
     $line = "$user,$month,$edit,$edits28" ;
     print COMMONS6 "$line\n" ;
@@ -1668,8 +1714,8 @@ if ($qqq)
 
   ($file_csv_user_month_all_projects_edits_uploads = $file_csv_user_month_all_projects) =~ s/\.csv/_EditsUploads.csv/ ;
   ($file_csv_commons_only = $file_csv_commons_6) =~ s/\.csv/_Only.csv/ ;
-  $file_csv_commons   = "csv_wx/EditsBreakdownPerUserPerMonthCOMMONS.csv" ;
-  $file_csv_commons_6 = "csv_wx/EditsBreakdownPerUserPerMonthCOMMONS_NS6.csv" ;
+  $file_csv_commons   = "csv_wx/EditsPerUserPerMonthPerNamespaceCOMMONS.csv" ;
+  $file_csv_commons_6 = "csv_wx/EditsPerUserPerMonthPerNamespaceCOMMONS_NS6.csv" ;
 
   abort ("$file_csv_commons_6 missing!")               if ! -e $file_csv_commons_6 ;
   abort ("$file_csv_user_month_all_projects missing!") if ! -e $file_csv_user_month_all_projects ;
@@ -1768,7 +1814,7 @@ if ($qqq)
   # threshold starting with a 3 are 10xSQRT(10), 100xSQRT(10), 1000xSQRT(10), etc
   @thresholds = (1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,250000,316228,500000,1000000,2500000,3162278,500000,10000000,25000000,31622777,5000000,100000000) ;
 
-  # now read back EditsBreakdownPerUserPerMonthAllProjects.csv
+  # now read back EditsPerUserPerMonthPerNamespaceAllProjects.csv
   # aggregate edits per user/month to hash files: editors per month with x+ edits (x = many levels)
   # (again full month and first 28 days)
   open FILE_CSV_ALL, '<', $file_csv_user_month_all_projects_edits_uploads ;
@@ -2050,21 +2096,11 @@ sub CollectActiveUsersWikiLovesMonuments
   chdir $path_in ;
   chdir ".." ;
 
-  exit ;
-}
+  &LogT ("Input folder is " . cwd () . "\n") ;
+  &LogT ("Output folder is " . cwd () . "/csv_wp\n") ;
 
-sub CollectActiveUsersWikiLovesMonuments
-{
-  &LogPhase ("CollectActiveUsersWikiLovesMonuments") ;
-
-  chdir $path_in ;
-  chdir ".." ;
-
-  print "Input folder is " . cwd () . "\n" ;
-  print "Output folder is " . cwd () . "/csv_wp\n" ;
-
-  my $filename_csv_in  = "EditsBreakdownPerUserPerMonthWikiLovesMonumentsUploaders.csv" ;
-  my $filename_csv_out = "WLM_Uploaders_EditsBreakdownPerUserPerMonth.csv" ;
+  my $filename_csv_in  = "EditsPerUserPerMonthPerNamespaceWikiLovesMonumentsUploaders.csv" ;
+  my $filename_csv_out = "WLM_Uploaders_EditsPerUserPerMonthPerNamespace.csv" ;
   my $file_out = cwd () . "/csv_mw/$filename_csv_out" ;
   my $file_out_sorted = $file_out ;
   $file_out_sorted =~ s/\.csv/_sorted.csv/ ;
@@ -2087,7 +2123,7 @@ sub CollectActiveUsersWikiLovesMonuments
 
   $cmd = "sort $file_out -o $file_out_sorted" ;
   $result = `$cmd` ;
-  print "$cmd => $result\n" ;
+  &LogT ("$cmd => $result\n") ;
   rename $file_out_sorted, $file_out ;
 
   my @lines ;
@@ -2191,6 +2227,12 @@ sub MergeActiveUsersPerMonthsAllWikisOrProjects
   my ($wp, $file_csv_add, $file_csv_from, $file_csv_to, $merge_namespaces, $month_last) = @_ ;
   my $language = '?' ;
 
+  if ($merge_namespaces && ($wp !~ /^zz/))
+  { 
+    print "GetContentNamespaces (mode $mode, lang $wp)\n" ;
+    &GetContentNamespaces ($mode, $wp) ; 
+  }  
+
   if ($merge_namespaces) # already done when merging projects
   {
     $file_csv_add2 = $file_csv_add ;
@@ -2226,7 +2268,7 @@ $trace = ($file_csv_add =~ /ZH.csv/) ;
       chomp $line_add ;
       $line_add =~ s/,\s+(\d)/,$1/g ;
 
-      ($user_add, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
+      ($user_add, $userid_ignore, $month_add, $namespace_add, $edits_add, $edits_add_28)  = split (',', $line_add) ;
 
       # if this user uploaded to WLM in any year, copy edits to WLM file
       # after merging such files for all projects, we can find out when user started to contribute
@@ -2773,7 +2815,7 @@ if ($usertype eq 'R')
     $cat_uploadwizard =~ s/[\x00-\x1F]//g ;
 
     if ($usertype eq 'B' and $cat_uploadwizard ne '')
-    { &Log2 ("Bot upload via uploadwizard: $line\n") ; }
+    { &LogQ ("Bot upload via uploadwizard: $line\n") ; }
     if ($usertype eq 'R' and $cat_uploadwizard ne '')
     {
       if (yyyy_mm lt '2011-01')

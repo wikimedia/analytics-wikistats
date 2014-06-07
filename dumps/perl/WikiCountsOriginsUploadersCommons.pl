@@ -16,7 +16,7 @@
   my $file_creates_commons      = "$dir_in/CommonsUploadersStats/CreatesCommons.csv" ;
   my $file_uploaders_per_month  = "$dir_in/CommonsUploadersStats/CommonsUploadersPerMonth.csv" ;
   my $file_meta                 = "$dir_in/CommonsUploadersStats/CommonsUploadersPerMonthMeta.txt" ;
-  my $file_edits_except_commons = "$dir_in/CommonsUploadersStats/EditsBreakdownPerUserPerMonthAllProjectsExceptCommons.csv" ;
+  my $file_edits_except_commons = "$dir_in/CommonsUploadersStats/EditsPerUserPerMonthPerNamespaceAllProjectsExceptCommons.csv" ;
   my $file_first_month_non_commons_per_user = "$dir_in/CommonsUploadersStats/FirstEditPerUser" ;
   my $file_bots                 = "$dir_in/CommonsUploadersStats/BotsAll.csv" ;
 

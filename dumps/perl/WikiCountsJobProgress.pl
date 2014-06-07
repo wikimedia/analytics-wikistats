@@ -62,6 +62,7 @@
 
   $file_html         = "$dir_out/out_wm/WikiCountsJobProgress.html" ;
   $file_html_c       = "$dir_out/out_wm/WikiCountsJobProgressCurrent.html" ;
+  $file_html_synopsis = "$dir_out/out_wm/WikiCountsJobProgressSynopsis.html" ;
 
   $file_daily_gain   = "$dir_out/out_wm/WikiCountsJobProgressDaily.txt" ;
 
@@ -169,6 +170,7 @@
   &WriteHtml ;
   &WriteHtmlCurrent ;
   &WriteHtmlJobRunTimes ;
+  &WriteHtmlSynopsis ;
   &WriteDailyGain ;
 
   print "Ready in " . (time - $timestart) . " sec\n" ;
@@ -274,7 +276,8 @@ sub ReadStatsCsv
 
     if ($language =~ /^tlh/) # obsolete, Klignon project abandoned
     { next ; }
-
+    if ($project eq "wx")
+    { print "$language\n" ; }
     $yy = substr ($contentdate,0,4) ;
     $mm = substr ($contentdate,4,2) ;
     $dd = substr ($contentdate,6,2) ;
@@ -287,6 +290,8 @@ sub ReadStatsCsv
     $days1 = int (($timestart - timelocal (0,0,0,$dd,$mm-1,$yy-1900)) / (24 * 60 * 60)) ;
     $rundate2 = "$yy$mm$dd" ;
 
+    $days_ago {$days1} ++ ;
+    
     $runlength =~ s/&#44;//g ;
 
     if ($runlength =~ /days.*?hrs.*?min.*?sec/)
@@ -298,8 +303,15 @@ sub ReadStatsCsv
 
     # $runlength2 = sprintf ("%07d", 9999999 - $runlength) ;
     # print "$project, $language, $days1, $days2, $minutes\n" ;
+    #
     if ($project eq "wx")
-    { if ($language !~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy|wikidata$/) { next ; } }
+    { 
+      if ($language !~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy|wikidata$/) 
+      { 
+      # print "Skip language $language\n" ; 
+  	next ; 
+      } 
+    }
 
     if ($rundate2 gt $rundatemax)
     {
@@ -435,9 +447,12 @@ sub ReadStatsDblist
  {
    $wiki =~ s/\s*//g ;
    chomp ($wiki) ;
+   
    if ($wiki !~ /wik/) { next ; }
 
-   if ($wiki =~ /wikiwiki/)
+   if ($wiki =~ /wikidatawiki/)
+   { $wiki = 'wikidata' ; }
+   elsif ($wiki =~ /wikiwiki/)
    { $wiki =~ s/wikiwiki/wiki/ ; }
    else
    { $wiki =~ s/wik.*$// ; }
@@ -482,7 +497,8 @@ sub WriteHtml
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=gmtime(time);
   $now_gm = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
   ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime(time);
-  $now = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
+  $now  = sprintf ("%02d-%02d-%04d %02d:%02d\n",$mday,$mon+1,$year+1900,$hour,$min) ;
+  $now2 = sprintf ("%02d-%02d %02d:%02d\n",$mday,$mon+1,$hour,$min) ;
 
   print HTML "<table><tr><td><h3><a href='http://stats.wikimedia.org/'>WikiStats</a> data gathering progress</h3></td>\n" .
              "<td><small><small>Page generated: $now GMT (server time)</small></td></tr></table><br>\n" ;
@@ -493,7 +509,10 @@ sub WriteHtml
     ($project,$language) = split (',',$run) ;
 
     if (! @dblists {"$project,$language"})
-    { next ; }
+    { 
+      print "Not in dblists: project $project language $language\n" ;	    
+      next ;
+    }
 
     if ($project ne $project_prev)
     {
@@ -755,7 +774,8 @@ sub WriteHtmlCurrent
 
     $days   = $data_age {$run} ;
     $months = $months_age {$run} ;
-
+    $up_to_date = $false ;
+    
     $rgb = "#FF0000" ;
     if ($language eq "sep11")
     { $rgb = "#808080" ; }
@@ -766,8 +786,16 @@ sub WriteHtmlCurrent
     elsif ($months == 1)
     { $rgb = "#000060" ; }
     elsif ($months == 0) # wikistats up to date, contains data up to previous month
-    { $rgb = "#008000" ; }
+    { 
+      $rgb = "#008000" ; 
+      $up_to_date = $true ;
+    }
 
+    if ($up_to_date)
+    { $new_files {$project} ++ ; }	    
+    else
+    { $old_files {$project} ++ ; }	    
+    
     $runtime = int ($runtimes {$run} / 60) ;
     $runlength = int ($runlengths {$run} / 60) ; # eun  length in minutes
     if ($runlength < 10)
@@ -921,6 +949,102 @@ sub WriteHtmlJobRunTimes
                    "</td></tr>\n" ;
   }
   print HTML "</table>\n" ;
+}
+
+sub HtmlOldNewFiles
+{
+  my ($project) = @_ ;	
+  my $html = "<td align=right class='done'>" . $new_files {$project} . "</td><td align=left class='todo'>" . $old_files {$project} . "</td>" ;
+}
+
+sub WriteHtmlSynopsis
+{
+
+  $width_logo = 30 ;
+
+  $page_wikipedia   = "http://stats.wikimedia.org/wikispecial/EN/Sitemap.htm" ;
+  $page_commons     = "http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaCOMMONS.htm" ;
+  $page_wikidata    = "http://stats.wikimedia.org/wikispecial/EN/TablesWikipediaWIKIDATA.htm" ;
+  $page_wikivoyage  = "http://en.wikipedia.org/wikistats/wikivoyage/EN/Sitemap.htm" ; 
+  $page_wiktionary  = "http://en.wikipedia.org/wikistats/wiktionary/EN/Sitemap.htm" ;
+  $page_wikibooks   = "http://en.wikipedia.org/wikistats/wikibooks/EN/Sitemap.htm" ;
+  $page_wikinews    = "http://en.wikipedia.org/wikistats/wikinews/EN/Sitemap.htm" ; 
+  $page_wikiquote   = "http://en.wikipedia.org/wikistats/wikiquote/EN/Sitemap.htm" ; 
+  $page_wikisource  = "http://en.wikipedia.org/wikistats/wikisource/EN/Sitemap.htm" ; 
+  $page_wikiversity = "http://en.wikipedia.org/wikistats/wikiversity/EN/Sitemap.htm" ;
+  $page_wikispecial = "http://en.wikipedia.org/wikistats/wikispecial/EN/Sitemap.htm" ; 
+  
+  $logo_wikipedia   = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Wikipedia-logo.png/40px-Wikipedia-logo.png' width=$width_logo />" ;
+  $logo_commons     = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Commons-logo.svg/40px-Commons-logo.svg.png' width='$width_logo' />" ;
+  $logo_wikidata    = "<img src='http://upload.wikimedia.org/wikipedia/commons/e/e4/Wikidata-logo-en-135px.png' width='$width_logo' />" ;
+  $logo_wikivoyage  = "<img src='http://upload.wikimedia.org/wikipedia/commons/b/b7/Wikivoyage-Logo-v3-en-highlight.png' width='$width_logo' />" ;
+  $logo_wiktionary  = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Wiktionary-logo-en.png/40px-Wiktionary-logo-en.png' width='$width_logo' />" ;
+  $logo_wikibooks   = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikibooks-logo.svg/40px-Wikibooks-logo.svg.png' width='$width_logo' />" ;
+  $logo_wikinews    = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Wikinews-logo.png/40px-Wikinews-logo.png' width='$width_logo' />" ;
+  $logo_wikiquote   = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Wikiquote-logo.svg/40px-Wikiquote-logo.svg.png' width='$width_logo' />" ;
+  $logo_wikisource  = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Wikisource-logo.svg/40px-Wikisource-logo.svg.png' width='$width_logo' />" ;
+  $logo_wikiversity = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wikiversity-logo.svg/40px-Wikiversity-logo.svg.png' width='$width_logo' />" ;
+  $logo_wikispecial = "<img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/35px-Wikimedia-logo.svg.png' width='$width_logo' />" ;
+	
+
+
+  $stats_wb = &HtmlOldNewFiles ('wb') ;
+  $stats_wk = &HtmlOldNewFiles ('wk') ;
+  $stats_wn = &HtmlOldNewFiles ('wn') ;
+  $stats_wo = &HtmlOldNewFiles ('wo') ;
+  $stats_wp = &HtmlOldNewFiles ('wp') ;
+  $stats_wq = &HtmlOldNewFiles ('wq') ;
+  $stats_ws = &HtmlOldNewFiles ('ws') ;
+  $stats_wv = &HtmlOldNewFiles ('wv') ;
+  $stats_wx = &HtmlOldNewFiles ('wx') ;
+  $stats_wd = '-' ;
+  $stats_co = '-' ;
+
+  $textcolor = '#CCC' ; 
+
+  my $table = "\n<table>\n" .
+	      "<tr><td class='logo'>$logo_wikibooks</td><td>&nbsp;</td><td class='proj'>Wikibooks</td>$stats_wb</tr>\n" .
+	      "<tr><td class='logo'>$logo_wiktionary</td><td>&nbsp;</td><td class='proj'>Wiktionary</td>$stats_wk</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikinews</td><td>&nbsp;</td><td class='proj'>Wikinews</td>$stats_wn</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikipedia</td><td>&nbsp;</td><td class='proj'>Wikipedia</td>$stats_wp</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikiquote</td><td>&nbsp;</td><td class='proj'>Wikiquote</td>$stats_wq\n" .
+	      "<tr><td class='logo'>$logo_wikisource</td><td>&nbsp;</td><td class='proj'>Wikisource</td>$stats_ws</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikiversity</td><td>&nbsp;</td><td class='proj'>Wikiversity</td>$stats_wv</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikivoyage</td><td>&nbsp;</td><td class='proj'>Wikivoyage</td>$stats_wo</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikispecial</td><td>&nbsp;</td><td class='proj'>Wikispecial</td>$stats_wx</tr>\n" .
+	      "<tr><td class='logo'>$logo_wikidata</td><td>&nbsp;</td><td class='proj'>Wikidata</td>$stats_wd</tr>\n" .
+	      "<tr><td class='logo'>$logo_commons</td><td>&nbsp;</td><td class='proj'>Commons</td>$stats_co</tr>\n" .
+              "</table>\n\n" ;
+
+  open HTML, '>', $file_html_synopsis ;
+  print HTML "<html>\n" .
+             "<head>\n" .
+             "<style type='text/css'>\n" .
+             "body {font-family:sans-serif}\n" .
+	   # "td {color:#008000; font-size:14px;}\n" .      
+	     "td {color:#008000; font-size:16px; font-weight:bold;}\n" .     
+	     "td.done {color:#080;text-align:right;}\n" .
+	     "td.todo {color:#F00;text-align:left;}\n" .  
+	     "td.proj {color:#888;}\n" .  
+	     ".body {color:#888;}\n" .  
+	     ".data {color:#FFF;}\n" .  
+	     ".null {color:#000;}\n" .  
+	     ".donelight {color:#686;}\n" .  
+	     ".todolight {color:#D99;}\n" .  
+	     "</style>\n" .	
+	     "</head>\n" .
+	     "<body>\n" . 
+             "<span class='body'><span class='null'>----</span>Wikimedia dumps <span class='donelight'>done</span> / <span class='todolight'>to do</span><br>" . 
+	     "Last upd: <span class='data'>$now2</span> UTC<br>\n" .
+             "Last days:" . 
+	     " 1: <span class='data'><b>" . (0+$days_ago {0}) . "</b></span>," . 
+	     " 2: <span class='data'><b>" . (0+$days_ago {1}) . "</b></span>," .
+	     " 3: <span class='data'><b>" . (0+$days_ago {2}) . "</b></span>" .
+	     "</span><br>" .
+	     $table .
+	     "</body>\n" .
+	     "</html>\n" ;
+  close HTML ;
 }
 
 sub WriteDailyGain 

@@ -138,13 +138,16 @@
   $useritem_edits_10 = 13 ;                      # count if user made 10 or more edits
 
   &ParseArguments ;
-
   &SetEnvironment ;
+
+  &OpenLog ;
+  &SpoolPreviousErrors ;
+  open (STDERR, ">>", $file_errors) ;
 
   if ($merge_user_edits_one_project) # option -y
   {
-    print "\nunlink $path_out/EditsBreakdownPerUserPerMonthAllWikis.csv\n" ;
-    unlink "$path_out/EditsBreakdownPerUserPerMonthAllWikis.csv" ;
+    &LogT ("\nunlink $path_out/EditsPerUserPerMonthPerNamespaceAllWikis.csv\n") ;
+    unlink "$path_out/EditsPerUserPerMonthPerNamespaceAllWikis.csv" ;
     &ReadBotNames ;
     &ReadUserNamesWikiLovesMonuments ;  # list of user names who uploaded WLM content in 2010,2011,2012,etc
     &CollectActiveUsersPerMonthsAllWikis ;
@@ -153,18 +156,14 @@
 
   if ($merge_user_edits_all_projects) # option -z
   {
-    print "\nunlink $path_out/EditsBreakdownPerUserPerMonthAllProjects.csv\n" ;
-    unlink "$path_out/EditsBreakdownPerUserPerMonthAllProjects.csv" ;
+    &LogT ("\nunlink $path_out/EditsPerUserPerMonthPerNamespaceAllProjects.csv\n") ;
+    unlink "$path_out/EditsPerUserPerMonthPerNamespaceAllProjects.csv" ;
     &ReadBotNames ;
     &CollectActiveUsersWikiLovesMonuments ;
     &CollectActiveUsersPerMonthAllProjects ;
     &CountActiveWikisPerMonthAllProjects ;
     exit ;
   }
-
-  &OpenLog ;
-  &SpoolPreviousErrors ;
-  open (STDERR, ">>", $file_errors) ;
 
   if (defined ($path_perl))
   { &CheckForNonAscii ; }
@@ -219,7 +218,7 @@
 
     if ($length_line_event eq "")
     {
-      &UpdateLog ;
+      &UpdateJobStats ;
       &abort ("No relevant events found") ;
     }
 
@@ -265,9 +264,9 @@
 
     &UpdateZeitGeist ;
 
-    &UpdateLog ;
+    &UpdateJobStats ;
 
-    &SortAndCompactEditsUserMonth ;
+    &SortAndCompactEditsUserMonthPerNamespace ;
 
     if ($mode eq "wp")
     { &WriteTimelineOverview ; }
@@ -304,7 +303,7 @@
   { &LogC (" -> " . ddhhmmss (time - $timestart). "\n") ; }
 
   if ($min_run > 1)
-  { &WriteDiskStatus ; }
+  { &LogDiskStatus ; }
 
   rmdir $path_temp ; # remove if empty
   if (-d $path_temp)

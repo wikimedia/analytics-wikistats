@@ -304,6 +304,7 @@ else
 
   $file_csv_stats_ploticus          = $path_in . "StatisticsPlotInput.csv" ;
   $file_csv_monthly_stats           = $path_in . "StatisticsMonthly.csv" ;
+  $file_csv_monthly_stats_full      = $path_in . "StatisticsMonthlyFullArchive.csv" ;
   $file_csv_namespace_stats         = $path_in . "StatisticsPerNamespace.csv" ;
   $file_csv_weekly_stats            = $path_in . "StatisticsWeekly.csv" ;
   $file_csv_users                   = $path_in . "StatisticsUsers.csv" ;
@@ -721,7 +722,6 @@ sub WhiteListLanguages
   {
     $line =~ s/,.*$// ;
     $wp = $line ;
-
     if ($wp =~ /mania|team|comcom|closed|chair|langcom|office|searchcom|sep11|nostalgia|stats|test/i)
     { $wp_ignore_keyword_prohibited {$wp}++ ; next ; }
 
@@ -747,7 +747,6 @@ sub WhiteListLanguages
     $wp_whitelist {$wp} = 1 ;
     $wp_whitelist {"$wp.m"} = 1 ; # relevant when processing page views, allow for mobile version
   }
-
   # for pageviews once each day update white list, so that WikiCountsSummarizeProjectCounts.pl step in pageviews_monthly.sh can use this same list next day
   if (($pageviews) && ($region eq ''))
   {
@@ -799,6 +798,7 @@ sub WhiteListLanguages
     {
       if (($wp_whitelist {$wp} > 0) && ($article_counts_last_month {$wp} < $threshold_articles))
       {
+        print "Too few articles: $wp\n" ;	       
         $wp_whitelist {$wp} = 0 ;
         $wp_ignore_too_few_articles      {$wp}++ ;
         $wp_ignore_too_small_or_inactive {$wp}++ ;
@@ -808,6 +808,7 @@ sub WhiteListLanguages
     {
       if (($wp_whitelist {$wp} > 0) && ($edit_counts_last_month {$wp} < $threshold_edits))
       {
+        print "Too few edits: $wp\n" ;	       
         $wp_whitelist {$wp} = 0 ;
         $wp_ignore_too_few_edits         {$wp}++ ;
         $wp_ignore_too_small_or_inactive {$wp}++ ;
@@ -827,7 +828,7 @@ sub WhiteListLanguages
   }
   @languages = join (',', sort keys %languages) ;
 
-
+  &Log ("\nProcess language codes $languages\n\n") ;
 
   &Log ("\nLanguage codes not accepted, but dump processing logged in StatisticsLog.csv:\n\n") ;
   &Log ("- Keyword prohibited: " . join (',', sort keys %wp_ignore_keyword_prohibited) . "\n") ;
@@ -890,6 +891,9 @@ sub ReadMonthlyStats
 
   if (! $pageviews)
   {
+    # read some monthly metrics from another file than StatisticsMonthly.csv
+    # namely StatisticsUserActivitySpread.csv, which has more precise data (broken out by user type)  	
+
     open "FILE_IN", "<", $file_csv_users_activity_spread ;
     while ($line = <FILE_IN>)
     {
@@ -928,8 +932,41 @@ sub ReadMonthlyStats
       if ($editors_month_hi_5 {$wp} < $m)
       { $editors_month_hi_5 {$wp} = $m ; }
     }
-
     close "FILE_IN" ;
+    
+    # read some more monthly metrics from another file than StatisticsMonthly.csv 
+    # namely from StatisticsMonthlyFullArchive.csv, which has also data derived from article content, like word counts, avg article size, image and link counts 
+    # (if it exists, which is only for Wikipedias right now, for other projects full archive is always used) 	
+    # note: other data in StatisticsMonthlyFullArchive.csv differ somewhat from data in StatisticsMonthly.csv
+    #       this is because for parsing of full archive file, existence of internal link is taken into account (part of official definition for proper article)
+    #       those fields which exist in both files are always taken from StatisticsMonthly.csv also for Wikipedias, for consistency
+    #       as full archive metrics will be gathered with lower frequency than once a month
+
+    if (-e $file_csv_monthly_stats_full) # only for Wikipedia 
+    {
+      open "FILE_IN", "<", $file_csv_monthly_stats_full ;
+      while ($line = <FILE_IN>)
+      {
+        chomp ($line) ;
+        ($wp, $date, @fields) = split (",", $line) ;
+        next if $wp_whitelist {$wp} == 0 ;
+
+	if (($date eq '01/31/2014') && ($fields [5] > 0)) # has full archive dump for this wiki been processed lately?
+	{ $monthly_stats_full_archive_input {$wp} = $true ; }	
+                                                               # see top table in e.g. http://stats.wikimedia.org/EN/TablesWikipediaEN.htm 
+	$metrics_full_archive {"$wp,$date,5"}  = $fields [ 5] ; # column F: Articles | count | > 200 ch 
+	$metrics_full_archive {"$wp,$date,8"}  = $fields [ 8] ; # column I: Articles | mean  | bytes 
+	$metrics_full_archive {"$wp,$date,9"}  = $fields [ 9] ; # column J: Articles | larger then | 0.5 Kb 
+	$metrics_full_archive {"$wp,$date,10"} = $fields [10] ; # column K: Articles | larger then | 2   Kb 
+	$metrics_full_archive {"$wp,$date,12"} = $fields [12] ; # column M: Database | larger then | 2   Kb 
+	$metrics_full_archive {"$wp,$date,13"} = $fields [13] ; # column N: Database | larger then | 2   Kb 
+	$metrics_full_archive {"$wp,$date,14"} = $fields [14] ; # column O: Links    | internal 
+	$metrics_full_archive {"$wp,$date,15"} = $fields [15] ; # column P: Links    | interwiki 
+	$metrics_full_archive {"$wp,$date,16"} = $fields [16] ; # column Q: Links    | image 
+	$metrics_full_archive {"$wp,$date,17"} = $fields [17] ; # column R: Links    | external 
+      }
+      close "FILE_IN" ;
+    } 	    
   }
 
   # find oldest month (to be skipped, probably incomplete)
@@ -961,13 +998,13 @@ sub ReadMonthlyStats
 
     next if $mode_wx and $m < 102 ; # oldest months are erroneous (incomplete)
 
-    # figures for current month are ignored when month has just begun # qqq
+    # figures for current month are ignored when month has just begun # 
     $days_in_month = days_in_month ($year, $month) ;
     $count_normalized = sprintf ("%.0f", 30/$days_in_month * $count) ;
     $pageviews     {$wp.$m} = $count_normalized ;
     $pageviews_raw {$wp.$m} = $count ;
 
-    $pageviews_monthly_totals_raw        {"$year-$month"} += $count ; # qqq
+    $pageviews_monthly_totals_raw        {"$year-$month"} += $count ; # 
     $pageviews_monthly_totals_normalized {"$year-$month"} += $count_normalized ;
 
 #   do this below, and remove code in next version
@@ -1027,18 +1064,35 @@ sub ReadMonthlyStats
     else
     {
       ($wp, $date, @fields) = split (",", $line) ;
-      # use newer counts, excluding bots from $file_csv_users_activity_spread
+      next if $wp_whitelist {$wp} == 0 ;
+
+      # substitute data from StatisticsUserActivitySpread.csv
       $fields [2] = $user_edits_5   {"$wp,$date"} ;
       $fields [3] = $user_edits_100 {"$wp,$date"} ;
+
+      # substitute data from StatisticsMonthlyFullArchive.csv, see above "if (-e $file_csv_monthly_stats_full)"
+      if (defined ($metrics_full_archive {"$wp,$date,5"}))
+      {
+        $fields  [5] = $metrics_full_archive {"$wp,$date,5"}  ; # column F: Articles | count | > 200 ch 
+	$fields  [8] = $metrics_full_archive {"$wp,$date,8"}  ; # column I: Articles | mean  | bytes 
+	$fields  [9] = $metrics_full_archive {"$wp,$date,9"}  ; # column J: Articles | larger then | 0.5 Kb 
+	$fields [10] = $metrics_full_archive {"$wp,$date,10"} ; # column K: Articles | larger then | 2   Kb 
+	$fields [12] = $metrics_full_archive {"$wp,$date,12"} ; # column M: Database | larger then | 2   Kb 
+	$fields [13] = $metrics_full_archive {"$wp,$date,13"} ; # column N: Database | larger then | 2   Kb 
+	$fields [14] = $metrics_full_archive {"$wp,$date,14"} ; # column O: Links    | internal 
+	$fields [15] = $metrics_full_archive {"$wp,$date,15"} ; # column P: Links    | interwiki 
+	$fields [16] = $metrics_full_archive {"$wp,$date,16"} ; # column Q: Links    | image 
+	$fields [17] = $metrics_full_archive {"$wp,$date,17"} ; # column R: Links    | external
+      } 	
     }
 
-    next if $wp_whitelist {$wp} == 0 ;
 
     # $date = &FixDateMonthlyStats ($date) ;
     $day   = substr ($date,3,2) ;
     $month = substr ($date,0,2) ;
     $year  = substr ($date,6,4) ;
 
+    next if $wp_whitelist {$wp} == 0 ;
     next if $year < 2001 ;  # StatisticsMonthly.csv contains weird dates for tiny Wp's, to be fixed in counts job
     next if $wp eq "ar" and $year < 2003 ;  # clearly erroneous record for arwiki pollutes TablesWikipediaGrowthSummaryContributors.htm
 
@@ -1082,7 +1136,7 @@ sub ReadMonthlyStats
       {
         if ($fields [$f] > $MonthlyStatsHigh {$wp.$c[$f]})
         {
-          $MonthlyStatsHigh {$wp.$c[$f]} = $fields [$f] ; # qqq
+          $MonthlyStatsHigh {$wp.$c[$f]} = $fields [$f] ; # 
           $MonthlyStatsHighMonth {$wp.$c[$f]} = $m ;
         }
       }
@@ -1137,7 +1191,7 @@ sub ReadMonthlyStats
     { $MonthlyStatsWp10000Articles {$wp} = $m ; }
     if (($MonthlyStatsWp100000Articles {$wp} eq "") && ($fields [4] >= 100000))
     { $MonthlyStatsWp100000Articles {$wp} = $m ; }
-
+    
     if ($m > $month_max)
     {
       $month_max = $m ;
@@ -1146,6 +1200,7 @@ sub ReadMonthlyStats
     }
   }
   close "FILE_IN" ;
+  &Log ("\nRead page views done\n") ;
   
   foreach $wp (keys %languages)
   {
@@ -1215,6 +1270,7 @@ sub ReadMonthlyStats
       }
     }
   }  
+
     # if ($mode_wp)
   if ($sort_pageviews)
   {
@@ -1238,6 +1294,8 @@ sub ReadMonthlyStats
 
   for $wp (@languages)
   {
+    next if $wp_whitelist {$wp} == 0 ;
+
     ($wp2 = $wp) =~ s/\.m// ;
 
     for ($m = $m_min ; $m <= $m_max ; $m++ )
@@ -1307,11 +1365,15 @@ if ($false)
   }
   close "FILE_IN" ;
 }
+
   if (! $pageviews)
   {
     # collect dates to display for recent months
     $year  = substr ($recent_dates [4],6,4) ;
     $month = substr ($recent_dates [4],0,2) ;
+
+    if (($year eq '') || ($month eq ''))
+    { abort "\@recent_dates not initialized, no valid counts found?" ; }
 
     for ($i = 3 ; $i >= 0 ; $i--)
     {
@@ -1541,7 +1603,6 @@ if ($false)
   if ($MonthlyStatsWpStopLo2 == 999)
   { $MonthlyStatsWpStopLo2 = $MonthlyStatsWpStop {"zz"} ; }
   unshift (@languages, "zz") ;
-
 
 #  if ($mode_wp) # for tests only
 #  {
@@ -1942,6 +2003,7 @@ if ($false)
   { $singlewiki = $true ; }
 
   $MonthlyStatsWpStart {"zzz"} = $MonthlyStatsWpStart {$wp_2nd} ;
+  &LogT ("\nReadMonthlyStats done\n") ;
 }
 
 sub GetPercPageViewsMobile

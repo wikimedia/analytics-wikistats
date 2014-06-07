@@ -30,7 +30,12 @@ sub NameSpaceArticle
   my ($language, $namespace) = @_ ;
 
   if ($base_content_namespaces_on_api)
-  { return ($content_namespace {$namespace} != 0 ) ; }
+  { 
+    if (! $namespaces_initialized) 
+    { abort "NameSpaceArticle: content_namespaces not initialized" ; }
+
+    return ($content_namespace {$namespace} != 0 ) ;
+  }
   else 
   {
   # if changed, also change WikiReportsOutputTables, find in code string 'NameSpaceArticle'
@@ -72,7 +77,7 @@ sub ReadInputXml
   { open "FILE_DUMP_CSV", ">", $file_dump_csv || abort ("Perl file '$file_dump_csv' could not be opened.") ; }
 
   open "FILE_CREATES", ">", $file_csv_creates || abort ("Perl file '$file_csv_creates' could not be opened.") ;
-  print FILE_CREATES "# fields: article type,yyyymmddhhnn,namespace,usertype,user,title,uploadwizard\n" ;
+  print FILE_CREATES "# fields: article type,yyyymmddhhnn,namespace,usertype,user,userid,title,uploadwizard\n" ;
   print FILE_CREATES "# usertype  = [A:anonymous|B:bot|R:registered user]\n" ;
   print FILE_CREATES "# article type = [-:page contains no internal link|R:page is redirect|S:(link list, deprecated)|S:stub|+:normal article]\n" ;
   print FILE_CREATES "# when processing full archive dump: count article only when it contains an internal link (official article definition), and is not a redirect\n" ;
@@ -161,12 +166,12 @@ sub ReadInputXml
   undef (%ndx_titles) ;
   &TraceMem ;
 
-  &Log2 ("\n") ;
+  &LogQ ("\n") ;
   foreach $key (keys %undef_namespaces)
-  { &Log2 ("False namespace " . sprintf ("%4d", $undef_namespaces {$key}) . "x : '$key'\n") ; }
+  { &LogQ ("False namespace " . sprintf ("%4d", $undef_namespaces {$key}) . "x : '$key'\n") ; }
   &Log ("\n") ;
   foreach $key (sort {$a <=> $b} keys %total_per_namespace)
-  { &Log2 ("Pages per namespace '" . sprintf("%3d",$key) . "': " . $total_per_namespace {$key} . "x\n") ; }
+  { &LogQ ("Pages per namespace '" . sprintf("%3d",$key) . "': " . $total_per_namespace {$key} . "x\n") ; }
 
   $line = "" ;
   foreach $key (sort {$imagetags {$b} <=> $imagetags {$a}} keys %imagetags)
@@ -243,10 +248,11 @@ sub ReadFileXml
 
   binmode FILE_IN ;
 
+  # log edits per user per month per namespace for this article, to be sorted and aggregated later
   if (! $prescan)
   {
-    open    EDITS_USER_MONTH_ARTICLE, ">", $file_csv_user_month_article ;
-    binmode EDITS_USER_MONTH_ARTICLE ;
+    open    EDITS_USER_MONTH_NAMESPACE_LOG, ">", $file_csv_user_month_namespace_log ;
+    binmode EDITS_USER_MONTH_NAMESPACE_LOG ;
   }
 
 # if (! $edits_only) # 2013 June: now works with sha1 tag, no longer with self geneated md5, sha1 also in stub dumps
@@ -371,10 +377,13 @@ sub ReadFileXml
     abort ("No data found in file '" . $file_in . "': $pages_read pages, $revisions_read revisions. File empty? XML layout changed?") ;
   }
 
-  &LogT ("\n\nPages read: $pages_read. Revisions read: $revisions_read \n") ;
+  &LogT ("\n\nPages read: $pages_read. Revisions read: $revisions_read \n\n") ;
+
+  &LogT ("Bytes written to events file: "  . &i2KbMb ($total_bytes_compressed_events) . 
+	 " (uncompressed would have been " . &i2KbMb ($total_bytes_raw_events) . ")\n") ;
 
   if (! $prescan)
-  { close EDITS_USER_MONTH_ARTICLE ; }
+  { close EDITS_USER_MONTH_NAMESPACE_LOG ; }
 
 
 # if (! $edits_only) # 2013 June: now works with sha1 tag, no longer with self generated md5, sha1 also in stub dumps
@@ -599,8 +608,8 @@ sub ReadInputXmlPage
   my $bytes_read_page = $bytes_read ;
 
   undef @revisions ;
-  undef %edits_user_month_article ;
-  undef %edits_user_month_article_28 ;
+  undef %edits_user_month_namespace ;
+  undef %edits_user_month_namespace_28 ;
   $edits_only_page_is_redirect = $false ;
 
   if ($use_tie)
@@ -635,7 +644,7 @@ sub ReadInputXmlPage
     }
 
     # if (@undef_namespaces {$name} == 1)
-    # { &Log2 ("\nFalse namespace '$name', title '$title'\n") ; }
+    # { &LogQ ("\nFalse namespace '$name', title '$title'\n") ; }
 
 #   if ($namespace > 100)
 #   { $namespace = $namespace % 2 ; }
@@ -686,8 +695,7 @@ sub ReadInputXmlPage
 
   while ($line =~ /<revision>/)
   {
-    ($article, $time, $user, $usertype, $comment, $sha1) = &ReadInputXmlRevision ;
-
+    ($article, $time, $user, $userid, $usertype, $comment, $sha1) = &ReadInputXmlRevision ($namespace) ;
 
     my $date = substr ($time,0,8) ;
     last if $date > $dumpdate ;
@@ -700,15 +708,16 @@ sub ReadInputXmlPage
 
       $user_page_creator     = $user2 ;
       $usertype_page_creator = $usertype ;
+      $userid_page_creator   = $userid ;
       $yyyymmddhhnn          = substr ($time,0,4).'-'.substr ($time,4,2).'-'.substr ($time,6,2).' '.substr ($time,8,2).':'.substr ($time,10,2) ;
-      $data_page_created     = "$yyyymmddhhnn,$namespace,$usertype,$user2,$title2" ;
+      $data_page_created     = "$yyyymmddhhnn,$namespace,$usertype,$user2,$userid,$title2" ;
       $yymm_page_created     = substr ($time,2,4) ;
 
       if (($namespace == 6) && ($article =~ /uploadwizard/i))
       {
         if ($article !~ /\[\[[^\]]*uploadwizard[^\]]*\]\]/i)
         {
-          &Log2 ("\n\narticle '$title' uploadwizard? $article\n\n") ;
+          &LogQ ("\n\narticle '$title' uploadwizard? $article\n\n") ;
           next ;
         }
         ($cat_uploadwizard = $article) =~ s/^.*?\[\[ ([^\]]*uploadwizard[^\]]*) \]\].*$/$1/ixos ; # case insensite , ignore newlines/spaces, compile once
@@ -802,8 +811,8 @@ sub ReadInputXmlPage
 
     $time_prev     = $time ;
     # store with $article = #@ if costly counts should be skipped on this revision
-    $revision_prev_not_same_period = "$pageid`$article`$time`$user`$usertype`" ;
-    $revision_prev_same_period     = "$pageid`#@`$time`$user`$usertype`" ;
+    $revision_prev_not_same_period = "$pageid`$article`$time`$user`$userid`$usertype`" ;
+    $revision_prev_same_period     = "$pageid`#@`$time`$user`$userid`$usertype`" ;
 
     &XmlReadUntil ('(?:<revision>|<\/page>)') ;
   }
@@ -896,7 +905,7 @@ sub ReadInputXmlPage
   # $text = pop @revisions ;
     $text = $revisions [--$ndx_revisions] ;
 
-    my ($pageid, $article, $time, $user, $usertype) = split ('\`', $text) ;
+    my ($pageid, $article, $time, $user, $userid, $usertype) = split ('\`', $text) ;
     if ($pageid !~ /^\d+$/)
     {
       &Log ("Title '$title' : page id not numeric (prev page id $pageid_prev): '" . substr ($pageid,0,80) . "...'\n") ;
@@ -917,11 +926,11 @@ sub ReadInputXmlPage
 
 my $start_process_revision = code_started() if $record_time_process_revision_main ;
 
-    $article_type = &ProcessRevision ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $time, $usertype) ;
+    $article_type = &ProcessRevision ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $userid, $time, $usertype) ;
 
     if ($most_recent_revision)
     {
-    # print DEBUG_EVENTS "EVENT 4 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+    # print DEBUG_EVENTS "EVENT 4 $title $time (pageid $pageid) [$article_type] $user $userseqno\n" ;
       $most_recent_revision = $false ;
       $most_recent_article_type_for_this_page = $article_type ;
     }
@@ -937,7 +946,12 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
   return if $article_type =~ /^\!/ or $data_page_created eq '' ; # ignore record, e.g. incomplete current month
 
   # only when processing full archive dump article article type can be redirect (R) or without internal link (-)
-  if ((! $edits_only_page_is_redirect) && ($most_recent_article_type_for_this_page !~ /-|R/))
+  if ($mode eq "wk") 
+  { $content_page = ($most_recent_article_type_for_this_page !~ /R/) ; } # for wiktionary no longer test for internal link
+  else
+  { $content_page = ($most_recent_article_type_for_this_page !~ /-|R/) ; } 
+  
+  if (! $edits_only_page_is_redirect && $content_page)
   {
     if (&NameSpaceArticle ($language, $namespace))
     { &IncUserData ($user_page_creator, $useritem_create_reg_namespace_a) ; }
@@ -1047,11 +1061,12 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
   undef %contributing_reg_users_per_month ;
   undef %contributing_all_users_per_month ;
 
+  # log edits per user per namespace for this article, to be aggregated later 
   if (! $prescan)
   {
     # also log edit count for first 28 days of months (could be zero), so that normalized monthly activity (regardless of length of month) becomes feasible
-    foreach $edits_user_month (sort keys  %edits_user_month_article)
-    { print EDITS_USER_MONTH_ARTICLE "$edits_user_month," . $edits_user_month_article {$edits_user_month} . "," . ($edits_user_month_article_28 {$edits_user_month}+0)  . "\n" ; }
+    foreach my $key (sort keys  %edits_user_month_namespace)
+    { print EDITS_USER_MONTH_NAMESPACE_LOG "$key," . $edits_user_month_namespace {$key} . "," . ($edits_user_month_namespace_28 {$key}+0)  . "\n" ; }
   }
 
   if ($use_tie)
@@ -1105,6 +1120,8 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
 
 sub ReadInputXmlRevision
 {
+  my $namespace = shift ;
+
   $revisions_read ++ ;
 
   if ($filesizelarge && ($revisions_read % 100000 == 0))
@@ -1124,7 +1141,7 @@ sub ReadInputXmlRevision
     &LogT ("\n\nParsing since " . ddhhmmss (time - $timestart_parse). ". Pages read: ${pages_read2}k. Revisions read: ${revisions_read2}k. Per hour $revs_per_hour/hr. Parse duration ~ $hours_total_for_run hrs, $hours_to_go_for_run hrs to go\n") ;
   }
 
-  my ($time, $article, $contributor, $user, $user_id, $sha1, $comment) ;
+  my ($time, $article, $contributor, $user, $userid, $sha1, $comment) ;
 
   &XmlReadUntil ('<timestamp>') ;
   $timestamp = $line ;
@@ -1135,18 +1152,18 @@ sub ReadInputXmlRevision
   $contributor = &XmlReadBetween ('contributor') ;
 
   $user = '?' ;
-  $user_id   = '?' ;
+  $userid = '?' ;
 
   if ($contributor =~ /<username>(.*)<\/username>/)
   { $user = $1 ; }
   if ($contributor =~ /<id>(.*)<\/id>/)
-  { $user_id = $1 ; }
+  { $userid = $1 ; }
   if ($contributor =~ /<ip>(.*)<\/ip>/)
   { $user = $1 ; }
-  # print "\n\nContributor\nId $user_id User '$user'\n" ;
+  # print "\n\nContributor\nId $userid User '$user'\n" ;
 
-  if (($user eq '?') && ($user_id eq '?'))
-  { &Log2 ("\n\nTimestamp $timestamp:\nTitle '$title':\nNo user info retrieved from contributor element:\n'$contributor'\n\n") ; }
+  if (($user eq '?') && ($userid eq '?'))
+  { &LogQ ("\n\nTimestamp $timestamp:\nTitle '$title':\nNo user info retrieved from contributor element:\n'$contributor'\n\n") ; }
 
   &XmlReadUntil ('(?:<text |<comment)') ;
 
@@ -1176,9 +1193,9 @@ sub ReadInputXmlRevision
       $article .= $line ;
       if ((++$loop_cycles % 1000 == 0) && (length ($article) > 10000000)) # is 'length ($article)' costly at huge strings ?
       {
-        &Log2 ('*' x 80 . "\nArticle $title, time $time, user $user, userid $userid, pageid $pageid\n$article") ;
+        &LogQ ('*' x 80 . "\nArticle $title, time $time, user $user, userid $userid, userseqno $userseqno, pageid $pageid\n$article") ;
         $article = '' ; # contain memory leak
-        # &abort ("Article $title, time $time, user $user, userid $userid, pageid $pageid, exceeds 10 million bytes. No good, aborting") ; # Q&D: better to skip to start of next article
+        # &abort ("Article $title, time $time, user $user, userseqno $userseqno, pageid $pageid, exceeds 10 million bytes. No good, aborting") ; # Q&D: better to skip to start of next article
       }
     }
 
@@ -1186,9 +1203,12 @@ sub ReadInputXmlRevision
     $totsize_revisions += length ($article) ;
   }
 
-  &XmlReadUntil ('<sha1>') ;
-  ($sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ;
-
+  &XmlReadUntil ('<sha1') ;
+  if ($line !~ /<\/sha1>/)
+  { $sha1 = 0 ; }
+  else
+  { ($sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ; }
+        
   my $month = substr ($time,0,6) ;
 # @contributing_all_users_per_month {"$month-$user"}++ ;
   my $date  = substr ($time,0,8) ;
@@ -1244,12 +1264,15 @@ sub ReadInputXmlRevision
   if ($sha1 eq '')
   { &Log ("$article $time: sha1 not found\n") ; }
 
-  return ($article, $time, $user, $usertype, $comment, $sha1) ;
+  return ($article, $time, $user, $userid, $usertype, $comment, $sha1) ;
 }
 
 sub DetectReverts
 {
   my ($namespace, $time, $user, $usertype, $comment, $sha1) = @_ ;
+
+  return if $sha1 == 0 ; # no checksum: dump contains <sha1 />
+
   my ($prev_revert,$prev_namespace,$prev_title,$prev_time,$prev_edits_ago,$prev_usertype,$prev_user,$prev_comment) ;
 
 my $start_process_sha1b = code_started() if $record_time_process_sha1 ;
@@ -1460,8 +1483,8 @@ sub WriteRevertsSample
 
 sub ProcessRevision
 {
-  my ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $time, $usertype) = @_ ;
-  # print DEBUG_EVENTS "EVENT 0 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+  my ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $userid, $time, $usertype) = @_ ;
+  # print DEBUG_EVENTS "EVENT 0 $title $time (pageid $pageid) [$article_type] $user $userseqno\n" ;
 
   $booktitle = "" ;
 
@@ -1509,13 +1532,13 @@ my $start_process_revision2 = code_started() if $record_time_process_revision_ma
     { $user = "an.on.ym.ous" ; }
   }
 
-  $userid = &GetUserData ($user, $useritem_id) ; # may invoke PutUserData first to create new user record
+  $userseqno = &GetUserData ($user, $useritem_id) ; # may invoke PutUserData first to create new user record
 
   $revision_is_redirect = $false ;
   $article_type = '-' ;
   if (&NameSpaceArticle ($language, $namespace)) # strategy
   {
-    ($revision_is_redirect, $article_type) = &CollectArticleCounts ($current_revision, $namespace, $pageid, $article, $user, $userid) ;
+    ($revision_is_redirect, $article_type) = &CollectArticleCounts ($current_revision, $namespace, $pageid, $article, $user, $userseqno) ;
 
 
     $yymm  = sprintf ("%02d%02d", $year - 2000, $month, ) ;
@@ -1564,7 +1587,7 @@ code_complete ("ProcessRevision3", $start_process_revision3) if $record_time_pro
 my $start_process_revision4 = code_started() if $record_time_process_revision_main ;
 
   if (! $prescan)
-  { &CollectUserCounts ($namespace, $user, $title, $revision_is_redirect, $time_gm, $usertype) ; }
+  { &CollectUserCounts ($namespace, $user, $userid, $title, $revision_is_redirect, $time_gm, $usertype) ; }
 
 code_complete ("ProcessRevision4", $start_process_revision4) if $record_time_process_revision_main ;
 
@@ -1573,7 +1596,7 @@ code_complete ("ProcessRevision4", $start_process_revision4) if $record_time_pro
 
 sub CollectUserCounts
 {
-  my ($namespace, $user, $title, $revision_is_redirect, $time, $usertype) = @_ ;
+  my ($namespace, $user, $userid, $title, $revision_is_redirect, $time, $usertype) = @_ ;
   my ($namespace2, $user2) ;
 
   my ($day,$month, $year) = (localtime ($time))[3,4,5] ;
@@ -1586,9 +1609,9 @@ sub CollectUserCounts
   ($title2 = $title) =~ s/,/&comma;/g ;
   $namespace2 = sprintf ("%03d", $namespace) ;
 
-  $edits_user_month_article {"$user2,$yyyymm,$namespace2"}++ ;
+  $edits_user_month_namespace {"$user2,$userid,$yyyymm,$namespace2"}++ ;
   if ($day <= 28)
-  { $edits_user_month_article_28 {"$user2,$yyyymm,$namespace2"}++ ; }
+  { $edits_user_month_namespace_28 {"$user2,$userid,$yyyymm,$namespace2"}++ ; }
 
   if (&NameSpaceArticle ($language, $namespace)) # strategy
   { $edits_total_namespace_a ++ ; }
@@ -1789,7 +1812,7 @@ sub CollectArticleCounts
   my $pageid    = shift ;
   my $article   = shift ;
   my $user      = shift ;
-  my $userid    = shift ;
+  my $userseqno    = shift ;
   my $time      = $time_gm ;
   my $revision_is_redirect = $false ;
   my $event ;
@@ -1817,8 +1840,8 @@ sub CollectArticleCounts
     
     $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb (0) . &i2bbbb (0) .
              &i2bb (0) . &i2b (0) . &i2b (0) . &i2b (0) . &i2b (0) .
-             &i2bbb (0) . &i2bbbb ($userid) . "\n" ;
-    # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) $article_type $user $userid\n" ;
+             &i2bbb (0) . &i2bbbb ($userseqno) . "\n" ;
+    # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) $article_type $user $userseqno\n" ;
     &WriteEvent ($event, $pageid, $time) ;
     $length_line_event = length ($event) ;
 
@@ -1840,7 +1863,7 @@ sub CollectArticleCounts
   $categorylinks = 0 ;
   $externallinks = 0 ;
 
-  # print DEBUG_EVENTS "EVENT 1 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+  # print DEBUG_EVENTS "EVENT 1 $title $time (pageid $pageid) [$article_type] $user $userseqno\n" ;
   if (! $skip_counts)
   {
     # see http://svn.wikimedia.org/viewvc/mediawiki/trunk/phase3/includes/Title.php?view=markup
@@ -2061,7 +2084,7 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
 
       # maximize values so that they fit into assigned byte space
       # theoretically this may not be enough for a tiny tiny fraction of counts
-      # for the foreseeing future this is acceptable (sub 0.1% error)
+      # for the foreseeing future this is acceptable (less than 0.1% error)
       # minimizing memory usage weighs higher
       if ($wikilinks     > $bhi)  {$wikilinks     = $bhi ; }  # max 127
       if ($imagelinks    > $bhi)  {$imagelinks    = $bhi ; }  # max 127
@@ -2076,7 +2099,7 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
     }
   }
 
-  my $userid2 = $userid ;
+  my $userseqno2 = $userseqno ;
 
   die ("\nOverflow: page id \$pageid can not be packed in 4 bytes!") if ($pageid > $b4hi) ;
   die ("\nOverflow: size \$size can not be packed in 4 bytes!") if ($size > $b4hi) ; # $size2 < $size
@@ -2099,7 +2122,7 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
 #  &i2b ($categorylinks) .    22,1
 #  &i2b ($externallinks) .    23,1
 #  &i2bbb ($words) .          24,3
-#  &i2bbbb ($userid) ;        27,4
+#  &i2bbbb ($userseqno) ;        27,4
 # reclen = 32
 
 # if ($booktitle ne "")
@@ -2115,15 +2138,15 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
       }
     }
 
-    if (($userid % 2) == 0) # reg. user ?
+    if (($userseqno % 2) == 0) # reg. user ?
     {
       $authors = $book_authors {$booktitle} ;
-      if ($authors =~ /\{$userid\}/)
-      { $authors =~ s/\{$userid\}\[(\d+)\]/"\{$userid\}\[".($1+1)."\]"/e ; }
+      if ($authors =~ /\{$userseqno\}/)
+      { $authors =~ s/\{$userseqno\}\[(\d+)\]/"\{$userseqno\}\[".($1+1)."\]"/e ; }
       else
-      { $authors .= "\{$userid\}[1]" }
+      { $authors .= "\{$userseqno\}[1]" }
       $book_authors {$booktitle} = $authors ;
-      # print "$booktitle:$userid -> $authors\n" ;
+      # print "$booktitle:$userseqno -> $authors\n" ;
     }
   }
 
@@ -2137,24 +2160,26 @@ code_complete ("CollectArticleCounts3", $start_collect_articlecounts3) if $recor
   if ($language eq 'wikidata') # count all pages
   { $article_type = '+' ; }
 
+  $bytes_raw_event = length ("$pageid $time $article_type $size $size2 $links $wikilinks $imagelinks $categorylinks $externallinks $words $userseqno2\n") ;
+
   $event = &i2bbbb ($pageid) . &t2bbbbb ($time) . $article_type . &i2bbbb ($size) . &i2bbbb ($size2) .
            &i2bb ($links) . &i2b ($wikilinks) . &i2b ($imagelinks) . &i2b ($categorylinks) . &i2b ($externallinks) .
-           &i2bbb ($words) . &i2bbbb ($userid2) . "\n" ;
+           &i2bbb ($words) . &i2bbbb ($userseqno2) . "\n" ;
   $length_line_event = length ($event) ;
 
-  # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) [$article_type] $user $userid\n" ;
+  # print DEBUG_EVENTS "EVENT 2 $title $time (pageid $pageid) [$article_type] $user $userseqno\n" ;
 
   if ($skip_counts)
   {
     $revision_is_redirect = $revision_is_redirect_prev ;
     $event    = $event_prev ;
     substr ($event, 4,5) = &t2bbbbb ($time) ;
-    substr ($event,27,4) = &i2bbbb ($userid2) ;
+    substr ($event,27,4) = &i2bbbb ($userseqno2) ;
   }
   $revision_is_redirect_prev = $revision_is_redirect ;
   $event_prev    = $event ;
 
-  &WriteEvent ($event, $pageid, $time) ;
+  &WriteEvent ($event, $pageid, $time, $bytes_raw_event) ;
   code_complete ("CollectArticleCounts4", $start_collect_articlecounts4) if $record_time_collect_article_counts ;
 
   return ($revision_is_redirect, $article_type) ;
@@ -2166,6 +2191,7 @@ sub WriteEvent
   my $event = shift ;
   my $pageid = shift ;
   my $time  = shift ;
+  my $bytes_raw_event = shift ;
 
   $tot_events++ ;
 
@@ -2180,7 +2206,7 @@ sub WriteEvent
 #      $words       = &bbb2i  (substr ($event,20,2)) ;
 #      @Count {$count} += $size ;
 #      @Count2 {$count} += $size2 ;
-#  &Log2 ("$month/$year Page id $pageid Index $pageid Count $count Size $size $size2 Links $links Int $wiki_links Img $image_links Ext $ext_links Words $words\n") ;
+#  &LogQ ("$month/$year Page id $pageid Index $pageid Count $count Size $size $size2 Links $links Int $wiki_links Img $image_links Ext $ext_links Words $words\n") ;
 
   $pageid = int ($pageid/10000) ;
 
@@ -2218,8 +2244,8 @@ sub WriteEvent
   print {$file_events_article} $event ;
 
   # return now for anonymous users
-  my $user_id = &bbbb2i  (substr ($event,27,4)) ;
-  if (($user_id % 2) == 1) # IP address ?
+  my $user_seqno = &bbbb2i  (substr ($event,27,4)) ;
+  if (($user_seqno % 2) == 1) # IP address ?
   { return ; }
 
   (my $month, my $year) = (localtime ($time))[4,5] ;
@@ -2235,6 +2261,9 @@ sub WriteEvent
     binmode ($file_events_month) ;
   }
   print {$file_events_month} $event ;
+
+  $total_bytes_raw_events        += $bytes_raw_event ;
+  $total_bytes_compressed_events += length ($event) ;
 }
 
 sub ReadFileCsv
@@ -2673,12 +2702,12 @@ sub ProcessSqlBlockComplete
 
       # restore quotes
       $user   =~ s^\#\*\$\@^'^g ;
-      $userid = $users {$user} ;
-      if (! defined ($userid))
+      $userseqno = $users {$user} ;
+      if (! defined ($userseqno))
       {
-        $userid = ++ $cnt_users ;
-        $users {$user} = $userid ;
-        $users_id {$userid} = $user ;
+        $userseqno = ++ $cnt_users ;
+        $users {$user} = $userseqno ;
+        $users_id {$userseqno} = $user ;
       }
     }
 
@@ -2746,7 +2775,7 @@ sub ProcessSqlBlockComplete
 #        }
 #        if ($article =~ /historyblobstub/)
 #        {
-#          # &Log2 ("\n$title $namespace Time $time ($time_gm) Recid $recid 1\n") ;
+#          # &LogQ ("\n$title $namespace Time $time ($time_gm) Recid $recid 1\n") ;
 
 #          if ($time_gm > $dumpdate_gm_hi) { next ; }
 
@@ -2754,7 +2783,7 @@ sub ProcessSqlBlockComplete
 #          $oldid = $1 ;
 #          $hash  = $2 ;
 #          # example: 'O:15:"historyblobstub":2:{s:6:"mOldId";s:5:"11205";s:5:"mHash";s:32:"624ebe6d9cfd68ab70664d3a92356ed1";}'
-#          my $line = sprintf("%2d-", $namespace) . sprintf ("%12d-", $oldid) . "$hash-" . sprintf("%10d", $time_gm) . "-" . &i2bbbb ($userid) . "\n" ;
+#          my $line = sprintf("%2d-", $namespace) . sprintf ("%12d-", $oldid) . "$hash-" . sprintf("%10d", $time_gm) . "-" . &i2bbbb ($userseqno) . "\n" ;
 #          print OLD_EVENTS $line ;
 #          $length_line_old_events = length ($line) ;
 #          $cnt_file_old_events++ ;
@@ -2762,7 +2791,7 @@ sub ProcessSqlBlockComplete
 #        }
 #        elsif ($article =~ /concatenatedgziphistoryblob/)
 #        {
-#        # &Log2 ("\n$title $namespace Time $time ($time_gm) Recid $recid 2\n") ;
+#        # &LogQ ("\n$title $namespace Time $time ($time_gm) Recid $recid 2\n") ;
 #        # example: 'O:27:"concatenatedgziphistoryblob":4:{s:8:"mVersion";i:0;s:11:"mCompressed";b:1;s:6:"mItems";s:380:"{compressed data follows}";s:12:"mDefaultHash";s:32:"4022db7a66758388aea6e875b2f2ae7a";}'
 
 #          # get length of compressed section
@@ -2807,7 +2836,7 @@ sub ProcessSqlBlockComplete
 #            $inflated =~ s/^s:32:"(\w{32,32})";s:(\d+):"// ;
 #            $article = substr ($inflated,0, $len) ;
 #            $inflated = substr ($inflated, $len+2) ;
-#            # &Log2 ("RecId $recid Hash $hash Len $len Article " . substr ($article,0,20) . "\n") ;
+#            # &LogQ ("RecId $recid Hash $hash Len $len Article " . substr ($article,0,20) . "\n") ;
 
 #            # hash_default points to revision that originaly belonged in this entry
 #            # store others for later matching with proper user/timestamp
@@ -3001,10 +3030,13 @@ sub TraceFlaggedRevs
           }
         }
         
-	&XmlReadUntil ('<sha1>') ;
-        ($chk_sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ;
-
-        &XmlReadUntil ('(?:<revision>|<\/page>)') ;
+        &XmlReadUntil ('<sha1') ;
+	if ($line !~ /<\/sha1>/)
+	{ $sha1 = 0 ; }
+	else
+	{ ($sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ; }
+        
+	&XmlReadUntil ('(?:<revision>|<\/page>)') ;
       }
     }
 
@@ -3043,6 +3075,8 @@ sub GetNextReview
 
 sub GetContentNamespaces
 {
+  undef %content_namespace ;
+  
   if (! $base_content_namespaces_on_api)
   {  
     &LogT ("Use fixed namespaces for counting, not namespaces collected via api\n\n") ; 
@@ -3051,96 +3085,94 @@ sub GetContentNamespaces
   &LogT ("GetContentNamespaces\n") ;
   	
   my ($mode,$language) = @_ ;
+
+  if (($mode eq '') || ($language eq ''))
+  { abort "GetContentNamespaces: invalid arguments mode '$mode' language '$language'" ; } 
+
   my $project ;
 
 # disable code to use api directly, always read namespaces from file
-if (0)
-{
-  if    ($mode eq 'wb') { $project = 'wikibooks' ; }
-  elsif ($mode eq 'wk') { $project = 'wiktionary' ; }
-  elsif ($mode eq 'wn') { $project = 'wikinews' ; }
-  elsif ($mode eq 'wo') { $project = 'wikivoyage' ; }
-  elsif ($mode eq 'wp') { $project = 'wikipedia' ; }
-  elsif ($mode eq 'wq') { $project = 'wikiquote' ; }
-  elsif ($mode eq 'ws') { $project = 'wikisource' ; }
-  elsif ($mode eq 'wv') { $project = 'wikiversity' ; }
-  elsif ($mode eq 'wx') {
-                          if ($language eq 'species')
-                          { $project = 'wikipedia' ; }
-                          else
-                          { $project = 'wikimedia' ; }
-                        }
-  elsif ($mode eq 'wm') { return ; }
-  else                  { abort "GetContentNamespaces: invalid mode $mode" ; }
-  
-  my $url = "http://$language.$project.org/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
-  # &LogT ("\n\nFetch $url'\n\n") ;
-  print "$url\n" ;
+# if (0)
+# {
+# if    ($mode eq 'wb') { $project = 'wikibooks' ; }
+# elsif ($mode eq 'wk') { $project = 'wiktionary' ; }
+# elsif ($mode eq 'wn') { $project = 'wikinews' ; }
+# elsif ($mode eq 'wo') { $project = 'wikivoyage' ; }
+# elsif ($mode eq 'wp') { $project = 'wikipedia' ; }
+# elsif ($mode eq 'wq') { $project = 'wikiquote' ; }
+# elsif ($mode eq 'ws') { $project = 'wikisource' ; }
+# elsif ($mode eq 'wv') { $project = 'wikiversity' ; }
+# elsif ($mode eq 'wx') {
+#                         if ($language eq 'species')
+#                         { $project = 'wikipedia' ; }
+#                         else
+#                         { $project = 'wikimedia' ; }
+#                       }
+# elsif ($mode eq 'wm') { return ; }
+# else                  { abort "GetContentNamespaces: invalid mode $mode" ; }
+# 
+# my $url = "http://$language.$project.org/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
+# # &LogT ("\n\nFetch $url'\n\n") ;
+# &LogT ("$url\n") ;
 
-  my $content_namespaces ;
-  my $content = &FetchWebPage ($url) ;
+# my $content_namespaces ;
+# my $content = &FetchWebPage ($url) ;
 
-  if ($content ne '')
-  {
-    my @lines = split ("\n", $content) ;
-    my $content_namespaces ;
-    foreach $line (@lines)
-    {
-      next if $line !~ /ns id=/ ;
-      next if $line !~ /content=''/ ;
-      ($id = $line) =~ s/^.*?id='(\d+)'.*$/$1/ ;
-      $content_namespaces .= "$id|" ;
-      $content_namespace {$id} = $true ;
-    }
+# if ($content ne '')
+# {
+#   my @lines = split ("\n", $content) ;
+#   my $content_namespaces ;
+#   foreach $line (@lines)
+#   {
+#     next if $line !~ /ns id=/ ;
+#     next if $line !~ /content=''/ ;
+#     ($id = $line) =~ s/^.*?id='(\d+)'.*$/$1/ ;
+#     $content_namespaces .= "$id|" ;
+#     $content_namespace {$id} = $true ;
+#   }
 
-    $content_namespaces_api = $content_namespaces ;
+#   $content_namespaces_api = $content_namespaces ;
 
-    if ($content_namespaces eq '')
-    {
-      $content_namespaces = "0" ;
-      &LogT ("No countable namespaces found via API! Assume namespace 0 is only countable namespace.") ;
-    }
-    # force extra content namespaces which may not have been defined in api, but always were countable
-    if ($project eq 'wikisource')
-    {  
-      if ($content_namespaces !~ /102/)
-      { $content_namespaces   .= "\|102" ; }
-      if ($content_namespaces !~ /104/)
-      { $content_namespaces   .= "\|104" ; }
-      if ($content_namespaces !~ /106/)
-      { $content_namespaces   .= "\|106" ; }
-    }
-    if ($project eq 'wikispecial')
-    {  
-      if ($language eq 'strategy')
-      {
-        if ($content_namespaces !~ /106/)
-        { $content_namespaces   .= "\|106" ; }
-      }
-      if ($language eq 'commons')
-      {
-        if ($content_namespaces !~ /6/)
-	{ $content_namespaces   .= "\|6" ; }
-        if ($content_namespaces !~ /14/)
-	{ $content_namespaces   .= "\|14" ; }
-      }
-    }
+#   if ($content_namespaces eq '')
+#   {
+#     $content_namespaces = "0" ;
+#     &LogT ("No countable namespaces found via API! Assume namespace 0 is only countable namespace.") ;
+#   }
+#   # force extra content namespaces which may not have been defined in api, but always were countable
+#   if ($project eq 'wikisource')
+#   {  
+#     if ($content_namespaces !~ /102/) { $content_namespaces   .= "\|102" ; }
+#     if ($content_namespaces !~ /104/) { $content_namespaces   .= "\|104" ; }
+#     if ($content_namespaces !~ /106/) { $content_namespaces   .= "\|106" ; }
+#   }
+#   if ($project eq 'wikispecial')
+#   {  
+#     if ($language eq 'strategy')
+#     { if ($content_namespaces !~ /106/) { $content_namespaces   .= "\|106" ; } }
 
-    if ($content_namespaces ne $content_namespaces_api)
-    { &LogT ("Content namespaces patched: $content_namespaces_api -> $content_namespaces\n") ; }
+#     if ($language eq 'commons')
+#     {
+#       if ($content_namespaces !~ /6/)   { $content_namespaces   .= "\|6" ; }
+#       if ($content_namespaces !~ /14/)  { $content_namespaces   .= "\|14" ; }
+#     }
+#   }
 
-    $content_namespaces =~ s/\|$// ;
-    # &LogT ("Content namespaces for language $language: $content_namespaces\n") ;
+#   if ($content_namespaces ne $content_namespaces_api)
+#   { &LogT ("Content namespaces patched: $content_namespaces_api -> $content_namespaces\n") ; }
 
-    &ReadFileCsv ($file_csv_content_namespaces) ;
-    push @csv, "$language,$content_namespaces" ;
-    &WriteFileCsv ($file_csv_content_namespaces) ;
-  }
-}  
+#   $content_namespaces =~ s/\|$// ;
+#   # &LogT ("Content namespaces for language $language: $content_namespaces\n") ;
+
+#   &ReadFileCsv ($file_csv_content_namespaces) ;
+#   push @csv, "$language,$content_namespaces" ;
+#   &WriteFileCsv ($file_csv_content_namespaces) ;
+# }
+# }  
 # else
 # {
+  
     if (! -e $file_csv_content_namespaces)
-    { abort ("Namespaces file not found: '$file_csv_content_namespaces'. Run 'collect_countable_namespaces.sh'\n") ; }
+    { abort ("Namespaces file not found: '$file_csv_content_namespaces'.\n>> Run 'collect_countable_namespaces.sh' <<") ; }
 
     my $language2 = $language ;
     $language2 =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
@@ -3168,8 +3200,11 @@ if (0)
       &LogT ("Content namespaces for language $language: " . join (',', sort keys %content_namespace) . "\n") ;
     }
     else
-    { abort("No entry found in namespaces file '$file_csv_content_namespaces' for $mode $language. Run 'collect_countable_namespaces.sh'\n") ; }
+    { abort("No entry found in namespaces file '$file_csv_content_namespaces' for project '$mode' language '$language2'.\n>> Run 'collect_countable_namespaces.sh' <<\n" .
+	    "If that doesn't help manually add line with just namespace 0 in namespaces file, or remove obsolete '../csv/csv_$mode/EditsPerUserPerMonthPerNamespaceXXX.csv (where XXX is language code)\n") ; }
 # }
+
+  $namespaces_initialized = $true ;
 }
 
 sub FetchWebPage
