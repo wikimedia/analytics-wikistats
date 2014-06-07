@@ -1,12 +1,5 @@
 #!/usr/bin/perl
 
-# for country reports fix:
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46205   fixed
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46267
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46277
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46289
-
-# -v -q 2012q3 -c -i "w:/# out stat1/squid/csv" -o "w:/# out test/squid/reports" -l . -a "w:/# out stat1/squid/csv/meta"
   $| = 1; # Flush output
 
   use SquidReportArchiveConfig ;
@@ -22,96 +15,55 @@
   $ratio_sqrt   = $true ;
   $ratio_linear = $false ;
 
-  getopt ("dmaqiolx", \%options) ;
+  getopt ("dmq", \%options) ;
 
   undef %country_code_not_specified_reported ;
 
-  $path_csv     = $options {"i"} ;
-  $path_reports = $options {"o"} ;
-  $path_log     = $options {"l"} ;
-  $path_meta    = $options {"a"} ; # m already taken, a for 'about' ~ 'meta'
-  $sample_rate  = $options {"x"} ;
+  $path_csv     = $job_runs_on_production_server ? $cfg_path_csv     : $cfg_path_csv_test ;
+  $path_reports = $job_runs_on_production_server ? $cfg_path_reports : $cfg_path_reports_test ;
+  $path_log     = $job_runs_on_production_server ? $cfg_path_log     : $cfg_path_log_test ;
 
-  print "sample rate $sample_rate\n" ;
-
-  die ("Specify input folder as -i [..]")   if not defined $path_csv ;
-  die ("Specify output folder as -i [..]")  if not defined $path_reports ;
-  die ("Specify log folder as -i [..]")     if not defined $path_log ;
-  die ("Specify meta folder as -a [..]")    if not defined $path_meta ;
-  die ("Specify sample rate -x [..]")       if not defined $sample_rate ;
-
-  die ("Input folder not found")      if ! -d $path_csv ;
-  die ("Output folder not found")     if ! -d $path_reports ;
-  die ("Log folder not found")        if ! -d $path_log ;
-  die ("Meta folder not found")       if ! -d $path_meta ;
-  die ("Specify numeric sample rate") if $sample_rate !~ /^\d+$/ ; 
-
-# $job_runs_on_production_server ? $cfg_path_csv     : $cfg_path_csv_test ;
-# $path_reports = $job_runs_on_production_server ? $cfg_path_reports : $cfg_path_reports_test ;
-# $path_log     = $job_runs_on_production_server ? $cfg_path_log     : $cfg_path_log_test ;
-
-  &LogDetail ("Path csv     = $path_csv\n") ;
-  &LogDetail ("Path reports = $path_reports\n") ;
-  &LogDetail ("Path log     = $path_log\n") ;
-  &LogDetail ("Path meta    = $path_meta\n") ;
+  &Log ("Path csv     = $path_csv\n") ;
+  &Log ("Path reports = $path_reports\n") ;
+  &Log ("Path log     = $path_log\n") ;
 
 # following test needs to change -> remove server name dependency (new run argument ?)
 # elsif ($hostname eq 'bayes')
 # {
-#   &LogDetail ("\n\nJob runs on server $hostname\n\n") ;
+#   &Log ("\n\nJob runs on server $hostname\n\n") ;
 #   $path_csv  = "/home/ezachte/wikistats/animation" ;
 #   $path_reports = "/home/ezachte/wikistats/animation" ;
 # }
 
   $file_csv_country_meta_info = "SquidReportCountryMetaInfo.csv" ;
 
-  $reports_set_basic     = 0 ;
-  $reports_set_countries = 1 ;
-
   # periodically harvest updated metrics from
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_population'
   # 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'
   if (defined ($options {"w"}))
   {
-    use LWP::Simple qw($ua get);
-    $ua->agent('Wikipedia Wikicounts job');
-    $ua->timeout(60);
-
-    &ReadWikipediaCountriesByPopulation ;
-    &ReadWikipediaCountriesByInternetUsers ;
-
-    &LogSub ("Ready\n\n") ;
+    &ReadWikipedia ;
+    &Log ("\n\nReady\n\n") ;
     exit ;
   }
   elsif (defined ($options {"c"}))
   {
     $reportcountries = $true ;
-    &LogSub ("Generate report per country\n\n") ;
+    &Log ("\nGenerate report per country\n\n") ;
 
     if (defined ($options {"q"}))
     {
-      $quarter_only = uc ($options {"q"}) ;  # process for this quarter only
+      $quarter_only = $options {"q"} ;  # process for this quarter only
       if ($quarter_only !~ /^2\d\d\dQ\d$/)
       { abort ("Specify run for one single quarter as -q yyyyQ[1-4], e.g. -q 2011Q3, not '$quarter_only'\n") ; }
       $quarter_only =~ s/^(\d\d\d\d)(Q\d)$/$1 $2/ ;
-      &LogDetail ("\nRun for one quarter only: $quarter_only\n\n") ;
+      &Log ("\nRun for one quarter only: $quarter_only\n\n") ;
     }
-    else
-    {
-      if (! defined ($options {"m"}))
-      { &LogDetail ("Specify month as -m yyyy-mm") ; exit ; }
-    
-      if ($options {"m"} !~ /^\d\d\d\d-\d\d$/) 
-      { &LogDetail ("Specify month as -m yyyy-mm") ; exit ; }
-
-      $reportmonth = $options {"m"} ;
-      &LogDetail ("Report month = $reportmonth\n") ;
-    }  
   }
   elsif (defined ($options {"m"}) || defined ($options {"d"}))
   {
     if (($options {"m"} !~ /^\d\d\d\d-\d\d$/) && ($options {"d"} !~ /^-\d+$/))
-    { &LogDetail ("Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)") ; exit ; }
+    { &Log ("Specify month as -m yyyy-mm or days back as -d -[days] (e.g. -d -1 for yesterday)") ; exit ; }
 
     $reportdaysback  = $options {"d"} ;
     $reportmonth     = $options {"m"} ;
@@ -122,9 +74,9 @@
       $reportmonth = sprintf ("%04d-%02d",$year+1900,$month+1) ;
     }
 
-    &LogDetail ("Report month = $reportmonth\n") ;
+    &Log ("Report month = $reportmonth\n") ;
   }
-  else { &LogDetail ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
+  else { &Log ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
 
 
   # date range used to be read from csv file with ReadDate, now there are daily csv files
@@ -138,9 +90,9 @@
   elsif ($reportcountries)
   { $path_reports = "$path_reports/countries" ; }
 
-  &LogDetail ("Write report to $path_reports\n") ;
+  print "Write report to $path_reports\n" ;
 
-  if (! $os_windows)
+  if (! $os_windows)      
   { $path_reports =~ s/ /-/g ; }
 
   if (! -d $path_reports)
@@ -151,9 +103,7 @@
 
   &InitProjectNames ;
 
-  &ReadInputRegionCodes ;
   &ReadInputCountriesNames ;
-  &ReadInputCountriesMeta ;
 
   if ($reportcountries)
   {
@@ -170,10 +120,9 @@
     }
 
     if (defined ($options {"e"})) # edits == saves
-    { &ReportCountries ('Saves',$sample_rate); }
+    { &ReportCountries ('Saves'); }
     if (defined ($options {"v"})) # views
-    { &ReportCountries ('Views',$sample_rate); }
-
+    { &ReportCountries ('Views'); }
 
     exit ;
   }
@@ -191,7 +140,7 @@
   $file_html_methods      = "SquidReportMethods.htm" ;
   $file_html_origins      = "SquidReportOrigins.htm" ;
   $file_html_opsys        = "SquidReportOperatingSystems.htm" ;
-# $file_html_opsys_html   = "SquidReportOperatingSystemsHtmlOnly.htm" ;
+  $file_html_opsys_html   = "SquidReportOperatingSystemsHtmlOnly.htm" ;
   $file_html_scripts      = "SquidReportScripts.htm" ;
   $file_html_skins        = "SquidReportSkins.htm" ;
   $file_html_user_agents  = "SquidReportUserAgents.htm" ;
@@ -200,11 +149,11 @@
   $file_html_requests     = "SquidReportRequests.htm" ;
   $file_html_google       = "SquidReportGoogle.htm" ;
   $file_html_clients      = "SquidReportClients.htm" ;
-# $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
+  $file_html_clients_html = "SquidReportClientsHtmlOnly.htm" ;
   $file_html_countries_info = "SquidReportCountryData.htm" ;
   $file_html_countries_browser = "SquidReportCountryBrowser.htm" ;
   $file_html_countries_os = "SquidReportCountryOs.htm" ;
-# $file_html_countries_device = "SquidReportCountryDevice.htm" ;
+  $file_html_countries_device = "SquidReportCountryDevice.htm" ;
   $file_html_user_agents_timed = "SquidReportUserAgentsTimed.htm" ;
   $file_html_browsers_timed = "SquidReportBrowsersTimed.htm" ;
   $file_html_devices_timed = "SquidReportDevicesTimed.htm" ;
@@ -241,15 +190,15 @@
   $file_csv_user_agents   = "public/SquidDataUserAgents.csv" ;
   $file_csv_devices       = "public/SquidDataDevices.csv" ;
   $file_csv_countries_info= "public/SquidDataCountriesInfo.csv" ;
-# $file_csv_useragents_time= "SquidDataUserAgentsMonths.csv" ;
+  $file_csv_useragents_time= "SquidDataUserAgentsMonths.csv" ;
 
   $file_csv_countries_languages_visited = "SquidDataCountriesViews.csv" ;
   $file_csv_countries_timed             = "SquidDataCountriesViewsTimed.csv" ;
 
-  &LogDetail ("\n\nJob SquidReportArchive.pl\n\n") ;
+  print "\n\nJob SquidReportArchive.pl\n\n" ;
 
   if (! -d "$path_csv/$reportmonth")
-  { &LogDetail ("Directory not found: $path_csv\/$reportmonth\n") ; exit ; }
+  { print "Directory not found: $path_csv\/$reportmonth\n" ; exit ; }
 
 # for ($month = 4 ; $month <= 10 ; $month ++)
 # {
@@ -269,49 +218,41 @@
           if ($date_first eq "")
           { $date_first = $date ; }
           $date_last = $date ;
-          &LogDetail ("Process dir $dir\n") ;
+          print "Process dir $dir\n" ;
           push @dirs_process, $dir ;
         }
         else
-        { &LogDetail ("Empty or incomplete dir $dir!\n") ; }
+        { print "Empty or incomplete dir $dir!\n" ; }
       }
       else
-      { &LogDetail ("Missing dir $dir!\n") ; }
+      { print "Missing dir $dir!\n" ; }
     }
 # }
   if ($#dirs_process < 0)
-  { &LogDetail ("No valid data to process.\n") ; exit ; }
+  { print "No valid data to process.\n" ; exit ; }
 
   $google_ip_ranges = "<b>IP ranges:</b> known ip ranges for Google are 64.233.[160.0-191.255], 66.249.[64.0-95.255], 66.102.[0.0-15.255], 72.14.[192.0-255.255], <br>74.125.[0.0-255.255], " .
   "209.085.[128.0-255.255], 216.239.[32.0-63.255] and a few minor other subranges</small><p>\n" ;
 
   &OpenLog ;
-  &PrepHtml ($reports_set_basic, $sample_rate) ;
+  &PrepHtml ;
   &SetPeriod ; # now date range derived from which folders found
 
 # &ReadDate ; date range was read from csv file
-  $ShowDevices      = $false ; # disabled on request of Mobile Team
-  $ShowDevicesTimed = $false ; # disabled on request of Mobile Team
+  $ShowDevices = $true ;
 
   foreach $path_process (@dirs_process)
   {
     $days_input_found ++ ;
 
-    &LogDetail ("\nRead input from $path_process\n") ;
+    print "\nRead input from $path_process\n" ;
     &ReadInputClients ;
     &ReadInputCrawlers ;
     &ReadInputMethods ;
     &ReadInputMimeTypes ;
     &ReadInputOpSys ;
-    if ($ShowDevices || $ShowDevicesTimed)
-    { 
-      my $DevicesRead = &ReadInputDevices ;
-      if (! $DevicesRead)
-      {
-        $ShowDevices      = $false ;
-        $ShowDevicesTimed = $false ;	
-      }
-    } 
+    if ($ShowDevices)
+    { $ShowDevices = &ReadInputDevices } ;
     &ReadInputOrigins ;
     &ReadInputScripts ;
     &ReadInputGoogle ;
@@ -327,22 +268,22 @@
 
   if ($days_input_found > 0)
   {
-    &LogDetail ("\nDays input = $days_input_found\n") ;
+    print "\nDays input = $days_input_found\n" ;
     $multiplier = 1 / $days_input_found ;
-    &LogDetail ("\nMultiplier = " . sprintf ("%.4f", $multiplier) . "\n") ;
+    &Log ("\nMultiplier = " . sprintf ("%.4f", $multiplier) . "\n") ;
   }
-  else { &LogDetail ("\nDays input = 0 (zero!)\n") ; }
+  else { &Log ("\nDays input = 0 (zero!)\n") ; }
 
   &WriteCsvCountriesTimed ;
   &WriteCsvCountriesGoTo ;
 
   foreach $key (keys_sorted_alpha_desc %edit_submit)
-  { &LogDetail ("YYY " . sprintf ("%5d", $edit_submit {$key}) . ": $key\n") ; }
+  { print "YYY " . sprintf ("%5d", $edit_submit {$key}) . ": $key\n" ; }
 
   foreach $total (keys_sorted_by_value_num_desc %edit_submits)
-  { &LogDetail ("total $total: ${edit_submits {$total}} \n") ; }
+  { print "total $total: ${edit_submits {$total}} \n" ; }
 
-  &LogDetail ("\n\n") ;
+  print "\n\n" ;
 
   foreach $domain (keys_sorted_by_value_num_desc %edit_submit_bot_sort)
   {
@@ -350,24 +291,24 @@
 
     last if $cnt < 100 ;
 
-    &LogDetail ("DOMAIN $domain total $cnt\n") ;
+    print "DOMAIN $domain total $cnt\n" ;
     foreach $key (sort keys %{$edit_submit_bot {$domain}})
-    { &LogDetail (sprintf ("%5d", $edit_submit_bot {$domain} {$key}) . ": $key\n") ; }
+    { print sprintf ("%5d", $edit_submit_bot {$domain} {$key}) . ": $key\n" ; }
   # { print "$key: ${edit_submit_bot {$domain} {$key}}, " ; }
-    &LogDetail ("\n") ;
+    print "\n" ;
   }
-  &LogDetail ("\n\n") ;
+  print "\n\n" ;
   foreach $agent (keys_sorted_by_value_num_desc %edit_submit_bot_agent_sort)
   {
     $cnt = $edit_submit_bot_agent_sort {$agent} ;
 
     last if $cnt < 25 ;
 
-    &LogDetail ("AGENT $agent total $cnt\n") ;
+    print "AGENT $agent total $cnt\n" ;
     foreach $key (sort keys %{$edit_submit_bot_agent {$agent}})
-    { &LogDetail (sprintf ("%5d", $edit_submit_bot_agent {$agent} {$key}) . ": $key\n") ; }
+    { print sprintf ("%5d", $edit_submit_bot_agent {$agent} {$key}) . ": $key\n" ; }
   # { print "$key: ${edit_submit_bot {$domain} {$key}}, " ; }
-    &LogDetail ("\n") ;
+    print "\n" ;
   }
 
 
@@ -394,8 +335,7 @@
   &WriteReportMethods ;
   &WriteReportMimeTypes ;
   &WriteReportOpSys ;
-  if ($ShowDevices) 
-  { &WriteReportDevices } ;
+  if ($ShowDevices) { &WriteReportDevices } ;
   &WriteReportOrigins ;
   &WriteReportScripts ;
   &WriteReportGoogle ;
@@ -406,8 +346,7 @@
   &WriteReportCountryBrowser ;
   &WriteReportUserAgentsTimed ;
   &WriteReportBrowsersTimed ;
-  if ($ShowDevicesTimed) 
-  { &WriteReportDevicesTimed } ;
+  if ($ShowDevices) { &WriteReportDevicesTimed } ;
   &WriteCsvGoogleBots ;
   &WriteCsvBrowserLanguages;
 
@@ -415,13 +354,13 @@
 # &WriteCsvCountriesTargets ;
   close "FILE_LOG" ;
 
-  &LogDetail ("\nReady\n\n") ;
+  &Log ("\nReady\n\n") ;
   exit ;
 
 sub ReportCountries
 {
-  my ($mode_report,$sample_rate) = @_ ;
-  &LogSub ("ReportCountries $mode_report, sample rate $sample_rate\n") ;
+  my $mode_report = shift ;
+  &Log ("\nReportCountries $mode_report\n\n") ;
 
   if ($mode_report eq 'Views')
   {
@@ -441,7 +380,7 @@ sub ReportCountries
   ($quarter_only2 = $quarter_only) =~ s/ // ;
 
   $file_csv_squid_counts_monthly        = "SquidData${selection2}PerCountryMonthly.csv" ; # LockePrev.csv" ;
-  $file_csv_squid_counts_daily          = "SquidData${selection2}PerCountryPerWikiDaily.csv" ;
+  $file_csv_squid_counts_daily          = "SquidData${selection2}PerCountryDaily.csv" ;
 
   $file_html_per_country_breakdown      = "SquidReport${selection}PerCountryBreakdown.htm" ;
   $file_html_per_country_breakdown_huge = "SquidReport${selection}PerCountryBreakdownHuge.htm" ;
@@ -457,7 +396,7 @@ sub ReportCountries
   if (! -e $path_csv_squid_counts_daily)  { abort ("Input file $path_csv_squid_counts_daily not found!") ; }
 
   &ReadInputCountriesMonthly ($project_mode) ;
-# &ReadInputCountriesDaily   ($project_mode) ;
+  &ReadInputCountriesDaily   ($project_mode) ;
 
   if ($render_svg_input) # undefined = false
   {
@@ -470,10 +409,9 @@ sub ReportCountries
     { &WriteCsvSvgFilePerCountryOverview ($views_edits, $yyyymm, \%requests_per_month_per_country_code, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") } ;
   }
 
-  # input for http://gunn.co.nz/map/, for now hardcoded quarter
-  &WriteCsvFilePerCountryDensity ($views_edits, '2013 Q2', \%requests_per_quarter_per_country, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") ;
+  &WriteCsvFilePerCountryDensity ($views_edits, '2011 Q4', \%requests_per_quarter_per_country, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person") ;
 
-  &PrepHtml ($reports_set_countries, $sample_rate) ;
+  &PrepHtml ;
   &SetPeriod ;
 
 # $comment = "<p>&nbsp;See also: <a href='SquidReportTrafficPerCountry.htm'>Wikipedia $views_edits per Country</a> / <a href='SquidReportLanguagesVisitedDetailed.htm'>Breakdown per Country of Wikipedia's Visited (detailed)</a> / <a href='SquidReportTrafficPerWikipediaOverview.htm'>Breakdown per Wikipedia of Requesting Countries</a>" ;
@@ -493,16 +431,11 @@ sub ReportCountries
   $links = "$links_views\n$links_edits\n" ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Overview" ;
-  &WriteReportPerCountryOverview ($title, $views_edits, &UnLink ($links,$offset_links+1),$sample_rate) ;
+  &WriteReportPerCountryOverview ($title, $views_edits, &UnLink ($links,$offset_links+1)) ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Breakdown" ;
-  if ($sample_rate == 1)
-  { &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 10000, $cutoff_percentage = 0.1, $show_logcount = $false, $sample_rate) ; }
-  else
-  {
-    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 100, $cutoff_percentage =   1, $show_logcount = $false, $sample_rate) ;
-    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, $cutoff_percentage = 0.1, $show_logcount = $true,  $sample_rate) ;
-  }
+  &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 100, $cutoff_percentage =   1, $show_logcount = $false) ;
+  &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, $cutoff_percentage = 0.1, $show_logcount = $true) ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Trends" ;
   &WriteReportPerCountryTrends ($title, $views_edits, &UnLink ($links,$offset_links+3)) ;
@@ -514,9 +447,9 @@ sub ReportCountries
 
 sub ReadDate
 {
-  &LogSub ("ReadDate\n") ;
+  &Log ("ReadDate\n") ;
 
-  &LogDetail ("Read from $path_process/$file_csv_crawlers") ;
+  &Log ("Read from $path_process/$file_csv_crawlers") ;
 
   open  CSV_CRAWLERS, '<', "$path_process/$file_csv_crawlers" ;
   $line = <CSV_CRAWLERS> ;
@@ -545,14 +478,14 @@ sub ReadDate
 
   $timespan   = ($timetill - $timefrom) / 3600 ;
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
-  &LogDetail ("Multiplier = $multiplier\n") ;
+  &Log ("Multiplier = $multiplier\n") ;
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
 }
 
 sub SetPeriod
 {
-  &LogSub ("SetPeriod\n") ;
+  &Log ("SetPeriod\n") ;
 
   $year_first  = substr ($date_first,0,4) ;
   $month_first = substr ($date_first,5,2) ;
@@ -562,8 +495,6 @@ sub SetPeriod
   $month_last  = substr ($date_last,5,2) ;
   $day_last    = substr ($date_last,8,2) ;
 
-  print "date_first $date_first, date_last $date_last\n" ;
-  
   if ($day_first eq '')
   { $day_first = 1 ; }
   if ($day_last eq '')
@@ -578,20 +509,20 @@ sub SetPeriod
   $period = sprintf ("%d %s %d - %d %s %d", $day_first, month_english_short ($month_first-1), $year_first, $day_last, month_english_short ($month_last-1), $year_last) ;
   if ($quarter_only ne '')
   { $period .= " ($quarter_only) " ; }
-# else
-# { $period .= " (last 12 months) " ; }
+  else
+  { $period .= " (last 12 months) " ; }
 
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
 
-  &LogDetail ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n\n") ;
+  &Log ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n\n") ;
 }
 
 sub PrepHtml
 {
-  my ($reports_set,$sample_rate) = @_ ;
+  my ($show_buglist) = @_ ;
 
-  &LogSub ("PrepHtml\n\n") ;
+  &Log ("\nPrepHtml\n\n") ;
 
   $language = "en" ;
   $header = &HtmlHead ;
@@ -601,21 +532,15 @@ sub PrepHtml
 
   $form   = &HtmlForm ;
   $formwithperc = &HtmlFormWithPerc ;
-
-  if ($sample_rate == 1)
-  { $header_sample_rate = "1:1 unsampled" ; }
-  else
-  { $header_sample_rate = "1:$sample_rate sampled" ; }
-
   $header.=  "<body bgcolor='\#FFFFDD'>\n$form\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>NOTICE" ;
+            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids)NOTICE<p>\nALSO, and <a href='#errata'><b>notes about reliability of these data<\/b><\/a><br><br>" ;
 
   $headerwithperc.=  "<body bgcolor='\#FFFFDD'>\n$formwithperc\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>" ;
+            "&nbsp;This analysis is based on a 1:1000 sampled server log (squids)<p>\nALSO, and <a href='#errata'><b>notes about reliability of these data<\/b><\/a><br><br>" ;
 
-  if ($set_reports eq 'country_reports')
+  if ($reportcountries)
   {
     $errata .= "<p><p>&nbsp;<font color=#900000>WMF traffic logging service suffered from server capacity problems from Nov 2009 till July 2010 and again in Aug/Sep/Oct 2011.<br>" .
                "&nbsp;Data loss only occurred during peak hours. It therefore may have had somewhat different impact for traffic from different parts of the world." ;
@@ -631,44 +556,41 @@ sub PrepHtml
     $errata .= "<font color=#900000>In a an unrelated server outage precisely half of traffic to WMF mobile sites was not counted from Oct 16 - Nov 29 (one of two load-balanced servers did not report traffic).<br>" .
                "WMF has since improved server monitoring, so that similar outages should be detected and fixed much faster from now on.</font><p>" ;
   }
-
-  if ($reports_set eq $reports_set_countries)
+  
+  if ($bug_list eq 'countries)
   {
-    $notice = "<p><font color=red>" .
-              "&nbsp;Unresolved Bugzilla bugs: " .
+    $notice = "<p><font color=red>
+              "Known Bugzilla bugs: " . 
               "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=55443'>55443</a>" .
-              "</font><p><font color=green>" .
-               "Recently resolved bugs: " .
-              "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46205'>46205</a> (Aug 2013)" .
-              "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46289'>46289</a> (Nov 2013)" .
-              "</font><p>" ;
+              "</font><p>" ;  	     
   }
   else
-  {
-    $notice = "<font color=red>" .
-            # "<h3>Warning: all recent Wikimedia traffic analysis reports have been generated from old scripts.</h3><p>" .
-	    # "The scripts are orphaned, and have not been maintained for at least 6 months. Many bugs are considerably older.<br></font>" .
-              "&nbsp;Unresolved Bugzilla bugs:</font> " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46190'>46190</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46191'>46191</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46195'>46195</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46201'>46201</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46265'>46265</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46267'>(46267)</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46268'>46268</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46269'>46269</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46271'>46271</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46273'>46273</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46274'>46274</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46275'>46275</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46277'>46277</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46278'>46278</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46279'>46279</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=57376'>57376</a>" .
-              "<p>" ;
+  { 
+    $notice = "<p><h3><font color=red>Warning: all recent Wikimedia traffic analysis reports have been generated from old scripts.</h3><p>" . 
+               "The scripts are orphaned, and have not been maintained for at least 6 months. Many bugs are considerably older.<br></font>" . 
+               "Known Bugzilla bugs: " . 
+  	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46190'>46190</a>, " .
+  	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46191'>46191</a>, " .
+  	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46195'>46195</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46201'>46201</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46205'>46205</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46265'>46265</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46267'>(46267)</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46268'>46268</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46269'>46269</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46271'>46271</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46273'>46273</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46274'>46274</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46275'>46275</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46277'>46277</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46278'>46278</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46279'>46279</a>, " .
+	       "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46289'>46289</a>" .
+	       "<p>" ;  	     
   }
-  $header =~ s/NOTICE/$notice/ ;
 
+  $header =~ s/NOTICE/$notice/ ;
+  
   # to be localized some day like any reports
   $out_explorer     = "<font color=#800000>Note: page may load slower on Microsoft Internet explorer than on other major browsers</font>" ;
   $out_license      = "All data and images on this page are in the public domain." ;
@@ -679,11 +601,11 @@ sub PrepHtml
 
   $out_myname_ez = "Erik Zachte" ;
   $out_myname_ae = "André Engels" ;
-  $out_mymail_ez = "ezachte\@### (no spam: ### = wikimedia.org)" ;
-  $out_mymail_ae = "analytics\@lists.wikimedia.org" ;
+  $out_mymail_ez = "ezachte@### (no spam: ### = wikimedia.org)" ;
+  $out_mymail_ae = "aengels@### (no spam: ### = wikimedia.org)" ;
   $out_mysite_ez = "http://infodisiac.com/" ;
 
-  $colophon_ez = "<p><a id='errata' name='errata'><b>Errata:</b> $errata<p>\n" .
+  $colophon_ez = "<p><a id='errata' name='errata'><b>Errata:</b> $errata<p>" .
                $out_generated . date_time_english (time) . "\n<br>" .
                $out_author . ":" . $out_myname_ez . ' ' .
                " (<a href='" . $out_mysite_ez . "'>" . $out_site . "</a>)<br>" .
@@ -697,7 +619,7 @@ sub PrepHtml
 
   $errata = 'No data loss or anomalies reported' ; # remove when also applicable to André's report (all reports show same text about input anomalies)
 
-  $colophon_ae = "<p><a id='errata' name='errata'><b>Errata:</b> $errata</a><p>\n" .
+  $colophon_ae = "<p><a id='errata' name='errata'><b>Errata:</b> $errata<p>" .
                $out_generated . date_time_english (time) . "\n<br>" .
                $out_author . ":" . $out_myname_ae . '<br>' .
                "$out_mail: $out_mymail_ae<br>\n" .
@@ -707,8 +629,8 @@ sub PrepHtml
                "</body>\n" .
                "</html>\n" ;
 
-  $dummy_requests    = "<font color=#808080>Destination/Mime</font>" ;
-  $dummy_origins     = "<font color=#000060>Origin</font>" ;
+  $dummy_requests    = "Requests <font color=#808080>by destination</font> or " ;
+  $dummy_origins     = "<font color=#000060>by origin</font>" ;
   $dummy_methods     = "<font color=#000060>Methods</font>" ;
   $dummy_scripts     = "<font color=#000060>Scripts</font>" ;
   $dummy_skins       = "<font color=#000060>Skins</font>" ;
@@ -724,10 +646,9 @@ sub PrepHtml
   $dummy_countries_browsers     = "<font color=#000060>Browsers</font>" ;
   $dummy_countries_os           = "<font color=#000060>Operating systems</font>" ;
   $dummy_countries_devices      = "<font color=#000060>Mobile devices</font>" ;
-  $dummy_countries              = "<font color=#000060>Countries</font>" ;
 
-  $link_requests    = "<a href='$file_html_requests'>Destination/Mime</a>" ;
-  $link_origins     = "<a href='$file_html_origins'>Origin</a>" ;
+  $link_requests    = "Requests <a href='$file_html_requests'>by destination</a> or " ;
+  $link_origins     = "<a href='$file_html_origins'>by origin</a>" ;
   $link_methods     = "<a href='$file_html_methods'>Methods</a>" ;
   $link_scripts     = "<a href='$file_html_scripts'>Scripts</a>" ;
   $link_skins       = "<a href='$file_html_skins'>Skins</a>" ;
@@ -754,9 +675,9 @@ sub PrepHtml
 
 sub ReadCountryCodes
 {
-  &LogSub ("ReadCountryCodes\n") ;
+  &Log ("ReadCountryCodes\n") ;
 
-  open CODES, '<', "$path_meta/$file_csv_country_codes" ;
+  open CODES, '<', "$path_csv/meta/$file_csv_country_codes" ;
   while ($line = <CODES>)
   {
     if ($line =~ /^[A-Z]/)
@@ -767,18 +688,13 @@ sub ReadCountryCodes
       # print "$code => $name\n" ;
     }
   }
-  $country_codes {'-'}  = 'Unknown' ;
   $country_codes {'--'} = 'Unknown' ;
-  $country_codes {'XX'} = 'Unknown' ;
-  $country_codes {'-P'} = 'IPv6' ;
-  $country_codes {'-X'} = 'Unknown' ;
-  $country_codes {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
   close CODES ;
 }
 
 sub ReadInputClients
 {
-  &LogSub ("ReadInputClients\n") ;
+  &Log ("ReadInputClients\n") ;
 
   my $file_csv = "$path_process/$file_csv_clients" ;
   if (! -e $file_csv)
@@ -901,7 +817,7 @@ sub ReadInputClients
 
 sub ReadInputCrawlers
 {
-  &LogSub ("ReadInputCrawlers\n") ;
+  &Log ("ReadInputCrawlers\n") ;
 
   my $file_csv = "$path_process/$file_csv_crawlers" ;
   if (! -e $file_csv)
@@ -958,7 +874,7 @@ sub ReadInputCrawlers
 
 sub ReadInputMethods
 {
-  &LogSub ("ReadInputMethods\n") ;
+  &Log ("ReadInputMethods\n") ;
 
   my $file_csv = "$path_process/$file_csv_methods" ;
   if (! -e $file_csv)
@@ -978,7 +894,7 @@ sub ReadInputMethods
 
 sub ReadInputMimeTypes
 {
-  &LogSub ("ReadInputMimeTypes\n") ;
+  &Log ("ReadInputMimeTypes\n") ;
 
   my $file_csv = "$path_process/$file_csv_requests" ;
   if (! -e $file_csv)
@@ -1067,7 +983,7 @@ sub ReadInputMimeTypes
 
 sub ReadInputOpSys
 {
-  &LogSub ("ReadInputOpSys\n") ;
+  &Log ("ReadInputOpSys\n") ;
 
   my $file_csv = "$path_process/$file_csv_opsys" ;
   if (! -e $file_csv)
@@ -1129,7 +1045,7 @@ sub ReadInputOpSys
 
 sub ReadInputOrigins
 {
-  &LogSub ("ReadInputOrigins\n") ;
+  &Log ("ReadInputOrigins\n") ;
 
   my $file_csv = "$path_process/$file_csv_origins" ;
   if (! -e $file_csv)
@@ -1214,7 +1130,7 @@ sub ReadInputOrigins
 
 sub ReadInputScripts
 {
-  &LogSub ("ReadInputScripts\n") ;
+  &Log ("ReadInputScripts\n") ;
 
   my $file_csv = "$path_process/$file_csv_scripts" ;
   if (! -e $file_csv)
@@ -1316,7 +1232,7 @@ sub ReadInputScripts
 
 sub ReadInputGoogle
 {
-  &LogSub ("ReadInputGoogle\n") ;
+  &Log ("ReadInputGoogle\n") ;
 
   my $file_csv = "$path_process/$file_csv_google" ;
   if (! -e $file_csv)
@@ -1375,7 +1291,7 @@ sub ReadInputGoogle
 
 sub ReadInputSkins
 {
-  &LogSub ("ReadInputSkins\n") ;
+  &Log ("ReadInputSkins\n") ;
 
   my $file_csv = "$path_process/$file_csv_skins" ;
   if (! -e $file_csv)
@@ -1398,7 +1314,7 @@ sub ReadInputSkins
 
 sub ReadInputIndexPhp
 {
-  &LogSub ("ReadInputIndexPhp\n") ;
+  &Log ("ReadInputIndexPhp\n") ;
 
   my $file_csv = "$path_process/$file_csv_indexphp" ;
   if (! -e $file_csv)
@@ -1526,7 +1442,7 @@ sub ReadInputIndexPhp
 
 sub ReadInputCountriesTimed
 {
-  &LogSub ("ReadInputCountriesTimed\n") ;
+  &Log ("ReadInputCountriesTimed\n") ;
 
   my $file_csv = "$path_process/public/$file_csv_countries_timed" ;
   if (! -e $file_csv)
@@ -1556,119 +1472,61 @@ sub ReadInputCountriesTimed
   close CSV_COUNTRIES ;
 }
 
-sub ReadInputRegionCodes
-{
-  &LogSub ("ReadInputRegionCodes\n") ;
-
-  $file_csv_region_codes = "RegionCodes.csv" ;
-  $path_csv_region_codes = "$path_meta/$file_csv_region_codes" ;
-  if (! -e $path_csv_region_codes) { abort ("Input file $path_csv_region_codes not found!") ; }
-
-  open    CSV_REGION_CODES, '<', $path_csv_region_codes ;
-
-  binmode CSV_REGION_CODES ;
-  while ($line = <CSV_REGION_CODES>)
-  {
-    chomp $line ;
-    ($country_code,$region_code,$north_south_code) = split (',', $line) ;
-    $region_codes      {$country_code} = $region_code ;
-    $north_south_codes {$country_code} = $north_south_code ;
-  }
-
-  close CSV_REGION_CODES ;
-}
-
 sub ReadInputCountriesNames
 {
-  &LogSub ("ReadInputCountriesNames\n") ;
+  &Log ("ReadInputCountriesNames\n") ;
 
   $file_csv_country_codes = "CountryCodes.csv" ;
-  $path_csv_country_codes = "$path_meta/$file_csv_country_codes" ;
+  $path_csv_country_codes = "$path_csv/meta/$file_csv_country_codes" ;
   if (! -e $path_csv_country_codes) { abort ("Input file $path_csv_country_codes not found!") ; }
 
   open    CSV_COUNTRY_CODES, '<', $path_csv_country_codes ;
 
   binmode CSV_COUNTRY_CODES ;
-
-  $country_names {'-'}  = 'Unknown' ;
-  $country_names {'--'} = 'Unknown' ;
-  $country_names {'-P'} = 'IPv6' ;
-  $country_names {'-X'} = 'Unknown' ;
-  $country_names {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
-  $country_names {"XX"} = "Unknown" ;
-
+  $country_names {"--"} = "Unknown" ;
   while ($line = <CSV_COUNTRY_CODES>)
   {
     chomp $line ;
 
     next if $line =~ /^#/ ;
 
-    $line =~ s/\"//g ;
-
     $line =~ s/[\x00-\x1f]//g ;
-    $line =~ s/UNDEFINED/Undefined/g ;
-    $line =~ s/territories/Territories/ ;
-    $line =~ s/(Falkland Islands).*$/$1/g ; # - (Malvinas)
-    $line =~ s/Reunion/Réunion/ ;
-    $line =~ s/Aland Islands/Åland Islands/ ;
-    $line =~ s/Bonaire, Saint Eustatius and Saba/Caribbean Netherlands/ ;
-    $line =~ s/Congo, The Democratic Republic of the/Congo Dem. Rep./ ;
-    $line =~ s/Congo$/Congo Rep./ ;
-    $line =~ s/Curacao/Curaçao/ ;
-    $line =~ s/Brunei Darussalam/Brunei/ ;
-    $line =~ s/Holy See.*$/Vatican City/ ;
-    $line =~ s/Iran, Islamic Republic of/Iran/ ;
-    $line =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $line =~ s/Korea, Republic of/South Korea/ ;
-    $line =~ s/Lao People's Democratic Republic/Laos/ ;
-    $line =~ s/Libyan Arab Jamahiriya/Libya/ ;
-    $line =~ s/Micronesia, Federated States of/Micronesia/ ;
-    $line =~ s/Moldova, Republic of/Moldova/ ;
-    $line =~ s/Myanmar/Burma/ ;
-    $line =~ s/Palestinian Territory/Palestinian Territories/ ;
-    $line =~ s/Pitcairn/Pitcairn Islands/ ;
-    $line =~ s/Russian Federation/Russia/ ;
-    $line =~ s/American American Samoa/American Samoa/ ;
-    $line =~ s/Saint Bartelemey/Saint Barthélemy/ ;
-    $line =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-    $line =~ s/Syrian Arab Republic/Syria/ ;
-    $line =~ s/Tanzania, United Republic of/Tanzania/ ;
-    $line =~ s/Virgin Islands, British/Virgin Islands, UK/ ;
-    $line =~ s/Virgin Islands, U.S./Virgin Islands, US/ ;
+    $line =~ s/C..?te d'Ivoire/C&ocirc;te d'Ivoire/g ;
 
-    # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
+  # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
     ($country_code,$country_name) = split (',', $line,2) ;
+    $region_codes      {$country_code} = $region_code ;
+    $north_south_codes {$country_code} = $north_south_code ;
 
     $country_name =~ s/"//g ;
+  # $country_code = uc ($country_code) ;
 
-    # next if $country_name eq "Anonymous Proxy" ;
-    # next if $country_name eq "Satellite Provider" ;
-    # next if $country_name eq "Other Country" ;
-    # next if $country_name eq "Asia/Pacific Region" ;
-    # next if $country_name eq "Europe" ;
+  # next if $country_name eq "Anonymous Proxy" ;
+  # next if $country_name eq "Satellite Provider" ;
+  # next if $country_name eq "Other Country" ;
+  # next if $country_name eq "Asia/Pacific Region" ;
+  # next if $country_name eq "Europe" ;
 
-#    if ($country_meta_info {$country}  eq "")
-#    {
-#      if ($country_meta_info_not_found_reported {$country} ++ == 0)
-#      { print "Meta info not found for country '$country'\n" ; }
-#    }
-
-    $country_names_found {$country_name} ++ ;
-    $country_names       {$country_code} = $country_name ;
-    $country_codes_all   {"$country_name|$country_code"} ++ ;
+#  if ($country_meta_info {$country}  eq "")
+#  {
+#    if ($country_meta_info_not_found_reported {$country} ++ == 0)
+#    { print "Meta info not found for country '$country'\n" ; }
+#  }
+    $country_name =~ s/^C..?te d/C&ocirc;te d/ ;
+    $country_names     {$country_code} = $country_name ;
+    $country_codes_all {"$country_name|$country_code"} ++ ;
   }
 
-  close CSV_COUNTRY_CODES ;
 }
 
 sub ReadInputCountriesMeta
 {
-  &LogSub ("ReadInputCountriesMeta\n") ;
+  &Log ("ReadInputCountriesMeta\n") ;
 
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
-  &LogDetail ("Read $path_meta/$file_csv_country_meta_info\n") ;
-  open    COUNTRY_META_INFO, '<', "$path_meta/$file_csv_country_meta_info" ;
+  &Log ("Read $path_csv/meta/$file_csv_country_meta_info\n") ;
+  open    COUNTRY_META_INFO, '<', "$path_csv/meta/$file_csv_country_meta_info" ;
   binmode COUNTRY_META_INFO ;
   while ($line = <COUNTRY_META_INFO>)
   {
@@ -1676,27 +1534,34 @@ sub ReadInputCountriesMeta
     $line =~ s/[\x00-\x1f]//g ;
 
     ($country,$link,$population,$connected,$icon) = split ',', $line ;
-    $icon =~ s/\"\/\/upload/\"http:\/\/upload/g ;
-
     # print "COUNTRY $country\nLINK $link\nPOPULATION $population\nCONNECTED $connected\n\n" ;
     $country =~ s/&comma;/,/g ;
 
-    $country =~ s/territories/Territories/ ;
-    $country =~ s/American American Samoa/American Samoa/ ;
-    $country =~ s/C..?te d'Ivoire/Cote d'Ivoire/g ;
-    $country =~ s/Democratic Republic of the Congo/Congo Dem. Rep./ ;
-    $country =~ s/^Republic of the Congo/Congo Rep./ ;
+    # use country names as given by MaxMind
+    $country =~ s/Brunei/Brunei Darussalam/ ;
+  # $country =~ s/Congo, The Democratic Republic of the/Democratic Republic of the Congo/ ;
+  # $country =~ s/Dem. Rep. of Congo/Democratic Republic of the Congo/ ;
     $country =~ s/East timor/Timor-Leste/ ;
     $country =~ s/Guyane/French Guiana/ ;
-    $country =~ s/Ivory Coast/Cote d'Ivoire/ ;
-    $country =~ s/^.*Micronesia/Micronesia/ ; # - Federated States of
+    $country =~ s/Iran/Iran, Islamic Republic of/ ;
+    $country =~ s/Laos/Lao People's Democratic Republic/ ;
+    $country =~ s/Libya/Libyan Arab Jamahiriya/ ;
     $country =~ s/Macau/Macao/ ;
-    $country =~ s/Saint Helena.*$/Saint Helena/ ;  # - , Ascension and Tristan da Cunha
-    $country =~ s/United States Virgin Islands/Virgin Islands, US/ ;
-    $country =~ s/British Virgin Islands/Virgin Islands, UK/ ;
+    $country =~ s/Moldova/Moldova, Republic of/ ;
+  # $country =~ s/North Korea/Korea, Republic of/ ;
+    $country =~ s/Palestine/Palestinian Territory/ ;
+  # $country =~ s/Republic of the Congo/Congo/ ;
+    $country =~ s/Russia/Russian Federation/ ;
+  # $country =~ s/North Korea/Korea, Democratic People's Republic of/ ;
+  # $country =~ s/South Korea/Korea, Republic of/ ;
+    $country =~ s/Syria/Syrian Arab Republic/ ;
+    $country =~ s/Tanzania/Tanzania, United Republic of/ ;
+    $country =~ s/U.S. Virgin Islands/Virgin Islands, British/ ;
+    $country =~ s/Vatican City/Holy See (Vatican City State)/ ;
+  # $country =~ s/^Korea$/South Korea/ ;
 
     if ($connected eq 'connected')
-    { $ip_connections_unknown .= "$country, " ; }
+    { &Log ("connected unknown: $country\n") ; }
 
     $connected =~ s/connected/../g ;
 
@@ -1706,57 +1571,20 @@ sub ReadInputCountriesMeta
   }
 
   close COUNTRY_META_INFO ;
-
-  if ($ip_connections_unknown ne '')
-  {
-    $ip_connections_unknown =~ s/, $// ;
-    &LogDetail ("IP connections unknown for:\n$ip_connections_unknown\n\n") ;
-  }
-
-  &ValidateCountryNames ;
-}
-
-sub ValidateCountryNames
-{
-  &LogSub ("ValidateCountryNames\n") ;
-
-  &LogDetail ("Compare country names in two hash arrays:\n\n") ;
-  &LogDetail ("Countries in \%country_names_found not found in \%country_meta_info:\n\n") ;
-
-  &LogBreak ;
-  foreach $country (sort keys %country_names_found)
-  {
-    if ($country_meta_info {$country} eq '')
-    { &LogList ("$country\n") ; }
-  }
-  &LogBreak ;
-
-  &LogDetail ("Countries in \%country_meta_info not found in \%country_names_found:\n\n") ;
-  &LogBreak ;
-  foreach $country (sort keys %country_meta_info)
-  {
-    if ($country_names_found {$country} eq '')
-    { &LogList ("$country\n") ; }
-  }
-  &LogBreak ;
 }
 
 sub CollectRegionCounts
 {
-  &LogSub ("CollectRegionCounts\n") ;
+  &Log ("CollectRegionCounts\n") ;
 
   my ($country_code, $region_code, $north_south_code, $country_name) ;
+
   foreach $country_code (keys %country_names)
   {
     $country_name = $country_names {$country_code} ;
     $country_meta = $country_meta_info {$country_name} ;
 
     my ($link,$population,$connected,$icon) = split (',', $country_meta) ;
-
-  # debug only:
-  # &LogList ("code $country_code\n") ;
-  # &LogList ("name $country_name\n") ;
-  # &LogList ("meta $country_meta\n") ;
 
     $region_code      = $region_codes      {$country_code} ;
     $north_south_code = $north_south_codes {$country_code} ;
@@ -1782,7 +1610,7 @@ sub CollectRegionCounts
 
 sub ReadInputCountriesMonthly
 {
-  &LogSub ("ReadInputCountriesMonthly\n") ;
+  &Log ("ReadInputCountriesMonthly\n") ;
 
   my $project_mode = shift ;
 
@@ -1817,53 +1645,32 @@ sub ReadInputCountriesMonthly
   $requests_all            = 0 ;
   $requests_recently_all   = 0 ;
 
-  # global reportmonth and local report_month is a bit confusing, to be fixed
-  if ($reportmonth ne '')
-  {
-    &LogDetail ("Month $reportmonth specified as cmd line argument\n") ;
-    $report_year  = substr ($reportmonth,0,4) ;	  
-    $report_month = substr ($reportmonth,5,2) ;	  
-  }
-  else
-  {
-    my ($sec,$min,$hour,$day,$report_month,$report_year) = localtime (time) ;
-    $report_year  += 1900 ;
-  # $report_month ++ ;
-    if ($report_month == 0) # EZ 10/2012 report till end of last month
-    {
-      $report_month = 12 ;
-      $report_year-- ;
-    }
-  }   
+  my ($sec,$min,$hour,$day,$report_month,$report_year) = localtime (time) ; 
+  $report_year  += 1900 ;
+#  $report_month ++ ;
+   if ($report_month == 0) # EZ 10/2012 report till end of last month 
+   {
+     $report_month = 12 ;	   
+     $report_year-- ;
+   }
 
-  &LogDetail ("Read monthly data (year $report_year, month $report_month) for project $project_mode (wp=Wikipedia, etc) from $path_csv_squid_counts_monthly\n") ;
+  &Log ("Only process data for project $project_mode (wp=Wikipedia, etc)\n") ;
+  &Log ("Read data from $path_csv_squid_counts_monthly\n") ;
 
   $date_first = '9999-99' ;
   $date_last  = '0000-00' ;
 
-  $invalid_country_codes = 0 ;
-  $discarded_input = 0 ;
-
-  my $lines = 0 ;
-  &LogBreak ;
-  &Log ("read from '$path_csv_squid_counts_monthly'\n") ;
   open CSV_SQUID_COUNTS_MONTHLY, '<', $path_csv_squid_counts_monthly ;
   while ($line = <CSV_SQUID_COUNTS_MONTHLY>)
   {
-    $lines++ ;
-    if ($lines % 100000 == 0)
-    { &LogList ("lines: $lines\n") ; }
-
     chomp $line ;
     $line =~ s/,\s+/,/g ;
     $line =~ s/\s+,/,/g ;
     ($yyyymm,$project,$language,$code,$bot,$count) = split (',', $line) ;
 
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
-
     $country = &GetCountryName ($code) ;
 
-    # next if $country =~ /\?/ ;
     next if &DiscardSquidInput ($bot,$project,$project_mode,$code,$language) ;
 
   #  $yyyymm = "2009-12" ;
@@ -1874,37 +1681,24 @@ sub ReadInputCountriesMonthly
 
     $recently = $false ;
 
+    if ((($year == $report_year) && ($month <= $report_month)) or # EZ 10/2012, skip current month  
+        (($year == $report_year - 1) && ($month > $report_month))) 
+    { $recently = $true ; }
+
        if ($month <= 3) { $quarter = $year . ' Q1' ; }
     elsif ($month <= 6) { $quarter = $year . ' Q2' ; }
     elsif ($month <= 9) { $quarter = $year . ' Q3' ; }
     else                { $quarter = $year . ' Q4' ; }
 
     if ($quarter_only ne '')
-    {
-      next if $quarter ne $quarter_only ;
-      $recently = $true ;
-    }
-    else
-    {
-    # Dec 2013: no quarterly report used to be avg monthly counts for last full 12 months, now it is data for one month 	    
-    # if ((($year == $report_year) && ($month <= $report_month)) or # EZ 10/2012, skip current month
-    #     (($year == $report_year - 1) && ($month > $report_month)))
-      if (($year == $report_year) && ($month == $report_month))
-      { $recently = $true ; }
-      else
-      { next ; }
-      # if ($lines % 1000 == 0) # debug only
-      # {  print "year $year, month $month, report_year $report_year, report_month $report_month\n" ; }	    
-    }
-    $lines_selected ++ ;
+    { next if $quarter ne $quarter_only ; }
 
     # if ($views_edits eq 'Page Edits')
 
     $quarters {$quarter} ++ ;
 
     if (($country =~ /\?/) || ($country =~ /unknown/i))
-  # { $requests_unknown_per_quarter {$quarter} += $count ; next ; }
-    { $requests_unknown_per_quarter {$quarter} += $count ; }
+    { $requests_unknown_per_quarter {$quarter} += $count ; next ; }
     $country_codes {"$country|$code"}++ ;
     $requests_all                                                                     += $count ;
     $requests_all_per_period                       {$yyyymm}                          += $count ;
@@ -1924,11 +1718,6 @@ sub ReadInputCountriesMonthly
     if ($yyyymm lt $requests_start) { $requests_start = $yyyymm ; }
     if ($yyyymm gt $requests_stop)  { $requests_stop  = $yyyymm ; }
 
-    if ($yyyymm lt $date_first)
-    { $date_first = $yyyymm ; }
-    if ($yyyymm gt $date_last)
-    { $date_last = $yyyymm ; }
-
     if ($recently)
     {
       if ($yyyymm lt $requests_recently_start) { $requests_recently_start = $yyyymm ; }
@@ -1941,48 +1730,27 @@ sub ReadInputCountriesMonthly
       $requests_recently_per_country_per_language            {$country}  {$language} += $count ;
       $requests_recently_per_language_per_country            {$language} {$country}  += $count ;
       $requests_recently_per_language                        {$language}             += $count ;
+
+      if ($yyyymm lt $date_first)
+      { $date_first = $yyyymm ; }
+      if ($yyyymm gt $date_last)
+      { $date_last = $yyyymm ; }
     }
   }
+  &Log ("$lines lines read from $path_csv_squid_counts_monthly\n") ;
 
-  if ($lines_selected == 0)
-  { abort ("No lines selected from $path_csv_squid_counts_monthly.\nRun step 'collect_country_stats' to add data for requested month.") ; }
-
-  if ($lines > 0)
-  {
-    $perc_invalid_country_codes = sprintf ("%.1f", 100 * $invalid_country_codes / $lines) ;
-    $perc_discarded_input       = sprintf ("%.1f", 100 * $discarded_input / $lines) ;
-  }
-  &LogList ("lines: $lines invalid country codes: $invalid_country_codes ($perc_invalid_country_codes\%), discard input: $discarded_input ($perc_discarded_input\%)\n") ;
-
-
-  &LogList ("Top 10 most found invalid country codes:\n") ;
-  &LogBreak () ;
-  $codes_reported = 0 ;
-  foreach $code (sort {$country_code_not_specified_reported {$b} <=> $country_code_not_specified_reported {$a}} keys %country_code_not_specified_reported)
-  {
-    &LogList ("Code $code: ${country_code_not_specified_reported {$code}}\n") ;
-    last if $codes_reported++ == 10 ;
-  }
-  &LogBreak () ;
-  &LogDetail ((0 + $lines) . " lines read from '$path_csv_squid_counts_monthly'\n") ;
-
-  if ($lines == 0)
-  { abort ("No lines read from '$path_csv_squid_counts_monthly'\n") ; }
-
-  @quarters = keys_sorted_alpha_asc %quarters ;
-  &LogBreak ;
+  @quarters = keys_sorted_alpha_desc %quarters ;
   foreach $quarter (@quarters)
   {
-    my $quarter2 = substr ($quarter,0,4) . 'q' . substr ($quarter,4,1) ;
-    &LogList ("quarter $quarter: requests: " . (0+$requests_per_quarter {$quarter}) . "\n") ;
+    &Log ("Quarter $quarter: requests: " . (0+$requests_per_quarter {$quarter}) . "\n") ;
 
     if ($requests_per_quarter {$quarter} == 0)
     { abort ("No known requests found for quarter $quarter") ; }
   }
-  &LogBreak ;
+  &Log ("\n") ;
 
   $months_recently = keys %months_recently ;
-# if ($months_recently == 0) { abort ("\$months_recently == 0\n") ; }
+  if ($months_recently == 0) { abort ("\$months_recently == 0\n") ; }
 
   $requests_recently_start = substr ($requests_recently_start,0,4) . '/' . substr ($requests_recently_start,5,2);
   $requests_recently_stop  = substr ($requests_recently_stop ,0,4) . '/' . substr ($requests_recently_stop ,5,2) ;
@@ -2014,7 +1782,7 @@ sub ReadInputCountriesMonthly
 
 sub ReadInputCountriesDaily
 {
-  &LogSub ("ReadInputCountriesDaily\n") ;
+  &Log ("ReadInputCountriesDaily\n") ;
 
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
@@ -2042,21 +1810,13 @@ sub ReadInputCountriesDaily
   $report_year  += 1900 ;
   $report_month ++ ;
 
-  &LogDetail ("Read daily data for project mode $project_mode from $path_csv_squid_counts_daily\n") ;
+  &Log ("Process project $project_mode\n\n") ;
+  &Log ("Read data from $path_csv_squid_counts_daily\n") ;
 
   $yyyymmdd_prev = "" ;
   open CSV_SQUID_COUNTS_DAILY, '<', $path_csv_squid_counts_daily ;
-
-  $invalid_country_codes = 0 ;
-  $discarded_input = 0 ;
-
-  my $lines = 0 ;
   while ($line = <CSV_SQUID_COUNTS_DAILY>)
   {
-    $lines++ ;
-    if ($lines % 100000 == 0)
-    { &LogList ("lines: $lines\n") ; }
-
     chomp $line ;
     ($yyyymmdd,$project,$language,$code,$bot,$count) = split (',', $line) ;
 
@@ -2065,7 +1825,6 @@ sub ReadInputCountriesDaily
 
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
     $country = &GetCountryName ($code) ;
-  # next if $country =~ /\?/ ;
 
     $country_codes_found {"$country|$code"} ++ ;
 
@@ -2082,9 +1841,9 @@ sub ReadInputCountriesDaily
   # $days_since_2000 = int (($time - $time_2000_01_01) / $sec_per_day) ;
     $days_this_year  = (gmtime $time) [7] ;
     $weeknum_this_year  = int ($days_this_year  / 7) + 1  ;
-    $weeknum_since_2000 = $year . 'w' . sprintf ("%02d",$weeknum_this_year) ; # * int ($days_since_2000 / 7) + 1  ;
+    $weeknum_since_2000 = $year . sprintf ("%02d",$weeknum_this_year) ; # * int ($days_since_2000 / 7) + 1  ;
 
-    $weeknum_this_years {$weeknum_since_2000}++ ;
+    $weeknum_this_years {"$weeknum_this_year - $weeknum_since_2000"}++ ;
 
     $descriptions_per_period {$weeknum_since_2000} = "week $weeknum_this_year - " . month_english_short ($month-1) . " $year" ;
     $days_in_input_for_week  {$weeknum_since_2000} {$yyyymmdd} ++ ;
@@ -2097,14 +1856,9 @@ sub ReadInputCountriesDaily
 
     # last if ($weeknum_since_2000 == 501) ; # test
   }
-  if ($lines > 0)
-  { $perc_invalid_country_codes = sprintf ("%.1f", 100 * $invalid_country_codes / $lines) ; }
-  &LogList ("lines: $lines invalid country codes: $invalid_country_codes ($perc_invalid_country_codes\%)\n") ;
 
-  &LogBreak ;
   foreach $week (sort keys %weeknum_this_years)
-  { &LogList ("week $week: lines " . $weeknum_this_years {$week} . "\n") ; }
-  &LogBreak ;
+  { print "week $week " . $weeknum_this_years {$week} . "\n" ; }
 
   foreach $week (sort {$a <=> $b} keys %days_in_input_for_week)
   {
@@ -2162,7 +1916,7 @@ sub ReadInputCountriesDaily
 
 sub NormalizeSquidInput
 {
-  # &LogSub ("NormalizeSquidInput\n") ;
+# &Log ("NormalizeSquidInput\n") ;
 
   my ($code,$language) = @_ ;
 
@@ -2184,20 +1938,19 @@ sub NormalizeSquidInput
 
 sub DiscardSquidInput
 {
-  # &LogSub ("DiscardSquidInput\n") ;
+# &Log ("DiscardSquidInput\n") ;
 
-  my ($bot,$project,$project_mode,$code,$language) = @_ ;
+  ($bot,$project,$project_mode,$code,$language) = @_ ;
   if ($bot ne "U"  or # user
       $project ne $project_mode or # eg 'wp'
       $language eq "upload" or
-      $language =~ /mobile/i)
-   # $code eq "A1" or # Anonymous Proxy
-   # $code eq "A2" or # Satellite Provider
-   #  $code eq "AP" or # Asia/Pacific Region
-   #  $code eq "EU")    # Europe
+      $language =~ /mobile/i or
+      $code eq "A1" or # Anonymous Proxy
+      $code eq "A2" or # Satellite Provider
+      $code eq "AP" or # Asia/Pacific Region
+      $code eq "EU")   # Europe
   {
   # print "bot $bot project '$project' project_mode $project_mode code $code language $language\n" ;
-    $discarded_input ++ ;
     return ($true) ;
   }
 
@@ -2209,10 +1962,9 @@ sub GetCountryName
   my $code = shift ;
   if ($country_names {$code} eq "")
   {
-    $country = "Unknown (code $code)" ;
+    $country = "$code (?)" ;
     if ($country_code_not_specified_reported {$code}++ == 0)
-    { &LogList ("country name not specified for $code\n") ; }
-    $invalid_country_codes++ ;
+    { print "Country name not specified for $code\n" ; }
   }
   else
   { $country = $country_names {$code} ; }
@@ -2221,7 +1973,7 @@ sub GetCountryName
 
 sub ReadInputBrowserLanguages
 {
-  &LogSub ("ReadInputBrowserLanguages\n") ;
+  &Log ("ReadInputBrowserLanguages\n") ;
 
   my $file_csv = "$path_process/$file_csv_browser_languages" ;
   if (! -e $file_csv)
@@ -2242,7 +1994,7 @@ sub ReadInputBrowserLanguages
 
 sub ReadInputUseragents
 {
-  &LogSub ("ReadInputUseragents\n") ;
+  &Log ("ReadInputUseragents\n") ;
 
   my $file_csv = "$path_process/$file_csv_user_agents" ;
   if (! -e $file_csv)
@@ -2315,12 +2067,12 @@ sub ReadInputUseragents
 
 sub ReadInputDevices
 {
-  &LogSub ("ReadInputDevices\n") ;
+  &Log ("ReadInputDevices\n") ;
 
   my $file_csv = "$path_process/$file_csv_devices" ;
   if (! -e $file_csv)
   {
-    &LogDetail ("Missing file $file_csv - devices screen will not be generated.\n") ;
+    &Log ("Missing file $file_csv - devices screen will not be generated.\n") ;
     return $false ;
   }
   open CSV_DEVICES, '<', $file_csv ;
@@ -2343,8 +2095,7 @@ sub ReadInputDevices
 
 sub ReadInputCountriesInfo
 {
-  &LogSub ("ReadInputCountriesInfo\n") ;
-
+  &Log ("ReadInputCountriesInfo\n") ;
   my $file_csv = "$path_process/$file_csv_countries_info" ;
   if (! -e $file_csv)
   { abort ("Function ReadInputCountryInfo: file $file_csv not found!!!") ; }
@@ -2356,15 +2107,15 @@ sub ReadInputCountriesInfo
 
     chomp ($line) ;
 
-    my ($type, $country, $value, $count) = split (',', $line) ;
+    (my $type, my $country, my $value, my $count) = split (',', $line) ;
 
     if ($type eq 'M')
     {
       $allcountrytotal += $count ;
-    # $countrytotal { $country } += $count ;
+      $countrytotal { $country } += $count ;
       if ($value ne '-')
       {
-      # $allcountrymobile += $count ;
+        $allcountrymobile += $count ;
         $countrymobile { $country } += $count ;
       }
     }
@@ -2376,11 +2127,6 @@ sub ReadInputCountriesInfo
     }
     elsif ($type eq 'O')
     {
-      if ($value !~ /^[a-zA-Z0-9\-\.]+$/)
-      {
-        print "Invalid OS $value -> 'Error'\n" ;
-        $value = 'Error' ;
-      }
       $countryos { $country, $value } += $count ;
       $allcountryos { $value } += $count ;
       $countryallos { $country } += $count ;
@@ -2424,7 +2170,7 @@ sub ReadInputCountriesInfo
 
 sub CalcPercentages
 {
-  &LogSub ("CalcPercentages\n") ;
+  &Log ("CalcPercentages\n") ;
 
   my $total_opsys           = $total_opsys_mobile           + $total_opsys_non_mobile ;
   my $total_opsys_html_only = $total_opsys_mobile_html_only + $total_opsys_non_mobile_html_only ;
@@ -2470,7 +2216,7 @@ sub CalcPercentages
 
 sub NormalizeCounts
 {
-  &LogSub ("NormalizeCounts\n") ;
+  &Log ("NormalizeCounts\n") ;
 
   $total_all_clientgroups = &Normalize ($total_all_clientgroups) ;
   $total_all_clientgroups_html_only = &Normalize ($total_all_clientgroups_html_only) ;
@@ -2625,7 +2371,7 @@ sub NormalizeCounts
 
 sub SortCounts
 {
-  &LogSub ("SortCounts\n") ;
+  &Log ("SortCounts\n") ;
 
 # ReadInputClients
 # @engines_sorted_count              = keys_sorted_by_value_num_desc %engines ;
@@ -2688,36 +2434,17 @@ sub SortCounts
   @skins_sorted_skin  = keys_sorted_alpha_asc %skins ;
 }
 
-
-#
-# isMobile checks M,W,T,P and if $val is one of those then we have a mobile device
-# if the record is a group aggregate, then we check the agent string again to see if we have
-# a mobile device or not
-#
-
-
-sub isMobile {
-  my ($val,$agent) = @_;
-  if($val =~ /^[MWTP]$/) {
-    return 1;
-  } elsif( $val eq 'G') {
-    #warn $tags_mobile;
-    return $agent =~ /(?:$tags_mobile|$tags_tablet)/io;
-  };
-  return 0;
-}
-
 sub WriteReportClients
 {
-  &LogSub ("WriteReportClients -> $path_reports/$file_html_clients\n") ;
+  &Log ("WriteReportClients -> $path_reports/$file_html_clients\n") ;
 
   open FILE_HTML_CLIENTS, '>', "$path_reports/$file_html_clients" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers e.a./ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_browsers)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
 # test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
@@ -2759,7 +2486,6 @@ sub WriteReportClients
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
     next if $mobile ne '-' ;
-  # next if isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -2855,8 +2581,6 @@ sub WriteReportClients
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
     next if $mobile ne 'M' ;
-  # next if !isMobile($mobile);
-
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3038,7 +2762,6 @@ sub WriteReportClients
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
     next if $rectype ne 'M' ; # group
-  # next if !isMobile($rectype) ; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -3126,7 +2849,6 @@ sub WriteReportClients
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
     next if $mobile ne '-' ;
-  # next if isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3193,7 +2915,6 @@ sub WriteReportClients
     $perc  = $clientgroups_perc {$key} ;
     ($mobile,$group) = split (',', $key) ;
     next if $mobile ne 'M' ;
-  # next if !isMobile($mobile);
     $count = &FormatCount ($count) ;
 
     $count_html_only = $clientgroups_html_only {$key} ;
@@ -3283,7 +3004,6 @@ sub WriteReportClients
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
     next if $rectype ne '-' ; # group
-  # next if isMobile($rectype); # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.005%" ;
     $count = &FormatCount ($count) ;
@@ -3308,8 +3028,7 @@ sub WriteReportClients
   {
     $count = $clients {$key} ;
     ($rectype, $client) = split (',', $key,2) ;
-    next if $rectype ne 'M' && $rectype ne 'W' && $rectype ne 'T' && $rectype ne 'P'; # group
-  # next if !isMobile($rectype); # group
+    next if $rectype ne 'M' && $rectype ne 'W' && rectype ne 'T' && rectype ne 'P'; # group
     $perc  = $clients_perc {$key} ;
     next if $perc lt "0.02%" ;
     $count = &FormatCount ($count) ;
@@ -3398,73 +3117,17 @@ sub WriteReportClients
   close FILE_HTML_CLIENTS ;
 }
 
-sub ListLinksExcept
-{
-  my ($link_skip) = @_ ;
-
-  my $links = "&nbsp;Requests: " ;
-  
-  $links .= ($link_skip ne $link_requests    ? $link_requests    : $dummy_requests)    . " - " ;
-  $links .= ($link_skip ne $link_origins     ? $link_origins     : $dummy_origins)     . " - " ;
-  $links .= ($link_skip ne $link_methods     ? $link_methods     : $dummy_methods)     . " - " ;
-  $links .= ($link_skip ne $link_scripts     ? $link_scripts     : $dummy_scripts)     . " - " ;
-  $links .= ($link_skip ne $link_user_agents ? $link_user_agents : $dummy_user_agents) . " - " ;
-  $links .= ($link_skip ne $link_skins       ? $link_skins       : $dummy_skins)       . " - " ;
-  $links .= ($link_skip ne $link_crawlers    ? $link_crawlers    : $dummy_crawlers)    . " - " ;
-  $links .= ($link_skip ne $link_opsys       ? $link_opsys       : $dummy_opsys)       . " - " ;
-  $links .= ($link_skip ne $link_browsers    ? $link_browsers    : $dummy_browsers)    . " - " ;
-  $links .= ($link_skip ne $link_google      ? $link_google      : $dummy_google)      . " - " ;
-  $links .= ($link_skip ne $link_countries   ? $link_countries   : $dummy_countries) ;
-# $links .= ($link_skip ne $link_ua_trends   ? $link_ua_trends   : $dummy_ua_trends) ;
-  if ($ShowDevices)
-  { $links .= ($link_skip ne $link_devices     ? " - " . $link_devices     : " - " . $dummy_devices) ; }
-
-  return $links ;
-}
-
-sub ListLinksGeoExcept
-{
-  my ($link_skip) = @_ ;
-
-  my $links = "&nbsp;Geographical info: " ;
-  
-  $links .= ($link_skip ne $link_countries_overview   ? $link_countries_overview   : $dummy_countries_overview)   . " - " ;
-  $links .= ($link_skip ne $link_countries_useragents ? $link_countries_useragents : $dummy_countries_useragents) . " - " ;
-  $links .= ($link_skip ne $link_countries_browsers   ? $link_countries_browsers   : $dummy_countries_browsers)   . " - " ;
-  $links .= ($link_skip ne $link_countries_os         ? $link_countries_os         : $dummy_countries_os)         . " - " ;
-  $links .= ($link_skip ne $link_countries_projects   ? $link_countries_projects   : $dummy_countries_projects)   . " - " ;
-  $links .= ($link_skip ne $link_countries_trends     ? $link_countries_trends     : $dummy_countries_trends) ;
-
-  return $links ;
-}
-
-sub ListLinksTrendsExcept
-{
-  my ($link_skip) = @_ ;
-
-  my $links = "&nbsp;Trends: " ;
-  
-  $links .= ($link_skip ne $link_user_agents      ? $link_user_agents      : $dummy_user_agents) . " - " ;
-# $links .= ($link_skip ne $link_trends_countries ? $link_trends_countries : $dummy_countries)   . " - " ;
-  $links .= ($link_skip ne $link_trends_browsers  ? $link_trends_browsers  : $dummy_browsers)    . " - " ;
-  $links .= ($link_skip ne $link_trends_devices   ? $link_trends_devices   : $dummy_devices) ;
-
-  return $links ;
-}
-
 sub WriteReportCrawlers
 {
-  &LogSub ("WriteReportCrawlers\n") ;
+  &Log ("WriteReportCrawlers\n") ;
 
   open FILE_HTML_CRAWLERS, '>', "$path_reports/$file_html_crawlers" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Crawler requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Crawler requests/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  
-  $html =~ s/LINKS/&ListLinksExcept ($link_crawlers)/e ; 
-
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $dummy_crawlers \/ $link_opsys \/ $link_devices \/ $dummy_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -3632,15 +3295,15 @@ sub WriteReportCrawlers
 
 sub WriteReportMethods
 {
-  &LogSub ("WriteReportMethods\n") ;
+  &Log ("WriteReportMethods\n") ;
 
   open FILE_HTML_METHODS, '>', "$path_reports/$file_html_methods" ;
 
   $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Request Methods/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Request Methods/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_methods)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $dummy_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=0>\n" ;
@@ -3721,16 +3384,16 @@ sub WriteReportMethods
 
 sub WriteReportMimeTypes
 {
-  &LogSub ("WriteReportMimeTypes\n") ;
+  &Log ("WriteReportMimeTypes\n") ;
 
   open FILE_HTML_REQUESTS, '>', "$path_reports/$file_html_requests" ;
 
   $html = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Requests by destination/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by destination/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests are sent to. Report 'Requests by origin' shows where requests come from.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_requests)/e ; 
+  $html =~ s/LINKS/$dummy_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html .= "<table border=1>\n" ;
 
   $header1 = "<tr><th colspan=2 class=l><small>x 1000</small></th><th colspan=2 class=c>Totals</th><th class=c><font color=#008000>Pages</font></th><th colspan=3 class=c><font color=#900000>Images</font></th><th colspan=99 class=c>Other</th></tr>\n" ;
@@ -3862,7 +3525,7 @@ sub WriteReportMimeTypes
   if ($total_mimes != $total_mimes3)
   {
     print ERR "total_mimes $total_mimes != total_mimes3 $total_mimes3\n" ;
-    &LogDetail ("total_mimes $total_mimes != total_mimes3 $total_mimes3\n") ;
+    print     "total_mimes $total_mimes != total_mimes3 $total_mimes3\n" ;
   }
 
   if ($threshold_mime > 0)
@@ -3888,15 +3551,15 @@ sub WriteReportMimeTypes
 
 sub WriteReportOpSys
 {
-  &LogSub ("WriteReportOpSys\n") ;
+  &Log ("WriteReportOpSys\n") ;
 
   open FILE_HTML_OPSYS, '>', "$path_reports/$file_html_opsys" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Operating Systems/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Operating Systems/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_opsys)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $dummy_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
@@ -3912,9 +3575,9 @@ sub WriteReportOpSys
   $html .= "<tr><td class=l colspan=99>The following overview of page requests by operating system is based on the <a href='http://en.wikipedia.org/wiki/User_agent'>user agent</a> information that accompanies most server requests.<br>" .
            "Please note that agent information does not follow strict guidelines and some programs may provide wrong information on purpose.<br>" .
            "This report ignores all requests where agent information is missing, or contains any of the following: bot, crawl(er) or spider.<p>" .
-           "<a href='http://en.wikipedia.org/wiki/Windows_NT#Releases'>Wikipedia</a>: NT 5.0: Windows 2000, NT 5.1/5: XP/Srv 2003, NT 6.0: VISTA/Srv 2008, NT 6.1: Windows 7, NT 6.2: Windows 8/Srv 2012, NT6.3: Windows 8.1/Srv 2012 R2.<br> " .
-           "<a href='http://en.wikipedia.org/wiki/Mac_OS_X#Versions'>Wikipedia</a>: OS X 10.4: Tiger, 10.5: Leopard, 10.6: Snow Leopard, 10.7: Lion, 10.8: Mountain Lion, 10.9: Mavericks.<br> " .
-           "<a href='http://en.wikipedia.org/wiki/List_of_Linux_distributions'>Wikipedia</a>: Linux distributions." .
+           "<a href='http://en.wikipedia.org/wiki/Windows_NT#Releases'>Wikipedia</a>: NT 5.0 = Windows 2000, NT 5.1/5.2 = XP + Server 2003, NT 6.0 = VISTA + Server 2008, NT 6.1 = Windows 7.<br> " .
+           "<a href='http://en.wikipedia.org/wiki/Mac_OS_X#Versions'>Wikipedia</a>: OS X 10.4 = Tiger, 10.5 = Leopard, 10.6 = Snow Leopard.<br> " .
+           "<a href='http://en.wikipedia.org/wiki/Ubuntu#Releases'>Wikipedia</a>: Ubuntu 7.10 = Gutsy Gibbon, 8.04 = Hardy Heron, 8.10 = Intrepid Ibex, 9.04 = Jaunty Jackalope, 9.10 = Karma Koala." .
            "</td></tr>\n" ;
 
 # $html .= "<tr><th class=l>Count<br><small>x 1000</small></th><th class=l>Secondary domain<br>(~site) name</th><th class=l>Mime type</th><th class=l>User agent</th></tr>\n" ;
@@ -3966,8 +3629,6 @@ sub WriteReportOpSys
     ($rectype, $os) = split (',', $key,2) ;
 
     next if $rectype ne '-' ; # group
-  # next if isMobile($rectype,$os) ; # group
-
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -3986,8 +3647,6 @@ sub WriteReportOpSys
     ($rectype, $os) = split (',', $key,2) ;
 
     next if $rectype ne 'M' ; # group
-  # next if !isMobile($rectype,$os) ; # group
-
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -4044,8 +3703,6 @@ sub WriteReportOpSys
     ($rectype, $os) = split (',', $key,2) ;
 
     next if $rectype ne '-' ; # group
-  # next if isMobile($rectype,$os); # group
-
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -4064,7 +3721,6 @@ sub WriteReportOpSys
     ($rectype, $os) = split (',', $key,2) ;
 
     next if $rectype ne 'M' ; # group
-  # next if !isMobile($rectype,$os); # group
 
     $count = &FormatCount ($count) ;
     $html .= "<tr><td class=l>$os</a></td>" . &ShowCountTd ($count) . "<td class=r>$perc</td></tr>\n" ;
@@ -4112,15 +3768,15 @@ sub WriteReportOpSys
 # http://en.wikipedia.org/wiki/Domain_name
 sub WriteReportOrigins
 {
-  &LogSub ("WriteReportOrigins\n") ;
+  &Log ("WriteReportOrigins\n") ;
 
   open FILE_HTML_ORIGINS, '>', "$path_reports/$file_html_origins" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Requests by origin/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Requests by origin/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_origins)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $dummy_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests come from. Report 'Requests by destination' shows where requests are serviced.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4728,15 +4384,15 @@ sub WriteReportOrigins
 
 sub WriteReportScripts
 {
-  &LogSub ("WriteReportScripts\n") ;
+  &Log ("WriteReportScripts\n") ;
 
   open FILE_HTML_SCRIPTS, '>', "$path_reports/$file_html_scripts" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Scripts/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Scripts/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_scripts)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $dummy_scripts \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -4907,15 +4563,15 @@ sub WriteReportScripts
 
 sub WriteReportGoogle
 {
-  &LogSub ("WriteReportGoogle\n") ;
+  &Log ("WriteReportGoogle\n") ;
 
   open FILE_HTML_SEARCH, '>', "$path_reports/$file_html_google" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Google requests/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Google requests/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_google)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/  $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers  \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $dummy_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1 width=500 wrap>\n" ;
@@ -5230,15 +4886,15 @@ sub WriteReportGoogle
 
 sub WriteReportSkins
 {
-  &LogSub ("WriteReportSkins\n") ;
+  &Log ("WriteReportSkins\n") ;
 
   open FILE_HTML_SKINS, '>', "$path_reports/$file_html_skins" ;
 
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Skins/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Skins/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_skins)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $dummy_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -5278,9 +4934,13 @@ sub UserAgentField
 {
    my ($value, $ismarked) = @_;
    if ($ismarked)
-   { $shownumber = &ShowCount ($value * $multiplier, $ismarked) ; }
+   {
+     $shownumber = &ShowCount ($value * $multiplier, $ismarked) ;
+   }
    else
-   { $shownumber = &ShowCount ($value * $multiplier) ; }
+   {
+     $shownumber = &ShowCount ($value * $multiplier) ;
+   }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -5292,9 +4952,13 @@ sub UserAgentFieldPerc
    if ($value < 1)
    { $shownumber = '-' }
    elsif ($ismarked)
-   { $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $ismarked) ; }
+   {
+     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare, $ismarked) ;
+   }
    else
-   { $shownumber = &ShowPerc (100 * $value * $multiplier / $compare) ; }
+   {
+     $shownumber = &ShowPerc (100 * $value * $multiplier / $compare) ;
+   }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -5302,9 +4966,13 @@ sub UserAgentFieldNew
 {
    my ($value, $ismarked, $percbase) = @_;
    if ($ismarked)
-   { $shownumber = &ShowCount ($value * $multiplier, $ismarked, $percbase) ; }
+   {
+     $shownumber = &ShowCount ($value * $multiplier, $ismarked, $percbase) ;
+   }
    else
-   { $shownumber = &ShowCount ($value * $multiplier, '', $percbase) ; }
+   {
+     $shownumber = &ShowCount ($value * $multiplier, '', $percbase) ;
+   }
    return "<td class=rt>$shownumber</td>" ;
 }
 
@@ -5412,11 +5080,10 @@ sub UserAgentCsvLine
 
 sub WriteReportUserAgents
 {
-  &LogSub ("WriteReportUserAgents\n") ;
-
+  &Log ("WriteReportUserAgents\n") ;
   $marker_color = '#8000FF' ;
   $bgcolor = '#FFFFDD' ;
-# $altbgcolor = '#DDFFDD' ;
+  $altbgcolor = '#DDFFDD' ;
 
   open FILE_HTML_USER_AGENTS, '>', "$path_reports/$file_html_user_agents" ;
   open FILE_CSV_USER_AGENTS, '>', "$path_reports/$file_csv_user_agents_out" ;
@@ -5425,8 +5092,8 @@ sub WriteReportUserAgents
   $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User Agent Overview/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_user_agents)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $dummy_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -5515,8 +5182,7 @@ sub SectionReportDevices
 
 sub WriteReportDevices
 {
-  &LogSub ("WriteReportDevices\n") ;
-
+  &Log ("WriteReportDevices\n") ;
   $marker_color = '#8000FF' ;
 
   open FILE_HTML_DEVICES, '>', "$path_reports/$file_html_devices" ;
@@ -5524,8 +5190,8 @@ sub WriteReportDevices
   $html  = $header ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Mobile Device Types/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Mobile Device Types/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
-  $html =~ s/LINKS/&ListLinksExcept ($link_devices)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $dummy_devices \/ $link_browsers \/ $link_google \/ $link_countries \/ $link_ua_trends/ ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<table border=1>\n" ;
   $html .= "<tr><th class=l>Device class</th><th class=c>Count</th><th class=c>Percentage</th><th class=l>Device</th><th class=c>Count</th><th class=c>Percentage</th></tr>" ;
@@ -5575,16 +5241,16 @@ sub ReportLineCountriesInfoTypes
 
 sub WriteReportCountriesInfo
 {
-  &LogSub ("WriteReportCountriesInfo\n") ;
+  &Log ("WriteReportCountriesInfo\n") ;
 
   open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
 
   my $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-  $html =~ s/LINKS1/&ListLinksExcept ($link_crawlers)/e ; 
-  $html =~ s/LINKS2/&ListLinksGeoExcept ($link_countries_useragents)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trend<br\/>\nLINKS/ ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $dummy_countries_useragents \/ $link_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -5663,6 +5329,7 @@ sub WriteReportCountriesInfo
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -5707,6 +5374,7 @@ sub WriteReportCountriesInfo
 
     ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
 
+    $icon =~ s/\"\/\/upload/\"http:\/\/upload/ ;
     $population_tot += $population ;
     $connected_tot += $connected ;
     $population_region {$region_code} += $population ;
@@ -5758,8 +5426,7 @@ sub WriteReportCountriesInfo
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS EU CA NA SA OC))
-# foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
@@ -5772,6 +5439,7 @@ sub WriteReportCountriesInfo
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -5796,8 +5464,6 @@ sub WriteReportCountriesInfo
                      "</tr>\n" ;
 
     if (($key eq 'XX') || (($key eq 'OC')))
-  # if (($key eq 'S' ) || (($key eq 'OC')))
-
     {   $html_regions .= "<tr><td colspan=999>&nbsp;</td></tr>" ; }
   }
 
@@ -5823,16 +5489,15 @@ sub WriteReportCountriesInfo
 
 sub WriteReportCountryOpSys
 {
-  &LogSub ("WriteReportCountryOpSys\n") ;
-
-  open FILE_HTML_COUNTRIES_OPSYS, '>', "$path_reports/$file_html_countries_os" || die ("Can not write $path_reports/$file_html_countries_os\n") ;
+  &Log ("WriteReportCountryOpSys\n") ;
+  open FILE_HTML_COUNTRIES_OPSYS, '>', "$path_reports/$file_html_countries_os" ;
 
   my $html = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-  $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
-  $html =~ s/LINKS2/&ListLinksGeoExcept ($link_countries_os)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trends<br\/>\nLINKS/ ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $link_countries_browsers \/ $dummy_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
 
@@ -5869,21 +5534,21 @@ sub WriteReportCountryOpSys
     next if ($code eq '-X') ;
     my $country = $country_codes {$code} ;
 
-  # $country =~ s/\"//g ;
-  # $country =~ s/Korea, Republic of/South Korea/ ;
-  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-  # $country =~ s/Palestinian Territory/Palestinian Territories/ ;
-  # $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
-  # $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country =~ s/Reunion/Réunion/ ;
-  # $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
-  # $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
-  # $country =~ s/\(Malvinas\)// ;
-  # $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-  # $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
-  # $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-  # $country =~ s/^\s+// ;
-  # $country =~ s/\s+$// ;
+    $country =~ s/\"//g ;
+    $country =~ s/Korea, Republic of/South Korea/ ;
+    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
+    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
+    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+    $country =~ s/Reunion/Réunion/ ;
+    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
+    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
+    $country =~ s/\(Malvinas\)// ;
+    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
+    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
+    $country =~ s/^\s+// ;
+    $country =~ s/\s+$// ;
 
     my $region_code      = $region_codes {$code} ;
     if ($region_code eq '')
@@ -5895,6 +5560,7 @@ sub WriteReportCountryOpSys
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6004,8 +5670,7 @@ sub WriteReportCountryOpSys
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS EU CA NA SA OC))
-# foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
@@ -6018,11 +5683,10 @@ sub WriteReportCountryOpSys
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
-
 
     $population_region  = $population_region {$key} ;
     $connected_region   = $connected_region  {$key} ;
@@ -6054,7 +5718,6 @@ sub WriteReportCountryOpSys
     $html_regions .= "</tr>\n" ;
 
     if (($key eq 'XX') || (($key eq 'OC')))
-  # if (($key eq 'S') || (($key eq 'OC')))
     { $html_regions .= "<tr><td colspan=99>&nbsp;</td></tr>" ; }
   }
   $html .= "</tbody>\n</table>" ;
@@ -6081,15 +5744,14 @@ sub WriteReportCountryOpSys
 
 sub WriteReportCountryBrowser
 {
-  &LogSub ("WriteReportCountryBrowser\n") ;
-
+  &Log ("WriteReportCountryBrowser\n") ;
   open FILE_HTML_COUNTRIES_BROWSER, '>', "$path_reports/$file_html_countries_browser" ;
   my $html = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browser breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browser breakdown per Country/ ;
-  $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-  $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
-  $html =~ s/LINKS2/&ListLinksGeoExcept ($link_countries_browsers)/e ; 
+  $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+  $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_ua_trends <br\/>\nLINKS/ ;
+  $html =~ s/LINKS/Geographical info: $link_countries_overview \/ $link_countries_useragents \/ $dummy_countries_browsers \/ $link_countries_os \/ $link_countries_projects \/ $link_countries_trends / ;
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
 
@@ -6126,21 +5788,21 @@ sub WriteReportCountryBrowser
     next if ($code eq '-X') ;
     my $country = $country_codes {$code} ;
 
-  # $country =~ s/\"//g ;
-  # $country =~ s/Korea, Republic of/South Korea/ ;
-  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-  # $country =~ s/Palestinian Territory/Palestinian Territories/ ;
-  # $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
-  # $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country =~ s/Reunion/Réunion/ ;
-  # $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
-  # $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
-  # $country =~ s/\(Malvinas\)// ;
-  # $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-  # $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
-  # $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-  # $country =~ s/^\s+// ;
-  # $country =~ s/\s+$// ;
+    $country =~ s/\"//g ;
+    $country =~ s/Korea, Republic of/South Korea/ ;
+    $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
+    $country =~ s/Palestinian Territory/Palestinian Territories/ ;
+    $country =~ s/Virgin Islands, U.S./United States Virgin Islands/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+    $country =~ s/Reunion/Réunion/ ;
+    $country =~ s/Virgin Islands, British/British Virgin Islands/ ;
+    $country =~ s/Micronesia, Federated States of/Federated States of Micronesia/ ;
+    $country =~ s/\(Malvinas\)// ;
+    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $country =~ s/^\s*Congo\s*$/Republic of the Congo/ ;
+    $country =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
+    $country =~ s/^\s+// ;
+    $country =~ s/\s+$// ;
 
     my $region_code      = $region_codes {$code} ;
     if ($region_code eq '')
@@ -6152,10 +5814,10 @@ sub WriteReportCountryBrowser
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region_name =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -6262,8 +5924,7 @@ sub WriteReportCountryBrowser
 
   $html_regions = '' ;
 
-  foreach $key (qw (N S QP XX AF AS EU CA NA SA OC))
-# foreach $key (qw (N S       AF AS AU EU CA NA SA OC)) # skip IPv6 and Unknown till data are vetted
+  foreach $key (qw (N S QP XX AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
@@ -6276,6 +5937,7 @@ sub WriteReportCountryBrowser
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
@@ -6310,8 +5972,6 @@ sub WriteReportCountryBrowser
     $html_regions .= "</tr>\n" ;
 
     if (($key eq 'XX') || (($key eq 'OC')))
-  # if (($key eq 'S') || (($key eq 'OC')))
-
     { $html_regions .= "<tr><td colspan=99>&nbsp;</td></tr>" ; }
   }
   $html .= "</tbody>\n</table>" ;
@@ -6404,7 +6064,7 @@ sub UserAgentsTimedRow
 
 sub WriteReportUserAgentsTimed
 {
-  &LogSub ("WriteReportUserAgentsTimed\n") ;
+  &Log ("WriteReportUserAgentsTimed\n") ;
 
   open FILE_HTML_USERAGENTS_TIMED, '>', "$path_reports/$file_html_user_agents_timed" ;
   my $html = "" ;
@@ -6419,7 +6079,6 @@ sub WriteReportUserAgentsTimed
      while ($line = <FILE_HTML_USERAGENTS_TIMED_OLD>)
      {
         $line =~ s/<tbody>/<tbody>\n$newrow/ ;
-        $line =~ s/$out_generated.*?<br>/"Updated on" . date_time_english (time) . "\n<br>"/e ;
         $html .= $line ;
      }
      close FILE_HTML_USERAGENTS_TIMED_OLD ;
@@ -6430,9 +6089,9 @@ sub WriteReportUserAgentsTimed
     $html = $headerwithperc ;
     $html =~ s/TITLE/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
     $html =~ s/HEADER/Wikimedia Traffic Analysis Report - User agents temporal development/ ;
-    $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-    $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
-    $html =~ s/LINKS2/&ListLinksTrendsExcept ($link_user_agents)/e ; 
+    $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+    $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
+    $html =~ s/LINKS/Trends: $dummy_user_agents \/ $link_trends_countries \/ $link_trends_browsers \/ $link_trends_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6485,7 +6144,7 @@ sub BrowsersTimedRow
     $totaltimed += $count ;
   }
   my $rowvalue = $totaltimed * $multiplier ;
-  $result = "<tr>" ;
+  my $result = "<tr>" ;
   $result .= "<td class=l>$month</td>" ;
   $result .= "<td/>" ;
   $result .= &UserAgentFieldNew( $nonmobiletimed {'MSIE'}, $false, $rowvalue) ;
@@ -6507,7 +6166,7 @@ sub BrowsersTimedRow
 
 sub WriteReportBrowsersTimed
 {
-  &LogSub ("WriteReportBrowsersTimed\n") ;
+  &Log ("WriteReportBrowsersTimed\n") ;
 
   open FILE_HTML_BROWSERS_TIMED, '>', "$path_reports/$file_html_browsers_timed" ;
   my $html = "" ;
@@ -6532,9 +6191,9 @@ sub WriteReportBrowsersTimed
     $html = $headerwithperc ;
     $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
     $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browsers temporal development/ ;
-    $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-    $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
-    $html =~ s/LINKS2/&ListLinksTrendsExcept ($link_trends_browsers)/e ; 
+    $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+    $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
+    $html =~ s/LINKS/Trends: $link_trends_useragents \/ $link_trends_countries \/ $dummy_browsers \/ $link_trends_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6559,19 +6218,17 @@ sub WriteReportBrowsersTimed
 sub DevicesTimedRow
 {
   my $month = shift ;
+  my $result = "<tr>" ;
   $month = &ShowMonth ($month) ;
-
-  &LogDetail ("Working on devices timed!\n") ;
+  print "Working on devices timed!\n" ;
 
   foreach $device (keys_sorted_by_value_num_desc %devices)
   {
     $catdevicesection { $catfordevice { $device} } += $devices { $device } ;
     $totaldevicetimed += $devices { $device} ;
   }
-
   my $rowvalue = $totaldevicetimed * $multiplier ;
   my $result = "<tr>" ;
-
   $result .= "<td class=l>$month</td>" ;
   $result .= "<td/>" ;
   $result .= &UserAgentFieldNew( $catdevicesection {'iOS'}, $false, $rowvalue) ;
@@ -6584,14 +6241,13 @@ sub DevicesTimedRow
   $result .= &UserAgentFieldNew( $catdevicesection {'Nintendo'}, $false, $rowvalue) ;
   $result .= &UserAgentFieldNew( $catdevicesection {'Other'}, $false, $rowvalue) ;
   $result .= "</tr>" ;
-
   return $result ;
 }
 
 
 sub WriteReportDevicesTimed
 {
-  &LogSub ("WriteReportDevicesTimed\n") ;
+  &Log ("WriteReportDevicesTimed\n") ;
 
   open FILE_HTML_DEVICES_TIMED, '>', "$path_reports/$file_html_devices_timed" ;
   my $html = "" ;
@@ -6616,9 +6272,9 @@ sub WriteReportDevicesTimed
     $html = $headerwithperc ;
     $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Devices temporal development/ ;
     $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Devices temporal development/ ;
-    $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
-    $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
-    $html =~ s/LINKS2/&ListLinksTrendsExcept ($link_trends_devices)/e ;
+    $html =~ s/ALSO/&nbsp;See also: <b>LINKS<\/b>/ ;
+    $html =~ s/LINKS/$link_requests $link_origins \/ $link_methods \/ $link_scripts \/ $link_user_agents \/ $link_skins \/ $link_crawlers \/ $link_opsys \/ $link_devices \/ $link_browsers \/ $link_google \/ $link_countries<br\/>\nLINKS/ ;
+    $html =~ s/LINKS/Trends: $link_trends_useragents \/ $link_trends_countries \/ $link_trends_browsers \/ $dummy_devices/ ;
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
@@ -6640,7 +6296,7 @@ sub WriteReportDevicesTimed
 
 sub WriteCsvGoogleBots
 {
-  &LogSub ("WriteCsvGoogleBots\n") ;
+  &Log ("WriteCsvGoogleBots\n") ;
 
   open CSV_GOOGLE_BOTS_OUT, '>', "$path_reports/$file_csv_google_bots" ;
   print CSV_GOOGLE_BOTS_OUT "Date Time,Ip Range,Hits\n" ;
@@ -6655,9 +6311,9 @@ sub WriteCsvGoogleBots
       chomp $line ;
       ($datetime,$range,$hits) = split (',', $line) ;
       ($date,$time) = split (' ', $datetime) ;
-      my ($year,$month,$day) = split ('\/', $date) ;
-      my $hour = substr ($time,0,2) ;
-      my $datetime = "\"=DATE($year,$month,$day)+TIME($hour,0,0)\"" ;
+      ($year,$month,$day) = split ('\/', $date) ;
+      $hour = substr ($time,0,2) ;
+      $datetime = "\"=DATE($year,$month,$day)+TIME($hour,0,0)\"" ;
       print CSV_GOOGLE_BOTS_OUT "$datetime,$hits,$range\n" ;
       $googlebots {$datetime} += $hits ;
     }
@@ -6670,7 +6326,7 @@ sub WriteCsvGoogleBots
 
 sub WriteCsvBrowserLanguages
 {
-  &LogSub ("WriteCsvBrowserLanguages\n") ;
+  &Log ("WriteCsvBrowserLanguages\n") ;
 
   open CSV_BROWSER_LANGUAGES, '>', "$path_reports/$file_csv_browser_languages" ;
   print CSV_BROWSER_LANGUAGES "Browser,Languages,Hits\n" ;
@@ -6681,7 +6337,7 @@ sub WriteCsvBrowserLanguages
 
 sub WriteCsvCountriesTimed
 {
-  &LogSub ("WriteCsvCountriesTimed: $path_csv/$file_csv_countries_timed\n") ;
+  &Log ("WriteCsvCountriesTimed: $path_csv/$file_csv_countries_timed\n") ;
 
   $multiplier_1000 = 1000 * $multiplier ;
   open CSV_COUNTRIES_TIMED, '>', "$path_csv/$file_csv_countries_timed" ;
@@ -6713,7 +6369,6 @@ sub WriteCsvCountriesTimed
       }
       print CSV_COUNTRIES_TIMED "$line\n" ;
 
-      my ($time, $time2, $hrs, $min, $line) ;
       foreach $time (sort {$a <=> $b} keys %times)
       {
         $hrs = $time / 60 ;
@@ -6737,7 +6392,7 @@ sub WriteCsvCountriesTimed
 # http://www.maxmind.com/app/iso3166 country codes
 sub WriteCsvCountriesGoTo
 {
-  &LogSub ("WriteCsvCountriesGoTo: $path_csv/$file_csv_countries_languages_visited\n") ;
+  &Log ("WriteCsvCountriesGoTo: $path_csv/$file_csv_countries_languages_visited\n") ;
 
   open CSV_COUNTRIES_LANGUAGES_VISITED, '>', "$path_csv/$file_csv_countries_languages_visited" ;
 
@@ -6802,7 +6457,7 @@ sub WriteCsvCountriesGoTo
 
 sub WriteReportPerLanguageBreakDown
 {
-  &LogSub ("WriteReportPerLanguageBreakDown\n") ;
+  &Log ("WriteReportPerLanguageBreakDown\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -6912,9 +6567,9 @@ sub WriteReportPerLanguageBreakDown
 
 sub WriteReportPerCountryOverview
 {
-  &LogSub ("WriteReportPerCountryOverview\n") ;
+  &Log ("WriteReportPerCountryOverview\n") ;
 
-  my ($title,$views_edits,$links,$sample_rate) = @_ ;
+  my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
   my (@index_countries,@csv_countries) ;
   my $views_edits_lc = lc $views_edits ;
@@ -6978,10 +6633,10 @@ sub WriteReportPerCountryOverview
     $region_name =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region_name =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region_name =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region_name =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region_name =~ s/^XX$/<font color=#808080><b>Unknown<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -6990,7 +6645,7 @@ sub WriteReportPerCountryOverview
     ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
 
     my $requests_this_country  = $requests_recently_per_country {$country} ;
-    my $requests_this_country2 = int ($requests_this_country * $sample_rate / $months_recently) ;
+    my $requests_this_country2 = int ($requests_this_country * 1000 / $months_recently) ;
     $requests_tot += $requests_this_country2  ;
 
     $requests_per_region {$region_code}      += $requests_this_country ;
@@ -7037,7 +6692,6 @@ sub WriteReportPerCountryOverview
     $country2 =~ s/Iran, Islamic Republic of/Iran/ ;
     $country2 =~ s/UAE/United Arab Emirates/ ;
     $country2 =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
-  # $country2 =~ s/Congo - The Democratic Republic of the/Congo Dem. Rep./ ;
   # $country2 =~ s/^Congo$/Republic of the Congo/ ;
     $country2 =~ s/Syrian Arab Republic/Syria/ ;
     $country2 =~ s/Tanzania, United Republic of/Tanzania/ ;
@@ -7116,7 +6770,7 @@ sub WriteReportPerCountryOverview
 
 
   $html_regions = '' ;
-  foreach $key (qw (N S AF AS EU CA NA SA OC XX))
+  foreach $key (qw (N S AF AS AU EU CA NA SA OC))
   {
     $region = $key ;
 
@@ -7127,10 +6781,10 @@ sub WriteReportPerCountryOverview
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
     $region =~ s/^SA$/<font color=#FCAA03><b>South-America<\/b><\/font>/ ;
     $region =~ s/^NA$/<font color=#C802CA><b>North-America<\/b><\/font>/ ;
+    $region =~ s/^AU$/<font color=#02AAD4><b>Australia<\/b><\/font>/ ;
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region =~ s/^XX$/<font color=#808080><b>Unknown<\/b><\/font>/ ;
 
     $population_region = $population_per_region {$key} ;
     $connected_region  = $connected_per_region  {$key} ;
@@ -7170,42 +6824,25 @@ sub WriteReportPerCountryOverview
     { $bar = "<img src='bluebar_hor.gif' width=" . (int ($perc_share_total * 3)) . " height=15>" ; }
 
  #  $html_regions .= &WriteReportPerCountryOverviewLine ("All countries in", $region, '', $requests, $population) ;
+    $html_regions .= "<tr><th>All countries in</th>" .
+                     "</td><td>$region</td>" .
+                     "<td>&nbsp;</td>" .
+                     "<td>$population_region</td>" .
+                     "<td>$perc_population_region</td>" .
+                     "<td>$connected_region</td>" .
+                     "<td>$perc_connected_region</td>" .
+                     "<td>$requests_region2</td>" .
+                     "<td>$requests_per_connected_person</td>" .
+                     "<td>$perc_share_total</th>" .
+                     "<td class=l>$bar</td></tr>\n" ;
 
-    if ($key ne 'XX')
-    {
-      $html_regions .= "<tr><th>All countries in</th>" .
-                       "</td><td>$region</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>$population_region</td>" .
-                       "<td>$perc_population_region</td>" .
-                       "<td>$connected_region</td>" .
-                       "<td>$perc_connected_region</td>" .
-                       "<td>$requests_region2</td>" .
-                       "<td>$requests_per_connected_person</td>" .
-                       "<td>$perc_share_total</th>" .
-                       "<td class=l>$bar</td></tr>\n" ;
-    }
-    else
-    {
-      $html_regions .= "<tr><th>Remainder</th>" .
-                       "</td><td>$region</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>$requests_region2</td>" .
-                       "<td>&nbsp;</td>" .
-                       "<td>$perc_share_total</th>" .
-                       "<td class=l>$bar</td></tr>\n" ;
-    }
-
-    if (($key eq 'S') || (($key eq 'XX')))
+    if (($key eq 'S') || (($key eq 'OC')))
     { $html_regions .= "<tr><td colspan=99>&nbsp;</td></tr>" ; }
   }
 
 
   $html .= "</tbody>\n</table>" ;
+  $html .= "<p>Countries are only included if the number of $views_edits_lc in the period exceeds 100,000 (100 matching records in 1:1000 sampled log)" ;
   $html .= "<br>$views_edits_lcf by bots are not included. Also all ip addresses that occur more than once on a given day are discarded for that day." ;
   $html .= "<br> A few false negatives are taken for granted. " ;
   $html .= "Country meta data collected from English Wikipedia (<a href='http://en.wikipedia.org/wiki/List_of_countries_by_population'>population</a>, <a href='http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'>internet users</a>)). " ;
@@ -7239,7 +6876,7 @@ sub WriteCsvFilePerCountryDensity
 {
   my ($views_edits, $period, $ref_requests_per_period_per_country, $max_requests_per_connected_us, $desc_animation) = @_ ;
 
-  &LogSub ("WriteCsvFilePerCountryDensity (input for input for http://gunn.co.nz/map/) $views_edits\n\n") ;
+  &Log ("\nWriteCsvFilePerCountryDensity $views_edits\n\n") ;
 
   my %requests_per_country_code = %{$ref_requests_per_period_per_country -> {$period}} ;
 
@@ -7324,26 +6961,20 @@ sub WriteCsvFilePerCountryDensity
     { $perc_connected = sprintf ("%.1f", 100 * $connected / $population) .'%' ; }
 
     # now use country names that are suitable for http://gunn.co.nz/map/
-    $country =~ s/UAE/United Arab Emirates/ ;                                                 # http://gunn.co.nz/map/
-    $country =~ s/Congo Dem. Rep./Democratic Republic of the Congo/ ;                         # http://gunn.co.nz/map/
-  # $country =~ s/^Congo$/Republic of the Congo/ ;                                            # http://gunn.co.nz/map/
-  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;                                              # http://gunn.co.nz/map/
-    $country =~ s/Serbia/republic of serbia/ ;                                                # http://gunn.co.nz/map/
-
-  # $country =~ s/Moldova, Republic of/Moldova/ ;
-  # $country =~ s/Korea, Republic of/South Korea/ ;
-  # $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-  # $country =~ s/Iran, Islamic Republic of/Iran/ ;
-  # $country =~ s/UAE/United Arab Emirates/ ;
-  # $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
- ## $country =~ s/^Congo$/Republic of the Congo/ ;
-  # $country =~ s/Syrian Arab Republic/Syria/ ;
-  # $country =~ s/Tanzania, United Republic of/Tanzania/ ;
-  # $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
- ## $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
-  # $country =~ s/Serbia/republic of serbia/ ;
-  # $country =~ s/Lao People's Democratic Republic/Laos/ ;
-  #  $country =~ s/,/./g ;
+    $country =~ s/Moldova, Republic of/Moldova/ ;
+    $country =~ s/Korea, Republic of/South Korea/ ;
+    $country =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+    $country =~ s/Iran, Islamic Republic of/Iran/ ;
+    $country =~ s/UAE/United Arab Emirates/ ;
+    $country =~ s/Congo - The Democratic Republic of the/Democratic Republic of the Congo/ ;
+  # $country =~ s/^Congo$/Republic of the Congo/ ;
+    $country =~ s/Syrian Arab Republic/Syria/ ;
+    $country =~ s/Tanzania, United Republic of/Tanzania/ ;
+    $country =~ s/Libyan Arab Jamahiriya/Libya/ ;
+  # $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
+    $country =~ s/Serbia/republic of serbia/ ;
+    $country =~ s/Lao People's Democratic Republic/Laos/ ;
+    $country =~ s/,/./g ;
 
 #Missing values for large countries (large as visible on http://gunn.co.nz/map/)
 #Democratic Republic of the Congo,372000.0,..,..,..,..
@@ -7377,7 +7008,7 @@ sub WriteCsvFilePerCountryDensity
   { $perc_connected_tot = sprintf ("%.1f", 100 * $connected_tot / $population_tot) .'%' ; }
 
 # push @csv_countries, "world,*,$requests_tot,$population_tot,$connected_tot,$perc_connected_tot,$requests_per_connected_person_tot,100%\n" ;
-  &LogDetail ("$period $requests_tot\n") ;
+  print "$period $requests_tot\n" ;
 
 # $file_csv_per_country_overview2 =  $file_csv_per_country_overview ;
 # $file_csv_per_country_overview2 =~ s/\.csv/-$postfix.csv/ ;
@@ -7386,7 +7017,7 @@ sub WriteCsvFilePerCountryDensity
 
 sub WriteCsvSvgFilePerCountryOverview
 {
-  &LogSub ("WriteCsvSvgFilePerCountryOverview\n") ;
+  &Log ("WriteCsvSvgFilePerCountryOverview\n") ;
 
   my ($views_edits, $period, $ref_requests_per_period_per_country_code, $max_requests_per_connected_user, $desc_animation) = @_ ;
 
@@ -7554,7 +7185,7 @@ next ;
   { $perc_connected_tot = sprintf ("%.1f", 100 * $connected_tot / $population_tot) .'%' ; }
 
   push @csv_countries, "world,*,$requests_tot,$population_tot,$connected_tot,$perc_connected_tot,$requests_per_connected_person_tot,100%\n" ;
-  &LogDetail ("$period $requests_tot\n") ;
+  print "$period $requests_tot\n" ;
 
   $file_csv_per_country_overview2 =  $file_csv_per_country_overview ;
   $file_csv_per_country_overview2 =~ s/\.csv/-$postfix.csv/ ;
@@ -7613,7 +7244,7 @@ next ;
 
 sub WriteWorldMapSvg
 {
-  &LogSub ("WriteWorldMapSvg\n") ;
+  &Log ("WriteWorldMapSvg\n") ;
 
   ($period, $description) = @_ ;
 
@@ -7626,9 +7257,7 @@ sub WriteWorldMapSvg
 #  { $line =~ s/COUNTRY_STYLES/$svg_text/ ; }
 
   ($text1,$text2) = split ' - ', $description ;
-  &LogDetail ("Animation description: $description -> $text1 | $text2\n") ;
-
-  my $lines ;
+  &Log ("Animation description: $description -> $text1 | $text2\n") ;
 
   $lines = join '', @lines ;
   $lines =~ s/<circle[^>]*?>//gs ;
@@ -7699,7 +7328,7 @@ sub WriteWorldMapSvg
   }
   close SVG_OUT ;
 
-  &LogDetail ("Convert world_map_$period.svg to png\n") ;
+  &Log ("Convert world_map_$period.svg to png\n") ;
   `svg/convert.exe svg/world_map_$period.svg png:svg/world_map_$period.png` ;
 # print "Convert world_map_$period.svg to jpg\n" ;
 # `svg/convert.exe svg/world_map_$period.svg jpg:svg/world_map_$period.jpg` ;
@@ -7779,25 +7408,20 @@ sub RatioAndFillColor2
 
 sub WriteReportPerCountryBreakdown
 {
-  &LogSub ("WriteReportPerCountryBreakDown\n") ;
+  &Log ("WriteReportPerCountryBreakDown\n") ;
 
-  my ($title,$views_edits,$links,$cutoff_requests, $cutoff_percentage, $show_logcount, $sample_rate) = @_ ;
+  my ($title,$views_edits,$links,$cutoff_requests, $cutoff_percentage, $show_logcount) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
   my ($requests_this_language, $requests_all_languages, $requests_used, $requests_other) ;
   my @index_countries ;
   my $views_edits_lc = lc $views_edits ;
 
-  if ($sample_rate == 1) # edits
-  { $report_version = '' ; }
+  if ($show_logcount)
+  { $report_version = "<p>Showing even small percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
+             "Switch to <a href='$file_html_per_country_breakdown'>concise version</a>" ; }
   else
-  {
-    if ($show_logcount)
-    { $report_version = "<p>Showing even small percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
-               "Switch to <a href='$file_html_per_country_breakdown'>concise version</a>" ; }
-    else
-    { $report_version = "<p>Showing only only major percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
-               " Switch to <a href='$file_html_per_country_breakdown_huge'>detailed version</a>" ; }
-  }     
+  { $report_version = "<p>Showing only only major percentages (> $cutoff_percentage\%) (read <a href='#more'>more</a>). " .
+             " Switch to <a href='$file_html_per_country_breakdown_huge'>detailed version</a>" ; }
 
   $html  = $header ;
   $html =~ s/TITLE/$title/ ;
@@ -7907,14 +7531,12 @@ sub WriteReportPerCountryBreakdown
   $html .= "</table>" ;
   $html .= "<p><a name='more' id='more'></a><b>Share<\/b> is the percentage of requesting ip addresses (out of the global total) which originated from this country" .
            "<br>&nbsp;Further percentages show per country share of $views_edits_lc per Wikipedia visited" ;
-  if ($sample_rate > 1)
-  { $html .= "<p><b>Countries</b> are only included if the number of requests in the period exceeds " . ($cutoff_requests * $sample_rate) . "($cutoff_requests matching records in 1:$sample_rate sampled log)" ; }
+  $html .= "<p><b>Countries</b> are only included if the number of requests in the period exceeds $cutoff_requests,000 ($cutoff_requests matching records in 1:1000 sampled log)" ;
   $html .= "<p><b>Wikipedia's</b> are only listed for some country if the share of visitors for that particular country exceeds $cutoff_percentage\%." ;
   if ($show_logcount)
   {
-    $html .= "<p>The second column displays the actual <b>numbers of records</b> found in the 1:$sample_rate sampled log on which the percentage is based." ;
-    if ($sample_rate > 1)
-    { $html .= "<br>Multiply by $sample_rate for actual $views_edits_lc over the whole period of $months_recently months." ; }
+    $html .= "<p>The second column displays the actual <b>numbers of records</b> found in the 1:1000 sampled log on which the percentage is based." .
+             "<br>Multiply by 1000 for actual $views_edits_lc over the whole period of $months_recently months." ;
     $html .= "<br>If the number of records in the sampled log does not reach the (arbitrary) number of 5 per sampled month, the percentage is flagged dark red to extra emphasize high inaccuracy." ;
   }
 
@@ -7938,7 +7560,7 @@ sub WriteReportPerCountryBreakdown
 
 sub WriteReportPerCountryTrends
 {
-  &LogSub ("WriteReportPerCountryTrends\n") ;
+  &Log ("WriteReportPerCountryTrends\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
@@ -7999,7 +7621,7 @@ sub WriteReportPerCountryTrends
     $html .= "</tr>\n" ;
     # print "\n" ;
 
-    my $lines = 0 ;
+    $lines = 0 ;
     foreach $quarter (reverse @quarters)
     {
       next if $views_edits eq 'Page Edits' and $quarter =~ /2009.*?Q3/ ; # strange results, to be researched
@@ -8233,7 +7855,7 @@ sub OpenLog
 # }
 # open "FILE_LOG", ">>", "$path_reports/$file_log" || abort ("Log file '$file_log' could not be opened.") ;
   open "FILE_LOG", ">>", "$path_log/$file_log" || abort ("Log file '$file_log' could not be opened.") ;
-  &LogDetail ("\n\n===== Wikimedia Sampled Visitors Log Report / " . date_time_english (time) . " =====\n\n") ;
+  &Log ("\n\n===== Wikimedia Sampled Visitors Log Report / " . date_time_english (time) . " =====\n\n") ;
 }
 
 sub Normalize
@@ -8251,32 +7873,9 @@ sub Log
   print FILE_LOG $msg ;
 }
 
-sub LogBreak
-{
-  &Log ("\n") ;
-}
-
-sub LogSub
-{
-  $msg = shift ;
-  &Log ("> $msg") ;
-}
-
-sub LogDetail
-{
-  $msg = shift ;
-  &Log (". $msg") ;
-}
-
-sub LogList
-{
-  $msg = shift ;
-  &Log ("* $msg") ;
-}
-
 sub InitProjectNames
 {
-  &LogSub ("InitProjectNames\n") ;
+  &Log ("InitProjectNames\n") ;
 
   # copied from WikiReports.pl
 
@@ -8627,9 +8226,17 @@ sub Percentage
   return ($perc) ;
 }
 
-sub ReadWikipediaCountriesByPopulation
+sub ReadWikipedia
 {
-  &LogSub ("ReadWikipediaCountriesByPopulation\n") ;
+  &Log ("ReadWikipedia\n") ;
+
+  use LWP::Simple qw($ua get);
+
+  $ua->agent('Wikipedia Wikicounts job');
+  $ua->timeout(60);
+
+
+  &Log ("Read List_of_countries_by_population\n\n") ;
   my $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
   my $html = get $url || abort ("Timed out!") ;
 
@@ -8655,11 +8262,10 @@ sub ReadWikipediaCountriesByPopulation
     if ($cells [2] =~ /<img /)
     {
       $icon = $cells [2] ;
-      $icon =~ s/srcset=\"[^\"]+\"// ;
       $icon =~ s/^.*?(<img[^>]*>).*$/$1/ ;
       $icon =~ s/class=\"[^\"]*\"// ;
       $icon =~ s/\s*\/>/>/ ;
-    # print "ICON '$icon'\n" ;
+      # print "ICON '$icon'\n" ;
     }
     else
     { $icon = "n.a." ; }
@@ -8698,28 +8304,17 @@ sub ReadWikipediaCountriesByPopulation
     $country =~ s/UAE/United Arab Emirates/ ;
     $country =~ s/Korea, South/South Korea/ ;
     $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
-  # $country =~ s/Congo, Democratic Republic of/Dem. Rep. Congo/ ;
-
     $country =~ s/Congo, Republic of/Republic of the Congo/ ;
-  # $country =~ s/Congo, Republic of/Rep. Congo/ ;
-
     $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
     $country =~ s/Gambia, The/Gambia/ ;
     $country =~ s/Bahamas, The/The Bahamas/ ;
-    $country =~ s/Myanmar/Burma/ ;
-    $country =~ s/Republic of Ireland/Ireland/ ;
-    $country =~ s/Palestin.*/Palestinian Territories/ ;
-    $country =~ s/Georgia_.*country.*/Georgia/ ;
     $country =~ s/,/&comma;/g ;
 
     # print "country: $country\nlink: $link\npopulation: $population\nconnected: $connected\nicon: $icon\n\n" ;
     $countries {$country} = "$country,$link,$population,connected,$icon\n" ;
   }
-}
 
-sub ReadWikipediaCountriesByInternetUsers
-{
-  &LogSub ("ReadWikipediaCountriesByInternetUsers\n") ;
+  &Log ("List_of_countries_by_number_of_Internet_users\n\n") ;
 
   $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users';
   $html = get $url || abort ("Timed out!") ;
@@ -8735,12 +8330,14 @@ sub ReadWikipediaCountriesByInternetUsers
   # print "$line\n\n" ;
 
     @cells = split "(?=<td)", $line ;
+   # foreach $cell (@cells)
+   # { print "CELL $cell\n" ; }
 
-    if ($cells [1] =~ /title/)
+    if ($cells [2] =~ /title/)
     {
-      $country = $cells [1] ;
-      $country =~ s/^.*?title=\"([^\"]+)".*$/$1/ ;
-    # print "COUNTRY '$country'\n" ;
+      $country = $cells [2] ;
+      $country =~ s/^.*?<a [^>]*>([^<]*)<.*$/$1/ ;
+      # print "COUNTRY '$country'\n" ;
     }
     else
     { $country = "n.a." ; }
@@ -8754,21 +8351,12 @@ sub ReadWikipediaCountriesByInternetUsers
     $country =~ s/Korea, South/South Korea/ ;
     $country =~ s/Congo, Democratic Republic of/Democratic Republic of the Congo/ ;
     $country =~ s/Congo, Republic of/Republic of the Congo/ ;
-  # $country =~ s/Congo, Democratic Republic of/Dem. Rep. Congo/ ;
-  # $country =~ s/Congo, Republic of/Rep. Congo/ ;
-  # $country =~ s/Macedonia, Republic of/Macedonia/ ;
+    $country =~ s/Macedonia, Republic of/Republic of Macedonia/ ;
     $country =~ s/Gambia, The/Gambia/ ;
     $country =~ s/Bahamas, The/The Bahamas/ ;
-    $country =~ s/Republic of Ireland/Ireland/ ;
-    $country =~ s/Republic of Macedonia/Macedonia/ ;
-    $country =~ s/Georgia.*country.*/Georgia/ ;
-    $country =~ s/The Gambia/Gambia/ ;
-    $country =~ s/Palestin.*/Palestinian Territories/ ;
-    $country =~ s/Myanmar/Burma/ ;
     $country =~ s/,/&comma;/g ;
 
-    $connected = $cells [2] ;
-    $connected =~ s/<td[^>]*>(.*?)<.*$/$1/, $connected =~ s/,/_/g ;
+    ($connected = $cells [3]) =~ s/<td[^>]*>(.*?)<.*$/$1/, $connected =~ s/,/_/g ;
     # print "POP $population\n\n" ;
 
     # print "Country: $country\nconnected: '$connected'\n\n" ;
@@ -8776,17 +8364,17 @@ sub ReadWikipediaCountriesByInternetUsers
     $countries {$country} =~ s/connected/$connected/ ;
   }
 
-  &LogDetail ("Metric 'connected' unknown for:\n\n") ;
+  &Log ("Metric 'connected' unknown for:\n\n") ;
   foreach $country (sort keys %countries)
   {
     $data = $countries {$country} ;
 
     if ($data =~ /connected/)
-    { &LogDetail ("$country\n") ; }
+    { &Log ("$country\n") ; }
   }
 
-  &LogDetail ("Write $path_meta/$file_csv_country_meta_info\n\n") ;
-  open COUNTRY_META_INFO, '>', "$path_meta/$file_csv_country_meta_info" ;
+  &Log ("Write $path_csv/meta/$file_csv_country_meta_info\n\n") ;
+  open COUNTRY_META_INFO, '>', "$path_csv/meta/$file_csv_country_meta_info" ;
   foreach $country (sort keys %countries)
   { print COUNTRY_META_INFO $countries {$country} ; }
   close COUNTRY_META_INFO ;
@@ -8809,9 +8397,8 @@ sub CountryMetaInfo
   my ($link_country,$icon,$population) ;
   if ($country_meta_info {$country}  eq "")
   {
-    $country_meta_info_not_found_reported {$country} ++ ;
-    if ($country_meta_info_not_found_reported {$country} == 1)
-    { &LogDetail ("Meta info not found for country $country\n") ; }
+    if ($country_meta_info_not_found_reported {$country} ++ == 0)
+    { &Log ("Meta info not found for country $country\n") ; }
     $link_country = $country ;
     return ($country,'','..','..') ;
   }
@@ -8898,10 +8485,6 @@ sub PrintHtml
   open  HTML_OUT, '>', $path ;
   print HTML_OUT $html ;
   close HTML_OUT ;
-
-  $ago = -M $path ;
-  &Log ("Html file printed: $path\n") ;
-
 }
 
 sub PrintCsv

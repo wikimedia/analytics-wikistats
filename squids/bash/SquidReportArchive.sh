@@ -7,7 +7,7 @@ ulimit -v 8000000
 wikistats=/a/wikistats_git
 squids=$wikistats/squids
 perl=$squids/perl
-perl=/home/ezachte/wikistats/squids-scripts-2012-10/perl/ # temp
+perl=/home/ezachte/wikistats/squids/perl/ # temp
 
 csv_sampled=$squids/csv               # views and edits, 1:1000 sampled       
 csv_edits_unsampled=$squids/csv_edits # edits only, 1:1 unsampled
@@ -24,15 +24,15 @@ cd $perl
 
 log=$logs/SquidReportArchive.log
 
-month=2014-03  
-quarter=2013Q4
-quarter2=2013-Q4 # hmm need to remove dash some day 
+month=2014-04  
+quarter=2014Q1
+quarter2=2014-Q1 # hmm need to remove dash some day 
 
 run_collect_country_stats=no
 run_refresh_from_wikipedia=no
 run_monthly_countries_reports=no
-run_quarterly_countries_reports=yes
-run_monthly_non_geo_reports=no
+run_quarterly_countries_reports=no
+run_monthly_non_geo_reports=yes
 
 if [ "$run_monthly_countries_reports" == "yes" ] ; then
   run_collect_country_stats=yes
@@ -142,6 +142,7 @@ if [ "$run_monthly_non_geo_reports" == "yes" ] ; then
 fi
 # after vetting reports are now manually rsynced to 
 # - stat1001/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
+
 # - stat1001/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
 
 echo Done
