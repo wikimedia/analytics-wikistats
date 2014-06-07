@@ -300,6 +300,8 @@ sub ReadStatisticsMonthlyAllProjects
 
   if (! -e $file_csv_in)
   { &Abort ("Input file '$file_csv_in' not found") ; }
+  if (-s $file_csv_in == 0)
+  { &Abort ("Input file '$file_csv_in' is empty, run ../dumps/bash/count_merge_editors.sh") ; }
 
   print "Read '$file_csv_in'\n" ;
   open CSV_IN, '<', $file_csv_in ;
@@ -447,6 +449,7 @@ sub WriteMonthlyData
       { $line .= "n.a.," ; }
       $line =~ s/,$// ;
       $output .= "$line\n" ;
+
 
     # $line = ",Total after merge - normalized (1st 28 days)," ;
     # for ($m = $m_start ; $m <= $m_last ; $m++)
@@ -1188,6 +1191,7 @@ sub InitProjectNames
   pih=>"http://pih.wikipedia.org Norfolk",
   pl=>"http://pl.wikipedia.org Polish",
   pms=>"http://pms.wikipedia.org Piedmontese",
+  pnb=>"http://pnb.wikipedia.org Western Panjabi",
   ps=>"http://ps.wikipedia.org Pashto",
   pt=>"http://pt.wikipedia.org Portuguese",
   qu=>"http://qu.wikipedia.org Quechua",
