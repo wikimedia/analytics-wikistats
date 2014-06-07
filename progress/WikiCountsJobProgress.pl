@@ -287,7 +287,7 @@ sub ReadStatsCsv
     # $runlength2 = sprintf ("%07d", 9999999 - $runlength) ;
     # print "$project, $language, $days1, $days2, $minutes\n" ;
     if ($project eq "wx")
-    { if ($language !~ /^species|commons|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy$/) { next ; } }
+    { if ($language !~ /^species|commons|wikidata|nostalgia|incubator|meta|sources|foundation|mediawiki|sep11|strategy$/) { print "skip $project\n" ; next ; } }
 
     if ($rundate2 gt $rundatemax)
     {
