@@ -13,5 +13,12 @@ countrycodes=/a/wikistats_git/squids/csv/meta/CountryCodes.csv
 clear
  
 cd $perl
-perl WikiCountsUploadsByCountryWLM.pl -i $dumps_public/commonswiki/latest/commonswiki-latest-pages-meta-history.xml.7z -o $csv_csv_wx -n $countrycodes
+# x = Xml file
+# n = country Names
+# o = Output folder
+# b = Bot names
+perl WikiCountsUploadsByCountryWLM.pl -x $dumps_public/commonswiki/latest/commonswiki-latest-pages-meta-history.xml.7z \
+                                      -o $csv/csv_wx \
+				      -b $csv/csv_wx/BotsAll.csv \
+				      -n $countrycodes 
 

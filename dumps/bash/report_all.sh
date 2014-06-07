@@ -1,8 +1,10 @@
 #!/bin/sh
 
-wikistats=/a/wikistats_git
+#wikistats=/a/wikistats_git
+wikistats=/home/ezachte/wikistats
 cd $wikistats/dumps/bash
 
+./report.sh wp final
 ./report.sh wb final
 ./report.sh wk final
 ./report.sh wn final
@@ -12,4 +14,3 @@ cd $wikistats/dumps/bash
 ./report.sh wv final
 ./report.sh wx final
 ./report_regions.sh wp final
-./report.sh wp final

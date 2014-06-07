@@ -5,7 +5,7 @@ c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
-#perl=/home/ezachte/wikistats/dumps/perl # tests
+perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
 csv=$dumps/csv
 out=$dumps/out
@@ -90,7 +90,7 @@ case "$projectcode" in
 esac  
 echo2 "Generate and publish reports for project $project" 
 
-# for x in it # test
+# for x in en # test
 for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
   echo2 ""
@@ -175,7 +175,6 @@ do
     cd $perl
     c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -o $out/out_$1
     cd $bash
-    
     echo2 ""
     echo2 "Copy new and updated files from $out_project -> $htdocs_project"
   
@@ -208,9 +207,9 @@ done
 echo2 ""
 
 # Archive English reports
-
 if [ $do_zip -eq 1 ] ; then
   echo2 "Archive new English reports" 
+  cd $bash
   ./zip_out.sh $1
 else
   echo2 "No English reports built. Skip zip phase"							

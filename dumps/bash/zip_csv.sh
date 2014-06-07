@@ -6,7 +6,7 @@ wikistats=/a/wikistats_git
 csv=$wikistats/dumps/csv
 zip_all=$csv/zip_all
 
-dataset2=dataset2::pagecounts-ez/wikistats
+dataset1001=dataset1001::pagecounts-ez/wikistats
 
 if [ "$1" == "" ] ; then
   echo "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
@@ -44,6 +44,6 @@ zip -q $zip_all/csv_$1_activity_trends.zip *.csv -i UserActivity* -x *Temp* *Tes
 #rm     $zip_all/bz2_$1.zip
 #zip -q $zip_all/bz2_$1.zip *.bz2
 
-echo "rsync -avv $zip_all/csv_*.zip $dataset2"
-rsync -avv $zip_all/csv_*.zip $dataset2
+echo "rsync -avv $zip_all/csv_*.zip $dataset1001"
+rsync -avv $zip_all/csv_*.zip $dataset1001
 

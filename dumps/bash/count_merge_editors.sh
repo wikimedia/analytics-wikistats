@@ -13,6 +13,7 @@ log=$dumps/logs/count_merge_editors.log
 cd $perl
 
 echo . > $log
+
 # merge editors for all wikis of one project
 perl WikiCounts.pl -m wb -i $csv/csv_wb -o $csv/csv_wb/ -y | tee -a $log | cat
 perl WikiCounts.pl -m wk -i $csv/csv_wk -o $csv/csv_wk/ -y | tee -a $log | cat
