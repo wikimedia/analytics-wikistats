@@ -6,7 +6,7 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 
-yyyy_mm=2013-10
+yyyy_mm=2014-03
 threshold=20
 depth=9
 
@@ -14,6 +14,7 @@ depth=9
 
 #                                   wiki               category                           yyyy_mm    threshold      abbr    depth        
 #./dammit_list_views_by_category.sh 'de.wikipedia.org' 'Arzneistoff'                      2013-01     20             'wp-de' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Stub_categories'                  $yyyy_mm    20             'wp-en' 5
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Determinants_of_health'           2013-07     20             'wp-en' $depth
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Health'                           2013-07     20             'wp-en' $depth
  ./dammit_list_views_by_category.sh 'de.wikipedia.org' 'Arzneistoff'                      $yyyy_mm    20             'wp-de' $depth
