@@ -39,9 +39,7 @@ echo_ "Consolidate pagecount files into one daily file for last $maxage complete
 cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat"
 flock -n -e $bash/dammit_compact_daily.semaphore -c "$cmd" || { echo "Script is already running: lock on ../bash/dammit_compact_daily.semaphore" ; exit 1 ; } >&2
 
-echo_ "Consolidate pagecount files for whole month into one monthly file - only finds work to do on first day of new month\n"
-# c1 $bash/dammit_compact_monthly.sh 
-flock -n -e $bash/dammit_compact_monthly.semaphore -c "$bash/dammit_compact_monthly.sh" || { echo "Script dammit_compact_monthly.sh is already running: lock on ../bash/dammit_compact_monthly.semaphore" ; exit 1 ; } >&2
+"$bash"/dammit_compact_monthly.sh || exit 1
 
 echo_ "Publish new files\n"
 rsync -arv --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
