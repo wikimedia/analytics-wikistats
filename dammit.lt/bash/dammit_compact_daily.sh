@@ -39,7 +39,8 @@ echo_ "Consolidate pagecount files into one daily file for last $maxage complete
 cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat"
 flock -n -e $bash/dammit_compact_daily.semaphore -c "$cmd" || { echo "Script is already running: lock on ../bash/dammit_compact_daily.semaphore" ; exit 1 ; } >&2
 
-"$bash"/dammit_compact_monthly.sh || exit 1
+"$bash"/dammit_compact_monthly.sh # If dammit_compact_monthly.sh fails, we
+# continue nonetheless, to get new daily files rsynced
 
 echo_ "Publish new files\n"
 rsync -arv --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
