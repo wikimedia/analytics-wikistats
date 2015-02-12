@@ -3103,9 +3103,7 @@ sub GenerateTableMostActiveUsers
   $active_users  = 0 ;
   $recently_active_users = 0 ;
 
-  $userpage = $out_userpages {$wp} ;
-  if (! defined ($userpage))
-  { $userpage = "user" ; }
+  $userpage = 'User' ;
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
   $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
 
@@ -3214,9 +3212,7 @@ sub GenerateTableMostActiveBots
                &tdcb   ($out_tbl1_hdr6)) ;           # Days ago
   my $bots = 0 ;
 
-  $userpage = $out_userpages {$wp} ;
-  if (! defined ($userpage))
-  { $userpage = "user" ; }
+  $userpage = 'User' ;
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
   $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
   # edits/creates 0 = article namespace, usually ns 0
@@ -3297,9 +3293,7 @@ sub GenerateTableSleepingUsers
 
   $memorable_absent_users = 0 ;
 
-  $userpage = $out_userpages {$wp} ;
-  if (! defined ($userpage))
-  { $userpage = "user" ; }
+  $userpage = 'User' ;
   $url = $out_urls {$wp} . $out_wikipage . $userpage ;
   $url_rc = $out_urls {$wp} . $out_wikipage . 'Special:Contributions/' ;
 
@@ -4196,57 +4190,57 @@ sub GenerateComparisonTable
       if ($pageviews_mobile and $mode_wp)
       {
 	if ($squidslog)
-	{ 
+	{
           $out_html .= "<p>Switch to <a href='../../EN/${href_normalized}'>same report based on webstatscollector</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized_squids'>${coverage2}/Raw Data</a>" ; 
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized_squids'>${coverage2}/Raw Data</a>" ;
         }
 	else
-	{ 
-          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_normalized_squids}'>same report based on squid logs</a>" ; 
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ; 
+	{
+          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_normalized_squids}'>same report based on squid logs</a>" ;
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
         }
 	$href_current_file =  $href_normalized ;
-      }	
+      }
       else
       {
         $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
         $href_current_file =  $href_normalized ;
-      }	
+      }
     }
     else
     {
       if ($pageviews_mobile and $mode_wp)
       {
 	if ($squidslog)
-        { 
+        {
           $out_html .= "<p>Switch to <a href='../../EN/${href_not_normalized}'> same report based on webstatscollector</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized_squids'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized_squids'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
         }
 	else
-	{ 
-          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_not_normalized_squids}'> same report based on squid logs</a>" ; 
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ; 
+	{
+          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_not_normalized_squids}'> same report based on squid logs</a>" ;
+	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
         }
         $href_current_file =  $href_not_normalized ;
-      }	
+      }
       else
       {
         $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
         $href_current_file =  $href_not_normalized ;
-      }	
+      }
     }
 
     if ($mode_wp)
     {
       if ($squidslog)
-      { 
-        $root  = "../../EN/" ; 
-        $root2 = "" ; 
+      {
+        $root  = "../../EN/" ;
+        $root2 = "" ;
       }
       else
-      { 
-	$root  = "" ; 
-        $root2 = "../wikimedia/squids/" ; 
+      {
+	$root  = "" ;
+        $root2 = "../wikimedia/squids/" ;
       }
 
       if ($pageviews_mobile)

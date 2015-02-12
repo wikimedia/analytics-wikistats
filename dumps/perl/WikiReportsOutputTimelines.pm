@@ -98,7 +98,7 @@ sub GenerateTimelinePages
     else
     { $link_title = "<a href='http://$wp.wikipedia.org$out_wikipageTemplate:$title'>$ns: $title2</a>" } ;
 
-    $link_user = "<a href='http://$wp.wikipedia.org$out_wikipage" . $out_userpages {$wp} . ":" . $user .
+    $link_user = "<a href='http://$wp.wikipedia.org$out_wikipage" . 'User' . ":" . $user .
                  "'>$user2</a>" ;
 
     $date1 = &GetDateEnglish($time1) ;

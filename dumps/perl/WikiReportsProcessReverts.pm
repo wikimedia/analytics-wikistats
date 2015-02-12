@@ -647,9 +647,7 @@ sub WriteReportReverts
       ($count_article,     $article_reverted)     = split (',', $article_reverted) ;
       ($count_non_article ,$non_article_reverted) = split (',', $non_article_reverted) ;
 
-      $userpage = $out_userpages {$wp} ;
-      if (! defined ($userpage))
-      { $userpage = "user" ; }
+      $userpage = 'User' ;
 
       $url_user    = $out_urls {$wp} . $out_wikipage . $userpage ;
       $url_article = $out_urls {$wp} . $out_wikipage ;

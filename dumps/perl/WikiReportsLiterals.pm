@@ -510,58 +510,6 @@ sub SetLiterals
   $out_languages_org {"wa"} = "Walon" ;
   $out_languages_org {"zh"} = "&#20013;&#25991;" ;
 
-# language specific part of user page url
-  $out_userpages     {"ar"} = "User" ;
-  $out_userpages     {"ast"} = "User" ;
-  $out_userpages     {"bg"} = "User" ;
-  $out_userpages     {"br"} = "User" ;
-  $out_userpages     {"bs"} = "User" ;
-  $out_userpages     {"cs"} = "Wikipedista" ;
-  $out_userpages     {"cy"} = "User" ;
-  $out_userpages     {"da"} = "Bruger" ;
-  $out_userpages     {"de"} = "Benutzer" ;
-  $out_userpages     {"el"} = "User" ;
-  $out_userpages     {"en"} = "User" ;
-  $out_userpages     {"eo"} = "Vikipediisto" ;
-  $out_userpages     {"es"} = "Usuario" ;
-  $out_userpages     {"fr"} = "Utilisateur" ;
-  $out_userpages     {"he"} = "%D7%9E%D7%A9%D7%AA%D7%9E%D7%A9" ;
-  $out_userpages     {"hi"} = "%E0%A4%B8%E0%A4%A6%E0%A4%B8%E0%A5%8D%E0%A4%AF_" ;
-  $out_userpages     {"hr"} = "User" ;
-  $out_userpages     {"hu"} = "User" ;
-  $out_userpages     {"id"} = "Pengguna" ;
-  $out_userpages     {"it"} = "Utente" ;
-  $out_userpages     {"ja"} = "%E5%88%A9%E7%94%A8%E8%80%85" ;
-  $out_userpages     {"ml"} = "User" ;
-  $out_userpages     {"ms"} = "User" ;
-  $out_userpages     {"nah"}= "User" ;
-  $out_userpages     {"nl"} = "Gebruiker" ;
-  $out_userpages     {"nn"} = "Bruker" ;
-  $out_userpages     {"ko"} = "%EC%82%AC%EC%9A%A9%EC%9E%90" ;
-  $out_userpages     {"pl"} = "Wikipedysta" ;
-  $out_userpages     {"pt"} = "Usu&aacute;rio" ;
-  $out_userpages     {"ro"} = "Utilizator" ;
-  $out_userpages     {"sh"} = "User" ;
-  $out_userpages     {"sk"} = "User" ;
-  $out_userpages     {"sl"} = "User" ;
-  $out_userpages     {"sr"} = "User" ;
-  $out_userpages     {"ru"} = "%D0%A3%D1%87%D0%B0%D1%81%D1%82%D0%BD%D0%B8%D0%BA" ;
-  $out_userpages     {"sv"} = "Anv%E4ndare" ;
-  $out_userpages     {"tr"} = "User" ;
-  $out_userpages     {"wa"} = "Uzeu" ;
-  $out_userpages     {"zh"} = "User" ;
-
-  if ($mode_wn)
-  {
-    $out_userpages   {"pl"} = "Wikireporter" ;
-  }
-
-  if ($mode_ws)
-  {
-    $out_userpages   {"cs"} = "U%C5%BEivatel" ;
-    $out_userpages   {"pl"} = "Wikiskryba" ;
-  }
-
   $out_none          = "" ;
   $out_html_doc      = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " .
                        "\"http://www.w3.org/TR/html4/loose.dtd\">\n";
