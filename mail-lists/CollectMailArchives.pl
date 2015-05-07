@@ -1,5 +1,8 @@
 #!/usr/bin/perl
 
+# Requires CPAN modules: Crypt::SSLeay IO::Socket::SSL LWP::Protocol::https
+# Requires: EzLib.pm from analytics/wikistats/analytics/perl/EzLib.pm
+
   use lib "/[.. path ..]/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
