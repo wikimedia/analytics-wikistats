@@ -380,7 +380,7 @@ sub WriteReportReverts
   my (@index_languages1, @index_languages2, @index_languages3) ;
 
   my $out_html_title = $out_statistics . " \- " . "Edit and Revert Trends" ;
-  my $out_page_title = $out_statistics . " \- " . "Edit and Revert Trends: " ."<a href='" . $out_urls {$wp} . "'>" . $out_languages {$wp} . "</a>" ;
+  my $out_page_title = $out_statistics . " \- " . "Edit and Revert Trends: " ."<a href='TablesWikipedia" . uc($wp) . ".htm'>" . $out_languages {$wp} . "</a>" ;
 
 # my $show_anons = ($editstottype {'A'}{$wp} > 100) ; # only on larger wikis # ($wp =~ /(?:en|de|ja|fr|pl|es|pt|ru|zh|nl|af)/i) ;
   my $show_anons = $false ;
