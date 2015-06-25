@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# trivial script to find bzips recursively
+
 ulimit -v 20000
 wikistats=/a/wikistats_git
 

@@ -8,8 +8,10 @@ csv=$dumps/csv
 out=$dumps/out
 report=$dumps/logs/log_pageviews_monthly.txt
 projectcounts=/a/dammit.lt/projectcounts
+meta=$csv/csv_mw/MetaLanguages.csv
+
 # projectcounts=/home/ezachte/test/projectcounts  # tests
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 echo "**************************" | tee -a $report | cat
 echo "Start pageviews_monthly.sh" | tee -a $report | cat
@@ -81,7 +83,7 @@ cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$lis
 # *  = some csv files which contain input for all projects have historically been stored in csv/csv_wp (some day move these to csv/csv_mw)
 # ** = yep not csv really, despite folder name csv_.. ;)
 
-perl $perl/WikiCountsSummarizeProjectCounts.pl -i $projectcounts -o $csv -w $projectcounts | tee -a $report | cat
+perl $perl/WikiCountsSummarizeProjectCounts.pl -i $projectcounts -o $csv -w $projectcounts -m $meta| tee -a $report | cat
 # exit # tests only 
 
 # -l = language (en:English)
@@ -212,8 +214,9 @@ echo "rsync -av $out/out_wx/EN/TablesPageViewsMonthly*.htm  $htdocs/wikispecial/
 
 # step 3c: zip and publish raw daily counts
 cd $csv/csv_wp
-zip PageViewsPerDayAll.csv.zip PageViewsPerDayAll.csv | tee -a  $report | cat
-rsync -av PageViewsPerDayAll.csv.zip $htdocs/archive/ | tee -a  $report | cat
+zip PageViewsPerDayAll.csv.zip PageViewsPerDayAll.csv        | tee -a  $report | cat
+rsync -av PageViewsPerDayAll.csv.zip $htdocs/archive/        | tee -a  $report | cat
+rsync -av PageViewsPerMonthMobile* $htdocs/wikimedia/mobile/ | tee -a  $report | cat
 
 echo "Ready" | tee -a $report | cat
 date | tee -a $report | cat

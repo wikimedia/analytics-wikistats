@@ -14,8 +14,8 @@
 
   if ($job_runs_on_production_server)
   {
-    $refresh_language_files_after_days_php = 999 ; # Q&D path, file does not get updated, investigate later, other pririties now
-    $refresh_language_files_after_days_wp  = 999 ;
+    $refresh_language_files_after_days_php = 9999 ; # Q&D path, file does not get updated, investigate later, other pririties now
+    $refresh_language_files_after_days_wp  = 9999 ;
   }
   else
   {
@@ -80,6 +80,9 @@ sub Localization
   &LogT ("\nLocalization\n") ;
 
   # move -> language files
+  $out_recent_months = "<b>Monthly counts for recent history of wiki</b>" ;
+  $out_quarterly     = "<b>Quarterly counts for entire history of wiki</b>" ;
+
   $out_wikiversity   = "Wikiversity" ;
   $out_wikiversities = "Wikiversities" ;
   $out_wikiversity   = "Wikiversity" ; ;

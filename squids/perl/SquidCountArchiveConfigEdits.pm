@@ -6,6 +6,7 @@ $trace_on_exit_verbose  = $false;
 $trace_on_exit_concise  = $false;
 
 $cfg_sample_rate = 1 ;
+#$cfg_sample_rate = 1000 ;
 
 $wikistats = "/a/wikistats_git" ;
 $squids = "$wikistats/squids" ;
@@ -16,7 +17,9 @@ $cfg_liblocation = "/home/ezachte/wikistats/squids-scripts-2012-10/perl" ;
 $cfg_path_root_production = "$squids/csv_edits" ; 
 $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
 
-$cfg_dir_in_production = "/a/squid/archive/edits" ;
+#$cfg_dir_in_production = "/a/squid/archive/edits" ; # old
+$cfg_dir_in_production = "/a/log/webrequest/archive/edits" ; # new
+#$cfg_dir_in_production = "/a/squid/archive/sampled" ;
 $cfg_dir_in_test = "?" ; # Erik
 
 $cfg_logname = "edits.tsv.log" ; # log file name changed from 2013-04-04

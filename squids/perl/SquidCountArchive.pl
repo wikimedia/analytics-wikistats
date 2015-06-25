@@ -303,6 +303,7 @@ sub SetFileNames
 
   $file_ip_frequencies       = "private/SquidDataIpFrequenciesDoNotPublish.csv" ;
   $file_ip_frequencies_bz2   = "private/SquidDataIpFrequenciesDoNotPublish.csv.bz2" ;
+  $file_ip_no_country        = "private/SquidDataIpFrequenciesNoCountryDoNotPublish.csv" ;
   $file_out_referers         = "private/SquidDataReferersDoNotPublish.txt" ;
 
   # two files with single events, written at SquidCountArchiveProcessLogRecord.pm, unlike aggregated data which are written at SquidCountArchiveWriteOutput.pm
@@ -517,6 +518,7 @@ sub InitGlobals # qqq
   undef %index_php_raw ;
   undef %ip_distribution ;
   undef %ip_frequencies ;
+  undef %ip_no_country ;
   undef %languages ;
   undef %languages_unrecognized ;
   undef %lines_read ;
@@ -556,6 +558,7 @@ sub ProcessPhase1 # collect IP frequencies, needed for filtering probable bots i
   return if not $data_read ;
 
   &WriteOutputIpFrequencies ($path_out) ;
+  &WriteOutputIpNoCountry   ($path_out) ;
 }
 
 sub ProcessPhase2 # Collect other data

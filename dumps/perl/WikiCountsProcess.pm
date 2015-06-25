@@ -1193,6 +1193,13 @@ sub CollectActiveUsersPerMonthsAllWikis
     $file_ages  {$wp} = $file_age ;
   }
 
+  $merge_always = $false ; # qqq Feb 2015: special mode, only for extrapolating from available data, not for direct publication 
+  if ($merge_always)
+  { 
+    $merge_till = "2014-12" ; 
+    print "Merge always (even when some large data files are not ready yet). Merge till $merge_till\n" ;
+  }
+
   # check if 25 largest files are more recent than merged data
   # if not defer merge to later
   if (-e $file_csv_user_month_all_wikis)
@@ -1201,26 +1208,46 @@ sub CollectActiveUsersPerMonthsAllWikis
     my $file_cnt = 0 ;
     foreach $wp (sort { $file_sizes {$b} <=> $file_sizes {$a} } keys %file_sizes)
     {
+# qqqq
       if ($file_ages {$wp} > $file_age_merged_data)
-      { $file_ages_older .= "$wp (" . sprintf ("%.0f", $file_ages {$wp}). "), " ; }
-      last if ++$file_cnt >= 25 ;
+      { 
+        $file_ages_older .= "$wp (" . sprintf ("%.0f", $file_ages {$wp}). "), " ; 
+        $skip_language_for_merging {$wp} = $true ;
+      }
+
+      if (! $merge_always)
+      { last if ++$file_cnt >= 25 ; }
     }
+
     if ($file_ages_older ne '')
     {
-      print "\nFor the following 25 largest data files with edits per user/month/namespace are older\n" .
-            "than merged file $file_csv_user_month_all_wikis ($file_age_merged_data):\n" . $file_ages_older . ".\nFiles are not ready for merging\n\n" ;
-      return ;
+      if (! $merge_always)
+      {
+        print "\nFor the following 25 largest data files with edits per user/month/namespace are older\n" .
+              "than merged file $file_csv_user_month_all_wikis ($file_age_merged_data):\n" . $file_ages_older . ".\nFiles are not ready for merging\n\n" ;
+        return ; 
+      }
+      else
+      {
+        print "\nMerge despite following data files with edits per user/month/namespace are older\n" .
+              "than merged file $file_csv_user_month_all_wikis ($file_age_merged_data):\n" . $file_ages_older . ".\nThese languages will be skipped\n\n" ;
+      }
     }
   }
 
   if ($mode eq 'wp')
-  { $large_wikis_required_for_merge = 25 ; }
+  { $large_wikis_required_for_merg = 25 ; }
   else
   { $large_wikis_required_for_merge =  3 ; }
 
   # ok, we will continue to merge
-  print "\nAll $large_wikis_required_for_merge largest per wiki data files are more recent than merged data file => time to update merged file.\n" ;
+  if (! $merge_always)
+  { print "\nAll $large_wikis_required_for_merge largest per wiki data files are more recent than merged data file => time to update merged file.\n" ; }
+  else
+  { print "\nMerge in any case.\n" ; }
+
   print "Determine last month of data available for these wikis in StatisticsMonthly.csv.\n\n" ;
+
   &ReadFileCsv ($file_csv_monthly_stats) ;
   foreach $line (@csv)
   {
@@ -1234,6 +1261,7 @@ sub CollectActiveUsersPerMonthsAllWikis
   foreach $wp (sort { $file_sizes {$b} <=> $file_sizes {$a} } keys %file_sizes)
   {
     next if $wp =~ /^zz+/ ;
+    next if $skip_language_for_merging {$wp} ;
 
     if ($lastmonth {$wp} !~ /^\d\d\d\d-\d\d$/)
     {
@@ -1241,16 +1269,30 @@ sub CollectActiveUsersPerMonthsAllWikis
       next ;
     }
 
+    if ($merge_always) # qqq
+    {
+      if ($lastmonth {$wp} lt $merge_till)
+      {
+        print "last month $wp: " . $lastmonth {$wp} . " < $merge_till, so skip merge for $wp\n" ;
+        $skip_language_for_merging {$wp} = $true ; 
+        next ;
+      }
+    }
+
     if ($lastmonth {$wp} lt $month_last)
     {
-      $month_last = $lastmonth {$wp} ;
+      $month_last = $lastmonth {$wp} ; 
       print "$wp -> month_last $month_last\n" ;
     }
 
-    print $lastmonth {$wp} . " $wp\n" ;
-    last if ++$file_cnt >= $large_wikis_required_for_merge ;
+    if (! $merge_always) # qqq
+    {
+      print $lastmonth {$wp} . " $wp\n" ;
+      last if ++$file_cnt >= $large_wikis_required_for_merge ;
+    }
   }
-  print "\nDiscard data beyond month $month_last (last month where top $large_wikis_required_for_merge wikis are up to date).\n\n" ;
+  if (! $merge_always) # qqq
+  { print "\nDiscard data beyond month $month_last (last month where top $large_wikis_required_for_merge wikis are up to date).\n\n" ; }
 
   # sort files by size, then from smallest to largest merge one at a time
   # in merge routine prep each file
@@ -1278,6 +1320,8 @@ sub CollectActiveUsersPerMonthsAllWikis
   print "\n" ;
   foreach $wp (sort { $file_sizes {$a} <=> $file_sizes {$b} } keys %file_sizes)
   {
+    next if $skip_language_for_merging {$wp} ;
+
     # next if $wp eq 'commons' ; # do not merge in yet 
 
     # next if $wp !~ /^(?:ab|ak)$/ ; # test only, use few files for speed
@@ -2020,8 +2064,15 @@ sub CountActiveWikisPerMonthAllProjects
       $date = sprintf ("%04d%02d%02d",$yyyy,$mm,$dd) ; # dd/mm/yyyy -> yyyy/mm/dd
 
       next if $dd != days_in_month ($yyyy,$mm) ; # incomplete month
-      next if $count_5 == 0 ;                    # nothing to count
+     
+      next if ($project eq 'wp') && ($wp eq 'ar')     and ($yyyy < 2003 or ($yyyy == 2003 and $mm < 7)) ;   # invalid edit timestamps in database which predate start of wiki
+      next if ($project eq 'wp') && ($wp eq 'kn')     and ($yyyy < 2004 or ($yyyy == 2004 and $mm < 9)) ;   # invalid edit timestamps in database which predate start of wiki
+      next if ($project eq 'wp') && ($wp eq 'simple') and ($yyyy < 2003 or ($yyyy == 2003 and $mm < 3)) ;   # invalid edit timestamps in database which predate start of wiki
 
+      $active_wikis {"0,$project,$date"} ++ ; # zero or more means all wikis
+      $active_wikis {"0,*,$date"} ++ ; 
+      
+      next if $count_5 == 0 ; # no active (5+ edits) editors
       if ($yyyy == 2001)                                                            # did wp:ar and wp:zh really start Jan 2001? Don't think so.  
       { print "[$line] project:$project date:$date 5:$count_5 100:$count_100\n" ; } # we need to screen for these outliers and remove them from stats. 
 
@@ -2062,8 +2113,10 @@ sub CountActiveWikisPerMonthAllProjects
   
   open CSV_OUT, '>', $file_out ;
   binmode CSV_OUT ;
+  print CSV_OUT "all known wikis,,,,,,,,,,,," ; 
   print CSV_OUT "1+ active editors,,,,,,,,,,,," ; 
   print CSV_OUT "5+ active editors\n" ; 
+  print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
   print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
   print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects\n" ; 
   
@@ -2072,6 +2125,11 @@ sub CountActiveWikisPerMonthAllProjects
     my $date_excel = "\"=date(" . substr ($date,0,4) . ',' . substr ($date,4,2) . ','  . substr ($date,6,2) . ")\"" ;
 
     print CSV_OUT "$date_excel" ;
+    print CSV_OUT ',' . $active_wikis {"0,*,$date"} ; 
+    foreach $project (qw (wb wn wp wq ws wv wo wk wx))
+    { print CSV_OUT ',' . $active_wikis {"0,$project,$date"} ; }
+    
+    print CSV_OUT ",,$date_excel" ;
     print CSV_OUT ',' . $active_wikis {"1,*,$date"} ; 
     foreach $project (qw (wb wn wp wq ws wv wo wk wx))
     { print CSV_OUT ',' . $active_wikis {"1,$project,$date"} ; }

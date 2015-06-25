@@ -1,7 +1,7 @@
 #!/bin/bash
 ulimit -v 20000
 
-echo legacy script, uses old paths from other server 
+echo legacy script, used mostly for copying data to development env (paths are obsoloete) 
 exit
 
 cd /a/ezachte 

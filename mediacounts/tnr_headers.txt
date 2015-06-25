@@ -1,0 +1,36 @@
+
+#1:  Base name
+#2:  Total sum of response size for base name
+#3:  Total requests
+#4:  Requests for the raw - original - unmodified file
+#5:  Requests for a transcoded audio file
+#6:  Requests sound data1 (reserved)
+#7:  Requests sound data2 (reserved)
+#8:  Requests for a transcoded image file 
+#9:  Requests for a transcoded image file (   0 <= width <= 199)
+#10: Requests for a transcoded image file ( 200 <= width <= 399)
+#11: Requests for a transcoded image file ( 400 <= width <= 599)
+#12: Requests for a transcoded image file ( 600 <= width <= 799)
+#13: Requests for a transcoded image file ( 800 <= width <= 999)
+#14: Requests for a transcoded image file (1000 <= width       )
+#15: Requests image data1 (reserved)
+#16: Requests image data2 (reserved)
+#17: Requests for a transcoded movie file
+#18: Requests for a transcoded movie file (  0 <= height <= 239)
+#19: Requests for a transcoded movie file (240 <= height <= 479)
+#20: Requests for a transcoded movie file (480 <= height       )
+#21: Requests movie data1 (reserved)
+#22: Requests movie data2 (reserved)
+#23: Requests with an internal refer (from WMF domains)
+#24: Requests with an external refer (from non-WMF domains)
+#25: Requests with unknown referer
+
+Caveat: image counts do contain 'prefetched' images for ImageViewer. Many of which have never been presented to the user.
+        (we are trying to come up with an efficient solution to detect and filter these - approx 25 M a day in Feb 2015).
+Note: #7 can exceed #8..#14 - as some thumbnails don't have size info  
+Documentation: https://www.mediawiki.org/wiki/Requests_for_comment/Media_file_request_counts
+Sources: ... (hive sources?)
+View file: http://upload.wikimedia.org[base]  
+
+#1,#2,#3,#4,#5,#6,#7,#8,#9,#10,#11,#12,#13,#14,#15,#16,#17,#18,#19,#20,#21,#22,#23,#24,#25
+base,size,requests,raw,audio,-,-,img,img XS,img S,img M,img L,img XL,img XXL,-,-,mov,mov S,mov M,mov L,-,-,int,ext,int/ext?

@@ -1295,7 +1295,13 @@ sub PhaseBuildDailyFile_PrepInputFiles
       chomp $line ;
       $line =~ s/^([^\.\s]+)2 /$1.y /o  ;
       $line =~ s/^([^\.\s]+) /$1.z /o  ;
+
+      $line2 = $line ;
       $line =~ s/[\x00-\x1F]+//g ;
+      if ($line ne $line2)
+      {
+         print "\nXXXXXXXXXXXXXXXXXX\n$line2\n->$line\n" ;
+      }
 
      ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
       if ($overflow ne '')  # too many fields, due to spaces in title since Jan 31, 2013, try to fix  
@@ -1326,6 +1332,9 @@ sub PhaseBuildDailyFile_PrepInputFiles
 
 	if ($lang eq 'ar.z') { print "$line\n\n" ; }
       }
+
+      $line =~ s/\s{2,}/ -field-empty- /g ; # Feb 2015: legacy format contains empty title(s), e.g. pagecounts-20150127-110000.gz contains 'ab  1 28331'  (notice 2 consecutive spaces)  
+
       print $fh_patched "$line\n" ;
     }
     close $fh_in ;
@@ -1489,7 +1498,10 @@ sub ValidateCounts
     { 
       print "\n" if ! $mismatch_found ;
       print "Mismatch for $date_or_month, lang '$lang': pageviews read $in, pageviews written $out\n" ;
-      $mismatch_found = $true ; 
+      if ($lang =~ /^[\w\-\_]+$/) # Q&D fix: do not abort on mismatch for trivial / invalid language code: 
+                                # "Mismatch for 20141225, lang 'AR.z': pageviews read 148, pageviews written 147"
+
+      { $mismatch_found = $true ; } 
     }
   }
   print "\n" ;

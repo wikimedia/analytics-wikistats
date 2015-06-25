@@ -11,7 +11,8 @@ $cfg_sample_rate = 1000 ;
 $cfg_path_root_production = "$squids/csv" ; 
 $cfg_path_root_test       = "w:/! perl/squids/archive/test" ;  # Erik
 
-$cfg_dir_in_production = "/a/squid/archive/sampled" ;
+$cfg_dir_in_production = "/a/squid/archive/sampled" ; # old
+$cfg_dir_in_production = "/a/log/webrequest/archive/sampled" ; # new
 $cfg_dir_in_test = "?" ; # Erik
 
 # $cfg_logname = "sampled-1000.tab.log" ;

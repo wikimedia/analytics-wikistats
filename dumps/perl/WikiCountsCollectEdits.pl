@@ -3,8 +3,8 @@
   use Time::Local ;
   use Getopt::Std ;
 
-  $| = 1; # Flush output
-  $verbose = 0 ;
+  $| = 1; # flush output
+  $verbose = 1 ;
 
   my %options ;
   getopt ("cipw", \%options) ;
@@ -22,7 +22,9 @@
   die "Specify wiki code as: -w [some wiki, e.g. enwiki]" if $wiki eq '' ;
   print "Wiki code: $wiki\n" ;
 
-  die "Specify dump file as: -i [full path to stub dump]" if ! -e $dump ;
+  die "Specify dump file as: -i [full path to stub dump]" if $dump eq '' ;
+  die "Input stub dump not found: $dump" if ! -e $dump ;
+
   print "Stub dump: $dump\n" ;
 
   $file_newest_dumps = "$path_csv/csv_$project/StatisticsNewestDumps.csv" ;
@@ -101,36 +103,77 @@ sub ProcessDump
   print "Write output to  $file_out\n\n" ;
   open CSV_OUT, '>', $file_out || die "Could not open $file_out" ;
   binmode CSV_OUT ;
-  print CSV_OUT "# n=namespace, t=title, e=edit, R=registered user, B=bot. A=anonymous\n" ;
+  print CSV_OUT "# record types: n=namespace, t=title, e=edit\n" ; 
+  print CSV_OUT "# record type e:user type,timestamp from xml, timestamp in seconds since 1900, username or ip address\n" ;
+  print CSV_OUT "# user type: R=registered user, B=bot, A=anonymous, -=undefined\n" ;
 
   while ($line = <XML>)
   {
-    if ($line =~ /\s*\<timestamp\>/) # Q&D: no check on xml level (below <page>)
+
+    if ($line =~ /<timestamp>/) # Q&D: no check on xml level (below <page>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
       $line =~ s/\s*$// ;
       ($timestamp = $line) =~ s/<[^>]+>//g ;
-      # print "e $timestamp\n" ;
+
+      $yyyy = substr ($timestamp,0,4) - 1900 ;
+      $mm   = substr ($timestamp,5,2) - 1 ;
+      $dd   = substr ($timestamp,8,2) ;
+      $hh   = substr ($timestamp,11,2) ;
+      $nn   = substr ($timestamp,14,2) ;
+      $ss   = substr ($timestamp,17,2) ;
+
+      $time_secs = timegm ($ss,$nn,$hh,$dd,$mm,$yyyy) ;
+
+      # test code 
+      # ($sec,$min,$hour,$day,$month,$year) = gmtime ($time_secs) ;
+      # $timestamp2 = sprintf ("%04d-%02d-%02dT%02d:%02d:%02dZ", $year+1900, $month+1, $day, $hour, $min, $sec) ;
+      # print "e $timestamp $timestamp2, $time, $yyyy $mm $dd, $hh $nn $ss, $time\n" ;
+      # die ("timestamps differ") if ($timestamp ne $timestamp2) ;
       # print CSV_OUT "e,$timestamp\n" ;
+
+      next ;
     }
 
-    if ($line =~ /\s*\<username\>/) # Q&D: no check on xml level (below <revision>)
+    if ($line =~ /<username/) # Q&D: no check on xml level (below <revision>)
     {
-      chomp $line ;
-      $line =~ s/^\s*// ;
-      $line =~ s/\s*$// ;
-      ($user = $line) =~ s/<[^>]+>//g ;
-      $user =~ s/,/&comma;/g ;
-      if ($bots {$user} > 0)
-      { $usertype = 'R' ; }
+      if ($line =~ /<username>/) 
+      {
+        chomp $line ;
+        $line =~ s/^\s*// ;
+        $line =~ s/\s*$// ;
+        ($user = $line) =~ s/<[^>]+>//g ;
+        $user =~ s/,/&comma;/g ;
+        if ($bots {$user} > 0)
+        { $usertype = 'B' ; }
+        else
+        { $usertype = 'R' ; }
+      }
+    # elsif ($line =~ /<username\s*\/>/) 
+    # { $user = 'empty user field' ; }
       else
-      { $usertype = 'B' ; }
+      { 
+        $user = 'empty user field' ; 
+        $usertype = '-' ; 
+      }
+      
       print "e $usertype $timestamp $user\n" if $verbose ;
-      print CSV_OUT "e,$usertype,$timestamp,$user\n" ;
+      print CSV_OUT "e,$usertype,$timestamp,$time_secs,$user\n" ;
+      next ;
     }
 
-    if ($line =~ /\s*\<ip\>/) # Q&D: no check on xml level (below <revision>)
+    # if ($line =~ /\s*\<sha1\>/) # Q&D: no check on xml level (below <revision>)
+    # {
+    #   chomp $line ;
+    #   $line =~ s/^\s*// ;
+    #   $line =~ s/\s*$// ;
+    #   ($sha1 = $line) =~ s/<[^>]+>//g ;
+    # print "e A $timestamp $user\n" if $verbose ;
+    # print CSV_OUT "e,A,$timestamp,$time_secs,$user\n" ;
+    # }
+
+    if ($line =~ /<ip>/) # Q&D: no check on xml level (below <revision>)
     {
       chomp $line ;
       $line =~ s/^\s*// ;
@@ -138,10 +181,11 @@ sub ProcessDump
       ($user = $line) =~ s/<[^>]+>//g ;
       $user =~ s/,/&comma;/g ;
       print "e A $timestamp $user\n" if $verbose ;
-      print CSV_OUT "e,A,$timestamp,$user\n" ;
+      print CSV_OUT "e,A,$timestamp,$time_secs,$user\n" ;
+      next ;
     }
 
-    if ($line =~ /\s*\<title\>/) # Q&D: no check on xml level (below <page>)
+    if ($line =~ /<title>/) # Q&D: no check on xml level (below <page>)
     {
       $titles++ ;
       if ($titles % 10000 == 0)
@@ -155,10 +199,14 @@ sub ProcessDump
       print "t $title\n" if $verbose ;
       $title =~ s/,/\&comma\;/g ;
       print CSV_OUT "t,$title\n" ;
+      next ;
     }
 
-    if ($line =~ /\s*\<namespace key/) # Q&D: no check on xml level (below <namespaces>)
+# print $line if $lines++ < 30 ;
+    if ($line =~ /<namespace key/) # Q&D: no check on xml level (below <namespaces>)
+  #  if ($line =~ /<namespace.*?key/) # Q&D: no check on xml level (below <namespaces>)
     {
+# die ("namespace key") ;    
       chomp $line ;
       $line =~ s/^\s*// ;
       $line =~ s/\s*$// ;
@@ -168,6 +216,7 @@ sub ProcessDump
       print "n $key $namespace\n" if $verbose ;
       $namespace =~ s/,/\&comma\;/g ;
       print CSV_OUT "n,$key,$namespace\n" ;
+      next ;
     }
 
   }
@@ -177,6 +226,7 @@ sub ProcessDump
 
 }
 
+# overcomplete routine copied form other script of mine for date-time formatting
 sub ddhhmmss
 {
   my $seconds = shift ;

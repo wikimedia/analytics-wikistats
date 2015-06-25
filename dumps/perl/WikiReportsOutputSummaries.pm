@@ -652,7 +652,7 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
            <hr color=#808080 width=100%>
            <font color=#808080>
            <small>
-           Published $summaries_published&nbsp;&nbsp;/&nbsp;&nbsp;
+           Published $summaries_published&nbsp;&nbsp;/&nbsp;&nbsp;$out_license<br>
            <b>See Also</b>
            <a href='$url_trends'><font color=#000080>Detailed trends</font></a> for <a href='$main_page'><font color=#000080>$out_language_name $out_publication</font></a>&nbsp;&nbsp;/&nbsp;&nbsp;
            <a href='$url_site_map'><font color=#000080>Stats for all $out_publications</font></a>&nbsp;&nbsp;/&nbsp;&nbsp;
@@ -677,7 +677,7 @@ else
 $source = <<__HTML_SUMMARY_SOURCE__ ;
     <tr>
       <td colspan=99 class=c>
-      <p><i><small>Sources <a href='http://stats.wikimedia.org'>stats.wikimedia.org</a> $source_wikipedia / Published $summaries_published</small></i>
+      <p><i><small>Sources <a href='http://stats.wikimedia.org'>stats.wikimedia.org</a> $source_wikipedia / Published $summaries_published<br>$out_license</small></i>
       </td>
     </tr>
 __HTML_SUMMARY_SOURCE__
@@ -1125,6 +1125,7 @@ sub GeneratePlotPageviews
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   my $wp = shift ;
+  $wp =~ s/_/-/g ;
 
   return if $wp =~ /^z+$/ ; # pseudo code for overall totals, zz,zzz are not language codes
 

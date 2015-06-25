@@ -8,7 +8,7 @@ perl=/home/ezachte/wikistats/squids-scripts-2012-10/perl/ # temp
 csv=$squids/csv_edits
 reports=$squids/reports_edits
 logs=$squids/logs
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 

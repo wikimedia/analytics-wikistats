@@ -45,9 +45,9 @@
   $file_html_r = "$dir_html/WikiCountsJobRunTimes.html" ;
   $file_log    = "WikiCountsLogConcise.txt" ;
 
-  if (-d "/mnt/htdocs")
+  if (-d "/mnt/")
   {
-    print "Job runs on bayes\n" ;
+    print "Job runs on stat1002\n" ;
     $dir_in            = "/a/wikistats" ;
     $dir_html          = "/mnt/htdocs" ;
     $dir_csv           = "/a/wikistats/" ;
@@ -632,6 +632,8 @@ sub WriteHtml
 
 sub WriteHtmlCurrent
 {
+if (0)
+{
   @free = `df -H /dev/sda1 /dev/sda6 /mnt/dumps` ;
   chomp $free [3] ;
   $free [3] .= $free [4] ;
@@ -644,7 +646,7 @@ sub WriteHtmlCurrent
     $line =~ s/\d+\.\d+\.\d+\.\d+\:// ;
     push @lines, $line ;
   }
-
+}
   push @lines, "\n" ;
   @used = `du --si /home/ezachte/wikistats /a/tmp/wikistats --si` ;
   foreach $line (@used)

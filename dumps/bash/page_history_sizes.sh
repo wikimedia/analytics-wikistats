@@ -7,7 +7,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 clear 
 

@@ -172,7 +172,7 @@ sub ReadSquidLogFiles
       if ($file_in =~ /\.gz$/o)
       { open IN, "-|", "gzip -dc $file_in | sed 's/\t/ /g;s/\\ \\ */\\ /g' | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
       else
-      { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html
+      { open IN, "-|", "cat $file_in | /usr/local/bin/geoiplogtag 5" ; } # http://perldoc.perl.org/functions/open.html # vi search tag: qqqq
       $fields_expected = 14 ;
     }
     else
@@ -213,29 +213,59 @@ sub ReadSquidLogFiles
 # print "mime " . $fields[10] . "\n" ;
 #next if $fields [9] eq '-' ;
 #next if $fields [9] =~ /NONE/ ;
-     if ($#fields > 14)
-     {
-if (! $scan_ip_frequencies)
-{
-# print "line $line2\n" ;
-# print "fields " . $#fields . "\n$line\n" ;
-}
+      
+      # check if country code has been added in input stream, 
+      # if not (no trailing uppercase chars), remember and add 'XX'
+      $end = substr ($line,-2,2) ;
 
-      $country_code = $fields [$#fields] ;
-      $fields [$#fields] = '' ;
-      $line = join (' ', @fields) ;
-      @fields = split (' ', $line, 14) ;
-      $fields [14] = $country_code ;
- $fields [13] =~ s/ /%20/g ;
+if ($end =~ /\-[A-W]/)
+{ print "$end + $line\n" ; }
+      #$linex = $line ;
+      #chomp $linex ;
+      if ($end !~ /[A-Z\-]{2}/) # qqq
+      # { print $fields [2] . "  +  '" . substr ($linex,-30,30) . "'\n" ; } 
+      { 
+        if ($scan_ip_frequencies)
+        {
+          # print $fields [2] . "  +  " . $fields [4] . "  +  " . $end . " + " . "$line\n\n\n" ;
+          $ip_no_country {$fields [4]}++ ;
+        }
+        $#fields++ ;
+        $fields [$#fields] = '--' ;
+      }
+      #print "end '$end'\n" ;
+ 
+      #print "a 13 " . $fields [13] . "\n" ;
+      #print "a 14 " . $fields [14] . "\n" ;
+      #print "a " . $#fields . " " . $fields [$#fields] . "\n\n" ;
 
-if (! $scan_ip_frequencies)
-{
-# print "2 $line\n" ;
-# print "\n\n12: " . $fields [12] . "\n"  ;
-# print "13: " . $fields [13] . "\n"  ;
-# print "14: " . $fields [14] . "\n"  ;
-# print "15: " . $fields [15] . "\n"  ;
-}
+      # if more than 14 fields, user agent contained spaces ->
+      # concat fields [13] and above except last one in [13], and last one (country code) in [14] 
+      if ($#fields > 14)
+      {
+        if (! $scan_ip_frequencies)
+        {
+        # print "line $line2\n" ;
+        # print "fields " . $#fields . "\n$line\n" ;
+        }
+      
+        $country_code = $fields [$#fields] ;
+        $fields [$#fields] = '' ;
+        $line = join (' ', @fields) ;
+        @fields = split (' ', $line, 14) ;
+        $fields [14] = $country_code ;
+        $fields [13] =~ s/ /%20/g ;
+        #print "b 13 " . $fields [13] . "\n" ;
+        #print "b 14 " . $fields [14] . "\n\n" ;
+
+        if (! $scan_ip_frequencies)
+        {
+          # print "2 $line\n" ;
+          # print "\n\n12: " . $fields [12] . "\n"  ;
+          # print "13: " . $fields [13] . "\n"  ;
+          # print "14: " . $fields [14] . "\n"  ;
+          # print "15: " . $fields [15] . "\n"  ;
+        }
       }
 
       if (! $scan_ip_frequencies) # phase 2

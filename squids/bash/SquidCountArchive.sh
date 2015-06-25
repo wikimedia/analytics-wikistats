@@ -10,10 +10,9 @@ cd $perl
 
 log=$squids/logs/SquidCountArchiveSampled.log
 cp SquidCountArchiveConfigSampled.pm SquidCountArchiveConfig.pm
-nice perl SquidCountArchive.pl -d 2014/04/01-2014/04/30 | tee $log | cat 
+nice perl SquidCountArchive.pl -d 2015/04/01-2015/06/20 | tee $log | cat 
 
-#exit
 
-log=$squids/logs_edits/SquidCountArchiveEdits.log
-cp SquidCountArchiveConfigEdits.pm SquidCountArchiveConfig.pm
-nice perl SquidCountArchive.pl -d 2014/04/01-2014/04/30 | tee $log | cat 
+#log=$squids/logs_edits/SquidCountArchiveEdits.log
+#cp SquidCountArchiveConfigEdits.pm SquidCountArchiveConfig.pm
+#nice perl SquidCountArchive.pl -d 2015/01/01-2015/03/31 | tee $log | cat 

@@ -7,7 +7,7 @@ perl=$wikistats/dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$wikistats/dumps/csv
 dblists=$wikistats/dumps/dblists/master%20copy # to be fixed: folder has space in name, here as %20
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 clear
 

@@ -3,14 +3,16 @@
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
+bash=/home/ezachte/wikistats/dumps/bash # tests
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 log=$dumps/logs/log_report_regions.txt
 
-/interval_days=-1 # set to -1 to have all reports generated despite age
+interval_days=-1 # set to -1 to have all reports generated despite age
 
 function echo2 {
   echo $1
@@ -47,7 +49,10 @@ echo2 day of month $day_of_month ge $abort_before - continue
 echo2 "\nStart report.sh regions"
 date >> $log
 
+cd $bash
 ./sync_language_files.sh 
+
+cd $perl
 
 echo2 ""
 echo2 "Generate regional reports"
@@ -59,7 +64,7 @@ do
   do	  
     echo2 "Get timestamp sitemap page for report $region, language $lang"
     lang_upper=$( echo "$lang" | tr '[:lower:]' '[:upper:]' )	
-    file="/a/out/out_$1/${lang_upper}_$region/#index.html"	
+    file="$out/out_$1/${lang_upper}_$region/#index.html"	
     now=`date +%s`
     prevrun=`stat -c %Y $file`
     let secs_out="$now - $prevrun" 
@@ -76,8 +81,8 @@ do
       perl WikiReports.pl -r $region_lc -m wp -l $lang -i $csv/csv_wp/ -o $out/out_wp # >> $log
       echo2 ""
       echo2 "Reports for $region completed, rsync to htdocs"
-      echo2 "rsync -a /a/out/out_wp/EN_$region/ $htdocs/EN_$region"
-      rsync -a /a/out/out_wp/EN_$region/ $htdocs/EN_$region
+      echo2 "rsync -a $out/out_wp/EN_$region/ $htdocs/EN_$region"
+      rsync -a $out/out_wp/EN_$region/ $htdocs/EN_$region
     fi  
   done;  
 done;
@@ -87,13 +92,19 @@ exit
 for x in en ;
 do 
   perl WikiReports.pl -r india      -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp # >> $log
+  perl WikiReports.pl -r africa     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  perl WikiReports.pl -r america    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  perl WikiReports.pl -r asia       -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  perl WikiReports.pl -r europe     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  perl WikiReports.pl -r oceania    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  perl WikiReports.pl -r artificial -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
   rsync -avv $out/out_wp/EN_India
-#  perl WikiReports.pl -r africa     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
-#  perl WikiReports.pl -r america    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
-#  perl WikiReports.pl -r asia       -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
-#  perl WikiReports.pl -r europe     -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
-#  perl WikiReports.pl -r oceania    -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
-#  perl WikiReports.pl -r artificial -m wp -l $x -i $csv/csv_wp/ -o $out/out_wp ;
+  rsync -avv $out/out_wp/EN_Africa
+  rsync -avv $out/out_wp/EN_America
+  rsync -avv $out/out_wp/EN_Asia
+  rsync -avv $out/out_wp/EN_Europe
+  rsync -avv $out/out_wp/EN_Oceania
+  rsync -avv $out/out_wp/EN_Artifial
 done;
 
 # perl WikiReports.pl -c -m $1 -l en -i $csv_$1/ -o $out_$1 

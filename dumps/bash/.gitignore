@@ -1,3 +1,7 @@
 # test scripts
 t.sh
 t?.sh
+
+# huge scripts that probably shouldn't be in source control
+nohup_non_wp.sh
+nohup_wp.sh

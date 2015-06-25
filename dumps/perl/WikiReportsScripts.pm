@@ -962,6 +962,7 @@ td.l {text-align:left;}
 td.lwrap {white-space:normal; text-align:left; padding-left:2px; padding-right:2px; padding-top:1px;padding-bottom:0px}
 
 td.cb    {text-align:center; border: inset 1px #FFFFFF}
+td.cbo   {text-align:center; border: inset 1px #FFFFFF ; vertical-align=text-bottom}
 td.cbg   {text-align:center; border: inset 1px #FFFFFF ; color:#808080; }
 td.lb    {text-align:left;   border: inset 1px #FFFFFF}
 td.rb    {text-align:right;  border: inset 1px #FFFFFF}

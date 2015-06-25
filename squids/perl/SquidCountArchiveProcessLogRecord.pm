@@ -138,40 +138,40 @@ sub ProcessLine
   if ($job_runs_on_production_server)
   {
     $country = "" ;
-if (0) # temp disabled for quicker processing qqq
-{
-    @xffparts = split ('%20',$xff) ;
-    foreach $ip (@xffparts)
+
+    if (0) # temp disabled for quicker processing qqq
     {
-       next if $country ne "" ;
-       if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
-       {
-         $country = $savedipcountry { $ip } ;
-         if ($country eq "")
-         {
-           $country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
-           $country =~ s/.*\s([\w-\(])/$1/ ;
-           $country =~ s/\s//g ;
-           $savedipcountry { $ip } = $country ;
-         }
-         $foundip = $ip ;
-         if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
-         { $country = "" ; }
-       }
+      @xffparts = split ('%20',$xff) ;
+      foreach $ip (@xffparts)
+      {
+        next if $country ne "" ;
+        if ($ip =~ /^\d+\.\d+\.\d+\.\d+$/)
+        {
+          $country = $savedipcountry { $ip } ;
+          if ($country eq "")
+          {
+            $country = `echo $ip | /usr/local/bin/geoiplogtag 1` ;
+            $country =~ s/.*\s([\w-\(])/$1/ ;
+            $country =~ s/\s//g ;
+            $savedipcountry { $ip } = $country ;
+          }
+          $foundip = $ip ;
+          if ($country =~ /(^(--|-P|A1|A2|AB|BL|G2|GF|KO|MF|O1|TE|TK)$|null)/ ) # Non-countries
+          { $country = "" ; }
+        } 
+      }
     }
-}    
+       
     if ($country eq "")
     {
       $country = $fields [14] ;
       $foundip = $client_ip ;
     }
-    if (($country eq "") || ($country =~ /null/))
+    if (($country eq "") || ($country eq "--") || ($country =~ /null/))
     {
       $country = "--" ;
       if ($foundip =~ /:/)
-      {
-        $country = "-P" ;
-      }
+      { $country = "-P" ; }
     }
     if (&IsInternal($foundip))
     { $country = "-X" ; }
@@ -179,7 +179,7 @@ if (0) # temp disabled for quicker processing qqq
   else
   {
     $country = $fields [14] ;
-    if ($country eq "")
+    if ($country eq "") # if /usr/local/bin/geoiplogtag has not been invoked $country will be empty 
     {
       if (++ $fake_country_code % 3 == 0)
       { $country = "XX" ; }
@@ -572,6 +572,8 @@ if (0) # temp disabled for quicker processing qqq
   # EXPLORER
   elsif ($agent2 =~ /Mozilla\/\d+\.\d+ \(compatible;.*MSIE/io)
   { ($version = $agent2) =~ s/^.*?(MSIE \d+\.\d+).*$/$1/o ; }
+  elsif ($agent2 =~ /Windows.*Trident.*rv:/io)
+  { ($version = $agent2) =~ s/^.*?rv:(\d+\.\d+).*$/MSIE $1/o ; }
 
   # CHROME
   elsif ($agent2 =~ /Chrome\/\d/io) # Chrome sometimes mimicked Safari to work around Hotmail bug
@@ -1302,12 +1304,20 @@ sub MatchAgent
 
 sub IsInternal
 {
-  # True iff the ip is from Wikimedia itself
   my $address = shift ;
+  
+  # address of Wikimedia server
   if ( $address =~ /^208\.80\.15[2345]/ )
   { return $true ; }
-  if ( $address =~ /^91.198.174/ )
+  if ( $address =~ /^91\.198\.174/ )
   { return $true ; }
+
+  # general internal addresses
+  if ( ( $address =~ /^10\./ ) || ( $address =~ /^169\.254/ ) || ( $address =~ /^192\.168\./ ) )
+  { return $true ; }
+  if ( $address =~ /^172\.(?:16|17|18|19|2\d|30|31)/ )
+  { return $true ; }
+
   return $false ;
 }
 

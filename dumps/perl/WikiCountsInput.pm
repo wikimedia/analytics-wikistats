@@ -1271,11 +1271,13 @@ sub DetectReverts
 {
   my ($namespace, $time, $user, $usertype, $comment, $sha1) = @_ ;
 
-  return if $sha1 == 0 ; # no checksum: dump contains <sha1 />
+  return if $sha1 eq '' ; # no checksum: dump contains <sha1 /> # 2014-06-17 test used to be == 0 which makes many valid sha1's go rejected  
 
   my ($prev_revert,$prev_namespace,$prev_title,$prev_time,$prev_edits_ago,$prev_usertype,$prev_user,$prev_comment) ;
 
 my $start_process_sha1b = code_started() if $record_time_process_sha1 ;
+
+  # print "1 $time $user $comment\n" if sha1 eq '0akk4czktvm38uh7xp0zs81xbpwm7bk' ; # debug qqq
 
   if (&NameSpaceArticle ($language, $namespace))
   { $revert = 'N' ; }
@@ -1432,7 +1434,7 @@ my $start_process_sha1b = code_started() if $record_time_process_sha1 ;
         open  REVERTED_EDITS, ">>", $file_csv_reverted_edits ;
       }
 
-      if ($revert =~ /^.C-/)
+      if ($revert =~ /^.C-/) # comment contains revert etxt ?
       { print REVERTED_EDITS substr($time,0,6) . ",$revert,$namespace,$user2,$usertype,$title2,'$comment2'\n" ; }
       else
       { print REVERTED_EDITS substr($time,0,6) . ",$revert,$namespace,$user2,$usertype,$title2,'$comment2',-$index_sha1_delta,$revert_after_secs_fmt,$prev_time,$prev_revert,$prev_usertype,$prev_user\n" ; }
@@ -3032,7 +3034,7 @@ sub TraceFlaggedRevs
         
         &XmlReadUntil ('<sha1') ;
 	if ($line !~ /<\/sha1>/)
-	{ $sha1 = 0 ; }
+	{ $sha1 = '' ; } # 2014-06-17 test in DetectReverts for empty string instead of 0 
 	else
 	{ ($sha1 = $line) =~ s/^.*?<sha1>([^<]*)<.*$/$1/g ; }
         

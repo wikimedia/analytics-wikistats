@@ -15,6 +15,7 @@ cd $wikistats/dumps/bash
 
 ./zip_out.sh wb
 ./zip_out.sh wk
+./zip_out.sh wm
 ./zip_out.sh wn
 ./zip_out.sh wo
 ./zip_out.sh wp

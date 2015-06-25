@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# script adapted from Stefan's for one time only converting of input files 
+# keep for reuse ?
 
 INPUT_DIR=""
 OUTPUT_DIR=""
@@ -33,7 +35,7 @@ while getopts "se" optname
 
 mkdir -p $OUTPUT_DIR
 
-for file_path in $INPUT_DIR*tsv*2013*.gz
+for file_path in $INPUT_DIR*tsv*201409*
 	do
 	echo "Started  processing $file_path"
 	file_name=`basename $file_path`

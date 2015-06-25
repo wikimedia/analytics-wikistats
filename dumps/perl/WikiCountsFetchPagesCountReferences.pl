@@ -84,6 +84,7 @@ sub GetPage
   my $url = URI::Heuristic::uf_urlstr($raw_url);
 
   my $ua = LWP::UserAgent->new();
+  $ua->proxy(["http"], $ENV{"http_proxy"}) ;
   $ua->agent("Wikimedia Perl job / EZ");
   $ua->timeout(60);
 

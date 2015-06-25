@@ -1,10 +1,11 @@
 #!/bin/sh
 
-ulimit -v 8000000
+ulimit -v 20000000
 
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
 perl=$dumps/perl
+perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 log=$dumps/logs/log_merge_editors.txt
 

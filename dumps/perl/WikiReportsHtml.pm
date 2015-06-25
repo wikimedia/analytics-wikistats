@@ -74,6 +74,7 @@ sub tdlbrx  { return "<td class=lb rowspan='" . (shift) . "' valign='top'>" . &t
 sub tdlx    { return "<td class=l colspan='" . (shift) . "'>".&w(&trim(shift))."</td>" ; }
 sub tdcxnb  { return "<td class=cb colspan='" . (shift) . "'>".&trim(shift)."</td>" ; }
 sub td      { return "<td>".&w(&trim(shift))."</td>" ; }
+sub tdo     { return "<td class=o>".&w(&trim(shift))."</td>" ; }
 sub th      { return "<th>".&w(&trim(shift))."</th>" ; }
 sub tdr     { return "<td>".&w(&trim(shift))."</td>" ; }
 sub tdrb    { return "<td class=rb>".&w(&trim(shift))."</td>" ; }
@@ -94,6 +95,7 @@ sub tdersb  { return "<td class=cb rowspan=" . (shift) . ">&nbsp;</td>" ; }
 sub tdecrsb  { return "<td class=cb colspan=" . (shift) . " rowspan=" . (shift) . ">&nbsp;</td>" ; }
 sub tdc     { return "<td class=c>"            .&trim(shift)."</td>" ; }
 sub tdcb    { return "<td class=cb>"           .&trim(shift)."</td>" ; }
+sub tdcbo   { return "<td class=cbo>"          .&trim(shift)."</td>" ; }
 sub tdcbg   { return "<td class=cbg>"          .&trim(shift)."</td>" ; }
 sub tdcbr2  { return "<td class=cb rowspan='2'>".&trim(shift)."</td>" ; }
 sub tdcbt   { return "<td class=cb valign=top>" .&trim(shift)."</td>" ; }

@@ -18,6 +18,7 @@
 
   our $timestart = time ;
   our $mirror = $false ; # no RTL languages support yet
+  our $count_total ;
 
   # -i "w:\! perl\dammit\dammit page requests per category\scan_categories_views_per_article.csv" -o "scan_categories_views_per_article.html"
 # our ($file_csv, $file_html_in, $file_html_out, , $view_threshold, $msg_month) = &ParseArguments ;
@@ -158,6 +159,8 @@ sub WriteReport
     chomp $line ;
     my ($project_code, $title, $count, $categories) = split (' ', $line, 4) ;
 
+    $count_total += $count ;
+
     next if $count < $view_threshold ;
 
     $title = uri_unescape ($title) ;
@@ -205,14 +208,20 @@ sub WriteReport
     if ($rows == 2500)
     { $html .= "##2500##" ; }
   }
+
+  $count_total =~ s/(\d)(\d\d\d\d\d\d\d\d\d)$/$1,$2/ ;
+  $count_total =~ s/(\d)(\d\d\d\d\d\d)$/$1,$2/ ;
+  $count_total =~ s/(\d)(\d\d\d)$/$1,$2/ ;
+ 
   $html .= "##999999##" ;
   
   $html .= "</tbody>\n" ;
-  $html .= "</table>" ;
-  $html .= "##PAGES##<p>" ;
-  $html .= "Views are number of times the article has been requested in the given month.<br>" ;
-  $html .= "This includes a small amount (+/-10?) requests by search engines (crawlers).<br>" ;
-  $html .= "Articles with less than $view_threshold requests have been omitted.<p>" ;
+  $html .= "</table>\n" ;
+  $html .= "##PAGES##<p>\n" ;
+  $html .= "$count_total overall page views found<p>\n" ;
+  $html .= "Views are number of times the article has been requested in the given month.<br>\n" ;
+  $html .= "This includes a small amount (+/-10?) requests by search engines (crawlers).<br>\n" ;
+  $html .= "Articles with less than $view_threshold requests have been omitted (but were counted for total page views).<p>" ;
  
 # $html .= "<a name=categories id=categories></a><small>" ;
 #  open HTML_IN, '<', $file_html_in ;

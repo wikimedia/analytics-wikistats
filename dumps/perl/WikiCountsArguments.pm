@@ -240,10 +240,15 @@ sub SetEnvironment
         &LogT ("Overrule edits only mode for selected wikis, 2011-03: contest on ID/JV, 2011-05: special request on SV\n") ;
         &LogT ("Overrule edits only mode for selected wikis, 2012-04: outreach programs: special request by Annie Lin\n") ;
         &LogT ("Overrule edits only mode for selected wikis, 2014-03: WikiAfrica program: special request by Heather Ford\n") ;
-        $edits_only = $false ;  # temporarily disable till full dump can be processed again
+        &LogT ("Overrule may be canceled later (May 2015)\n") ;
+        $edits_only = $false ; 
       }
     }
   }
+
+  &LogT ("From May 2015 onwards run all dumps 'edits_only'\n") ;
+  $edits_only = $true ; # qqq
+
 # 23/04/2013: revert to letting cmd line set this 
 # else
 # { $edits_only = $false ; } # for now only speed up Wikipedia, not other mostly much smaller projects
@@ -270,6 +275,12 @@ sub SetEnvironment
 
       $dumpdate = &SetDumpDate ($path_in)  ;
     }
+  }
+
+  if (($language eq "wikidata") && ($dumpdate eq "20150331")) # Q&D fix for wikidata dumps that took too long to complete after several restarts
+  {
+    $dumpdate = "20150430" ; 
+    print "patch dumpdate -> $dumpdate\n" ; 
   }
 
   if (! ($dumpdate =~ m/^\d{8,8}$/))
@@ -876,7 +887,7 @@ sub SetDumpDir
   if ($dumpdir ne "")
   { $path_in .= "$dumpdir/" ; }
   &LogT ("\nUse folder $path_in\n\n") ;
-
+  
   return ($dumpdir) ;
 }
 
@@ -893,6 +904,7 @@ sub SetDumpDate
   open INDEX_HTML, '<', "$path_in/index.html" ;
   while ($line = <INDEX_HTML>)
   {
+    # May 2015 sorry for duplicated code in several branches, needs restructuring
     if ($edits_only)
     {
       if ($line =~ /Extracted page abstracts/) # last dump before stub-meta-history dump -> start time of job step
@@ -901,13 +913,29 @@ sub SetDumpDate
         $year  = substr ($line,0,4) ;
         $month = substr ($line,5,2) ;
         $day   = substr ($line,8,2) ;
+        
+        if ($year !~ /^2/)
+        {
+          # new situation in May 2015: job only generates stub dumps -> take dumpdate from folder name
+          print "previous step didn't run, job did stub dumps only -> take dumpdate from folder name\n" ;
+          chomp $line ;
+          $line =~ s/^.*-(\d{8,8})-.*$/$1/ ;
+          if (length ($line) != 8)
+          { abort ("No date found in Yahoo step in index.html 1\n'$line'\n") ; }
+          $year  = substr ($line,0,4) ;
+          $month = substr ($line,4,2) ;
+          $day   = substr ($line,6,2) ;
+        }
+
         $date = sprintf ("%04d%02d%02d", $year, $month, $day) ;
         $datestartdump = $date ;
+        
         $month-- ;
         if ($month < 1)
         { $month = 12 ; $year-- ; }
         $day = days_in_month ($year,$month) ;
         $dumpdate = sprintf ("%04d%02d%02d", $year, $month, $day) ;
+        print "dumpdate (edits only) $dumpdate\n" ;
         last ;
       }
       if ($line =~ /Creating split stub dumps/)
@@ -936,6 +964,20 @@ sub SetDumpDate
         $year  = substr ($line,0,4) ;
         $month = substr ($line,5,2) ;
         $day   = substr ($line,8,2) ;
+        
+        if ($year !~ /^2/)
+        {
+          # new situation in May 2015: job only generates stub dumps -> take dumpdate from folder name
+          print "previous step didn't run, job did stub dumps only -> take dumpdate from folder name\n" ;
+          chomp $line ;
+          $line =~ s/^.*-(\d{8,8})-.*$/$1/ ;
+          if (length ($line) != 8)
+          { abort ("No date found in Yahoo step in index.html 2\n'$line'\n") ; }
+          $year  = substr ($line,0,4) ;
+          $month = substr ($line,4,2) ;
+          $day   = substr ($line,6,2) ;
+        }
+
         $date = sprintf ("%04d%02d%02d", $year, $month, $day) ;
         if (($datestartdump eq "") || ($date lt $datestartdump))
         {
@@ -945,6 +987,7 @@ sub SetDumpDate
           { $month = 12 ; $year-- ; }
           $day = days_in_month ($year,$month) ;
           $dumpdate = sprintf ("%04d%02d%02d", $year, $month, $day) ;
+          print "dumpdate (not 'edits only') $dumpdate\n" ;
         }
       }
     }

@@ -175,8 +175,8 @@ sub ParseXml
   $timestart = time ; # save system time
 
   my $wlm_images        = 0 ;
-  my $wlm_any_revision  = $false ;
-  my $wlm_last_revision = $false ;
+  my $wlm_any_revision_has_template  = $false ;
+  my $wlm_last_revision_has_template = $false ;
 
      if ($file_xml =~ /\.gz$/) # extension gz ?
   { open XML, "-|", "gzip -dc \"$file_xml\""   || die ("Input file could not be opened: $file_xml") ; }
@@ -241,7 +241,7 @@ sub ParseXml
 #last if $lines++ > 3000000000 ;
       $titles++ ;
 
-      if ($wlm_any_revision)
+      if ($wlm_any_revision_has_template)
       {
         $wlm_images++ ;
 	
@@ -285,7 +285,7 @@ sub ParseXml
 
 	$error_reason =~ s/, $// ; # remove trailing comman/space
 
-	if ($wlm_last_revision)
+	if ($wlm_last_revision_has_template)
 	{
 	  $images_per_year_per_country_last_rev          {"$wlm_year,$wlm_country"} ++ ;
 	  $images_per_year_per_country_per_user_last_rev {"$wlm_year,$wlm_country"} {$wlm_user} ++ ;
@@ -306,7 +306,7 @@ sub ParseXml
 	}
 
         $wlm_unflagged = '-' ; 
-	if (! $wlm_last_revision)
+	if (! $wlm_last_revision_has_template)
 	{ $wlm_unflagged = 'unflagged' ; }
 
         if ($wlm_usertype eq 'R') # registered user, not a bot
@@ -314,8 +314,8 @@ sub ParseXml
 
 	print CSV_UPLOADS "$wlm_year,$wlm_country,\"$title\",$wlm_usertype,\"$wlm_user\",$wlm_timestamp,$wlm_unflagged\n" ;
         
-	$wlm_any_revision = $false ;
-        $wlm_last_revision = $false ;
+	$wlm_any_revision_has_template = $false ;
+        $wlm_last_revision_has_template = $false ;
       }
 
       $wlm_year    = '--' ;
@@ -379,7 +379,7 @@ sub ParseXml
       { $wlm_timestamp = $timestamp ; }
     # print "time $timestamp\n" if $verbose ;
 
-      $wlm_last_revision = $false ; # we will found out about this revision being the last
+      $wlm_last_revision_has_template = $false ; # we will found out about this revision being the last
     }
 
     if ($line =~ /^\s*<username>/) 
@@ -434,8 +434,8 @@ sub ParseXml
         if ($line =~ /\{\{Wiki[\s_]Loves[\s_]Monuments/i) # now test more strict (slightly more costly, therefor only as step 2)
 	{
   	  $trace = "match! $line\n" ;	      
-          $wlm_any_revision  = $true ; # remember there was at least one wlm revision until all revisions for this page have been processed   
-          $wlm_last_revision = $true ; # assume this is last revison until proven wrong
+          $wlm_any_revision_has_template  = $true ; # remember there was at least one wlm revision until all revisions for this page have been processed   
+          $wlm_last_revision_has_template = $true ; # assume this is last revison until proven wrong
       
 	  if ($line =~ /\{\{Wiki[\s_]Loves[\s_]Monuments\s*\d+/i)
 	  {
@@ -595,7 +595,7 @@ sub ParseXml
 
   close ERRORS ;
   
-  if ($wlm_last_revision)
+  if ($wlm_last_revision_has_template)
   { $wlm_images++ ; }
 
   $line = "$wlm_images WLM images found in " . &ddhhmmss (time - $timestart, $time_format). "\n" ;

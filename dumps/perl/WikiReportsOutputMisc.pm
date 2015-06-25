@@ -246,6 +246,8 @@ sub GenerateSiteMapNew
 #               "Since a year it has become increasingly difficult to produce valid dumps for the largest wikipedias. " .
 #               "Until that problem is fixed some figures will be outdated. " ; }
 
+# $out_msg = "<b><font color=red>January 2014: Unfortunately monthly database dump generation is delayed for many wikis. Reports will appear later than usual. Our sincere apologies for any inconvenience caused.</font><font color=#080><br>Upd. March 2: Dump generation was restarted on February 12. All dumps are up to date now for December, some not for January, some days to go. This is an intermediate update.</font></b>" ;
+
   &GenerateHtmlStart ($out_html_title,  $out_zoom,          $out_options,
                       $out_page_title,  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
@@ -1052,6 +1054,9 @@ sub GenerateHtmlStartWikipediaReport
   $out_page_title   .= "&nbsp;" . $out_page_subtitle ;
   $out_page_subtitle = "" ;
   $out_explanation   = "" ;
+
+# $out_msg = "<b><font color=red>January 2014: Unfortunately monthly database dump generation is delayed for many wikis. Reports will appear later than usual. Our sincere apologies for any inconvenience caused.</font><font color=#080><br>Upd. March 2: Dump generation was restarted on February 12. All dumps are up to date now for December, some not for January, some days to go. This is an intermediate update.</font></b>" ;
+
   &GenerateHtmlStart ($out_html_title,  $out_zoom_buttons,  $out_options,
                       $out_page_title,  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,

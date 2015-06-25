@@ -1,15 +1,79 @@
 #!/bin/bash
 ulimit -v 2000000
 
-# collect newewest projectcounts files (hourly page view stats per wiki), add to tar, and publish
+# to be run monthly
+
+# each line produces two reports in http://stats.wikimedia.org/wikimedia/pageviews/categorized/
+# - a subtree of the category scheme for  certain wiki, starting from a specified top category
+#   e.g. http://stats.wikimedia.org/wikimedia/pageviews/categorized/wp-en/2014-05/categories_wp-en_cat_Lists_2014-05.html
+# - a list of all pages belonging to that subtree, and their monthly page views 
+#   e.g. http://stats.wikimedia.org/wikimedia/pageviews/categorized/wp-en/2014-05/pageviews_wp-en_cat_Lists_2014-05.html
+
+# see also: http://stats.wikimedia.org/cgi-bin/search_portal.pl?search=page+views+category+hierarchy
+
+# arguments:
+# - target wiki
+# - top category (use underscores for spaces)
+# - yyyy_mm: month to be reported
+# - threshold: only list pages with at least this number of page views
+# - top folder: : reports will appear under http://stats.wikimedia.org/wikimedia/pageviews/categorized/[yyyy_mm] 
+# - depth: to follow subcategories up to this depth 
+
+# prune category tree as follows: add lines to file exclude.csv, in order to not include certain subcategories, 
+# in order to speed up pruning start by collecting only small subtree (e.g. depth 5), prune and rerun with more depth
+# see also: dammit_list_views_by_category_blacklist.sh 
 
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 
-yyyy_mm=2014-03
+yyyy_mm=2015-04
 threshold=20
-depth=9
+depth=10
 
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-01    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-02    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-03    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-04    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-05    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-06    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-07    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-08    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-09    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-10    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-11    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-12    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2015-01    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2015-02    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2015-03    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2015-04    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-01    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-02    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-03    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-04    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-05    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-06    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-07    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-08    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-09    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-10    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-11    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2014-12    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2015-01    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2015-02    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2015-03    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_the_Netherlands'       2015-04    $threshold     'wp-en' $depth
+exit
+
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Wikipedia_maintenance_categories_sorted_by_month'           $yyyy_mm    50             'wp-en' 9
+ 
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Wikipedia_games'                  $yyyy_mm    50             'wp-en' 3
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Medicine'                         $yyyy_mm    50             'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'yo.wikipedia.org' 'Medical_articles_translated_from_English' $yyyy_mm    1      'wp-yo' $depth
+
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Leiden'                 $yyyy_mm    20             'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Museums_in_Leiden'                $yyyy_mm    20             'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Airlines'                         $yyyy_mm    20             'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Suicide'                          $yyyy_mm    20             'wp-en' 5
 # url encode: http://meyerweb.com/eric/tools/dencoder/
 
 #                                   wiki               category                           yyyy_mm    threshold      abbr    depth        

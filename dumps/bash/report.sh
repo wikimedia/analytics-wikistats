@@ -9,7 +9,7 @@ perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 log=$dumps/logs/log_report_sh.txt
 

@@ -1,8 +1,6 @@
 #!/bin/bash
 ulimit -v 2000000
 
-# collect newewest projectcounts files (hourly page view stats per wiki), add to tar, and publish
-
 wiki=$1
 category=$2
 yyyy_mm=$3
@@ -17,7 +15,7 @@ dammit=$wikistats/dammit.lt
 perl=$dammit/perl
 perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 work=/a/dammit.lt/pagecounts/categorized
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 data=$work/data
 publish=$work/publish
 

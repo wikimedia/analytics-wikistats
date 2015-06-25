@@ -265,7 +265,8 @@
 
 # &GenerateComparisonTables ;
 
-  if ($language eq "en")
+  &LogT ("\nRegion code = '$region'\n") ;
+  if (($language eq "en") && ($region eq ''))
   {
      &GenerateYearlyGrowthStats ;
 #  # &TestCompleted ;
@@ -278,6 +279,11 @@
   {
     &LogT ("\nGenerate Summaries Per Wiki\n\n") ;
     &GenerateSummariesPerWiki ;
+  }
+  else
+  {
+    if ($mode_wm) { &LogT ("\nDo not generate Summaries Per Wiki (language $language \$mode_wm = 1) \n\n") ; }
+    else          { &LogT ("\nDo not generate Summaries Per Wiki (language $language \$mode_wm = 0) \n\n") ; }
   }
 
 # &GenerateTablesPerWikipedia ("zzz") ;

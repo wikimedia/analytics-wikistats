@@ -5,10 +5,10 @@ ulimit -v 8000000
 wikistats=/a/wikistats_git
 out=$wikistats/dumps/out
 
-dataset1001=dataset1001::pagecounts-ez/wikistats
+dataset1001=dataset1001.wikimedia.org::pagecounts-ez/wikistats
 
 if [ "$1" == "" ] ; then
-  echo "Project code missing! Specify as 1st argument one of wb,wk,wn,wp,wq,ws,wv,wx"
+  echo "Project code missing! Specify as 1st argument one of wb,wk,wm,wn,wp,wq,ws,wv,wx"
   exit
 fi  
 
@@ -22,5 +22,5 @@ fi
 
 zip -q -r $out/zip_all/out_$1.zip *
 
-echo rsync -avv $out/zip_all/out_w*.zip $dataset1001
-rsync -avv $out/zip_all/out_w*.zip $dataset1001
+echo rsync -ipv4 -avv $out/zip_all/out_w*.zip $dataset1001
+rsync -ipv4 -avv $out/zip_all/out_w*.zip $dataset1001

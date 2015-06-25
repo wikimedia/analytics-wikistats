@@ -1,7 +1,7 @@
 wikistats=/a/wikistats_git
 squids=$wikistats/squids
 csv=$squids/csv
-htdocs=stat1001.wikimedia.org::a/srv/stats.wikimedia.org/htdocs/
+htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 archive=dataset1001::pagecounts-ez
 
 cd $csv

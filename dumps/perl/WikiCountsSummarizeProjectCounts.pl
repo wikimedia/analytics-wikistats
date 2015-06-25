@@ -55,6 +55,7 @@
   &InitProjectNames ;
 
 # &ScanFiles ; # (legacy) flat files
+  &ReadMetaLanguages ;
   &ScanWhiteList ;
   &ScanTarFiles ; # fill @files with sorted list of file names starting with 'projectcounts'
   &FindMissingFiles ;
@@ -133,6 +134,15 @@
   &WriteCsvFilesPerPeriod ($do_normalize);
   &WriteCsvHtmlFilesPopularWikis ($do_normalize)  ;
 
+  print "\nErrors:\n\n" ;
+  foreach $error (sort {$errors1 {$b} <=> $errors1 {$a}} keys %errors1)
+  { print $errors1 {$error} . ": $error\n" ; }
+  foreach $error (sort {$errors2 {$b} <=> $errors2 {$a}} keys %errors2)
+  { print $errors2 {$error} . ": $error\n" ; }
+
+  &WriteTrendsMobileViews ;
+  &WriteRatioMobileViews ;
+  
   &LogT ("\nReady\n") ;
   exit ;
 
@@ -243,7 +253,7 @@
 sub LogArguments
 {
   my $arguments ;
-  getopt ("iolpftw", \%options) ;
+  getopt ("iolmpftw", \%options) ;
   foreach $arg (sort keys %options)
   { $arguments .= " -$arg " . $options {$arg} . "\n" ; }
   print ("\nArguments\n$arguments\n") ;
@@ -267,11 +277,12 @@ sub ParseArguments
   $path_in    = $options {"i"} ;
   $path_csv   = $options {"o"} ;
   $path_white = $options {"w"} ;
+  $file_meta  = $options {"m"} ;
 
   die "Input folder '$path_in' does not exist"         if (! -d $path_in) ;
   die "Output folder '$path_csv' does not exist"       if (! -d $path_csv) ;
   die "White list folder '$path_white' does not exist" if (! -d $path_white) ;
-
+  die "Languages meta data file '$file_meta' does not exist" if (! -e $file_meta) ;
   die "Always specify project (-p) when you specify language (-l)" if ((! defined ($options {"p"})) && (defined ($options {"l"})));
 
   $select_project  = $options {"p"} ;
@@ -328,6 +339,11 @@ sub ParseArguments
   { die "You specified invalid date range: $date_from - $date_till\n" ; }
 
   print "\n" ;
+
+  $file_trends_mobile_csv   = "$path_csv/csv_wp/PageViewsPerMonthMobileTrends.csv" ;
+  $file_ratio_mobile_wp_csv = "$path_csv/csv_wp/PageViewsPerMonthMobileTrendsMatrixWp.csv" ;
+  $file_ratio_mobile_csv    = "$path_csv/csv_wp/PageViewsPerMonthMobileRatio.csv" ;
+  $file_perc_mobile_txt     = "$path_csv/csv_wp/PageViewsPerMonthMobileRatioPerLangOrRegion.txt" ;
 }
 
 sub SetComparisonPeriods
@@ -428,6 +444,28 @@ sub SetComparisonPeriods
 #  @files = sort {$a cmp $b} @files ;
 #}
 
+sub ReadMetaLanguages
+{
+  open CSV_LANGUAGES, '<', $file_meta ;
+  while ($line = <CSV_LANGUAGES>)
+  {
+    next if $line =~ /^#/ ;
+    next if $line =~ /^\s*$/ ;
+
+    chomp $line ;
+    ($lang,$name,$speakers,$regions) = split (',', $line) ;
+
+    $regions =~ s/\|C// ; # ignore China as separate region, is also tagged as Asia
+    $regions =~ s/\|I// ; # ignore India as separate region, is also tagged as Asia
+    $regions =~ s/\|/\//g ; # A|B -> A/B
+
+    $names    {$lang} = "$name" ;
+    $speakers {$lang} = "$speakers" ;
+    $regions  {$lang} = "$regions" ;
+  }
+  close CSV_LANGUAGES ;
+}
+
 sub ScanWhiteList
 {
   print "$path_white/WhiteListWikis.csv\n" ;
@@ -464,6 +502,8 @@ sub ScanTarFiles
     @files_tar = $tar->list_files ;
     foreach my $file (@files_tar)
     {
+    # next if $file lt "projectcounts-20121100-000000" or  $file gt "projectcounts-20130200-000000" ; # #test
+    # next if $file !~ /20141[12]/ ; # test qqq
       next if $file !~ /^projectcounts-\d{8}-\d{6}$/ ;
       next if $date_from ne "" and $file lt "projectcounts-$date_from" ;
       next if $date_till ne "" and $file gt "projectcounts-$date_till" ;
@@ -476,6 +516,7 @@ sub ScanTarFiles
       next if $file ge "projectcounts-20121214-000000" and $file lt "projectcounts-20130108-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20130723-000000" and $file lt "projectcounts-20130724-000000" ; # bad measurements on these dates
       next if $file ge "projectcounts-20140105-000000" and $file lt "projectcounts-20140107-000000" ; # bad measurements on these dates
+      next if $file ge "projectcounts-20140827-000000" and $file lt "projectcounts-20140828-000000" ; # bad measurements on these dates
 
       push @files, $file ;
       $file_in_tar {$file} = $file_in ;
@@ -580,7 +621,7 @@ sub AdjustForMissingFilesAndUndercountedMonths
   foreach $period (sort keys %{$hours_processed {"month"}})
   {
     $rescale  = 1 ; # compensate for hours which are missing or incomplete in input
-    $rescale2 = 1 ; # compensate for underreporting due to server overload (summer 2010) 
+    $rescale2 = 1 ; # compensate for underreporting due to server overload (summer 2010)
     $processed = $hours_processed {"month"}{$period} ;
     $missing   = $hours_missing   {"month"}{$period} ;
     if ($processed > 0)
@@ -606,17 +647,17 @@ sub AdjustForMissingFilesAndUndercountedMonths
       {
         ($project,$language) = split (',', $wiki) ;
         $before = $totals {"month"} {$project} {"$language,$period"} ;
-	# for all projects first incomplete month is not included (too long ago to care)
-	# except for latest added project wikivoyage (code wo) for which data capture started 17th January 2013
-	# -> multiply by (31 days) / (31-16 days) = 2.067 (and $rescale is not equal 1 for Jan 2013, so recalc will happen anyway)
-	if (($project eq 'wo') && ($period eq '2013/01'))
-	{ $after  = sprintf ("%.0f", $before * 2.067) ; }
-	else
-	{ $after  = sprintf ("%.0f", $before * $rescale * $rescale2) ; }
+        # for all projects first incomplete month is not included (too long ago to care)
+        # except for latest added project wikivoyage (code wo) for which data capture started 17th January 2013
+        # -> multiply by (31 days) / (31-16 days) = 2.067 (and $rescale is not equal 1 for Jan 2013, so recalc will happen anyway)
+        if (($project eq 'wo') && ($period eq '2013/01'))
+        { $after  = sprintf ("%.0f", $before * 2.067) ; }
+        else
+        { $after  = sprintf ("%.0f", $before * $rescale * $rescale2) ; }
 
-	$totals {"month"} {$project} {"$language,$period"} = $after ;
+        $totals {"month"} {$project} {"$language,$period"} = $after ;
 
-	if ($language =~ /^(?:de|en)$/)
+        if ($language =~ /^(?:de|en)$/)
         { print "project $project, language $language, period $period: $before -> $after\n" ; }
       }
     }
@@ -732,7 +773,7 @@ sub CountPageViews
       elsif ($project eq "v")   { $project = "wv"; } # wikiversity
       elsif ($project eq "w")   { $project = "wx"; } # miscellaneous
       elsif ($project eq "mw")  { $project = "wp"; $language .= ".m" } # mobile wikipedia
-      else { print ("unexpected project code [$language]$project\n") } ;
+      else { @errors1 {"unexpected project code [$language]$project"} ++ } ;
 
       # select number of wikipedia's are presented as group wikispecial
       # omit mediawiki, no counts for that one available
@@ -748,7 +789,7 @@ sub CountPageViews
       if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
       {
         if ($blacklist {"$project,$language"} == 0)
-        { print "Not in white list: $project,$language\n" ; }
+        { @errors2 {"Not in white list: $project,$language"} ++ ; }
         $blacklist {"$project,$language"}++ ;
         next ;
       }
@@ -788,12 +829,12 @@ sub CountPageViews
     # close IN ;
 
     if (++$filesparsed % 500 == 0)
-    { 
+    {
       $progress = sprintf ("%.0f",100 * $filesparsed / $filecnt) ;
       if ($progress > 20) # only predict run time from 20% , first months are going fast, only Wikipedia, no mobile views
       { $time_to_go = mmss ((100 - $progress)* (time - $timestart_parse) / $progress) . " to go" ; }
 
-      &LogT ("$filesparsed/$filecnt files parsed ($progress\%, $time_to_go), last was $file\n") ; 
+      &LogT ("$filesparsed/$filecnt files parsed ($progress\%, $time_to_go), last was $file\n") ;
     }
   }
 
@@ -868,6 +909,7 @@ sub WriteCsvFilesPerPeriod
 
       &Log ("File csv: $file_csv\n") ;
       open CSV, ">", $file_csv ;
+
       foreach $key (sort  {$a cmp $b} keys %{$totals {$period}{$project}})
       {
         ($language,$yearmonth) = split (",", $key) ;
@@ -913,6 +955,7 @@ sub WriteCsvFilesPerPeriod
       }
       close CSV ;
     }
+
   }
 
   if ($normalize)
@@ -996,6 +1039,246 @@ sub WriteCsvFilesPerPeriod
                     $csv_analytics_normalized_mobile)    . "\n" ;
     }
   }
+}
+
+sub WriteTrendsMobileViews
+{
+  print "\nWriteTrendsMobileViews\n" ;
+  &Log ("File out: $file_trends_mobile_csv\n") ;
+  open CSV, ">", $file_trends_mobile_csv ;
+  print CSV "# PageViews ~ html requests with url pattern [language].[wiki].org/wiki/[title]\n" .
+            "# as collected with webstatscollector tool and reported in 'projectcounts' files (hourly page views per wiki)\n" .
+            "# See https://dumps.wikimedia.org/other/pagecounts-ez/ (sanitized version; correcting for missing data)\n" .
+            "# Note: 'mobile' refers to requests for mobile site (not from mobile devices; which is entirely different)\n" .
+            "# For 'normalized' view counts (often used at Wikistats): multiply daily counts by days in month\n" .
+            "# Project codes: wb=Wikibooks wk=Wiktionary wn=Wikinews wo=Wikivoyage wp=Wikipedia wq=Wikiquote ws=Wikisource wv=Wikiversity wx=Wikispecial\n" .
+            "#\n" .
+            "# project,language,language code,month,perc mobile views,all views,non mobile views,mobile views,days in month,days in full month,is full month,views daily,non mobile views daily,mobile views daily\n" ;
+  foreach $key (sort keys %csv_analytics_in_page_views_non_normalized_non_mobile)
+  {
+    ($project,$lang,$yyyymm) = split (',', $key) ;
+    
+    $yyyymm =~ s/-/\//g ;
+    $yyyymmdd = $date_high {$yyyymm} ;
+    $yyyy = substr ($yyyymmdd,0,4) ;
+    $mm   = substr ($yyyymmdd,5,2) ;
+    $dd   = substr ($yyyymmdd,8,2) ;
+    $days_in_month = days_in_month ($yyyy,$mm) ;
+    $full_month = ($dd == $days_in_month) ? 'Y' : 'N' ;
+    $month = sprintf ("%4d-%02d",$yyyy,$mm) ;
+
+    next if $full_month eq 'N' and $dd < 10 ;
+
+  # print "$yyyy $mm $dd $days_in_month $full_month\n" ; # test qqq
+
+    $views_non_mobile = 0 + $csv_analytics_in_page_views_non_normalized_non_mobile {$key} ;
+    $views_mobile     = 0 + $csv_analytics_in_page_views_non_normalized_mobile     {$key} ;
+    $views_all        = $views_non_mobile + $views_mobile ;
+    if ($views_all > 0)
+    {
+      $perc_mobile = sprintf ("%.1f",100 * $views_mobile / $views_all) ;
+      if ($days_in_month > 0)
+      {
+        $views_daily_non_mobile = sprintf ("%.0f", $views_non_mobile / $dd) ;
+        $views_daily_mobile     = sprintf ("%.0f", $views_mobile     / $dd) ;
+        $views_daily_all        = sprintf ("%.0f", $views_all        / $dd) ;
+      }
+      else
+      { $views_daily_all = $views_daily_non_mobile = $views_daily_mobile  = '-' ; }
+
+      print CSV "$project," . $names{$lang} . ",$lang,$month,$perc_mobile\%,$views_all,$views_non_mobile,$views_mobile,$dd,$days_in_month,$full_month,$views_daily_all,$views_daily_non_mobile,$views_daily_mobile\n" ;
+
+      if (($project eq 'wp') && ($views_mobile > 0))
+      {
+        $month_perc_mobile {"$yyyy-$mm"}++ ; 
+        if (! $full_month)
+        { $month_perc_mobile_incomplete {"$yyyy-$mm"} = "$yyyy-$mm-$dd" ; }
+        
+        $perc_mobile {"$lang|$yyyy-$mm"} = $perc_mobile ;
+        $views_mobile {$lang} = $views_mobile ;
+        $views_all    {$lang} = $views_all ;
+        $csv_analytics_perc_mobile {"$yyyy-$mm"} = $perc_mobile ;
+      }
+    }
+  }
+  close CSV ;
+
+  &Log ("File out: $file_ratio_mobile_wp_csv\n") ;
+
+  (@languages_sorted_by_mobile_pageviews) = sort {$views_mobile {$b} <=> $views_mobile {$a}} keys %views_mobile ;
+  open CSV, ">", $file_ratio_mobile_wp_csv ;
+
+  print CSV "Wikipedias ordered by total mobile views in last month\n" ;
+  print CSV "Meta data as in e.g. http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryOverview2014Q2.htm\n" ;
+  print CSV "All meta data from Wikipedia. Speakers includes non-native speakers.\n" ;
+
+  $line = "Speakers (M),";
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  { $line .= "$speakers{$lang}," ; }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  $line = "Regions," ;
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  { $line .= "$regions{$lang}," ; }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  $line = "All views last month," ;
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  {
+    $views = $views_all {$lang} ;
+  # $views = sprintf ("%.1f",$views / 1000000) ;
+  # or
+  # $views =~ s/\d(\d\d\d\d\d\d\d\d\d)$/$1,$2/ ;
+  # $views =~ s/\d(\d\d\d\d\d\d)$/$1,$2/ ;
+  # $views =~ s/\d(\d\d\d)$/$1,$2/ ;
+    $line .= "$views," ;
+  }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  $line = "Mobile views," ;
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  {
+    $views = $views_mobile {$lang} ;
+  # $views = sprintf ("%.1f",$views / 1000000) ;
+  # or
+  # $views =~ s/\d(\d\d\d\d\d\d\d\d\d)$/$1,$2/ ;
+  # $views =~ s/\d(\d\d\d\d\d\d)$/$1,$2/ ;
+  # $views =~ s/\d(\d\d\d)$/$1,$2/ ;
+    $line .= "$views," ;
+  }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  $line = "lang code," ;
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  { $line .= "$lang," ; }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  $line = "language," ;
+  foreach $lang (@languages_sorted_by_mobile_pageviews)
+  { $line .= "$names{$lang}," ; }
+  $line =~ s/,$// ;
+  print CSV "$line\n" ;
+
+  foreach $yyyymm (sort keys %month_perc_mobile)
+  {
+    $line = "$yyyymm," ;
+    if ($month_perc_mobile_incomplete {"$yyyy-$mm"} ne '')
+    { $line = $month_perc_mobile_incomplete {"$yyyy-$mm"} ; }
+    
+    foreach $lang (@languages_sorted_by_mobile_pageviews)
+    { $line .= $perc_mobile {"$lang|$yyyymm"} . "," ; }
+    $line =~ s/,$// ;
+    print CSV "$line\n" ;
+    print     "$line\n" ;
+  }
+  close CSV ;
+# exit ; # test qqq
+}
+
+sub WriteRatioMobileViews
+{
+  print "\nWriteRatioMobileViews\n" ;
+
+  $file_pageviews_csv = "$path_csv/csv_wp/PageViewsPerMonthAll.csv" ;
+  open CSV_IN, '<', $file_pageviews_csv ;
+  while ($line = <CSV_IN>)
+  {
+    # last if $lines++ > 50 ;
+    chomp $line ;
+    ($lang,$date,$count) = split (',', $line) ;
+    if ($lang eq $lang_prev) # store data for newer month, except for last (incomplete) month
+    {
+      # remember previous for every language -> print one but last
+      $counts {$lang} = $count_prev ;
+      $dates  {$lang} = $date_prev ;
+    }
+    $lang_prev  = $lang ;
+    $count_prev = $count ;
+    $date_prev  = $date ;
+  }
+  close CSV_IN ;
+
+  open  CSV_OUT, '>', $file_ratio_mobile_csv ;
+  print CSV_OUT "Meta data as in e.g. http://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryOverview2014Q2.htm\n" ;
+  print CSV_OUT "All meta data from Wikipedia. Speakers in millions - also includes non-native speakers.\n" ;
+  print CSV_OUT "Regions: AF=Africa AS=Asia EU=Europe NA=North America OC=Oceania SA=South America W=World AL=Artificial Languages.\n" ;
+  print CSV_OUT "language,language code,regions,perc mobile,speakers,all views,main site,mobile site,month\n" ;
+  foreach $lang (sort keys %counts)
+  {
+    next if $lang =~ /\.m/ ; # mobile
+    next if $lang eq 'www' ; # portal
+
+  # print "$key\n" ;
+    if ($dates {$lang} ne $dates {"$lang.m"})
+  # { print "unequal dates or missing info for $lang (date:'${dates {$lang}}') and $lang.m (date: '${dates {$lang.m}}')\n" ; }
+    { print "unequal dates or missing info for $lang (date:'${dates {$lang}}') and $lang.m (date: '" . $dates {"$lang.m"} . "')\n" ; }
+    else
+    {
+      $count_main   = $counts {$lang} ;
+      $count_mobile = $counts {"$lang.m"} ;
+      $count_all    = $count_main + $count_mobile ;
+      $date         = $dates {$lang} ;
+      if ($count_all == 0)
+      { $perc_mobile = 'n.a.' ; }
+      else
+      { $perc_mobile = sprintf ("%.1f", 100 * ($count_mobile / $count_all)) . '%' ; }
+    }
+
+    $date =~ s/\//-/g ;
+    $date = substr ($date,0,7) ;
+    print CSV_OUT $names {$lang} . ",$lang," . $regions {$lang} . ",$perc_mobile," . $speakers {$lang} . ",$count_all,$count_main,$count_mobile,$perc_mobile,$date\n" ;
+  # print         $names {$lang} . ",$lang," . $regions {$lang} . ',' . $speakers {$lang} . ",$count_all,$count_main,$count_mobile,$perc_mobile,$date\n" ;
+
+    $regions = $regions {$lang} ;
+
+    $regions_main   {$regions} += $count_main ;
+    $regions_mobile {$regions} += $count_mobile ;
+    $regions_all    {$regions} += $count_all ;
+    $langs          {$regions} .= "$lang:" . $names {$lang} . ", " ;
+  }
+  close CSV_OUT ;
+
+  print "\n\n" ;
+
+  open TXT_OUT, '>', $file_perc_mobile_txt ;
+  print TXT_OUT "Percentage mobile per group of languages, grouped by region(s) where the language is spoken\n\n" ;
+
+  foreach $regions (sort keys %langs)
+  {
+    $langs {$regions} =~ s/,\s*$// ;
+
+    $count_main   = $regions_main   {$regions} ;
+    $count_mobile = $regions_mobile {$regions} ;
+    $count_all    = $regions_all    {$regions} ;
+
+    if ($count_all == 0)
+    { $perc_mobile = 'n.a.' ; }
+    else
+    { $perc_mobile = sprintf ("%.1f", 100 * ($count_mobile / $count_all)) . '%' ; }
+
+    $regions2 = $regions ;
+    $regions2 =~ s/AF/Africa/ ;
+    $regions2 =~ s/AS/Asia/ ;
+    $regions2 =~ s/EU/Europe/ ;
+    $regions2 =~ s/NA/North-America/ ;
+    $regions2 =~ s/SA/South-America/ ;
+    $regions2 =~ s/W/World/ ;
+    $regions2 =~ s/OC/Oceania/ ;
+    $regions2 =~ s/AL/Artificial/ ;
+
+    if ($regions2 =~ /\//)
+    { $region = 'regions' }
+    else
+    { $region = 'region' }
+
+    print TXT_OUT "$region: $regions2\nlanguages:" . $langs {$regions} . "\nperc mobile: $perc_mobile\n\n" ;
+  }
+  close TXT_OUT ;
 }
 
 sub WriteCsvHtmlFilesPopularWikis
@@ -1449,11 +1732,11 @@ sub WriteCsvHtmlFilesPopularWikis
     open CSV_IN,  '<', $file_csv ;
     open CSV_OUT, '>', "$dir_out/wikilytics_in_pageviews.csv" ;
     while ($line = <CSV_IN>)
-    { 
+    {
       # QD hack, replace zeroes by spaces
       $line =~ s/\,0\,/,,/g ;
       $line =~ s/\,0\,/,,/g ;
-      print CSV_OUT $line ; 
+      print CSV_OUT $line ;
     }
     close CSV_IN ;
     close CSV_OUT ;

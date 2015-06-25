@@ -161,6 +161,7 @@
     &ReadBotNames ;
     &CollectActiveUsersWikiLovesMonuments ;
     &CollectActiveUsersPerMonthAllProjects ;
+    print "CountActiveWikisPerMonthAllProjects\n" ;
     &CountActiveWikisPerMonthAllProjects ;
     exit ;
   }

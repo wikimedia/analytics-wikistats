@@ -1700,8 +1700,10 @@ sub GenerateTableMonthlyStats
 
   if ($wp eq 'commons')
   { $out_html .= "<p><font color=#F00><a href='https://en.wikipedia.org/wiki/Wiki_Loves_Monuments'>Wiki Loves Monuments</a> contest months:<br>" . 
-	         "Sep 2013 WLM World - 48 countries<br>" . 	 
-		 "Sep 2012 WLM World - 35 countries - over 353,000 new images - over 15,000 participants<br>" .
+	         "Sep 2014 WLM World - 41 countries<br>" . 	 
+	         # June 2015, adjusted from WLM_stats_2010_2014.xlsx 	 
+	         "Sep 2013 WLM World - 48 countries<br>" .                                                      # 48 -> 52	 
+		 "Sep 2012 WLM World - 38 countries - over 353,000 new images - over 15,000 participants<br>" . # 35 -> 38
 		 "Sep 2011 WLM Europe - 18 countries - over 168,000 new images - over 5,000 participants <br>" . 
 	         "Sep 2010 WLM Netherlands - 12,500 new images</font><p>" ; } 
   
@@ -6842,7 +6844,7 @@ sub RecordTime
 sub WLM_month
 { 
   my $m = shift ;
-  return $true if $m % 12 == 9 and $m >= 129 and $m <= 165 ;
+  return $true if $m % 12 == 9 and $m >= 129 and $m <= 177 ;
   return $false ;
 }	 
 

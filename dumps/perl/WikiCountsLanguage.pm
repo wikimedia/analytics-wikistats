@@ -89,8 +89,11 @@ sub OptimizeRegExpKeyword
 
 sub GetLanguageSettings
 {
-  my ($found, $encoding, $category, $image, $user, $redirtag) = &ReadFilePhp ;
-
+# my ($found, $encoding, $category, $image, $user, $redirtag) = &ReadFilePhp ;
+  my $found = 0 ; # May 2015: force reuse as language files got corrupted recently for all projects
+               # somehow scripts revert to defaults when parsing php fails
+               # until fixed new tags will have to be added manually
+ 
   # if php script not found or incomplete, reuse parameters from last session
   if (! $found)
   {

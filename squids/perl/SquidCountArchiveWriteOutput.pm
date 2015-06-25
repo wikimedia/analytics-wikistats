@@ -89,6 +89,97 @@ sub WriteOutputIpFrequencies
   }
 }
 
+sub WriteOutputIpNoCountry # Q&D temporary (?) code variation on WriteOutputIpFrequencies
+{
+  trace WriteOutputIpNoCountry ;
+
+  my $path_out = shift ;
+  print "\ncd $path_out\n\n" ;
+  chdir ($path_out) ;
+
+  $comment = "# Data from $time_to_start till $time_to_stop (yyyy-mm-ddThh:mm:ss) - all counts in thousands due to sample rate of log (1 = 1000)\n" ;
+
+  open  CSV_MULTIPLE_ADDRESSES, '>', $file_ip_no_country ;
+  print                        "# html pages found: $html_pages_found\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# html pages found: $html_pages_found\n" ;
+  print CSV_MULTIPLE_ADDRESSES "#\n" ;
+
+  my %ip_distribution ;
+
+  foreach $address (keys %ip_no_country)
+  {
+    $ip_distribution {$ip_no_country {$address}} ++ ;
+  }
+
+  $ip_distribution_ge_2     = 0 ;
+  $ip_distribution_ge_3     = 0 ;
+  $ip_distribution_ge_4     = 0 ;
+  $ip_distribution_ge_5     = 0 ;
+  $ip_distribution_ge_10    = 0 ;
+  $ip_distribution_ge_20    = 0 ;
+  $ip_distribution_ge_50    = 0 ;
+  $ip_distribution_ge_100   = 0 ;
+  $ip_distribution_ge_250   = 0 ;
+  $ip_distribution_ge_1000  = 0 ;
+  $ip_distribution_ge_2500  = 0 ;
+  $ip_distribution_ge_10000 = 0 ;
+
+  foreach $frequency (sort {$a <=> $b} keys %ip_distribution)
+  {
+    $metafreq = $ip_distribution {$frequency} ;
+    if ($frequency >= 2)     { $ip_distribution_ge_2     += $metafreq ; }
+    if ($frequency >= 3)     { $ip_distribution_ge_3     += $metafreq ; }
+    if ($frequency >= 4)     { $ip_distribution_ge_4     += $metafreq ; }
+    if ($frequency >= 5)     { $ip_distribution_ge_5     += $metafreq ; }
+    if ($frequency >= 10)    { $ip_distribution_ge_10    += $metafreq ; }
+    if ($frequency >= 20)    { $ip_distribution_ge_20    += $metafreq ; }
+    if ($frequency >= 50)    { $ip_distribution_ge_50    += $metafreq ; }
+    if ($frequency >= 100)   { $ip_distribution_ge_100   += $metafreq ; }
+    if ($frequency >= 250)   { $ip_distribution_ge_250   += $metafreq ; }
+    if ($frequency >= 1000)  { $ip_distribution_ge_1000  += $metafreq ; }
+    if ($frequency >= 2500)  { $ip_distribution_ge_2500  += $metafreq ; }
+    if ($frequency >= 10000) { $ip_distribution_ge_10000 += $metafreq ; }
+    if ($frequency > 20) { next ; }
+    print                        "# $metafreq addresses occur $frequency times\n" ;
+    print CSV_MULTIPLE_ADDRESSES "# $metafreq addresses occur $frequency times\n" ;
+  }
+
+  print CSV_MULTIPLE_ADDRESSES "#\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_2 addresses occur 2+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_3 addresses occur 3+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_4 addresses occur 4+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_5 addresses occur 5+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_10 addresses occur 10+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_20 addresses occur 20+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_50 addresses occur 50+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_100 addresses occur 100+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_250 addresses occur 250+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_1000 addresses occur 1000+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_2500 addresses occur 2500+ times\n" ;
+  print CSV_MULTIPLE_ADDRESSES "# $ip_distribution_ge_10000 addresses occur 10000+ times\n" ;
+
+  foreach $address (sort {$ip_no_country {$b} <=> $ip_no_country {$a}} keys %ip_no_country)
+  {
+    $frequency = $ip_no_country {$address} ;
+  # print "$freq,$address\n" ;
+    if ($frequency > 1)
+    { print CSV_MULTIPLE_ADDRESSES "$frequency,$address\n" ; }
+  }
+
+  close CSV_MULTIPLE_ADDRESSES ;
+
+  if ($job_runs_on_production_server)
+  {
+    $cmd = "bzip2 -f $file_ip_no_country" ;
+    print "\ncmd = '$cmd'\n" ;
+    `$cmd` ;
+  }
+}
+
+sub WriteOutpuIpNoCountry
+{
+}
+
 sub WriteOutputSquidSequenceGaps
 {
   trace WriteOutputSquidSequenceGaps ;

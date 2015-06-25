@@ -33,7 +33,14 @@ sub GenerateAnimationsInputProjectsGrowth
   $mmddyyyy   = &m2mmddyyyy ($month_max) ;
   $till_year  = substr ($mmddyyyy,6,4) ;
   $till_month = substr ($mmddyyyy,0,2)+0 ;
-  $m2 = $month_max ;
+  $till_month -- ; 
+  if ($till_month == 0)
+  { 
+    $till_year -- ;
+    $till_month = 12 ;
+  }
+
+  $m2 = $month_max ; # skip current month
 
   $articles_max = $max_value_f {4} ;
   $editors_max  = $max_value_f {2} ;

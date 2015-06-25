@@ -121,7 +121,6 @@
       ($sec,$min,$hour,$day,$month,$year) = localtime (time+$reportdaysback*86400) ;
       $reportmonth = sprintf ("%04d-%02d",$year+1900,$month+1) ;
     }
-
     &LogDetail ("Report month = $reportmonth\n") ;
   }
   else { &LogDetail ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
@@ -299,7 +298,7 @@
 
     &LogDetail ("\nRead input from $path_process\n") ;
     &ReadInputClients ;
-    &ReadInputCrawlers ;
+  # &ReadInputCrawlers ; # 16 April, 2015, report broken, much too many odd user agent strings
     &ReadInputMethods ;
     &ReadInputMimeTypes ;
     &ReadInputOpSys ;
@@ -324,7 +323,6 @@
   }
 
   &ReadCountryCodes ;
-
   if ($days_input_found > 0)
   {
     &LogDetail ("\nDays input = $days_input_found\n") ;
@@ -415,6 +413,11 @@
 # &WriteCsvCountriesTargets ;
   close "FILE_LOG" ;
 
+  print "\nSuspect mime codes skipped:\n\n" ;
+  foreach $mime (sort keys %suspect_mime_codes)
+  {
+    print $suspect_mime_codes {$mime} . ': ' . $mime . "\n" ; 
+  } 
   &LogDetail ("\nReady\n\n") ;
   exit ;
 
@@ -483,7 +486,7 @@ sub ReportCountries
   $links = "<p>&nbsp;<b>Page Views Per Country</b> - " .
            "<a href='$file_html_per_country_overview'>Overview</a> / " .
            "<a href='$file_html_per_country_breakdown'>Breakdown</a> / " .
-           "<a href='$file_html_per_country_trends'>Trends</a>,&nbsp;&nbsp;&nbsp;&nbsp;" .
+         # "<a href='$file_html_per_country_trends'>Trends</a>,&nbsp;&nbsp;&nbsp;&nbsp;" . # deprecated, too unreliable
            "<b>Page Views Per Wikipedia Language - </b> " .
            "<a href='$file_html_per_language_breakdown'>Breakdown</a>" ;
 
@@ -496,6 +499,7 @@ sub ReportCountries
   &WriteReportPerCountryOverview ($title, $views_edits, &UnLink ($links,$offset_links+1),$sample_rate) ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Breakdown" ;
+
   if ($sample_rate == 1)
   { &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 10000, $cutoff_percentage = 0.1, $show_logcount = $false, $sample_rate) ; }
   else
@@ -504,8 +508,8 @@ sub ReportCountries
     &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, $cutoff_percentage = 0.1, $show_logcount = $true,  $sample_rate) ;
   }
 
-  $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Trends" ;
-  &WriteReportPerCountryTrends ($title, $views_edits, &UnLink ($links,$offset_links+3)) ;
+# $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Trends" ; # deprecated, too unreliable
+# &WriteReportPerCountryTrends ($title, $views_edits, &UnLink ($links,$offset_links+3)) ;
 
 # $links =~ s/,.*$// ;
   $title = "$title_main - <font color=#008000>$views_edits Per Wikipedia Language</font> - Breakdown" ;
@@ -762,7 +766,7 @@ sub ReadCountryCodes
     if ($line =~ /^[A-Z]/)
     {
       chomp ($line) ;
-      ($code,$region,$north_south,$name) = split (',',$line,4) ;
+      ($code,$name) = split (',',$line,2) ;
       $country_codes {$code} = unicode_to_html ($name) ;
       # print "$code => $name\n" ;
     }
@@ -951,7 +955,7 @@ sub ReadInputCrawlers
     { $agent =~ s/(bot|spider|crawl(?:er)?)/<b>$1<\/b>/gi ; }
     if ($mime2 eq "text/html")
     { $total_page_crawlerrequests += $count ; }
-    $crawlers {"$mime|$agent"} += $count ;
+    $crawlers {"$mime|$agent"} += $count ; # April 16, 2015, unsually wide variety in user agents bloats report, show -- instead
   }
   close CSV_CRAWLERS ;
 }
@@ -992,6 +996,11 @@ sub ReadInputMimeTypes
     chomp $line ;
     ($project, $origin, $ext, $mime, $parm, $count) = split (',', $line) ;
 
+    if (($mime =~ /https?:/) || (length ($mime) > 40)) # Q&D sanitizing which actually should occur in count job 
+    {
+      $suspect_mime_codes {$mime} ++ ;
+      next ; 
+    }
     $project = &ExpandAbbreviation ($project) ;
 
     $mime =~ s/(\w+\.)(\w+\.)(\w+)/$1$2<br>$3/ ;
@@ -3465,6 +3474,10 @@ sub WriteReportCrawlers
   
   $html =~ s/LINKS/&ListLinksExcept ($link_crawlers)/e ; 
 
+  $html .= "<h2><font color=#A00>April 2015: report broken</h2><p>See <a href='https://phabricator.wikimedia.org/T96372?workflow=create'>Phabricator T96372</a>" ;
+
+if ($crawler_report_repaired)
+{ 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
   $html .= "<table border=1>\n" ;
@@ -3479,6 +3492,7 @@ sub WriteReportCrawlers
            "<br>2 The user agent string contains the term bot, spider or crawl[er]'" .
            "PERC_GOOGLE\n" .
            "</td></tr>\n" ;
+
 
   $total_crawlers = 0 ;
 # $html .= "<tr><th class=l>Count<br><small>x 1000</small></th><th class=l>Secondary domain<br>(~site) name</th><th class=l>Mime type</th><th class=l>User agent</th></tr>\n" ;
@@ -3624,8 +3638,10 @@ sub WriteReportCrawlers
   $html .= "</table><p>\n" ;
 
   $html .= "<p>$google_ip_ranges" ;
+
   $html .= $colophon_ez ;
 
+}
   print FILE_HTML_CRAWLERS $html ;
   close FILE_HTML_CRAWLERS ;
 }
@@ -5576,7 +5592,7 @@ sub ReportLineCountriesInfoTypes
 sub WriteReportCountriesInfo
 {
   &LogSub ("WriteReportCountriesInfo\n") ;
-
+  
   open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
 
   my $html  = $headerwithperc ;
@@ -5638,7 +5654,6 @@ sub WriteReportCountriesInfo
   {
     next if ($code eq '-X') ;
     my $country = $country_codes {$code} ;
-
     $country =~ s/\"//g ;
     $country =~ s/Korea, Republic of/South Korea/ ;
     $country =~ s/Cote d'Ivoire/Côte d'Ivoire/ ;
@@ -5706,7 +5721,6 @@ sub WriteReportCountriesInfo
     $countryua {'reg_'.$north_south_code, 'N', 'M' } += $countryua {$code, 'N', 'M' } ;
 
     ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
-
     $population_tot += $population ;
     $connected_tot += $connected ;
     $population_region {$region_code} += $population ;
@@ -5737,7 +5751,7 @@ sub WriteReportCountriesInfo
     }
 
   }
-
+  
   $population_tot2 = &i2KM2 ($population_tot) ;
   $connected_tot2  = &i2KM2 ($connected_tot) ;
 
@@ -6181,6 +6195,7 @@ sub WriteReportCountryBrowser
     $country_total {'reg_'.$north_south_code} += $country_total {$code} ;
 
     ($link_country,$icon,$population,$connected) = &CountryMetaInfo ($country) ;
+
     $icon =~ s/\"\/\/upload/\"http:\/\/upload/ ;
     $population_tot += $population ;
     $connected_tot += $connected ;
@@ -6220,7 +6235,7 @@ sub WriteReportCountryBrowser
     }
 
   }
-
+  
   $population_tot2 = &i2KM2 ($population_tot) ;
   $connected_tot2  = &i2KM2 ($connected_tot) ;
 
@@ -6969,8 +6984,10 @@ sub WriteReportPerCountryOverview
     my ($country,$code) = split ('\|', $country_code) ;
 
     my $region_code      = $region_codes {$code} ;
+
     if ($region_code eq '')
     { $region_code = 'XX' ; }
+
     my $north_south_code = $north_south_codes {$code} ;
 
     $region_name = $region_code ;
@@ -7818,7 +7835,10 @@ sub WriteReportPerCountryBreakdown
 
   foreach $country (keys_sorted_by_value_num_desc %requests_recently_per_country)
   {
-    next if $requests_recently_per_country {$country} < $cutoff_requests ;
+    # Q&D fix, if condition is enabled prints just 2 countries in SquidReportPageEditsPerCountryBreakdown.htm
+    # now that we returned to sampled edits
+
+    # next if $requests_recently_per_country {$country} < $cutoff_requests ; 
 
     %requests_per_language = %{$requests_recently_per_country_per_language {$country}} ;
     @languages = keys_sorted_by_value_num_desc %requests_per_language ;
@@ -7938,6 +7958,8 @@ sub WriteReportPerCountryBreakdown
 
 sub WriteReportPerCountryTrends
 {
+  exit ; # deprecated, too unreliable
+
   &LogSub ("WriteReportPerCountryTrends\n") ;
 
   my ($title,$views_edits,$links) = @_ ;
@@ -8806,6 +8828,7 @@ sub GetLanguageInfo
 sub CountryMetaInfo
 {
   my $country = shift ;
+  $country =~ s/"//g ;
   my ($link_country,$icon,$population) ;
   if ($country_meta_info {$country}  eq "")
   {

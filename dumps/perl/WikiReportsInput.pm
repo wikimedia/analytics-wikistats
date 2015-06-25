@@ -1,4 +1,4 @@
-    #!/usr/bin/perl
+#!/usr/bin/perl
 
 no warnings 'uninitialized';
 
@@ -81,7 +81,8 @@ sub ParseArguments
   {
     $region = lc $region ;
     $some_languages_only = $true ;
-    foreach my $wp qw(as bn bh bpy en gu hi kn ks ml mr my ne new or pi pa sa sd si ta te ur)
+    my @langcodes = qw(as bn bh bpy en gu hi kn ks ml mr my ne new or pi pa sa sd si ta te ur) ; 
+    foreach my $wp (@langcodes)
     {
       $include_language {$wp}     = $true ;
       $include_language {"$wp.m"} = $true ; # also mobile
@@ -354,6 +355,7 @@ else
   $file_csv_language_names_diff     = $path_in . "LanguageNamesViaPhpAndWpCompared.csv" ;
   $file_csv_translatewiki           = $path_in . "TranslateWiki.csv" ;
   $file_csv_run_stats               = $path_in . "StatisticsLogRunTime.csv" ;
+  $file_csv_perc_mobile             = $path_in . "PageViewsPerMonthMobileTrends.csv" ;
 
   $file_csv_pageviewsmonthly_html   = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
 
@@ -2003,6 +2005,21 @@ if ($false)
   { $singlewiki = $true ; }
 
   $MonthlyStatsWpStart {"zzz"} = $MonthlyStatsWpStart {$wp_2nd} ;
+
+  if ($mode_wp) # qqq
+  {
+    open  CSV_PERC_MOBILE, '<', $file_csv_perc_mobile ;
+    while ($line = <CSV_PERC_MOBILE>)
+    {
+    # next if $line =~ /^#/ ;
+      next if $line !~ /^wp/ ;
+      ($project,$dummy,$wp,$yyyymm,$perc_mobile) = split (',', $line) ; 
+      $m = &yyyymmdd2i (substr ($yyyymm,0,4) . substr ($yyyymm,5,2)) ;
+      $MonthlyStats {$wp.($m).'pm'} = $perc_mobile ;
+    }
+    close CSV_PERC_MOBILE ;
+  }
+  
   &LogT ("\nReadMonthlyStats done\n") ;
 }
 
