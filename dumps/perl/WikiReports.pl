@@ -271,7 +271,7 @@
      &GenerateYearlyGrowthStats ;
 #  # &TestCompleted ;
      &ReadEditHistory ;
-     &ReadRevertHistoryGenerateReports ;
+   # &ReadRevertHistoryGenerateReports ; # disabled July 2015
      &GenerateEditHistoryReports ; # wait till R runs on stat1
   }
 
