@@ -24,14 +24,14 @@ cd $perl
 
 log=$logs/SquidReportArchive.log
 
-month=2015-01  
-quarter=2015Q1
-quarter2=2015-Q1 # hmm need to remove dash some day 
+month=2015-07  
+quarter=2015Q2
+quarter2=2015-Q2 # hmm need to remove dash some day 
 
 run_collect_country_stats=no
 run_refresh_from_wikipedia=no
-run_monthly_countries_reports=no
-run_quarterly_countries_reports=yes
+run_monthly_countries_reports=yes
+run_quarterly_countries_reports=no
 run_monthly_non_geo_reports=no
 
 if [ "$run_monthly_countries_reports" == "yes" ] ; then
@@ -40,7 +40,7 @@ fi
 if [ "$run_quarterly_countries_reports" == "yes" ] ; then
   run_collect_country_stats=yes
 fi
-run_collect_country_stats=no # speed up repeated tests
+# run_collect_country_stats=no # speed up repeated tests
 
 # -c = country reports
 # -v = views

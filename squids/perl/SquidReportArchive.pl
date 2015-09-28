@@ -495,7 +495,7 @@ sub ReportCountries
 
   $links = "$links_views\n$links_edits\n" ;
 
-  $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Overview" ;
+  $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Overview" ; 
   &WriteReportPerCountryOverview ($title, $views_edits, &UnLink ($links,$offset_links+1),$sample_rate) ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Breakdown" ;
@@ -2729,6 +2729,8 @@ sub WriteReportClients
   $html =~ s/LINKS/&ListLinksExcept ($link_browsers)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
+  &AddNoticeSurvey (1) ;
+
 # test code, all counts from csv files are in thousands (from 1:1000 sampled page file) and will be scaled x 1000
 # thus scale these test figures in reverse direction first
 # $html .= &ShowCountTd (891234567890/1000) . "<br>" ;
@@ -3474,6 +3476,8 @@ sub WriteReportCrawlers
   
   $html =~ s/LINKS/&ListLinksExcept ($link_crawlers)/e ; 
 
+  &AddNoticeSurvey (8) ;
+
   $html .= "<h2><font color=#A00>April 2015: report broken</h2><p>See <a href='https://phabricator.wikimedia.org/T96372?workflow=create'>Phabricator T96372</a>" ;
 
 if ($crawler_report_repaired)
@@ -3659,6 +3663,8 @@ sub WriteReportMethods
   $html =~ s/LINKS/&ListLinksExcept ($link_methods)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
+  &AddNoticeSurvey (7) ;
+
   $html .= "<table border=0>\n" ;
   $html .= "<tr><td>" ;
 
@@ -3747,6 +3753,9 @@ sub WriteReportMimeTypes
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests are sent to. Report 'Requests by origin' shows where requests come from.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
   $html =~ s/LINKS/&ListLinksExcept ($link_requests)/e ; 
+
+  &AddNoticeSurvey (4) ;
+
   $html .= "<table border=1>\n" ;
 
   $header1 = "<tr><th colspan=2 class=l><small>x 1000</small></th><th colspan=2 class=c>Totals</th><th class=c><font color=#008000>Pages</font></th><th colspan=3 class=c><font color=#900000>Images</font></th><th colspan=99 class=c>Other</th></tr>\n" ;
@@ -3914,6 +3923,8 @@ sub WriteReportOpSys
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
   $html =~ s/LINKS/&ListLinksExcept ($link_opsys)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
+  &AddNoticeSurvey (2) ;
 
   $total_all2 = &FormatCount ($total_opsys_mobile + $total_opsys_non_mobile) ;
   $total_opsys_mobile2 = &FormatCount ($total_opsys_mobile) ;
@@ -4138,6 +4149,8 @@ sub WriteReportOrigins
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
   $html =~ s/LINKS/&ListLinksExcept ($link_origins)/e ; 
   $html =~ s/NOTES/<br>&nbsp;This report shows where requests come from. Report 'Requests by destination' shows where requests are serviced.<br>&nbsp;Those numbers bear no direct relation.<br>/ ;
+
+  &AddNoticeSurvey (5) ;
 
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td colspan=99>" ;
@@ -4755,6 +4768,8 @@ sub WriteReportScripts
   $html =~ s/LINKS/&ListLinksExcept ($link_scripts)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
+  &AddNoticeSurvey (9) ;
+
   $html .= "<table border=1>\n" ;
   $html .= "<tr><td colspan=99>" ;
 
@@ -4933,6 +4948,8 @@ sub WriteReportGoogle
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
   $html =~ s/LINKS/&ListLinksExcept ($link_google)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
+  &AddNoticeSurvey (3) ;
 
   $html .= "<table border=1 width=500 wrap>\n" ;
 #  $html .= "<tr><td colspan=99 class=l>&nbsp;<br>This report shows <b>all requests to Wikimedia servers where a Google server of service was involved in any way</b>,<br> " .
@@ -5257,6 +5274,8 @@ sub WriteReportSkins
   $html =~ s/LINKS/&ListLinksExcept ($link_skins)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
 
+  &AddNoticeSurvey (10) ;
+
   $html .= "<table border=1>\n" ;
 
   $html .= "<tr><td colspan=99 class=l><b>Skin</b><br>Files (&ge; 3)</td></tr>\n" ;
@@ -5444,6 +5463,8 @@ sub WriteReportUserAgents
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS<\/b>/ ;
   $html =~ s/LINKS/&ListLinksExcept ($link_user_agents)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+  
+  &AddNoticeSurvey (11) ;
 
   $html .= "<table border=1>\n" ;
 
@@ -5595,7 +5616,7 @@ sub WriteReportCountriesInfo
   
   open FILE_HTML_COUNTRIES_INFO, '>', "$path_reports/$file_html_countries_info" ;
 
-  my $html  = $headerwithperc ;
+  $html  = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Page view breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
@@ -5608,6 +5629,8 @@ sub WriteReportCountriesInfo
            "<ul><li>All data from the Wikimedia servers themselves is counted as 'unknown'. This includes much of the Wikimedia app data, which is often received, then resent with slight modification</li>" .
            "<li>Wikimedia iOS app is not recognized for versions older than 3.0</li>" .
            "</ul>" ;
+
+  &AddNoticeSurvey (26) ;
 
   $html .= &HtmlSortTable ;
 
@@ -5841,7 +5864,7 @@ sub WriteReportCountryOpSys
 
   open FILE_HTML_COUNTRIES_OPSYS, '>', "$path_reports/$file_html_countries_os" || die ("Can not write $path_reports/$file_html_countries_os\n") ;
 
-  my $html = $headerwithperc ;
+  $html = $headerwithperc ;
   $html =~ s/TITLE/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
   $html =~ s/HEADER/Wikimedia Traffic Analysis Report - OS breakdown per Country/ ;
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
@@ -5849,6 +5872,8 @@ sub WriteReportCountryOpSys
   $html =~ s/LINKS2/&ListLinksGeoExcept ($link_countries_os)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
+
+  &AddNoticeSurvey (27) ;
 
   $html .= &HtmlSortTable ;
   $html .= "<p><table border=1 width=800 class=tablesorter id=table1>\n" ;
@@ -6098,14 +6123,17 @@ sub WriteReportCountryBrowser
   &LogSub ("WriteReportCountryBrowser\n") ;
 
   open FILE_HTML_COUNTRIES_BROWSER, '>', "$path_reports/$file_html_countries_browser" ;
-  my $html = $headerwithperc ;
-  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browser breakdown per Country/ ;
-  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browser breakdown per Country/ ;
+  $html = $headerwithperc ;
+  $html =~ s/TITLE/Wikimedia Traffic Analysis Report - Browser breakdown per country/ ;
+  $html =~ s/HEADER/Wikimedia Traffic Analysis Report - Browser breakdown per country/ ;
   $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
   $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
   $html =~ s/LINKS2/&ListLinksGeoExcept ($link_countries_browsers)/e ; 
   $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+
   $html .= "<p>Note: Requests from Wikimedia servers themselves have been counted as 'unknown country', and in fact form by far the greatest part of those.</p>\n" ;
+
+  &AddNoticeSurvey (25) ;
 
   $html .= &HtmlSortTable ;
   $html .= "<p><table border=1 width=800 class=tablesorter id=table1>\n" ;
@@ -6422,7 +6450,7 @@ sub WriteReportUserAgentsTimed
   &LogSub ("WriteReportUserAgentsTimed\n") ;
 
   open FILE_HTML_USERAGENTS_TIMED, '>', "$path_reports/$file_html_user_agents_timed" ;
-  my $html = "" ;
+  $html = "" ;
 
   $prevmonth = &PreviousMonth($reportmonth) ;
   ($prevfile = "$path_reports/$file_html_user_agents_timed") =~ s/$reportmonth/$prevmonth/ ;
@@ -6450,6 +6478,8 @@ sub WriteReportUserAgentsTimed
     $html =~ s/LINKS2/&ListLinksTrendsExcept ($link_user_agents)/e ; 
 
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+  
+    &AddNoticeSurvey (12) ;
 
     $html .= "<p><table border=1 width=800>\n" ;
     $html .= "<thead>\n" ;
@@ -6525,7 +6555,7 @@ sub WriteReportBrowsersTimed
   &LogSub ("WriteReportBrowsersTimed\n") ;
 
   open FILE_HTML_BROWSERS_TIMED, '>', "$path_reports/$file_html_browsers_timed" ;
-  my $html = "" ;
+  $html = "" ;
 
   $prevmonth = &PreviousMonth($reportmonth) ;
   ($prevfile = "$path_reports/$file_html_browsers_timed") =~ s/$reportmonth/$prevmonth/ ;
@@ -6550,8 +6580,9 @@ sub WriteReportBrowsersTimed
     $html =~ s/ALSO/&nbsp;Other reports:<br><b>LINKS1<br\/>\nLINKS2<\/b>/ ;
     $html =~ s/LINKS1/&ListLinksExcept ('')/e ; 
     $html =~ s/LINKS2/&ListLinksTrendsExcept ($link_trends_browsers)/e ; 
-
     $html =~ s/X1000/&rArr; <font color=#008000><b>all counts x 1000<\/b><\/font>.<br>/ ;
+    
+    &AddNoticeSurvey (13) ;
 
     $html .= "<p><table border=1 width=800>\n" ;
     $html .= "<thead>\n" ;
@@ -6609,7 +6640,7 @@ sub WriteReportDevicesTimed
   &LogSub ("WriteReportDevicesTimed\n") ;
 
   open FILE_HTML_DEVICES_TIMED, '>', "$path_reports/$file_html_devices_timed" ;
-  my $html = "" ;
+  $html = "" ;
 
   $prevmonth = &PreviousMonth($reportmonth) ;
   ($prevfile = "$path_reports/$file_html_devices_timed") =~ s/$reportmonth/$prevmonth/ ;
@@ -6833,7 +6864,9 @@ sub WriteReportPerLanguageBreakDown
   $html =~ s/X1000/.&nbsp;Period <b>$requests_recently_start - $requests_recently_stop<\/b>/ ;
   $html =~ s/DATE// ;
 
-  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a>\n" ;
+  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a><p>\n" ;
+
+  &AddNoticeSurvey (23) ;
 
   $html .= "<p><table border=1 width=800>INDEX\n" ;
 
@@ -6948,6 +6981,8 @@ sub WriteReportPerCountryOverview
   $html =~ s/NOTES// ;
   $html =~ s/X1000/.&nbsp;Period <b>$requests_recently_start - $requests_recently_stop<\/b>/ ;
   $html =~ s/DATE// ;
+  
+  &AddNoticeSurvey (21) ;
 
   $html .= &HtmlSortTable ;
 
@@ -7825,7 +7860,9 @@ sub WriteReportPerCountryBreakdown
   $html =~ s/X1000/.&nbsp;Period <b>$requests_recently_start - $requests_recently_stop<\/b>/ ;
   $html =~ s/DATE// ;
 
-  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a>\n" ;
+  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a><p>\n" ;
+
+  &AddNoticeSurvey (22) ;
 
   $html .= "<p><table border=1 width=800>INDEX\n" ;
 
@@ -7984,7 +8021,9 @@ sub WriteReportPerCountryTrends
            "especially in Q1 and Q2. We don't know yet what caused this, this might be an artifact. Please be cautious to draw conclusions from this.</font>" ;
   }
 
-  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a>\n" ;
+  $html .= "<p>Portal is <a href='http://www.wikipedia.org'>www.wikipedia.org</a><p>\n" ;
+
+  &AddNoticeSurvey (24) ;
 
   $html .= "<p><table border=1 width=800>INDEX\n" ;
 
@@ -8653,7 +8692,7 @@ sub ReadWikipediaCountriesByPopulation
 {
   &LogSub ("ReadWikipediaCountriesByPopulation\n") ;
   my $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
-  my $html = get $url || abort ("Timed out!") ;
+  $html = get $url || abort ("Timed out!") ;
 
 # open TEST, '<', 'List_of_countries_by_population.html' ;
 # @lines = <TEST> ;
@@ -9447,3 +9486,16 @@ __HTML_WORLD_MAPS__
 return $html_worldmaps ;
 }
 
+# yeah, changing a global yet again
+sub AddNoticeSurvey
+{
+  my $report_id = shift ;
+
+  $html .= "<font color=#F00><b><big>Aug 2015: This report has been discontinued until further notice, due to lack of maintenance.</big></font><br><font color=#A00>Only some of the Wikistats traffic reports will be migrated to Wikimedia Foundation's new hadoop-based infrastructure.<br>If you want this particular report included in the migration <a href='https://www.mediawiki.org/w/index.php?title=Analytics/Wikistats/TrafficReports/Future_per_report_B2'>let us know</a> (id for this report is '$report_id').<br>Read more <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future'>here</a>.</b></font><br>&nbsp;<br>" ;
+
+if ($report_id > 20)
+{
+  $html .= "<p><font color=#A00><b><big>Aug 2015: Warning, data are unreliable!</big><p>Wikistats traffic reports with a breakdown by geography (like this one) are currently unreliable and for some countries totally wrong. Please ignore data until further notice. We are investigating. Our apologies for any inconvenience caused.</b></font><p>" ; 
+}
+
+}
