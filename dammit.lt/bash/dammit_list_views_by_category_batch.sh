@@ -30,6 +30,30 @@ yyyy_mm=2015-04
 threshold=20
 depth=10
 
+# ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Agriculture'                      2015-06    $threshold     'wp-en' 20
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Featured_articles'      2015-06    $threshold     'wp-en' 5
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Good_articles'          2015-06    $threshold     'wp-en' 5
+
+exit
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Biography'            2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Biography/Sports_and_games' 2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_United_States'        2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Football'             2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_India'                2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Television'           2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Film'                 2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Military_history'     2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Musicians'            2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Actors_and_Filmmakers' 2015-06    $threshold     'wp-en' 10
+
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Did_you_know'         2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Medicine'             2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Good_articles'        2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Physics'              2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Demographics'         2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Cities'               2015-06    $threshold     'wp-en' 10
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Agriculture'          2015-06    $threshold     'wp-en' 10
+exit
  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-01    $threshold     'wp-nl' $depth
  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-02    $threshold     'wp-nl' $depth
  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2014-03    $threshold     'wp-nl' $depth
