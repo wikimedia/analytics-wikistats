@@ -477,6 +477,8 @@ sub ReadStatsDblist
 
 sub WriteHtml
 {
+  print "\nWriteHtml\n" ;
+
   print "Write $file_html\n" ;
   open HTML, '>', $file_html ;
   print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN" .
@@ -667,6 +669,10 @@ sub WriteHtml
 
 sub WriteHtmlCurrent
 {
+  print "\nWriteHtmlCurrent\n" ;
+
+if (0) # job hangs on df sometimes
+{
   push @lines, "\nDisk resources:\n\n" ;
   @free = `df -h | grep -P 'mnt|sda'` ;
   foreach $line (@free)
@@ -677,7 +683,10 @@ sub WriteHtmlCurrent
     $line =~ s/\d+\.\d+\.\d+\.\d+\:// ;
     push @lines, $line ;
   }
+}
 
+if (0)
+{
   push @lines, "\nFolders > 1G:\n\n" ;
   @used = `du --si $dir_usage | grep [0-9]G` ;
   foreach $line (@used)
@@ -685,6 +694,7 @@ sub WriteHtmlCurrent
     if ($line =~ /\d[MG]/)
     { push @lines, $line ; }
   }
+}
 
   print "Write $file_html_c\n" ;
   open HTML, '>', $file_html_c ;
@@ -884,6 +894,8 @@ sub WriteHtmlCurrent
 
 sub WriteHtmlJobRunTimes
 {
+  print "\nWriteHtmlJobRunTimes\n" ;
+
   print HTML "<p><h3>Job statistics</h3>\n" ;
 
   if ($threshold_edits_only > 0)
@@ -959,6 +971,7 @@ sub HtmlOldNewFiles
 
 sub WriteHtmlSynopsis
 {
+  print "\nWriteHtmlSynopsis\n" ;
 
   $width_logo = 30 ;
 
@@ -1049,6 +1062,8 @@ sub WriteHtmlSynopsis
 
 sub WriteDailyGain 
 {
+  print "\nWriteDailyGain\n" ;
+
   my ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time - 24*3600); # collect stats for end of previous day
   my $yesterday = sprintf ("%04d-%02d-%02d", $year+1900, $month+1,$mday) ;
   my ($sec,$min,$hour,$mday,$month,$year,$wday,$yday,$isdst)=localtime(time); # compare file date with today
