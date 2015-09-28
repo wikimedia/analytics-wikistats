@@ -161,7 +161,9 @@ sub ProcessLine
         } 
       }
     }
-       
+    
+ #  next if $country ne 'RU' ; # qqq test only
+   
     if ($country eq "")
     {
       $country = $fields [14] ;
