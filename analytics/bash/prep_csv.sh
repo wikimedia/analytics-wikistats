@@ -28,9 +28,9 @@ yyyymm2=$(date -d "2 month ago" +"%Y-%m")
 #yyyymm=2012-08 # !!!!!!  yyyymm "1 month ago" on 31 July gives 2012-07 !!!1 
 
 #hard coded until auto set is more robust (day 21-31 use previous month, day 1-20 use two months ago)
-yyyymm=2015-05 # last month to report on  
-yyyymm2=2015-04 # previous month for comto compare 
-yyyymm_rc=2015-07 # rc is month of RC meeting
+yyyymm=2015-08 # last month to report on  
+yyyymm2=2015-07 # previous month for comto compare 
+yyyymm_rc=2015-10 # rc is month of RC meeting
 
 echo process data up to $yyyymm and write to rc-$yyyymm.zip
 log=$analytics/logs/prep_csv_$yyyymmdd.log 
@@ -82,13 +82,15 @@ c1 perl AnalyticsPrepWikiCountsOutputCore.pl -i $csv_dumps -o $csv_rc/$yyyymm -m
 cp $csv_dumps/csv_wp/analytics_in_page_views.csv $csv_rc/$yyyymm # adjust to wikistat_git when dump process has been migrated
 cp $csv_dumps/csv_wp/wikilytics_in_pageviews.csv $csv_rc/$yyyymm # adjust to wikistat_git when dump process has been migrated
 
-echo compare csv files from folders $yyyymm2 and $yyyymm
+#echo compare csv files from folders $yyyymm2 and $yyyymm
 #c2 perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_pageviews.csv 
 #c2 perl AnalyticsCompareMonthlyCsvFiles.pl -c $csv_rc -1 $yyyymm -2 $yyyymm2 -t 2 -f wikilytics_in_wikistats_core_metrics.csv
 
 # set +x # do not show commands
 
+echo "zip -> $csv_rc/$yyyymm"
 cd $csv_rc/$yyyymm
-zip rc-$yyyymm_rc.zip wikilytics*.csv comparison*.txt
+zip rc-$yyyymm_rc.zip wikilytics*.csv # comparison*.txt
+ls -l
 
 echo -e "\n>>> ready <<<"
