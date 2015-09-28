@@ -160,6 +160,13 @@ sub ValidateCategory
     print "Category '$category' not found or empty on wiki '$wiki'\n" ;
     exit ;
   }
+
+# if ($category =~ /WikiProject/i)
+# { $redirect_from_talk_page = $true ; }
+# else
+# { $redirect_from_talk_page = $false ; }
+
+  $redirect_from_talk_page = $true ; # make this command line flag?
 }
 
 sub ScanCategories
@@ -465,6 +472,12 @@ sub GetArticles
     $article =~ s/\%2F/\//g ;
     $article =~ s/\%3A/:/g ;
     $article =~ s/\%5F/_/g ;
+
+    if ($redirect_from_talk_page)
+    {
+      $article =~ s/^Talk://i ;
+      $article =~ s/[_ ]?Talk:/:/i ; 
+    }
   }
   return (@articles) ;
 }
