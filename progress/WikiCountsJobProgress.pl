@@ -453,6 +453,7 @@ sub ReadStatsDblist
 
 sub WriteHtml
 {
+  print "\nWriteHtml\n" ;
   open HTML, '>', $file_html ;
   print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN" .
              "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" .
@@ -632,6 +633,7 @@ sub WriteHtml
 
 sub WriteHtmlCurrent
 {
+  print "WriteHtmlCurrent\n" ;
 if (0)
 {
   @free = `df -H /dev/sda1 /dev/sda6 /mnt/dumps` ;
@@ -824,6 +826,7 @@ if (0)
 
 sub WriteHtmlJobRunTimes
 {
+  print "WriteHtmlJobRunTimes\n" ;
 #  open HTML, '>', $file_html_r ;
 #  print HTML "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN" .
 #             "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n" .
