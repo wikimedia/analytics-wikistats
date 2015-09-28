@@ -23,9 +23,62 @@ date=auto # 20101231 # auto
 
 rm $csv/csv_$set/WikiCountsRunAborted.txt
 
-x=itwikinews # wikidatawiki
-project=wn # wx
 #date=20150430
+
+x=enwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+exit
+
+x=commonswiki
+project=wx # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=wikidatawiki
+project=wx # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+exit
+
+x=eswiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=itwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=jawiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=nlwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=plwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=ptwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=ruwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=frwiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=dewiki
+project=wp # wx
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+x=enwiki
+project=wp # wx
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 
 exit
