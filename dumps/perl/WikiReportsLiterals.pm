@@ -177,6 +177,7 @@ sub SetLanguageInfo
   gl=>"http://gl.wikipedia.org Galician [3.5,EU]", # was Galego
   glk=>"http://glk.wikipedia.org Gilaki [3.3,AS]",
   gn=>"http://gn.wikipedia.org Guarani [7,SA]",
+  gom=>"http://gom.wikipedia.org Goan Konkani [7.4,AS,I]",
   got=>"http://got.wikipedia.org Gothic [,EU]",
   gu=>"http://gu.wikipedia.org Gujarati [46,AS,I]",
   gv=>"http://gv.wikipedia.org Manx [0.0017,EU]", # was Manx Gaelic
