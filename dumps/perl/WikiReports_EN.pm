@@ -61,7 +61,8 @@ $out_license      = "All data and images on this page are in the public domain."
 $out_generated    = "Generated on " ;
 
 $out_sqlfiles     = "from recent <a href='http://download.wikimedia.org'>database dump</a> files.<br>Data processed up to " ;
-$out_pageviewfiles = "from recent <a href='$out_pageviewlogs'>page view log files</a>.<br>Data processed up to " ;
+#$out_pageviewfiles = "from recent <a href='$out_pageviewlogs'>page view log files</a>.<br>Data processed up to " ;
+$out_pageviewfiles = "from recent project[counts|views] files, see 'Archived input files' above</a>.<br>Data processed up to " ;
 $out_delay        = "Please note that the lengthy dump process (many weeks) means a delay in publishing these statistics is always to be expected." ;
 $out_version      = "Script version:" ;
 $out_author       = "Author" ;
