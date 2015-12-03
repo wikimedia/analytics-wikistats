@@ -2,10 +2,11 @@
 
 no warnings 'uninitialized';
 
+
 sub ParseArguments
 {
   my $options ;
-  getopt ("ldiopmsvr", \%options) ;
+  getopt ("ldijopmsvr", \%options) ;
 
   foreach $key (keys %options)
   {
@@ -24,6 +25,7 @@ sub ParseArguments
   $language      = $options {"l"} ;
 # $dumpdate      = $options {"d"} ;
   $path_in       = $options {"i"} ;
+  $path_pv       = $options {"j"} ;
   $path_out      = $options {"o"} ;
   $path_pl       = $options {"p"} ;
   $gif2png       = $options {"g"} ;
@@ -167,7 +169,9 @@ sub ParseArguments
 
   $langcode  = uc ($language) ;
   $testmode  = ((defined $options {"t"}) ? $true : $false) ;
-  $squidslog = ((defined $options {"q"}) ? $true : $false) ;
+
+# obsolete SP001
+# $squidslog = ((defined $options {"q"}) ? $true : $false) ;
 
   if ($testmode)
   { print "Test mode\n" ; }
@@ -205,7 +209,7 @@ sub ParseArguments
   }
 
   if ($pageviews && (! $pageviews_non_mobile) && (! $mode_wp))
-  { abort ("For all projects expect Wikipedia only render page views reports for 'non-mobile' aka 'normal'") ; }
+  { abort ("For all projects expect Wikipedia only render page views reports for 'non-mobile' aka 'normal'\nif (\$pageviews && (! \$pageviews_non_mobile) && (! \$mode_wp)) ") ; }
 
   if (defined $animation)
   { undef $pageviews ; undef $categorytrees ; }
@@ -224,6 +228,11 @@ sub ParseArguments
   { $path_in  =~ s/[\\]*$/\\/ ; } # make sure there is one trailing (back)slash
   else
   { $path_in  =~ s/[\/]*$/\// ; }
+
+  if ($path_pv =~ /\\/)
+  { $path_pv  =~ s/[\\]*$/\\/ ; } # make sure there is one trailing (back)slash
+  else
+  { $path_pv  =~ s/[\/]*$/\// ; }
 
   if ($dump_gallery)
   {
@@ -273,6 +282,9 @@ sub ParseArguments
 
   if (! -d $path_in)
   { abort ("Input directory '" . $path_in . "' not found.") ; }
+
+  if (! -d $path_pv)
+  { abort ("Project views directory '" . $path_pv . "' not found.") ; }
 
   if (! -d $path_out)
   { mkdir $path_out, 0777 ; }
@@ -326,13 +338,32 @@ else
   $file_csv_binaries_stats          = $path_in . "StatisticsPerBinariesExtension.csv" ;
   $file_csv_language_codes          = $path_in . "LanguageCodes.csv" ;
   $file_csv_zeitgeist               = $path_in . "ZeitGeist.csv" ;
-  $file_csv_pageviewsmonthly        = $path_in . "PageViewsPerMonthAll.csv" ;
-  $file_csv_pageviewsmonthly_combi  = $path_in . "PageViewsPerMonthAllCombi.csv" ;
-  $file_csv_pageviewsmonthly_totals = $path_in . "PageViewsPerMonthAllTotalled.csv" ;
+
+  $file_csv_pageviewsmonthly        = $path_pv . "projectviews_per_month_all.csv" ;
+
+# obsolete SP001
+# $file_csv_pageviewsmonthly_combi  = $path_pv . "PageViewsPerMonthAllCombi.csv" ;
+  $file_csv_pageviewsmonthly_totals = $path_pv . "projectviews_per_month_all_totalled.csv" ;
+  $file_csv_views_yearly_growth     = $path_pv . "projectviews_growth_last_year" ;
+  $file_csv_views_log_forecast      = $path_pv . "PageViewsLogForecast.csv" ;
+  $file_csv_perc_mobile             = $path_pv . "projectviews_per_month_mobile_trends.csv" ;
+  $file_csv_pageviewsmonthly_html   = $path_pv . "projectviews_per_month_all_projects_html.csv" ;
+
+  # use old names ?
+  if (! -e $file_csv_pageviewsmonthly)
+  {
+    $file_csv_pageviewsmonthly        = $path_in . "PageViewsPerMonthAll.csv" ;
+  # obsolete SP001
+  # $file_csv_pageviewsmonthly_combi  = $path_in . "PageViewsPerMonthAllCombi.csv" ;
+    $file_csv_pageviewsmonthly_totals = $path_in . "PageViewsPerMonthAllTotalled.csv" ;
+    $file_csv_views_yearly_growth     = $path_in . "PageViewsGrowthLastYear.csv" ;
+    $file_csv_views_log_forecast      = $path_in . "PageViewsLogForecast.csv" ;
+    $file_csv_perc_mobile             = $path_in . "PageViewsPerMonthMobileTrends.csv" ;
+    $file_csv_pageviewsmonthly_html   = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
+  }
+  
   $file_csv_edits_per_article       = $path_in . "EditsPerArticle.csv" ;
   $file_csv_users_activity_spread   = $path_in . "StatisticsUserActivitySpread.csv" ;
-  $file_csv_views_yearly_growth     = $path_in . "PageViewsGrowthLastYear.csv" ;
-  $file_csv_views_log_forecast      = $path_in . "PageViewsLogForecast.csv" ;
   $file_csv_growth                  = $path_in . "WikimediaGrowthStats.csv" ;
   $file_txt_growth                  = $path_in . "WikimediaGrowthStats.txt" ;
 
@@ -355,9 +386,6 @@ else
   $file_csv_language_names_diff     = $path_in . "LanguageNamesViaPhpAndWpCompared.csv" ;
   $file_csv_translatewiki           = $path_in . "TranslateWiki.csv" ;
   $file_csv_run_stats               = $path_in . "StatisticsLogRunTime.csv" ;
-  $file_csv_perc_mobile             = $path_in . "PageViewsPerMonthMobileTrends.csv" ;
-
-  $file_csv_pageviewsmonthly_html   = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
 
   $file_csv_whitelist_wikis         = $path_in . "WhiteListWikis.csv" ;
   $file_publish                     = $path_out . "#publish.txt" ;
@@ -574,6 +602,26 @@ sub ReadFileCsvOnly
   close FILE_IN ;
 }
 
+sub ReadFileCsvExcept
+{
+  my ($file_csv,$wp) = @_ ;
+  undef @csv  ;
+
+  if (! -e $file_csv)
+  { &LogT ("File $file_csv not found.\n") ; return ; }
+
+  open FILE_IN, "<", $file_csv ;
+  while ($line = <FILE_IN>)
+  {
+    if ($line !~ /^$wp\,/)
+    {
+      chomp ($line) ;
+      push @csv, $line ;
+    }
+  }
+  close FILE_IN ;
+}
+
 sub FixDateMonthlyStats
 {
   #fix date of wp's that were not updated on last run
@@ -762,7 +810,7 @@ sub WhiteListLanguages
   }
 
   if ($pageviews)
-  { $file_monthly_stats = "PageViewsPerMonthAll.csv" ; }
+  { $file_monthly_stats = $file_csv_pageviewsmonthly ; } # was "PageViewsPerMonthAll.csv" ; 
   else
   { $file_monthly_stats = "StatisticsMonthly.csv" ; }
 
@@ -890,6 +938,8 @@ sub ReadMonthlyStats
   $MonthlyStatsWpStart {"zz"} = 9999 ;
 
   $month_max = 0 ;
+  $active_wikis_max_1 = 0 ;
+  $active_wikis_max_3 = 0 ;
 
   if (! $pageviews)
   {
@@ -905,6 +955,7 @@ sub ReadMonthlyStats
       # thresholds = 1,3,5,10,25,32,50,100,etc
 
       ($wp, $date, $reguser_bot, $ns_group, @fields) = split (",", $line) ;
+
     #  print "$wp, $date,  $reguser_bot, $ns_group\n" ;
       if ($reguser_bot ne "R") { next ; } # R: registered user, B: bot
       if ($ns_group    ne "A") { next ; } # A: articles, T: talk pages, O: other
@@ -933,9 +984,26 @@ sub ReadMonthlyStats
       { $editors_month_lo_5 {$wp} = $m ; }
       if ($editors_month_hi_5 {$wp} < $m)
       { $editors_month_hi_5 {$wp} = $m ; }
+
+      # count wikis with x+ active editors (5+ edits each) per month
+      if ($count_5 >= 1) { $wikis_with_editors_with_at_least_x_edits {"$m.1"} ++ ; } 
+      if ($count_5 >= 3) { $wikis_with_editors_with_at_least_x_edits {"$m.3"} ++ ; }  
+      if ($count_5 >= 5) { $wikis_with_editors_with_at_least_x_edits {"$m.5"} ++ ; } 
+
+      if ($wikis_with_editors_with_at_least_x_edits {"$m.1"} > $active_wikis_max_1)
+      { 
+        $active_wikis_max_1= $wikis_with_editors_with_at_least_x_edits {"$m.1"} ;
+        $active_wikis_month_max_1 = $m ;
+      }
+      if ($wikis_with_editors_with_at_least_x_edits {"$m.3"} > $active_wikis_max_3)
+      { 
+        $active_wikis_max_3= $wikis_with_editors_with_at_least_x_edits {"$m.3"} ;
+        $active_wikis_month_max_3 = $m ;
+      }
     }
+ 
     close "FILE_IN" ;
-    
+
     # read some more monthly metrics from another file than StatisticsMonthly.csv 
     # namely from StatisticsMonthlyFullArchive.csv, which has also data derived from article content, like word counts, avg article size, image and link counts 
     # (if it exists, which is only for Wikipedias right now, for other projects full archive is always used) 	
@@ -1009,19 +1077,29 @@ sub ReadMonthlyStats
     $pageviews_monthly_totals_raw        {"$year-$month"} += $count ; # 
     $pageviews_monthly_totals_normalized {"$year-$month"} += $count_normalized ;
 
-#   do this below, and remove code in next version
-#   if ($count_normalized > $pageviews_max {$wp})
-#   {
-#     $pageviews_max       {$wp} = $count_normalized ;
-#     $pageviews_month_max {$wp} = $m ;
-#   }
+    $wp_zz = 'zz' ; 
+    if (($wp =~ /\.m/) || ($wp =~ /\.zero/)) 
+    { $wp_zz .= '.m' ; }
+    $pageviews     {$wp_zz.$m} += $count_normalized ; 
+    $pageviews_raw {$wp_zz.$m} += $count ;           
 
     if (($pageviews_month_lo {$wp} == 0) || ($pageviews_month_lo {$wp} > $m))
     { $pageviews_month_lo {$wp} = $m ; }
     if ($pageviews_month_hi {$wp} < $m)
     { $pageviews_month_hi {$wp} = $m ; }
+    
+    if (($pageviews_month_lo {'zz'} == 0) || ($pageviews_month_lo {'zz'} > $m))
+    { $pageviews_month_lo {'zz'} = $m ; }
+    if ($pageviews_month_hi {'zz'} < $m)
+    { $pageviews_month_hi {'zz'} = $m ; }
   }
   close "FILE_IN" ;
+
+  for ($m = $m_min ; $m <= $m_max ; $m++ )
+  {
+    $count_normalized_zz = $pageviews {$wp_zz.$m} ; 
+    $count_zz = $pageviews_raw {$wp_zz.$m} ;        
+  }
 
   open "FILE_TOTALS", ">", $file_csv_pageviewsmonthly_totals ;
   print FILE_TOTALS "date,page views raw,page views normalized\n" ;
@@ -1252,10 +1330,14 @@ sub ReadMonthlyStats
   if ($pageviews || $wikimedia)
   {
     $sort_pageviews = $true ;
-    if ($squidslog)
-    { &ReadFileCsv ($file_csv_pageviewsmonthly_combi, "") ; }
-    else
-    { &ReadFileCsv ($file_csv_pageviewsmonthly, "") ; }
+
+  # obsolete SP001
+  # if ($squidslog)
+  # { &ReadFileCsv ($file_csv_pageviewsmonthly_combi, "") ; }
+  # else
+  # { &ReadFileCsv ($file_csv_pageviewsmonthly, "") ; }
+    &ReadFileCsv ($file_csv_pageviewsmonthly, "") ; 
+
     foreach $line (@csv)
     {
       chomp $line ;
@@ -1293,13 +1375,12 @@ sub ReadMonthlyStats
   { $sort_languages {$wp} = chr ($language_ndx ++) ; }
   $sort_languages {"zz"} = chr (0) ;
 
-
+  push @languages,'zz' ;
   for $wp (@languages)
   {
-    next if $wp_whitelist {$wp} == 0 ;
+    next if $wp_whitelist {$wp} == 0 and $wp !~ /^zz+$/ ; 
 
     ($wp2 = $wp) =~ s/\.m// ;
-
     for ($m = $m_min ; $m <= $m_max ; $m++ )
     {
       if ($pageviews_non_mobile)
@@ -1342,31 +1423,6 @@ sub ReadMonthlyStats
       }
     }
   }
-
-if ($false)
-{
-  open "FILE_IN", "<", $file_csv_webalizer_monthly ;
-  while ($line = <FILE_IN>)
-  {
-    chomp ($line) ;
-
-    ($wp, $date, @fields) = split (",", $line) ;
-    # $date = &FixDateMonthlyStats ($date) ;
-    $day   = substr ($date,3,2) ;
-    $month = substr ($date,0,2) ;
-    $year  = substr ($date,6,4) ;
-    $m     = ord (&yyyymm2b ($year, $month)) ;
-
-    # figures for current month are ignored when month has just begun
-    #                          were
-    # if ($day < 7)
-    # { next ; }
-
-    $MonthlyStats {$wp.$m.$c[$fmax-1]} = $fields [0] ;
-    $MonthlyStats {$wp.$m.$c[$fmax  ]} = $fields [1] ;
-  }
-  close "FILE_IN" ;
-}
 
   if (! $pageviews)
   {
