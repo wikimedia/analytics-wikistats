@@ -25,7 +25,7 @@ sub ReadRevertHistoryGenerateReports
 
   foreach $wp (@languages)
   {
-    # next if $wp ne "en" ;
+  # next if $wp ne "zz" and $wp ne "en" ; # for quick tests
   
     &LogT ("\nReadRevertHistoryGenerateReports $wp\n\n") ;
 
@@ -205,6 +205,7 @@ sub ReadRevertHistoryGenerateReports
 
         # global hashes
         $reverts_in_article_namespaces_per_revertedusertype        {$prev_usertype} {"$yyyy/$mm/$dd"}{$wp} ++ ;
+        $reverts_in_article_namespaces_per_revertedusertype        {$prev_usertype} {"$yyyy/$mm/$dd"}{'zz'} ++ ; 
         if ($prev_usertype eq 'A')
         { $reverts_anon_per_revertingusertype_tot {$usertype} {$wp} ++ ; }
 
@@ -219,7 +220,7 @@ sub ReadRevertHistoryGenerateReports
         # $reverts_non_article {"$yyyy/$mm/$dd"}{$wp} ++ ;
       }
 
-      # last if ($cnt++) > 1000000 ;
+    # last if ($cnt++) > 1000000 ; # for quick tests
       if ($reverts_read {$wp} % 100000 == 0)
       { print "Reverts read " . ($reverts_read {$wp} / 1000) . " k\n" ; }
     }
