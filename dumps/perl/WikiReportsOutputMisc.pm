@@ -1210,11 +1210,11 @@ sub GenerateHtmlStartComparisonTables
     if ($mode_wp)
     {
       if ($pageviews_non_mobile)
-      { $out_html_title .= "<font color=#008000>, Non-mobile</font>" ; }
+      { $out_html_title .= "<font color=#008000>, Non-mobile site</font>" ; }
       elsif ($pageviews_mobile)
-      { $out_html_title .= "<font color=#008000>, Mobile</font>" ; }
+      { $out_html_title .= "<font color=#008000>, Mobile site</font>" ; }
       elsif ($pageviews_combined)
-      { $out_html_title .= "<font color=#008000>, All Platforms</font>" ; }
+      { $out_html_title .= "<font color=#008000>, Both sites</font>" ; }
     }
 
     if ($normalized)
@@ -1536,18 +1536,20 @@ sub GenerateColophon
   ($sec,$min,$hour) = gmtime(time);
   $out_generated_at = &GetDate (time) . ' ' . sprintf ("%02d:%02d",$hour,$min) ;
 
-  if ($squidslog)
-  {
-    $out_myname = "Stefan Petrea" ;
-    $out_mymail = "stefan.petrea@### (no spam: ### = gmail.com)" ;
-    $out_mysite = "" ;
-    $out_squidslog = " from 1:1000 sampled squid logs" ;
-  }  
+# obsolete SP001
+# if ($squidslog)
+# {
+#   $out_myname = "Stefan Petrea" ;
+#   $out_mymail = "stefan.petrea@### (no spam: ### = gmail.com)" ;
+#   $out_mysite = "" ;
+#   $out_squidslog = " from 1:1000 sampled squid logs" ;
+# }  
+
   $out_unnormalized = "No data on this page have been normalized to 30 day months (as WMF does on certain traffic reports).<br>" ; 	
 
   $out_html .= "<p><small>\n" .
 #              ($wikimedia ? $out_sort_order3 : "") .
-               $out_unnormalized . "\n" .
+#              $out_unnormalized . "\n" . # Nov 2015: also appears on traffic reports which can be normalized, investigate
                $out_history . "\n" .
                $out_sort_order3 .
                (($sitemap_new_layout) ? $participation {"intro"} : "") .
@@ -1555,12 +1557,14 @@ sub GenerateColophon
 
                $out_generated . $out_generated_at . " " .
 
-               ($squidslog ? "$out_squidslog<p>" :
+             # obsolete SP001    
+             # ($squidslog ? "$out_squidslog<p>" :
+               ($false ? "$out_squidslog<p>" :
 	       ($dumpdetails ne '' ? "<p>$dumpdetails<p>" : ($pageviews ? $out_pageviewfiles : $out_sqlfiles) . &GetDate ($dumpdate2) . "\n<p>")) .
 
                (! $pageviews ? $out_delay : "") .
                (! $wikimedia ? "$out_no_wikimedia<br>" : "") .
-               $out_version . $version . "\n<br>" .
+             # $out_version . $version . "\n<br>" . # version id not updated in years
                $out_author . ":" . $out_myname .
                " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
                ($wikimedia ? $out_mail . ":" . $out_mymail . "<br>\n" : "") .
