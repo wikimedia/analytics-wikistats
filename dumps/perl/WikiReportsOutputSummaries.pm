@@ -40,6 +40,8 @@ sub GenerateSummariesPerWiki
   $language_count = $#languages + 1 ;
   foreach $wp (@languages)
   {
+  # next if $wp ne 'zz' and $wp ne 'en' and $wp ne 'commons' and $wp ne 'wikidata' ; # for quick tests
+    
     next if $wp_only ne '' and $wp ne $wp_only ;
 
     $language         = $out_languages {$wp} ;
@@ -64,7 +66,7 @@ sub GenerateSummariesPerWiki
     $summaries_index ++ ;
     $summaries_progress = "$summaries_index/$language_count" ;
 
-    if (($skip {$wp}) || ($wp =~ /^z+$/))
+    if ($skip {$wp}) 
     {
       &LogT ("$summaries_progress: skip $wp\n") ;
       next ;
@@ -84,10 +86,15 @@ sub GenerateSummariesPerWiki
       &GeneratePlotArticles ($wp, 'New') ;
     }
 
+    $html =~ s/PLOT_TOTAL_ARTICLES/$html_plot_total_articles/ ;
     &GeneratePlotEditors   ($wp) ;
 
-    if (! $mode_wo) # no page views yet for wikivoyage
-    { &GeneratePlotPageviews ($wp) ; }
+    if ($wp =~ /^zz+$/) 
+    { &GeneratePlotActiveWikis ($wp) ; }
+
+  # next if $wp !~ /^zz+$/ and $wp ne 'en' ; # for quick tests
+
+    &GeneratePlotPageviews ($wp) ; 
 
     $cmd = "mv *.Rout $path_in\n" ;
     `$cmd` ;
@@ -160,6 +167,8 @@ sub GenerateSummariesPerWiki
   $out_html_header_report_card   = &HtmlHeaderReportCard ($logo_project, $index_html, $cross_ref, $title_content) ;
   $out_html_report_card = &HtmlReportCard ($title_content, $out_style2, $out_html_header_report_card, $out_html_report_card, $explanation_report_card) ;
 
+print "write summary page $file_html_all\n" ;
+
   open "FILE_OUT", ">", $file_html_all ;
   print FILE_OUT &AlignPerLanguage ($out_html_report_card) ;
   close "FILE_OUT" ;
@@ -184,6 +193,9 @@ sub GetSummaryPerWiki
   my $out_language_name = $out_languages {$wp} ;
 
   my $main_page = &GetProjectBaseUrl ($wp) ;
+
+  if ($wp =~ /^zz+$/)
+  { $main_page = '' ; } 
 
   &LogT ("$progress: month $month_year $out_language_name $out_publication ($wp)\n") ;
   $html = "\n" ;
@@ -285,6 +297,28 @@ sub GetSummaryPerWiki
   $metric_NE_monthly  = &SummaryTrendChange ($this_month, $prev_month) ;
   $metric_NE_data     = &FormatSummary ($this_month) ;
 
+  if ($wp =~ /^zz+$/)
+  {
+    my $blue = '#AAF' ;
+    my $msg  = 'View charts for this metric across all projects' ;
+    my $url  = 'http://stats.wikimedia.org/EN' ;
+    $link_total_editors   = "<br><a href='$url/ProjectTrendsEditors.html'><font color=$blue>$msg</font></a>" ;
+    $link_total_pageviews = "<br><a href='$url/ProjectTrendsPageviews.html'><font color=$blue>$msg</a>" ;
+    $link_total_articles  = "<br><a href='$url/ProjectTrendsTotalArticles.html'><font color=$blue>$msg</a>" ;
+    $link_new_articles    = "<br><a href='$url/ProjectTrendsNewArticles.html'><font color=$blue>$msg</a>" ;
+    $link_total_edits     = "<br><a href='$url/ProjectTrendsTotalEdits.html'><font color=$blue>$msg</a>" ;
+    $link_active_wikis    = "<br><a href='$url/ProjectTrendsActiveWikis.html'><font color=$blue>$msg</a>" ;
+  }
+  else
+  {
+    $link_total_editors   = '' ;
+    $link_total_pageviews = '' ;
+    $link_total_articles  = '' ;
+    $link_new_articles    = '' ;
+    $link_total_edits     = '' ;
+    $link_active_wikis    = '' ;
+  }
+
   if (! $mode_wx)
   {
     # million speakers
@@ -324,6 +358,8 @@ sub GetSummaryPerWiki
   $plot_uploaders      = 'PlotUploaders'     . uc ($wp) . '.png' ;
   $plot_total_articles = 'PlotTotalArticles' . uc ($wp) . '.png' ;
   $plot_new_articles   = 'PlotNewArticles'   . uc ($wp) . '.png' ;
+  $plot_edits          = 'PlotEditsSmall'    . uc ($wp) . '.png' ;
+  $plot_active_wikis   = 'PlotActivity'      . uc ($wp) . '.png' ;
 
   if ($mode_wx)
   { $wiki = $out_language_name ; }
@@ -371,9 +407,9 @@ $html = <<__HTML_SUMMARY__ ;
         <table width=100% border=0>
           <tr>
             <td class=l width=34%>TOP</td>
-            <td class=r width=22%><font color=$col_highlight>Data</td>
-            <td class=r width=22%><font color=$col_highlight>Yearly change</td>
-            <td class=r width=22%><font color=$col_highlight>Monthly change</td>
+            <td class=r width=22%><font color=black><b>Data</b></td>
+            <td class=r width=22%><font color=black><b>Yearly change</b></td>
+            <td class=r width=22%><font color=black><b>Monthly change</b></td>
           </tr>
           <tr>
             <td colspan=99><hr color=#808080></td>
@@ -456,13 +492,15 @@ $html = <<__HTML_SUMMARY__ ;
       </td>
     </tr>
 
+    PLOT_ACTIVE_WIKIS
+    PLOT_EDITORS
+    PLOT_UPLOADERS
+    PLOT_EDITS
+    PLOT_PAGEVIEWS
     PLOT_BINARIES
     PLOT_UPLOADS
     PLOT_TOTAL_ARTICLES
     PLOT_NEW_ARTICLES
-    PLOT_EDITORS
-    PLOT_UPLOADERS
-    PLOT_PAGEVIEWS
 
     EXPLANATION
     SEE_ALSO
@@ -475,8 +513,9 @@ $html = <<__HTML_SUMMARY__ ;
 
 __HTML_SUMMARY__
 
-if ($mode_wo) # no data yet for wikivoyage
-{ $html =~ s/PLOT_PAGEVIEWS// ; }
+# obsolete ?
+# if ($mode_wo) # no data yet for wikivoyage
+# { $html =~ s/PLOT_PAGEVIEWS// ; }
 
 $html_speakers = <<__HTML_SUMMARY_SPEAKERS__ ;
           <tr>
@@ -518,7 +557,9 @@ __HTML_SUMMARY_PLOT_BINARIES__
 $html_plot_editors = <<__HTML_SUMMARY_PLOT_EDITORS__ ;
     <tr>
       <td class=c colspan=99 width=100%>
-      &nbsp;<p><img src='$plot_editors'></td>
+      &nbsp;<p><img src='$plot_editors'>
+      $link_total_editors
+      </td>
     </tr>
 __HTML_SUMMARY_PLOT_EDITORS__
 
@@ -526,7 +567,10 @@ $html_plot_pageviews = <<__HTML_SUMMARY_PLOT_PAGEVIEWS__ ;
     <tr>
       <td class=c colspan=99 width=100%>
       &nbsp;<p><img src='$plot_pageviews'>
-      <br><small><font color=#808080>page views: $pageviews_per_unit</font>$msg_pageviews_mobile_added</small></td>
+      <br><small><font color=#808080>Page views: $pageviews_per_unit</font>$msg_pageviews_mobile_added</small>
+      <br><small><font color=#808080>Metrics have been normalized to months of 30 days: Jan*30/31, Feb*30/(28|29), Mar*30/31, etc</font></small> 
+      $link_total_pageviews
+      </td>
     </tr>
 __HTML_SUMMARY_PLOT_PAGEVIEWS__
 
@@ -552,6 +596,7 @@ $html_plot_total_articles = <<__HTML_SUMMARY_PLOT_TOTAL_ARTICLES__ ;
     <tr>
       <td class=c colspan=99 width=100%>
       &nbsp;<p><img src='$plot_total_articles'>
+      $link_total_articles
       </td>
     </tr>
 __HTML_SUMMARY_PLOT_TOTAL_ARTICLES__
@@ -561,15 +606,37 @@ $html_plot_new_articles = <<__HTML_SUMMARY_PLOT_NEW_ARTICLES__ ;
     <tr>
       <td class=c colspan=99 width=100%>
       &nbsp;<p><img src='$plot_new_articles'>
+      $link_new_articles
       </td>
     </tr>
 __HTML_SUMMARY_PLOT_NEW_ARTICLES__
 # <br><small><font color=#808080>new articles: $new_articles_per_unit</font></small> # before </td>
 
+$html_plot_edits = <<__HTML_SUMMARY_PLOT_EDITS__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_edits'>
+      $link_total_edits
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_EDITS__
+# <br><small><font color=#808080>new articles: $edits_per_unit</font></small> # before </td>
+
+$html_plot_active_wikis = <<__HTML_SUMMARY_PLOT_ACTIVE_WIKIS__ ;
+    <tr>
+      <td class=c colspan=99 width=100%>
+      &nbsp;<p><img src='$plot_active_wikis'>
+      $link_active_wikis
+      </td>
+    </tr>
+__HTML_SUMMARY_PLOT_ACTIVE_WIKIS__
+# <br><small><font color=#808080>active wikis: $active_wikis</font></small> # before </td>
+
   if ($mode_wx)
   {
     if ($wp eq 'commons')
     {
+      $html =~ s/PLOT_ACTIVE_WIKIS// ;
       $html =~ s/PLOT_TOTAL_ARTICLES// ;
       $html =~ s/PLOT_NEW_ARTICLES// ;
       $html =~ s/BINARIES/&ReadStatisticsBinariesCommons/e ;
@@ -580,9 +647,11 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
       $html =~ s/PLOT_PAGEVIEWS/$html_plot_pageviews/ ;
       $html =~ s/PLOT_UPLOADS/$html_plot_uploads/ ;
       $html =~ s/PLOT_UPLOADERS/$html_plot_uploaders/ ;
+      $html =~ s/PLOT_EDITS/$html_plot_edits/ ;
     }
     else
     {
+      $html =~ s/PLOT_ACTIVE_WIKIS// ;
       $html =~ s/PLOT_TOTAL_ARTICLES/$html_plot_total_articles/ ;
       $html =~ s/PLOT_NEW_ARTICLES/$html_plot_new_articles/ ;
       $html =~ s/BINARIES// ;
@@ -592,6 +661,7 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
       $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
       $html =~ s/PLOT_UPLOADS// ;
       $html =~ s/PLOT_UPLOADERS// ;
+      $html =~ s/PLOT_EDITS/$html_plot_edits/ ;
 
       if ($pageviews_max {$wp} == 0)
     # { $html =~ s/PLOT_PAGEVIEWS/<tr><td class=c><p><font color=#800000><small>Page views unknown<\/small><\/font><\/td><\/tr>/ ; }
@@ -603,11 +673,24 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
   else
   {
     $html =~ s/BINARIES// ;
-    $html =~ s/SPEAKERS/$html_speakers/ ;
+
+    if ($wp =~ /^zz+$/)
+    {
+      $html =~ s/SPEAKERS// ; 
+      $html =~ s/PARTICIPATION// ; 
+    }
+    else
+    { $html =~ s/PLOT_ACTIVE_WIKIS// ; }
+    
+    $html =~ s/PLOT_ACTIVE_WIKIS/$html_plot_active_wikis/ ;
+
+    $html =~ s/SPEAKERS/$html_speakers/ ; 
+
     if ($speakers * 1000000 >= 100000) # enough speakers for participation metric ?
     { $html =~ s/PARTICIPATION/$html_participation/ ; }
     else
     { $html =~ s/PARTICIPATION// ; }
+
     $html =~ s/PLOT_BINARIES// ;
     $html =~ s/PLOT_EDITORS/$html_plot_editors/ ;
 
@@ -621,6 +704,7 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
     $html =~ s/PLOT_UPLOADERS// ;
     $html =~ s/PLOT_TOTAL_ARTICLES/$html_plot_total_articles/ ;
     $html =~ s/PLOT_NEW_ARTICLES/$html_plot_new_articles/ ;
+    $html =~ s/PLOT_EDITS/$html_plot_edits/ ;
   }
 
   if ($region eq '')
@@ -655,7 +739,7 @@ __HTML_SUMMARY_PLOT_NEW_ARTICLES__
            Published $summaries_published&nbsp;&nbsp;/&nbsp;&nbsp;$out_license<br>
            <b>See Also</b>
            <a href='$url_trends'><font color=#000080>Detailed trends</font></a> for <a href='$main_page'><font color=#000080>$out_language_name $out_publication</font></a>&nbsp;&nbsp;/&nbsp;&nbsp;
-           <a href='$url_site_map'><font color=#000080>Stats for all $out_publications</font></a>&nbsp;&nbsp;/&nbsp;&nbsp;
+           <a href='$url_site_map'><font color=#000080>Stats for all $out_publication wikis</font></a>&nbsp;&nbsp;/&nbsp;&nbsp;
            <a href='http://stats.wikimedia.org'><font color=#000080>Wikistats portal</font></a>
             </small>
            </font>
@@ -906,7 +990,7 @@ sub GeneratePlotBinaries
   # edit plot parameters
 
   if ($wp eq 'zz')
-  { $out_script_plot =~ s/TITLE/Images on all $out_publications (x 1,000,000)/g ; }
+  { $out_script_plot =~ s/TITLE/Images on all $out_publication wikis (x 1,000,000)/g ; }
   elsif ($mode_wx)
   { $out_script_plot =~ s/TITLE/Images on $out_language_name wiki (x 1,000,000)/g ; }
   else
@@ -992,8 +1076,6 @@ sub GeneratePlotEditors
 
   my $wp = shift ;
 
-  return if $wp =~ /^z+$/ ;
-
 # &LogT ("GeneratePlotEditors $wp\n") ;
 
   my $file_csv_data_R   = $path_in . "R_PlotData_Editors.R-data" ;
@@ -1072,7 +1154,7 @@ sub GeneratePlotEditors
   # edit plot parameters
 
   if ($wp eq 'zz')
-  { $out_script_plot =~ s/TITLE/Active Editors on all $out_publications/g ; }
+  { $out_script_plot =~ s/TITLE/Active Editors on all $out_publication wikis/g ; }
   elsif ($mode_wx)
   { $out_script_plot =~ s/TITLE/Active Editors on $out_language_name wiki/g ; }
   else
@@ -1107,11 +1189,151 @@ sub GeneratePlotEditors
   $out_script_plot =~ s/COLOR_25/purple2/g ;
   $out_script_plot =~ s/COLOR_100/dodgerblue2/g ;
 
+  if ($mode_wo)
+  { 
+    $out_script_plot =~ s/PLOT_FOOTER_COLOR/#808080/ ;
+    $out_script_plot =~ s/PLOT_FOOTER/Jan 2013 Wikivoyage became a new Wikimedia project. Earlier content was added at Wikitravel./ ; 
+  }
+  elsif ($wp eq 'commons')
+  {
+    $out_script_plot =~ s/PLOT_FOOTER_COLOR/#808080/ ;
+    $out_script_plot =~ s/PLOT_FOOTER/Peaks in editors are from photo contests, mainly Wiki Loves Monuments (Sep 2011-..), Wiki Loves Earth (2014-..)/ ;
+  }
+  else
+  {
+    $out_script_plot =~ s/PLOT_FOOTER_COLOR/#808080/ ;
+    $out_script_plot =~ s/PLOT_FOOTER// ; 
+  }
+
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+}
+
+sub GeneratePlotActiveWikis
+{
+  my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+
+  my $wp = shift ;
+
+# &LogT ("GeneratePlotEditors $wp\n") ;
+
+  my $file_csv_data_R   = $path_in . "R_PlotData_ActiveWikis.R-data" ;
+  my $file_script_R     = $path_in . "R_PlotScript_ActiveWikis.R-in" ;
+  my $path_png_raw      = "$path_out_plots\/PlotActivity" . uc($wp) . ".png" ;
+  my $path_png_trends   = "$path_out_plots\/PlotActivity" . uc($wp) . ".png" ;
+  my $path_svg          = "$path_out_plots\/PlotActivity" . uc($wp) . ".svg" ;
+  my $out_script_plot   = $out_script_plot_active_wikis ;
+  my $out_language_name = $out_languages {$wp} ;
+  my $month_plot_max    = $active_wikis_month_max_3 ;
+  my $code              = uc ($wp) ;
+
+  if ($month_plot_max == 0)
+  { print "$wp: \$month_max = \$editors_month_max_5 \{\$wp\} <- == 0\n" ; return ; }
+
+  $file_csv_data_R      =~ s/\\/\//g ;
+  $path_png_raw         =~ s/\\/\//g ;
+  $path_png_trends      =~ s/\\/\//g ;
+  $path_svg             =~ s/\\/\//g ;
+  $out_language_name    =~ s/&nbsp;/ /g ;
+
+  $active_wikis_max = $active_wikis_max_1 ;
+  if ($active_wikis_max > 0)
+  {
+    # get nice rounded upper boundary for chart y axis
+    $active_wikis_max_rounded = 10000000000000 ;
+    while ($active_wikis_max_rounded / 10 > $active_wikis_max)  { $active_wikis_max_rounded /= 10 ; }
+
+       if ($active_wikis_max_rounded * 0.15 > $active_wikis_max) { $active_wikis_max_rounded *= 0.15 ; }
+    elsif ($active_wikis_max_rounded * 0.2 > $active_wikis_max) { $active_wikis_max_rounded *= 0.2 ; }
+    elsif ($active_wikis_max_rounded * 0.25 > $active_wikis_max) { $active_wikis_max_rounded *= 0.25 ; }
+    elsif ($active_wikis_max_rounded * 0.3 > $active_wikis_max) { $active_wikis_max_rounded *= 0.3 ; }
+    elsif ($active_wikis_max_rounded * 0.4 > $active_wikis_max) { $active_wikis_max_rounded *= 0.4 ; }
+    elsif ($active_wikis_max_rounded * 0.5 > $active_wikis_max) { $active_wikis_max_rounded *= 0.5 ; }
+    elsif ($active_wikis_max_rounded * 0.6 > $active_wikis_max) { $active_wikis_max_rounded *= 0.6 ; }
+    elsif ($active_wikis_max_rounded * 0.8 > $active_wikis_max) { $active_wikis_max_rounded *= 0.8 ; }
+  # print "$wp editors max $editors_max -> editors max rounded $editors_max_rounded\n" ;
+
+    $active_wikis_max =~ s/(\d)(\d\d\d)$/$1,$2/ ;
+    $active_wikis_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+    $active_wikis_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+    $active_wikis_max =~ s/(\d)(\d\d\d),/$1,$2,/ ;
+  }
+  else
+  { $editors_max = '10' ; }
+
+  # edit plot parameters
+  open ACTIVITY_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
+  print ACTIVITY_OUT "language,month,count_1,count_3,count_5\n" ;
+
+  # start in year where value exceeds 1/100 of max value
+
+  for ($m = $editors_month_lo_5 {$wp} ; $m < $editors_month_hi_5 {$wp} ; $m++)
+  { last if $editors_5 {$wp.$m} >= $editors_max / 100 ; }
+  $editors_month_lo_5_100th = $m - $m % 12 + 1 ;
+
+  $period = month_year_english_short ($editors_month_lo_5_100th) . ' ' . month_year_english_short ($editors_month_hi_5 {$wp}) ;
+
+  for ($m = $editors_month_lo_5_100th ; $m <= $editors_month_hi_5 {$wp} ; $m++)
+  {
+    # make boundary not show at 2010-01-31 but at 2010-01-01 as follows:
+    # instead of value for last day of month, present it as value for first day of next month
+    # this requires outputting extra first value for 20xx-01-01 (to make chart start at January)
+    $count_1 = $wikis_with_editors_with_at_least_x_edits {"$m.1"} ++ ;  
+    $count_3 = $wikis_with_editors_with_at_least_x_edits {"$m.3"} ++ ; 
+    $count_5 = $wikis_with_editors_with_at_least_x_edits {"$m.5"} ++ ;
+
+    if ($m == $editors_month_lo_5_100th)
+    {
+      $date = &m2mmddyyyy ($m) ;
+      $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+      print ACTIVITY_OUT "zz,$date,$count_1,$count_3,$count_5\n" ;
+    # print              "zz,$date,$count_1,$count_3,$count_5\n" ; 
+    }
+
+    $date = &m2mmddyyyy ($m+1) ;
+    $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
+    print ACTIVITY_OUT "zz,$date,$count_1,$count_3,$count_5\n" ;
+  # print              "zz,$date,$count_1,$count_3,$count_5\n" ; 
+  }
+  close ACTIVITY_OUT ;
+
+  # edit plot parameters
+
+  $out_script_plot =~ s/TITLE/Active $out_publication wikis (3+ active editors)/g ; 
+
+  $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
+  $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
+
+  $out_script_plot =~ s/Wikipedia/$out_publication/g ;
+
+  $out_script_plot =~ s/FILE_CSV/$file_csv_data_R/g ;
+  $out_script_plot =~ s/FILE_PNG_TRENDS/$path_png_trends/g ;
+  $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
+  $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
+
+  $out_script_plot =~ s/COL_DATA/2:7/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:6/g ;
+
+  $out_script_plot =~ s/CODE/$code/g ;
+  $out_script_plot =~ s/MAX_METRIC/active wikis/ ;
+  $out_script_plot =~ s/MAX_MONTH/$month_plot_max/g ;
+  $out_script_plot =~ s/MAX_VALUE/$active_wikis_max_3/g ;
+  $out_script_plot =~ s/YLIM_MAX/$active_wikis_max_rounded/g ;
+  $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+  $out_script_plot =~ s/PERIOD/$period/g ;
+
+  $out_script_plot =~ s/COLOR_1/gold2/g ;
+  $out_script_plot =~ s/COLOR_3/violetred2/g ;
+  $out_script_plot =~ s/COLOR_5/dodgerblue/g ;
+
+  $out_script_plot =~ s/LABEL_1/1+ active editors/g ;
+  $out_script_plot =~ s/LABEL_3/3+ active editors/g ;
+  $out_script_plot =~ s/LABEL_5/5+ active editors/g ;
+
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
 # plot normalized (= all months are 30 days) page views from $pageviews {$wp.$m} ($wp=language code, $m=month ndx)
-# which is hash filled in WikiReportsInput.pm from $file_csv_pageviewsmonthly = $path_in . "PageViewsPerMonthAll.csv"
+# which is hash filled in WikiReportsInput.pm from $file_csv_pageviewsmonthly = $path_in . "projectviews_per_month_all.csv" # was "PageViewsPerMonthAll.csv"
 # which contains for every wiki in the project (e.g. in ../csv_wp for Wikipedia):
 # one line per month for non-mobile (since Jan 2008 for Wikipedia, some months later for other projects) 
 # and one line per month for mobile (since June 2010)
@@ -1127,12 +1349,10 @@ sub GeneratePlotPageviews
   my $wp = shift ;
   $wp =~ s/_/-/g ;
 
-  return if $wp =~ /^z+$/ ; # pseudo code for overall totals, zz,zzz are not language codes
+ &LogT ("GeneratePlotPageviews $wp\n") ;
 
   if ($pageviews_max {$wp} == 0)
   { print "\nNo pageviews found for wiki $wp!\n\n" ; return ; }
-
-# &LogT ("GeneratePlotPageviews $wp\n") ;
 
   my $file_csv_data_R   = $path_in . "R_PlotData_PageViews.R-data" ;
   my $file_script_R     = $path_in . "R_PlotScript_Pageviews.R-in" ;
@@ -1154,7 +1374,7 @@ sub GeneratePlotPageviews
   $out_language_name    =~ s/&nbsp;/ /g ;
 
   open PAGEVIEWS_OUT, '>', $file_csv_data_R || &Abort ("Could not open file $file_csv_data_R") ;
-  print PAGEVIEWS_OUT "language,month,count_normalized_non_mobile,count_normalized_mobile,count_normalized_total\n" ;
+  print PAGEVIEWS_OUT "language,month,count_normalized_non_mobile_old_def,count_normalized_non_mobile_new_def,count_normalized_mobile_old_def,count_normalized_mobile_new_def,count_normalized_total_old_def,count_normalized_total_new_def\n" ;
 
   ($metric_max, $metric_max_rounded, $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($pageviews_max) ;
 
@@ -1162,19 +1382,61 @@ sub GeneratePlotPageviews
 
   $pageviews_month_lo = $pageviews_month_lo {$wp} - $pageviews_month_lo {$wp} % 12 ; # always start in January, to align x axis properly
 
+  $pageviews_month_hi = $pageviews_month_hi {$wp} ;
+
+# add code to suppres mobile counts when less than 0.1 of total
+  $show_non_mobile_only = $false ;  
+  $count_normalized_mobile_hi             = sprintf ("%.0f", $pageviews {"$wp.m".$pageviews_month_hi} / $metric_unit) ; 
+  $count_normalized_non_mobile_new_def_hi = sprintf ("%.0f", $pageviews {$wp.$pageviews_month_hi} / $metric_unit) ;
+  if ($count_normalized_mobile_hi < 0.2 * $count_normalized_non_mobile_new_def_hi)
+  { $show_non_mobile_only = $true ; } 
+
   for ($m = $pageviews_month_lo ; $m < $pageviews_month_hi {$wp} ; $m++)
   {
     if ($m < $pageviews_month_lo {$wp})
     { 
-      $count_normalized_non_mobile = "" ; 
-      $count_normalized_mobile     = "" ; 
-      $count_normalized_total      = "" ; 
+      $count_normalized_non_mobile_old_def = "" ; 
+      $count_normalized_non_mobile_new_def = "" ; 
+      $count_normalized_mobile_old_def     = "" ; 
+      $count_normalized_mobile_new_def     = "" ; 
+      $count_normalized_total_old_def      = "" ; 
+      $count_normalized_total_new_def      = "" ; 
     }
     else
     { 
-      $count_normalized_non_mobile = sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit) ; 
-      $count_normalized_mobile     = sprintf ("%.0f", $pageviews {"$wp.m".$m} / $metric_unit) ; 
-      $count_normalized_total      = $count_normalized_non_mobile + $count_normalized_mobile ;
+      if ($m >= 185) # months since Jan 2000, 184 = April 2015
+      {
+        $count_normalized_non_mobile_new_def = &blank_zero (sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit)) ; 
+        $count_normalized_non_mobile_old_def = "" ;
+        $count_normalized_mobile_new_def     = &blank_zero (sprintf ("%.0f", $pageviews {"$wp.m".$m} / $metric_unit)) ; 
+        $count_normalized_mobile_old_def     = "" ;
+        $count_normalized_total_new_def      = &blank_zero ($count_normalized_non_mobile_old_def + $count_normalized_non_mobile_new_def + $count_normalized_mobile_old_def + $count_normalized_mobile_new_def) ;
+        $count_normalized_total_old_def      = "" ;
+      }
+      else
+      {
+        $count_normalized_non_mobile_old_def = &blank_zero (sprintf ("%.0f", $pageviews {$wp.$m} / $metric_unit)) ; 
+        $count_normalized_non_mobile_new_def = "" ;
+        $count_normalized_mobile_old_def     = &blank_zero (sprintf ("%.0f", $pageviews {"$wp.m".$m} / $metric_unit)) ; 
+        $count_normalized_mobile_new_def     = "" ;
+        $count_normalized_total_old_def      = &blank_zero ($count_normalized_non_mobile_old_def + $count_normalized_non_mobile_new_def + $count_normalized_mobile_old_def + $count_normalized_mobile_new_def) ;
+        $count_normalized_total_new_def      = "" ;
+      }
+
+      # suppress parts of black line (total) where almost similar to green line (main old or new)
+      if ($count_normalized_total_old_def + $count_normalized_total_new_def < 1.05 * ($count_normalized_non_mobile_old_def + $count_normalized_non_mobile_new_def))
+      { 
+        $count_normalized_total_old_def = "" ; 
+        $count_normalized_total_new_def = "" ; 
+      }
+      
+      if ($show_non_mobile_only)
+      {
+        $count_normalized_mobile_old_def = "" ;
+        $count_normalized_mobile_new_def = "" ;
+        $count_normalized_total_old_def  = "" ;         
+        $count_normalized_total_new_def  = "" ;         
+      }  
     }
 
     # $days_in_month =  days_in_month (substr($date,6,4),substr($date,0,2)) ;
@@ -1188,12 +1450,13 @@ sub GeneratePlotPageviews
     {
       $date = &m2mmddyyyy ($m) ;
       $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
-      print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile,$count_normalized_mobile,$count_normalized_total\n" ;
+      print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile_old_def,$count_normalized_non_mobile_new_def,$count_normalized_mobile_old_def,$count_normalized_mobile_new_def,$count_normalized_total_old_def,$count_normalized_total_new_def\n" ;
     }
 
     $date = &m2mmddyyyy ($m+1) ;
     $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
-    print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile,$count_normalized_mobile,$count_normalized_total\n" ;
+    print PAGEVIEWS_OUT "$wp,$date,$count_normalized_non_mobile_old_def,$count_normalized_non_mobile_new_def,$count_normalized_mobile_old_def,$count_normalized_mobile_new_def,$count_normalized_total_old_def,$count_normalized_total_new_def\n" ;
+  # print "$wp,$date,$count_normalized_non_mobile_old_def,$count_normalized_non_mobile_new_def,$count_normalized_mobile_old_def,$count_normalized_mobile_new_def,,$count_normalized_total\n" ; # 
 
   }
   close PAGEVIEWS_OUT ;
@@ -1201,7 +1464,7 @@ sub GeneratePlotPageviews
   # edit plot parameters
 
   if ($wp eq 'zz')
-  { $out_script_plot =~ s/TITLE/Page Views on all $out_publications$metric_unit_text1/g ; }
+  { $out_script_plot =~ s/TITLE/Page Views on all $out_publication wikis$metric_unit_text1/g ; }
   elsif ($mode_wx)
   { $out_script_plot =~ s/TITLE/Page Views on $out_language_name wiki$metric_unit_text1/g ; }
   else
@@ -1210,6 +1473,10 @@ sub GeneratePlotPageviews
     $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
     $out_script_plot =~ s/CODE/$code/g ;
   }
+
+  # patch legend, remove two empty lines
+  if ($show_non_mobile_only)
+  { $out_script_plot =~ s/\, \"mobile \"\, \"total \"// ; }
 
   $mmddyyyy = &m2mmddyyyy ($month_plot_max) ;
   $month_plot_max = $months_en [substr ($mmddyyyy,0,2) - 1] . " " . substr ($mmddyyyy,6,4) ;
@@ -1221,8 +1488,8 @@ sub GeneratePlotPageviews
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
 
-  $out_script_plot =~ s/COL_DATA/2:5/g ;
-  $out_script_plot =~ s/COL_COUNTS/2:4/g ;
+  $out_script_plot =~ s/COL_DATA/2:8/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:7/g ;
 
   $out_script_plot =~ s/CODE/$code/g ;
 
@@ -1234,9 +1501,12 @@ sub GeneratePlotPageviews
   $out_script_plot =~ s/UNIT/$metric_unit_text/g ;
   $out_script_plot =~ s/PERIOD/$period/g ;
 
-  $out_script_plot =~ s/COLOR_NON_MOBILE/green4/g ;
-  $out_script_plot =~ s/COLOR_MOBILE/blue3/g ;
-  $out_script_plot =~ s/COLOR_TOTAL/black/g ;
+  $out_script_plot =~ s/COLOR_NON_MOBILE_OLD_DEF/green4/g ; 
+  $out_script_plot =~ s/COLOR_NON_MOBILE_NEW_DEF/green4/g ; 
+  $out_script_plot =~ s/COLOR_MOBILE_OLD_DEF/blue/g ;
+  $out_script_plot =~ s/COLOR_MOBILE_NEW_DEF/blue/g ;
+  $out_script_plot =~ s/COLOR_TOTAL_OLD_DEF/black/g ;
+  $out_script_plot =~ s/COLOR_TOTAL_NEW_DEF/black/g ;
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
@@ -1489,7 +1759,7 @@ sub GeneratePlotArticles
   my ($wp,$tot_or_new) = @_ ;
   $tot_or_new_lc = lc $tot_or_new ;
 
-  return if $wp =~ /^z+$/ ;
+# return if $wp =~ /^z+$/ ;
 
   # &LogT ("GeneratePlotArticles $wp $tot_or_new\n") ;
 
@@ -1519,7 +1789,7 @@ sub GeneratePlotArticles
   $month_plot_max = 1 ;
   $m_lo = 999 ;
   $m_hi = 0 ;
-
+ 
   $m_stop = $MonthlyStatsWpStop {$wp} ;
   if ($call_ignore_input_beyond_month++ == 0)
   { &Log ("\nIgnore input beyond month $m_stop: " . &month_year_english_short ($m_stop) . "\n\n") ; }
@@ -1527,6 +1797,7 @@ sub GeneratePlotArticles
   $articles = 0 ;
   $articles_per_usertype = 0 ;
   $tot_articles_prev = 0 ;
+
   &ReadFileCsv ($file_csv_monthly_stats, $wp) ;
 
   foreach $line (@csv)
@@ -1569,7 +1840,6 @@ sub GeneratePlotArticles
 
     $tot_articles_prev = $tot_articles ;
   }
-  close ARTICLES_IN ;
 
   if ($tot_or_new eq 'New')
   {
@@ -1629,14 +1899,35 @@ sub GeneratePlotArticles
 
     $tot_articles_prev = $tot_articles ;
   }
-  close ARTICLES_IN ;
+  close ARTICLES_OUT ;
 
   # edit plot parameters
+
+  if ($wp eq 'zz') 
+  { $out_script_plot =~ s/TITLE/Articles on all $out_publication wikis$metric_unit_text1/g ; } 
+  elsif ($mode_wx)
+  { $out_script_plot =~ s/TITLE/Article on $out_language_name wiki$metric_unit_text1/g ; } 
+  else
+  {
+    $out_script_plot =~ s/TITLE/Articles on LANGUAGE $out_publication$metric_unit_text1/g ;
+    $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+    $out_script_plot =~ s/CODE/$code/g ;
+  }
 
   if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
   {
     $out_script_plot   = $out_script_plot_articles2 ;
-    $out_script_plot =~ s/TITLE/New articles per month on $out_language_name $out_publication$metric_unit_text1/g ;
+    if ($wp eq 'zz') 
+    { $out_script_plot =~ s/TITLE/New articles on all $out_publication wikis$metric_unit_text1/g ; } 
+    elsif ($mode_wx)
+    { $out_script_plot =~ s/TITLE/New articles on $out_language_name wiki$metric_unit_text1/g ; } 
+    else
+    {
+      $out_script_plot =~ s/TITLE/New articles on LANGUAGE $out_publication$metric_unit_text1/g ;
+      $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
+      $out_script_plot =~ s/CODE/$code/g ;
+    }
+  # $out_script_plot =~ s/TITLE/New articles per month on $out_language_name $out_publication$metric_unit_text1/g ; 
   }
   else
   { $out_script_plot =~ s/TITLE/Total articles on $out_language_name $out_publication$metric_unit_text1/g ; } 
@@ -1737,7 +2028,7 @@ sub SummaryUnitAndScale
   if ($metric_max >= 10000000)
   {
     $metric_unit = 1000000 ;
-    $metric_unit_text1 = " (x 1000,000)" ;
+    $metric_unit_text1 = " (x 1,000,000)" ;
     $metric_unit_text2 = " million" ;
   }
   $metric_max = sprintf ("%.0f", $metric_max / $metric_unit) ;
@@ -2126,11 +2417,18 @@ sub GeneratePlotCallR
 
   $cmd = "R CMD BATCH \"$file_script\" \"$file_script_out\"" ;
 
-  if ($generate_edit_plots++ < 5)
+  if ($generate_edit_plots++ < 10)
   { print "CMD $cmd\n" ; }
 
   @result = `$cmd` ;
 }
 
+sub blank_zero
+{
+  my $count = shift ;
+  $count = '' if $count == 0 ;
+  return ($count) ;
+}
+ 
 1;
 

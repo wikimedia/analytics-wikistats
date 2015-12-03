@@ -237,11 +237,11 @@ axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
 
-lines(dates,plotdata\$times_tot_decomposed\.trend,type="l", col="black", lty="solid", lwd=3)
-lines(dates,plotdata\$times_anon_decomposed\.trend,type="l", col="red", lty="solid", lwd=3)
-lines(dates,plotdata\$times_reg_decomposed\.trend,type="l", col="blue", lty="solid", lwd=3)
-lines(dates,plotdata\$times_bots_decomposed\.trend,type="l", col="green4", lty="solid", lwd=3)
-lines(dates,plotdata\$times_reverts_decomposed\.trend,type="l", col="magenta3", lty="solid", lwd=3)
+lines(dates,plotdata\$times_tot_decomposed\.trend,type="l", col="black", lty="solid", lwd=2)
+lines(dates,plotdata\$times_anon_decomposed\.trend,type="l", col="red", lty="solid", lwd=2)
+lines(dates,plotdata\$times_reg_decomposed\.trend,type="l", col="blue", lty="solid", lwd=2)
+lines(dates,plotdata\$times_bots_decomposed\.trend,type="l", col="green4", lty="solid", lwd=2)
+lines(dates,plotdata\$times_reverts_decomposed\.trend,type="l", col="magenta3", lty="solid", lwd=2)
 
 lines(dates,plotdata\$PE_edits_total,col="black", lty="solid", lwd=0.8)
 lines(dates,plotdata\$PE_edits_bots,col="green4", lty="solid", lwd=0.8)
@@ -353,10 +353,10 @@ axis.POSIXct(1, at=seq(r[1], r[2], by="year"), format="%b %y ", tck=1, col="#909
 
 title(" TITLE ",  cex.main=2,   font.main=3, col.main= "black")
 
-lines(dates,plotdata\$times_tot_decomposed\.trend,type="l", col="black", lty="solid", lwd=3)
-lines(dates,plotdata\$times_anon_decomposed\.trend,type="l", col="red", lty="solid", lwd=3)
-lines(dates,plotdata\$times_reg_decomposed\.trend,type="l", col="blue", lty="solid", lwd=3)
-lines(dates,plotdata\$times_bots_decomposed\.trend,type="l", col="green4", lty="solid", lwd=3)
+lines(dates,plotdata\$times_tot_decomposed\.trend,type="l", col="black", lty="solid", lwd=2)
+lines(dates,plotdata\$times_anon_decomposed\.trend,type="l", col="red", lty="solid", lwd=2)
+lines(dates,plotdata\$times_reg_decomposed\.trend,type="l", col="blue", lty="solid", lwd=2)
+lines(dates,plotdata\$times_bots_decomposed\.trend,type="l", col="green4", lty="solid", lwd=2)
 
 lines(dates,plotdata\$PR_reverts_total,col="black", lty="solid", lwd=0.8)
 lines(dates,plotdata\$PR_reverts_bots,col="green4", lty="solid", lwd=0.8)
@@ -974,6 +974,7 @@ td.img   {padding:0px ; margin:0px ; border: inset 1px #FFFFFF}
 table.b td    {text-align:right;  border: inset 1px #FFFFFF}
 table.b th    {text-align:center; border: none}
 table.b th.l  {text-align:left;   border: none ; vertical-align:top;}
+table.b td.l  {text-align:left;   border: inset 1px #FFFFFF}
 table.b th.c  {text-align:center; border: none ; vertical-align:top;}
 table.b th.r  {text-align:right;  border: none ; vertical-align:top;}
 table.b td.cb {text-align:center; border: inset 1px #FFFFFF}

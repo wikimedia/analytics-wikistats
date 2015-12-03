@@ -4,6 +4,15 @@
   use EzLib ;
   use WikiReportsNoWikimedia ;
 
+
+  $out_html_new_pageview_def = 
+"<tr><td colspan=999 class='l' style=\"padding:10px\" bgcolor=#C0FFC0><b><font color=#008000 size=+1>Nov 2015: Data in this report, from May 2015 onwards, are now based on the <a href='https://wikitech.wikimedia.org/wiki/Analytics/Pageviews'>new pageview definition</a>.</font></b><p>" . 
+"<font color=#006000>In the old situation spider/crawler traffic (from search engines) wasn't filtered (a known issue, we needed hadoop to make that possible).<br>" . 
+"Those requests made up almost 20% of total page 'views' on Wikipedia, and even much more on sister projects (details will follow)<p>" .
+"Also, the new data stream does exclude housekeeping traffic (mainly used for fundraising banners), which in 2014 overwhelmed content related traffic on smaller projects (not on Wikipedia).<p>" . 
+"The top table row, with year-over-year changes, is temporarily disabled, until the new pageview definition will have been in effect for at least a year.<p>" . 
+"Thanks for your patience.</b></font></td></tr>" ;
+ 
 sub GenerateCurrentStatus
 {
   &LogT ("\nGenerate Current Status Tables") ;
@@ -634,7 +643,7 @@ if (0)
 
   $out_html = $out_html_start ;
 
-  $legend = "<p><b>Legend: </b>(3m)=3 month average&nbsp;&nbsp;|&nbsp;&nbsp;<b>M</b>=x1000,000, <b>k</b>=x1000&nbsp;&nbsp;|&nbsp;&nbsp;" .
+  $legend = "<p><b>Legend: </b>(3m)=3 month average&nbsp;&nbsp;|&nbsp;&nbsp;<b>M</b>=x1,000,000, <b>k</b>=x1000&nbsp;&nbsp;|&nbsp;&nbsp;" .
             "More: <b>T</b>=Tables, <b>C</b>=Charts" .
             "&nbsp;&nbsp;|&nbsp;&nbsp;Access: <b>A</b>=Admin, <b>B</b>=Bureaucrat, <b>C</b>=Checkuser, <b>D</b>=Developer, <b>O</b>=Oversight, <b>X</b>=bot, <b>R</b>=Ratio: Admins/New articles per day</small>" ;
   $out_html .= $legend ;
@@ -3953,7 +3962,7 @@ sub GenerateTableEditsPerArticle
                  $out_generated . &GetDate (time) . " " .
                  $out_sqlfiles  . &GetDate ($dumpdate2) . "\n<br>" .
                  (! $wikimedia ? "$out_no_wikimedia<br>" : "") .
-                 $out_version . $version . "\n<br>" .
+               # $out_version . $version . "\n<br>" . # version id not updated in years
                  $out_author . ":" . $out_myname .
                  " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
                  ($wikimedia ? $out_mail . ":" . $out_mymail . "<br>\n" : "") .
@@ -4088,12 +4097,15 @@ sub GenerateComparisonTable
 
   if ($pageviews)
   { 
+    $out_html =~ s/(<\/form>)/<p><a href='http:\/\/stats.wikimedia.org\/EN\/TablesPageViewsSitemap.htm'><b>List all page view reports<\/b><\/a>$1/ ;
+
     if ($pageviews_mobile)
     {
-      if ($squidslog)	  
-      { $content .= " based on squids log" ; } 
-      else
-      { $content .= " based on webstatscollector" ; } 
+    # Stefan Petrea's squid logs based reports no longer needed after switch to webstatscollector 3.0 (SP001)
+    # if ($squidslog)	  
+    # { $content .= " based on squids log" ; } 
+    # else
+    # { $content .= " based on webstatscollector" ; } 
    
       $href_normalized     = 'TablesPageViewsMonthlyMobile.htm' ;
       $href_not_normalized = 'TablesPageViewsMonthlyOriginalMobile.htm' ;
@@ -4142,13 +4154,18 @@ sub GenerateComparisonTable
     $out_html .= "<p><h2>$content</h2><p>" ;
 
     $out_html .= "<b>Page views per language per month</b> (plus links to edit trends)\n" ;
+    
+    if (($region ne '') && ($region ne 'artificial'))
+    {
+      $out_html .= "<p><b>Please be aware this page only presents languages spoken in region "  . ucfirst ($region) . ", but the figures are on <i>worldwide traffic</i> to the respective wikis.</b>\n" ;
+    }
 
     if ($pageviews_combined)
     { $out_html .= " <b>Mobile + Non-mobile traffic</b>" ; }
 
   # $out_html .= "<h3><span id='wait'>!!! <font color='#800000'>" . $out_rendering . "</font> !!!</span></h3>\n" ;
 
-    if ($mode_wp && ($region eq '') && (! $squidslog))
+    if ($mode_wp && ($region eq '')) # && (! $squidslog)) SP001
     { $out_html .= " ($msg_perc_mobile)" ; }
 
     # for linear regression
@@ -4169,43 +4186,50 @@ sub GenerateComparisonTable
 
    #if ($pageviews_mobile)            { $coverage2 = "<font color=#0000FF>Mobile, </font>" ; }
    # elsif ($pageviews_non_mobile)     { $coverage2 = "<font color=#0000FF>Non-Mobile, </font>" ; }
-   #if ($pageviews_combined)          { $coverage2 = "<font color=#0000FF>All Platforms, </font>" ; }
+   #if ($pageviews_combined)          { $coverage2 = "<font color=#0000FF>Both sites, </font>" ; }
     if ($pageviews_mobile)            { $coverage2 = "Mobile" ; }
-    elsif ($pageviews_non_mobile)     { $coverage2 = "Non-Mobile" ; }
-    if ($pageviews_combined)          { $coverage2 = "All Platforms" ; }
+    elsif ($pageviews_non_mobile)     { $coverage2 = "Desktop" ; }  # was Non-Mobile
+    if ($pageviews_combined)          { $coverage2 = "Both sites" ; }
+
+    $coverage1 = 'same report' ; # major simplification 
 
     if ($normalize_days_per_month)
     {
-      $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison. " ;
+      $out_html .= "<p>Monthly totals on this page have been normalized to months of 30 days, for fair comparison. " ;
       $raw_or_not = "Normalized" ;
     }
     else
     {
-      $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days. " ;
+      $out_html .= "<p>Monthly totals on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days. " ;
       $raw_or_not = "Raw Data" ;
     }
 
-    $out_html .= "<p><a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>Site map for all page view reports</a><p>" ;
+  # moved to header section
+  # $out_html .= "<p>View <a href='http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm'>list of all page view reports</a><p>" ;
 
     if ($normalize_days_per_month)
     {
       if ($pageviews_mobile and $mode_wp)
       {
-	if ($squidslog)
-	{
-          $out_html .= "<p>Switch to <a href='../../EN/${href_normalized}'>same report based on webstatscollector</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized_squids'>${coverage2}/Raw Data</a>" ;
-        }
-	else
-	{
-          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_normalized_squids}'>same report based on squid logs</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
-        }
-	$href_current_file =  $href_normalized ;
+      # obsolete SP1001
+      # if ($squidslog)
+      # {
+      #   $out_html .= "<p>Switch to <a href='../../EN/${href_normalized}'>same report based on webstatscollector</a>" ;
+      #	  $out_html .= "<p>Switch to <a href='$href_not_normalized_squids'>$coverage1, raw data</a> (= unnormalized)" ;
+      #  }
+      #	else
+      #	{
+      #   $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_normalized_squids}'>same report based on squid logs</a>" ;
+       	# $out_html .= "<p>Switch to <a href='$href_not_normalized'>$coverage1, raw data</a> (= unnormalized)" ;
+       	  $out_html .= "<p>Switch to <a href='$href_not_normalized'>raw data</a> (= unnormalized)" ;
+      #  }
+      	$href_current_file =  $href_normalized ;
       }
       else
       {
-        $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
+      # $out_html .= "<p>Switch to $coverage1<a href='$href_not_normalized'>${coverage2}/Raw Data</a>" ;
+        # $out_html .= "<p>Switch to <a href='$href_not_normalized'>$coverage1, raw data</a> (= unnormalized)" ;
+        $out_html .= "<p>Switch to <a href='$href_not_normalized'>raw data</a> (= unnormalized)" ;
         $href_current_file =  $href_normalized ;
       }
     }
@@ -4213,51 +4237,63 @@ sub GenerateComparisonTable
     {
       if ($pageviews_mobile and $mode_wp)
       {
-	if ($squidslog)
-        {
-          $out_html .= "<p>Switch to <a href='../../EN/${href_not_normalized}'> same report based on webstatscollector</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized_squids'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
-        }
-	else
-	{
-          $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_not_normalized_squids}'> same report based on squid logs</a>" ;
-	  $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
-        }
+      # obsolete SP1001
+      # if ($squidslog)
+      # {
+      #   $out_html .= "<p>Switch to <a href='../../EN/${href_not_normalized}'> same report based on webstatscollector</a>" ;
+      #	  $out_html .= "<p>Switch to <a href='$href_normalized_squids'>$coverage1, normalized data</a> (for fairer comparison of monthly trends)" ;
+      # }
+      #	else
+      #	{
+      #    $out_html .= "<p>Switch to <a href='../wikimedia/squids/${href_not_normalized_squids}'> same report based on squid logs</a>" ;
+      	# $out_html .= "<p>Switch to <a href='$href_normalized'>$coverage1, normalized data</a> (for fairer comparison of monthly trends)" ;
+      	  $out_html .= "<p>Switch to <a href='$href_normalized'>normalized data</a> (for fairer comparison of monthly trends)" ;
+      #  }
         $href_current_file =  $href_not_normalized ;
       }
       else
       {
-        $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
+      # $out_html .= "<p>Switch to $coverage1<a href='$href_normalized'>${coverage2}/Normalized</a> (for fairer comparison of monthly trends)" ;
+        # $out_html .= "<p>Switch to <a href='$href_normalized'>$coverage1, normalized data</a> (for fairer comparison of monthly trends)" ;
+        $out_html .= "<p>Switch to <a href='$href_normalized'>normalized data</a> (for fairer comparison of monthly trends)" ;
         $href_current_file =  $href_not_normalized ;
       }
     }
 
     if ($mode_wp)
     {
-      if ($squidslog)
-      {
-        $root  = "../../EN/" ;
-        $root2 = "" ;
-      }
-      else
-      {
+    # obsolete SP1001
+    # if ($squidslog)
+    # {
+    #   $root  = "../../EN/" ;
+    #   $root2 = "" ;
+    # }
+    # else
+    # {
 	$root  = "" ;
         $root2 = "../wikimedia/squids/" ;
-      }
+    # }
 
       if ($pageviews_mobile)
-      { $out_html .= "<p>Switch to $coverage1 <a href='${root}TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
-                     "<a href='${root}TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
+    # { $out_html .= "<p>Switch to $coverage1 <a href='${root}TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
+      { $out_html .= "<p>Show traffic to <a href='${root}TablesPageViewsMonthly.htm'>non-mobile ('main') site</a>, mobile site, " . # $raw_or_not</a>, " .
+                     " <a href='${root}TablesPageViewsMonthlyCombined.htm'>both sites</a>" ; }  #, $raw_or_not</a>" ; }
       elsif ($pageviews_non_mobile)
-      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on webstatscollector), " .
-                     " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " . 
-		     blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs), " .
-                     " <a href='TablesPageViewsMonthlyCombined.htm'>All Platforms/$raw_or_not</a>" ; }
+    # { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on webstatscollector), " .
+      { $out_html .= "<p>Show traffic to non-mobile ('main') site, <a href='TablesPageViewsMonthlyMobile.htm'>mobile site</a>, " . # $raw_or_not</a>" . 
+                   # obsolete SP1001
+                   # " (based on webstatscollector), " .
+                   # " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " . 
+		   # blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs), " .
+                     " <a href='TablesPageViewsMonthlyCombined.htm'>both sites</a>" ; } # $raw_or_not</a>" ; }
       else
-      { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
-                     " <a href='TablesPageViewsMonthlyMobile.htm'>Mobile/$raw_or_not</a> (based on webstatscollector), " .
-                     " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " .
-		     blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs)" ;
+    # { $out_html .= "<p>Switch to $coverage1 <a href='TablesPageViewsMonthly.htm'>Non-Mobile/$raw_or_not</a>, " .
+      { $out_html .= "<p>Show traffic to <a href='TablesPageViewsMonthly.htm'>non-mobile ('main') site</a>, " .  # $raw_or_not</a>, " .
+                     " <a href='TablesPageViewsMonthlyMobile.htm'>mobile site</a>, both sites" ; # $raw_or_not</a>" ;  
+                   # obsolete SP1001
+                   # " (based on webstatscollector), " ;
+                   # " <a href='${root2}TablesPageViewsMonthlySquidsMobile.htm'>Mobile/$raw_or_not</a> " .
+		   # blank_text_after ("31/07/2013", "<font color=#008000><b>New</b></font>") . " (based on squid logs)" ;
       }
     }
 
@@ -4265,56 +4301,60 @@ sub GenerateComparisonTable
     {
       $root = $testmode ? ".." : "../.." ;
 
-      if ($squidslog)
-      { $root = "../../EN/$root" ; }
-      else
-      { $root = "../wikimedia/squids/$root" ; }
+    # obsolete SP1001
+    # if ($squidslog)
+    # { $root = "../../EN/$root" ; }
+    # else
+    # { $root = "../wikimedia/squids/$root" ; }
+      $root = "../wikimedia/squids/$root" ; 
 
-      $out_html .= "<p>Switch to Wikipedia " ;
-      if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>All Languages</a>, or Per Region: " ; }
+      $out_html .= "<p>For project Wikipedia show " ;
+      if ($region ne '')           { $out_html .= "<a href='$root/EN/$href_current_file'>all languages</a>, or only those languages used often in " ; }
       if ($region ne 'africa')     { $out_html .= "<a href='$root/EN_Africa/$href_current_file'>Africa</a>, " ; }
       if ($region ne 'asia')       { $out_html .= "<a href='$root/EN_Asia/$href_current_file'>Asia</a>, " ; }
       if ($region ne 'america')    { $out_html .= "<a href='$root/EN_America/$href_current_file'>America's</a>, " ; }
       if ($region ne 'europe')     { $out_html .= "<a href='$root/EN_Europe/$href_current_file'>Europe</a>, " ; }
       if ($region ne 'india')      { $out_html .= "<a href='$root/EN_India/$href_current_file'>India</a>, " ; }
       if ($region ne 'oceania')    { $out_html .= "<a href='$root/EN_Oceania/$href_current_file'>Oceania</a>, " ; }
-      if ($region ne 'artificial') { $out_html .= "<a href='$root/EN_Artificial/$href_current_file'>Artificial Languages</a>" ; }
+      if ($region ne 'artificial') { $out_html .= "or only <a href='$root/EN_Artificial/$href_current_file'>artificial languages</a>" ; }
       $out_html =~ s/, $// ;
-      if ($pageviews_mobile)
-      { $out_html .= " ($coverage2/${raw_or_not}, based on webstatscollector)" ; }
-      else
-      { $out_html .= " ($coverage2/${raw_or_not})" ; }
+    # if ($pageviews_mobile)
+    # { $out_html .= " ($coverage2/${raw_or_not}, based on webstatscollector)" ; }
+    # else
+    # { $out_html .= " ($coverage2/${raw_or_not})" ; }
     }
 
   # if ($pageviews_non_mobile)
   # {
       $root = $mode_wp ? "../" : "../../" ;
 
-      if ($squidslog)
-      { $root = "../../EN/$root" ; }
+    # obsolete SP1001
+    # if ($squidslog)
+    # { $root = "../../EN/$root" ; }
 
       $out_xref = "<a href='${root}EN/TablesPageViewsMonthlyAllProjects.htm'>All projects, </a>\n" ;
-      $mode_wb ? ($out_xref .= "Wikibooks, ")   : ($out_xref .= "<a href='${root}wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
-      $mode_wk ? ($out_xref .= "Wiktionary, ")  : ($out_xref .= "<a href='${root}wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
-      $mode_wn ? ($out_xref .= "Wikinews, ")    : ($out_xref .= "<a href='${root}wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
-      $mode_wo ? ($out_xref .= "Wikivoyage, ")  : ($out_xref .= "<a href='${root}wikivoyage/EN/$href_current_file2'>Wikivoyage, </a>\n") ;
-      $mode_wp ? ($out_xref .= "Wikipedia, ")   : ($out_xref .= "<a href='${root}EN/$href_current_file2'>Wikipedias, </a>\n") ;
-      $mode_wq ? ($out_xref .= "Wikiquote, ")   : ($out_xref .= "<a href='${root}wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
-      $mode_ws ? ($out_xref .= "Wikisource, ")  : ($out_xref .= "<a href='${root}wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
-      $mode_wv ? ($out_xref .= "Wikiversity, ") : ($out_xref .= "<a href='${root}wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
-      $mode_wx ? ($out_xref .= "Wikispecial")   : ($out_xref .= "<a href='${root}wikispecial/EN/$href_current_file2'>Wikispecial</a>\n") ;
-    # $out_html .= "<p>Switch to All Platforms, $coverage2 " . $out_xref ;
+      $mode_wb ? ($out_xref .= "Wikibooks, ")    : ($out_xref .= "<a href='${root}wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n") ;
+      $mode_wk ? ($out_xref .= "Wiktionary, ")   : ($out_xref .= "<a href='${root}wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n") ;
+      $mode_wn ? ($out_xref .= "Wikinews, ")     : ($out_xref .= "<a href='${root}wikinews/EN/$href_current_file2'>Wikinews, </a>\n") ;
+      $mode_wo ? ($out_xref .= "Wikivoyage, ")   : ($out_xref .= "<a href='${root}wikivoyage/EN/$href_current_file2'>Wikivoyage, </a>\n") ;
+      $mode_wp ? ($out_xref .= "Wikipedia, ")    : ($out_xref .= "<a href='${root}EN/$href_current_file2'>Wikipedias, </a>\n") ;
+      $mode_wq ? ($out_xref .= "Wikiquote, ")    : ($out_xref .= "<a href='${root}wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n") ;
+      $mode_ws ? ($out_xref .= "Wikisource, ")   : ($out_xref .= "<a href='${root}wikisource/EN/$href_current_file2'>Wikisources, </a>\n") ;
+      $mode_wv ? ($out_xref .= "Wikiversity, ")  : ($out_xref .= "<a href='${root}wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n") ;
+      $mode_wx ? ($out_xref .= "Other Projects") : ($out_xref .= "<a href='${root}wikispecial/EN/$href_current_file2'>Other Projects</a>\n") ;
+    # $out_html .= "<p>Switch to Both sites, $coverage2 " . $out_xref ;
       $out_html .= "<p>Switch to " . $out_xref ;
   # }
 
 
-    if ($squidslog)
-    {
-      $out_html .= "<p><a href='http://www.mediawiki.org/wiki/User:Spetrea/New_mobile_pageviews_documentation'>Documentation</a> " .
-                   "(contains details on how to run this report, patches welcome, " . 
-		   "source code is <a href='https://github.com/wikimedia/analytics-wikistats/tree/localdev/pageviews_reports/'>here</a> " . 
-		   "and <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>here</a>)<p>" ;
-    }
+  # obsolete SP1001
+  # if ($squidslog)
+  # {
+  #   $out_html .= "<p><a href='http://www.mediawiki.org/wiki/User:Spetrea/New_mobile_pageviews_documentation'>Documentation</a> " .
+  #                "(contains details on how to run this report, patches welcome, " . 
+  #	   "source code is <a href='https://github.com/wikimedia/analytics-wikistats/tree/localdev/pageviews_reports/'>here</a> " . 
+  #		   "and <a href='https://github.com/wikimedia/analytics-wikistats/tree/master/dumps'>here</a>)<p>" ;
+  #  }
 
     $out_html .=  blank_text_after ("31/01/2014", "<p><font color=#008000><b>Dec 5, 2013: Major overreporting in recent months has been fixed today.</b><br>" . 
                  "A software change around Aug 2013 caused internal housekeeping messages to be counted as page views, leading to a monthly growing overcount" . 
@@ -4323,20 +4363,37 @@ sub GenerateComparisonTable
 
     if (! $mode_wo)  # wikivoyage did not yet exist when following data losses occurred 
     { 
-      if (! $squidslog)
-      {      
-        $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
-        $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). " . 
-                     "Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
-        $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In August, September and October 2011 counts were again underreported. " . 
-	             "These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%</font>") ;
-      }		     
+    # obsolete SP1001
+    # if (! $squidslog)
+    # {      
+        $out_html .= "<p><font color=#A00000>Known errors:<br>" ; 
+        $out_html .= "Nov 2009 - Mar 2010: counts this period are 10% to 20% too low, due to message loss (server overload).<br>" ;
+        $out_html .= "Dec 2012 - Jan 2013: counts for last two weeks of Dec and first week of Jan were broken (much bogus traffic). " . 
+                     "Data for these weeks have been extrapolated from unaffected days.<br> " ;
+        if ($mode_wx)
+        { 
+          $out_html .= "Aug 2012 - Apr 2015: counts for meta included much bogus traffic (Special:RecordImpression). Data for these months are now estimates. <br>" ;  
+          $out_html .= "Mobile counts for projects on this page 'Other Projects' are not yet included. <br>" ; 
+        } 
 
-      $out_html .= "<p><b><font color=#FF0000>Warning: These counts include bot/crawler requests.</b><br>" . 
-                   "Actually 'page requests' for now would be more a accurate report title than 'page views'.</font><br>" . 
- 	           "Filtering these bot requests is planned, but awaits a solution that doesn't overload our servers.<br>" . 
-	  	   "Overall about <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>15% of pages served</a> " . 
-	  	   "on all Wikimedia wikis combined are due to bots requests. On less popular wikis the share of bot requests will be higher.</font>" ;
+        if ($mode_wb || $mode_wn || $mode_wq || $mode_ws || $mode_wv)
+        { 
+          $out_html .= "Nov 2013 - Apr 2015: counts for English wikibooks/news/quotes/sources/versity included much bogus traffic (HideBanners). Data for these months have been copied from last valid month, Oct 2013. <br>" ;  
+        } 
+        
+      # if ($mode_wx)
+      # { $out_html .= "May 2015 - Apr 2015:  bla. <br>" ; } 
+
+        $out_html .= blank_text_after ("31/03/2012", "In August, September and October 2011 counts were again underreported. " . 
+	             "These have been be corrected. Correction for Aug +6.1%, Sep +18.8%, Oct +6.7%") ;
+        $out_html .= "</font>" ; 
+    # obsolete SP1001
+    # }		     
+
+#     $out_html .= "<p><b><br>" . 
+#	           "Filtering these bot requests is planned, but awaits a solution that doesn't overload our servers.<br>" . 
+#  		   "Overall about <a href='http://stats.wikimedia.org/wikimedia/squids/SquidReportCrawlers.htm'>15% of pages served</a> " . 
+#  	  	   "on all Wikimedia wikis combined are due to bots requests. On less popular wikis the share of bot requests will be higher.</font>" ;
 
       if ($pageviews_mobile)
       { $out_html .= blank_text_after ("31/03/2012", "<br><font color=#A00000>In October and November 2011 precisely half of traffic to mobile sites " . 
@@ -4344,11 +4401,12 @@ sub GenerateComparisonTable
       $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>For December 2011 88 hours of data were missing between 23th and 26th. " . 
 	           "Counts for December have been recalculated to compensate for this gap. (There is a minor adjustment for November as well)</font>") ;
 
-      if (! $squidslog)	   
-      {
+    # if (! $squidslog)
+    # {      
         $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . 
-                     "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
-      }		     
+                     "<b>Data archives</b>:<br><a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>yearly archives of hourly <i>projectcounts</i> files, using old page views definition (wc 1.0)</a> and<br> <a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectviews/'>yearly archives of hourly <i>projectviews</i> files, using new page views definition (wc 3.0), plus csv output (using new definition where available) </a>" ;
+    # obsolete SP1001
+    # }		     
 
                  # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
                  # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low.<p>" .
@@ -4357,6 +4415,8 @@ sub GenerateComparisonTable
   }
 
   $out_html .= "<table border=1 cellspacing=0 id='table1' class=b style='margin-top:5px; border:solid 1px #000000' summary='Header comparison table'>\n" ;
+      
+  $out_html .= $out_html_new_pageview_def ;
 
   if (! $mode_wx)
   { &GenerateComparisonTableHeadersCascade ($f, $true, 9999) ; }
@@ -4369,7 +4429,7 @@ sub GenerateComparisonTable
   if ($pageviews)
   {
     &GenerateComparisonTableEditPlots ;
-    &GenerateComparisonTableYearlyGrowth (0) ;
+  # &GenerateComparisonTableYearlyGrowth (0) ;
     &GenerateComparisonTableViewRates (0) ;
     &GenerateComparisonTableSparklinesWithBars ;
   }
@@ -4618,6 +4678,7 @@ sub GenerateComparisonTable
 
 sub GenerateComparisonTablePageviewsAllProjects
 {
+  &LogT ("GenerateComparisonTablePageviewsAllProjects\n") ;
   my ($normalized) = @_ ;
 
   return if ! $pageviews_combined ;
@@ -4628,8 +4689,6 @@ sub GenerateComparisonTablePageviewsAllProjects
   my $javascript  = $true ;
 
   undef %views_tot_monthly ;
-
-  &LogT ("GenerateComparisonTablePageviewsAllProjects\n") ;
 
   $legend = "<table border='0'><tr><td valign=bottom><table border=1 cellspacing=0 id='legend' class=b style='margin-top:5px; border:solid 1px #000000'><tr>" .
              &TdBgColor ('I', '-50%') .
@@ -4691,14 +4750,16 @@ sub GenerateComparisonTablePageviewsAllProjects
 
   if ($normalized)
   {
-    $out_html .= "<p>View counts on this page have been normalized to months of 30 days, for fair comparison.." .
-                 "<p>Switch to All Projects <a href='$href_not_normalized'> All Platforms/Raw Data.</a>" ;
+    $out_html .= "<p>Monthly counts on this page have been normalized to months of 30 days, for fair comparison.." .
+               # "<p>Switch to All Projects <a href='$href_not_normalized'> All Platforms/Raw Data.</a>" ;
+                 "<p>Switch to <a href='$href_not_normalized'> All Project, Both sites, Raw Data.</a>" ;
     $coverage3 = "Normalized, " ;
   }
   else
   {
-    $out_html .= "<p>View counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days..<p>" .
-                 "<p>Switch to All Projects <a href='$href_normalized'>All Platforms/Normalized</a>." ;
+    $out_html .= "<p>Monthly counts on this page have <font color=#FF0000><b>not</b></font> been normalized to months of 30 days..<p>" .
+               # "<p>Switch to All Projects <a href='$href_normalized'>All Platforms/Normalized</a>." ;
+                 "<p>Switch to <a href='$href_normalized'>All Projects, Both Sites, Normalized</a>." ;
     $coverage3 = "Raw Data, " ;
   }
 
@@ -4707,7 +4768,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $href_current_file2 = $href_current_file ;
   $href_current_file2 =~ s/Combined// ;
 
-  $out_html .= "<p>Switch to All Platforms, " ;
+  $out_html .= "<p>Switch to All Sites, " ;
   $out_html .= "<a href='$root/wikibooks/EN/$href_current_file2'>Wikibooks, </a>\n" ;
   $out_html .= "<a href='$root/wiktionary/EN/$href_current_file2'>Wiktionaries, </a>\n" ;
   $out_html .= "<a href='$root/wikinews/EN/$href_current_file2'>Wikinews, </a>\n" ;
@@ -4715,7 +4776,7 @@ sub GenerateComparisonTablePageviewsAllProjects
   $out_html .= "<a href='$root/wikiquote/EN/$href_current_file2'>Wikiquotes, </a>\n" ;
   $out_html .= "<a href='$root/wikisource/EN/$href_current_file2'>Wikisources, </a>\n" ;
   $out_html .= "<a href='$root/wikiversity/EN/$href_current_file2'>Wikiversities, </a>\n" ;
-  $out_html .= "<a href='$root/wikispecial/EN/$href_current_file2'>Wikispecial</a>\n" ;
+  $out_html .= "<a href='$root/wikispecial/EN/$href_current_file2'>Other Projects</a>\n" ;
 
   $out_html .= "<p><font color=#A00000>Warning: page view counts from Nov 2009 till March 2010 are 10% to 20% too low due to server overload.</font> " ;
   $out_html .= "<br><font color=#A00000>Page view counts for last two weeks of Dec 2012 and first week of Jan 2013 were broken (much bogus traffic). Data for these weeks have been omitted and monthly figures have been extrapolated from data for unaffected days.</font> " ;
@@ -4724,7 +4785,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   if (! $normalized)
   { $out_html .= blank_text_after ("30/06/2012", "<br><font color=#A00000>Till Jan 2012 totals for all projects (right-most column) were about twice too high, in this report only. Has been fixed.</font>") ; }
 
-  $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") . "<a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>Archived input files</a>" ;
+  $out_html .= "<p>" . blank_text_after ("1/03/2012", "<font color=#008000><b>NEW</b></font>: ") .
+                     "<b>Data archives</b>:<br><a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectcounts/'>yearly archives of hourly <i>projectcounts</i> files, using old page views definition (wc 1.0)</a> and<br> <a href='http://dumps.wikimedia.org/other/pagecounts-ez/projectviews/'>yearly archives of hourly <i>projectviews</i> files, using new page views definition (wc 3.0), plus csv output (using new definition where available) </a>" ;
 
               # "In July 2010 is was established that the server that collects and aggregates log data for all squids could not keep up with all incoming messages, and hence underreported page views. " .
               # "This issue has been resolved. For April - July 2010 the amount of underreporting could be inferred from still available log files and counts for these months have been corrected (read <a href='http://infodisiac.com/blog/wp-content/uploads/2010/07/assessment.pdf'>more</a>). For earlier months, possibly from Nov 2009 till March 2010 counts in the table below are too low." .
@@ -4738,10 +4800,12 @@ sub GenerateComparisonTablePageviewsAllProjects
   # add data for non-mobile projects
   foreach $code (qw (wb wk wn wp wq ws wv wo wx)) # in case of wx (wikispecial), file contains only results for commons
   {
-    $path_in_views = $path_in ;
+    $path_in_views = $path_pv ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
 
-    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+  # $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+    $file_views_html = "$path_in_views/projectviews_per_month_all_projects_html.csv" ;
+    &LogT ("Read $file_views_html\n") ;
     if (! -e $file_views_html)
     { print "$file_views_html not found\n" ; next ; }
 
@@ -4769,14 +4833,15 @@ sub GenerateComparisonTablePageviewsAllProjects
       $html_pageviews_all_projects {"$code,$topic,$id"} = $html ;
     }
   }
-
-  # add data for mobile wikipedia
+  
+# add data for mobile wikipedia
   foreach $code (qw (wp))
   {
-    $path_in_views = $path_in ;
+    $path_in_views = $path_pv ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
 
-    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+  # $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+    $file_views_html = "$path_in_views/projectviews_per_month_all_projects_html.csv" ;
     if (! -e $file_views_html)
     { print "$file_views_html not found\n" ; next ; }
 
@@ -4807,10 +4872,11 @@ sub GenerateComparisonTablePageviewsAllProjects
   # add data for all platforms for wikipedia
   foreach $code (qw (wp))
   {
-    $path_in_views = $path_in ;
+    $path_in_views = $path_pv ;
     $path_in_views =~ s/csv_$mode/csv_$code/ ;
 
-    $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+  # $file_views_html = "$path_in_views/PageViewsPerMonthHtmlAllProjects.csv" ;
+    $file_views_html = "$path_in_views/projectviews_per_month_all_projects_html.csv" ;
     if (! -e $file_views_html)
     { print "$file_views_html not found\n" ; next ; }
 
@@ -4842,6 +4908,8 @@ sub GenerateComparisonTablePageviewsAllProjects
   # print "\$month_lo_pageviews $month_lo_pageviews\n" ;
 
   $out_html .= "<p>\n\n<table border=1>\n" ;
+  $out_html .= $out_html_new_pageview_def ;
+
 
   my %project_names ;
   $project_names {'wb'}   = 'wikibooks' ;
@@ -4885,22 +4953,29 @@ sub GenerateComparisonTablePageviewsAllProjects
   $line_html .= &th("&nbsp;Total&nbsp;") ;
   $out_html .= &tr ($line_html) ;
 
-  $line_html = &the ;
-# foreach $code (qw (wb wk wn wo wp wp.m wp.c wq ws wv wx))
+  $line_html = &tdrb ("<small>See also ...</small>") ;
+  my $folder ;
   foreach $code (qw (wb wk wn wp wp.m wp.c wq ws wv wo wx))
   {
-    if ($code eq 'wb')   { $link = "$root/wikibooks/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wk')   { $link = "$root/wiktionary/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wn')   { $link = "$root/wikinews/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wo')   { $link = "$root/wikivoyage/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wp')   { $link = "$root/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wp.m') { $link = "$root/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wp.c') { $link = "$root/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wq')   { $link = "$root/wikiquote/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'ws')   { $link = "$root/wikisource/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wv')   { $link = "$root/wikiversity/EN/PlotEditsZZ.png" ; }
-    if ($code eq 'wx')   { $link = "$root/wikispecial/EN/PlotEditsZZ.png" ; }
-    $line_html .= &tdcb ("<a href='$link'>Edit Trends</a>") ;
+    if ($code eq 'wb')   { $folder = "$root/wikibooks/EN" ; }
+    if ($code eq 'wk')   { $folder = "$root/wiktionary/EN" ; }
+    if ($code eq 'wn')   { $folder = "$root/wikinews/EN" ; }
+    if ($code eq 'wo')   { $folder = "$root/wikivoyage/EN" ; }
+    if ($code eq 'wp')   { $folder = "$root/EN" ; }
+    if ($code eq 'wp.m') { $folder = "$root/EN" ; }
+    if ($code eq 'wp.c') { $folder = "$root/EN" ; }
+    if ($code eq 'wq')   { $folder = "$root/wikiquote/EN" ; }
+    if ($code eq 'ws')   { $folder = "$root/wikisource/EN" ; }
+    if ($code eq 'wv')   { $folder = "$root/wikiversity/EN" ; }
+    if ($code eq 'wx')   { $folder = "$root/wikispecial/EN" ; }
+  # $line_html .= &tdcb ("<a href='$link'>Edit Trends</a>") ;
+
+    my $link_edits   = "$folder/PlotEditsSmallZZ.png" ;
+    my $link_views   = "$folder/PlotPageviewsZZ.png" ;
+    my $link_summary = "$folder/SummaryZZ.htm" ;
+    $line_html .= &tdcb ("<small><a href='$link_edits'><font color='#000080'>Edit Trends</font></a></small><br>" .
+                         "<small><a href='$link_views'><font color='#000080'>View Trends</font></a></small><br>" .
+                         "<small><a href='$link_summary'><font color='#000080'>Summary</font></a></small>") ;
   }
   $line_html .= &tdcb ("") ;
   $out_html .= &tr ($line_html) ;
@@ -4972,6 +5047,13 @@ sub GenerateComparisonTablePageviewsAllProjects
   # update javascript macro's with percentage of overall total + overall total as extra column
   for ($m = $month_hi_pageviews ; $m >= $month_lo_pageviews ; $m--)
   {
+    if ($pageviews && ($m == 184)) # 184'th month after Jan 2000 = April 2015, so put <hr> above April 2015
+    {
+      # mark cut over to new page view definitions
+      $out_html .= &tr ("<td class=lb><small><small><a href=''><font color=blue>new definition</font></a></small></small></td><td class=lb colspan=334 bgcolor=#AAAAFF><small><small><hr style=\"width:100%; height:12px; color:#00f; background-color: #AAAAFF;\"></small></small></td>") ;
+    #  $out_html .= &tr ("<td class=lb colspan=334 ><img src='../red.gif' width='3' height='3' alt=''></td>") ;
+    }
+
     $line_html = $html_pageviews_all_projects {"wp,monthly,header_$m"} ;
     next if $line_html eq '' ;
 
@@ -5740,6 +5822,14 @@ sub GenerateComparisonTableMonthlyData
 
   for (my $m = $dumpmonth_ord ; $m >= $m0 ; $m--)
   {
+
+    if ($pageviews && ($m == 184)) # 184'th month after Jan 2000 = April 2015, so put <hr> above April 2015
+    {
+      # mark cut over to new page view definitions
+      $out_html .= &tr ("<td class=lb><small><small><a href=''><font color=blue>new definition</font></a></small></small></td><td class=lb colspan=334 bgcolor=#AAAAFF><small><small><hr style=\"width:100%; height:12px; color:#00f; background-color: #AAAAFF;\"></small></small></td>") ;
+    #  $out_html .= &tr ("<td class=lb colspan=334 ><img src='../red.gif' width='3' height='3' alt=''></td>") ;
+    }
+
     $line_html = '' ;
     if (($m % 12 == 0) && ($m < $dumpmonth_ord) && ($m > $m0))
     {
@@ -6161,7 +6251,7 @@ sub GenerateComparisonTableSparklinesWithBars
   $javascript  = $true ;
 
   if ($out_trend eq "")
-  { $out_trend = 'Top month<p>&nbsp;<p>Trend last<br>24 months' ; }
+  { $out_trend = 'new def <img src="../blue.gif" width=10 height=2><br>old def <img src="../grey.gif" width=10 height=2><br>recent max <img src="../black.gif" width=10 height=2><p>&nbsp;<br>Trend last<br>24 months' ; }
 
   &StoreHtmlPageviewsAllProjects ('zz',"sparklines,header", &td ($out_trend)) ;
 
@@ -6207,7 +6297,9 @@ sub GenerateComparisonTableSparklinesWithBars
       if ($views_hi > 0)
       { $height =  sprintf ("%.0f", (($views / $views_hi) * 50)) + 1 ; }
 #     if ($views eq "") { last ; }
-      if ($views == $views_hi)
+      if ($m == 185) # 185'th month after Jan 2000 = May 2015, so put blue bar on May 201 2055 
+      { $img = "blue.gif" ; }
+      elsif ($views == $views_hi)
       { $img = "black.gif" ; }
       else
       { $img = "grey.gif" ; }
@@ -6220,8 +6312,10 @@ sub GenerateComparisonTableSparklinesWithBars
       # { $value2 = "b1();b2b(3,$height);" . $value2 ; }
         if ($views == $views_hi)
         { $value2 = "b1(1);b2a(2,$height);" . $value2 ; }
-        else
+        elsif ($m <= 185) # 185'th month after Jan 2000 = May 2015, so put blueish bar from May 2015 onwards 
         { $value2 = "b1(1);b2b(2,$height);" . $value2 ; }
+        else        
+        { $value2 = "b1(1);b2c(2,$height);" . $value2 ; }
       }
       else
       {
@@ -6639,7 +6733,7 @@ sub GenerateTablePageviewsPerRange
 
   if ($region eq '')
   {
-    $out_html .= "<p>&nbsp;<hr>&nbsp;<h3>Distribution of page views</h3>" ;
+    $out_html .= "<p>&nbsp;<hr>&nbsp;<h3>Distribution of page views</h3>" ; 
 
     $out_html .= "<table border=0><tr>" ;
     $out_html .= &td ("<span class=d1>x%</span><span class=d2>y%</span>") ;
@@ -6757,7 +6851,7 @@ sub GenerateComparisonTableEditPlots
   $m = $dumpmonth_ord ;
   if ($dumpmonth_incomplete)
   { $m -- ; }
-  $line_html = &tdrb ("") ;
+  $line_html = &tdrb ("<small>See also ...</small>") ;
 
   foreach my $wp (@languages)
   {
@@ -6767,8 +6861,12 @@ sub GenerateComparisonTableEditPlots
     { $line_html .= &tdcb ("&nbsp;") ; }
     else
     {
-      my $link = "../EN/EditsReverts" . uc ($wp) . ".htm" ;
-      $line_html .= &tdcb ("<small><a href='$link'><font color='#000080'>Edit Trends</font></a></small>") ;
+      my $link_edits   = "../EN/PlotEditsSmall" . uc ($wp) . ".png" ;
+      my $link_views   = "../EN/PlotPageviews" . uc ($wp) . ".png" ;
+      my $link_summary = "../EN/Summary" . uc ($wp) . ".htm" ;
+      $line_html .= &tdcb ("<small><a href='$link_edits'><font color='#000080'>Edit Trends</font></a></small><br>" .
+                           "<small><a href='$link_views'><font color='#000080'>View Trends</font></a></small><br>" .
+                           "<small><a href='$link_summary'><font color='#000080'>Summary</font></a></small>") ;
     }
   }
 
