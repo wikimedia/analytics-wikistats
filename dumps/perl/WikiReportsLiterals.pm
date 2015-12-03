@@ -246,6 +246,7 @@ sub SetLanguageInfo
   ltg=>"http://ltg.wikipedia.org Latgalian [0.15,EU]",
   lv=>"http://lv.wikipedia.org Latvian [1.6,EU]",
   mad=>"http://mad.wikipedia.org Madurese [14]",
+  mai=>"http://mai.wikipedia.org Maithili [30,AS]",
   mak=>"http://mak.wikipedia.org Makasar [2]",
   map_bms=>"http://map-bms.wikipedia.org Banyumasan [13.5,AS]",
   "map-bms"=>"http://map-bms.wikipedia.org Banyumasan",
@@ -520,7 +521,7 @@ sub SetLiterals
   $out_meta_utf8     = "<meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\">\n" ;
   $out_meta_robots   = "<meta name=\"robots\" content=\"index,follow\">\n" ;
 
-  $out_scriptfile    = "<script language=\"javascript\" type=\"text/javascript\" src=\"..\/WikipediaStatistics14.js\"></script>\n" ;
+  $out_scriptfile    = "<script language=\"javascript\" type=\"text/javascript\" src=\"..\/WikipediaStatistics15.js\"></script>\n" ;
 
   $out_html_language = $language ; # default only, override when needed
   $out_web_address   = "http://" . $wp . ".wikipedia.org" ; # default only
