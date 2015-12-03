@@ -12,7 +12,7 @@ $index_hide = $false ;
 
 sub ReadEditHistory
 {
-  return if $language ne "en" ;
+# return if $language ne "en" ; # test 
 
   &LogT ("\nReadEditHistory\n") ;
   my @nsid ;
@@ -98,27 +98,27 @@ sub ReadEditHistory
 
 sub GenerateEditHistoryReports
 {
-  return if $language ne "en" ;
+  &LogT ("\nGenerateEditHistoryReports $language\n") ;
 
-  &LogT ("\nGenerateEditHistoryReports\n") ;
+  return if $language ne "en" ;
 
   $mb_plots_generated_all = 0 ;
   $plots_all = 0 ;
 
-#  if ($testmode)
-#  {
-#    &WriteEditsPerUserType ('fy') ;
-#    &GeneratePlotEdits     ('fy');
-#    &GeneratePlotReverts   ('fy') ;
-#    &GeneratePlotAnons     ('fy') ; # disabled
-#    &GenerateEditHistoryReport ($plots_all, 4, 'Table') ;
-#    return ;
-#  }
+  if ($testmode)
+  {
+    &WriteEditsPerUserType ('es') ;
+    &GeneratePlotEdits     ('es');
+    &GeneratePlotReverts   ('es') ;
+    &GeneratePlotAnons     ('es') ; # disabled
+    &GenerateEditHistoryReport ($plots_all, 4, 'Table') ;
+    return ;
+  }
 
   &WriteEditsPerUserType ('zz') ;
   &GeneratePlotEdits ('zz') ;
 
-  foreach $lang (sort {$reverts_read {$b} <=> $reverts_read {$a}} keys %reverts_read)
+  foreach my $lang (sort {$reverts_read {$b} <=> $reverts_read {$a}} keys %reverts_read)
   {
     $calls_generate_edit_history_reports++ ;
     &Log ("\nGenerateEditHistoryReports $lang ($calls_generate_edit_history_reports)\n") ;
@@ -477,8 +477,6 @@ sub GeneratePlotEdits
 {
   my $lang = shift ;
 
-  return if $lang =~ /^zzz?$/ ;
-
 #  if ($testmode)
 #  {
 #    my $file_reverts = $path_in . "/RevertedEdits" . uc ($lang) . ".csv" ;
@@ -487,24 +485,25 @@ sub GeneratePlotEdits
 
   &LogT ("GeneratePlotEdits $lang\n") ;
 
-  if (! $reverts_read {$lang})
+  if (( $lang !~ /^zz+$/) && (! $reverts_read {$lang}))
   { &LogT ("No reverts read. Skip plot.\n") ; return ; }
 
-  my $file_csv_input    = $file_edits_per_usertype ;
-  my $path_png_raw      = "$path_out_plots\/PlotEdits" . uc($lang) . ".png" ;
-  my $path_png_trends   = "$path_out_plots\/PlotEditsTrends" . uc($lang) . ".png" ;
-  my $path_svg          = "$path_out_plots\/PlotEdits" . uc($lang) . ".svg" ;
-  my $out_script_plot   = $out_script_plot_edits ;
-  my $out_language_name = $out_languages {$lang} ;
-  my $editsmax          = $editsmax {$lang} ;
-  my $maxmonth          = $editsmaxmonth {$lang} ;
-  my $code              = uc ($lang) ;
+  my $file_csv_input     = $file_edits_per_usertype ;
+  my $path_png_raw       = "$path_out_plots\/PlotEdits" . uc($lang) . ".png" ;
+  my $path_png_raw_small = "$path_out_plots\/PlotEditsSmall" . uc($lang) . ".png" ;
+  my $path_png_trends    = "$path_out_plots\/PlotEditsTrends" . uc($lang) . ".png" ;
+  my $path_svg           = "$path_out_plots\/PlotEdits" . uc($lang) . ".svg" ;
+  my $out_script_plot    = $out_script_plot_edits ;
+  my $out_language_name  = $out_languages {$lang} ;
+  my $editsmax           = $editsmax {$lang} ;
+  my $maxmonth           = $editsmaxmonth {$lang} ;
+  my $code               = uc ($lang) ;
 
-  $file_csv_input       =~ s/\\/\//g ;
-  $path_png_raw         =~ s/\\/\//g ;
-  $path_png_trends      =~ s/\\/\//g ;
-  $path_svg             =~ s/\\/\//g ;
-  $out_language_name    =~ s/&nbsp;/ /g ;
+  $file_csv_input        =~ s/\\/\//g ;
+  $path_png_raw          =~ s/\\/\//g ;
+  $path_png_trends       =~ s/\\/\//g ;
+  $path_svg              =~ s/\\/\//g ;
+  $out_language_name     =~ s/&nbsp;/ /g ;
 
   # calc plot parameters
 
@@ -524,12 +523,17 @@ sub GeneratePlotEdits
   my $percA = sprintf ("%.0f", 100 * $editstotA / $editstotG) ;
   my $percB = sprintf ("%.0f", 100 * $editstotB / $editstotG) ;
   my $percX = sprintf ("%.0f", 100 * $revertstotX / ($editstotG - $revertstotX)) if $editstotG - $revertstotX > 0  ;
+  
+  if ($lang !~ /^zz+$/)
+  { &LogT ("GeneratePlotEdits trace: $lang, revertstotX $revertstotX, editstotG $editstotG, editstotG $editstotG\n") ; }  
 
   $editsmax =~ s/(\d)(\d\d\d)$/$1,$2/ ;
   $editsmax =~ s/(\d)(\d\d\d),/$1,$2,/ ;
   $editsmax =~ s/(\d)(\d\d\d),/$1,$2,/ ;
   $editsmax =~ s/(\d)(\d\d\d),/$1,$2,/ ;
 
+  if (($lang =~ /^zz+$/) && ($revertstotX == 0)) # no revert data for all wikis combined 
+  { $out_script_plot =~ s/"TOT_X PERC_X ",// ; }
 
   # edit plot parameters
 
@@ -559,11 +563,16 @@ sub GeneratePlotEdits
   $out_script_plot =~ s/MAX_MONTH/$maxmonth/g ;
   $out_script_plot =~ s/EDITS/$editsmax/g ;
 
-  $out_script_plot =~ s/TOT_G/total $editstotG/g ;
-  $out_script_plot =~ s/TOT_R/total $editstotR/g ;
-  $out_script_plot =~ s/TOT_A/total $editstotA/g ;
-  $out_script_plot =~ s/TOT_B/total $editstotB/g ;
-  $out_script_plot =~ s/TOT_X/total $revertstotX/g ;
+# $out_script_plot =~ s/TOT_G/total $editstotG/g ;
+# $out_script_plot =~ s/TOT_R/total $editstotR/g ;
+# $out_script_plot =~ s/TOT_A/total $editstotA/g ;
+# $out_script_plot =~ s/TOT_B/total $editstotB/g ;
+# $out_script_plot =~ s/TOT_X/total $revertstotX/g ;
+  $out_script_plot =~ s/TOT_G/$editstotG/g ;
+  $out_script_plot =~ s/TOT_R/$editstotR/g ;
+  $out_script_plot =~ s/TOT_A/$editstotA/g ;
+  $out_script_plot =~ s/TOT_B/$editstotB/g ;
+  $out_script_plot =~ s/TOT_X/$revertstotX/g ;
 
   $out_script_plot =~ s/PERC_G/(100%)/g ;
   $out_script_plot =~ s/PERC_R/($percR%)/g ;
@@ -574,6 +583,19 @@ sub GeneratePlotEdits
   $out_script_plot =~ s/LANGUAGE/$out_language_name/g ;
 
   my $file_script_R = $path_in . "R-PlotScriptEdits.R-in" ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+
+  # also generate a smaller png (half height) for inclusion in summary report
+  my $file_script_R = $path_in . "R-PlotScriptEditsSmall.R-in" ;
+  $out_script_plot =~ s/480/240/g ;
+  $out_script_plot =~ s/$path_png_raw/$path_png_raw_small/ ;
+  $out_script_plot =~ s/, " "//g ; # compact legend
+  $out_script_plot =~ s/, "#E0E0E1"//g ; # compact legend: no empty lines between legend segments 
+# $out_script_plot =~ s/title\(.*?.\)/title(" Edits on $out_language_name $out_publication",  cex.main=1.2,   font.main=3, col.main= "black")/g ;
+  $out_script_plot =~ s/(title.*?)\)/$1,  cex.main=1.2,   font.main=3, col.main= "black")/g ;
+  $out_script_plot =~ s/format="\%b \%y "/format="%Y "/g ;
+  $out_script_plot =~ s/inset=0.05/inset=0.01/g ; # position legend more left
+
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
 }
 
@@ -796,6 +818,8 @@ sub WriteEditsPerUserType
 {
   my $lang = shift  ;
 
+# return if $lang !~ /^zz+$/ and $lang ne 'en' ; # for quick tests 
+ 
   if ($testmode)
   {
     my $file_reverts = $path_in . "/RevertedEdits" . uc ($lang) . ".csv" ;
@@ -839,7 +863,7 @@ sub WriteEditsPerUserType
   for $month (sort keys %months)
   {
     $month2 = substr ($month,0,4) . substr ($month,5,2) ;
-    last if $month2 ge $month_reverts_hi {$lang} ;
+    last if $lang !~ /^zz+$/ and $month2 ge $month_reverts_hi {$lang} ;
 
     if ($editstot {$month}{$lang} >  0)
     { $edits_found = $true ; }
