@@ -31,10 +31,11 @@ threshold=20
 depth=10
 
 # ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Agriculture'                      2015-06    $threshold     'wp-en' 20
+ ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Images_from_Wiki_Loves_Africa_2015'      2015-10    $threshold     'wm-commons' 2
+exit
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Featured_articles'      2015-06    $threshold     'wp-en' 5
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Good_articles'          2015-06    $threshold     'wp-en' 5
 
-exit
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Biography'            2015-06    $threshold     'wp-en' 10
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Biography/Sports_and_games' 2015-06    $threshold     'wp-en' 10
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_United_States'        2015-06    $threshold     'wp-en' 10
