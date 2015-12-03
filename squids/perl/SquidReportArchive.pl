@@ -451,8 +451,8 @@ sub ReportCountries
   $file_html_per_country_overview       = "SquidReport${selection}PerCountryOverview$quarter_only2.htm" ;
   $file_html_per_country_trends         = "SquidReport${selection}PerCountryTrends.htm" ;
   $file_html_per_language_breakdown     = "SquidReport${selection}PerLanguageBreakdown.htm" ;
-  $file_csv_per_country_overview        = "SquidReport${selection}PerCountryOverview.csv" ;
-  $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;
+  $file_csv_per_country_overview        = "SquidReport${selection}PerCountryOverview.csv" ; # output file
+  $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;  # output file 
 
   $path_csv_squid_counts_monthly  = "$path_csv/$file_csv_squid_counts_monthly" ;
   if (! -e $path_csv_squid_counts_monthly)  { abort ("Input file $path_csv_squid_counts_monthly not found!") ; }
@@ -2086,7 +2086,7 @@ sub ReadInputCountriesDaily
     $year    = substr ($yyyymmdd,0,4) ;
     $month   = substr ($yyyymmdd,5,2) ;
     $day     = substr ($yyyymmdd,8,2) ;
-
+# qqqq
     $time = timegm(0,0,0,$day,$month-1,$year-1900) ;
   # $days_since_2000 = int (($time - $time_2000_01_01) / $sec_per_day) ;
     $days_this_year  = (gmtime $time) [7] ;
