@@ -14,7 +14,7 @@ perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 bash=$perl/../bash
 logs=$dammit/logs 
 
-input=/mnt/data/xmldatadumps/public/other/pagecounts-raw
+input=/mnt/data/xmldatadumps/public/other/pageviews # webstatscollector 3.0 was pagecounts-raw for webstatscollector 1.0
 output=/a/dammit.lt/pagecounts/merged
 temp=/a/dammit.lt/pagecounts/temp
 dataset1001=dataset1001.wikimedia.org::pagecounts-ez/merged/
@@ -27,7 +27,7 @@ logfile_summary=$logs/_summary_compact_daily_jobs.log
 date | tee -a $logfile | cat
 echo_ "rsync -arv --include=*.bz2 $output/* $dataset1001"
 # -a archive mode, -r recursive, -v verbose, -O do not try to upd dir timestamp
-rsync -arv --include=*.bz2 $output/* $dataset1001 | tee -a $logfile | cat
+#rsync -arv --include=*.bz2 $output/* $dataset1001 | tee -a $logfile | cat
 
 cd $perl
 
@@ -43,7 +43,7 @@ flock -n -e $bash/dammit_compact_daily.semaphore -c "$cmd" || { echo "Script is 
 # continue nonetheless, to get new daily files rsynced
 
 echo_ "Publish new files\n"
-rsync -arv -ipv4 --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
+#rsync -arv -ipv4 --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
 
 
 #grep ">>" $logs/*.log

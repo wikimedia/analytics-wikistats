@@ -80,6 +80,8 @@
   $fs_open    = 'O' ;
   $fs_closed  = 'C' ;
 
+  $pageinput = 'pageviews' ; # input file changed from pagecounts-... to pageviews-... in webstatscollector 3.0
+
   $test_max_lines_output = 0 ;    # if $test_max_lines_output > 0 break after $test_max_lines_output lines output
 # $test_max_language     = 'at' ; # if $test_max_language ne '', treat input line starting with language code gt $test_max_language as end of file
 
@@ -171,7 +173,7 @@ sub OnTestOnlySetDefaultArgs
 #    next if $fn_in_daily eq "" ;
 #    next if $fn_in_daily !~ /\.(?:bz2|7z)/ ;
 
-#    ($day = $fn_in_daily) =~ s/^pagecounts-\d{6}(\d+)_(?:fdt|fdt\.7z|h\.bz2)$/$1/ ;
+#    ($day = $fn_in_daily) =~ s/^$pageinput-\d{6}(\d+)_(?:fdt|fdt\.7z|h\.bz2)$/$1/ ;
 #    $day = sprintf ("%2d", $day-1) ;
 
 #    $fn_in_daily = "$dir_in/$year-$month/$fn_in_daily" ;
@@ -762,7 +764,7 @@ sub PhaseBuildDailyFile_CollectFilesToProcessForAllDays
   my (@folders, @files) ;
 
   &Log ("\nPhaseBuildDailyFile_CollectFilesToProcessForAllDays\n") ;
-  &Log ("\nCollect file names for hourly pagecount files, for last $max_file_age_in_days completed days\n") ;
+  &Log ("\nCollect file names for hourly pagecount|pageview files, for last $max_file_age_in_days completed days\n") ;
   &Log ("\n\nRead input files from $dir_in\nWrite merged files to $dir_out\n\n") ;
 
   chdir ($dir_in) || &Abort ("Cannot chdir to $dir_in\n") ;
@@ -819,9 +821,9 @@ sub PhaseBuildDailyFile_CollectFilesToProcessForAllDays
     opendir (DIR, "$folder_yyyy_mm");
     while ($file_yyyy_mm_dd_hh = readdir (DIR))
     {
-      next if $file_yyyy_mm_dd_hh !~ /pagecounts-\d{8,8}-\d{6,6}.gz$/ ;
+      next if $file_yyyy_mm_dd_hh !~ /$pagecounts-\d{8,8}-\d{6,6}.gz$/ ;
 
-      if ($file_yyyy_mm_dd_hh !~ /pagecounts-$date_range/)
+      if ($file_yyyy_mm_dd_hh !~ /$pagecounts-$date_range/)
       {
         if ($verbose)
         { &Log ("Skip $file_yyyy_mm_dd_hh, outside date range '$date_range'\n") ; }
@@ -860,16 +862,28 @@ sub PhaseBuildDailyFile_CollectFilesToProcessForAllDays
 sub PhaseBuildDailyFile_FileAgeInDays
 {
   my ($file_yyyy_mm_dd_hh) = @_ ;
-  my $yyyy = substr ($file_yyyy_mm_dd_hh,11,4) ;
-  my $mm   = substr ($file_yyyy_mm_dd_hh,15,2) ;
-  my $dd   = substr ($file_yyyy_mm_dd_hh,17,2) ;
+  my ($yyyy,$mm,$dd) ;
+
+  if ($file_yyyy_mm_dd_hh =~ /pagecounts/)
+  {
+    $yyyy = substr ($file_yyyy_mm_dd_hh,11,4) ;
+    $mm   = substr ($file_yyyy_mm_dd_hh,15,2) ;
+    $dd   = substr ($file_yyyy_mm_dd_hh,17,2) ;
+  }
+  else
+  {
+    $yyyy = substr ($file_yyyy_mm_dd_hh,10,4) ;
+    $mm   = substr ($file_yyyy_mm_dd_hh,14,2) ;
+    $dd   = substr ($file_yyyy_mm_dd_hh,16,2) ;
+  }
+
   my $days_file = sprintf ("%.0f", timegm (0,0,0,$dd, $mm-1, $yyyy-1900) / (24 * 60 * 60)) ;
 
   ($dd,$mm,$yyyy) = (gmtime (time)) [3,4,5] ;
   my $days_today = sprintf ("%.0f", timegm (0,0,0,$dd, $mm, $yyyy) / (24 * 60 * 60)) ;
 
   $file_age_in_days = $days_today - $days_file ;
-# print "$file_yyyy_mm_dd_hh: $file_age_in_days days ago\n" ;
+
   return ($file_age_in_days) ;
 }
 
@@ -885,7 +899,10 @@ sub PhaseBuildDailyFile_CollectDatesToProcess
   foreach $file (@files)
   {
     $file =~ s/^.*\/// ;
-    $date = substr ($file,11,8) ;
+    if ($file_yyyy_mm_dd_hh =~ /pagecounts/)
+    { $date = substr ($file,11,8) ; }
+    else
+    { $date = substr ($file,10,8) ; }
     $files_per_date {$date}++ ;
   }
 
@@ -934,7 +951,7 @@ sub PhaseBuildDailyFile_SelectFilesToMergeForOneDay
 
   foreach $file (@files)
   {
-    next if $file !~ /pagecounts-$date-\d{6,6}.gz$/ ;
+    next if $file !~ /$pagecounts-$date-\d{6,6}.gz$/ ;
 
     push @files_found, $file ;
   }
@@ -1269,10 +1286,10 @@ sub PhaseBuildDailyFile_PrepInputFiles
   {
     next if $file_in eq "" ;
 
-    ($hour = $file_in) =~ s/^.*?pagecounts-\d+-(\d\d)\d+\.gz$/$1/ ;
+    ($hour = $file_in) =~ s/^.*?$pageinput-\d+-(\d\d)\d+\.gz$/$1/ ;
     $hour += 0 ; # force numeric
     my $file_name = $file_in ; 
-    $file_name =~ s/^.*pagecounts/pagecounts/ ;
+    $file_name =~ s/^.*$pageinput/$pageinput/ ;
     $file_name =~ s/\.gz// ;
     $file_patched = "$dir_temp/$file_name~patched" ;
     $file_sorted  = "$dir_temp/$file_name~sorted" ;
@@ -1300,7 +1317,7 @@ sub PhaseBuildDailyFile_PrepInputFiles
       $line =~ s/[\x00-\x1F]+//g ;
       if ($line ne $line2)
       {
-         print "\nXXXXXXXXXXXXXXXXXX\n$line2\n->$line\n" ;
+         print "\nFile $file_in, line has changed after removing \\x00-\\x1F: \n'$line2'\n->\n'$line'\n" ;
       }
 
      ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
@@ -1557,7 +1574,7 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
 
       if (! -e $fn_in_daily)
       {
-        &Log ("File missing: $fn_in_daily\n") ;
+        &Log ("\nFile missing: $fn_in_daily\n") ;
         &Log ("Skip month $year-$month, input for last day of this month not yet found\n") ;
         &Log ("1) Data feed from hourly log files has stalled?\n") ;
         &Log ("2) Daily consolidation of hourly files still needs to run? (phase 1 of this script)\n") ;
@@ -1605,7 +1622,7 @@ sub PhaseBuildMonthlyFile_CollectMonthsToProcess
 
   my $months_to_process = $#months_to_process + 1 ;
   if ($months_to_process < 1)
-  { &Abort ("\n!! No months found for which files need to be compacted. End processing.") ; }
+  { &Abort ("\n\n!! No months found for which files need to be compacted. End processing.") ; }
 
   # keep list sorted backwards -> process newest month first
   return @months_to_process ;
