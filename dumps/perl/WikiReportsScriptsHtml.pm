@@ -336,6 +336,7 @@ td.img   {padding:0px ; margin:0px ; border: inset 1px #FFFFFF}
 table.b td    {text-align:right;  border: inset 1px #FFFFFF}
 table.b th    {text-align:center; border: none}
 table.b th.l  {text-align:left;   border: none ; vertical-align:top;}
+table.b td.l  {text-align:left;   border: none ; vertical-align:top;}
 table.b th.c  {text-align:center; border: none ; vertical-align:top;}
 table.b th.r  {text-align:right;  border: none ; vertical-align:top;}
 table.b td.cb {text-align:center; border: inset 1px #FFFFFF}
@@ -421,5 +422,76 @@ EXd.write("<img src='http://w0.extreme-dm.com','/0.gif?tag=siroops3&j=y&srw='+EX
 </noscript>
 
 __COUNTER__
+
+sub ReadHtmlTrendsAllProjects
+{
+  my $html = <<__SCRIPT_TRENDS_ALL_PROJECTS__ ;
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<head>
+<meta name="language" content="en,English">
+<meta name="robots" content="index,follow">
+
+<meta http-equiv="Content-type" content="text/html; charset=iso-8859-1">
+
+<title>Wikimedia Active Wikis</title>
+
+<style>
+body   {font-family:arial,sans-serif; font-size:12px; background-color:#333; color:#FFF;}
+canvas {border:2px solid #333;}
+a:link    { color:#AAAAFF;text-decoration:none; }
+a:visited {color:#AAAAFF;text-decoration:none; }
+a:active  {color:#AAAAFF;text-decoration:none; }
+a:hover   {color:#AAAAFF;text-decoration:underline; }
+</style>
+
+</head>
+<body>
+
+<table border=0 align=center>
+<tr>
+<td><h1>HEADER</h1></td>
+<td align=right><img src='http://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/25px-Wikimedia-logo.svg.png'></td>
+</tr>
+<tr>
+<td colspan=99><font color=#AAA>View similar overview for metric</font> 
+<a href='ProjectTrendsActiveWikis.html'>Active wikis</a>, 
+<a href='ProjectTrendsEditors.html'>Total editors</a>, 
+<a href='ProjectTrendsTotalEdits.html'>Total edits</a>,
+<a href='ProjectTrendsPageviews.html'>Pageviews</a>, 
+<a href='ProjectTrendsTotalArticles.html'>Total articles</a>, 
+<a href='ProjectTrendsNewArticles.html'>New articles</a> 
+</tr>
+<tr>
+<td align=left colspan=99>
+COMMENTS_TOP
+</td>
+</tr>
+<tr>
+<td><img src='http://stats.wikimedia.org/EN/PNG'><br><a href='http://stats.wikimedia.org/EN/SummaryZZ.htm'>View all trend charts for Wikipedia project</a></td>
+<td><img src='http://stats.wikimedia.org/wikibooks/EN/PNG'><br><a href='http://stats.wikimedia.org/wikibooks/EN/SummaryZZ.htm'>View all trend charts for Wikibooks project</a></td>
+</tr>
+<tr>
+<td><img src='http://stats.wikimedia.org/wikinews/EN/PNG'><br><a href='http://stats.wikimedia.org/wikinews/EN/SummaryZZ.htm'>View all trend charts for Wikinews project</a></td>
+<td><img src='http://stats.wikimedia.org/wiktionary/EN/PNG'><br><a href='http://stats.wikimedia.org/wiktionary/EN/SummaryZZ.htm'>View all trend charts for Wiktionary project</a></td>
+</tr>
+<tr>
+<td><img src='http://stats.wikimedia.org/wikiquote/EN/PNG'><br><a href='http://stats.wikimedia.org/wikiquote/EN/SummaryZZ.htm'>View all trend charts for Wikiquotes project</a></td>
+<td><img src='http://stats.wikimedia.org/wikisource/EN/PNG'><br><a href='http://stats.wikimedia.org/wikisource/EN/SummaryZZ.htm'>View all trend charts for Wikisource project</a></td>
+</tr>
+<tr>
+<td><img src='http://stats.wikimedia.org/wikivoyage/EN/PNG'><br><a href='http://stats.wikimedia.org/wikivoyage/EN/SummaryZZ.htm'>View all trend charts for Wikivoyage project</a></td>
+<td><img src='http://stats.wikimedia.org/wikiversity/EN/PNG'><br><a href='http://stats.wikimedia.org/wikiversity/EN/SummaryZZ.htm'>View all trend charts for Wikiversity project</a></td>
+</tr>
+<tr>
+<td><img src='http://stats.wikimedia.org/wikispecial/EN/PNGCOMMONS'><br><a href='http://stats.wikimedia.org/wikispecial/EN/SummaryCOMMONS.htm'>View all trend charts for Commons</a></td>
+<td><img src='http://stats.wikimedia.org/wikispecial/EN/PNGWIKIDATA'><br><a href='http://stats.wikimedia.org/wikispecial/EN/SummaryWIKIDATA.htm'>View all trend charts for Wikidata</a></td>
+</tr>
+COMMENTS_BOTTOM
+</table>
+</body>
+</html>
+__SCRIPT_TRENDS_ALL_PROJECTS__
+ return ($html) ;
+}
 
 1 ;

@@ -316,5 +316,94 @@ sub GenerateChartPostfix
   "<small>$description</small><p>\n" ;
 }
 
+sub GeneratePagesTrendsAllProjects
+{
+  $comment_editors1 = "Wikivoyage: peak in editors on Wikivoyage in Jan 2013 marks the start of the project. Earlier history is from WikiTravel project, see <a href='https://en.wikivoyage.org/wiki/Wikivoyage:Wikivoyage_and_Wikitravel'>WikiVoyage and WikiTravel<\/a>." ;
+  $comment_editors2 = "Commons: peaks in editors are from photo contests (esp. <a href='http:\/\/www.wikilovesmonuments.org\/'>Wiki Loves Monuments<\/a> in Sep since 2010 and <a href='http:\/\/wikilovesearth.org\/'>Wiki Loves Earth<\/a> in summer since 2014" ;
+  $comment_editors3 = "Wikivoyage: increase in active wikis on Wikivoyage in Jan 2013 marks the start of the project. Earlier history is from WikiTravel project, see <a href='https://en.wikivoyage.org/wiki/Wikivoyage:Wikivoyage_and_Wikitravel'>WikiVoyage and WikiTravel<\/a>." ;
+  $comment_edits1   = "Wikipedia: peak in bot activity on Wikipedia in Jan 2013 is due to migration of all interwikilinks to Wikidata" ;
+$comment_views_bottom = "<tr><td colspan='99'>" .
+"<font color='#AAAAAA'>In Sep/Nov 2015 an update to the crawler filter excluded even more requests; this time influencing mostly wikis with lots of preview requests, most notably Commons.<br>" .
+"Mobile traffic is only plotted separately for those projects where it forms a substantial share of total traffic.</font>" .
+"</td></tr>" ;
+
+$comment_views_top = <<__COMMENT_VIEWS_TOP__ ;
+<tr><td colspan='99'>
+&nbsp;<br>
+<font color='#FF8888'>From May 2015 onwards page view counts no longer include page requests from search engines, which before then formed roughly 20% of overall traffic.</font><br>
+<font color='#BB6666'>Data are now collected via hadoop/hive, and come with a new pageview definition, which strictly focuses on human page views.</font><br>
+<font color='#BB6666'>Distribution of human page requests is totally different from crawler requests, as most crawlers treat all pages equal.<br>
+The share of crawler requests differed widely per page/wiki/project, and was even higher than the global average of 20% for less visited pages/wikis/projects.</font><br>&nbsp; 
+__COMMENT_VIEWS_TOP__
+
+  my $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotEditorsCOMMONS.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotEditorsWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotEditorsZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - Total editors per project/ ;
+  $html =~ s/COMMENTS_TOP// ;
+  $html =~ s/COMMENTS_BOTTOM/<tr><td colspan='99'>\&nbsp;<p><font color=#C0C0C0>$comment_editors1<br>$comment_editors2<\/font><\/td><\/tr>/ ;
+  $html =~ s/COMMENTS_BOTTOM// ;
+  open HTML, '>', "$path_out/ProjectTrendsEditors.html" ;
+  print HTML $html ;
+  close HTML ;
+
+  $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotPageviewsCOMMONS.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotPageviewsWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotPageviewsZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - Total pageviews per project/ ;
+  $html =~ s/COMMENTS_TOP/$comment_views_top/ ;
+  $html =~ s/COMMENTS_BOTTOM/$comment_views_bottom/ ;
+  open HTML, '>', "$path_out/ProjectTrendsPageviews.html" ;
+  print HTML $html ;
+  close HTML ;
+
+  $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotActiveWikisCOMMONS.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotActiveWikisWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotActivityZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - Active wikis per project/ ;
+  $html =~ s/<td.*?COMMONS.*?td>/<td><\/td>/ ;
+  $html =~ s/<td.*?WIKIDATA.*?td>/<td><\/td>/ ;
+  $html =~ s/COMMENTS_TOP// ;
+  $html =~ s/COMMENTS_BOTTOM// ;
+  open HTML, '>', "$path_out/ProjectTrendsActiveWikis.html" ;
+  print HTML $html ;
+  close HTML ;
+
+  $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotBinariesCOMMONS1.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotTotalArticlesWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotTotalArticlesZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - Total articles per project/ ;
+  $html =~ s/COMMENTS_TOP// ;
+  $html =~ s/COMMENTS_BOTTOM// ;
+  open HTML, '>', "$path_out/ProjectTrendsTotalArticles.html" ;
+  print HTML $html ;
+  close HTML ;
+
+  $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotNewArticlesCOMMONS.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotNewArticlesWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotNewArticlesZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - New articles per project/ ;
+  $html =~ s/COMMENTS_TOP// ;
+  $html =~ s/COMMENTS_BOTTOM// ;
+  open HTML, '>', "$path_out/ProjectTrendsNewArticles.html" ;
+  print HTML $html ;
+  close HTML ;
+
+  $html = &ReadHtmlTrendsAllProjects ;
+  $html =~ s/PNGCOMMONS/PlotUploadsCOMMONS.png/g ;
+  $html =~ s/PNGWIKIDATA/PlotEditsSmallWIKIDATA.png/g ;
+  $html =~ s/PNG/PlotEditsSmallZZ.png/g ;
+  $html =~ s/HEADER/Wikimedia - Total edits per project/ ;
+  $html =~ s/COMMENTS_TOP// ;
+  $html =~ s/COMMENTS_BOTTOM// ;
+  open HTML, '>', "$path_out/ProjectTrendsTotalEdits.html" ;
+  print HTML $html ;
+  close HTML ;
+}
 
 1;
