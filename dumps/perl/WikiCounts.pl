@@ -278,6 +278,8 @@
     if ($mode eq 'wx' and $language eq 'commons')
     { &CollectUploaders ; }
 
+    &AggregateMonthlyStats ;
+
     &RenameTempCsvFiles ;
 
     &WriteJobRunStats ;

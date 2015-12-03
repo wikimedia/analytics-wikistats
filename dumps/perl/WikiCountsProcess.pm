@@ -3176,6 +3176,98 @@ sub CollectUploadersPerMonth
   &Log ("$yyyy_mm $line\n") ;
 }
 
+sub AggregateMonthlyStats
+{
+  $file_csv_monthly_stats_test = $file_csv_monthly_stats ;
+  $file_csv_monthly_stats_test =~ s/\.csv/_Test.csv/ ;
+  &ReadFileCsvExcept ($file_csv_monthly_stats, 'zz') ;
+
+  my %dates ;
+
+  foreach $line (@csv)
+  {
+    chomp $line ;
+     
+    ($lang,$date,$tot_contributors,$new_contributors,$editors_ge5,$editors_ge100,$tot_articles,$alt_articles,$new_articles_per_day,
+     $mean_versions,$mean_bytes,$over_size1,$over_size2,$edits_per_month,
+     $tot_bytes,$tot_words,$tot_links,$tot_links_wiki,$tot_links_images,$tot_links_external,$tot_redirects,$tot_categorized,$pages_without_internal_link     ,
+     $edits_per_month_reg,$edits_per_month_anon,$edits_per_month_bot,
+     $new_articles_per_month_reg,$new_articles_per_month_anon,$new_articles_per_month_bot) = split (',', $line) ;
+
+    $yyyy = substr ($date,6,4) ;
+    $mm   = substr ($date,0,2) ;
+    $dd   = substr ($date,3,2) ;
+
+    next if $dd != &days_in_month ($yyyy,$mm) ; # skip incomplete month
+
+    $dates {$date}++ ;
+    
+    # don't add counts per wiki if not available for each wiki (= if harvested from full archive dunp only)
+    $tot_contributors            {$date} += $tot_contributors ; 
+    $new_contributors            {$date} += $new_contributors ;
+    $editors_ge5                 {$date} = '' ; # needs deduplication
+    $editors_ge100               {$date} = '' ; # needs deduplication
+    $tot_articles                {$date} += $tot_articles ;
+    $alt_articles                {$date} += $alt_articles ;
+    $new_articles_per_day        {$date} += $new_articles_per_day ;
+    $mean_versions               {$date} = '' ; # can't add averages per wiki
+    $mean_bytes                  {$date} = '' ; # can't add averages per wiki
+    $over_size1                  {$date} = '' ;
+    $over_size2                  {$date} = '' ;
+    $edits_per_month             {$date} += $edits_per_month ;
+    $tot_bytes                   {$date} = '' ;
+    $tot_words                   {$date} = '' ;
+    $tot_links                   {$date} = '' ;
+    $tot_links_wiki              {$date} = '' ;
+    $tot_links_images            {$date} = '' ;
+    $tot_links_external          {$date} = '' ;
+    $tot_redirects               {$date} = '' ;
+    $tot_categorized             {$date} = '' ;
+    $pages_without_internal_link {$date} = '' ;
+    $edits_per_month_reg         {$date} += $edits_per_month_reg ;
+    $edits_per_month_anon        {$date} += $edits_per_month_anon ;
+    $edits_per_month_bot         {$date} += $edits_per_month_bot ;
+    $new_articles_per_month_reg  {$date} += $new_articles_per_month_reg ;
+    $new_articles_per_month_anon {$date} += $new_articles_per_month_anon ;
+    $new_articles_per_month_bot  {$date} += $new_articles_per_month_bot ;
+  }
+
+  foreach $date (sort {substr ($a,6,4).substr($a,0,2) <=> substr ($b,6,4).substr($b,0,2)} keys %dates) # alas format is mm/dd/yyyy
+  {
+    push @csv, "zz,$date,".
+     $tot_contributors            {$date} . ',' .
+     $new_contributors            {$date} . ',' .
+     $editors_ge5                 {$date} . ',' .
+     $editors_ge100               {$date} . ',' .
+     $tot_articles                {$date} . ',' .
+     $alt_articles                {$date} . ',' .
+     $new_articles_per_day        {$date} . ',' .
+     $mean_versions               {$date} . ',' .
+     $mean_bytes                  {$date} . ',' .
+     $over_size1                  {$date} . ',' .
+     $over_size2                  {$date} . ',' .
+     $edits_per_month             {$date} . ',' .
+     $tot_bytes                   {$date} . ',' .
+     $tot_words                   {$date} . ',' .
+     $tot_links                   {$date} . ',' .
+     $tot_links_wiki              {$date} . ',' .
+     $tot_links_images            {$date} . ',' .
+     $tot_links_external          {$date} . ',' .
+     $tot_redirects               {$date} . ',' .
+     $tot_categorized             {$date} . ',' .
+     $pages_without_internal_link {$date} . ',' .
+     $edits_per_month_reg         {$date} . ',' .
+     $edits_per_month_anon        {$date} . ',' .
+     $edits_per_month_bot         {$date} . ',' .
+     $new_articles_per_month_reg  {$date} . ',' .
+     $new_articles_per_month_anon {$date} . ',' .
+     $new_articles_per_month_bot  {$date} . ',' ;
+ 
+  }
+  &WriteFileCsv ($file_csv_monthly_stats) ;
+}
+
+
 1;
 
 #sub MergeActiveUsersPerMonthsAllWikisOrProjectsOldVersion

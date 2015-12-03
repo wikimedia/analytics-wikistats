@@ -142,10 +142,11 @@ sub SetEnvironment
   my ($date, $time, $runtime, $conversions, $fraction_5, $fraction_100, $recently_active_users,
       $edits_total_namespace_a, $edits_total_ip_namespace_a, $edits_total_namespace_x, $edits_total_ip_namespace_x) ;
 
-  # wikisource: find wiki specific namespaces for proofread extension
-  # see also http://www.mediawiki.org/wiki/Extension:Proofread_Page
-  if ($mode eq "ws")
-  { &SetProofReadNameSpaces ; }
+# wikisource: find wiki specific namespaces for proofread extension
+# see also http://www.mediawiki.org/wiki/Extension:Proofread_Page
+# file ProofReadCodes.csv is corrupt, but I can't see where the codes are used so disable for now
+# if ($mode eq "ws")
+# { &SetProofReadNameSpaces ; }
 
   if ($path_in =~ /\\/)
   { $path_in  =~ s/[\\]*$/\\/ ; } # make sure there is one trailing (back)slash
@@ -247,7 +248,7 @@ sub SetEnvironment
   }
 
   &LogT ("From May 2015 onwards run all dumps 'edits_only'\n") ;
-  $edits_only = $true ; # qqq
+  $edits_only = $true ; 
 
 # 23/04/2013: revert to letting cmd line set this 
 # else
@@ -671,6 +672,7 @@ sub SetProofReadNameSpaces
 {
   $file_proofread_codes = $path_out . "/ProofReadCodes.csv" ;
 
+  print $file_proofread_codes ;
   &ReadFileCsvOnly ($file_proofread_codes) ;
   if ($#csv > -1)
   { ($dummy,$namespacePagePrev,$namespaceIndexPrev) = split (',', $csv [0]) ; }

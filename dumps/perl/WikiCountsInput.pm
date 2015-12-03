@@ -2349,6 +2349,26 @@ sub ReadFileCsvOnly
   close FILE_IN ;
 }
 
+sub ReadFileCsvExcept
+{
+  my ($file_csv,$language) = @_ ;
+  undef @csv  ;
+
+  if (! -e $file_csv)
+  { &LogT ("File $file_csv not found.\n") ; return ; }
+
+  open FILE_IN, "<", $file_csv ;
+  while ($line = <FILE_IN>)
+  {
+    if ($line !~ /^$language\,/)
+    {
+      chomp ($line) ;
+      push @csv, $line ;
+    }
+  }
+  close FILE_IN ;
+}
+
 sub ReadAccessLevels
 {
   &LogPhase ("ReadAccessLevels") ;
