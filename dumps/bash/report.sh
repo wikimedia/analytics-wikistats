@@ -8,6 +8,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
 csv=$dumps/csv
+csv_pv=/a/dammit.lt/projectviews/csv
 out=$dumps/out
 htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
@@ -90,8 +91,8 @@ case "$projectcode" in
 esac  
 echo2 "Generate and publish reports for project $project" 
 
-# for x in en # test
-for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+for x in en # test
+# for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
   echo2 ""
   echo2 ">>> loop with $projectcode:$x"
@@ -173,7 +174,7 @@ do
     echo2 "Run reporting for language $x_upper"
     
     cd $perl
-    c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -o $out/out_$1
+    c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
     cd $bash
     echo2 ""
     echo2 "Copy new and updated files from $out_project -> $htdocs_project"
@@ -207,13 +208,13 @@ done
 echo2 ""
 
 # Archive English reports
-if [ $do_zip -eq 1 ] ; then
-  echo2 "Archive new English reports" 
-  cd $bash
-  ./zip_out.sh $1
-else
-  echo2 "No English reports built. Skip zip phase"							
-fi  
+#if [ $do_zip -eq 1 ] ; then
+#  echo2 "Archive new English reports" 
+#  cd $bash
+#  ./zip_out.sh $1
+#else
+#  echo2 "No English reports built. Skip zip phase"							
+#fi  
 
 echo2 ""
 echo2 "Ready" 

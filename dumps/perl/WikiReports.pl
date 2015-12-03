@@ -1,4 +1,9 @@
 #!/usr/bin/perl
+
+# Reverts altijd 0% ?
+# legend uitlegeen bij summary 'Edits on all ...'
+# link naar http://stats.wikimedia.org/EN/draft/ProjectTrendsActiveWikis.html werkt niet op http://stats.wikimedia.org/EN/draft/ProjectTrendsTotalEdits.html   
+
 # Copyright (C) 2003-2008 Erik Zachte , email ezachte a-t wikimedia d-o-t org
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2
@@ -25,7 +30,7 @@
 
   use lib "/home/ezachte/lib" ;
   use EzLib ;
-# $trace_on_exit = $true ;
+  $trace_on_exit = $true ;
   $trace_on_exit_concise = $true ;
   ez_lib_version (14) ;
 
@@ -253,6 +258,8 @@
     exit ;
   }
 
+  &GeneratePagesTrendsAllProjects ;
+  
   &LogT ("\nGenerate Current Status") ;
   if (! $singlewiki)
   { &GenerateCurrentStatus ; }
@@ -265,13 +272,13 @@
 
 # &GenerateComparisonTables ;
 
-  &LogT ("\nRegion code = '$region'\n") ;
+  &LogT ("\nRegion code = '$region', language = '$language'\n") ;
   if (($language eq "en") && ($region eq ''))
   {
      &GenerateYearlyGrowthStats ;
-#  # &TestCompleted ;
+   # &TestCompleted ;
      &ReadEditHistory ;
-   # &ReadRevertHistoryGenerateReports ; # disabled July 2015
+     &ReadRevertHistoryGenerateReports ; 
      &GenerateEditHistoryReports ; # wait till R runs on stat1
   }
 
@@ -288,7 +295,6 @@
 
 # &GenerateTablesPerWikipedia ("zzz") ;
 # &TestCompleted ;
-
   &LogT ("\nGenerate Growth Summary") ;
   &GenerateGrowthSummary ;
 

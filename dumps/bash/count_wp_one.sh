@@ -21,11 +21,11 @@ date=auto # 20101231 # auto
 #reverts_only="-u 1" # comment to collect all data (u for undo)
 #date=$1
 
-rm $csv/csv_$set/WikiCountsRunAborted.txt
+# rm $csv/csv_$set/WikiCountsRunAborted.txt
 
 #date=20150430
 
-x=enwiki
+x=nlwiki
 project=wp # wx
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 

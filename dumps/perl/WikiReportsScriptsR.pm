@@ -12,10 +12,12 @@ mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=F
 mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
 __SCRIPT_PLOT_CREDITS__
 
-$include_script_credits_ez = <<__SCRIPT_EDIT_CREDITS_EZ__ ;
-mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#808080")
-mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
-mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
+$include_script_credits_ez = <<__SCRIPT_EDIT_CREDITS_EZ__ ; # now same as $include_script_plot_credits 
+mtext(paste(" stats.wikimedia.org "), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#000000")
+mtext(paste ("Erik Zachte  -  perl+R  -  ", format(Sys.time(), "%b %d, %H:%M ")), cex=0.80, line=0.2, side=4, adj=0, outer=FALSE, col="#AAAAAA")
+#mtext(paste(format(Sys.time(), " stats.wikimedia.org ")), cex=0.85, line=1.5, side=3, adj=1, outer=FALSE, col="#808080")
+#mtext(paste(format(Sys.time(), " %Y-%m-%d %H:%M ")), cex=0.85, line=0.5, side=3, adj=1, outer=FALSE, col="#808080")
+#mtext("Script: Erik Zachte. Renderer: R", cex=0.85, line=0.2, side=4, adj=0, outer=FALSE, col="#999999")
 __SCRIPT_EDIT_CREDITS_EZ__
 
 $include_script_plot_cairo_640_240 = <<__SCRIPT_PLOT_CAIRO__ ;
@@ -40,7 +42,7 @@ mtext("MAX_MONTH: MAX_VALUE ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, c
 __SCRIPT_PLOT_TOP_MONTH__
 
 $include_script_plot_grid = <<__SCRIPT_PLOT_GRID__ ;
-axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format=" ",   tck=1,     col="gray80") # vertical monthly bars light grey
+#axis.POSIXct(1, at=seq(r[1], r[2], by="month"), format=" ",   tck=1,     col="gray90") # vertical monthly bars light grey
 axis.POSIXct(1, at=seq(r[1], r[2], by="year"),  format="%Y ", tck=1,     col="gray80") # year numbers below x axis
 axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format=" ",   tck=1,     col="gray20") # vertical yearly bar dark grey
 axis.POSIXct(1, at=seq(r[1], r[2], by="year") , format=" ",   tck=-0.02, col="gray20") # extending slightly below x asix (as tick marks)
@@ -61,6 +63,11 @@ $include_script_plot_axis_summary = <<__SCRIPT_PLOT_AXIS_SUMMARY__ ;
 axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
 __SCRIPT_PLOT_AXIS_SUMMARY__
 
+$include_script_plot_axis_summary_test = <<__SCRIPT_PLOT_AXIS_SUMMARY_TEST__ ;
+#axis(2, at=100000000*c(0:10),labels=100000000*c(0:10), col.axis="black", las=2, tck=1, col="#D0D0D0")
+axis(2, col.axis="black", las=2, col="#D0D0D0")
+__SCRIPT_PLOT_AXIS_SUMMARY_TEST__
+
 $include_script_title = <<__SCRIPT_PLOT_TITLE__ ;
 title(\" TITLE \", cex.main=1.2, font.main=3, col.main= \"black\")
 __SCRIPT_PLOT_TITLE__
@@ -76,8 +83,28 @@ par(oma=c(0,0,0,0))
 __SCRIPT_PLOT_OPTIONS_SUMMARY__
 
 $include_plot_months_normalized  = <<__SCRIPT_PLOT_MONTHS_NORMALIZED__ ;
-mtext(\"metrics have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")
+mtext(\"metrics have been normalized to months of 30 days (Jan*30/31, Feb*(29|30)/28, Mar*30/31, etc)\", cex=0.85, line=3.2, side=1, outer=FALSE, col=\"#808080\")
 __SCRIPT_PLOT_MONTHS_NORMALIZED__
+
+$include_plot_old_new_definition  = <<__SCRIPT_PLOT_OLD_NEW_DEFINITION__ ;
+mtext(\"May 2015: a new pageview definition took effect, which eliminated all crawler traffic. Dashed lines mark old definition.\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"darkred\") # was 808080
+__SCRIPT_PLOT_OLD_NEW_DEFINITION__
+
+$include_plot_footer  = <<__SCRIPT_PLOT_FOOTER__ ;
+mtext(\"PLOT_FOOTER\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"PLOT_FOOTER_COLOR\") 
+__SCRIPT_PLOT_FOOTER__
+
+$include_plot_explain_edits  = <<__SCRIPT_PLOT_EXPLAIN_EDITS__ ;
+mtext(\"Reg. = edits by registered users, Anon. = edits by anonymous users, Bot = edits by background editing jobs, Reverts = edit to restore earlier content.\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")
+__SCRIPT_PLOT_EXPLAIN_EDITS__
+
+$include_plot_active_editor  = <<__SCRIPT_PLOT_ACTIVE_EDITOR__ ;
+mtext(\"Only registered editors who submit five or more edits in a given month (while signed in) count as active editor\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")
+__SCRIPT_PLOT_ACTIVE_EDITOR__
+
+$include_plot_article_edits  = <<__SCRIPT_PLOT_ARTICLE_EDITS__ ;
+mtext(\"Only edits on content pages \(not on talk pages, project pages, etc\) are counted here\", cex=0.85, line=2.2, side=1, outer=FALSE, col=\"#808080\")
+__SCRIPT_PLOT_ARTICLE_EDITS__
 
 $include_script_reverts_cairo_trends = <<__SCRIPT_REVERTS_CAIRO_TRENDS__ ;
 #install.packages(c("Cairo"), repos="http://cran.r-project.org" )
@@ -180,17 +207,22 @@ plot (dates,plotdata\$PE_edits_total,type="l", col="black", lty="solid", lwd=0.5
 $include_script_reverts_axis
 $include_script_reverts_title
 
-lines(dates,plotdata\$PE_edits_total,col="black", lty="solid", lwd=2)
-lines(dates,plotdata\$PE_edits_bots,col="green4", lty="solid", lwd=2)
-lines(dates,plotdata\$PE_edits_reg_users,col="blue", lty="solid", lwd=2)
-lines(dates,plotdata\$PE_edits_anon_users,type="l", col="red", lty="solid", lwd=2)
-lines(dates,plotdata\$PE_reverts_total,col="magenta3", lty="solid", lwd=2)
+lines(dates,plotdata\$PE_edits_total,col="black", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PE_edits_bots,col="green4", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PE_edits_reg_users,col="blue", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PE_edits_anon_users,type="l", col="red", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PE_reverts_total,col="magenta3", lty="solid", lwd=2.2)
 
-legend("topleft",c("All edits ", "TOT_G PERC_G " , " ", "Registered edits ", "TOT_R PERC_R ", " ", "Anonymous edits ", "TOT_A PERC_A ", " ", "Bot edits ", "TOT_B PERC_B ",  " ", "Reverts ", "TOT_X PERC_X ","", "(article edits only)"), lty=1, lwd=2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "magenta3", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
+# "#E0E0E1" will edited out in regexp for compact legend 
+#legend("topleft",c("All edits ", "TOT_G PERC_G " , " ", "Registered edits ", "TOT_R PERC_R ", " ", "Anonymous edits ", "TOT_A PERC_A ", " ", "Bot edits ", "TOT_B PERC_B ", " ", "Reverts ", "TOT_X PERC_X "), lty=1, lwd=2.2, col=c("black","#E0E0E0", "#E0E0E1", "blue","#E0E0E0", "#E0E0E1", "red","#E0E0E0", "#E0E0E1", "green4", "#E0E0E0", "#E0E0E1", "magenta3", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
+legend("topleft",c("All TOT_G PERC_G " , "Reg. TOT_R PERC_R ", "Anon. TOT_A PERC_A ", "Bot TOT_B PERC_B ", "Reverts TOT_X PERC_X "), lty=1, lwd=2.2, col=c("black", "blue", "red", "green4", "magenta3"), inset=0.05, bg="#E0E0E0")
 
-mtext("100 = max edits in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("100% = max edits in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+mtext("percentage of max edits", cex=0.85, line=2.5, side=2, adj=0, outer=FALSE, col="#808080")
 
+$include_plot_explain_edits
+$include_plot_article_edits 
 $include_script_credits_ez
 $include_script_plot_go
 __SCRIPT_EDIT_PLOT_EDITS__
@@ -233,11 +265,11 @@ $include_script_reverts_axis
 $include_script_reverts_title
 
 
-lines(dates, plotdata\$times_tot_decomposed\.trend,     type="l", col="black",    lty="solid", lwd=3)
-lines(dates, plotdata\$times_anon_decomposed\.trend,    type="l", col="red",      lty="solid", lwd=3)
-lines(dates, plotdata\$times_reg_decomposed\.trend,     type="l", col="blue",     lty="solid", lwd=3)
-lines(dates, plotdata\$times_bots_decomposed\.trend,    type="l", col="green4",   lty="solid", lwd=3)
-lines(dates, plotdata\$times_reverts_decomposed\.trend, type="l", col="magenta3", lty="solid", lwd=3)
+lines(dates, plotdata\$times_tot_decomposed\.trend,     type="l", col="black",    lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_anon_decomposed\.trend,    type="l", col="red",      lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_reg_decomposed\.trend,     type="l", col="blue",     lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_bots_decomposed\.trend,    type="l", col="green4",   lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_reverts_decomposed\.trend, type="l", col="magenta3", lty="solid", lwd=2.2)
 
 lines(dates, plotdata\$PE_edits_total,               col="black",    lty="solid", lwd=0.8)
 lines(dates, plotdata\$PE_edits_bots,                col="green4",   lty="solid", lwd=0.8)
@@ -245,10 +277,12 @@ lines(dates, plotdata\$PE_edits_reg_users,           col="blue",     lty="solid"
 lines(dates, plotdata\$PE_edits_anon_users,type="l", col="red",      lty="solid", lwd=0.8)
 lines(dates, plotdata\$PE_reverts_total,             col="magenta3", lty="solid", lwd=0.8)
 
-legend("topleft",c("All edits ", "TOT_G PERC_G " , " ", "Registered edits ", "TOT_R PERC_R ", " ", "Anonymous edits ", "TOT_A PERC_A ", " ", "Bot edits ", "TOT_B PERC_B ",  " ", "Reverts ", "TOT_X PERC_X ","", "(article edits only)"), lty=1, lwd=2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "magenta3", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
+legend("topleft",c("All edits ", "TOT_G PERC_G " , " ", "Registered edits ", "TOT_R PERC_R ", " ", "Anonymous edits ", "TOT_A PERC_A ", " ", "Bot edits ", "TOT_B PERC_B ",  " ", "Reverts ", "TOT_X PERC_X ","", "(article edits only)"), lty=1, lwd=2.2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "magenta3", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
 
 mtext("100 = max edits in ", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext("MAX_MONTH: EDITS ", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
+$include_plot_explain_edits
+$include_plot_article_edits 
 $include_script_credits_ez
 $include_script_plot_go
 __SCRIPT_EDIT_PLOT_EDITS_TRENDS__
@@ -287,13 +321,13 @@ $include_script_reverts_axis
 $include_script_reverts_title
 
 
-#lines(dates,plotdata\$times_anon_decomposed\.trend, type="l", col="red",    lty="solid", lwd=3)
-lines(dates,plotdata\$PR_reverts_total,                        col="black",  lty="solid", lwd=2.5)
-lines(dates,plotdata\$PR_reverts_bots,                         col="green4", lty="solid", lwd=1.8)
-lines(dates,plotdata\$PR_reverts_reg_users,                    col="blue",   lty="solid", lwd=1.8)
-lines(dates,plotdata\$PR_reverts_anon_users,         type="l", col="red",    lty="solid", lwd=1.8)
+#lines(dates,plotdata\$times_anon_decomposed\.trend, type="l", col="red",    lty="solid", lwd=2.2)
+lines(dates,plotdata\$PR_reverts_total,                        col="black",  lty="solid", lwd=2.2)
+lines(dates,plotdata\$PR_reverts_bots,                         col="green4", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PR_reverts_reg_users,                    col="blue",   lty="solid", lwd=2.2)
+lines(dates,plotdata\$PR_reverts_anon_users,         type="l", col="red",    lty="solid", lwd=2.2)
 
-legend("topleft",c("Ratio for all edits ", "TOT_G PERC_G " , " ", "for registered edits ", "TOT_R PERC_R ", " ", "for anonymous edits ", "TOT_A PERC_A ", " ", "for bot edits ", "TOT_B PERC_B ", "", "(article edits only)"), lty=1, lwd=2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
+legend("topleft",c("Ratio for all edits ", "TOT_G PERC_G " , " ", "for registered edits ", "TOT_R PERC_R ", " ", "for anonymous edits ", "TOT_A PERC_A ", " ", "for bot edits ", "TOT_B PERC_B ", "", "(article edits only)"), lty=1, lwd=2.2 col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
 
 mtext("percentage", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext("reverted", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
@@ -337,17 +371,17 @@ $include_script_reverts_axis
 $include_script_reverts_title
 
 
-lines(dates,plotdata\$times_tot_decomposed\.trend,  type="l", col="black",  lty="solid", lwd=3)
-lines(dates,plotdata\$times_anon_decomposed\.trend, type="l", col="red",    lty="solid", lwd=3)
-lines(dates,plotdata\$times_reg_decomposed\.trend,  type="l", col="blue",   lty="solid", lwd=3)
-lines(dates,plotdata\$times_bots_decomposed\.trend, type="l", col="green4", lty="solid", lwd=3)
+lines(dates,plotdata\$times_tot_decomposed\.trend,  type="l", col="black",  lty="solid", lwd=2.2)
+lines(dates,plotdata\$times_anon_decomposed\.trend, type="l", col="red",    lty="solid", lwd=2.2)
+lines(dates,plotdata\$times_reg_decomposed\.trend,  type="l", col="blue",   lty="solid", lwd=2.2)
+lines(dates,plotdata\$times_bots_decomposed\.trend, type="l", col="green4", lty="solid", lwd=2.2)
 
 lines(dates,plotdata\$PR_reverts_total,               col="black",  lty="solid", lwd=0.8)
 lines(dates,plotdata\$PR_reverts_bots,                col="green4", lty="solid", lwd=0.8)
 lines(dates,plotdata\$PR_reverts_reg_users,           col="blue",   lty="solid", lwd=0.8)
 lines(dates,plotdata\$PR_reverts_anon_users,type="l", col="red",    lty="solid", lwd=0.8)
 
-legend("topleft",c("Ratio for all edits ", "TOT_G PERC_G " , " ", "for registered edits ", "TOT_R PERC_R ", " ", "for anonymous edits ", "TOT_A PERC_A ", " ", "for bot edits ", "TOT_B PERC_B ", "", "(article edits only)"), lty=1, lwd=2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
+legend("topleft",c("Ratio for all edits ", "TOT_G PERC_G " , " ", "for registered edits ", "TOT_R PERC_R ", " ", "for anonymous edits ", "TOT_A PERC_A ", " ", "for bot edits ", "TOT_B PERC_B ", "", "(article edits only)"), lty=1, lwd=2.2, col=c("black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "red","#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
 
 mtext("percentage", cex=0.85, line=1.5, side=3, adj=0, outer=FALSE, col="#000000")
 mtext("reverted", cex=0.85, line=0.5, side=3, adj=0, outer=FALSE, col="#000000")
@@ -378,17 +412,17 @@ r <- as.POSIXct(round(range(dates), "days"))
 
 par(mar=c(2.5,3,2.5,1.5))
 par(oma=c(0,0,0,0))
-plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lwd=2, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
+plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lwd=22, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i")
 
 $include_script_reverts_axis
 $include_script_reverts_title
 
 
-lines(dates,plotdata\$PA_edits_anon_users_kept, type="l", col="black",   lty="solid", lwd=1.8)
-lines(dates,plotdata\$PA_edits_anon_users,      type="l", col="red",     lty="solid", lwd=1.8)
-lines(dates,plotdata\$PA_reverts_by_reg_users,  type="l", col="blue",    lty="solid", lwd=1.8)
-lines(dates,plotdata\$PA_reverts_by_anon_users, type="l", col="darkred", lty="solid", lwd=1.8)
-lines(dates,plotdata\$PA_reverts_by_bots,       type="l", col="green",   lty="solid", lwd=1.8)
+lines(dates,plotdata\$PA_edits_anon_users_kept, type="l", col="black",   lty="solid", lwd=2.2)
+lines(dates,plotdata\$PA_edits_anon_users,      type="l", col="red",     lty="solid", lwd=2.2)
+lines(dates,plotdata\$PA_reverts_by_reg_users,  type="l", col="blue",    lty="solid", lwd=2.2)
+lines(dates,plotdata\$PA_reverts_by_anon_users, type="l", col="darkred", lty="solid", lwd=2.2)
+lines(dates,plotdata\$PA_reverts_by_bots,       type="l", col="green",   lty="solid", lwd=2.2)
 
 legend("topleft",c("All anonymous edits ", "TOT_AT PERC_AT " , " ", "Not reverted ", "TOT_AM PERC_AM", " ","Reverted by reg user ","TOT_RR PERC_RR ", " ", "Reverted by anon user ", "TOT_RA PERC_RA ",  " ", "Reverted by bot ", "TOT_RB PERC_RB ","", "(article edits only)"), lty=1, lwd=2,col=c("red","#E0E0E0", "#E0E0E0", "black","#E0E0E0", "#E0E0E0", "blue","#E0E0E0", "#E0E0E0", "darkred", "#E0E0E0", "#E0E0E0", "green4", "#E0E0E0", "#E0E0E0", "#E0E0E0"), inset=0.05, bg="#E0E0E0")
 
@@ -433,11 +467,11 @@ plot (dates,plotdata\$PA_edits_anon_users,type="l", col="white", lty="solid", lw
 $include_script_reverts_axis
 $include_script_reverts_title
 
-lines(dates, plotdata\$times_anon_kept_decomposed\.trend,   type="l", col="black",   lty="solid", lwd=3)
-lines(dates, plotdata\$times_anon_decomposed\.trend,        type="l", col="red",     lty="solid", lwd=3)
-lines(dates, plotdata\$times_reg_decomposed\.trend,         type="l", col="blue",    lty="solid", lwd=3)
-lines(dates, plotdata\$times_bot_revert_decomposed\.trend,  type="l", col="green",   lty="solid", lwd=3)
-#lines(dates,plotdata\$times_anon_revert_decomposed\.trend, type="l", col="darkred", lty="solid", lwd=3)
+lines(dates, plotdata\$times_anon_kept_decomposed\.trend,   type="l", col="black",   lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_anon_decomposed\.trend,        type="l", col="red",     lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_reg_decomposed\.trend,         type="l", col="blue",    lty="solid", lwd=2.2)
+lines(dates, plotdata\$times_bot_revert_decomposed\.trend,  type="l", col="green",   lty="solid", lwd=2.2)
+#lines(dates,plotdata\$times_anon_revert_decomposed\.trend, type="l", col="darkred", lty="solid", lwd=2.2)
 
 lines(dates, plotdata\$PA_edits_anon_users_kept, type="l", col="black",   lty="solid", lwd=0.8)
 lines(dates, plotdata\$PA_edits_anon_users,      type="l", col="red",     lty="solid", lwd=0.8)
@@ -470,13 +504,13 @@ axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
 $include_script_plot_grid
 $include_script_title
 
-lines(dates,plotdata\$count_1,col="COLOR_1", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_2,col="COLOR_2", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_3,col="COLOR_3", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_4,col="COLOR_4", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_1,col="COLOR_1", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_2,col="COLOR_2", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_3,col="COLOR_3", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_4,col="COLOR_4", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=2.2)
 
-legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("LABEL_1 ", "LABEL_2 ", "LABEL_3 ", "LABEL_4 ", "LABEL_5 "), lty=1, lwd=2.2, col=c("COLOR_1","COLOR_2", "COLOR_3", "COLOR_4", "COLOR_5"), inset=0.02, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
@@ -494,17 +528,17 @@ $include_script_options_summary
 
 plot (dates,plotdata\$count_5,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
-$include_script_plot_axis_summary
+$include_script_plot_axis_summary_test
 $include_script_plot_grid
 $include_script_title
-
-lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_25,col="COLOR_25", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_5,col="COLOR_5", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_25,col="COLOR_25", lty="solid", lwd=2.2)
+lines(dates,plotdata\$count_100,col="COLOR_100", lty="solid", lwd=2.2)
 
 #legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits ", "(reg edits only)"), lty=1, lwd=2, col=c("COLOR_5","COLOR_25", "COLOR_100", "#F0F0F0"), inset=0.05, bg="#E0E0E0")
-legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=1.8, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("5+ edits ", "25+ edits ", "100+ edits "), lty=1, lwd=2.2, col=c("COLOR_5","COLOR_25", "COLOR_100"), inset=0.02, bg="#E0E0E0")
 
+$include_plot_footer
 $include_script_plot_top_month
 $include_script_plot_period
 $include_script_plot_credits
@@ -519,22 +553,30 @@ $include_script_plot_data
 $include_script_plot_cairo_640_240
 $include_script_options_summary
 
-plot (dates,plotdata\$count_normalized_non_mobile,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+plot (dates,plotdata\$count_normalized_non_mobile_old_def,type="l", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
 
 $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-legend("topleft",c("non mobile ", "mobile ", "total "), lty=1, lwd=1.8, col=c("COLOR_NON_MOBILE","COLOR_MOBILE", "COLOR_TOTAL"), inset=0.02, bg="#E0E0E0")
+#legend("topleft",c("main, old", "main site", "mobile site", "total "), lty=1, lwd=2.2, col=c("COLOR_NON_MOBILE_OLD_DEF","COLOR_NON_MOBILE_NEW_DEF","COLOR_MOBILE_OLD_DEF", "COLOR_MOBILE_NEW_DEF", "COLOR_TOTAL_OLD_DEF", "COLOR_TOTAL_NEW_DEF"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("main site", "mobile site", "total "), lty=1, lwd=2.2, col=c("COLOR_NON_MOBILE_NEW_DEF","COLOR_MOBILE_NEW_DEF", "COLOR_TOTAL_NEW_DEF"), inset=0.02, bg="#E0E0E0")
 
-lines(dates,plotdata\$count_normalized_non_mobile, col="green4", lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_normalized_mobile,     col="blue3",  lty="solid", lwd=1.8)
-lines(dates,plotdata\$count_normalized_total,      col="black",  lty="solid", lwd=1.8)
+lines(dates,plotdata\$count_normalized_total_old_def,       col="COLOR_TOTAL_OLD_DEF",      lty="longdash", lwd=1.8)
+lines(dates,plotdata\$count_normalized_total_new_def,       col="COLOR_TOTAL_NEW_DEF",      lty="solid",    lwd=2.2)
+lines(dates,plotdata\$count_normalized_non_mobile_old_def,  col="COLOR_NON_MOBILE_NEW_DEF", lty="longdash", lwd=1.8)
+lines(dates,plotdata\$count_normalized_non_mobile_new_def,  col="COLOR_NON_MOBILE_NEW_DEF", lty="solid",    lwd=2.2)
+lines(dates,plotdata\$count_normalized_mobile_old_def,      col="COLOR_MOBILE_OLD_DEF",     lty="longdash", lwd=1.8)
+lines(dates,plotdata\$count_normalized_mobile_new_def,      col="COLOR_MOBILE_NEW_DEF",     lty="solid",    lwd=2.2)
+
+#legend("topleft",c("main, old", "main site", "mobile site", "total "), lty=1, lwd=2.2, col=c("COLOR_NON_MOBILE_OLD_DEF","COLOR_NON_MOBILE_NEW_DEF","COLOR_MOBILE_OLD_DEF", "COLOR_MOBILE_NEW_DEF", "COLOR_TOTAL_OLD_DEF", "COLOR_TOTAL_NEW_DEF"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("main site", "mobile site", "total "), lty=1, lwd=2.2, col=c("COLOR_NON_MOBILE_NEW_DEF","COLOR_MOBILE_NEW_DEF", "COLOR_TOTAL_NEW_DEF"), inset=0.02, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
 $include_script_plot_credits
-$include_plot_months_normalized
+$include_plot_old_new_definition
+#$include_plot_months_normalized # text is not outside plot, in html
 $include_script_plot_go
 __SCRIPT_EDIT_PLOT_PAGEVIEWS__
 
@@ -555,10 +597,10 @@ $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-#lines(dates,plotdata\$uploads_tot,    col="grey50", lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploads_bot,    col="green4", lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploads_manual, col="blue",   lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploads_wizard, col="red",    lty="solid", lwd=1.8)
+#lines(dates,plotdata\$uploads_tot,    col="grey50", lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploads_bot,    col="green4", lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploads_manual, col="blue",   lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploads_wizard, col="green2", lty="solid", lwd=2.2)
 
 legend("topleft",c("Bot uploads ", "All manual uploads ", "Manual uploads via wizard "), lty=1, lwd=2, col=c("green4","blue", "red"), inset=0.05, bg="#E0E0E0")
 
@@ -583,12 +625,12 @@ $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-lines(dates, plotdata\$uploaders_ge_1,        col="COLOR_1",  lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploaders_ge_5,        col="COLOR_5",  lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploaders_ge_25,       col="COLOR_25", lty="solid", lwd=1.8)
-lines(dates, plotdata\$uploaders_wizard_ge_1, col="COLOR_W1", lty="solid", lwd=1.8)
+lines(dates, plotdata\$uploaders_ge_1,        col="COLOR_1",  lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploaders_ge_5,        col="COLOR_5",  lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploaders_ge_25,       col="COLOR_25", lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploaders_wizard_ge_1, col="COLOR_W1", lty="solid", lwd=2.2)
 
-legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=2.2, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
@@ -612,9 +654,9 @@ $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-lines(dates,plotdata\$articles,col="orange3", lty="solid", lwd=1.8)
+lines(dates,plotdata\$articles,col="orange3", lty="solid", lwd=2.2)
 
-#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=1.8, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
+#legend("topleft",c("1+ uploads ", "5+ uploads ", "25+ uploads ","1+ uploads via wizard "), lty=1, lwd=2.2, col=c("COLOR_1","COLOR_5","COLOR_25","COLOR_W1"), inset=0.02, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
@@ -638,12 +680,12 @@ $include_script_plot_axis_summary
 $include_script_plot_grid
 $include_script_title
 
-lines(dates, plotdata\$articles_reg,  col="green4", lty="solid", lwd=1.8)
-lines(dates, plotdata\$articles_anon, col="red",    lty="solid", lwd=1.8)
-lines(dates, plotdata\$articles_bot,  col="blue",   lty="solid", lwd=1.8)
+lines(dates, plotdata\$articles_reg,  col="green4", lty="solid", lwd=2.2)
+lines(dates, plotdata\$articles_anon, col="red",    lty="solid", lwd=2.2)
+lines(dates, plotdata\$articles_bot,  col="blue",   lty="solid", lwd=2.2)
 
 # http://stat.ethz.ch/R-manual/R-patched/library/graphics/html/legend.html
-legend("topleft",c("reg", "anon", "bots"), lty=1, lwd=1.8, col=c("green4","red","blue"), inset=0.02, bg="#E0E0E0")
+legend("topleft",c("reg", "anon", "bots"), lty=1, lwd=2.2, col=c("green4","red","blue"), inset=0.02, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
@@ -651,6 +693,35 @@ $include_script_plot_credits
 #$out_plot_months_normalized
 $include_script_plot_go
 __SCRIPT_EDIT_PLOT_ARTICLES2__
+
+# PX = Plot Activity
+$out_script_plot_active_wikis = <<__SCRIPT_EDIT_PLOT_ACTIVE_WIKIS__ ;
+
+$include_script_plot_multititle
+$include_script_plot_data
+$include_script_plot_cairo_640_240
+$include_script_options_summary
+
+#plot (dates,plotdata\$count_1,type="l", log="y", col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0.001,YLIM_MAX))
+ plot (dates,plotdata\$count_1,type="l",          col="blue", lty="solid", lwd=0.5, tck=1, xlab="", ylab="", xaxt="n", yaxt="n", las=2, bty="o", xaxs = "i", yaxs = "i", ylim=c(0,YLIM_MAX))
+
+axis(2, col.axis="black", las=2, tck=1, col="#D0D0D0")
+
+$include_script_plot_grid
+$include_script_title
+
+lines(dates,plotdata\$count_1,col="COLOR_1", lty="dotted", lwd=1.7)
+lines(dates,plotdata\$count_3,col="COLOR_3", lty="solid",  lwd=2.2)
+lines(dates,plotdata\$count_5,col="COLOR_5", lty="dotted", lwd=1.7)
+
+legend("topleft",c("LABEL_1 ", "LABEL_3 ", "LABEL_5 "), lty=1, lwd=2.2, col=c("COLOR_1", "COLOR_3", "COLOR_5"), inset=0.02, bg="#E0E0E0")
+
+$include_plot_active_editor
+$include_script_plot_top_month
+$include_script_plot_period
+$include_script_plot_credits
+$include_script_plot_go
+__SCRIPT_EDIT_PLOT_ACTIVE_WIKIS__
 
 }
 
