@@ -286,7 +286,7 @@ sub Localization
     if ($mode_wx)
     {
       $out_publications = $out_wikispecials ;
-      $out_publication  = '' ; # $out_wikispecial ; hide group name other/special 'Other Projects Statistics Commons' -> 'Statistics Commons' 
+      $out_publication  = $out_wikispecial ; # doesn't allways work: group name other/special 'Other Projects Statistics Commons' -> 'Statistics Commons' 
       $out_publishers   = $out_wikispecialists ;
     }
 
