@@ -67,9 +67,9 @@ sub WritePageViewsMonthly
     else
     { $file_html = $path_out . "TablesPageViewsMonthlyOriginalCombined.htm" ; }
   }
-
-  if ($squidslog)
-  { $file_html =~ s/Monthly/MonthlySquids/ ; }
+# obsolete SP001
+# if ($squidslog)
+# { $file_html =~ s/Monthly/MonthlySquids/ ; }
 
   print "\n\nFILE HTML '$file_html'\n\n" ;
 
@@ -81,6 +81,8 @@ sub WritePageViewsMonthly
 # store rendered html (header column and 'all languages' column = 'zz' = Sigma) for reuse on page views report for all projects
 sub StoreHtmlPageviewsAllProjects
 {
+# &LogT ("StoreHtmlPageviewsAllProjects") ;
+
   my ($wp, $keys, $data) = @_ ;
 
   my ($source, $normalized) ;
@@ -117,6 +119,7 @@ sub WriteMonthlyStatsHtmlAllProjects
 
   my (@csv,$source, $normalized) ;
 
+  &LogT ("Update $file_csv_pageviewsmonthly_html\n") ;
   open CSV, '<', $file_csv_pageviewsmonthly_html || abort ("Could not open file $file_csv_pageviewsmonthly_html") ;
   foreach $line (<CSV>)
   {
@@ -140,8 +143,6 @@ sub WriteMonthlyStatsHtmlAllProjects
   foreach $line (@csv)
   { print CSV $line ; }
   close CSV ;
-
-  # print "\n" ;
 }
 
 1;
