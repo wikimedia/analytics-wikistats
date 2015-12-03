@@ -7,6 +7,7 @@
 
   use Time::Local ;
   use Archive::Tar;
+  use Getopt::Std ;
 
   $tar = Archive::Tar->new;
 
@@ -14,14 +15,7 @@
 
   $timestart = time ;
 
-  $dir_tars    = "/a/dammit.lt/projectcounts" ;
-  $dir_dumps   = "/mnt/data/xmldatadumps/public/other/pagecounts-raw" ;
-  $dir_archive = "dataset1001.wikimedia.org::pagecounts-ez/projectcounts" ;
-  
-  if (! -d $dir_tars)
-  { &Abort ("Folder not found: '$dir_tars'\n") ; }
-  if (! -d $dir_dumps)
-  { &Abort ("Folder not found: '$dir_dumps'\n") ; }
+  &ParseArguments ;
 
   ($month,$year) = (gmtime(time))[4,5];
   $year += 1900;
@@ -32,12 +26,50 @@
   { $month = 12 ; $year -- ; }
   $prev_month = sprintf ("%04d/%04d-%02d", $year, $year, $month) ;
 
+# 2015-11 seed new tar file for new projectviews files (webstatscollecotr 1.0 -> 3.0 upgrade) 
+# &GetProjectCounts ("2015/2015-05") ;
+# &GetProjectCounts ("2015/2015-06") ;
+# &GetProjectCounts ("2015/2015-07") ;
+# &GetProjectCounts ("2015/2015-08") ;
+# &GetProjectCounts ("2015/2015-09") ;
+# &GetProjectCounts ("2015/2015-10") ;
+# &GetProjectCounts ("2015/2015-11") ;
+
+# daily cron job add new project[counts|views] files for last 30-60 days (normally should only find new files for last 24 hours) 
   &GetProjectCounts ($prev_month) ;
   &GetProjectCounts ($this_month) ;
+
   &ArchiveTars ;
 
   &Log ("Ready in " . (time - $timestart) . " sec.\n") ;
   exit ;
+
+sub ParseArguments
+{
+# $dir_tars    = "/a/dammit.lt/projectcounts" ;
+# $dir_dumps   = "/mnt/data/xmldatadumps/public/other/pagecounts-raw" ;
+# $dir_archive = "dataset1001.wikimedia.org::pagecounts-ez/projectcounts" ;
+  
+  my $options ;
+  getopt ("tpr", \%options) ;
+
+  $dir_tars    = $options {'t'} ;
+  $dir_dumps   = $options {'p'} ;
+  $dir_archive = $options {'r'} ;
+
+  &Abort ("Specify local folder for tar files as '-t'\n") if $dir_tars eq '' ;
+  &Abort ("Specify folder to collect hourly project counts from as '-p'\n") if $dir_dumps eq '' ;
+  &Abort ("Specify folder to rsync tars to as '-r'\n") if $dir_archive eq '' ;
+  &Abort ("Folder not found: '$dir_tars'\n")  if ! -d $dir_tars ;
+  &Abort ("Folder not found: '$dir_dumps'\n") if ! -d $dir_dumps ;
+
+  print "Local folder for tar files: '$dir_tars'\n" ; 
+  print "Folder to collect hourly project counts from: '$dir_dumps'\n" ; 
+  print "Folder to rsync tars to: '$dir_tars'\n" ;
+
+  ($tar_filename = $dir_tars) =~ s/^.*\/// ;
+  print "tar filename starts with $tar_filename\n" ;
+}
 
 sub GetProjectCounts
 {
@@ -45,9 +77,9 @@ sub GetProjectCounts
   my $year  = substr ($yyyy_yyyy_mm,0,4) ;
   my $month = substr ($yyyy_yyyy_mm,10,2) ;
 
-  print "GetProjectCounts for $year - $month\n" ;
+  print "\nGetProjectCounts for $year - $month\n" ;
 
-  $tar_file = "$dir_tars/projectcounts-$year.tar" ;
+  $tar_file = "$dir_tars/$tar_filename-$year.tar" ;
 
   if (-e $tar_file)
   {
@@ -71,7 +103,7 @@ sub GetProjectCounts
   foreach $file (sort @files)
   {
     next if ! -e $file ;
-    next if $file !~ /^projectcounts/ ;
+    next if $file !~ /^$tar_filename/ ;
     &GetFile ($tar_file,$dir_files, $file) ;
     $last_file_added = $file ;
   }
@@ -92,7 +124,7 @@ sub GetFile
   $cmd = "tar --append --file=$tar_file $file" ;
   &Log ("Cmd '$cmd'\n") ;
   $result = `$cmd` ;
-  print "$result\n" ;
+  # print "$cmd -> $result\n" ;
 }
 
 sub ArchiveTars
@@ -101,10 +133,10 @@ sub ArchiveTars
   print LAST $last_file_added ;
   close LAST ;
 
-  $cmd = "rsync -av $dir_tars/projectcounts-20??.tar $dir_archive" ;
+  $cmd = "rsync -av -ipv4 $dir_tars/$tar_filename-20??.tar $dir_archive" ;
   &Log ("Cmd '$cmd'\n") ;
   $result = `$cmd` ;
-  print "$result\n" ;
+  print "$cmd -> $result\n" ;
 }
 
 sub Log

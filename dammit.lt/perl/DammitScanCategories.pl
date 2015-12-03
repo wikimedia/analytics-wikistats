@@ -96,7 +96,7 @@ sub ParseArguments
   if (! -d $path_out)
   { abort ("Output directory '" . $path_out . "' not found and could not be created") ; }
 
-  if (! -e $path_exclude)
+  if (($path_exclude ne '') and (! -e $path_exclude))
   { abort ("File with categories not to expand '" . $path_exclude . "' not found") ; }
 
   $file_log             = "$path_out/scan_categories.log" ;
@@ -109,33 +109,36 @@ sub ParseArguments
   print "Txt  $file_categories\n" ;
   print "Html $path_html\n" ;
 
-  print "\nDo not expand categories for wiki '$wiki', root category '$category':\n" ; 
-  open CSV, '<', $path_exclude ;
-  while ($line = <CSV>)
+  if (! -d $path_out)
   {
-    chomp $line ;	  
+    print "\nDo not expand categories for wiki '$wiki', root category '$category':\n" ; 
+    open CSV, '<', $path_exclude ;
+    while ($line = <CSV>)
+    {
+      chomp $line ;	  
     
-    my ($wiki_x,$category_root,$category_exclude) = split ('\|', $line) ;
-    $category_root    = uri_unescape ($category_root) ;
-    $category_exclude = uri_unescape ($category_exclude) ;
+      my ($wiki_x,$category_root,$category_exclude) = split ('\|', $line) ;
+      $category_root    = uri_unescape ($category_root) ;
+      $category_exclude = uri_unescape ($category_exclude) ;
 
-    # remove leading and trailing spaces
-    $wiki_x           =~ s/^\s*// ;
-    $wiki_x           =~ s/\s*$// ;
-    $category_root    =~ s/^\s*// ;
-    $category_root    =~ s/\s*$// ;
-    $category_exclude =~ s/^\s*// ;
-    $category_exclude =~ s/\s*$// ;
+      # remove leading and trailing spaces
+      $wiki_x           =~ s/^\s*// ;
+      $wiki_x           =~ s/\s*$// ;
+      $category_root    =~ s/^\s*// ;
+      $category_root    =~ s/\s*$// ;
+      $category_exclude =~ s/^\s*// ;
+      $category_exclude =~ s/\s*$// ;
     
-    next if $category_exclude eq '' ;
-    next if $wiki_x ne $wiki ;
-    next if $category_root ne $category ;
-    print "'$category_exclude'\n" ;
-    $category_exclude =~ s/\*/.*/g ;
-    if ($category_exclude =~ /\*/)
-    { $regexps_exclude .= "$category_exclude|" ; }
-    $do_not_expand {$category_exclude} ++ ; 
-  }
+      next if $category_exclude eq '' ;
+      next if $wiki_x ne $wiki ;
+      next if $category_root ne $category ;
+      print "'$category_exclude'\n" ;
+      $category_exclude =~ s/\*/.*/g ;
+      if ($category_exclude =~ /\*/)
+      { $regexps_exclude .= "$category_exclude|" ; }
+      $do_not_expand {$category_exclude} ++ ; 
+    }
+  }  
   print "\n" ;
   $regexps_exclude =~ s/\|$// ;
   print "regexps: $regexps_exclude\n" ; ;
