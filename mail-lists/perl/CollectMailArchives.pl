@@ -3,7 +3,8 @@
 # Requires CPAN modules: Crypt::SSLeay IO::Socket::SSL LWP::Protocol::https
 # Requires: EzLib.pm from analytics/wikistats/analytics/perl/EzLib.pm
 
-  use lib "/[.. path ..]/lib" ;
+# use lib "/[.. path ..]/lib" ;
+# use lib "/home/ezachte/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
 
@@ -13,20 +14,33 @@
   $checkhtml = $true ;
   $checktext = $false ;
 
-  if (-e '/[.. path ..]')
+  ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+
+  if (-d "/mnt")
   {
-    $root = '/[.. path ..]/@lists' ;
-    $file_log = "/[.. path ..]/LogCollectMailArchives.txt" ;
+    # to do : undo hard coded paths 
+    print "Job runs on $hostname\n" ;
+    $root     = "/a/wikistats_git/mail-lists/lists" ;
+    $file_log = "/home/ezachte/wikistats/mail-lists/logs/LogCollectMailArchives_" . 
+                sprintf ("%4d_%02d_%02d_%02d_%02d",$year+1900,$mon+1,$day,$hour,$min) . ".txt" ;
   }
   else
-  {
-    $root = '\@lists' ;
-    $file_log = "LogCollectMailArchives.txt" ;
-  }
+  { die "Job now supposed to run on WMF server" ; }
+# if (-e '/[.. path ..]')
+# {
+#   $root = '/[.. path ..]/@lists' ;
+#   $file_log = "/[.. path ..]/LogCollectMailArchives.txt" ;
+# }
+# else
+# {
+#   $root = '\@lists' ;
+#   $file_log = "LogCollectMailArchives.txt" ;
+# }
 
-  ($sec,$min,$hourstarted,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-
-  &OpenLog ;
+# &OpenLog ;
+  print "Log to $file_log\n\n" ;
+  open  FILE_LOG, '>', $file_log || abort ("Log file '$file_log' could not be opened.") ;
+  print FILE_LOG "\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n" ;
 
   $content =~ s/\x09+\x20+/ /g ;
   $content =~ s/\x09+/ /g ;
@@ -40,7 +54,8 @@
 
   &Log ("Ready fetching archives\n\n") ;
 
-  close "FILE_LOG" ;
+  close FILE_LOG ;
+  print "\n\nReady" ;
   exit ;
 
 sub GetPage
@@ -158,7 +173,7 @@ sub GetMailingList
 
       if (($getcnt >= 2) && (-e $path))
       {
-        &Log("Skip $path\n") ;
+      # &Log("Skip $path\n") ;
         next ;
       }
       $url2 = $url . $file ;
@@ -167,25 +182,27 @@ sub GetMailingList
       {
         # &Log ("$file fetched\n") ;
         &SaveFile ($root, $name, $file, $content) ;
-        # if (++$getcnt >= 2)
-        # { last ; }
+        if (++$getcnt >= 2)
+        { last ; }
         $getcnt++ ; # only fetch newest two months always
-        if ($getcnt > 4)
-        { last ; } ; # test only: limit new files per folder to speed up process
+      # if ($getcnt > 4)
+      # { last ; } ; # test only: limit new files per folder to speed up process
       }
     }
   }
 
-  $cmd = "gzip -dfv /[.. path ..]/$folder/*.txt.gz" ;
+# $cmd = "gzip -dfv $root/$name/*.txt.gz" ; 
+  $path = "$root/" . lc ($name) . "/*.txt.gz" ; # always store folders lowercase, to avoid lower vs mixed case duplicates (when name changed case in listinfo) 
+  $cmd = "gzip -dfv $path" ; 
   $result = `$cmd` ;
   &Log ("\nGzip '$cmd' -> $result\n") ;
-
 }
+
 
 sub SaveFile
 {
-  my $root    = shift ;
-  my $folder  = $root . "/" . shift ;
+  my $root    = lc (shift) ;
+  my $folder  = lc ($root . "/" . shift) ;
   my $file    = shift ;
   my $content = shift ;
   my $path    = "$folder/$file" ;
@@ -210,7 +227,7 @@ sub SaveFile
   $s = -s $path ;
   if ($l > $s)
   {
-           &Log ("Write '$path' $l $s\n") ;
+    &Log ("Write '$path' $l $s\n") ;
     unlink $path ;
     open "FILE_OUT", ">", $path  || abort ("File '$path' could not be opened.") ;
     binmode FILE_OUT ;
@@ -225,24 +242,26 @@ sub SaveFile
 
 sub OpenLog
 {
-  $fileage  = -M $file_log ;
-  if ($fileage > 5)
-  {
-    open "FILE_LOG", "<", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-    @log = <FILE_LOG> ;
-    close "FILE_LOG" ;
-    $lines = 0 ;
-    open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-    foreach $line (@log)
-    {
-      if (++$lines >= $#log - 5000)
-      { print FILE_LOG $line ; }
-    }
-    close "FILE_LOG" ;
-  }
-  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  close "FILE_LOG" ; # first update timestamp only to show job is running (no shell access)
-  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+# lines obsolete, needed for server with no shell access
+# $fileage  = -M $file_log ;
+# if ($fileage > 5)
+# {
+#   open "FILE_LOG", "<", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#   @log = <FILE_LOG> ;
+#   close "FILE_LOG" ;
+#   $lines = 0 ;
+#   open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#   foreach $line (@log)
+#   {
+#     if (++$lines >= $#log - 5000)
+#     { print FILE_LOG $line ; }
+#   }
+#   close "FILE_LOG" ;
+# }
+# open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+# close "FILE_LOG" ; # first update timestamp only to show job is running (no shell access)
+  print "Log to $file_log\n\n" ;
+  open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
   &Log ("\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n") ;
 }
 

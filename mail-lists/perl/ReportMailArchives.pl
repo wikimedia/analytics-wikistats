@@ -9,34 +9,45 @@
 
   $false    = 0 ;
   $true     = 1 ;
-  $root_in  = '@lists' ;
+  
+  $timestarted = time ;
+  ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = localtime($timestarted);
 
-  if (-e '/[.. path ..]')
+  if (-d "/mnt")
   {
-    $file_log = '/[.. path ..]/cgi-bin/LogScanMailArchives.txt' ;
-    $root_out = '/[.. path ..]/Wikipedia/ScanMail' ;
-    $root_in  = '/[.. path ..]/cgi-bin/@lists' ;
-    $do_iconv = $true ;
+    # to do : undo hard coded paths
+    print "Job runs on $hostname\n" ;
+    $path_in  = "/a/wikistats_git/mail-lists/lists" ;
+    $path_out = "/a/wikistats_git/mail-lists/out" ;
+    $file_log = "/home/ezachte/wikistats/mail-lists/logs/LogReportsMailArchives_" .
+                sprintf ("%4d_%02d_%02d_%02d_%02d",$year+1900,$mon+1,$day,$hour,$min) . ".txt" ;
   }
   else
-  {
-    $file_log = 'LogScanMailArchives.txt' ;
-    $root_out = '@html' ;
-    $do_iconv = $false ;
-  }
+  { die "Job now supposed to run on WMF server" ; }  
   
-  $version  = '0.2' ;
+# if (-e '/[.. path ..]')
+# {
+#   $file_log = '/[.. path ..]/cgi-bin/LogScanMailArchives.txt' ;
+#   $path_out = '/[.. path ..]/Wikipedia/ScanMail' ;
+#   $path_in  = '/[.. path ..]/cgi-bin/@lists' ;
+#   $do_iconv = $true ;
+# }
+# else
+# {
+#   $file_log = 'LogScanMailArchives.txt' ;
+#   $path_out = '@html' ;
+#   $do_iconv = $false ;
+# }
+  
+  $version  = '0.3' ;
   $datetime = &GetDateTimeEnglishShort (time) ;
 
-  if (!-e $root_in)  { die "Folder $root_in no found\n" ; }
-  if (!-e $root_out) { die "Folder $root_out no found\n" ; }
-
-  $timestarted = time ;
-  ($sec,$min,$hourstarted,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($timestarted);
+  if (!-e $path_in)  { die "Folder $path_in no found\n" ; }
+  if (!-e $path_out) { die "Folder $path_out no found\n" ; }
 
   &Init ;
   &OpenLog ;
-  &ScanFolder ($root_in) ;
+  &ScanFolder ($path_in) ;
 
   &Log ("\nWrite List Stats\n") ;
   @folders = sort @folders ;
@@ -154,6 +165,9 @@ sub Init
 'Tomos at Wikipedia' => 'wiki tomos'
 ) ;
 
+foreach $key (keys %aliases)
+{ $aliases_lc {lc ($key)} = $aliases {$key} ; } 
+
 %monthes = (
 'January'   => 1,
 'February'  => 2,
@@ -239,9 +253,9 @@ sub ScanFolder
         $foldercnt++ ;
         $folder = $file ;
         &Log ("\nFolder $folder\n\n") ;
-        if ($folder ne $root_in)
+        if ($folder ne $path_in)
         { push @folders, $folder ; }
-        &ScanFolder ("$folder");
+        &ScanFolder ($folder);
       }
       else
       {
@@ -284,22 +298,29 @@ sub ScanFile
   my $file   = shift ;
   my $period = shift ;
 
-  # Wikimedia-l didn't exist before 2012-04-09: skip the archives before this date
+  # wikimedia-l didn't exist before 2012-04-09: skip the archives before this date
   # They're also broken mirrors, with twice as many posts as foundation-l had
-  if ( ($folder eq "Wikimedia-l") && ($period < 2012*12+4) )
+  if ( ($folder eq "wikimedia-l") && ($period < 2012*12+4) )
   { return ($continue) ; }
 
   open "FILE_ARCHIVE", "<", $file  || abort ("File '$file' could not be opened.") ;
   $continue = $true ;
   while (($line = <FILE_ARCHIVE>) && $continue)
   {
-          $line =~ s/\x09+\x20+/ /g ;
-          $line =~ s/\x09+/ /g ;
+# next if $line !~ /DiPierro/ ;
+    chomp $line ;
+
+    $line =~ s/From: bogus\@does\.not\.exist\.com \(\)/From: bogus@does.not.exist.com (no name)/ ;
+    $line2 = $line ;
+    $line =~ s/\x09+\x20+/ /g ;
+    $line =~ s/\x09+/ /g ;
 
     if ($line =~ /^From\:.*\((.*)\)/i)
     {
-
-      ($name) = $line =~ /^From\:.*?\((.*)\)\s*$/ ;
+    # ($name = $line) =~ /^From\:.*?\((.*)\)\s*$/ ;
+      ($name = $line) =~ s/^From\:[^\(]+\((.*?)\)\s*$/$1/ ;
+    # ($name = $line) =~ s/^From\:\s*// ;
+    # $name =~ s/ .*// ;
       $name =~ s/\s*\(gmail\)\s*//i ;
       $name =~ s/\s*\.+\s*$//i ;
       $name =~ s/\s*\@ nupedia.com\s*//i ;
@@ -308,25 +329,26 @@ sub ScanFile
 #if (($name !~ /8859/) && ($name !~ /1250/)){ next ; }
 #if ($name !~ /^gemma/i) { next ; }
 
-
       $name =~ s/\(/&#40;/g ;
       $name =~ s/\)/&#41;/g ;
 
       if ($folder eq "WikiPL-l")
       {
-                $name =~ s/(.)/&WinCode1250 ($1)/ge ;
+        $name =~ s/(.)/&WinCode1250 ($1)/ge ;
       }
 
       $name2 = &Encode ($name, $period) ;
       if ($name2 =~ /^\s*$/) # e.g. from bogus@does.not.exist.com
       {
-        &Log ("Folder $folder File $file Name '$name' -> ''\n") ;
+        &Log ("Folder $folder File $file Name '$name' -> '' (line was '$line2')\n") ;
         next ;
       }
+
       $name = $name2 ;
 
       my $board = $false ;
 
+# needs massive update
       if (($name eq 'Jimmy Wales')           && ($period > 2004*12+5))
       { $board = $true ; }
 
@@ -880,7 +902,7 @@ sub WriteAliasList
 
   foreach $alias (@keys)
   {
-    $name  = @aliases {$alias} ;
+    $name  = @aliases_lc {lc ($alias)} ;
 
     if ($name eq 'Ellywa')      { next ; } # hide real names for privacy reasons
     if ($name eq 'GerardM')     { next ; }
@@ -946,7 +968,7 @@ sub WritePage
   if ($file !~ /\.pl$/i)
   {
     $file = &EncodeURL ($file) ;
-    open "FILE_HTML", ">", "$root_out/$file.html"  || abort ("File '$file' could not be opened.") ;
+    open "FILE_HTML", ">", "$path_out/$file.html"  || abort ("File '$file' could not be opened.") ;
     print FILE_HTML $html ;
     close "FILE_HTML" ;
   }
@@ -957,12 +979,13 @@ sub Encode
   my $name   = shift ;
   my $period = shift ;
 
-  $alias = $aliases {$name} ;
+# print "Alias '$name' = '" . $aliases_lc {lc ($name)} . "'\n" ; 
+  $alias = $aliases_lc {lc ($name)} ;
   if ($alias ne '')
   { $name = $alias ; }
 
-  if ($name =~ /nemo/i)
-  { &Log ("Name $name\n") ; }
+# if ($name =~ /xxxx/i) # debug code
+# { &Log ("Name $name\n") ; }
 
   $name =~ s/at svn.leuksman.com/ (SVN)/ ;
   $name =~ s/at svn.wikimedia.org/ (SVN)/ ;
