@@ -9491,7 +9491,7 @@ sub AddNoticeSurvey
 {
   my $report_id = shift ;
 
-  $html .= "<font color=#F00><b><big>Aug 2015: This report has been discontinued until further notice, due to lack of maintenance.</big></font><br><font color=#A00>Only some of the Wikistats traffic reports will be migrated to Wikimedia Foundation's new hadoop-based infrastructure.<br>If you want this particular report included in the migration <a href='https://www.mediawiki.org/w/index.php?title=Analytics/Wikistats/TrafficReports/Future_per_report_B2'>let us know</a> (id for this report is '$report_id').<br>Read more <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future'>here</a>.</b></font><br>&nbsp;<br>" ;
+  $html .= "<font color=#F00><b><big>Aug 2015: This report has been discontinued until further notice, due to lack of maintenance.</big></font><br><font color=#A00>Only some of the Wikistats traffic reports will be migrated to Wikimedia Foundation's new hadoop-based infrastructure. See them <a target='_blank' href='https://browser-reports.wmflabs.org/'>here</a>.<br>If you want this particular report included in the migration <a href='https://www.mediawiki.org/w/index.php?title=Analytics/Wikistats/TrafficReports/Future_per_report_B2'>let us know</a> (id for this report is '$report_id').<br>Read more <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future'>here</a>.</b></font><br>&nbsp;<br>" ;
 
 if ($report_id > 20)
 {
