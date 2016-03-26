@@ -25,7 +25,7 @@ date=auto # 20101231 # auto
 
 #date=20150430
 
-x=nlwiki
+x=dewiki
 project=wp # wx
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 
