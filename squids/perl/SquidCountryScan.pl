@@ -131,7 +131,19 @@ sub CollectRawData
             if ($line =~ /^#/) { next ; }
 
             chomp $line ;
+            if ($line =~ ',,')
+            { 
+              # print "Invalid line '$line'\n" ;  # old bug
+              next ;
+            }
+ 
             ($bot,$wiki,$country,$count) = split (',', $line) ;
+
+            if (($mode eq 'visits') && ($yyyymm ge '2015-05')) # switch to hive -> unsampled data!
+            {
+              $count = sprintf ("%.0f", $count / 1000) ; 
+              next if $count < 1 ;
+            }                
 
             if ($bot =~ /Y/)
             { $bot = 'B' ; }
@@ -139,11 +151,21 @@ sub CollectRawData
             { $bot = 'U' ; }
 
             ($project,$language) = split (':', $wiki) ;
+            if ($language eq '')
+            { 
+              ($project,$language) = split ('\.', $wiki) ;
+            # print "no lang: wiki $wiki, project $project, lang $language\n" ;
+            }
+ 
             $project =~ s/\s//g ;
 
           # if ($project ne "wp") { next ; }
           # if ($yyyymm  ne "2009-11") { next ; }
           # if ($language eq "www") { next ; }
+
+          # debug
+          # if ($language eq '')
+          # { print "file $file, line $line, project $project, lang $langage\n" ; }
 
             $visits_monthly       {"$yyyymm,$project,$language,$country,$bot"}   += $count ;
             $visits_daily         {"$yyyymmdd,$bot"}                             += $count ;
@@ -258,6 +280,7 @@ sub CollectRawData
   foreach $key (sort keys %visits_monthly)
   {
     ($yyyymm, $project, $language, $country) = split (',', $key) ;
+
     $correction = $correct_for_missing_days {$yyyymm} ;
     $count = $visits_monthly{$key} ;
     $count2 = $count ;
