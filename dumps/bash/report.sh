@@ -91,8 +91,8 @@ case "$projectcode" in
 esac  
 echo2 "Generate and publish reports for project $project" 
 
-for x in en # test
-# for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+# for x in en # test
+for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
   echo2 ""
   echo2 ">>> loop with $projectcode:$x"
