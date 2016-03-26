@@ -130,15 +130,15 @@ sub ForceExtraContentNamespaces
   # force extra content namespaces which may not have been defined in api, but always were countable 
   foreach $key (sort keys %namespaces)
   {
-    if ($key =~ /^ws,/)
-    {
-      if ($namespaces {$key} !~ /102/) 
-      { $namespaces   {$key} .= "\|102" ; }
-      if ($namespaces {$key} !~ /104/) 
-      { $namespaces   {$key} .= "\|104" ; }
-      if ($namespaces {$key} !~ /106/) 
-      { $namespaces   {$key} .= "\|106" ; }
-    }
+    # if ($key =~ /^ws,/)
+    # {
+    #  if ($namespaces {$key} !~ /102/) 
+    #  { $namespaces   {$key} .= "\|102" ; }
+    #  if ($namespaces {$key} !~ /104/) 
+    #  { $namespaces   {$key} .= "\|104" ; }
+    #  if ($namespaces {$key} !~ /106/) 
+    #  { $namespaces   {$key} .= "\|106" ; }
+    # }
   }  
 
   if ($namespaces {"wx,strategy"} !~ /106/) 
