@@ -903,6 +903,7 @@ sub SetDumpDate
 
   $stub_dump_done = $false ;
 
+  print "Parse index file '$path_in/index.html'\n" ;
   open INDEX_HTML, '<', "$path_in/index.html" ;
   while ($line = <INDEX_HTML>)
   {
@@ -911,11 +912,12 @@ sub SetDumpDate
     {
       if ($line =~ /Extracted page abstracts/) # last dump before stub-meta-history dump -> start time of job step
       {
+        print "$line\n" ;    
         $line =~ s/.*?<span class='updates'>// ;
         $year  = substr ($line,0,4) ;
         $month = substr ($line,5,2) ;
         $day   = substr ($line,8,2) ;
-        
+        print "1 Extracted page abstracts $year $month $day\n" ;
         if ($year !~ /^2/)
         {
           # new situation in May 2015: job only generates stub dumps -> take dumpdate from folder name
@@ -927,6 +929,7 @@ sub SetDumpDate
           $year  = substr ($line,0,4) ;
           $month = substr ($line,4,2) ;
           $day   = substr ($line,6,2) ;
+          print "2 Extracted page abstracts $year $month $day\n" ;
         }
 
         $date = sprintf ("%04d%02d%02d", $year, $month, $day) ;
