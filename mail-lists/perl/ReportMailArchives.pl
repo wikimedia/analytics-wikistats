@@ -12,6 +12,7 @@
   
   $timestarted = time ;
   ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = localtime($timestarted);
+  $period_now = ($year+1900)*12+($mon+1) ;
 
   if (-d "/mnt")
   {
@@ -202,7 +203,7 @@ thin {border:none;margin:0px}
 </head>
 <body bgcolor='#FFFFDD'>
 <table width=100%><tr><td class=l>
-<h2>Wikimedia Mail Stats: <a href='URL'>LIST</a></h2>
+<h2>Wikimedia Mail Stats: <a href='URL'>LIST</a></h2>REMARK
 </td><td class=r>
 <small>
 <a href='index.html'>All lists</a><br>
@@ -215,7 +216,7 @@ HTML
 <small>
 Please don't confuse number of posts of a person with relevance of that person's contributions.
 Less may be more in some cases.
-<p>Generated on DATETIME
+<p>Generated on DATETIME (UTC)
 <br>Script version:VERSION
 <br>Author:Erik Zachte (<a href='http://infodisiac.com/'>Web site</a>)
 <br>Mail:erikzachte@###.com (&lt;nospam&gt; ### = infodisiac &lt;/nospam&gt;)
@@ -303,6 +304,8 @@ sub ScanFile
   if ( ($folder eq "wikimedia-l") && ($period < 2012*12+4) )
   { return ($continue) ; }
 
+  return if $folder eq 'wikidata-l' ; # wikidata-l is incomplete duplicate of wikidata
+  
   open "FILE_ARCHIVE", "<", $file  || abort ("File '$file' could not be opened.") ;
   $continue = $true ;
   while (($line = <FILE_ARCHIVE>) && $continue)
@@ -408,6 +411,12 @@ sub ScanFile
       $edits_name_tot_month  {"$period|$name"} ++ ;
       $edits_tot             {"$period"} ++ ;
       $edits_tot_list        {"$folder"} ++ ;
+
+      if ($period > $edits_name_list_last {"$folder|$name"}) 
+      { $edits_name_list_last {"$folder|$name"} = $period ; }
+      if ($period > $edits_name_last {"$name"}) 
+      { $edits_name_last {"$name"} = $period ; }
+
       $edits_tot_all ++ ;
     }
   }
@@ -478,7 +487,7 @@ sub WriteListStats
   }
   $output .= "</tr><p>" ;
 
-  $columns = $#periods + 3 ;
+  $columns = $#periods + 4 ;
   $output .= "<tr class=thin><td colspan=$columns height=1 class=thin><img src='grey.gif' height=2 width=100%></td></tr>" ;
 
   if ($edits_name_list {"$folder|Board"} > 5)
@@ -538,7 +547,7 @@ sub WriteListStats
     {
       $em = $edits_name_list_month {"$folder|$period|$name"} ;
       if ($em == "")
-      { $output .= "<td>-</td>" ; }
+      { $output .= "<td>\&nbsp;</td>" ; }
       else
       { $output .= "<td>$em</td>" ; }
     }
@@ -547,7 +556,7 @@ sub WriteListStats
 
   $output .= "</table>\n" ;
 
-  &WritePage ($folder, $true) ;
+  &WritePage ($folder, $true, '') ;
 }
 
 sub WriteNameStats
@@ -570,7 +579,7 @@ sub WriteNameStats
 
   $output  = "<table border='1'>\n" ;
 
-  $output .= "<tr><th class=l valign=top>period</th><th>&nbsp;</th>" ;
+  $output .= "<tr><th class=l valign=top>period</th><th>&nbsp;</th><th>&nbsp;</th>" ;
   foreach $period (@periods)
   {
     $year  = $periody {$period} ;
@@ -581,7 +590,7 @@ sub WriteNameStats
   $output .= "</tr>\n" ;
 
   $total = $edits_name_tot {$name} ;
-  $output .= "<tr><th class=l valign=bottom>Total</th><th valign=bottom>$total</th>" ;
+  $output .= "<tr><th class=l valign=bottom>total</th><th valign=bottom>$total</th><th valign=bottom><font color=#884>last<br>post<br>mon<br>ago</font></th>" ;
   $max = 0 ;
   foreach $period (@periods)
   {
@@ -594,7 +603,7 @@ sub WriteNameStats
   {
     $count = $edits_name_tot_month {"$period|$name"} ;
     if (($count == 0) || ($max == 0))
-    { $output .= "<td>-</td>" ; }
+    { $output .= "<td valign=bottom>-</td>" ; }
     else
     {
       $height = int (0.5 + 100 * $count / $max) ;
@@ -618,12 +627,16 @@ sub WriteNameStats
 
     $total = $edits_name_list {"$folder|$name"} ;
     $folder2 = &FormatListName ($folder) ;
-    $output .= "<tr><td class=l><a href='$folder\.html'>$folder2</a></td><th>$total</th>" ;
+    $months_ago = $period_now - $edits_name_list_last {"$folder|$name"} ;
+    if ($months_ago == 0)
+    { $months_ago = '-' ; }
+
+    $output .= "<tr><td class=l><a href='$folder\.html'>$folder2</a></td><th>$total</th><td><font color=#AAA>$months_ago</font></td>" ;
     foreach $period (@periods)
     {
       $em = $edits_name_list_month {"$folder|$period|$name"} ;
       if ($em == "")
-      { $output .= "<td>-</td>" ; }
+      { $output .= "<td>&nbsp;</td>" ; }
       else
       { $output .= "<td>$em</td>" ; }
     }
@@ -633,7 +646,7 @@ sub WriteNameStats
   $output .= "</table>\n" ;
 
   $output .= "<p><a href='_Aliases.html'>List of aliases</a></small>\n" ;
-  &WritePage ($name, $false) ;
+  &WritePage ($name, $false, $name) ;
 }
 
 sub WriteTopNameStats
@@ -656,11 +669,11 @@ sub WriteTopNameStats
   @keys = keys %edits_name_tot ;
   @keys = sort { @edits_name_tot {$b} <=> @edits_name_tot {$a} } @keys ;
 
-  $output  = "This list contains all community members that posted at least 200 times on all lists combined.<p>See below for <a href='#colours'>explanation of colours</a>.<p>" ;
+  $output  = "This list contains all community members that posted at least 200 times on all lists combined.<p>See below for <a href='#colours'>explanation of colours</a>.<p><font color=AA7><small>" . "Last = Last mail posted x months ago (blank if person posted this month)</small></font><br>" ;
 
   $output .= "<table border='1'>\n" ;
 
-  $output .= "<tr><th><font color=#800000>cat F</font></th><th><font color=#008000>cat P</font></th><th><font color=#000080>cat T</font></th><th class=l valign=top>Name</th><th>&nbsp;FPT&nbsp;</th><th>Total</th><th colspan=14 class=l>Mostly posted at..." .
+  $output .= "<tr><th><font color=#800000>cat F</font></th><th><font color=#008000>cat P</font></th><th><font color=#000080>cat T</font></th><th>Last</th><th class=l valign=top>Name</th><th>&nbsp;FPT&nbsp;</th><th>Total</th><th colspan=14 class=l>Mostly posted at..." .
              "<font color=#800000>foundation</font>, <font color=#008000>project</font> or <font color=#000080>technical</font> oriented lists.</th></tr>\n\n" ;
   foreach $name (@names)
   {
@@ -715,6 +728,10 @@ sub WriteTopNameStats
       &Log ("Name $name " . @totposts {"#800000"} ." , " . @totposts {"#008000"} . " , "  . @totposts {"#000080"} . "\n") ;
       &Log ("Name $name red $red $red2 $red3, green $green $green2 $green3, blue $blue $blue2 $blue3 mix $mix maxcolor $maxcolor\n") ;
     }
+    else
+    { 
+      $mix   = "\#000" ;
+    }
 
     $images = "<td bgcolor=$red3>&nbsp;</td>" .
               "<td bgcolor=$green3>&nbsp;</td>" .
@@ -727,7 +744,12 @@ sub WriteTopNameStats
 
 #   if ($url ne "$name\.html")
 #   { &Log ("$name\.html -> $url\n") ; }
-    $output .= "<tr>$images<td class=l><a href='$url'>$name2</a></td>$mix<th>$count</th>" ;
+
+    $months_ago = $period_now - $edits_name_last {"$name"} ;
+    if ($months_ago == 0)
+    { $months_ago = '' ; }
+
+    $output .= "<tr>$images<td class=r><font color=#666>$months_ago</font></td><td class=l><a href='$url'>$name2</a></td>$mix<th>$count</th>" ;
 
     for ($ndx = 0 ; $ndx <= 6 ; $ndx++)
     {
@@ -768,7 +790,7 @@ sub WriteTopNameStats
              "The 'FPT' column shows a simple addition of the three category colour values.<br>" .
              "It can be used to match likewise inclined people in the list (of course don't take this too seriously).</small>" ;
   $output .= "<p><a href='_Aliases.html'>List of aliases</a></small>\n" ;
-  &WritePage ("_PowerPosters", $false) ;
+  &WritePage ("_PowerPosters", $false, '') ;
 }
 
 sub GetFolderColor
@@ -888,9 +910,9 @@ sub WriteListIndex
              "It can be used to match likewise inclined people in the list (of course don't take this too seriously).<br>" .
              "<b>April 2009: The colouring scheme is somewhat outdated. You can help by sending corrections to the mail address below.</b></small>" ;
 
-  &WritePage ("index", $false) ;
-  &WritePage ("Index", $false) ;
-  &WritePage ("\_Index", $false) ;
+  &WritePage ("index", $false, '') ;
+  &WritePage ("Index", $false, '') ;
+  &WritePage ("\_Index", $false, '') ;
 }
 
 sub WriteAliasList
@@ -923,14 +945,14 @@ sub WriteAliasList
   $output .= "<p><small>Several real names are omitted here for privacy reasons.</small>" ;
   $output .= "<p><small>Feel free to send updates to the mail address shown below.</small>" ;
 
-  &WritePage ("_Aliases", $false) ;
+  &WritePage ("_Aliases", $false, '') ;
 }
 
 sub WritePage
 {
-  my $file = shift ;
+  my ($file, $linksite, $name) = @_ ;
+
   $file =~ s/\//%25%2E/g ;
-  my $linksite = shift ;
 
   my $html = $out_html ;
   if (($file =~ /_?Index/i) || ($file =~ /PowerPosters/i))
@@ -938,17 +960,30 @@ sub WritePage
     $html =~ s/<a href='URL'>LIST<\/a>/LIST/ ;
     $html =~ s/GO_UP/http\:\/\/infodisiac.com\//g ;
     $html =~ s/UP/Home/g ;
+    $html =~ s/REMARK//g ;
   }
   elsif ($file =~ /_Aliases/)
   {
     $html =~ s/<a href='URL'>LIST<\/a>/LIST/ ;
     $html =~ s/GO_UP/index.html/g ;
     $html =~ s/UP/Index/g ;
+    $html =~ s/REMARK//g ;
   }
   else
   {
+    my $last_active = $period_now - $edits_name_last {"$name"} ;
+
+    if ($last_active == 0)
+    { $last_active = 'Last update this month' ; }
+    elsif ($last_active == 0)
+    { $last_active = " Last active previous month" ; }   
+    else
+    { $last_active = " Last active $last_active months ago" ; }   
+
     $html =~ s/GO_UP/index.html/g ;
     $html =~ s/UP/Index/g ;
+    $html =~ s/LIST/LIST/g ;
+    $html =~ s/REMARK/$last_active/g ;
   }
 
   if (! $linksite)
@@ -1254,6 +1289,7 @@ sub FormatListName
   my $name = shift ;
   $name =~ s/^Wiki([a-z]{2,3})\-l$/"Wiki".uc($1)."-l"/ie ;
   $name =~ s/^Wikimedia([a-z]{2,3})\-l$/"Wikimedia".uc($1)."-l"/ie ;
+  $name =~ s/\-/&#8209;/g ;
   return ($name) ;
 }
 
