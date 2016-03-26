@@ -8,6 +8,11 @@ bash="/home/ezachte/wikistats/mediacounts/bash"
 
 cd $bash
 
+#zipfile="mediacounts.top1000.2015-12-31.v00.csv.zip" 
+#year=2015
+#echo "hdfs dfs -put -f $archive_local/daily/$year/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/$year"
+#hdfs dfs -put -f $archive_local/daily/$year/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/$year
+
 year_prev=2015
 year_now=2015
 
@@ -58,8 +63,8 @@ do
                                       "$archive_local/tmp" \
                                       $file 
         echo publish $zipfile
-        echo "hdfs dfs -put -f $archive_local/daily/2015/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/2015"
-        hdfs dfs -put -f $archive_local/daily/2015/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/2015
+        echo "hdfs dfs -put -f $archive_local/daily/$year/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/$year"
+        hdfs dfs -put -f $archive_local/daily/$year/$zipfile hdfs:///wmf/data/archive/mediacounts/daily/$year
      fi
     fi 
   done
