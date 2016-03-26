@@ -205,6 +205,8 @@ sub ParseXml
   my $wla_any_revision_has_template  = $false ;
   my $wla_last_revision_has_template = $false ;
 
+  print "\n\nOPEN $file_xml\n\n" ;
+
      if ($file_xml =~ /\.gz$/) # extension gz ?
   { open XML, "-|", "gzip -dc \"$file_xml\""   || die ("Input file could not be opened: $file_xml") ; }
   elsif ($file_xml =~ /\.bz2$/) # extension bz2 ?
@@ -260,11 +262,12 @@ sub ParseXml
 #  { print " lines: " . &commify($lines) . "\n" ; }
 #}
 
+  $lines_per_file = 0 ;
   while ($line = <XML>)
   {
     $lines ++ ;
-
-    next if ($lines < 6000000000) ;
+    $lines_per_file++ ;
+  # next if ($lines < 6000000000) ; # no WLA updates before this threshold (empirically found)
 
     if ($line =~ /^\s*<title>/)
     {
@@ -526,6 +529,41 @@ sub ParseXml
     {
       $in_text = $false ;
     }
+
+
+    if ($line =~ /<\/mediawiki>/) # || ($lines_per_file > 100))
+    {
+      print "\n\nCLOSE $file_xml\n\n" ;
+      close XML ;
+      $lines_per_file = 0 ;
+
+      if ($file_xml =~ /\d\./) # processing partial xml files? try next one
+      {
+        if ($seqold == 0)
+        {
+          $seqold = 1 ;
+          $seqnew = 2 ;
+        }
+
+        $file_xml =~ s/$seqold\./$seqnew\./ ;        
+
+        $seqnew ++ ;
+        $seqold ++ ;
+
+        if (-e $file_xml)
+        {           
+          print "\n\nOPEN $file_xml\n\n" ;
+          if ($file_xml =~ /\.gz$/) # extension gz ?
+          { open XML, "-|", "gzip -dc \"$file_xml\""   || die ("Input file could not be opened: $file_xml") ; }
+          elsif ($file_xml =~ /\.bz2$/) # extension bz2 ?
+          { open XML, "-|", "bzip2 -dc \"$file_xml\""  || die ("Input file could not be opened: $file_xml") ; }
+          elsif ($file_xml =~ /\.7z$/) # extension 7z ?
+          { open XML, "-|", "7z e \"$file_xml\" -so"   || die ("Input file could not be opened: $file_xml") ; }
+          else
+          {                                               die ("Unexpected extension: $file_xml") ; }
+        }
+      }
+    }    
   }
 
   print HTML "</body>\n</html\n" ;
