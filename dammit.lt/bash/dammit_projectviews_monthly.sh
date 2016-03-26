@@ -31,7 +31,7 @@ cd $csv_in
 cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$list  csv_ws/$list csv_wv/$list csv_wx/$list > $projectcounts/$list
 
 # step 1: data collecting 
-
+# *************************************************************************************************************************************************
 # Main steps in WikiCountsSummarizeProjectCounts.pl:
 
 # LogArguments 
@@ -89,9 +89,17 @@ cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$lis
 
 # *  = some csv files which contain input for all projects have historically been stored in csv/csv_wp (some day move these to csv/csv_mw)
 # ** = yep not csv really, despite folder name csv_.. ;)
+# *************************************************************************************************************************************************
 
 # old version before upgrade to wc 3.0 format:
 # perl $perl/WikiCountsSummarizeProjectCounts.pl -i $projectcounts -o $csv -w $projectcounts -m $meta| tee -a $report | cat
+
+# -i = input folder (with 'wc1' tar files = webstatscollector 1 = with legacy page view definition = a.o. without bots removed) 
+# -j = input folder (with 'wc3' tar files = webstatscollector 3 = new page view definition         = a.o. with bots removed)
+# -m = meta file with data per language code (language name, number of speakers, regions)
+# -o = output (csv files)
+# -s = start month for new page view definition (not used, hard coded = 201505)
+# -w = folder for WhiteListWikis.csv (valid language codes)
 
 cd $projectviews
 perl $perl_dammit/DammitSummarizeProjectViews.pl -i $projectcounts -j $projectviews -o $csv_pv -w $projectcounts -m $meta -s $date_switch | tee $log | cat

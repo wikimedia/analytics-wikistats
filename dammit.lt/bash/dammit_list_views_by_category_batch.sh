@@ -30,9 +30,18 @@ yyyy_mm=2015-04
 threshold=20
 depth=10
 
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Leiden'                         2016-01    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Leiden'                         2016-01    $threshold     'wp-en' $depth
+exit  
+ ./dammit_list_views_by_category.sh 'es.wikipedia.org' 'Flaviviridae'                   2016-01    $threshold     'wp-es' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Flaviviruses'                   2016-01    $threshold     'wp-en' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Wijk_in_Leiden'                   2016-01    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Leiden'                           2016-01    $threshold     'wp-nl' $depth
+ ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Museum_in_Nederland'              2016-01    $threshold     'wp-nl' $depth
 # ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Agriculture'                      2015-06    $threshold     'wp-en' 20
- ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Images_from_Wiki_Loves_Africa_2015'      2015-10    $threshold     'wm-commons' 2
-exit
+# ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Influenza'           2015-12    10     'wp-en' 5
+ ./dammit_list_views_by_category.sh 'pt.wikipedia.org' 'Gripe'               2015-12    10     'wp-pt' 5
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Phytopathology'      2015-10    10     'wp-en' 5
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Featured_articles'      2015-06    $threshold     'wp-en' 5
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Good_articles'          2015-06    $threshold     'wp-en' 5
 

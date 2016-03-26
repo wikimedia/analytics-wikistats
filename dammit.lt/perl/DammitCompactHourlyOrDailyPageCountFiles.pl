@@ -66,6 +66,8 @@
 # if both max_age (-a) and date range (-d) have been specified both criteria will have to be fulfilled, allows e.g. to (re)process only files for first three months of year
 # note for monthly processing specifying both -a + -d may seem a bit over the top, -a is default for cron processing (-d may be deprecated)
 
+# Some trivial comments (like 'open file for write') are to categorize statements, for easy search.
+
   &AttachLibraries ;
   &OnTestOnlySetDefaultArgs ;
 
@@ -185,12 +187,12 @@ sub OnTestOnlySetDefaultArgs
 #    if ($job_runs_on_production_server)
 #    {
 #      if ($fn_in_daily =~ /\.bz2$/)
-#      { open $fh_in_daily [$day], "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("MergeFilesFullMonth: Open failed for '$fn_in_daily'\n") ; }
+#      { open $fh_in_daily [$day], "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("MergeFilesFullMonth: Open failed for '$fn_in_daily'\n") ; } # open file for read
 #      else # .gz
-#      { open $fh_in_daily [$day], "-|", "7z e  -so \"$fn_in_daily\"" || &Abort ("MergeFilesFullMonth: Open failed for '$fn_in_daily'\n") ; }
+#      { open $fh_in_daily [$day], "-|", "7z e  -so \"$fn_in_daily\"" || &Abort ("MergeFilesFullMonth: Open failed for '$fn_in_daily'\n") ; } # open file for read
 #    }
 #    else
-#    { open $fh_in_daily [$day], '<', $fn_in_daily || &Abort ("Open failed for '$fn_in_daily'\n") ; }
+#    { open $fh_in_daily [$day], '<', $fn_in_daily || &Abort ("Open failed for '$fn_in_daily'\n") ; } # open file for read
 
 #    binmode $fh_in_daily [$day] ;
 
@@ -200,10 +202,13 @@ sub OnTestOnlySetDefaultArgs
 #    $files_in_found ++ ;
 
 #    $file = $fh_in_daily [$day] ;
-#    $line = <$file> ;
+#    $line = <$file> ; # read line
+#    $lines_read_daily [$day] ++ ;
 #    while (($line =~ /^#/) || ($line =~ /^@/))
-#    { $line = <$file> ; }
-
+#    { 
+#      $line = <$file> ; # read line
+#      $lines_read_daily [$day] ++ ;
+#    }
 #    chomp $line ;
 #    if ($line =~ /^[^ ]+ [^ ]+ [^ ]+$/) # prepare for format change: space will be added between daily total and hourly counts
 #    {
@@ -364,13 +369,15 @@ sub OnTestOnlySetDefaultArgs
 
 #          $total_per_month += $total_per_day ;
 #          $file = $fh_in_daily [$day] ;
-#          # $line = <$file> ;
+#          # $line = <$file> ; # read line
+#          # $lines_read_daily [$day] ++ ;
 
 #          while ($true)
 #          {
-#            # if (($line = <$file>) && ($lines_read_this_month++ < 10000)) # test code
-#              if ($line = <$file>)
+#            # if (($line = <$file>) && ($lines_read_this_month++ < 10000)) # test code # read line
+#              if ($line = <$file>) # read line
 #            {
+#              $lines_read_daily [$day] ++ ;
 #              next if $line =~ /^#/ ;
 #              next if $line =~ /^@/ ;
 
@@ -397,6 +404,7 @@ sub OnTestOnlySetDefaultArgs
 #            else
 #            {
 #              close $fh_in_daily [$day] ;
+#              $lines_read_daily [$day] = -1 ;
 
 #              $files_in_open-- ;
 #              $file_in_open [$day] = $false ;
@@ -503,14 +511,14 @@ sub CheckHoursMissing
   return if $fn_in_check !~ /\.(?:bz2|7z)/ ;
 
   if ($fn_in_check =~ /\.bz2$/)
-  { open $fh_in_check, "-|", "bzip2 -dc \"$fn_in_check\"" || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
+  { open $fh_in_check, "-|", "bzip2 -dc \"$fn_in_check\"" || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; } # open file for read
   else #7z
-  { open $fh_in_check, "-|", "7z e -so \"$fn_in_check\""  || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; }
+  { open $fh_in_check, "-|", "7z e -so \"$fn_in_check\""  || &Abort ("CheckHoursMissing: could not open '$fn_in_check'.") ; } # open file for read
 
   binmode $fh_in_check ;
 
   $lines_checked = 0 ;
-  while ($line = <$fh_in_check>)
+  while ($line = <$fh_in_check>) # read line
   {
     if ($line =~ /^#.*?requests per full day are omitted/)
     { ($threshold_requests_omitted = $line) =~ s/[^\d]//g ; }
@@ -884,6 +892,7 @@ sub PhaseBuildDailyFile_FileAgeInDays
 
   $file_age_in_days = $days_today - $days_file ;
 
+# print "$file_yyyy_mm_dd_hh: $file_age_in_days days ago\n" ;
   return ($file_age_in_days) ;
 }
 
@@ -1011,7 +1020,7 @@ sub PhaseBuildDailyFile_MergeFiles
   $time_start_cycle = time ;
   $lines = 0 ;
 
-# open TRACE, '>', "/home/ezachte/trace.txt" ; # debug code
+# open TRACE, '>', "/home/ezachte/trace.txt" ; # debug code # open file for write
 
   undef @fh_in_hourly ;
   undef %totals_in ;
@@ -1033,7 +1042,7 @@ sub PhaseBuildDailyFile_MergeFiles
   $key_low_prev = "" ;
   while ($files_in_open_hourly > 0)
   {
-    # find lowest key among all open files
+    # find lowest key among all opened files
     $key_low = "\xFF\xFF";
     for ($hour = 0 ; $hour < 24 ; $hour++)
     {
@@ -1066,21 +1075,24 @@ sub PhaseBuildDailyFile_MergeFiles
           $total += $count [$hour] ;
 
           $file = $fh_in_hourly [$hour] ;
-          $line = <$file> ;
+          $line = <$file> ; # read line
+          $lines_read_hourly [$hour] ++ ;
           if ($trace_reads)
 	  { print TRACE sprintf ("%02d: ", $hour) . $line ; }
           	  
 	  while ($line =~ /^\Q$key_low\E /) # |Q..|E do not interpret special chars like ( and ) in variable 
 	  {
 	    print "\nIgnore duplicate key '$key_low'\n\n" ; # should only occur few days after data stream bug from Jan 31 2013   	  
-            $line = <$file> ;
+            $line = <$file> ; # read line
+            $lines_read_hourly [$hour] ++ ;
             if ($trace_reads) # qqq
 	    { print TRACE sprintf ("%02d: ", $hour) . $line ; }
 	  }
 	  
 	  while ($line =~ /^\*/)
 	  { 
-            $line = <$file> ; 
+            $line = <$file> ; # read line 
+            $lines_read_hourly [$hour] ++ ;
             if ($trace_reads) # qqq
 	    { print TRACE sprintf ("%02d: ", $hour) . $line ; }
           }
@@ -1116,10 +1128,11 @@ sub PhaseBuildDailyFile_MergeFiles
             close $fh_in_hourly [$hour] ; 
 
             if ($line)
-	    { print "EOF hour $hour, lang $lang, test_max_language $test_max_language\n" ; } 
+	    { print "EOF hour $hour, line " . $lines_read_hourly [$hour] . ", lang $lang, test_max_language $test_max_language\n" ; } 
 
+            $lines_read_hourly [$hour] = -1 ;
 	    $files_in_open_hourly-- ;
-            $fs_open_hourly [$hour] = $fs_closed ;
+            $fs_open_hourly [$hour] = $fs_closed ; 
             $fs_key_hourly  [$hour] = "\xFF\xFF";
           }
         }
@@ -1145,7 +1158,7 @@ sub PhaseBuildDailyFile_MergeFiles
 
   # next if &InvalidLanguage ($key_low) ;
 
-    &CheckForSequenceError ($key_low_prev, $key_low, $files_in_open_hourly) ;
+    &CheckForSequenceErrorHourly ($key_low_prev, $key_low, $files_in_open_hourly) ;
     &PhaseBuildDailyFile_WriteCounts ($fh_out_merged_hourly, $total, $counts, $files_in_found_hourly, $key_low, $lang_prev) ;
 
     $key_low_prev = $key_low ;
@@ -1192,7 +1205,7 @@ sub PhaseBuildDailyFile_OpenOutputFiles
   #   return ('', '', ! $process_day) ;
   # }
 
-  open $fh_out_merged_hourly, '>', "$fn_out_merged_hourly" || &Abort ("Output file '$fn_out_merged_hourly' could not be opened.") ;
+  open $fh_out_merged_hourly, '>', "$fn_out_merged_hourly" || &Abort ("Output file '$fn_out_merged_hourly' could not be opened.") ; # open file for write
   binmode $fh_out_merged_hourly ;
 
   return ($fn_out_merged_hourly, $fh_out_merged_hourly, $process_day) ;
@@ -1276,9 +1289,9 @@ sub PhaseBuildDailyFile_PrepInputFiles
   for ($hour = 0 ; $hour < 24 ; $hour++)
   { $fs_open_hourly [$hour] = $fs_missing ; }
 
-  $cmd = "rm $dir_temp/pagecounts-????????-??????~patched" ;
+  $cmd = "rm $dir_temp/pageviews-????????-??????~patched" ;
   `$cmd` ;
-  $cmd = "rm $dir_temp/pagecounts-????????-??????~sorted" ;
+  $cmd = "rm $dir_temp/pageviews-????????-??????~sorted" ;
   `$cmd` ;
 
   my ($file_in, $file_sorted) ;
@@ -1300,13 +1313,18 @@ sub PhaseBuildDailyFile_PrepInputFiles
     $total_bytes_processed_overall += -s $file_in ;
     
     my $time_start_patch_sort = time ;
-    open $fh_in, "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; 
-    open $fh_patched, '>', $file_patched || &Abort ("Could not write '$file_patched'") ; 
+    open $fh_in, "-|", "gzip -dc \"$file_in\"" || &Abort ("Input file '" . $file_in . "' could not be opened.") ; # open file for read
+    open $fh_patched, '>', $file_patched || &Abort ("Could not write '$file_patched'") ; # open file for write
 
     $lines_read = 0 ;
     $lines_read_extra_spaces = 0 ;
-    while ($line = <$fh_in>)
+    $lines_read_hourly [$hour] = 0 ;
+
+    my ($key,$prev_key) ;
+
+    while ($line = <$fh_in>) # read line
     {
+      $lines_read_hourly [$hour] ++ ;
       $lines_read ++ ;
       # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix, test for field delimited string without dot 
       chomp $line ;
@@ -1314,13 +1332,14 @@ sub PhaseBuildDailyFile_PrepInputFiles
       $line =~ s/^([^\.\s]+) /$1.z /o  ;
 
       $line2 = $line ;
-      $line =~ s/[\x00-\x1F]+//g ;
+      $line =~ s/[\x00-\x1F]/\?/g ;
       if ($line ne $line2)
       {
-         print "\nFile $file_in, line has changed after removing \\x00-\\x1F: \n'$line2'\n->\n'$line'\n" ;
+        print "\nFile $file_in, line $lines_read has changed after removing \\x00-\\x1F: \n'$line2'\n->\n'$line'\n" ;
+      # print "\nXXXXXXXXXXXXXXXXXX\n$line2\n->$line\n" ;
       }
 
-     ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
+      ($lang,$title,$count,$dummy,$overflow) = split (' ', $line) ;
       if ($overflow ne '')  # too many fields, due to spaces in title since Jan 31, 2013, try to fix  
       {
         $lines_read_extra_spaces ++ ;
@@ -1351,8 +1370,28 @@ sub PhaseBuildDailyFile_PrepInputFiles
       }
 
       $line =~ s/\s{2,}/ -field-empty- /g ; # Feb 2015: legacy format contains empty title(s), e.g. pagecounts-20150127-110000.gz contains 'ab  1 28331'  (notice 2 consecutive spaces)  
+      
+      $key = "$lang $title" ;
+      if ($key eq $key_prev)
+      {
+        print "Skip line $lines_read: duplicate key '$key' (may be result of removing extra spaces and/or replacing unprintable characters from title\n" ;
+        next ; 
+      }
+
+      if ($line !~ /^[a-z]/)
+      { 
+        print "Skip line $lines_read (with invalid language code): '$line'\n" ; 
+        next ;
+      }
+
+      if ($line !~ /[^\s]+\s[^\s]+\s[^\s]+/)
+      { 
+        print "Skip line $lines_read (with less than 3 space separated fields): '$line'\n" ; 
+        next ;
+      }
 
       print $fh_patched "$line\n" ;
+      $key_prev = "$lang $title" ;
     }
     close $fh_in ;
     close $fh_patched ;
@@ -1367,24 +1406,28 @@ sub PhaseBuildDailyFile_PrepInputFiles
     if ($lines_read_extra_spaces > 0)
     { print "Invalid lines with extra spaces: $lines_read_extra_spaces out of $lines_read total\n" ; }
 
-    open $fh_in_hourly [$hour], "<", $file_sorted || &Abort ("Sorted file '" . $file_sorted . "' could not be opened.") ; 
-
+    open $fh_in_hourly [$hour], "<", $file_sorted || &Abort ("Sorted file '" . $file_sorted . "' could not be opened.") ; # open file for read
     binmode $fh_in_hourly [$hour] ;
+    $lines_read_hourly [$hour] = 0 ;
+    $fs_open_hourly [$hour] = $fs_open ;
 
     $files_in_found ++ ;
 
-    $fs_open_hourly [$hour] = $fs_open ;
-
     $file = $fh_in_hourly [$hour] ;
-    $line = <$file> ;
+    $line = <$file> ; # read line
+    $lines_read_hourly [$hour]++ ;
     while ($line =~ /^\*/)
-    { $line = <$file> ; }
+    { 
+      $line = <$file> ; # read line
+      $lines_read_hourly [$hour]++ ;
+    }
 
   # while ($line !~ /^[0-9a-zA-Z]/)
   # {
   #   chomp $line ;
   #   &Log ("Skip malformed line '" . substr ($line, 0, 20) . "' [etc]\n") ;
-  #   $line = <$file> ;
+  #   $line = <$file> ; # read line
+  #   $lines_read_hourly [$hour]++ ;
   # }
 
     # $line =~ s/^(\w+)2 /$1.y /o  ;# project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
@@ -1666,39 +1709,51 @@ sub PhaseBuildMonthlyFile_MergeFiles
   $key_low_prev = "" ;
   while ($files_in_open_daily > 0)
   {
-    # find lowest key among all open files
+    # find lowest key among all opened files
     $key_low = "\xFF\xFF";
     for ($day = 1 ; $day <= $days_in_month ; $day++)
     {
       if (($files_in_open_daily == $days_in_month) || ($fs_open_daily [$day] eq $fs_open))
       {
         if ($fs_key_daily [$day] lt $key_low)
-        { $key_low = $fs_key_daily [$day] ; }
+        { 
+          $key_low = $fs_key_daily [$day] ; 
+          # print "day $day: -> new key_low '$key_low'\n" ; # test qqq
+        }
       }
     }
+    # print "key_low '$key_low'\n" ; # test qqq
 
     $counts_monthly = "" ;
     $total_monthly  = 0 ;
     for ($day = 1 ; $day <= $days_in_month ; $day++)
     {
-# print "day $day fs_open_daily " . $fs_open_daily [$day] . "\n" ;
+      # print "day $day fs_open_daily " . $fs_open_daily [$day] . "\n" ;
       if ($fs_open_daily [$day] eq $fs_missing)
       {
       # for ($hour = 0 ; $hour < 24 ; $hour++)
       # { $counts_monthly .= chr ($day+ord('A')-1) . chr ($hour+ord('A')) . '?' ; }
         $counts_monthly .= chr ($day+ord('A')-1) . '*?,' ;
-# print "day $day $counts_monthly\n" ;
+        # print "day $day $counts_monthly\n" ;
       }
       elsif ($fs_open_daily [$day] eq $fs_open)
       {
-        # for all files where this lowest key is present, updated encoded counts and numeric total, and read new line
+        # for all files where this lowest key is present, update encoded counts and numeric total, and read new line
         if ($fs_key_daily [$day] eq $key_low)
         {
           $counts_monthly .= chr ($day+ord('A')-1) . $counts_daily [$day] . ',' ;
           $total_monthly += $total_daily [$day] ;
 
           $fh = $fh_in_daily [$day] ;
-          $line = <$fh> ;
+          $line = <$fh> ; # read line
+          $lines_read_daily [$day]++ ;
+          while ($line && ($line !~ /^[a-z]/))
+          { 
+            $lines_read = $lines_read_daily [$day] ;
+            print "Skip line $lines_read (with invalid language code): '$line'\n" ; 
+            $line = <$fh> ; # read line
+            $lines_read_daily [$day]++ ;
+          }
 
         # patch already done in phase 1:
         # $line =~ s/^([\w\-]+)2 /$1.y /o  ; # project wikipedia comes without suffix -> out of sort order, make it fit by appending suffix
@@ -1718,10 +1773,10 @@ sub PhaseBuildMonthlyFile_MergeFiles
           }
           else
           {
-            close $fh_in_daily [$day] ;
-
+            close $fh_in_daily [$day] ; # close file
+            $lines_read_daily = -1 ;  
             $files_in_open_daily-- ;
-            $fs_open_daily [$day] = $fs_closed ;
+            $fs_open_daily [$day] = $fs_closed ; 
             $fs_key_daily  [$day] = "\xFF\xFF";
           }
         }
@@ -1741,7 +1796,7 @@ sub PhaseBuildMonthlyFile_MergeFiles
 
   # next if &InvalidLanguage ($key_low) ;
 
-    &CheckForSequenceError ($key_low_prev, $key_low, $files_in_open_hourly) ;
+    &CheckForSequenceErrorDaily ($key_low_prev, $key_low, $files_in_open_daily) ;
 
     # if ($niofd_qqq ++ % 10 > 0) # test ValidateCounts 
     #{ 
@@ -1775,7 +1830,6 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
   &Log ("\nOpen Input Files for month $year-$month\n\n") ;
 
   my $days_in_month = &DaysInMonth ($year,$month) ;
-
   my $day ;
   for ($day = 1 ; $day <= $days_in_month ; $day++)
   {
@@ -1783,6 +1837,8 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
     $fs_open_daily [$day] = $fs_missing ;
 
     $fn_in_daily = "$dir_in/$year/$year-$month/pagecounts-$year-$month-$day.bz2" ;
+    $fn_patched  = "$dir_temp/pageviews-$year-$month-$day.patched" ;
+    $fn_sorted   = "$dir_temp/pageviews-$year-$month-$day.sorted" ;
     if (! -e $fn_in_daily)
     {
       if ($verbose)
@@ -1793,26 +1849,46 @@ sub PhaseBuildMonthlyFile_OpenInputFiles
     if ($verbose)
     { &Log ("File found: $fn_in_daily\n") ; }
 
-    open $fh_in_daily [$day], "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("Input file '" . $fn_in_daily . "' could not be opened.") ; 
+    my $time_start_patch_sort = time ;
+    &Log ("Write temp file $fn_patched\n") ; 
+    open $fh_in_daily, "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("Input file '$fn_in_daily' could not be opened.") ; # open file for read 
+    open $fh_patched, '>', $fn_patched || &Abort ("Temp file '$fn_patched' could not be opened.") ; 
+    binmode $fh_in_daily ;
+    binmode $fh_patched ;
+
+    while ($line = <$fh_in_daily>)
+    {
+    # next if $line !~ /^de.m/ ; # test 
+      next if $line =~ /^#/ ;
+      next if $line !~ /^[a-z][a-z\-\.]+ / ; 
+      $line =~ s/\s\s+/ /g ;
+      print $fh_patched $line ;
+    }
+    close $fh_patched ;
+
+    $cmd = "sort $fn_patched -o $fn_sorted" ;
+    $result = `$cmd` ;
+    
+    &Log ("Patch/sort to '$fn_sorted' in " . (time - $time_start_patch_sort) . " secs.\n") ;
+  # open $fh_in_daily [$day], "-|", "bzip2 -dc \"$fn_in_daily\"" || &Abort ("Input file '$fn_in_daily' could not be opened.") ; # open file for read 
+    open $fh_in_daily [$day], "<", $fn_sorted || &Abort ("Input file '$fn_sorted' could not be opened.") ; # open file for read 
 
     $total_files_processed_per_cycle ++ ;
-    $total_bytes_processed_per_cycle += -s $fn_in_daily ;
+    $total_bytes_processed_per_cycle += -s $fn_sorted ;
     $total_files_processed_overall ++ ;
-    $total_bytes_processed_overall += -s $fn_in_daily ;
+    $total_bytes_processed_overall += -s $fn_sorted ;
 
     binmode $fh_in_daily [$day] ;
 
-    $files_in_found ++ ;
-
+    $lines_read_daily [$day] = 0 ;
     $fs_open_daily [$day] = $fs_open ;
 
+    $files_in_found ++ ;
+
     $fh = $fh_in_daily [$day] ;
-    $line = <$fh> ;
-    while ($line && ($line =~ /^#/))
-    {
-      $line = <$fh> ;
-    }
-    if (! $line) { &Abort ("No valid data found in $fn_in_daily") ; }
+    $line = <$fh> ; # read line
+    $lines_read_daily [$day] ++ ;
+    if (! $line) { &Abort ("No valid data found in $fn_sorted") ; }
 
     ($lang,$title,$total_daily,$counts_daily) = split (' ', $line) ;
     $totals_per_lang_in {$lang} += $total_daily ;   
@@ -1915,27 +1991,76 @@ sub PhaseBuildMonthlyFile_WriteCounts
   { print $fh_out_merged_daily "$key_low $total_monthly $counts_monthly\n" ; }
 }
 
-sub CheckForSequenceError
+sub CheckForSequenceErrorHourly
 {
   my ($key_low_prev, $key_low, $files_in_open) = @_ ;
+  my ($hour,$read) ;
+
+  &Log ("") ;
 
   if ($key_low_prev gt $key_low)
   {
     for ($hour = 0 ; $hour < 24 ; $hour++)
-    { &Log ("hour $hour: key ${fs_key_hourly[$hour]}\n") ; }
-    &Abort ("Sequence error: '$key_low_prev' gt '$key_low'\n") ;
+    { 
+      $hour = sprintf ("%02d",$hour) ;
+      $read = (0+$lines_read_hourly [$hour]) ;      
+      &Log ("hour $hour, lines read $read: key '${fs_key_hourly[$hour]}'\n") ; 
+    }
+    &Log ("") ;
+    &Abort ("Sequence error hourly 1: key_low_prev '$key_low_prev' gt key_low '$key_low'\n") ;
   }
 
   if (($key_low_prev eq $key_low)  && ($files_in_open > 0))
   {
     for ($hour = 0 ; $hour < 24 ; $hour++)
     {
-       if ($fs_open_hourly [$hour] eq $fs_open)
-       { &Log ("hour $hour: file open,   key ${fs_key_hourly [$hour]}\n") ; }
-       else
-       { &Log ("hour $hour: file closed, key ${fs_key_hourly [$hour]}\n") ; }
+      $hour = sprintf ("%02d",$hour) ;
+      $read = (0+$lines_read_hourly [$hour]) ;      
+      if ($fs_open_hourly [$hour] eq $fs_open)
+      { &Log ("hour $hour, lines read $read: file open,   key '${fs_key_hourly [$hour]}'\n") ; }
+      else
+      { &Log ("hour $hour, lines read $read: file closed, key '${fs_key_hourly [$hour]}'\n") ; }
     }
-    &Abort ("Sequence error: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ;
+  # &Abort ("Sequence error: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ; # downgrade error -> warning
+    &Log ("\nSequence error hourly 2: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ; 
+  }
+}
+
+sub CheckForSequenceErrorDaily
+{
+  my ($key_low_prev, $key_low, $files_in_open) = @_ ;
+  my ($day,$read) ;
+
+  &Log ("") ;
+
+  if ($key_low_prev gt $key_low)
+  {
+    for ($day = 1 ; $day <= 31 ; $day++)
+    { 
+      $day = sprintf ("%02d",$day) ;
+      $read = (0+$lines_read_daily [$day]) ;      
+      if ($fs_open_daily [$day] eq $fs_open)
+      { &Log ("day $day, lines read $read: key '${fs_key_daily[$day]}'\n") ; }
+      else
+      { &Log ("day $day, lines read $read: file not open, key '${fs_key_daily[$day]}'\n") ; }
+    }
+    &Log ("") ;
+    &Abort ("Sequence error daily 1: key_low_prev '$key_low_prev' gt key_low '$key_low'\n") ;
+  }
+
+  if (($key_low_prev eq $key_low)  && ($files_in_open > 0))
+  {
+    for ($day = 1 ; $day <= 31 ; $day++)
+    {
+      $day = sprintf ("%02d",$day) ;
+      $read = (0+$lines_read_daily [$day]) ;      
+      if ($fs_open_daily [$day] eq $fs_open)
+      { &Log ("day $day, lines read $read: file open,   key '${fs_key_daily [$day]}'\n") ; }
+      else
+      { &Log ("day $day, lines read $read: file closed, key '${fs_key_daily [$day]}'\n") ; }
+    }
+  # &Abort ("Sequence error: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ; # downgrade error -> warning
+    &Log ("\nSequence error daily 2: key_low_prev: '$key_low_prev' eq key_low: '$key_low'\n") ; 
   }
 }
 
@@ -1962,7 +2087,7 @@ sub PhaseBuildMonthlyFile_OpenOutputFile
   #   &Log ("\nTarget file '$fn_out_merged_hourly.[7z|bz2|zip|gz]' exists already. Skip this date.\n") ;
   #   return ('', '', ! $process_day) ;
   # }
-  open $fh_out_merged_daily, '>', "$fn_out_merged_daily" || &Abort ("Output file '$fn_out_merged_daily' could not be opened.") ;
+  open $fh_out_merged_daily, '>', "$fn_out_merged_daily" || &Abort ("Output file '$fn_out_merged_daily' could not be opened.") ; # open file for write
   binmode $fh_out_merged_daily ;
 
   return ($fn_out_merged_daily, $fh_out_merged_daily, $process_day) ;

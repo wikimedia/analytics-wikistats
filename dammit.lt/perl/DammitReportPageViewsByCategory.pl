@@ -83,7 +83,7 @@ sub WriteReport
 #          " (a list of pages about politicians may feature a page about a music album, just because a famous musician happened to be also a minor politician).<p>" ;
   $html .= "Please note that any Wikipedia article can have tens of categories assigned to it.<br>" .
            "A popular article will rank high in any list where it's featured, regardless of the category under review.<br>" . 
-	   "Thus a well-known singer may be top ranking in a list about politicians, because he/she also played a minor or brief role in politics.<p>" ;
+	   "Thus a well-known singer may be top ranking in a list about politicians, even though he/she played just a minor or brief role in politics.<p>" ;
   $html .= "Click arrow in header to sort on that column. Shift+click to add column as secondary sort order. " ;
   $html .= "E.g. first on category, secondary on views.<br>" ;
   $html .= "On huge tables sort will take a while, please be patient.<p>" ;

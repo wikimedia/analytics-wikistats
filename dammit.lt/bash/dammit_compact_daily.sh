@@ -25,13 +25,17 @@ logfile_summary=$logs/_summary_compact_daily_jobs.log
 
 # extra step, in case yesterdays job did not finish normally
 date | tee -a $logfile | cat
-echo_ "rsync -arv --include=*.bz2 $output/* $dataset1001"
-# -a archive mode, -r recursive, -v verbose, -O do not try to upd dir timestamp
+# echo_ "rsync -arv --include=*.bz2 $output/* $dataset1001"
+## -a archive mode, -r recursive, -v verbose, -O do not try to upd dir timestamp
 #rsync -arv --include=*.bz2 $output/* $dataset1001 | tee -a $logfile | cat
+#exit
+
+cd $temp
+rm *sorted
+rm *patched
 
 cd $perl
-
-maxage=31 # process files for last .. completed days (runs daily, so should have one day of work to do)
+maxage=14 # process files for last .. completed days (runs daily, so should have one day of work to do)
 
 echo_ "Consolidate pagecount files into one daily file for last $maxage completed days\n"
 # date > $bash/dsh/dammit_compact_daily.semaphoreammit_compact_daily.semaphore
@@ -43,7 +47,7 @@ flock -n -e $bash/dammit_compact_daily.semaphore -c "$cmd" || { echo "Script is 
 # continue nonetheless, to get new daily files rsynced
 
 echo_ "Publish new files\n"
-#rsync -arv -ipv4 --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
+rsync -arv -ipv4 --include=*.bz2 $output/* $dataset1001  | tee -a $logfile | cat
 
 
 #grep ">>" $logs/*.log

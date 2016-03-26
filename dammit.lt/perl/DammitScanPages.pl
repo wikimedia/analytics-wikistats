@@ -109,9 +109,13 @@ print HTML
   $now = sprintf ("%2d/%02d/%4d %2d hrs\n", $mday,$mon+1,$year+1900,$hour) ; 
   print HTML "<h3>Number of users who uploaded one or images to Wiki Loves Africa 2015 up till $now GMT is $uploaders_cnt</h3>\n\n" ;  
   foreach $user (sort {$users {$b} <=> $users {$a}} keys %users)
-  { print HTML "<h3>" . $users{$user}. " image uploads: user <a href='https://commons.wikimedia.org/wiki/user:$user'>$user</a></h3>" . $images {$user} . "\n" ; }
+  { 
+    print HTML "<h3>" . $users{$user}. " image uploads: user <a href='https://commons.wikimedia.org/wiki/user:$user'>$user</a></h3>" . $images {$user} . "\n" ;
+    $total_uploads += $users{$user} ;
+  }
 
 print HTML 
+"<p>Total uploads: $total_uploads\n" .
 "</body>\n" .
 "</html>\n" ;
 

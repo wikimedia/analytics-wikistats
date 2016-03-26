@@ -73,7 +73,7 @@
   &AdjustForMissingFilesAndUndercountedMonths ;
 
   &WriteCsvFilesPerPeriod ($no_normalize);
-# &WriteCsvHtmlFilesPopularWikis ($no_normalize)  # used for old Report Card
+# &WriteCsvHtmlFilesPopularWikis ($no_normalize) ; # used for old report card  
 
   # normalize to 30 days
   foreach $project (sort keys %{$totals {"month"}})
@@ -142,7 +142,7 @@
   }
 
   &WriteCsvFilesPerPeriod ($do_normalize);
-# &WriteCsvHtmlFilesPopularWikis ($do_normalize) ; # obsolete -used for old Report Card
+  &WriteCsvHtmlFilesPopularWikis ($do_normalize) ; 
 
   print "\nErrors:\n\n" ;
   foreach $error (sort {$errors1 {$b} <=> $errors1 {$a}} keys %errors1)
@@ -539,6 +539,7 @@ sub ScanTarFolder
     ($projectfilename = $file_in) =~ s/\-.*$// ; # keep projectcounts or projectviews
 
   # next if $file_in !~ /(?:2013|2014|2015)\.tar/ ; # qqq speedup tests
+  # next if $file_in !~ /(?:2015)\.tar/ ; # 2016-02-21 qqq speedup tests
 
     print "Read tar file '$file_in'\n" ;
     $tar->read($file_in);
@@ -936,7 +937,8 @@ sub CountProjectViews
 
       next if $project eq "wx" and $year == 2007 and $month < 6 ; # shouldn't happen
 
-      if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
+# qqq 2016-02-21  if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
+      if (0)
       {
         # log on first encounter (disabled)
         # if ($blacklist {"$project,$language"} == 0)
@@ -1506,7 +1508,7 @@ print "lang $lang " . $dates{$lang} . " - " . $dates{"$lang.m"} . "\n" ;
     print TXT_OUT "$region: $regions2\nlanguages:" . $langs {$regions} . "\nperc mobile: $perc_mobile\n\n" ;
   }
   close TXT_OUT ;
-exit ;
+# exit ;
 }
 
 sub WriteCsvHtmlFilesPopularWikis
@@ -1522,7 +1524,7 @@ sub WriteCsvHtmlFilesPopularWikis
   @totals_lastmonth = sort {$totals_lastmonth {$b} <=> $totals_lastmonth {$a}} keys %totals_lastmonth ;
 
   $dir_out  = "$path_csv/csv_wp" ;
-  $file_csv = "$dir_out/projectviews_permonth_popularwikis_$month_0_file.csv" ;
+  $file_csv = "$dir_out/projectviews_per_month_popular_wikis_$month_0_file.csv" ;
   $msg_normalized = "Page view data are not normalized to 30 day months" ;
   if ($normalize)
   {
@@ -1956,6 +1958,7 @@ sub WriteCsvHtmlFilesPopularWikis
 
   if ($normalize)
   {
+    &Log ("Copy to wikilytics file '$dir_out/wikilytics_in_pageviews.csv'") ;
     open CSV_IN,  '<', $file_csv ;
     open CSV_OUT, '>', "$dir_out/wikilytics_in_pageviews.csv" ;
     while ($line = <CSV_IN>)
@@ -1967,6 +1970,10 @@ sub WriteCsvHtmlFilesPopularWikis
     }
     close CSV_IN ;
     close CSV_OUT ;
+  }
+  else
+  {
+    &Log ("Not \$normalize. Do not copy to wikilytics file '$dir_out/wikilytics_in_pageviews.csv'") ;
   }
 }
 
