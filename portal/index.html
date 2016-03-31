@@ -135,7 +135,7 @@ document.write ("<ul>" +
     <a href='#summaries'>Summaries for all wikis</a> <br>   
     <a href='#views'>Page views per project / wiki</a> <br>
     <a href='#countries'>Page views / edits per country / language</a> <br>
-    <a href='#requests'>Server requests</a>
+    <a href='#traffic_breakdown'>Traffic breakdowns</a>
     
   	<p><b>Further topics:</b><p>
 
@@ -390,7 +390,7 @@ document.write ("<ul>" +
     <hr width=500 align=left>
 		<a id='requests' name='requests'></a>	
     <p>
-    <h3><img src='wmf_logo.png'>&nbsp;<a href="http://stats.wikimedia.org/wikimedia/squids/SquidReportRequests.htm">Server Requests</a> (breakdown of traffic per type, origin, etc)</h3>
+    <h3><img src='wmf_logo.png'>&nbsp;<a href="http://stats.wikimedia.org/wikimedia/squids/SquidReportRequests.htm">Server Requests</a> (defunct, replaced by <a href='http://stats.wikimedia.org/cgi-bin/search_portal.pl?search=traffic_breakdown'>Traffic Breakdown</a>)</h3>
     <p>
     This analysis is based on a traffic logs (aka squid logs) 
     <p>Note: WMF stores one in thousand log lines for a limited period, hence read <font color=#008000><b>all counts x 1000</b></font>.<br>
@@ -422,7 +422,31 @@ document.write ("<ul>" +
     	 <br>categories,category,agent strings,user agent,UA,totals,counts,pageviews,page views,
     	 <br>html requests,squids,logs,traffic,requests,maxmind</span> 	
     <p>
-    	
+    
+    <hr width="500" align="left">
+		<a id="traffic_breakdown" name="traffic_breakdown"></a>	
+    <p>
+    </p><h3><img src="wmf_logo.png">&nbsp;<a href="https://browser-reports.wmflabs.org/#all-sites-by-browser">Traffic Breakdown</a></h3>
+    <p>
+    Analysis of WMF traffic, based on the unsampled hadoop/hive data stream. 
+    </p><p>
+    <b>Topics:</b><br></p><ul c="">
+    </li><li><a href="https://browser-reports.wmflabs.org/#all-sites-by-os">Which <b>operating systems</b> do our clients use?</a> Platform, major version <font color=#AAA>(see also the <a target="_blank" href="http://stats.wikimedia.org/wikimedia/squids/SquidReportOperatingSystems.htm"><font color=#AAF>previous discontinued report</font></a>)</font><br>
+    </li><li><a href="https://browser-reports.wmflabs.org/#all-sites-by-browser">Which <b>browsers</b> are how popular?</a> Brand, major version <font color=#AAA>(see also the <a target="_blank" href="http://stats.wikimedia.org/wikimedia/squids/SquidReportClients.htm"><font color=#AAF>previous discontinued report</font></a>)</font><br>
+    <br>
+  </li></ul>
+    <p><a href="https://browser-reports.wmflabs.org/#all-sites-by-browser"><img src="traffic_breakdown_OS.jpg" border="1"></a></p>
+    <p><a href="https://browser-reports.wmflabs.org/#all-sites-by-browser"><img src="traffic_breakdown_OS_2.jpg" border="1"></a></p>
+    <p>
+    </p><p>Author <a href="https://www.mediawiki.org/wiki/Analytics">WMF Analytics Team</a>   
+    <p>March 2016 this replaced those legacy <a href='http://stats.wikimedia.org/cgi-bin/search_portal.pl?search=server+squid+requests'>Wikistats traffic reports</a>  
+     that were marked by users<br>as particularly valuable, in <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future_per_report_B2'>this survey</a>. New reports were added as well.
+
+    </p><p><span class="tags">Tags:tabels,matrix,lineplots,breakdowns,
+    	 <br>user agent,UA,totals,percentages,counts,pageviews,page views,
+    	 <br>html requests,server requests,logs,traffic,hadoop,hive,maxmind</span> 	
+    </p>
+	
     <hr width=500 align=left>
 		<a id='edit' name='edits'></a>	
     <p>
