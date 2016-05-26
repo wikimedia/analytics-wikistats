@@ -7,6 +7,9 @@
 # https://bugzilla.wikimedia.org/show_bug.cgi?id=46289
 
 # -v -q 2012q3 -c -i "w:/# out stat1/squid/csv" -o "w:/# out test/squid/reports" -l . -a "w:/# out stat1/squid/csv/meta"
+
+# sub ReadInputCountriesMonthly reads $path_csv_squid_counts_monthly (/a/wikistats_git/squids/csv/SquidDataVisitsPerCountryMonthly.csv)
+
   $| = 1; # Flush output
 
   use SquidReportArchiveConfig ;
@@ -452,7 +455,18 @@ sub ReportCountries
   $file_html_per_country_trends         = "SquidReport${selection}PerCountryTrends.htm" ;
   $file_html_per_language_breakdown     = "SquidReport${selection}PerLanguageBreakdown.htm" ;
   $file_csv_per_country_overview        = "SquidReport${selection}PerCountryOverview.csv" ; # output file
-  $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;  # output file 
+  $file_csv_per_country_density         = "SquidReport${selection}PerCountryDensity.csv" ;  # output file
+
+  # add prev/next for quarter reports # qqq
+  $yyyy = substr ($quarter_only2,0,4) ;
+  $q    = substr ($quarter_only2,5,1) ;
+  if ($q == 1) { $q = 4 ; $yyyy-- ; } else  { $q-- ; }
+  $link_html_per_country_overview_prev = "SquidReport${selection}PerCountryOverview${yyyy}Q$q.htm" ;
+
+  $yyyy = substr ($quarter_only2,0,4) ;
+  $q    = substr ($quarter_only2,5,1) ;
+  if ($q == 4) { $q = 1 ; $yyyy++ ; } else  { $q++ ; }  
+  $link_html_per_country_overview_next = "SquidReport${selection}PerCountryOverview${yyyy}Q$q.htm" ;
 
   $path_csv_squid_counts_monthly  = "$path_csv/$file_csv_squid_counts_monthly" ;
   if (! -e $path_csv_squid_counts_monthly)  { abort ("Input file $path_csv_squid_counts_monthly not found!") ; }
@@ -491,7 +505,12 @@ sub ReportCountries
            "<a href='$file_html_per_language_breakdown'>Breakdown</a>" ;
 
   ($links_views = $links) =~ s/Edits/Views/g ;
-  ($links_edits = $links) =~ s/Views/Edits/g ;
+# ($links_edits = $links) =~ s/Views/Edits/g ;
+
+  $links_edits = "<p>&nbsp;<b>Page Edits Per Country</b> - " .
+           "<font color=red>No data available</font> / " .
+           "<b>Page Edits Per Wikipedia Language - </b> " .
+           "<font color=red>No data available</font>" ;
 
   $links = "$links_views\n$links_edits\n" ;
 
@@ -551,7 +570,10 @@ sub ReadDate
   $multiplier = (24 * 3600) / ($timetill - $timefrom) ;
   &LogDetail ("Multiplier = $multiplier\n") ;
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
+# $header =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd) <a href='$link_html_per_country_overview_prev'>prev<\/a>\/<a href='$link_html_per_country_overview_next'>next<\/a>/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)/ ;
+# $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period (yyyy-mm-dd)  <a href='$link_html_per_country_overview_prev'>prev<\/a>\/<a href='$link_html_per_country_overview_next'>next<\/a>/ ;
+  $link_html_per_country_overview_prev = "SquidReport${selection}PerCountryOverview${yyyy}Q$q.htm" ;
 }
 
 sub SetPeriod
@@ -586,7 +608,9 @@ sub SetPeriod
 # { $period .= " (last 12 months) " ; }
 
   $header =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
+# $header =~ s/DATE/Monthly requests or daily averages, for period: $period <a href='$link_html_per_country_overview_prev'>prev<\/a>\/<a href='$link_html_per_country_overview_next'>next<\/a>/ ;
   $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period/ ;
+# $headerwithperc =~ s/DATE/Monthly requests or daily averages, for period: $period <a href='$link_html_per_country_overview_prev'>prev<\/a>\/<a href     ='$link_html_per_country_overview_next'>next<\/a>/ ;
 
   &LogDetail ("Sample period: $period => for daily averages multiplier = " . sprintf ("%.2f",$multiplier) . "\n\n") ;
 }
@@ -611,13 +635,15 @@ sub PrepHtml
   else
   { $header_sample_rate = "1:$sample_rate sampled" ; }
 
+  $run_time = "<font color=#888877>" . date_time_english (time) . " UTC</font> " ;
+
   $header.=  "<body bgcolor='\#FFFFDD'>\n$form\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>NOTICE" ;
+            "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>NOTICE" ;
 
   $headerwithperc.=  "<body bgcolor='\#FFFFDD'>\n$formwithperc\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>" ;
+            "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>" ;
 
   if ($set_reports eq 'country_reports')
   {
@@ -638,14 +664,14 @@ sub PrepHtml
 
   if ($reports_set eq $reports_set_countries)
   {
-    $notice = "<p><font color=red>" .
-              "&nbsp;Unresolved Bugzilla bugs: " .
-              "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=55443'>55443</a>" .
-              "</font><p><font color=green>" .
-               "Recently resolved bugs: " .
-              "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46205'>46205</a> (Aug 2013)" .
-              "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46289'>46289</a> (Nov 2013)" .
-              "</font><p>" ;
+  # $notice = "<p><font color=red>" .
+  #           "&nbsp;Unresolved Bugzilla bugs: " .
+  #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=55443'>55443</a>" .
+  #           "</font><p><font color=green>" .
+  #            "Recently resolved bugs: " .
+  #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46205'>46205</a> (Aug 2013)" .
+  #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46289'>46289</a> (Nov 2013)" .
+  #           "</font><p>" ;
   }
   else
   {
@@ -771,11 +797,11 @@ sub ReadCountryCodes
       # print "$code => $name\n" ;
     }
   }
-  $country_codes {'-'}  = 'Unknown' ;
-  $country_codes {'--'} = 'Unknown' ;
-  $country_codes {'XX'} = 'Unknown' ;
+  $country_codes {'-'}  = 'Unknown3' ;
+  $country_codes {'--'} = 'Unknown4' ;
+  $country_codes {'XX'} = 'Unknown5' ;
   $country_codes {'-P'} = 'IPv6' ;
-  $country_codes {'-X'} = 'Unknown' ;
+  $country_codes {'-X'} = 'Unknown6' ;
   $country_codes {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
   close CODES ;
 }
@@ -1599,12 +1625,12 @@ sub ReadInputCountriesNames
 
   binmode CSV_COUNTRY_CODES ;
 
-  $country_names {'-'}  = 'Unknown' ;
-  $country_names {'--'} = 'Unknown' ;
+  $country_names {'-'}  = 'Unknown7' ;
+  $country_names {'--'} = 'Unknown8' ;
   $country_names {'-P'} = 'IPv6' ;
-  $country_names {'-X'} = 'Unknown' ;
+  $country_names {'-X'} = 'Unknown9' ;
   $country_names {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
-  $country_names {"XX"} = "Unknown" ;
+  $country_names {"XX"} = "Unknown10" ;
 
   while ($line = <CSV_COUNTRY_CODES>)
   {
@@ -1856,6 +1882,7 @@ sub ReadInputCountriesMonthly
   my $lines = 0 ;
   &LogBreak ;
   &Log ("read from '$path_csv_squid_counts_monthly'\n") ;
+
   open CSV_SQUID_COUNTS_MONTHLY, '<', $path_csv_squid_counts_monthly ;
   while ($line = <CSV_SQUID_COUNTS_MONTHLY>)
   {
@@ -1871,6 +1898,7 @@ sub ReadInputCountriesMonthly
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
 
     $country = &GetCountryName ($code) ;
+    next if $country =~ /invalid/i ; # frequent parsing error in earlier years
 
     # next if $country =~ /\?/ ;
     next if &DiscardSquidInput ($bot,$project,$project_mode,$code,$language) ;
@@ -1910,6 +1938,8 @@ sub ReadInputCountriesMonthly
     # if ($views_edits eq 'Page Edits')
 
     $quarters {$quarter} ++ ;
+
+# parse country data # qqq 
 
     if (($country =~ /\?/) || ($country =~ /unknown/i))
   # { $requests_unknown_per_quarter {$quarter} += $count ; next ; }
@@ -2074,6 +2104,7 @@ sub ReadInputCountriesDaily
 
     ($code,$language) = &NormalizeSquidInput ($code,$language) ;
     $country = &GetCountryName ($code) ;
+    next if $country =~ /invalid/i ; # frequent parsing error in earlier years
   # next if $country =~ /\?/ ;
 
     $country_codes_found {"$country|$code"} ++ ;
@@ -2196,6 +2227,9 @@ sub DiscardSquidInput
   # &LogSub ("DiscardSquidInput\n") ;
 
   my ($bot,$project,$project_mode,$code,$language) = @_ ;
+
+  $project =~ s/[^a-z\-\_]//g ; # remove %@ encoding for mobile etc
+# print "$bot,$project,$project_mode,$code,$language\n" ;
   if ($bot ne "U"  or # user
       $project ne $project_mode or # eg 'wp'
       $language eq "upload" or
@@ -2207,6 +2241,10 @@ sub DiscardSquidInput
   {
   # print "bot $bot project '$project' project_mode $project_mode code $code language $language\n" ;
     $discarded_input ++ ;
+#if (($project eq 'wp') && ($bot eq 'U')) # debug # qqq
+#{
+#  print "discard bot $bot, project $project, mode $project_mode, code $code, language $language\n" ;
+#}
     return ($true) ;
   }
 
@@ -2218,13 +2256,18 @@ sub GetCountryName
   my $code = shift ;
   if ($country_names {$code} eq "")
   {
+    if ($code =~ /(?:=|Mozilla)/) # known frequent parsing error in earlier years, do not report
+    { return ('country name invalid') ; }
+
     $country = "Unknown (code $code)" ;
-    if ($country_code_not_specified_reported {$code}++ == 0)
+    if ($country_code_not_specified_reported {$code}++ == 0)  
     { &LogList ("country name not specified for $code\n") ; }
+
     $invalid_country_codes++ ;
   }
   else
   { $country = $country_names {$code} ; }
+
   return ($country) ;
 }
 
@@ -5803,7 +5846,7 @@ sub WriteReportCountriesInfo
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
     $region =~ s/^QP$/<b>IPv6<\/b>/ ;
-    $region =~ s/^XX$/<b>Unknown<\/b>/ ;
+    $region =~ s/^XX$/<b>Unknown11<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
@@ -6051,7 +6094,7 @@ sub WriteReportCountryOpSys
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
     $region =~ s/^QP$/<b>IPv6<\/b>/ ;
-    $region =~ s/^XX$/<b>Unknown<\/b>/ ;
+    $region =~ s/^XX$/<b>Unknown12<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
@@ -6060,7 +6103,7 @@ sub WriteReportCountryOpSys
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
+    $region =~ s/^XX$/<font color=#666666><b>Unknown13<\/b><\/font>/ ;
 
 
     $population_region  = $population_region {$key} ;
@@ -6197,7 +6240,7 @@ sub WriteReportCountryBrowser
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region_name =~ s/^XX$/<font color=#666666><b>Unknown<\/b><\/font>/ ;
+    $region_name =~ s/^XX$/<font color=#666666><b>Unknown14<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -6313,7 +6356,7 @@ sub WriteReportCountryBrowser
     $region =~ s/^N$/<font color=#000BF7><b>Global North<\/b><\/font>/ ;
     $region =~ s/^S$/<font color=#FE0B0D><b>Global South<\/b><\/font>/ ;
     $region =~ s/^QP$/<b>IPv6<\/b>/ ;
-    $region =~ s/^XX$/<b>Unknown<\/b>/ ;
+    $region =~ s/^XX$/<b>Unknown15<\/b>/ ;
 
     $region =~ s/^AF$/<font color=#028702><b>Africa<\/b><\/font>/ ;
     $region =~ s/^CA$/<font color=#249CA0><b>Central-America<\/b><\/font>/ ;
@@ -7021,7 +7064,10 @@ sub WriteReportPerCountryOverview
     my $region_code      = $region_codes {$code} ;
 
     if ($region_code eq '')
-    { $region_code = 'XX' ; }
+    { $region_code = 'XX' ; } 
+
+  #  if ($region_code eq 'XX')
+  # { print "$code $country $region_code\n" ; exit ; } # debug only # qqq 
 
     my $north_south_code = $north_south_codes {$code} ;
 
@@ -7033,7 +7079,7 @@ sub WriteReportPerCountryOverview
     $region_name =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region_name =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region_name =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region_name =~ s/^XX$/<font color=#808080><b>Unknown<\/b><\/font>/ ;
+    $region_name =~ s/^XX$/<font color=#808080><b>Unknown1<\/b><\/font>/ ;
 
     $north_south_name = $north_south_code ;
     $north_south_name =~ s/^N$/<font color=#000BF7><b>N<\/b><\/font>/ ;
@@ -7182,12 +7228,12 @@ sub WriteReportPerCountryOverview
     $region =~ s/^EU$/<font color=#0100CA><b>Europe<\/b><\/font>/ ;
     $region =~ s/^AS$/<font color=#E10202><b>Asia<\/b><\/font>/ ;
     $region =~ s/^OC$/<font color=#02AAD4><b>Oceania<\/b><\/font>/ ;
-    $region =~ s/^XX$/<font color=#808080><b>Unknown<\/b><\/font>/ ;
+    $region =~ s/^XX$/<font color=#808080><b>Unknown2<\/b><\/font>/ ;
 
     $population_region = $population_per_region {$key} ;
     $connected_region  = $connected_per_region  {$key} ;
     $requests_region   = $requests_per_region   {$key} ;
-    $requests_region2  = $requests_per_region2  {$key} ;
+    $requests_region2  = $requests_per_region2  {$key} ; # qqq
 
     $perc_connected_region = ".." ;
     if ($population_region > 0)
@@ -9491,11 +9537,20 @@ sub AddNoticeSurvey
 {
   my $report_id = shift ;
 
-  $html .= "<font color=#F00><b><big>Aug 2015: This report has been discontinued until further notice, due to lack of maintenance.</big></font><br><font color=#A00>Only some of the Wikistats traffic reports will be migrated to Wikimedia Foundation's new hadoop-based infrastructure. See them <a target='_blank' href='https://browser-reports.wmflabs.org/'>here</a>.<br>If you want this particular report included in the migration <a href='https://www.mediawiki.org/w/index.php?title=Analytics/Wikistats/TrafficReports/Future_per_report_B2'>let us know</a> (id for this report is '$report_id').<br>Read more <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future'>here</a>.</b></font><br>&nbsp;<br>" ;
-
-if ($report_id > 20)
+# $html .= "<font color=#F00><b><big>Aug 2015: This report has been discontinued until further notice, due to lack of maintenance.</big></font><br><font color=#A00>Only some of the Wikistats traffic reports will be migrated to Wikimedia Foundation's new hadoop-based infrastructure. See them <a target='_blank' href='https://analytics.wikimedia.org/dashboards/browsers/'>here</a>.<br>If you want this particular report included in the migration <a href='https://www.mediawiki.org/w/index.php?title=Analytics/Wikistats/TrafficReports/Future_per_report_B2'>let us know</a> (id for this report is '$report_id').<br>Read more <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future'>here</a>.</b></font><br>&nbsp;<br>" ;
+if (($quarter_only ne '') && ($quarter_only lt "2015 Q2"))
 {
-  $html .= "<p><font color=#A00><b><big>Aug 2015: Warning, data are unreliable!</big><p>Wikistats traffic reports with a breakdown by geography (like this one) are currently unreliable and for some countries totally wrong. Please ignore data until further notice. We are investigating. Our apologies for any inconvenience caused.</b></font><p>" ; 
-}
+  $html .= "<font color=#080><b><big>Feb 2016: This report has been upgraded, and does now include mobile views. But still is based on pre-hadoop data stream (squid logs)</big></b></font>" ;
+}    
+else 
+{ 
+  $html .= "<font color=#080><b><big>Feb 2016: This report has been upgraded, and is now based on Wikimedia Foundations's new hadoop-based infrastructure.<br>Earlier versions of this report have been republished with new data, starting May 2015. Thanks so much for your patience!<p>" . 
+           "Mar 2016: Non-regional Wikistats traffic reports which were marked by users in <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/TrafficReports/Future_per_report_B2'>this survey</a> as particularly valuable<br>
+have also been migrated to Wikimedia Foundation's new hadoop-based infrastructure. See <a href='https://analytics.wikimedia.org/dashboards/browsers/#all-sites-by-os'>here</a></big></b></font><br>&nbsp;<br>" ;  
+}    
+#if ($report_id > 20)
+#{
+# $html .= "<p><font color=#A00><b><big>Aug 2015: Warning, data are unreliable!</big><p>Wikistats traffic reports with a breakdown by geography (like this one) are currently unreliable and for some countries totally wrong. Please ignore data until further notice. We are investigating. Our apologies for any inconvenience caused.</b></font><p>" ; 
+#}
 
 }
