@@ -1,0 +1,220 @@
+﻿<style>
+a         {color:#0000D0;text-decoration:none; vertical-align:middle}
+a:link    {color:#0000D0;text-decoration:none}
+a:visited {color:#0000D0;text-decoration:none}
+a:active  {color:#0000D0;text-decoration:none}
+a:hover   {color:#FF00FF}
+
+#map 
+{ 
+position: absolute; // https://css-tricks.com/absolute-relative-fixed-positioining-how-do-they-differ/
+//position: relative; 
+//position: static; 
+//  position: fixed; 
+//  width:  50%; 
+//  height: 20%; 
+  max-height: 1000px; 
+  top:    0px;
+  bottom: 0px; 
+  right:  0px; 
+  left:   0px; 
+  margin:         0px ;
+  background-color: #EAEAFF; // blue ocean
+}
+
+body
+{
+  overflow:       hidden ;
+  font-family:    arial,sans-serif; 
+  font-size:      11px; 
+  border:         none ;
+  margin:         0px ;
+} 
+
+tr, th, td  
+{
+  font-size:      11px ; 
+  white-space:    nowrap; 
+  text-align:     left; 
+  vertical-align: middle;
+  padding-left:   2px; 
+  padding-right:  2px; 
+  padding-top:    1px; 
+  padding-bottom: 0px;
+  border:         none ;
+} 
+
+th
+{
+  white-space:    nowrap; 
+  vertical-align: top; 
+  font-width:     bold;
+}
+
+tr 
+{
+  font-size:      11px;
+  vertical-align: middle ;
+}
+
+.l { text-align: left; }
+.c { text-align: center; }
+.r { text-align: right; }
+
+//tr.bubbles      th {font-size:12px; border:none} 
+
+//tr.row_shade_odd  td {font-size:11px;} 
+//tr.row_shade_odd  th {font-size:11px;} 
+//tr.row_shade_even td {font-size:11px; background-color:#EEE;} 
+//tr.row_shade_even th {font-size:11px; background-color:#EEE;} 
+
+tr.row_shade_even  
+{
+  background-color: #EEE;
+} 
+
+.datamaps-legend    
+{
+  position:         static; 
+  border:           1px; 
+  background-color: #8F8F8; 
+//  height:           10%; 
+  font-size:        11px; 
+  right: -50px;
+  bottom: -20px;
+}
+
+.datamaps-legend dl 
+{
+  text-align: left; 
+  display:    inline-block;
+}
+
+//tabs: .tags     {color:font-size:8px;color:#CCCCAA; }
+//tabs: .taks     {color:font-size:8px;color:#FF00FF; } <-- switch tags and taks during maintenance for better visibility -->
+
+// in datamaps.world.hires.min.js
+// .hoverinfo {padding: 4px; border-radius: 1px; background-color: #FFF; box-shadow: 1px 1px 5px #CCC; font-size: 12px; border: 1px solid #CCC; } 
+
+.hoverinfo       { position: relative ; top: 10px ;   background-color: #FFF; }
+.hoverinfo_top   { position: relative ; top: -300px ; left:  20px ; background-color: #FFF; box-shadow: 1px 1px 5px #CCC; font-size: 12px; border: 1px solid #CCC; } }
+.hoverinfo_left  { position: fixed ;    top: 10px ;   left:  20px ; background-color: #FFF; box-shadow: 1px 1px 5px #CCC; font-size: 12px; border: 1px solid #CCC; }}
+.hoverinfo_right { position: fixed ;    top: 10px ;   right: 20px ; background-color: #FFF; box-shadow: 1px 1px 5px #CCC; font-size: 12px; border: 1px solid #CCC; }}
+
+// .datamaps-subunit:hover { stroke-width: 2px; } // not working: http://stackoverflow.com/questions/34737421/d3-datamaps-changing-border-width-on-mouseover  
+.download 
+{ 
+  background: #333; 
+  color: #FFF; 
+  font-weight: 900; 
+  border: 2px solid #B10000; 
+  padding: 4px; 
+  margin:4px;
+}
+
+#page_title 
+{
+  position: absolute;
+  width: 100%;
+  height: 30px;
+  top:0px;
+  left: 0; 
+  font-size:12px;  
+  font-weight: bold;
+  background-color:#EEEEEE;
+}
+
+.mainTitleText
+{
+  font-size:14px;
+}
+
+#CreditsContainer
+{
+  position: absolute;
+  width: 100%;
+  height: 36px;
+  bottom:0px;
+  left: 0; 
+  background-color:#FAFAFA;
+}
+
+// move legend inside box does not work yet: 
+// see http://stackoverflow.com/questions/31858980/r-rmaps-datamaps-moving-the-legend-of-a-choropleth-map
+//.datamaps-legend { position: static; }
+//.datamaps-legend dl { text-align: center; display: inline-block; }
+
+/* modal background */
+.modal 
+{ 
+//width:        300px;
+//height:       300px;
+//position:     absolute;
+//left:         50%;
+//top:          50%; 
+//margin-left:  -150px;
+//margin-top: - 150px;
+
+  overflow-y:   scroll;
+  display:      none; /* Hidden by default */
+  position:     fixed;// relative;  
+  z-index:      2002; 
+  left:         0;
+  top:          0;
+  width:        100%; 
+  height:       100%; 
+  background-color: rgb(0,0,0); 
+  background-color: rgba(0,0,0,0.3); // black with opacity
+}
+
+/* Modal Content/Box */
+.modal-content 
+{
+//width: 300px;
+//height: 300px;
+//position: absolute;
+//left: 50%;
+//top: 50%; 
+//margin-left: -150px;
+//margin-top: -150px;
+
+  overflow-y: scroll; // auto; // scroll;
+  z-index:2; /* Sit on top */
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  height:100%;
+//width: 40%; /* Could be more or less, depending on screen size */
+}
+
+// close button
+.close 
+{
+  color:        #aaa;
+  float:        right;
+  font-size:    12px;
+  font-weight:  bold;
+}
+
+.close:hover,
+.close:focus 
+{
+  color:           black;
+  text-decoration: none;
+  cursor:          pointer;
+}
+
+#overlay 
+{
+  visibility: hidden;
+  position:   absolute;
+  left:       0px;
+  top:        0px;
+  width:      100%;
+  height:     100%;
+  text-align: center;
+  z-index:    1000;
+}
+
+</style>
