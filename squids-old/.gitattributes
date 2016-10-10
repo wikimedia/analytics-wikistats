@@ -1,3 +1,0 @@
-*.pl     text diff=perl eol=lf
-*.pm     text diff=perl eol=lf
-*.sh     text diff=bash eol=lf
