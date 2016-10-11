@@ -4,7 +4,7 @@
 # https://bugzilla.wikimedia.org/show_bug.cgi?id=46205   fixed
 # https://bugzilla.wikimedia.org/show_bug.cgi?id=46267
 # https://bugzilla.wikimedia.org/show_bug.cgi?id=46277
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46289
+# https://bugzilla.wikimedia.org/show_bug.cgi?id=46289   fixed
 
 # -v -q 2012q3 -c -i "w:/# out stat1/squid/csv" -o "w:/# out test/squid/reports" -l . -a "w:/# out stat1/squid/csv/meta"
 
@@ -667,10 +667,6 @@ sub PrepHtml
   # $notice = "<p><font color=red>" .
   #           "&nbsp;Unresolved Bugzilla bugs: " .
   #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=55443'>55443</a>" .
-  #           "</font><p><font color=green>" .
-  #            "Recently resolved bugs: " .
-  #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46205'>46205</a> (Aug 2013)" .
-  #           "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46289'>46289</a> (Nov 2013)" .
   #           "</font><p>" ;
   }
   else
@@ -678,23 +674,7 @@ sub PrepHtml
     $notice = "<font color=red>" .
             # "<h3>Warning: all recent Wikimedia traffic analysis reports have been generated from old scripts.</h3><p>" .
 	    # "The scripts are orphaned, and have not been maintained for at least 6 months. Many bugs are considerably older.<br></font>" .
-              "&nbsp;Unresolved Bugzilla bugs:</font> " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46190'>46190</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46191'>46191</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46195'>46195</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46201'>46201</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46265'>46265</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46267'>(46267)</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46268'>46268</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46269'>46269</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46271'>46271</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46273'>46273</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46274'>46274</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46275'>46275</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46277'>46277</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46278'>46278</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=46279'>46279</a>, " .
-                "<a href='https://bugzilla.wikimedia.org/show_bug.cgi?id=57376'>57376</a>" .
+              "&nbsp;<a href='https://phabricator.wikimedia.org/maniphest/query/iJTKCpmjB0A9/#R'>Unresolved bugs</a></font> " .
               "<p>" ;
   }
   $header =~ s/NOTICE/$notice/ ;
