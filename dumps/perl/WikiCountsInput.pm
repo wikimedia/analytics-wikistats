@@ -42,7 +42,8 @@ sub NameSpaceArticle
     if ($language eq 'strategy')
     { return (($namespace == 0) || ($namespace == 106)) ; }
     elsif ($language eq 'commons')
-    { return (($namespace == 0) || ($namespace == 6) || ($namespace == 14)) ; } # + file and category namespaces
+  # { return (($namespace == 0) || ($namespace == 6) || ($namespace == 14)) ; } # + file and category namespaces
+    { return ($namespace == 6) ; } # Oct 2016 only binaries
     elsif ($mode_ws) # wikisource wikis
     { return (($namespace == 0) || ($namespace == 102) || ($namespace == 104) || ($namespace == 106)) ; } # + author, page, index (`100 = portal)
     else
@@ -345,13 +346,6 @@ sub ReadFileXml
          &XmlReadUntil ('(?:<page>|<\/mediawiki>)') ;
        }
     }
-
-# test only
-#if ($pages_read_test++ > 100000)
-#{
-#  $line = "<\/mediawiki>" ;
-#  last ;
-#}
   }
 
   $filesize_uncompressed = $bytes_read ;
@@ -386,11 +380,8 @@ sub ReadFileXml
   { close EDITS_USER_MONTH_NAMESPACE_LOG ; }
 
 
-# if (! $edits_only) # 2013 June: now works with sha1 tag, no longer with self generated md5, sha1 also in stub dumps
-# {
-    close REVERTS_SAMPLE ;
-    close REVERTED_EDITS ;
-# }
+  close REVERTS_SAMPLE ;
+  close REVERTED_EDITS ;
 }
 
 sub XmlReadUntil
@@ -1413,13 +1404,11 @@ my $start_process_sha1b = code_started() if $record_time_process_sha1 ;
 
       if ($reverts_sha1_articles_bots % 250 == 0)
       {
-        # &Log ("\n" . "x" x 80) ;
         &Log ("\n$reverts_sha1_articles_bots bot 'reverts' out of $reverts_sha1_articles SHA1 reverts = " .
               "-B: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_1 / $reverts_sha1_articles) .
               ", B-: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_2 / $reverts_sha1_articles) .
               ", BB: " . sprintf ("%.2f%", 100 * $reverts_sha1_articles_bots_3 / $reverts_sha1_articles) .
               "\n") ;
-        # &Log ("x" x 80 . "\n") ;
       }
     }
 
@@ -1486,7 +1475,6 @@ sub WriteRevertsSample
 sub ProcessRevision
 {
   my ($current_revision, $ndx_revisions, $pageid, $namespace, $title, $article, $user, $userid, $time, $usertype) = @_ ;
-  # print DEBUG_EVENTS "EVENT 0 $title $time (pageid $pageid) [$article_type] $user $userseqno\n" ;
 
   $booktitle = "" ;
 
@@ -2732,168 +2720,6 @@ sub ProcessSqlBlockComplete
         $users_id {$userseqno} = $user ;
       }
     }
-
-#    if ((($flags =~ /gzip/) || ($flags =~ /object/)) && ($namespace =~ /^(?:0|10|14)$/))
-#    {
-#      $article =~ s/\#\*\$\@/'/g ; # put back \' text quotes
-#      $article =~ s/\\\\/\#\*\$\@/g ;
-#      $article =~ s/\\0/\x00/g ;
-#      $article =~ s/\\\'/'/g ;
-#      $article =~ s/\\\"/"/g ;
-#      $article =~ s/\\n/\n/g ;
-#      $article =~ s/\\r/\r/g ;
-#      $article =~ s/\\t/\t/g ;
-#      $article =~ s/\\z/\x1A/gi ; # \e
-#      $article =~ s/\\\%/\%/g ;
-#      $article =~ s/\\\_/\_/g ;
-#      $article =~ s/\#\*\$\@/\\/g ;
-
-#     From /usr/include/zlib.h
-#     inflate() returns Z_OK if some progress has been made (more input
-#     processed or more output produced), Z_STREAM_END if the end of the
-#     compressed data has been reached and all uncompressed output has
-#     been produced, Z_NEED_DICT if a preset dictionary is needed at
-#     this point, Z_DATA_ERROR if the input data was corrupted (input
-#     stream not conforming to the zlib format or incorrect adler32
-#     checksum), Z_STREAM_ERROR if the stream structure was inconsistent
-#     (for example if next_in or next_out was NULL), Z_MEM_ERROR if
-#     there was not enough memory, Z_BUF_ERROR if no progress is
-#     possible or if there was not enough room in the output buffer when
-#     Z_FINISH is used. In the Z_DATA_ERROR case, the application may
-#     then call inflateSync to look for a good compression block.
-
-#      if ($flags =~ /gzip/)
-#      {
-#        $cnt_inflated++ ;
-
-#        ($refinf, $status) = inflateInit(-WindowBits => 0 - MAX_WBITS);
-#        ($article2, $status) = $refinf->inflate ($article) ;
-#        if ($status == Z_STREAM_END) # Z_OK = 0
-#        { $article2 .= $article ; }
-#        $article = $article2 ;
-
-#        if (($status != Z_OK) && ($status != Z_STREAM_END))
-#        {
-#          if ($cnt_inflate_errors < 100)
-#          { &Log ("Inflate error $status on article '$title', recid $recid\n") ; }
-#          $cnt_inflate_errors++ ;
-#          next ;
-#        }
-#      }
-
-      # I tried to unserialize with 'serialize.pm' by Scott Herring
-      # http://hurring.com/code/perl/serialize/
-      # it has no support for objects
-      # but worse it is extremely slow, goes through state machine for each character
-
-#      if (($flags =~ /object/) && ($flags !~ /external/))
-#      {
-#        if (($namespace != 0) && ($namespace != 10))
-#        {
-#          if ($time_gm > $dumpdate_gm_hi) { next ; }
-
-#          &CollectUserCounts ($namespace, $user, $false, $time_gm) ;
-#          next ;
-#        }
-#        if ($article =~ /historyblobstub/)
-#        {
-#          # &LogQ ("\n$title $namespace Time $time ($time_gm) Recid $recid 1\n") ;
-
-#          if ($time_gm > $dumpdate_gm_hi) { next ; }
-
-#          $article =~ m/mOldId";s:\d+:"(\d+)";s:5:"mHash";s:32:"(\w{32,32})/ ;
-#          $oldid = $1 ;
-#          $hash  = $2 ;
-#          # example: 'O:15:"historyblobstub":2:{s:6:"mOldId";s:5:"11205";s:5:"mHash";s:32:"624ebe6d9cfd68ab70664d3a92356ed1";}'
-#          my $line = sprintf("%2d-", $namespace) . sprintf ("%12d-", $oldid) . "$hash-" . sprintf("%10d", $time_gm) . "-" . &i2bbbb ($userseqno) . "\n" ;
-#          print OLD_EVENTS $line ;
-#          $length_line_old_events = length ($line) ;
-#          $cnt_file_old_events++ ;
-#          next ;
-#        }
-#        elsif ($article =~ /concatenatedgziphistoryblob/)
-#        {
-#        # &LogQ ("\n$title $namespace Time $time ($time_gm) Recid $recid 2\n") ;
-#        # example: 'O:27:"concatenatedgziphistoryblob":4:{s:8:"mVersion";i:0;s:11:"mCompressed";b:1;s:6:"mItems";s:380:"{compressed data follows}";s:12:"mDefaultHash";s:32:"4022db7a66758388aea6e875b2f2ae7a";}'
-
-#          # get length of compressed section
-#          $article =~ s/.*mItems.*?s:// ;
-#          $length = substr ($article,0,10) ;
-#          $length =~ s/^(\d+)\:.*$/$1/ ;
-#          $article =~ s/.*?\"// ;
-
-#          # get compressed section
-#          $article2     = substr ($article,0,$length) ;
-#          $hash_default = substr ($article,$length) ;
-#          $hash_default =~ s/^.*?mDefaultHash";s:32:"(\w{32,32}).*$/$1/ ;
-
-#          ($refinf, $status) = inflateInit(-WindowBits => 0 - MAX_WBITS);
-#          ($inflated, $status) = $refinf->inflate ($article) ;
-#          if ($status == Z_STREAM_END)
-#          { $inflated .= $article ; }
-#          if (($status != Z_OK) && ($status != Z_STREAM_END))
-#          {
-#            if ($cnt_inflate_errors < 100)
-#            { &Log ("Inflate error $status on article '$title', recid $recid\n") ; }
-#            $cnt_inflate_errors++ ;
-#            next ;
-#          }
-
-#          # example: a:2:{s:32:"4022db7a66758388aea6e875b2f2ae7a";s:212:"{data}";s:32:"89d9a2563c9c48a920e8636b25fedfc3";s:118:"{data}";}
-
-#          # parse decompressed section
-
-#          # get number of entries in compressed section
-#          $inflated =~ m/^a:(\d+):/ ;
-#          $entries = $1 ;
-
-#          # get to start of first section
-#          $inflated =~ s/^a:(\d+):\{// ;
-
-#          $article_default = "" ;
-#          while ($inflated =~ m/^s:32:"(\w{32,32})";s:(\d+):/g)
-#          {
-#            $hash = $1 ;
-#            $len  = $2 ;
-#            $inflated =~ s/^s:32:"(\w{32,32})";s:(\d+):"// ;
-#            $article = substr ($inflated,0, $len) ;
-#            $inflated = substr ($inflated, $len+2) ;
-#            # &LogQ ("RecId $recid Hash $hash Len $len Article " . substr ($article,0,20) . "\n") ;
-
-#            # hash_default points to revision that originaly belonged in this entry
-#            # store others for later matching with proper user/timestamp
-#            if ($hash eq $hash_default)
-#            { $article_default = $article ; }
-
-#            &CollectArticleCounts ($table, $namespace, $recid, $hash, $article) ;
-
-#            if ($mode eq "wp")
-#            {
-#              my ($ns_title, $sha1) = &ChecksumTimelines ($namespace, $title, $article);
-#              if ($sha1 ne "")
-#              {
-#                $ns_title =~ s/\,/&comma;/g ;
-#                print OLD_TIMELINES "$recid,$hash,$ns_title,$sha1\n" ;
-#                $cnt_file_old_timelines++ ;
-#              }
-#            }
-#          }
-#          $article = $article_default ;
-#        }
-#        else
-#        {
-#          if ($cnt_unknown_objects < 100)
-#          {
-#            { &Log ("Flag 'object' found but not 'historyblobstub' or 'concatenatedgziphistoryblob' on article '$title', recid $recid\n") ; }
-#            $cnt_unknown_objects++ ;
-#            next ;
-#          }
-#        }
-#      }
-#    }
-
-#   if ($time_gm > $dumpdate_gm_hi) { next ; }
-
   }
 
   $bytes_read += length ($line) ;
