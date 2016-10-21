@@ -208,6 +208,8 @@ sub AssumeBots
     &LogT ("Add unflagged bots, known to disrespect or to no longer use bot flag: $unflaggedbots\n\n") ;
     foreach $bot (split (',', $unflaggedbots))
     { $bots {$bot} ++ ; }
+
+    $bots {'Kolega2357'} ++ ; # 2016-09: manually added 14M edits, 4.5M in last month
   }
 
   &LogT ("Also assume certain accounts are bots, based on previously stored bots for all projects\n") ;
