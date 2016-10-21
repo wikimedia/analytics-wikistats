@@ -269,12 +269,13 @@ sub GenerateSiteMapNew
 # { $out_more_tables = "<a href='#comparisons'><b>$out_comparisons</b></a> / <a href='#see_also'><b>$out_generated2</b></a>" ; }
   {
     if ($region eq "")
-    { $out_more_tables = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>See bottom of page for <a href='#comparisons'><b>language comparisons</b></a> / <a href='#see_also'><b>other reports</b></a></small>" ; }
+    { $out_more_tables = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>See bottom of  page for <a href='#comparisons'><b>language comparisons</b></a> / <a href='#see_also'><b>other reports</b></a>&nbsp;&nbsp;&nbsp;See also the <a href='TablesCurrentStatusVerbose.htm'>expanded version of this report.</small>" ; }
     else
     {
       if ($#languages > 50)
       { $out_more_tables = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>See below for <a href='#comparisons'><b>language comparisons</b></a></small>" ; }
     }
+
   }
   $out_more_tables =~ s/\://g ;
 
@@ -300,6 +301,10 @@ sub GenerateSiteMapNew
     }
     else
     { $out_html .= "<h2>$out_publications</h2>\n" ; }
+ 
+   if ($mode_wp)
+   { $out_html .= "<p><b><font color=#080>Mar 2016 !New!</b></font> Extra columns added. Also, want to bookmark this page with default sort column? Now you can!<br>" . 
+                  "Add url argument 'sortcol=x' (where x is 4-6|8-17), add D for descending sort. E.g. 'Sitemap.htm?sortcol=13D'" ; }
 
     if ($wikimedia)
     {
@@ -319,6 +324,7 @@ sub GenerateSiteMapNew
     if ($sitemap_new_layout)
     {
 
+
       $out_html .= "<thead>\n" ;
 
     # $out_html .= &tr ($mode_wp ? &tdcbt5 (&b ("Languages")) : &tdcbt4 (&b ("Languages")) .
@@ -326,6 +332,8 @@ sub GenerateSiteMapNew
                         &tdcbt5 (&b ("Languages")) .
                         &tdcbt  (&b ("Regions")) .
                         &tdcbt3 (&b ("Participation")) .
+                        &tdcbt4 (&b ("Active editors")) .
+                        &tdcbt2 (&b ("Edits")) .
                         &tdcbt  (&b ("Usage")) .
                         &tdcbt  (&b ("Content"))) ;
                       # &tdcbt  (&b ($out_site)) .
@@ -341,10 +349,16 @@ sub GenerateSiteMapNew
                         (&tdcbt ("<small>Code<br>&rArr; Project<br>Main Page</small>")) .
                         (&tdlbt ("<small>Language<br>&rArr; Wikipedia article</small>")) .
                         $out_participation {"header"} .
+                        &tdcbt("<a href='TablesWikipediansEditsGt5.htm'><small>5+ edits<br>&nbsp;p/month&nbsp;</small></a><br><small>(3m avg)</small>") .
+                        &tdcbt("<a href='TablesWikipediansEditsGt100.htm'><small>100+ edits<br>&nbsp;p/month&nbsp;</small></a><br><small>(3m avg)</small>") .
+                        &tdcbt("<small>Admins</small>") .
+                        &tdcbt("<small>Bots</small>") .
+                        &tdcbt ("<small><a href='BotActivityMatrixEdits.htm'>Bot<br>edits</a></small>") .
+                        &tdcbt ("<small>Human<br>edits<br>by unreg.<br>users</small>") .
                         &tdcbt ("<small>Views<br>per hour</small>") .
                         &tdcbt ("<small>Article<br>count</small>")) ;
 #     $out_html .= &tr (&tde . &tde . &tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
-      $out_html .= &tr (&the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
+      $out_html .= &tr (&the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
     # $out_html .= &tr (&tdimg ("<a href='TablesWikipediaZZ.htm'><img src='../Tables.png'></a> <a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>") .
 
       if ($region eq '')
@@ -365,11 +379,11 @@ sub GenerateSiteMapNew
                                   "<font color=#FFAA00><span title='South America'>SA<\/span><\/font> " .
                                   "<font color=#00AAD4><span title='Oceania'>OC<\/span><\/font> " .
                                   "<font color=#000000><span title='Constructed Language'>CL<\/span><\/font> " .
-                                  "<font color=#000000><span title='World Language'>W<\/span><\/font></small></small></small>") .
-                          &tde . &tde . &tde . &tde . &tde) ;
+                                  "<font color=#000001><span title='World Language'>W<\/span><\/font></small></small></small>") .
+                          &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde) ;
                         # &tdcbt ("<a href='$out_url_all'>" . &w( $out_site) . "</a>") .
       }
-      $out_html .= "</thead><tbody>\n" ;
+      $out_html .= "</thead>\n<tbody>\n" ;
     }
 
     my @languages2 = @languages ;
@@ -477,6 +491,22 @@ sub GenerateSiteMapNew
           }
           $views = &tdrb (&w ($views)) ;
         }
+  
+        $editors_ge_5   = &tdrb (@MonthlyStats {$wp.$c[2].'avg3'}) ;
+        $editors_ge_100 = &tdrb (@MonthlyStats {$wp.$c[3].'avg3'}) ;
+        $access_sysop   = &tdrb (@access {"$wp|sysop"}) ;
+        $access_bots    = &tdrb (@access {"$wp|bot"}) ;
+        $editors = $editors_ge_5 . $editors_ge_100 . $access_sysop . $access_bots ;
+
+        $edits_anonymous = sprintf ("%.0f", 100 * $edits_total_ip {$wp} / ($edits_total {$wp} - $BotEditsArticlesPerWiki {$wp})) . "%" ;
+        $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
+        if ($cnt > 0)
+        { $edits_bot = sprintf ("%.0f", 100 * $BotEditsArticlesPerWiki {$wp} / $cnt) . "%" ; }
+        else
+        { $edits_bot = "0%" ; }
+        if (($wp eq "en") && ($BotEditsArticlesPerWiki {$wp} == 0))
+        { $edits_bot = "" ; } # no data yet
+        $edits = &tdrb ($edits_bot) . &tdrb ($edits_anonymous) ;    
 
         $code_website = "<a href='${out_urls {$wpc}}'>$wpc3</a>" ;
 
@@ -491,10 +521,11 @@ sub GenerateSiteMapNew
           if ($region ne '')
           { $dir_all_languages = '../EN/' ; }
 
+          # build one row in main table on Sitemap page, e.g. https://stats.wikimedia.org/EN/Sitemap.htm
           $out_html .= &tr (
                           # &tdcb ($out_language_article .
                           # "<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
-                             &tdcb (&w($lastdump_short_month {$wp})) .
+                            &tdcb (&w($lastdump_short_month {$wp})) .
                             &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
@@ -504,6 +535,8 @@ sub GenerateSiteMapNew
                           # (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ("$out_language_article $out_language_name") : "") : "") .
                             (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ("<a href='" . $out_article {$wpc} . "'>$out_language_name</a>") : "") : "") .
                             $out_participation {$wpc2} .
+                            $editors .
+                            $edits .
                             $views .
                             &tdrb (&w ($totarticles))) ;
                           # &tdcb ("<a href='" . $out_urls {$wpc} . "'>" . &w($out_site) . "</a>") .
@@ -522,10 +555,9 @@ sub GenerateSiteMapNew
         }
      }
     }
+    $out_html .= "</tbody>\n" ;
     $out_html .= &tr ("<td class=l width=600 colspan=99>$out_included</td>") ;
-
-    $out_html .= "</tbody>\n</table>\n" ;
-
+    $out_html .= "</table>\n" ;
 
     if (($some_languages_only) || ($#languages < 25))
     { &TableSeeAlso (1) ; }
@@ -822,8 +854,8 @@ sub TableSeeAlso
                                "<a href='http://stats.wikimedia.org/EN/TableRankArticleHistoryByTotalEdits.html'>by edit count</a>" .
                                blank_text_after ("30/04/2009", " <font color=#008000><b>NEW</b></font>") ) . &tde) ;
       $out_html .= &tr (&tdlb ("<a href='http://meta.wikimedia.org/wiki/Template:Wikimedia_Growth'>Wikimedia growth</a>") . &tde) ;
-      $out_html .= &tr (&tdlb ("Mailing list activity: <a href='http://www.infodisiac.com/Wikipedia/ScanMail/index.html'>All lists</a>&nbsp;/&nbsp;".
-                              "<a href='http://www.infodisiac.com/Wikipedia/ScanMail/_PowerPosters.html'>Power posters</a>") . &tde) ;
+      $out_html .= &tr (&tdlb ("Mailing list activity: <a href='https://stats.wikimedia.org/mail-lists/'>All lists</a>&nbsp;/&nbsp;".
+                              "<a href='https://stats.wikimedia.org/mail-lists/_PowerPosters.html'>Power posters</a>") . &tde) ;
 
       $out_html .= &tr (&tdlb ("Job progress: <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>Database dumps</a>&nbsp;/&nbsp;" .
                                "<a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>")) . &tde) ;
@@ -1476,8 +1508,25 @@ sub GenerateHtmlStart
 
   if (! $pageviews)
   {
-  #  $out_html .= "<font color=#C00000><h3>Feb 30, 2012: Reports are broken, and need to be regenerated, due date &plusmn; April 7</h3></font>" .
-  #               "<font color=#C00000>After recent dump format change redirect pages were no longer recognized, as a result article count and new articles per day are much too high. Effect on other metrics is negligible.</font><p>"   ;
+    my $sp2 = "&nbsp;&nbsp;" ;
+
+    $out_html .= "<table><tr><td colspan=999 style='background-color:#CC8;text-align:left'>" .
+                 "<font color=#000000>&nbsp;<br>$sp2" .
+                 "<b>May 2016: The major overhaul of Wikistats reports has entered a new phase.</b>$sp2<p>" .
+                 "${sp2}First phase focused on migrating the traffic analysis reports to our new infrastructure. Those are operational now.$sp2<br> " .
+                 "${sp2}The Analytics Team will now proceed to also migrate data collection and reporting about wiki content and contributors.$sp2<br> " .
+                 "${sp2}First results are expected later this year.$sp2<p>" .
+                 "${sp2}More info at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'>this announcement</a><br>" .
+                 "${sp2}You can still tell us which reports you want to see preserved, in this " .
+                 "<a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'>survey.</a></font>$sp2" .
+                 "</td></tr></table>$sp2<br>" ;
+
+# original banner shown in 2016 May-Aug
+#   $out_html .= "<table><tr><td colspan=999 style='background-color:#000;text-align:left'>" . 
+#                "<font color=#00FF00>&nbsp;<br><h3><big>&nbsp;&nbsp;May 2016: Wikistats' days will be over soon. A successor is in the works.&nbsp;</h3></big></h3><br>&nbsp;&nbsp;" .
+#                "<b>Read more at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'><font color=#A0A0FF>this announcement</font></a>. " . 
+#                "Please tell us which reports you want to see preserved, in this <a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'><font color='#A0A0FF'>survey.</font></a></b></font>" . 
+#                 "<br>&nbsp;</td></tr></table>" ;   
   }
 }
 
