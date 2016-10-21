@@ -94,7 +94,7 @@ sub GetNamespaces
     elsif ($lang eq 'foundation') { $url = 'wikimediafoundation.org' ; }
     elsif ($lang eq 'wikidata')   { $url = 'www.wikidata.org' ; }
     
-    $url .= "/w/api.php?action=query&meta=siteinfo&siprop=namespaces" ;
+    $url .= "/w/api.php?action=query&meta=siteinfo&siprop=namespaces&format=xml" ;
 
     ($success,$content) = GetPage ($url) ;
     
@@ -107,13 +107,13 @@ sub GetNamespaces
     }
 
     # print $content ;
-    @lines = split "\n", $content ;
+    @lines = split "<ns", $content ;
     $namespaces {"$proj_code,$lang"} = "0\|" ; # always add ns 0 (api call may fail, e.g. on incubator wiki (e.g. Feb 2014: kr.wikibooks.org) 
     foreach $line (@lines)
     {
-      next if $line !~ /ns id=/ ;
-      next if $line !~ /content=&quot;&quot;/ ;
-      ($ns = $line) =~ s/^.*id=&quot;(\d+)&quot;.*$/$1/ ;
+      next if $line !~ / id=/ ;
+      next if $line !~ /content=\"\"/ ;
+      ($ns = $line) =~ s/^.*? id=\"(\d+)\".*$/$1/ ;
       next if $ns == 0 ; # already added
       if ($ns =~ /^\d+$/)
       { $namespaces {"$proj_code,$lang"} .= "$ns\|" ; }
