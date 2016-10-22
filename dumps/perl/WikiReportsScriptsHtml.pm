@@ -108,6 +108,17 @@ $out_script_sorter = <<__SCRIPT_SORTER__ ;
   format: function(s) { return \$.tablesorter.formatFloat(s.replace(/<.*?>/g,"").replace(/\&nbsp\;/g,"").replace(/,/g,"").replace(/-/,"-1")); },
   type: "numeric"
 });
+
+function getParameterByName( name ){
+  name = name.replace(/[\\[]/,"\\\\\\[").replace(/[\\]]/,"\\\\\\]");
+  var regexS = "[\\\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var results = regex.exec( window.location.href );
+  if( results == null )
+    return "";
+  else
+    return decodeURIComponent(results[1].replace(/\\+/g, " "));
+}
 </script>
 
 <style type="text/css">
@@ -175,9 +186,17 @@ __SCRIPT_SORTER__
 
 $out_script_sorter_invoke = <<__SCRIPT_SORTER_INVOKE__ ;
 <script type='text/javascript'>
+var sortcol = getParameterByName('sortcol');
+var regexp = /d/i ;
+var ascdesc='0';
+if (regexp.exec (sortcol))
+{ ascdesc='1'; } 
+sortcol=sortcol.replace(/\\D/g,'') ;
+
 \$('#table2').tablesorter({
   // debug:true,
-  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:false},3:{sorter:false},4:{sorter:'nohtml'},5:{sorter:'nohtml'},6:{sorter:'nohtml'},7:{sorter:false},8:{sorter:'millions'},9:{sorter:'digitsonly'},10:{sorter:'digitsonly'},11:{sorter:'digitsonly'},12:{sorter:false}}
+  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:false},3:{sorter:false},4:{sorter:'nohtml'},5:{sorter:'nohtml'},6:{sorter:'nohtml'},7:{sorter:false},8:{sorter:'millions'},9:{sorter:'digitsonly'},10:{sorter:'digitsonly'},11:{sorter:'digitsonly'},12:{sorter:'digitsonly'},13:{sorter:'digitsonly'},14:{sorter:'digitsonly'},15:{sorter:'digitsonly'},16:{sorter:'digitsonly'},17:{sorter:'digitsonly'}},
+  sortList: [[sortcol,ascdesc]]
 });
 </script>
 __SCRIPT_SORTER_INVOKE__
