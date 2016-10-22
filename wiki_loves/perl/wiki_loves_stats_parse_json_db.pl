@@ -26,12 +26,12 @@
   print "\n" ;
 
 # my $url  = "http://tools.wmflabs.org/wikiloves/db.json";
-  my $txt_log                     = "$path_log/wiki_loves_parse_json_log.txt";
-  my $txt_warnings                = "$path_out/wiki_loves_parse_json_warnings.txt";
+  my $txt_log                     = "$path_log/wiki_loves_uploads_parse_json_log.txt";
+  my $txt_warnings                = "$path_out/wiki_loves_uploads_parse_json_warnings.txt";
 
-  my $csv_contest_countries       = "$path_out/wiki_loves_countries.csv";
-  my $csv_contest_countries_users = "$path_out/wiki_loves_users.csv";
-  my $csv_contest_countries_dates = "$path_out/wiki_loves_dates.csv";
+  my $csv_contest_countries       = "$path_out/wiki_loves_uploads_countries.csv";
+  my $csv_contest_countries_users = "$path_out/wiki_loves_uploads_users.csv";
+  my $csv_contest_countries_dates = "$path_out/wiki_loves_uploads_dates.csv";
 
   open    TXT_LOG, '>', $txt_log ;
   binmode TXT_LOG, ':utf8'  ;
