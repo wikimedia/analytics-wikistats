@@ -17,22 +17,45 @@ reports_edits_unsampled=$squids/reports_edits
 
 logs=$squids/logs
 meta=$csv_sampled/meta # for bots views and edits use these 'meta' files (lookup for country/region codes) 
-
+data_hourly=/mnt/hdfs/wmf/data/archive/projectview/geo/hourly/ 
 htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 
 log=$logs/SquidReportArchive.log
 
-month=2015-07  
-quarter=2015Q2
-quarter2=2015-Q2 # hmm need to remove dash some day 
+month=2016-08
+quarter=2016Q2
 
-run_collect_country_stats=no
+run_collect_country_stats=yes
 run_refresh_from_wikipedia=no
 run_monthly_countries_reports=yes
 run_quarterly_countries_reports=no
 run_monthly_non_geo_reports=no
+
+# very loose input validation
+if [ "$1" != "" ]
+then
+  echo "Argument provided: $1"
+  if [[ $1 =~ ^2[0-9][0-9][0-9]-[0-1][0-9]$ ]]
+  then 
+    echo "Month provided: $1"
+    month=$1
+    run_monthly_countries_reports=yes
+    run_quarterly_countries_reports=no
+  elif [[ $1 =~ ^2[0-9][0-9][0-9]Q[1-4]$ ]]  
+  then 
+    echo "Quarter provided: $1"
+    quarter=$1
+    run_monthly_countries_reports=no
+    run_quarterly_countries_reports=yes
+  else 
+    echo "Unexpected argument: $1"
+    exit
+  fi
+fi
+
+quarter2="${quarter:0:4}-${quarter:4:2}" # hmm need to remove dash in some folders some day 
 
 if [ "$run_monthly_countries_reports" == "yes" ] ; then
   run_collect_country_stats=yes
@@ -40,7 +63,20 @@ fi
 if [ "$run_quarterly_countries_reports" == "yes" ] ; then
   run_collect_country_stats=yes
 fi
-# run_collect_country_stats=no # speed up repeated tests
+
+file="$csv_sampled/SquidDataVisitsPerCountryMonthly.csv" 
+age=$(stat -c %Y $file)
+now=$(date +"%s")
+days=$(( (now - age) / (60 * 60 * 24) ))
+threshold=2 
+echo "age $file $age, now $now, days $days"
+if (( $days < $threshold )) 
+then
+  echo "File $file less than $threshold days old, skip regenerating" 
+  run_collect_country_stats=no
+fi
+
+run_collect_country_stats=yes # speed up repeated tests
 
 # -c = country reports
 # -v = views
@@ -59,22 +95,44 @@ args_edits_sampled="  -e  -i $csv_sampled         -o $reports_sampled         -a
 args_edits_unsampled="-e  -i $csv_edits_unsampled -o $reports_edits_unsampled -a $meta -l $logs -x 1"
 # once every so many months refresh meta info from English Wikipedia 
 # this is not one too often, as Wikipedia page syntax can change anytime, so vetting is needed
-if [ "$refresh_from_wikipedia" == "yes" ] ; then
-  perl SquidReportArchive.pl -w $args_views_sampled | tee -a $log | cat # last run Oct 2013
+if [ "$run_refresh_from_wikipedia" == "yes" ] ; then
+  perl SquidReportArchive.pl -w $args_views_sampled | tee -a $log | cat # last run Feb 2016
+  exit
 fi
 
 # perl SquidReportArchive.pl -m 201007 > $log
 # after further automating SquidScanCountries.sh
 
 # >> COLLECT PER COUNTRY STATS <<
+
+# reads 
+# SquidDataCountriesViews.csv
+#
+# produces 
+# SquidDataVisitsPerCountryMonthly.csv
+# SquidDataVisitsPerCountryPerWikiDaily.csv
+# SquidDataVisitsPerCountryPerProjectDaily.csv
+# SquidDataVisitsPerCountryDailyDetailed.csv
+
+# reads 
+# SquidDataCountriesSaves.csv
+#
+# produces 
+# SquidDataSavesPerCountryMonthly.csv
+# SquidDataSavesPerCountryPerWikiDaily.csv
+# SquidDataSavesPerCountryPerProjectDaily.csv
+# SquidDataSavesPerCountryDailyDetailed.csv
+
 if [ "$run_collect_country_stats" == "yes" ] ; then
   echo ">> COLLECT PER COUNTRY STATS <<" >> $log
 
+  perl SquidCountryAggregateDaily.pl -v -s "2015-05" -i $data_hourly -o $csv_sampled -l $logs | tee -a $log | cat 
   # collect per country page view stats for all months, start in July 2009
   perl SquidCountryScan.pl  -v -s "2009-07" -i $csv_sampled         -l $logs | tee -a $log | cat 
+# no edits: exit # test run only 
   # collect per country page edit stats for all months, start in July 2013
 # perl SquidCountryScan.pl  -e -s "2011-11" -i $csv_edits_unsampled -l $logs | tee -a $log | cat 
-  perl SquidCountryScan.pl  -e -s "2011-11" -i $csv_sampled   -l $logs | tee -a $log | cat 
+# no edits: perl SquidCountryScan.pl  -e -s "2011-11" -i $csv_sampled   -l $logs | tee -a $log | cat
 fi
 
 # >> WRITE OTHER COUNTRY REPORTS <<
@@ -85,7 +143,7 @@ if [ "$run_monthly_countries_reports" == "yes" ] ; then
   perl SquidReportArchive.pl -c $args_views_sampled   -m $month | tee -a $log | cat # -c for per country reports
 # perl SquidReportArchive.pl -c $args_edits_unsampled -m $month | tee -a $log | cat # -c for per country reports
 
-  perl SquidReportArchive.pl -c $args_edits_sampled   -m $month | tee -a $log | cat # -c for per country reports
+# no edits: perl SquidReportArchive.pl -c $args_edits_sampled   -m $month | tee -a $log | cat # -c for per country reports
 
 #      ls -l     $reports_sampled/countries/SquidReport*Per*.htm         
 # echo "rsync -av $reports_sampled/countries/SquidReport*Per*.htm         $htdocs/archive/squid_reports_draft/$month"
@@ -93,15 +151,17 @@ if [ "$run_monthly_countries_reports" == "yes" ] ; then
       ls -l     $reports_sampled/$month/SquidReportPageViewsPer*.htm         
 echo "rsync -av $reports_sampled/$month/SquidReportPageViewsPer*.htm                   $htdocs/archive/squid_reports/$month"
       rsync -av $reports_sampled/$month/SquidReportPageViewsPer*.htm                   $htdocs/archive/squid_reports/$month
-      ls -l     $reports_sampled/$month/SquidReportPageEditsPer*.htm         
-echo "rsync -av $reports_sampled/$month/SquidReportPageEditsPer*.htm                   $htdocs/archive/squid_reports/$month"
-      rsync -av $reports_sampled/$month/SquidReportPageEditsPer*.htm                   $htdocs/archive/squid_reports/$month
+echo "rsync -av $reports_sampled/$month/SquidReportPageViewsPer*.htm                   $htdocs/wikimedia/squids"
+      rsync -av $reports_sampled/$month/SquidReportPageViewsPer*.htm                   $htdocs/wikimedia/squids
+# no edits:       ls -l     $reports_sampled/$month/SquidReportPageEditsPer*.htm         
+# no edits: echo "rsync -av $reports_sampled/$month/SquidReportPageEditsPer*.htm                   $htdocs/archive/squid_reports/$month"
+# no edits:       rsync -av $reports_sampled/$month/SquidReportPageEditsPer*.htm                   $htdocs/archive/squid_reports/$month
 #     ls -l     $reports_edits_unsampled/countries/SquidReport*.htm 
 #echo "rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports_draft/$month"
 #      rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports_draft/$month
-exit
-  rsync -av $reports_sampled/countries/SquidReport*.htm         $htdocs/wikimedia/squids
-  rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports/$month
+# exit
+# rsync -av $reports_sampled/countries/SquidReport*.htm         $htdocs/wikimedia/squids
+# no edits: rsync -av $reports_edits_unsampled/countries/SquidReport*.htm $htdocs/archive/squid_reports/$month
   
   cd $reports_sampled/countries
   echo "tar -cvf - *.htm | gzip > reports-countries-sampled-$month.tar.gz"
@@ -126,7 +186,7 @@ if [ "$run_quarterly_countries_reports" == "yes" ] ; then
   rsync -av $reports_sampled/$quarter2/SquidReportPageViewsPerCountryOverview$quarter.htm  $htdocs/wikimedia/squids/SquidReportPageViewsPerCountryOverview$quarter.htm
 
 # no longer obsolete (has been kept for reference and fallback): generate page edit reports from sampled squid logs  
-  perl SquidReportArchive.pl  -c -q $quarter $args_edits_sampled | tee -a $log | cat 
+# no edits: perl SquidReportArchive.pl  -c -q $quarter $args_edits_sampled | tee -a $log | cat 
   rsync -av $reports_sampled/$quarter2/SquidReportPageEditsPerCountryOverview$quarter.htm  $htdocs/wikimedia/squids/SquidReportPageEditsPerCountryOverview$quarter.htm
 
 # generate page edit reports from *un*sampled squid logs  
