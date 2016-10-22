@@ -88,7 +88,8 @@ sub StoreHtmlPageviewsAllProjects
   my ($source, $normalized) ;
 
   if ($mode_wx)
-  { return if $wp ne 'commons' and $wp ne '' ; } # test here to keep call tidy
+# { return if $wp ne 'commons' and $wp ne '' ; } # test here to keep call tidy
+  { return if $wp ne 'zz' and $wp ne '' ; } # test here to keep call tidy # May 2016 include other 'other projects' beyond commons 
   else
   { return if $wp ne 'zz' and $wp ne '' ; } # test here to keep call tidy
 
