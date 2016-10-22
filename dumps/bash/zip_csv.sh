@@ -15,9 +15,9 @@ fi
 
 cd $csv/csv_$1
 
-echo "rebuild $zip_all/csv_$1_main.zip"
-rm     $zip_all/csv_$1_main.zip                                                                     # always skip:
-zip -q $zip_all/csv_$1_main.zip *.csv -x Creates* Edits* Revert* Categories* UserActivity*          *Temp* *Test* *Ploticus* *.zip
+#echo "rebuild $zip_all/csv_$1_main.zip"
+#rm     $zip_all/csv_$1_main.zip                                                                     # always skip:
+#zip -q $zip_all/csv_$1_main.zip *.csv -x Creates* Edits* Revert* Categories* UserActivity*          *Temp* *Test* *Ploticus* *.zip
 
 echo "rebuild $zip_all/csv_$1_creates.zip"
 rm     $zip_all/csv_$1_creates.zip
@@ -38,6 +38,8 @@ zip -q $zip_all/csv_$1_categories.zip *.csv -i Categories* -x *Temp* *Test*
 echo "rebuild $zip_all/csv_$1_activity_trends.zip"
 rm     $zip_all/csv_$1_activity_trends.zip
 zip -q $zip_all/csv_$1_activity_trends.zip *.csv -i UserActivity* -x *Temp* *Test*
+
+ls -l $zip_all/*.zip 
 
 # obsolete ?
 #echo "rebuild $zip_all/bz2_$1.zip"
