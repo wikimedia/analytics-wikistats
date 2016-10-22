@@ -19,9 +19,9 @@
 #print "xxx\n" ;
 #print md5 ($file) ;
 #exit ;
-  $file_in   = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2015-10/Images_from_Wiki_Loves_Africa_2015/scan_categories_found_articles.csv" ;
-  $file_out  = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2015-10/Images_from_Wiki_Loves_Africa_2015/WLA_uploaders.csv" ;
-  $file_html = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2015-10/Images_from_Wiki_Loves_Africa_2015/WLA_uploaders.html" ;
+  $file_in   = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2016-09/Images_from_Wiki_Loves_Monuments_2016/scan_categories_found_articles.csv" ;
+  $file_out  = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2016-09/Images_from_Wiki_Loves_Monuments_2016/WLM_uploaders.csv" ;
+  $file_html = "/a/dammit.lt/pagecounts/categorized/data/wm-commons/2016-09/Images_from_Wiki_Loves_Monuments_2016/WLM_uploaders.html" ;
   open (IN,  '<', $file_in   || die "file in not found: $file_in not found") ; 
   open (OUT, '>', $file_out  || die "file in not found: $file_out could not be created") ; 
   open (HTML,'>', $file_html || die "file in not found: $file_html could not be created") ; 
@@ -37,7 +37,7 @@
     # print "$image\n" ;
     $url = "https://commons.wikimedia.org/w/api.php?action=query&titles=File:$image&prop=imageinfo&iiprop=user|url" ;    
     ($result, $content) = &GetPage ($url, $true) ;
-    sleep (1) ;
+  #  sleep (1) ;
 
     if ($result)
     { 
