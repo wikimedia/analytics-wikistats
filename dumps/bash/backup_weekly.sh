@@ -17,15 +17,15 @@ scripts=/home/ezachte/wikistats/
 
 dt=$(date +[%Y-%m-%d][%H:%M])
 
-# $bash/zip_all.sh # all = all projects ../dumps/csv/csv_* and ..dumps/out/out_*
-
-cd $out/zip_all
-echo "zip $backup/out_all_english_$dt.zip out*.zip"
-zip $backup/out_all_english_$dt.zip out*.zip
+$bash/zip_all.sh # all = all projects ../dumps/csv/csv_* and ..dumps/out/out_*
 
 cd /home/ezachte
 echo "tar --no-recursion -c -f $backup/home_$dt.tar * .*"
 tar --no-recursion -c -f $backup/home_$dt.tar * .*
+
+cd $out/zip_all
+echo "zip $backup/out_all_english_$dt.zip out*.zip"
+zip $backup/out_all_english_$dt.zip out*.zip
 
 cd $analytics
 echo "tar cvzf $backup/analytics_$dt.tar.gz *"
