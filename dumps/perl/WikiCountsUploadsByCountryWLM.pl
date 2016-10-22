@@ -6,6 +6,22 @@
   use warnings ;
 # use strict ;
 
+  # since this is run only once a year, temporary use hardcoded files
+  # Q&D past here new file, someday parse html status file, like https://dumps.wikimedia.org/commonswiki/20161001/
+  # section "All pages with complete edit history (.7z)"
+
+  $folder_xml = "/mnt/data/xmldatadumps/public/commonswiki/20161001" ;
+  @xml_files = qw (commonswiki-20161001-pages-meta-history1.xml-p000000001p001855684.7z
+                   commonswiki-20161001-pages-meta-history1.xml-p001855685p004288603.7z
+                   commonswiki-20161001-pages-meta-history1.xml-p004288605p006457504.7z
+                   commonswiki-20161001-pages-meta-history2.xml-p006457505p011852935.7z
+                   commonswiki-20161001-pages-meta-history2.xml-p011852936p016129764.7z
+                   commonswiki-20161001-pages-meta-history3.xml-p016129765p023222913.7z
+                   commonswiki-20161001-pages-meta-history3.xml-p023222914p029059062.7z
+                   commonswiki-20161001-pages-meta-history4.xml-p029059063p035492989.7z
+                   commonswiki-20161001-pages-meta-history4.xml-p035492990p043650172.7z
+                   commonswiki-20161001-pages-meta-history4.xml-p043650173p051981353.7z) ;
+ 
   $| = 1; # flush output immediately
 
   $true  = 1 ;
@@ -36,18 +52,32 @@ sub WriteUploaders
   foreach $line (@uploaders)
   {
     ($wlm_year,$wlm_user) = split (',',$line,2) ;
+    if ($wlm_year !~ /^\d\d\d\d$/)
+    {
+      print "Invalid wlm_year: '$wlm_year'\nLine '$line'\n" ; 
+      next ; 
+    }
     if ($wlm_year ne $wlm_year_prev)
     {
       if ($wlm_year_prev ne '')
-      { close TXT ; }
+      { 
+        print "close TXT 1\n" ; 
+        close TXT ; 
+      }
+      print "open TXT: $path_csv/WLM_uploaders_$wlm_year.txt\n" ; 
       open TXT, '>', "$path_csv/WLM_uploaders_$wlm_year.txt" ;
 
       $wlm_year_prev = $wlm_year ;	    
     }	    
+    print "print TXT: $wlm_user\n" ; 
     print TXT "$wlm_user\n" ;
   } 
+
   if ($wlm_year_prev ne '')
-  { close TXT ; }
+  { 
+    print "close TXT 2\n" ; 
+    close TXT ; 
+  }
 }
 
 sub ParseArguments
@@ -163,7 +193,7 @@ sub ParseXml
   my ($file_xml, $file_counts, $file_uploads, $file_edits, $file_html, $file_trace, $file_errors, @bots) = @_ ; # function arguments
   my ($bot, $user, $line, $trace, $usertype, $timestamp, $titles, $page_id, $wlm_year, $wlm_country) ;
   my (%bots) ;  # hash file %bots: access one element as $bots{some value}  
- 
+
   # array -> hash
   foreach $bot (@bots)
   { $bots {$bot} = $true ; }
@@ -178,18 +208,7 @@ sub ParseXml
   my $wlm_any_revision_has_template  = $false ;
   my $wlm_last_revision_has_template = $false ;
 
-     if ($file_xml =~ /\.gz$/) # extension gz ?
-  { open XML, "-|", "gzip -dc \"$file_xml\""   || die ("Input file could not be opened: $file_xml") ; }
-  elsif ($file_xml =~ /\.bz2$/) # extension bz2 ?
-  { open XML, "-|", "bzip2 -dc \"$file_xml\""  || die ("Input file could not be opened: $file_xml") ; }
-  elsif ($file_xml =~ /\.7z$/) # extension 7z ?
-  { open XML, "-|", "7z e \"$file_xml\" -so"   || die ("Input file could not be opened: $file_xml") ; }
-  else
-  {                                               die ("Unexpected extension: $file_xml") ; }
-
   print "Start $time\n\n" ;
-
-  binmode XML ;
 
   open CSV_UPLOADS, '>', $file_uploads ;
   binmode CSV_UPLOADS ;
@@ -233,6 +252,24 @@ sub ParseXml
 #  { print " lines: " . &commify($lines) . "\n" ; }
 #} 
 
+  $files_xml = 0 ;
+  while ($file_xml = shift (xml_files))
+  {
+    $file_xml = "$folder_xml/$file_xml" ;
+    $files_xml ++ ;
+    print "Process xml file $files_xml: $file_xml\n" ;
+ 
+       if ($file_xml =~ /\.gz$/) # extension gz ?
+    { open XML, "-|", "gzip -dc \"$file_xml\""   || die ("Input file could not be opened: $file_xml") ; }
+    elsif ($file_xml =~ /\.bz2$/) # extension bz2 ?
+    { open XML, "-|", "bzip2 -dc \"$file_xml\""  || die ("Input file could not be opened: $file_xml") ; }
+    elsif ($file_xml =~ /\.7z$/) # extension 7z ?
+    { open XML, "-|", "7z e \"$file_xml\" -so"   || die ("Input file could not be opened: $file_xml") ; }
+    else
+    {                                               die ("Unexpected extension: $file_xml") ; }
+
+    binmode XML ;
+# todo: indent two spaces till 'next file_xml'
   while ($line = <XML>)
   {
     $lines ++ ;	  
@@ -391,12 +428,14 @@ sub ParseXml
       $line =~ s/_/ /g ;       # replace underscores by spaces
       $line =~ s/\&amp;/\&/g ; # replace tag by character
       $user = $line ;
+
       if (defined ($bots {$user}))
       { $usertype = 'B' ; } # bot
       elsif (&IpAddress ($user)) # some anons are not specified by <ip>..</ip> tag
       { $usertype = 'A' ; } # anon
       else
       { $usertype = 'R' ; } # registered user
+
       print "$timestamp $usertype $user\n" if $verbose ;
       if ($wlm_user eq '')
       { $wlm_user = "$user" ; }
@@ -478,6 +517,8 @@ sub ParseXml
       $in_text = $false ;
     }
   }
+  close XML ;
+} # next file_xml
 
   print HTML "</body>\n</html\n" ;
 
