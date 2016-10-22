@@ -130,6 +130,14 @@ en.wikipedia.org|Africa|World War I
 en.wikipedia.org|Africa|World War II
 en.wikipedia.org|Africa|Zombies
 
+en.wikipedia.org|Education|Arts
+en.wikipedia.org|Education|.*alumni.*
+en.wikipedia.org|Education|.*school.*
+en.wikipedia.org|Education|.*student.*
+en.wikipedia.org|Education|.*people.*
+en.wikipedia.org|Education|.*sport.*
+en.wikipedia.org|Education|Arts
+
 en.wikipedia.org|World_War_II|Aftermath of World War II
 fr.wikipedia.org|Seconde_Guerre_mondiale|Ville titulaire de la croix de guerre 1939-1945 
 
@@ -149,6 +157,8 @@ fr.wikipedia.org|Afrique|Musique noire américaine
 it.wikipedia.org|Africa|Diaspora africana
 it.wikipedia.org|Africa|Medioriente
 it.wikipedia.org|Africa|Seconda guerra mondiale
+
+
 EOF
 
 less $data/exclude.csv
