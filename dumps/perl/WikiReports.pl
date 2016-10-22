@@ -264,11 +264,16 @@
   if (! $singlewiki)
   { &GenerateCurrentStatus ; }
 
-  &LogT ("\nGenerate Site Map") ;
   if ($showplots)
-  { &GenerateSiteMapNew ; }
+  { 
+    &LogT ("\nGenerate New Site Map") ;
+    &GenerateSiteMapNew ; 
+  }
   else
-  { &GenerateSiteMap ; }
+  { 
+    &LogT ("\nGenerate Old Site Map") ;
+    &GenerateSiteMap ; 
+  }
 
 # &GenerateComparisonTables ;
 
@@ -279,7 +284,7 @@
    # &TestCompleted ;
      &ReadEditHistory ;
      &ReadRevertHistoryGenerateReports ; 
-     &GenerateEditHistoryReports ; # wait till R runs on stat1
+     &GenerateEditHistoryReports ; 
   }
 
   if (($language eq "en") && (! $mode_wm))
