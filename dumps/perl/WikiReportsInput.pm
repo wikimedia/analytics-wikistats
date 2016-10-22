@@ -208,8 +208,9 @@ sub ParseArguments
     print "\nCollect pageviews for $keys_html_pageviews_all_projects\n\n" ;
   }
 
-  if ($pageviews && (! $pageviews_non_mobile) && (! $mode_wp))
-  { abort ("For all projects expect Wikipedia only render page views reports for 'non-mobile' aka 'normal'\nif (\$pageviews && (! \$pageviews_non_mobile) && (! \$mode_wp)) ") ; }
+# May 2016 reports for mobile for non wikipedia projects seems long overdue: enable
+# if ($pageviews && (! $pageviews_non_mobile) && (! $mode_wp))
+# { abort ("For all projects expect Wikipedia only render page views reports for 'non-mobile' aka 'normal'\nif (\$pageviews && (! \$pageviews_non_mobile) && (! \$mode_wp)) ") ; }
 
   if (defined $animation)
   { undef $pageviews ; undef $categorytrees ; }
@@ -340,6 +341,7 @@ else
   $file_csv_zeitgeist               = $path_in . "ZeitGeist.csv" ;
 
   $file_csv_pageviewsmonthly        = $path_pv . "projectviews_per_month_all.csv" ;
+  $file_csv_pageviewsmonthly_merged = $path_pv . "projectviews_per_month_all_merged_mobile_zero.csv" ;
 
 # obsolete SP001
 # $file_csv_pageviewsmonthly_combi  = $path_pv . "PageViewsPerMonthAllCombi.csv" ;
@@ -353,6 +355,7 @@ else
   if (! -e $file_csv_pageviewsmonthly)
   {
     $file_csv_pageviewsmonthly        = $path_in . "PageViewsPerMonthAll.csv" ;
+    $file_csv_pageviewsmonthly_merged = $path_in . "PageViewsPerMonthAllMergedMobileZero.csv" ;
   # obsolete SP001
   # $file_csv_pageviewsmonthly_combi  = $path_in . "PageViewsPerMonthAllCombi.csv" ;
     $file_csv_pageviewsmonthly_totals = $path_in . "PageViewsPerMonthAllTotalled.csv" ;
@@ -360,6 +363,43 @@ else
     $file_csv_views_log_forecast      = $path_in . "PageViewsLogForecast.csv" ;
     $file_csv_perc_mobile             = $path_in . "PageViewsPerMonthMobileTrends.csv" ;
     $file_csv_pageviewsmonthly_html   = $path_in . "PageViewsPerMonthHtmlAllProjects.csv" ;
+  }
+  
+  # combine counts for .m and .z   
+  if (-e $file_csv_pageviewsmonthly)
+  {
+    my $lines_in, $lines_out, $size_in, $size_out, $count_in, $count_out ;
+
+    open PV_IN, '<', $file_csv_pageviewsmonthly ;
+    while ($line = <PV_IN>)
+    {
+      next if $line !~ /,/ ;
+      $lines_in++ ;
+      chomp $line ;
+      ($lang,$date,$count) = split (',', $line) ;
+      $count_in += $count ;
+      $lang =~ s/\.z/\.m/ ;
+      $pageviewsmonthly {"$lang,$date"} += $count ; 
+    }     
+    close PV_IN ;
+    
+    open PV_OUT, '>', $file_csv_pageviewsmonthly_merged ;
+    foreach $key (sort keys %pageviewsmonthly)
+    { 
+      $lines_out++ ;
+      $count = $pageviewsmonthly {$key} ;
+      print PV_OUT "$key,$count\n" ;
+      $count_out += $count ;
+    }
+    close PV_OUT ; 
+    undef %pageviewsmonthly ;
+
+    $size_in  = -s $file_csv_pageviewsmonthly ;
+    print "\nMerge .m and .z counts\n" ;
+    print "in: $file_csv_pageviewsmonthly lines $lines_in size $size_in count $count_in\n" ;
+    $file_csv_pageviewsmonthly      = $file_csv_pageviewsmonthly_merged ;
+    $size_out = -s $file_csv_pageviewsmonthly ;
+    print "out: $file_csv_pageviewsmonthly lines $lines_out size $size_out count $count_out\n\n" ;
   }
   
   $file_csv_edits_per_article       = $path_in . "EditsPerArticle.csv" ;
@@ -1078,7 +1118,7 @@ sub ReadMonthlyStats
     $pageviews_monthly_totals_normalized {"$year-$month"} += $count_normalized ;
 
     $wp_zz = 'zz' ; 
-    if (($wp =~ /\.m/) || ($wp =~ /\.zero/)) 
+    if (($wp =~ /\.m/) || ($wp =~ /\.z/)) # new data file contains .z, not .zero
     { $wp_zz .= '.m' ; }
     $pageviews     {$wp_zz.$m} += $count_normalized ; 
     $pageviews_raw {$wp_zz.$m} += $count ;           
@@ -1112,7 +1152,7 @@ sub ReadMonthlyStats
   else
   { open "FILE_IN", "<", $file_csv_monthly_stats ; }
 
-  while ($line = <FILE_IN>)
+  while ($line = <FILE_IN>) # qqq
   {
     chomp ($line) ;
 
@@ -1405,7 +1445,6 @@ sub ReadMonthlyStats
         {
           $pageviews_max       {$wp} = $count_normalized ;
           $pageviews_month_max {$wp} = $m ;
-
           $MonthlyStatsHigh {$wp.$c[0]} = $count_normalized ;
           $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
         }
@@ -1416,7 +1455,6 @@ sub ReadMonthlyStats
         {
           $pageviews_max       {$wp} = $count_raw ;
           $pageviews_month_max {$wp} = $m ;
-
           $MonthlyStatsHigh {$wp.$c[0]} = $count_raw ;
           $MonthlyStatsHighMonth {$wp.$c[0]} = $m ;
         }
@@ -1907,7 +1945,12 @@ sub ReadMonthlyStats
 
   $m1 = $month_max ;
   $m2 = $m1 - 12 ;
-  if ($month_max_incomplete) { $m2-- ; }
+  if ($month_max_incomplete) { $m1-- ; $m2-- ; }
+
+# debug code
+  $m1-- ; 
+  $m2-- ; 
+
   $articles_plus_since = "1 " . &GetDateShort2 ($m2+1, $true) ;
   foreach my $wp (@languages)
   {
@@ -1915,28 +1958,37 @@ sub ReadMonthlyStats
     {
       if ($m2 <= $MonthlyStatsWpStop {$wp})
       {
-        @MonthlyStats {$wp.$c[$f].'+'} = @MonthlyStatsHigh {$wp.$c[$f]} -
-                                        @MonthlyStats     {$wp.$m2.$c[$f]} ;
+# debug code
+# if ($f == 0)
+# { 
+# print "A wp $wp: f:$f c[f]:" . $c[$f] . " m1:$m1 high: '" . @MonthlyStatsHigh {$wp.$c[$f]} . "' 12 months earlier: m2:$m2 " . @MonthlyStats {$wp.$m2.$c[$f]} . "\n" ; 
+# print "B wp $wp: f:$f c[f]:" . $c[$f] . " m1:$m1 high: '" . @MonthlyStats {$wp.$m1.$c[$f]} . "' 12 months earlier: m2:$m2 " . @MonthlyStats {$wp.$m2.$c[$f]} . "\n" ;
+# }
+      # @MonthlyStats {$wp.$c[$f].'+'} = @MonthlyStatsHigh {$wp.$c[$f]} -
+      #                                  @MonthlyStats     {$wp.$m2.$c[$f]} ;
+        @MonthlyStats {$wp.$c[$f].'+'} = @MonthlyStats {$wp.$m1.$c[$f]} -
+                                         @MonthlyStats {$wp.$m2.$c[$f]} ;
         if (@MonthlyStats {$wp.$c[$f].'+'} < 0)
         { @MonthlyStats {$wp.$c[$f].'+'} = 0 ; }
 
-      # if (@MonthlyStats {$wp.$m2.$c[$f]} > 0)
-        if (@MonthlyStatsHigh {$wp.$c[$f]} > 0)
+      # if (@MonthlyStatsHigh {$wp.$c[$f]} > 0)
+        if (@MonthlyStats {$wp.$m1.$c[$f]} > 0)
         {
           @MonthlyStats {$wp.$c[$f].'%'} = sprintf ("%.0f" , 100 *@MonthlyStats {$wp.$c[$f].'+'} /
-                                          # @MonthlyStats     {$wp.$m2.$c[$f]}) ;
-                                          @MonthlyStatsHigh {$wp.$c[$f]}) ;
+                                          @MonthlyStats     {$wp.$m1.$c[$f]}) ;
+                                        # @MonthlyStatsHigh {$wp.$c[$f]}) ;
           if (@MonthlyStats {$wp.$m2.$c[$f]} > 0)
-          { @MonthlyStats {$wp.$c[$f].'+%'} = 100 * (@MonthlyStats {$wp.$c[$f].'+'} / @MonthlyStats {$wp.$m2.$c[$f]}) ; }
+          {   @MonthlyStats {$wp.$c[$f].'+%'} = 100 * (@MonthlyStats {$wp.$c[$f].'+'} / @MonthlyStats {$wp.$m2.$c[$f]}) ; }
           if (@MonthlyStats {$wp.$c[$f].'+%'} < 10)
-          { @MonthlyStats {$wp.$c[$f].'+%'} = sprintf ("%.1f", @MonthlyStats {$wp.$c[$f].'+%'}) ; }
+          {   @MonthlyStats {$wp.$c[$f].'+%'} = sprintf ("%.1f", @MonthlyStats {$wp.$c[$f].'+%'}) ; }
           else
-          { @MonthlyStats {$wp.$c[$f].'+%'} = sprintf ("%.0f", @MonthlyStats {$wp.$c[$f].'+%'}) ; }
+          {   @MonthlyStats {$wp.$c[$f].'+%'} = sprintf ("%.0f", @MonthlyStats {$wp.$c[$f].'+%'}) ; }
           if (@MonthlyStats {$wp.$c[$f].'+%'} >999)
-          { @MonthlyStats {$wp.$c[$f].'+%'} = "" ; }
+          {   @MonthlyStats {$wp.$c[$f].'+%'} = "" ; }
         }
       }
     }
+
     foreach $f (1,2,3)
     {
       $m3 = $MonthlyStatsWpStop {$wp} ;
@@ -2062,7 +2114,7 @@ sub ReadMonthlyStats
 
   $MonthlyStatsWpStart {"zzz"} = $MonthlyStatsWpStart {$wp_2nd} ;
 
-  if ($mode_wp) # qqq
+  if ($mode_wp)
   {
     open  CSV_PERC_MOBILE, '<', $file_csv_perc_mobile ;
     while ($line = <CSV_PERC_MOBILE>)
