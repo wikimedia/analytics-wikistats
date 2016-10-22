@@ -13,10 +13,11 @@ traffic_geo.sh:
 
 collect_country_info_from_wikipedia.sh:
     invokes:
-        traffic/perl/CollectCountryInfoFromWikipedia.pl
+        ../traffic/perl/CollectCountryInfoFromWikipedia.pl
     collects demographics from English Wikipedia:
         http://en.wikipedia.org/wiki/List_of_countries_by_population 
         http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
     writes
         /a/wikistats_git/squids/csv/meta/CountryInfo.csv (ref to squids in names is legacy, pre-hadoop)
+
 
