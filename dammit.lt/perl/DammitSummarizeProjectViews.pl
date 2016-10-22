@@ -937,8 +937,8 @@ sub CountProjectViews
 
       next if $project eq "wx" and $year == 2007 and $month < 6 ; # shouldn't happen
 
-# qqq 2016-02-21  if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
-      if (0)
+      if (($language ne "www") && ($whitelist {"$project,$language"} == 0))
+    # if (0)
       {
         # log on first encounter (disabled)
         # if ($blacklist {"$project,$language"} == 0)
@@ -958,7 +958,7 @@ sub CountProjectViews
 
       $wikis_processed {"$project,$language"}++ ;
 
-     $totals {"month"}   {$project} {"$language,$year/$month"} += $count ;
+      $totals {"month"}   {$project} {"$language,$year/$month"} += $count ;
 
       if ($language =~ /\.m/)
       { $totals_mobile {"month"} {$project} {"$language,$year/$month"} += $count ; }
@@ -968,7 +968,7 @@ sub CountProjectViews
       # print "$project $language $year/$month: " . $totals {"month"} {$project}{"$language,$year/$month"} . "\n" ;
       $totals {"week"}    {$project} {"$language,$year,$week"} += $count ;
       $totals {"day"}     {$project} {"$language,$year/$month/$day"} += $count ;
-      $totals {"hour"}    {$project} {"$language,$year/$month/$day,$hour"} = $count ; # huge file, reactivate when really used
+    # $totals {"hour"}    {$project} {"$language,$year/$month/$day,$hour"} = $count ; # huge file, reactivate when really used
       $totals {"weekday"} {$project} {"$language,$weekday"} += $count ;
 
       if ("$year/$month" eq $month_0) # determines sort order, no need to rescale for missing projectcount files
@@ -1087,7 +1087,8 @@ sub WriteCsvFilesPerPeriod
 
     foreach $project (sort keys %{$totals {$period}})
     {
-    # &Log ("$project ") ;
+#next if project ne 'wp' ; # qqq
+#&LogT ("project $project period $period 1\n") ; # qqq
 
       $dir_out = "$path_csv/csv_$project" ;
       if (! -d $dir_out)
@@ -1107,8 +1108,10 @@ sub WriteCsvFilesPerPeriod
 
       open CSV, ">", $file_csv ;
 
+#&LogT ("project $project period $period 2\n") ; # qqq
       foreach $key (sort  {$a cmp $b} keys %{$totals {$period}{$project}})
       {
+#&LogT ("project $project period $period key $key\n") ; # qqq
         ($language,$yearmonth) = split (",", $key) ;
         # print "PERIOD $period PROJECT $project KEY $key\n" ;
         if ($period eq "month")
@@ -1153,6 +1156,7 @@ sub WriteCsvFilesPerPeriod
         else
         { 
           $count = $totals{$period}{$project}{$key} ; 
+#&LogT ("project $project period $period key $key count $count\n") ; # qqq
           print CSV "$key,$count\n" if $count > 0 ;
         }
       }
@@ -1560,6 +1564,8 @@ sub WriteCsvHtmlFilesPopularWikis
     $largest_projects {"$project-$language"} ++ ;
 
     $language_name = $out_languages {$language} ;
+    if ($language_name eq '')
+    { $language_name = "\($project-$language\)" ; }
 
     print CSV ",,,,,,,," ;
 
@@ -1617,6 +1623,8 @@ sub WriteCsvHtmlFilesPopularWikis
     $largest_projects {"$project-$language"} ++ ;
 
     $language_name = $out_languages {$language} ;
+    if ($language_name eq '')
+    { $language_name = "\($project-$language\)" ; }
 
     print CSV ",,,,,,,," ;
 
@@ -1670,6 +1678,8 @@ sub WriteCsvHtmlFilesPopularWikis
 
     ($language,$mobile)   = split ('\.', $language) ;
     $language_name = $out_languages {$language} ;
+    if ($language_name eq '')
+    { $language_name = "\($project-$language\)" ; }
     if ($mobile eq 'm')
     { $language_name .= ' Mobile' ; }
 
@@ -1720,6 +1730,8 @@ sub WriteCsvHtmlFilesPopularWikis
 
 #    ($project, $language) = split (',', $line) ;
 #    $language_name = $out_languages {$language} ;
+#    if ($language_name eq '')
+#    { $language_name = "\($project-$language\)" ; }
 
 #    if (($project ne "wp") && ($project ne "wx"))
 #    { print CSV ",,,,,,,," . "$language_name " . &GetProjectName ($project) . "," ; }
@@ -1764,6 +1776,8 @@ sub WriteCsvHtmlFilesPopularWikis
 #    ($project, $language) = split (',', $line) ;
 #    ($language,$mobile)   = split ('\.', $language) ;
 #    $language_name = $out_languages {$language} ;
+     if ($language_name eq '')
+     { $language_name = "\($project-$language\)" ; }
 #    if ($mobile eq 'm')
 #    { $language_name .= ' Mobile' ; }
 
