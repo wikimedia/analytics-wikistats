@@ -191,6 +191,7 @@ $out_html = <<__HTML__ ;
 <title>Mail Stats: LIST</title>
 <style type=\"text/css\">
 <!--
+body {font-family:arial,sans-serif; font-size:12px }
 td   {font-size:10px ; text-align:center }
 th   {font-size:10px ; text-align:center }
 td.l {font-size:10px ; text-align:left }
