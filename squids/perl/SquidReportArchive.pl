@@ -639,11 +639,13 @@ sub PrepHtml
 
   $header.=  "<body bgcolor='\#FFFFDD'>\n$form\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>NOTICE" ;
+          # "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>NOTICE" ;
+            "$run_time<p>\nALSO<p>NOTICE" ;
 
   $headerwithperc.=  "<body bgcolor='\#FFFFDD'>\n$formwithperc\n<hr>" .
           # "&nbsp;This analysis is based on a 1:1000 sampled server log (squids) X1000\nALSO<br>" ; # X1000 obsolete (may become a toggle ?)
-            "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>" ;
+          # "$run_time&nbsp;This analysis is based on a $header_sample_rate server log (squids)<p>\nALSO<p>&nbsp;<a href='#errata'>Notes on reliability of these data<\/a><br><br>" ;
+            "$run_time<p>\nALSO<br><br>" ;
 
   if ($set_reports eq 'country_reports')
   {
