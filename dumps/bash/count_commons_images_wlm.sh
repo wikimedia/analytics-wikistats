@@ -17,7 +17,7 @@ cd $perl
 # n = country Names
 # o = Output folder
 # b = Bot names
-perl WikiCountsUploadsByCountryWLM.pl -x $dumps_public/commonswiki/latest/commonswiki-latest-pages-meta-history.xml.7z \
+perl WikiCountsUploadsByCountryWLM.pl -x $dumps_public/commonswiki/20161001/commonswiki-20161001-stub-meta-history.xml.gz \
                                       -o $csv/csv_wx \
 				      -b $csv/csv_wx/BotsAll.csv \
 				      -n $countrycodes 
