@@ -105,7 +105,6 @@ cd $projectviews
 perl $perl_dammit/DammitSummarizeProjectViews.pl -i $projectcounts -j $projectviews -o $csv_pv -w $projectcounts -m $meta -s $date_switch | tee $log | cat
 zip projectviews_csv.zip csv/csv*/projectviews_* log*projectviews*
 rsync -av -ipv4 projectviews_csv.zip  dataset1001.wikimedia.org::pagecounts-ez/projectviews
-
 # exit # tests only 
 
 # -l = language (en:English)
@@ -143,6 +142,8 @@ perl WikiReports.pl -v n -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/o
 perl WikiReports.pl -v n -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/out_wx    | tee -a $report | cat
 perl WikiReports.pl -v m -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/out_wx -n | tee -a $report | cat
 perl WikiReports.pl -v m -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/out_wx    | tee -a $report | cat
+perl WikiReports.pl -v c -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/out_wx -n | tee -a $report | cat
+perl WikiReports.pl -v c -m wx -l en -i $csv/csv_wx/ -j $csv_pv/csv_wx -o $out/out_wx    | tee -a $report | cat
 echo "rsync -av $out/out_wx/EN/TablesPageViewsMonthly*.htm  $htdocs/wikispecial/EN" | tee -a $report | cat
       rsync -av $out/out_wx/EN/TablesPageViewsMonthly*.htm  $htdocs/wikispecial/EN  | tee -a $report | cat
 
