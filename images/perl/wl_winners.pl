@@ -4,9 +4,9 @@
 # convert and annotate images into several sets (depending on target resolution) (add new resolution at PhaseConvertImages)
 
 # use case:
-# offline slide shows (there is great online slide show tool already)
-# with selected images only (tweaked file names makes that a no brainer)
-# with image resized for perfect fit to target platform (and thus greatly reduced file size)
+# offline slide shows (there is a great online slide show tool already)
+# with selected images only (tweaked file names makes that a no-brainer)
+# with image resized, for perfect fit to target platform (and thus greatly reduced file size)
 
 # meta data are collected from the winners pages, and complemented (if needed) from the image upload page
 # annotations are: left: contest name & country, center: title, right: photograph/author & license
@@ -17,16 +17,16 @@
 # to do: make this script more widely usable,
 # - first for Wiki Loves Earth (should be easy as it WLE follows same pattern for winners pages)
 # hopefully for other contests (Wiki Loves Africa?)
-# a tweaked version could read a random list of image urls from Commons from text file, for maimum applicability
+# a tweaked version could read a random list of image urls from Commons from text file, for maximum applicability
 
-# developed and tested on Windows 7
+# developed and tested on Windows 10
 
 # required (in same directory as perl script):
 # ImageMagick tool convert.exe: https://www.imagemagick.org/script/binary-releases.php (I used curl-7.46.0-win64.exe)
 # curl.exe: https://curl.haxx.se/download.html
 
-# note: this script is on purpose not meant to be run on Wikimedia servers (which would have been somewhat easier to develop)
-# this way reuse of the script in any context is best
+# note: this script is on purpose not meant to be run on Wikimedia servers (which would have been somewhat faster to develop)
+# this way adaptation and reuse of the script in any context is easiest
 
   use URI::Escape;
   use Time::Local ;
@@ -67,12 +67,17 @@
   binmode CSV_SECTIONS ;
 
   unlink ($file_image_errors) ;
+  if (! -d $folder)
+  {
+    mkdir $folder ;
+    die "Folder $folder count not be created" if ! -d $folder ;
+  }
 
-# &CollectCountryCodesFromCommonsConfigPage ; # one time only, read 'Commons page Module_WL data - Wikimedia Commons.html' (maintain manually)
+  &CollectCountryCodesFromCommonsConfigPage ; # one time only, read 'Commons page Module_WL data - Wikimedia Commons.html' (maintain manually)
   &ReadCountryCodesFromFile ;
   &ReadDataFromFile ($silent) ;
 
-  # &PhaseCollectImages ;
+  &PhaseCollectImages ;
   &PhaseConvertImages ;
   &Log ("\n\nReady\n\n") ;
   exit ;
@@ -91,10 +96,10 @@ sub PhaseCollectImages
 sub PhaseConvertImages
 {
 # ref https://www.paintcodeapp.com/news/ultimate-guide-to-iphone-resolutions
-  &ConvertImages (2560,1600,24,14) ; # full HD TV, iPhone 6+/6s+/7+ plus
-# &ConvertImages (1920,1080,20,12) ; # full HD TV, iPhone 6+/6s+/7+ plus
-# &ConvertImages (1334,750,16,12) ; # iPhone 6/6s/7
-# &ConvertImages (1136,640,14,10) ; # iPhone 5/5s
+  &ConvertImages (2560,1600,24,14) ;
+  &ConvertImages (1920,1080,20,12) ; # full HD TV, iPhone 6+/6s+/7+ plus
+  &ConvertImages (1334,750,16,12) ; # iPhone 6/6s/7
+  &ConvertImages (1136,640,14,10) ; # iPhone 5/5s
 }
 
 # one time only: download and save html pages with contest winners
