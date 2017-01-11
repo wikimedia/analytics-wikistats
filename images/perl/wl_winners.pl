@@ -43,12 +43,10 @@
 
   $file_size_minimum = 1024 ; # files less than so many bytes are failed downloads (in WLM context) -> remove
 
-  $skip_until_contest = '' ; # for speed up of debug session
-
   $width =  390 ;
   $width = 1920 ;
 
-# $skip_until_content = "WLM_2011_FR" ; # debug only
+# $skip_until_contest = "WLM_2011_FR" ; # for speed of debug session
 
   our $prize = 0 ; # number from 1 onwards for best in year
   our $image_data_stored = 0 ;
