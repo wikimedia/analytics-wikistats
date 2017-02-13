@@ -286,7 +286,7 @@
      &ReadRevertHistoryGenerateReports ; 
      &GenerateEditHistoryReports ; 
   }
-
+  
   if (($language eq "en") && (! $mode_wm))
   {
     &LogT ("\nGenerate Summaries Per Wiki\n\n") ;

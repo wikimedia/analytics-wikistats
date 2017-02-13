@@ -2415,6 +2415,12 @@ sub GeneratePlotCallR
   print R_SCRIPT $script ;
   close R_SCRIPT ;
 
+# if "Error in library(Cairo) : there is no package called 'Cairo'":
+# see https://phabricator.wikimedia.org/T155254:
+#
+# export http_proxy=http://webproxy.eqiad.wmnet:8080; export HTTPS_PROXY=http://webproxy.eqiad.wmnet:8080;
+# R
+# > install.packages(c("Cairo"), repos="http://cran.r-project.org" )
   $cmd = "R CMD BATCH \"$file_script\" \"$file_script_out\"" ;
 
   if ($generate_edit_plots++ < 10)

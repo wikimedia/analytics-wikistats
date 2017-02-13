@@ -599,10 +599,12 @@ $include_script_title
 
 #lines(dates,plotdata\$uploads_tot,    col="grey50", lty="solid", lwd=2.2)
 lines(dates, plotdata\$uploads_bot,    col="green4", lty="solid", lwd=2.2)
-lines(dates, plotdata\$uploads_manual, col="blue",   lty="solid", lwd=2.2)
-lines(dates, plotdata\$uploads_wizard, col="green2", lty="solid", lwd=2.2)
+lines(dates, plotdata\$uploads_manual, col="blue",    lty="solid", lwd=2.2)
+# lines(dates, plotdata\$uploads_wizard, col="red",   lty="solid", lwd=2.2)
 
-legend("topleft",c("Bot uploads ", "All manual uploads ", "Manual uploads via wizard "), lty=1, lwd=2, col=c("green4","blue", "red"), inset=0.05, bg="#E0E0E0")
+#legend("topleft",c("Bot uploads ", "All manual uploads ", "Manual uploads via wizard "), lty=1, lwd=2, col=c("green4","blue", "red"), inset=0.05, bg="#E0E0E0")
+# Jan 2017: no longer show 'all manual' and 'manual with uploadwizard' separately, as these totally overlap 
+legend("topleft",c("Bot uploads ", "Manual uploads "), lty=1, lwd=2, col=c("green4","blue"), inset=0.05, bg="#E0E0E0")
 
 $include_script_plot_top_month
 $include_script_plot_period
