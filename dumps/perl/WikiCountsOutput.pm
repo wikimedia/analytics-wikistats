@@ -81,7 +81,7 @@ sub UpdateMonthlyStats
     $edits_namespace_a        = substr ($user_rec, 0, 8) ;
     $edits_recent_namespace_a = substr ($user_rec, 9, 8) ;
     $first                    = substr ($user_rec,84,10) ;
-    $tenth                    = substr ($user_rec,106,10) ;
+    $tenth                    = substr ($user_rec,106,10) ; # sort criterium for file
     $user                     = substr ($user_rec,117) ;
 
     # if (index (lc($user), "conversion") != -1) { next ; }
@@ -96,7 +96,7 @@ sub UpdateMonthlyStats
     { $users ++ ; }
 
   # while ($first > $date)
-    while ($tenth > $date)
+    while ($tenth > $date) # going back in time write records for all months where data are known, then restart loop with next older month 
     {
       $yymm     = sprintf ("%02d%02d", $year-2000, $month) ;
 

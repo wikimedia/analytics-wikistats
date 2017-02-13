@@ -2056,6 +2056,7 @@ sub CountActiveWikisPerMonthAllProjects
       # thresholds =1,3,5,10,25,32,50,100,250,316,500,1000,2500,3162,5000,10000,25000,31623,50000,100000,etc
       
       @counts = split (',', $counts) ;
+      $count_3   = $counts [1] ;
       $count_5   = $counts [2] ;
 
       $mm   = substr ($date,0,2) ;
@@ -2072,12 +2073,19 @@ sub CountActiveWikisPerMonthAllProjects
       $active_wikis {"0,$project,$date"} ++ ; # zero or more means all wikis
       $active_wikis {"0,*,$date"} ++ ; 
       
-      next if $count_5 == 0 ; # no active (5+ edits) editors
+      next if $count_5 == 0 ; # no active editors (with 5+ edits)
       if ($yyyy == 2001)                                                            # did wp:ar and wp:zh really start Jan 2001? Don't think so.  
       { print "[$line] project:$project date:$date 5:$count_5 100:$count_100\n" ; } # we need to screen for these outliers and remove them from stats. 
 
       $active_wikis {"1,$project,$date"} ++ ; 
       $active_wikis {"1,*,$date"} ++ ; 
+
+      if ($count_5 >= 3) 
+      { 
+        $active_wikis {"3,$project,$date"} ++ ; 
+        $active_wikis {"3,*,$date"} ++ ; 
+      }
+
       if ($count_5 >= 5) 
       { 
         $active_wikis {"5,$project,$date"} ++ ; 
@@ -2115,7 +2123,9 @@ sub CountActiveWikisPerMonthAllProjects
   binmode CSV_OUT ;
   print CSV_OUT "all known wikis,,,,,,,,,,,," ; 
   print CSV_OUT "1+ active editors,,,,,,,,,,,," ; 
+  print CSV_OUT "3+ active editors,,,,,,,,,,,," ; 
   print CSV_OUT "5+ active editors\n" ; 
+  print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
   print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
   print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects,," ; 
   print CSV_OUT "date,Total,Wikibooks,Wikinews,Wikipedia,Wikiquote,Wikisource,Wikiversity,Wikivoyage,Wiktionary,Other projects\n" ; 
@@ -2134,6 +2144,11 @@ sub CountActiveWikisPerMonthAllProjects
     foreach $project (qw (wb wn wp wq ws wv wo wk wx))
     { print CSV_OUT ',' . $active_wikis {"1,$project,$date"} ; }
     
+    print CSV_OUT ",,$date_excel" ;
+    print CSV_OUT ',' . $active_wikis {"3,*,$date"} ; 
+    foreach $project (qw (wb wn wp wq ws wv wo wk wx))
+    { print CSV_OUT ',' . $active_wikis {"3,$project,$date"} ; }
+
     print CSV_OUT ",,$date_excel" ;
     print CSV_OUT ',' . $active_wikis {"5,*,$date"} ; 
     foreach $project (qw (wb wn wp wq ws wv wo wk wx))
@@ -2562,7 +2577,7 @@ $trace = ($file_csv_add =~ /ZH.csv/) ;
   }
 }
 
-sub CollectUserStats
+sub CollectUserStats 
 {
   &LogPhase ("CollectUserStats") ;
   &TraceMem ;
@@ -2574,6 +2589,7 @@ sub CollectUserStats
     my $record = $userdata {$user} ;
     # &Log ("Record4 $record\n") ;
     my @fields = split (',', $record) ;
+
     if (@fields [$useritem_edit_reg_namespace_a] == 0) { next ; }
     $first = @fields [$useritem_edit_first] ;
     $last  = @fields [$useritem_edit_last] ;
@@ -2800,6 +2816,7 @@ sub CollectUploaders
 # for tests on Windows skip this very time consuming step, (rely on 'once per session only' manual workaround)
 if ($job_runs_on_production_server)
 {
+  &LogT ("CollectUploaders 1\n") ;
   # reorder fields in input
   open FILE_CREATES,          '<', $file_csv_creates ;
   open FILE_CREATES_BINARIES, '>', $file_csv_creates_binaries ;
@@ -2826,6 +2843,7 @@ if ($usertype eq 'R')
   close FILE_CREATES ;
   close FILE_CREATES_BINARIES ;
 
+  &LogT ("CollectUploaders 2\n") ;
   $filesize_in = -s $file_csv_creates_binaries ;
   return if $filesize_in == 0 ;
   $filesize_in = &i2KbMb ($filesize_in) ;
@@ -2861,6 +2879,7 @@ if ($usertype eq 'R')
   $level_max_B = 0 ;
 
   my $lines = 0 ;
+  &LogT ("CollectUploaders 3\n") ;
   while ($line = <FILE_CREATES_BINARIES>)
   {
     $lines++ ;
@@ -2977,6 +2996,7 @@ if ($user =~ /robot/i) # temp code to fix few users, should migrate to counts jo
   { $active_uploads_per_month {"$user_prev,W"} = $uploads_this_user_this_month_wizard ; }
 
   &CollectUploadersPerMonth ($yyyy_mm_prev) ;
+  &LogT ("CollectUploaders 4\n") ;
 
 # print "t_max R " . $t_max {'R'} . "\n" ;
 # print "t_max B " . $t_max {'B'} . "\n" ;
@@ -3051,7 +3071,7 @@ if ($user =~ /robot/i) # temp code to fix few users, should migrate to counts jo
   open FILE_ACTIVITY_TRENDS_TOP_UPLOADERS, '>', $file_csv_top_uploaders ;
 
   foreach $user (sort {$all_uploads1 {$b} <=> $all_uploads1 {$a}} keys %all_uploads1)
-  {
+   {
   # for verification only:
   # if ($bot_uploads1 {$user} != $bot_uploads2 {$user})
   # {
@@ -3093,9 +3113,11 @@ if ($user =~ /robot/i) # temp code to fix few users, should migrate to counts jo
   close FILE_ACTIVITY_TRENDS_TOP_UPLOADERS_MONTHLY ;
 
 
+  &LogT ("CollectUploaders 5\n") ;
   if (! $edits_only)
   {
-    print "\n\n\n" ;
+    &LogT ("CollectUploaders 5b\n") ;
+    print "\n\n\nWrite '$file_csv_uploadwizard'\n" ;
     open FILE_UPLOADWIZARD, '>', $file_csv_uploadwizard ;
     print FILE_UPLOADWIZARD "month,total uploads,uploads by bot,uploads by reg. user, uploads by reg. user via uploadwizard, perc uploads by reg. user via uploadwizard\n" ;
     foreach $yyyy_mm (sort {$a cmp $b} keys %yyyy_mm)
@@ -3118,6 +3140,11 @@ if ($user =~ /robot/i) # temp code to fix few users, should migrate to counts jo
       print "$line" ;
     }
     close FILE_UPLOADWIZARD ;
+    &LogT ("CollectUploaders 5b\n") ;
+  }
+  else
+  {
+    &LogT ("CollectUploaders edits_only\n") ;
   }
 }
 

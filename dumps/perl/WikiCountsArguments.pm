@@ -460,6 +460,8 @@ sub SetEnvironment
       }
     }
 
+#   $file_in_xml_full =~ s/simplewiki.*$/simplewiki\/20161001\/simplewiki-20161001-stub-meta-history.xml.gz/ ; # Oct 2016 test: hard code input file name
+
     $file_csv_stats_ploticus        = $path_out . "StatisticsPlotInput.csv" ;
     $file_csv_monthly_stats         = $path_out . "StatisticsMonthly.csv" ;
     $file_csv_monthly_editors       = $path_out . "StatisticsMonthlyEditors.csv" ;

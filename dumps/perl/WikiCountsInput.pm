@@ -381,6 +381,8 @@ sub XmlReadUntil
 
   while ($line = <FILE_IN>)
   {
+    # $line =~ s/redirect/zblabla/ig ; # Oct 2016 temporarily remove all redirects for test
+
     # only when full archive dump is processed check each revision for being a redirect
     # in stub dump there can be a <redirect [some article title]> attribute, determined by #REDIRECT (or other language equivalent) (used to be for last revision?)
     # note that very last revision in dump could be beyond last date which should be processed, could cause small (negligible) discrepancies
@@ -1542,9 +1544,12 @@ sub CollectUserCounts
   ($title2 = $title) =~ s/,/&comma;/g ;
   $namespace2 = sprintf ("%03d", $namespace) ;
 
-  $edits_user_month_namespace {"$user2,$userid,$yyyymm,$namespace2"}++ ;
-  if ($day <= 28)
-  { $edits_user_month_namespace_28 {"$user2,$userid,$yyyymm,$namespace2"}++ ; }
+  if ((! $revision_is_redirect) && ($usertype eq 'R')) # Oct 2016 do not count redirects or bots, like in other metrics
+  {
+    $edits_user_month_namespace {"$user2,$userid,$yyyymm,$namespace2"}++ ;
+    if ($day <= 28)
+    { $edits_user_month_namespace_28 {"$user2,$userid,$yyyymm,$namespace2"}++ ; }
+  }
 
   if (&NameSpaceArticle ($language, $namespace)) # strategy
   { $edits_total_namespace_a ++ ; }
@@ -1703,6 +1708,7 @@ sub CollectUserCounts
     }
 
     @edits_10 = split ('\|', $fields [$useritem_edits_10]) ;
+
 
     # less then 10 times stored -> add time
     if ($#edits_10 < 9)
