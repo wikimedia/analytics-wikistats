@@ -1517,9 +1517,14 @@ sub GenerateHtmlStart
                  "${sp2}The Analytics Team will now proceed to also migrate data collection and reporting about wiki content and contributors.$sp2<br> " .
                  "${sp2}First results are expected later this year.$sp2<p>" .
                  "${sp2}More info at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'>this announcement</a><br>" .
-                 "${sp2}You can still tell us which reports you want to see preserved, in this " .
-                 "<a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'>survey.</a></font>$sp2" .
+                 "${sp2}You can see the first wireframes for Wikistats 2.0 and " .
+                 "<a href='https://www.mediawiki.org/wiki/Wikistats_2.0_Design_Project/RequestforFeedback/Round1'>comment on the design here.</a></font>$sp2" .
                  "</td></tr></table>$sp2<br>" ;
+
+# survey banner shown September 2016 - February 2017
+# "${sp2}You can still tell us which reports you want to see preserved, in this " .
+# "<a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'>survey.</a></font>$sp2" .
+# "</td></tr></table>$sp2<br>" ;
 
 # original banner shown in 2016 May-Aug
 #   $out_html .= "<table><tr><td colspan=999 style='background-color:#000;text-align:left'>" . 
