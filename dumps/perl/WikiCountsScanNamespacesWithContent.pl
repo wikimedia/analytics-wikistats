@@ -145,8 +145,8 @@ sub ForceExtraContentNamespaces
   { $namespaces   {"wx,strategy"} .= "\|106" ; }
   if ($namespaces {"wx,commons"} !~ /\|6/) 
   { $namespaces   {"wx,commons"} .= "\|6" ; }
-  if ($namespaces {"wx,commons"} !~ /\|14/) 
-  { $namespaces   {"wx,commons"} .= "\|14" ; }
+# if ($namespaces {"wx,commons"} !~ /\|14/) 
+# { $namespaces   {"wx,commons"} .= "\|14" ; }
 
   foreach $key (sort keys %namespaces)
   {
