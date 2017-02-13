@@ -135,7 +135,7 @@
   $useritem_create_reg_namespace_x = 10 ;        # reg user, all other namespaces
   $useritem_create_reg_recent_namespace_a = 11 ; # reg user, article namespace, if in last 30 days
   $useritem_create_reg_recent_namespace_x = 12 ; # reg user, other namespace namespace, if in last 30 days
-  $useritem_edits_10 = 13 ;                      # count if user made 10 or more edits
+  $useritem_edits_10 = 13 ;                      # track 10 oldest timestamps | later count in WikiProcess from month that user made 10th edit
 
   &ParseArguments ;
   &SetEnvironment ;
@@ -170,12 +170,9 @@
   { &CheckForNonAscii ; }
 
   # partial execution for tests only
-#  if (! $job_runs_on_production_server)
-#  {
-#    $language = 'commons' ;
-#    &CollectUploaders ;
-#    exit ;
-#  }
+  # $language = 'commons' ;
+  # &CollectUploaders ;
+  # exit ;
 
   &TraceMem ;
   if ((! defined ($webalizer_only)) && (! $skip_on_dumpdate))
