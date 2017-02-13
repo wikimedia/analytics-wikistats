@@ -7,9 +7,9 @@
 # Also pages without internal links do not qualify (on most projects).
 # For stub dumps this can not be established: no raw text available, hence different page totals are found
 # 3) redirect
-# Also pages which are redirects do not qualify for article counts.
-# For stub dumps this can not be established per revisions (and thus different page totals are found)
-# For full archive dumps (with all page content) the article content is scanned for #REDIRECT, or a localized version, like so
+# Also pages which are redirects do not qualify for article counts (but they do count for edit(or) counts starting Dec 2016).
+# For stub dumps this can not be established per revisions (and thus different page totals are found over consecutive dumps)
+# For full archive dumps (with all page content) the article content used to be for #REDIRECT, or a localized version, like so
 # $revision_is_redirect = ($article =~ m/(?:$redirtag).*?\[\[.*?(?:\||\]\])/ios) ;
 # For stub dumps the page xml can contain the following tag <redirect title="[some title]" />, but once per page, not per revision
 
@@ -83,7 +83,7 @@ sub ReadInputXml
   print FILE_CREATES "# article type = [-:page contains no internal link|R:page is redirect|S:(link list, deprecated)|S:stub|+:normal article]\n" ;
   print FILE_CREATES "# when processing full archive dump: count article only when it contains an internal link (official article definition), and is not a redirect\n" ;
   print FILE_CREATES "# when processing full archive dump: only difference for stubs is : those are not counted for alternate article count \n" ;
-  print FILE_CREATES "# when processing stub dump: article content is unavailable (no test for redirect or stub threshold) -> article count will be higher\n" ;
+  print FILE_CREATES "# when processing stub dump: article content is unavailable (no test for stub threshold) -> article count will be higher\n" ;
 
   if ($edits_only)
   { print FILE_CREATES "# this file was generated from stub dump\n" ; }
@@ -901,7 +901,8 @@ code_complete ("ProcessRevision", $start_process_revision) if $record_time_proce
   else
   { $content_page = ($most_recent_article_type_for_this_page !~ /-|R/) ; } 
   
-  if (! $edits_only_page_is_redirect && $content_page)
+# if (! $edits_only_page_is_redirect && $content_page)
+  if ($content_page) # Dec 2016 redirects are no longer exluded from edit(or) ocunts, they are still for article counts
   {
     if (&NameSpaceArticle ($language, $namespace))
     { &IncUserData ($user_page_creator, $useritem_create_reg_namespace_a) ; }
@@ -1544,7 +1545,8 @@ sub CollectUserCounts
   ($title2 = $title) =~ s/,/&comma;/g ;
   $namespace2 = sprintf ("%03d", $namespace) ;
 
-  if ((! $revision_is_redirect) && ($usertype eq 'R')) # Oct 2016 do not count redirects or bots, like in other metrics
+# if ((! $revision_is_redirect) && ($usertype eq 'R')) # Oct 2016 do not count redirects or bots, like in other metrics
+  if ($usertype eq 'R') # Dec 2016 redirects are no longer excluded from edit(or) ocunts, they are still for article counts
   {
     $edits_user_month_namespace {"$user2,$userid,$yyyymm,$namespace2"}++ ;
     if ($day <= 28)
@@ -1603,8 +1605,8 @@ sub CollectUserCounts
 
   # remember edits per user per month
   ($user2 = $user) =~ s/,/&#44;/g ;
-  if (! $revision_is_redirect)
-  {
+# if (! $revision_is_redirect) # Dec 2016 redirects are no longer exluded from edit(or) ocunts, they are still for article counts
+# {
     if ($filesizelarge) # zzz
     {
       my $yyyymm = sprintf ("%04d-%02d", $year, $month) ;
@@ -1647,13 +1649,14 @@ sub CollectUserCounts
 #       }
 #     }
 #   }
-  }
+# }
 
   if (! &NameSpaceArticle ($language, $namespace))
   { return ; }
 
-  if ($revision_is_redirect)
-  { return ; }
+# Dec 2016 redirects are no longer exluded from edit(or) ocunts, they are still for article counts
+# if ($revision_is_redirect)
+# { return ; }
 
   # remember first and last update for this user
   my $record = $userdata {$user} ;
@@ -1708,7 +1711,6 @@ sub CollectUserCounts
     }
 
     @edits_10 = split ('\|', $fields [$useritem_edits_10]) ;
-
 
     # less then 10 times stored -> add time
     if ($#edits_10 < 9)
