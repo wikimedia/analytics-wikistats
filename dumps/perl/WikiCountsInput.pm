@@ -2792,7 +2792,7 @@ sub GetContentNamespaces
     &LogT ("Use fixed namespaces for counting, not namespaces collected via api\n\n") ; 
     return ;
   }
-  &LogT ("GetContentNamespaces\n") ;
+  # &LogT ("GetContentNamespaces\n") ;
   	
   my ($mode,$language) = @_ ;
 
@@ -2804,33 +2804,33 @@ sub GetContentNamespaces
   if (! -e $file_csv_content_namespaces)
   { abort ("Namespaces file not found: '$file_csv_content_namespaces'.\n>> Run 'collect_countable_namespaces.sh' <<") ; }
 
-    my $language2 = $language ;
-    $language2 =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
+  my $language2 = $language ;
+  $language2 =~ s/_/-/g ; # wikistats (unfortunately) uses codes like 'roa_rup', not 'roa-rup' , to be changed some day
 
-    $line_content_namespaces = '' ;
-    open FILE_NS, "<", $file_csv_content_namespaces ;
-    while ($line = <FILE_NS>)
+  $line_content_namespaces = '' ;
+  open FILE_NS, "<", $file_csv_content_namespaces ;
+  while ($line = <FILE_NS>)
+  {
+    if ($line =~ /^$mode\,$language2\,/)
     {
-      if ($line =~ /^$mode\,$language2\,/)
-      {
-        chomp ($line) ;
-        $line_content_namespaces = $line ;
-        last ;
-      }
+      chomp ($line) ;
+      $line_content_namespaces = $line ;
+      last ;
     }
-    close FILE_NS ;
+  }
+  close FILE_NS ;
 
-    if ($line_content_namespaces ne '')
-    {
-      &LogT ("Read content namespaces from file '$file_csv_content_namespaces': line='$line_content_namespaces'\n") ;
-      my ($dummy_mode,$dummy_language,$content_namespaces) = split (',', $line_content_namespaces) ;
-      foreach $id (split '\|', $content_namespaces)
-      { $content_namespace {$id} = $true ; }
-      &LogT ("Content namespaces for language $language: " . join (',', sort keys %content_namespace) . "\n") ;
-    }
-    else
-    { abort("No entry found in namespaces file '$file_csv_content_namespaces' for project '$mode' language '$language2'.\n>> Run 'collect_countable_namespaces.sh' <<\n" .
-	    "If that doesn't help manually add line with just namespace 0 in namespaces file, or remove obsolete '../csv/csv_$mode/EditsPerUserPerMonthPerNamespaceXXX.csv (where XXX is language code)\n") ; }
+  if ($line_content_namespaces ne '')
+  {
+    # &LogT ("Read content namespaces from file '$file_csv_content_namespaces': line='$line_content_namespaces'\n") ;
+    my ($dummy_mode,$dummy_language,$content_namespaces) = split (',', $line_content_namespaces) ;
+    foreach $id (split '\|', $content_namespaces)
+    { $content_namespace {$id} = $true ; }
+    &LogT ("Content namespaces for language $language: " . join (',', sort keys %content_namespace) . "\n") ;
+  }
+  else
+  { abort("No entry found in namespaces file '$file_csv_content_namespaces' for project '$mode' language '$language2'.\n>> Run 'collect_countable_namespaces.sh' <<\n" .
+    "If that doesn't help manually add line with just namespace 0 in namespaces file, or remove obsolete '../csv/csv_$mode/EditsPerUserPerMonthPerNamespaceXXX.csv (where XXX is language code)\n") ; }
 # }
 
   $namespaces_initialized = $true ;
