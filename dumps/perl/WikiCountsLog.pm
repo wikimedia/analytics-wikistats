@@ -30,24 +30,16 @@ sub OpenLog
   &LogFlushBuffer ;
 }
 
-# to be changed: use Linux cmd 'tail' 
 sub ShrinkLogFile
 {
-  $fileage  = -M $file_log ;
-  if ($fileage > 5)
-  {
-    open "FILE_LOG", "<", $file_log || abort ("Log file 'WikiCountsLog.txt' could not be opened.") ;
-    @log = <FILE_LOG> ;
-    close "FILE_LOG" ;
-    $lines = 0 ;
-    open "FILE_LOG", ">", $file_log || abort ("Log file 'WikiCountsLog.txt' could not be opened.") ;
-    foreach $line (@log)
-    {
-      if (++$lines >= $#log - 5000)
-      { print FILE_LOG $line ; }
-    }
-    close "FILE_LOG" ;
-  }
+  ($file_shrunk = $file_log) =~ s/\.txt/Shrunk\.txt/ ; 
+  $cmd = "tail -n 10000 $file_log > $file_shrunk" ;
+  $result = `$cmd` ;
+  print "'$cmd' -> " . ($result+0) . "\n\n" ;
+
+  $cmd = "mv $file_shrunk $file_log" ;
+  $result = `$cmd` ;
+  print "'$cmd' -> " . ($result+0) . "\n\n" ;
 }
 
 # only for large wikis, show how long processing took on last run  
