@@ -2891,13 +2891,14 @@ if ($usertype eq 'R')
     ($yyyy_mm,$user,$usertype,$count_flag,$cat_uploadwizard) = split (',', $line) ;
     $cat_uploadwizard =~ s/[\x00-\x1F]//g ;
 
-    if ($usertype eq 'B' and $cat_uploadwizard ne '')
-    { &LogQ ("Bot upload via uploadwizard: $line\n") ; }
-    if ($usertype eq 'R' and $cat_uploadwizard ne '')
-    {
-      if (yyyy_mm lt '2011-01')
-      { &Log ("\n\nEarly reference to uploadwizard: $line\n\n") ; }
-    }
+  # if ($usertype eq 'B' and $cat_uploadwizard ne '')
+  # { &LogQ ("Bot upload via uploadwizard: $line\n") ; }
+
+  # if ($usertype eq 'R' and $cat_uploadwizard ne '')
+  # {
+  #   if ($yyyy_mm lt '2011-01')
+  #   { &Log ("\n\nEarly reference to uploadwizard: $line\n\n") ; }
+  # }
 
     if ($cat_uploadwizard ne '')
     { $flag_uploadwizard = 'Y' ; }
