@@ -70,6 +70,8 @@ sub ParseArguments
     $merge_user_edits_one_project = $true ;
     $file_csv_content_namespaces  = $path_out . "StatisticsContentNamespaces.csv" ; 
     $file_csv_content_namespaces  =~ s/csv_\w\w/csv_mw/ ; # collected in global dir by job 'collect_countable_namespaces.sh'
+    $job_code = "m:$mode:merge edit counts per user, all languages" ;
+    $job_code_uc = uc $job_code ;
     return ;
   }
   if (defined ($options {"z"}))
@@ -77,6 +79,8 @@ sub ParseArguments
     $merge_user_edits_all_projects = $true ;
     $file_csv_content_namespaces  = $path_out . "StatisticsContentNamespaces.csv" ; 
     $file_csv_content_namespaces  =~ s/csv_\w\w/csv_mw/ ; # collected in global dir by job 'collect_countable_namespaces.sh'
+    $job_code = "m:$mode:merge edit counts per user, all projects" ;
+    $job_code_uc = uc $job_code ;
     return ;
   }
 
@@ -407,7 +411,7 @@ sub SetEnvironment
         &LogT ("\nRun in 'edits only' mode\n") ;
         $file_in_xml_full = $path_in . $language_ . "-" . $filedate . "-stub-meta-history.xml.gz" ;
       # $file_in_xml_full = "/a/" . $language_ . "-" . $filedate . "-stub-meta-history.xml.gz " ;
-      # $file_in_xml_full =~ s/\d{8}/20090604/g ; # temp
+      # $file_in_xml_full =~ s/\d{8}/20170101/g ; # temp
       }
       else
       {
