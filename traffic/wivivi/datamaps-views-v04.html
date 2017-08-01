@@ -1,0 +1,212 @@
+﻿<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+<!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> -->
+<!-- <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE10"> -->
+
+    <title>Visualization of Wikipedia pageviews per country/region/language</title>
+
+
+    <script src="datamaps/d3.min.js"></script>
+    <script src="datamaps/topojson.min.js"></script>
+ <!--   <script src="datamaps/datamaps.world.hires.min.js"></script> -->
+    <script src="datamaps/datamaps.world.hires.min.js.patched"></script>
+<!--<script src="datamaps/colorbrewer.js"></script> not used, kept for reference -->
+
+<!--<script src="//stats.wikimedia.org/wikimedia/squids/scripts/d3.min.js"></script>
+    <script src="//stats.wikimedia.org/wikimedia/squids/scripts/topojson.min.js"></script>
+    <script src="//stats.wikimedia.org/wikimedia/squids/scripts/datamaps.world.hires.min.js.patched"></script>
+    <script src="//stats.wikimedia.org/wikimedia/squids/scripts/colorbrewer.js"></script> not used, kept for reference -->
+
+    <link rel="stylesheet" type="text/css" href="datamaps-views-v04.css"> <!-- Erik Zachte -->
+
+<style>
+a         {color:#0000D0;text-decoration:none; vertical-align:middle}
+a:link    {color:#0000D0;text-decoration:none}
+a:visited {color:#0000D0;text-decoration:none}
+a:active  {color:#0000D0;text-decoration:none}
+//a:hover   {color:#FF00FF}
+a:hover   {color:#FF0000}
+
+//@media screen and (-webkit-min-device-pixel-ratio:0) 
+//{
+//  button.iOS-device {-webkit-appearance: button-bevel ; height:14px ;}
+//  .iOS-device {-webkit-appearance: button-bevel ; height:14px ;}
+//  listbox.iOSdevice {-webkit-appearance: none ; }
+//}
+</style>
+
+  </head>
+
+<body>
+
+<!--
+<noscript>
+<h2><font color="800000">Javascript is disabled on your browser.</font></h2>
+<h3><font color="#008000">This visualization requires javascript.</font></h3>
+<p><hr width=500 align=left><p>	
+</noscript>
+-->
+
+
+<!-- here is our box which will move around. it is styled in the css/style.css file -->
+<div id="infobox" class="infobox">
+  <p>
+    <!-- filled by script -->
+  </p>
+</div>
+
+<div class="modal">
+  <div class="modal-content" style='z-index:1002'>
+    <p id="modal-infobox">
+      <!-- filled by script -->
+    </p>
+  </div>
+</div>
+
+
+<div style="position:fixed; right:5px; bottom:5px; z-index: 1001;">
+  <span id='status_bottom_right'>
+    <!-- filled by script on not so small screens, see also status_bottom_left -->
+  </span> 
+</div>
+
+<!-- BUTTON SWITCH MODE -->
+<button id='btn_switch_mode' style='z-index:1; position:fixed; top:2px; left:4px;' type='button' onclick='switchMode ()'>
+  <!-- changed by script -->
+  <table>
+    <tr>
+      <td><b>&rArr;</b> <img src='WorldSmall2.jpg' alt='switch mode between pageviews per capita to any Wikipedia and pageviews to language x' style='margin:0px;padding:0px;border:0px'></td>
+      <td>Pageviews&nbsp;&nbsp;&nbsp;<br>per capita</td>
+    </tr>
+  </table>
+</button> ;
+
+<!-- BUTTON SHOW TABLE LANGUAGES -->
+<button id='btn_show_table_dialog_languages' class='btn_show_table_dialog' style='webkit-appearance:none ; visibility:hidden ;z-index:1; position:fixed; top:2px; left:160px;   ' type='button' onclick='showTableDialog ()'>
+  <table class=no_border><tr><td><img src='infobox1.png' alt='show breakdown by country'></td><td>Breakdown by country<br>for English language</td></tr></table> 
+</button> 
+
+<!-- BUTTON SHOW TABLE REGIONS -->
+<button id='btn_show_table_dialog_regions' class='btn_show_table_dialog' style='z-index:1; position:fixed; top:2px; left:160px; visibility:hidden' type='button' onclick='showTableDialog ()'>
+  <table class=no_border><tr><td><img src='infobox2.png' alt='show breakdown by country'>for entire world</td></tr></table>
+</button> 
+
+<!-- SELECT BOX CHOOSE LANGUAGE -->
+<div id='select_box_languages' style="z-index:1; position:fixed; left:325px; top:8px; padding:2px; background-color:#CCCCCC;"> 
+  <!-- html for select+options will be inserted here -->
+</div>
+
+<!-- SELECT BOX CHOOSE REGION -->
+<div id='select_box_regions' style="z-index:1; position:fixed; left:325px; top:8px; padding:2px; background-color:#CCCCCC;"> 
+  <!-- html for select+options will be inserted here -->
+</div>
+
+<!-- BUTTON SHOW ICONS -->
+<button id='btn_icons' class='btn_icons' title='abbreviate metrics to icons?' style='z-index:1; position:fixed; top:2px ; right:80px; visibility:hidden' type='button' onclick='toggleIcons ()'>
+  <!-- filled by script -->
+</button> 
+
+<!-- BUTTON SHOW BUBBLES (red circles, datamaps onhover feature) -->
+<button id='btn_bubbles' class='btn_bubbles' title='hide region markers' style='z-index:1; position:fixed; top:4px; right:38px; visibility:hidden' type='button' onclick='toggleBubbles ()'>
+  <!-- filled by script -->
+</button> 
+
+<!-- BUTTON SHOW HELP -->
+<button id='btn_show_help' class='btn_show_help' title='help' style='z-index:1; position:fixed; top:2px; right:4px; visibility:hidden' type='button' onclick='showHelp ()'>
+  <!-- filled by script -->
+<!-- <span class=large_blue><font color=blue size=+2><b>?</b></font></span> -->
+<span class=large_blue><b>?</b></span>
+<!-- <img src='//upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Info-icon_Wikipedians.svg/20px-Info-icon_Wikipedians.svg.png' alt='icon for people'> -->
+</button> 
+
+    <div id='text_footer2' style='visibility:normal'>
+      <a href='https://wikimediafoundation.org/wiki/Home'>@Wikimedia Foundation</a>, 
+      <a href='https://creativecommons.org/licenses/by-sa/4.0/legalcode'>CC-BY-SA</a> 
+      (author <a href='https://meta.wikimedia.org/wiki/User:Erik_Zachte'>Erik Zachte</a>) 
+
+      <br>Many thanks to <a href='https://github.com/markmarkoh'>Mark DiMarco</a> for <a href='http://datamaps.github.io/'>DataMaps</a>
+      and to <a href='https://ourworldindata.org/about/'><i>Our world in Data</i></a> team for inspiration. 
+      Data supplied by <a href='https://www.mediawiki.org/wiki/Analytics'>WMF Analytics Team</a>.
+
+      <br>See also static version, with  
+      <a href='https://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryOverview.htm'>Overview</a> 
+      and breakdown of pageviews 
+      <a href='//stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryBreakdown.htm'>By Country</a> and  
+      <a href='//stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerLanguageBreakdown.htm'>By Language</a>. 
+    </div>
+<div id="all">
+<div id="all">
+  <div id="map" style="position:absolute; width:100%; height:90%">
+<!--  <div id="map" style="position:relative; width:100%; height:90%"> -->
+    <!-- filled by script -->
+  </div> 
+
+<!-- PAGE TITLE -->
+  <div> 
+    <svg id="page_title">
+    <!-- filled by script -->
+    </svg>
+  </div>
+
+<!-- ICONS, LEGEND AND ABOUT TEXTS -->
+  <div id='legend_about' style='position:absolute; text-align:left; bottom:5px; left:10px'>
+    <div id='icons_explanation'>
+      <!-- filled by script -->
+    </div>
+  </div>
+
+  <!-- BUTTON SHOW LEGEND -->
+  <button id='btn_show_legend' class='btn_show_legend' style='z-index:1; position:fixed; bottom:5px; left:5px; visibility:hidden' type='button' onclick='showLegend ()'>
+    Legend
+  </button> 
+
+    <div id='legend'>
+      <!-- filled by script -->
+    </div>
+
+  <!-- BUTTON SHOW ABOUT -->
+  <button id='btn_show_about' class='btn_show_about' style='z-index:1; position:fixed; bottom:5px; left:70px; visibility:hidden' type='button' onclick='showAbout ()'>
+    About
+  </button> 
+
+  <!-- BUTTON SHOW STATUS -->
+  <button id='btn_show_status' class='btn_show_status' style='z-index:1; position:fixed; bottom:5px; left:126px; visibility:hidden' type='button' onclick='showStatus ()'>
+    Status
+  </button> 
+
+  <!-- BUTTON SHOW HELP -->
+  <button id='btn_show_help2' class='btn_show_help2' style='z-index:1; position:fixed; bottom:5px; left:186px; visibility:hidden' type='button' onclick='showHelp ()'>
+    Help
+  </button> 
+
+    <div id='text_footer' style='visibility:hidden; position:fixed; bottom:5px; left:5px'>
+      <a href='https://wikimediafoundation.org/wiki/Home'>@Wikimedia Foundation</a>, 
+      <a href='https://creativecommons.org/licenses/by-sa/4.0/legalcode'>CC-BY-SA</a> 
+      (author <a href='https://meta.wikimedia.org/wiki/User:Erik_Zachte'>Erik Zachte</a>) 
+
+      <br>Many thanks to <a href='https://github.com/markmarkoh'>Mark DiMarco</a> for <a href='http://datamaps.github.io/'>DataMaps</a>
+      and to <a href='https://ourworldindata.org/about/'><i>Our world in Data</i></a> team for inspiration. 
+      Data supplied by <a href='https://www.mediawiki.org/wiki/Analytics'>WMF Analytics Team</a>.
+
+      <br>See also static version, with  
+      <a href='https://stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryOverview.htm'>Overview</a> 
+      and breakdown of pageviews 
+      <a href='//stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerCountryBreakdown.htm'>By Country</a> and  
+      <a href='//stats.wikimedia.org/wikimedia/squids/SquidReportPageViewsPerLanguageBreakdown.htm'>By Language</a>. 
+    </div>
+
+    <div id='status_bottom_left'>
+      <!-- filled by script on small screens -->
+    </div> 
+  </div>
+</div>
+
+  <!-- logic for this visualization, author Erik Zachte -->
+  <script src="datamaps-views-month.js"></script> <!-- generated on stat1002, contains month for which data apply -->
+  <script src="datamaps-views-v04.js" type="text/javascript"></script>  
+
+</body> 
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>WiViVi data files</title>
+
+<!--  <link rel="stylesheet" type="text/css" href="datamaps-views-v1.css"> -->
+<style>
+a         {color:#0000D0;text-decoration:none; vertical-align:middle}
+a:link    {color:#0000D0;text-decoration:none}
+a:visited {color:#0000D0;text-decoration:none}
+a:active  {color:#0000D0;text-decoration:none}
+a:hover   {color:#FF00FF}
+</style>
+
+</head>
+
+<body>
+
+<blockquote>
+  <h1>WiViVi data files</h1>
+
+
+<h3>Introduction</h3>
+ <a href='//stats.wikimedia.org/newviz'>WiViVi</a> data files have been generated on a Wikimedia server [1] from a hadoop based data stream.<br>
+ This hadoop data stream has been supplied by the <a href='https://wikitech.wikimedia.org/wiki/Analytics'>WMF Analytics Team</a>.
+
+<p>There can be four levels of separators:
+<ul>
+<li>',' - Fields are separated by commas (hence these files are called CSV files).
+<li>'|' - Some fields (named 'breakdown...') contain a list of elements, separated by pipe symbols.
+<li>':' - Each element then contains a list of subelements, separated by colons.
+<li>'^' - Subelements which contain pageviews or people contain a number and a unit, separated by a circumflex.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Replace ^K with 000, ^M with 000000, ^B with 000000000
+</ul>
+
+<p>The following four csv files are directly read by the javascript file:
+(pageviews and requests are synonyms here)
+
+<h3>1) Country flags (images)</h3>
+File <a href='datamaps-flags.csv'>datamaps-flags.csv</a><br>
+Html for these flag images has been collected from this <a href='https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population'>English Wikipedia page</a>, with script [2] 
+<p>Sample:<br>
+<code>
+country_iso3,flag_image (html)<br>
+USA,&lt;img src='//upload.wikimedia.org/wikipedia/en/thumb/a/a4/Flag_of_the_United_States.svg/23px-Flag_of_the_United_States.svg.png' width=23 height=12 border=1&gt;<br>
+JPN,&lt;img src='//upload.wikimedia.org/wikipedia/en/thumb/9/9e/Flag_of_Japan.svg/23px-Flag_of_Japan.svg.png' width=23 height=15 border=1&gt;<br>
+DEU,&lt;img src='//upload.wikimedia.org/wikipedia/en/thumb/b/ba/Flag_of_Germany.svg/23px-Flag_of_Germany.svg.png' width=23 height=14 border=1&gt;<br>
+GBR,&lt;img src='//upload.wikimedia.org/wikipedia/en/thumb/a/ae/Flag_of_the_United_Kingdom.svg/23px-Flag_of_the_United_Kingdom.svg.png' width=23 height=12 border=1&gt;<br>
+etc.
+</code>
+
+<h3>2) Language data</h3>
+File <a href='datamaps-views-per-language.csv'>datamaps-views-per-language.csv</a><br>
+<p>Sample:<br>
+<code>
+name,label,population,perc_population,requests,breakdown_by_language,viewfreq_per_country<br>
+#1:&nbsp;English&nbsp;Wikipedia,EN,1.5^B,20.3%&nbsp;of&nbsp;7.4^B,7.1^B,1:USA:US:N:NA:3.0^B:41.5%|2:GBR:UK:N:EU:703^M:9.9%|3:IND:India:S:AS:532^M:7.5%|4:CAN:Canada:N:NA:310^M:4.3%|5:IRN:Iran:S:AS:246^M:3.4%|6:AUS:Australia:N:OC:220^M:3.1%|7:DEU:Germany:N:EU:156^M:2.2%|8:PAK:Pakistan:S:AS:114^M:1.6%|9:PHL:Philippines:S:AS:111^M:1.6%|10:FRA:France:N:EU:85.6^M:1.2%|11:CHN:China:S:AS:81.5^M:1.1%|12:NLD:Netherlands:N:EU:80.1^M:1.1%|13:IRL:Ireland:N:EU:53.2^M:0.7%|14:MYS:Malaysia:S:AS:52.7^M:0.7%|15:ITA:Italy:N:EU:52.5^M:0.7%|16:IDN:Indonesia:S:AS:52.1^M:0.7%|17:SGP:Singapore:S:AS:50.8^M:0.7%|18:SWE:Sweden:N:EU:47.5^M:0.7%|19:BRA:Brazil:S:SA:47.0^M:0.7%|20:RUS:Russia:N:EU:43.3^M:0.6%|21:ESP:Spain:N:EU:42.6^M:0.6%|22:ZAF:South&nbsp;Africa:S:AF:41.1^M:0.6%|23:NZL:New&nbsp;Zealand:N:OC:40.5^M:0.6%|24:POL:Poland:N:EU:40.1^M:0.6%|25:JPN:Japan:N:AS:37.1^M:0.5%|26:NGA:Nigeria:S:AF:35.4^M:0.5%|27:MEX:Mexico:S:NA:31.3^M:0.4%|28:GRC:Greece:N:EU:28.8^M:0.4%|29:ROU:Romania:N:EU:27.8^M:0.4%|30:DNK:Denmark:N:EU:27.1^M:0.4%|31:ARE:UAE:S:AS:26.9^M:0.4%|32:BEL:Belgium:N:EU:26.7^M:0.4%|33:NOR:Norway:N:EU:26.4^M:0.4%|34:FIN:Finland:N:EU:26.4^M:0.4%|35:HKG:Hong&nbsp;Kong:S:AS:26.0^M:0.4%|36:KOR:South&nbsp;Korea:N:AS:24.3^M:0.3%|37:ISR:Israel:S:AS:23.8^M:0.3%|38:UKR:Ukraine:N:EU:22.9^M:0.3%|39:CHE:Switzerland:N:EU:22.2^M:0.3%|40:THA:Thailand:S:AS:21.7^M:0.3%|41:CZE:Czech&nbsp;Rep.:N:EU:19.0^M:0.3%|42:BGD:Bangladesh:S:AS:18.9^M:0.3%|43:PRT:Portugal:N:EU:17.4^M:0.2%|44:TWN:Taiwan:S:AS:17.3^M:0.2%|45:HUN:Hungary:N:EU:17.2^M:0.2%|46:VNM:Vietnam:S:AS:16.6^M:0.2%|47:SRB:Rep.&nbsp;of&nbsp;Serbia:N:EU:16.5^M:0.2%|48:AFG:Afghanistan:S:AS:16.3^M:0.2%|49:KEN:Kenya:S:AF:15.4^M:0.2%|50::Unknown:X:XX:15.4^M:0.2%,USA:91.3;JPN:3.4;DEU:16.5;GBR:94.8;IND:91.7;RUS:7.5;FRA:15.4;ITA:10.3;CAN:84.5;IRN:72.6;BRA:15.6;ESP:15.4;POL:15.9;MEX:12.8;AUS:95.1;TWN:8.1;NLD:40.0;ARG:9.7;UKR:15.2;PHL:86.9;IDN:41.7;SWE:38.3;PAK:96.9;CHN:77.2;CHE:22.3;HKG:26.3;AUT:16.1;BEL:28.9;COL:9.5;KOR:26.6;CZE:24.3;THA:27.8;CHL:11.5;ISR:31.2;MYS:69.8;FIN:35.2;PER:9.0;SGP:79.7;IRL:84.3;VNM:26.8;VEN:8.6;ROU:48.3;NOR:48.0;GRC:53.9;DNK:51.0;HUN:33.6;SAU:30.3;PRT:37.5;ZAF:95.1;NZL:95.1;ECU:7.1;NGA:96.7;SRB:45.7;EGY:31.4;KAZ:6.5;ARE:79.8;BGR:37.9;BLR:7.9;MAR:18.3;XXX:54.3;HRV:51.7;DZA:12.5;AGO:6.7;BGD:83.4;SVK:36.9;DOM:14.3;BOL:6.5;URY:12.2;GTM:9.1;AFG:94.5;KEN:97.1;SVN:52.9;CRI:22.0;LTU:46.4;PAN:19.5;AZE:20.5;EST:45.3;IRQ:31.8;LKA:88.9;GEO:45.4;BIH:44.4;TUN:18.6;PRY:8.1;LVA:43.9;SLV:11.1;KWT:49.0;HND:12.9;JOR:31.4;NPL:94.6;PRI:62.6;ALB:59.2;LBN:59.7;QAT:73.2;ARM:26.3;GHA:97.6;MKD:68.2;LUX:31.3;MDA:23.1;UZB:12.5;TZA:88.9;NIC:11.9;TUR:32.7;KHM:76.8;KGZ:9.2;CIV:16.5;OMN:56.8;CYP:67.6;MOZ:15.6;MAC:17.1;JAM:97.4;MMR:90.8;BHR:68.9;TTO:96.6;SDN:25.3;MLT:85.2;CMR:32.6;ISL:81.2;SYR:20.2;UGA:98.4;COD:14.5;MUS:83.0;ETH:87.7;REU:9.1;SEN:14.3;MNE:44.9;PSE:25.2;LBY:23.8;HTI:14.1;ZMB:98.8;MDG:15.8;ZWE:98.1;YEM:14.5;TKM:54.6;MNG:68.2;BRN:85.6;TJK:10.5;CUB:25.6;BHS:99.4;GIN:13.7;GLP:9.6;NAM:88.7;BRB:95.9;BFA:13.2;SUR:53.6;BEN:19.2;RWA:84.0;MDV:91.6;LAO:41.7;FJI:98.8;GAB:9.5;BWA:96.6;MLI:13.4;GUY:97.0;IMN:100.0;SOM:76.1;JEY:100.0;GUM:96.8;LBR:100.0;MWI:96.5;TGO:15.1;CUW:68.9;PNG:100.0;GGY:100.0;MRT:14.7;ABW:78.1;GUF:11.0;LCA:97.3;BMU:100.0;BLZ:96.1;CYM:98.8;SLE:100.0;AND:23.1;ATG:99.1;BDI:27.5;XXX:56.0;BTN:100.0;FRO:75.7;CPV:15.7;DJI:36.7;NER:19.5;LIE:19.2;MCO:38.3;LSO:100.0;VIR:99.7;TCD:11.3;SYC:71.1;TLS:38.5;GIB:99.6;COG:12.0;SWZ:100.0;GRD:93.6;GMB:100.0;DMA:100.0;ALA:43.0;VCT:100.0;SSD:83.3;SXM:99.5;KNA:89.3;SMR:11.0;GRL:57.8;TCA:100.0;MNP:100.0;VGB:99.1;GNQ:5.7;VUT:92.2;GNB:19.8;SLB:100.0;XXX:81.1;ASM:100.0;AIA:100.0;COK:100.0;WSM:100.0;FSM:100.0;VAT:9.1;TON:100.0;PLW:100.0;ERI:100.0;MHL:100.0;KIR:100.0;<br>
+</code>
+<p>
+<b>read as</b>
+<p>
+<code>
+name=#1:&nbsp;English&nbsp;Wikipedia (#1 is rank)<br>
+label=EN (language code)<br>
+population=1.5^B (misnomer, is actually speakers, primary and secondary language speakers (the latter if known)<br>
+perc_population=20.3%&nbsp;of&nbsp;7.4^B (percentage of word population)<br>
+requests to this language, within one month=7.1^B <br>
+breakdown_by_language=1:USA:US:N:NA:3.0^B:41.5%|etc. country data separated by pipe symbol | and within that elements separated by colon :<br>
+&nbsp;&nbsp;rank=1<br>
+&nbsp;&nbsp;country code=USA<br>
+&nbsp;&nbsp;name to present=US<br>
+&nbsp;&nbsp;global north/south=N (north)<br>
+&nbsp;&nbsp;region=NA (North America)<br>
+&nbsp;&nbsp;requests from this country, to this language, within one month=3.0^B<br>
+&nbsp;&nbsp;perc connected (to internet)=41.5%<br>
+viewfreq_per_country
+</code>
+
+<h3>3) Country data</h3>
+File <a href='datamaps-views-per-country.csv'>datamaps-views-per-country.csv</a><br>
+<p>Sample:<br>
+<code>
+ISO,views_per_person,total_views_as_perc_of_world_views,total_views,population,perc_people_connected,flag_icon,breakdown_per_language<br>
+USA,10.0,22.5,3.2^B,324^M,88%,,en:English:91.3%|es:Spanish:1.6%|zh:Chinese:1.0%|pt:Portuguese:1.0%|id:Indonesian:0.6%|ru:Russian:0.4%|ja:Japanese:0.4%|fr:French:0.4%|de:German:0.4%|nl:Dutch:0.3%|ar:Arabic:0.2%|it:Italian:0.2%|tl:Tagalog:0.2%|fa:Persian:0.2%|hi:Hindi:0.2%|simple:Simple:0.1%|tr:Turkish:0.1%|ko:Korean:0.1%|sv:Swedish:0.1%|bn:Bengali:0.1%|^:Other:1.1%<br>
+JPN,8.5,7.5,1.1^B,127^M,91%,,ja:Japanese:94.1%|en:English:3.4%|zh:Chinese:1.2%|ru:Russian:0.2%|fr:French:0.2%|de:German:0.1%|sv:Swedish:0.1%|es:Spanish:0.1%|^:Other:0.6%<br>
+DEU,11.6,6.6,947^M,81.8^M,87%,,de:German:74.0%|en:English:16.5%|ru:Russian:1.8%|fr:French:0.8%|it:Italian:0.8%|es:Spanish:0.5%|pl:Polish:0.5%|zh:Chinese:0.5%|tr:Turkish:0.4%|ja:Japanese:0.3%|ar:Arabic:0.3%|fa:Persian:0.3%|uk:Ukrainian:0.3%|pt:Portuguese:0.2%|nl:Dutch:0.2%|el:Greek:0.2%|ko:Korean:0.1%|sv:Swedish:0.1%|ro:Romanian:0.1%|hu:Hungarian:0.1%|^:Other:2.0%<br>
+etc.
+</code>
+<p>
+<b>read as</b>
+<p>
+<code>
+ISO=USA<br>
+views_per_person=10.0<br>
+total_views_as_perc_of_world_views (from this country to any Wikipedia)=22.5<br>
+total_views (from this country to any Wikipedia)=3.2^B<br>
+population=324^M<br>
+perc_people_connected (to internet)=88%<br>
+flag_icon<br>
+breakdown_per_language (of percentage request to language x)=en:English:91.3%|es:Spanish:1.6%|etc.<br>
+&nbsp;&nbsp;language code=en<br>
+&nbsp;&nbsp;language name=English<br>
+&nbsp;&nbsp;percentage=91.3%<br>
+</code>
+
+<h3>4) Region data</h3>
+File <a href='datamaps-views-per-region.csv'>datamaps-views-per-region.csv</a><br>
+<p>Sample:<br>
+<code>
+name,label,latitude,longitude,borderColor,highlightBorderColor,population,perc_population,connected,perc_connected,requests,requests_per_connected_person,perc_share_total,breakdown_by_country,viewfreq_per_country<br>
+World,W,44,-175,black,black,7390^M,100%,3248^M,44%,14389^M,4.4,100%,1:USA:US:N:324^M:4.4%:88%:3236^M:22.5%|2:JPN:Japan:N:127^M:1.7%:91%:1076^M:7.5%|3:DEU:Germany:N:82^M:1.1%:87%:947^M:6.6%|4:GBR:UK:N:65^M:0.9%:83%:742^M:5.2%|5:IND:India:S:1330^M:18.0%:35%:581^M:4.0%|6:RUS:Russia:N:147^M:2.0%:70%:578^M:4.0%|7:FRA:France:N:65^M:0.9%:80%:555^M:3.9%|8:ITA:Italy:N:61^M:0.8%:59%:509^M:3.5%|9:CAN:Canada:N:37^M:0.5%:81%:366^M:2.5%|10:IRN:Iran:S:79^M:1.1%:32%:339^M:2.4%|11:BRA:Brazil:S:207^M:2.8%:58%:300^M:2.1%|12:ESP:Spain:N:46^M:0.6%:79%:277^M:1.9%|13:POL:Poland:N:38^M:0.5%:63%:253^M:1.8%|14:MEX:Mexico:S:129^M:1.7%:49%:245^M:1.7%|15:AUS:Australia:N:24^M:0.3%:76%:231^M:1.6%|16:TWN:Taiwan:S:24^M:0.3%:79%:214^M:1.5%|17:NLD:Netherlands:N:17^M:0.2%:93%:200^M:1.4%|18:ARG:Argentina:S:44^M:0.6%:59%:154^M:1.1%|19:UKR:Ukraine:N:43^M:0.6%:44%:151^M:1.0%|20:PHL:Philippines:S:103^M:1.4%:43%:128^M:0.9%|21:IDN:Indonesia:S:261^M:3.5%:20%:125^M:0.9%|22:SWE:Sweden:N:9.9^M:0.1%:92%:124^M:0.9%|23:PAK:Pakistan:S:194^M:2.6%:18%:118^M:0.8%|24:CHN:China:S:1378^M:18.7%:52%:106^M:0.7%|25:CHE:Switzerland:N:8.3^M:0.1%:83%:99^M:0.7%|26:HKG:Hong&nbsp;Kong:S:7.3^M:0.10%:72%:99^M:0.7%|27:AUT:Austria:N:8.7^M:0.1%:76%:94^M:0.7%|28:BEL:Belgium:N:11^M:0.2%:76%:92^M:0.6%|29:COL:Colombia:S:49^M:0.7%:48%:91^M:0.6%|30:KOR:South&nbsp;Korea:N:51^M:0.7%:82%:91^M:0.6%|31:CZE:Czech&nbsp;Rep.:N:11^M:0.1%:74%:78^M:0.5%|32:THA:Thailand:S:66^M:0.9%:30%:78^M:0.5%|33:CHL:Chile:S:18^M:0.2%:63%:77^M:0.5%|34:ISR:Israel:S:8.6^M:0.1%:64%:76^M:0.5%|35:MYS:Malaysia:S:32^M:0.4%:63%:75^M:0.5%|36:FIN:Finland:N:5.5^M:0.07%:88%:75^M:0.5%|37:PER:Peru:S:31^M:0.4%:37%:71^M:0.5%|38:SGP:Singapore:S:5.5^M:0.07%:72%:64^M:0.4%|39:IRL:Ireland:N:4.8^M:0.06%:79%:63^M:0.4%|40:VNM:Vietnam:S:93^M:1.3%:44%:62^M:0.4%|41:VEN:Venezuela:S:31^M:0.4%:50%:60^M:0.4%|42:ROU:Romania:N:20^M:0.3%:55%:58^M:0.4%|43:NOR:Norway:N:5.2^M:0.07%:92%:55^M:0.4%|44:GRC:Greece:N:11^M:0.1%:59%:53^M:0.4%|45:DNK:Denmark:N:5.7^M:0.08%:92%:53^M:0.4%|46:HUN:Hungary:N:9.8^M:0.1%:74%:51^M:0.4%|47:SAU:Saudi&nbsp;Arabia:S:31^M:0.4%:53%:50^M:0.3%|48:PRT:Portugal:N:10^M:0.1%:65%:46^M:0.3%|49:ZAF:South&nbsp;Africa:S:56^M:0.8%:43%:43^M:0.3%|50:NZL:New&nbsp;Zealand:N:4.7^M:0.06%:77%:43^M:0.3%|<br>
+etc.
+</code>
+<p>
+<b>read as</b>
+<p>
+<code>
+name=World<br> 
+label=W<br>
+latitude=44<br> 
+longitude=-175<br>
+borderColor (for continent marker=red circle)=black<br>
+highlightBorderColor (same) =black<br>
+population=7390^M<br>
+perc_population=100%<br>
+connected (to internet)=3248^M<br>
+perc_connected=44%<br>
+requests=14389^M<br>
+requests_per_connected_person=4.4<br>
+perc_share_total=100%<br>
+breakdown_by_country=1:USA:US:N:324^M:4.4%:88%:3236^M:22.5%|2:JPN:Japan:N:127^M:1.7%:91%:1076^M:7.5%|etc.<br>
+&nbsp;&nbsp;rank=1<br>
+&nbsp;&nbsp;country code=USA<br>
+&nbsp;&nbsp;name to show=US<br>
+&nbsp;&nbsp;global north/south=N (north)<br>
+&nbsp;&nbsp;population=324^M<br>
+&nbsp;&nbsp;population as percentage of world total=4.4%<br>
+&nbsp;&nbsp;requests from this country, to any language, within one month=3.0^B<br>
+&nbsp;&nbsp;perc connected to internet=88%<br>
+&nbsp;&nbsp;requests from this country to any Wikipedia:3236^M<br>
+&nbsp;&nbsp;requests as perc of global total:22.5%<br>
+</code>
+
+<h3>Notes</h3>
+[1] July 2017: server stat1002, job datamaps_views.sh<br>
+[2] script CollectCountryInfoFromWikipedia.pl
+</blockquote>
+
+</body>
+</html>
+.
