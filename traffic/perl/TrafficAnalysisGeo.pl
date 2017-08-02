@@ -8,7 +8,7 @@
 
 # scaling iframe http://jsfiddle.net/Masau/7WRHM/
 
-# derived from stat1002:/a/wikistats_git/squids/perl/SquidReportArchive.pl
+# derived from stat1005:/a/wikistats_git/squids/perl/SquidReportArchive.pl
 # removed all code for obsolete reports  
 
 # general remarks:lots of html is built
@@ -796,7 +796,10 @@ sub ReadInputCountryInfo
     $country =~ s/\%2C/,/g ;
 
     if ($connected eq '-')
-    { $ip_connections_unknown .= "$country, " ; }
+    { 
+      $ip_connections_unknown .= "$country, " ; 
+      print "ip connection unknown: $country\n" ; 
+    }
 
     $connected =~ s/\-/../g ;
 

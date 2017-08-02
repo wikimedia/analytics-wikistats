@@ -3,7 +3,7 @@
 # '//en.wikipedia.org/wiki/List_of_countries_by_population'
 # '//en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users'
 
-# derived from stat1002:/a/wikistats_git/squids/perl/SquidReportArchive.pl
+# derived from stat1005:/a/wikistats_git/squids/perl/SquidReportArchive.pl
 # but with different file names and cleaner content (less format details)
 
   use strict 'subs' ;

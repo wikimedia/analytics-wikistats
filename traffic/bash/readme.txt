@@ -1,5 +1,5 @@
 datamaps_views.sh: 
-    generate data files for visualization: pageviews per region/country/language (subset of traffic_geo.sh)
+    generate data files for visualization: worldmap (using datamaps lib) showing pageviews per region/country/language (subset of traffic_geo.sh)
     invokes:
         SquidReportArchive.pl -w (at long intervals, to harvest English Wikipedia demographics)
         SquidCountryAggregateDaily.pl once a day to import hadoop data
