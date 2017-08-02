@@ -5,7 +5,6 @@
 !.gitignore
 !perl/
 !bash/
-!csv/
 
 # select scripts
 !*.pl
