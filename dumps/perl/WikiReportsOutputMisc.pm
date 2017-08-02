@@ -294,7 +294,8 @@ sub GenerateSiteMapNew
   {
     if ($sitemap_new_layout && (! $mode_wx))
     {
-      $out_html .= "<table border=0><tr><td><h2>$out_publications</h2></td><td><h3>$out_more_tables</h3></td>" .
+      $out_html .= "<table border=0>" . 
+                   "<tr><td><h2>$out_publications</h2></td><td><h3>$out_more_tables</h3></td>" .
                  # "<td><b>&nbsp;&nbsp;&nbsp;<img src='../Tables.png'>&nbsp;=&nbsp;$out_btn_tables&nbsp;<img src='../BarCharts.png'>&nbsp;=&nbsp;$out_btn_charts</b></td>" .
                  # "<td>&nbsp;&nbsp;&nbsp;&nbsp;<b><font size=+1 color='#0000A0' face=\'Times'>W</font> = Wikipedia Article&nbsp;&nbsp;&nbsp;<img src='../BarCharts.png'>&nbsp;=&nbsp;$out_btn_charts</b></td>" .
                    "</tr></table>\n" ;
@@ -303,8 +304,8 @@ sub GenerateSiteMapNew
     { $out_html .= "<h2>$out_publications</h2>\n" ; }
  
    if ($mode_wp)
-   { $out_html .= "<p><b><font color=#080>Mar 2016 !New!</b></font> Extra columns added. Also, want to bookmark this page with default sort column? Now you can!<br>" . 
-                  "Add url argument 'sortcol=x' (where x is 4-6|8-17), add D for descending sort. E.g. 'Sitemap.htm?sortcol=13D'" ; }
+   { $out_html .= "<p><font color=#080>Mar 2016</font>: Want to bookmark this page with default sort column? Now you can!<br>" . 
+                  "Add url argument 'sortcol=x' (where x is 4-6|8-18), add D for descending sort. E.g. 'Sitemap.htm?sortcol=14D'" ; }
 
     if ($wikimedia)
     {
@@ -319,10 +320,31 @@ sub GenerateSiteMapNew
       if ($mode_wx) { $out_url_all = "http://wikimedia.org" ; }
     }
 
+    $out_html .= "<p>" . 
+                 blank_text_after ("01/10/2017", " <font color=#008000><b>June 2017 !New!</b></font> ") .
+                 "Column added: 'Months since 3 or more active editors'. " . 
+                 "Sort by <a href='Sitemap.htm?sortcol=10D'>duration of inactivity</a>" .
+                 "<br><b>ACTIVEWIKIS1 out of LISTEDWIKIS listed wikis were active (3+ active editors) in last month</b>, " . 
+                 "<font color=#888888>ACTIVEWIKIS3 in last 3 months, </font><font color=#CCCCCC>ACTIVEWIKIS12 in last 12 months.</font> " . 
+                 "See also <a href='//stats.wikimedia.org/EN/ProjectTrendsActiveWikis.html'>activity charts</a>. " ; 
+
     $out_html .= "<table border=1 cellspacing=0 id=table2 style='' summary='Tables and charts' class=tablesorter>\n" ;
 
     if ($sitemap_new_layout)
     {
+      $background_color1 = '#FDFDBB' ;
+      $background_color2 = '#ECECAA' ;
+
+      $out_html .= "<colgroup>" . 
+                   "<col span=1 style='background-color:$background_color1'>" . # Data 
+                   "<col span=5 style='background-color:$background_color1'>" . # Languages 
+                   "<col span=1 style='background-color:$background_color1'>" . # Regions
+                   "<col span=3 style='background-color:$background_color2'>" . # Participation
+                   "<col span=5 style='background-color:$background_color1'>" . # Active Editors
+                   "<col span=2 style='background-color:$background_color2'>" . # Edits
+                   "<col span=1 style='background-color:$background_color1'>" . # Usage
+                   "<col span=1 style='background-color:$background_color2'>" . # Content
+                   "</colgroup>" ; 
 
 
       $out_html .= "<thead>\n" ;
@@ -332,7 +354,7 @@ sub GenerateSiteMapNew
                         &tdcbt5 (&b ("Languages")) .
                         &tdcbt  (&b ("Regions")) .
                         &tdcbt3 (&b ("Participation")) .
-                        &tdcbt4 (&b ("Active editors")) .
+                        &tdcbt5 (&b ("Active editors")) .
                         &tdcbt2 (&b ("Edits")) .
                         &tdcbt  (&b ("Usage")) .
                         &tdcbt  (&b ("Content"))) ;
@@ -349,6 +371,7 @@ sub GenerateSiteMapNew
                         (&tdcbt ("<small>Code<br>&rArr; Project<br>Main Page</small>")) .
                         (&tdlbt ("<small>Language<br>&rArr; Wikipedia article</small>")) .
                         $out_participation {"header"} .
+                        &tdcbt("<small>Months<br>since<br>3 or more<br><a href='//stats.wikimedia.org/EN/ProjectTrendsActiveWikis.html'>active<br>editors</a></small>") .
                         &tdcbt("<a href='TablesWikipediansEditsGt5.htm'><small>5+ edits<br>&nbsp;p/month&nbsp;</small></a><br><small>(3m avg)</small>") .
                         &tdcbt("<a href='TablesWikipediansEditsGt100.htm'><small>100+ edits<br>&nbsp;p/month&nbsp;</small></a><br><small>(3m avg)</small>") .
                         &tdcbt("<small>Admins</small>") .
@@ -358,7 +381,9 @@ sub GenerateSiteMapNew
                         &tdcbt ("<small>Views<br>per hour</small>") .
                         &tdcbt ("<small>Article<br>count</small>")) ;
 #     $out_html .= &tr (&tde . &tde . &tde . &tde . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
-      $out_html .= &tr (&the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the . &the) ;
+      $the1 = "<th class=cb style='background-color:$background_color1'>&nbsp;</th>" ; 
+      $the2 = "<th class=cb style='background-color:$background_color2'>&nbsp;</th>" ; 
+      $out_html .= &tr ($the1 . $the1 . $the1 . $the1 . $the1 . $the1 . $the1 . $the2 . $the2 . $the2 . $the1 . $the1 . $the1 . $the1 . $the1 . $the2 . $the2 . $the1 . $the2) ;
     # $out_html .= &tr (&tdimg ("<a href='TablesWikipediaZZ.htm'><img src='../Tables.png'></a> <a href='ChartsWikipediaZZ.htm'><img src='../BarCharts.png'></a>") .
 
       if ($region eq '')
@@ -370,7 +395,7 @@ sub GenerateSiteMapNew
                           &tdcb (&w("<a href='TablesWikipediaZZ.htm'> " . $out_btn_tables . " </a>")) .
                           &tdcb (&w("<a href='ChartsWikipediaZZ.htm'> " . $out_btn_charts . " </a>")) .
                           &tdcbt ("<a href='$out_url_all'>&Sigma;</a>") .
-                         (&tdlbt ("<a href='TablesWikipediaZZ.htm'>" . $out_languages {"zz"} . "</a>&nbsp;(" . $#languages . ")")) .
+                         (&tdlbt ("<a href='TablesWikipediaZZ.htm'>" . $out_languages {"zz"} . "</a>")) . # &nbsp;(" . $#languages . ")")) .
                           &tdlbt ("<small><small><small>" .
                                   "<font color=#008800><span title='Africa'>AF<\/span><\/font> " .
                                   "<font color=#DD0000><span title='Asia'>AS<\/span><\/font> " .
@@ -380,7 +405,7 @@ sub GenerateSiteMapNew
                                   "<font color=#00AAD4><span title='Oceania'>OC<\/span><\/font> " .
                                   "<font color=#000000><span title='Constructed Language'>CL<\/span><\/font> " .
                                   "<font color=#000001><span title='World Language'>W<\/span><\/font></small></small></small>") .
-                          &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde) ;
+                          &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde . &tde) ;
                         # &tdcbt ("<a href='$out_url_all'>" . &w( $out_site) . "</a>") .
       }
       $out_html .= "</thead>\n<tbody>\n" ;
@@ -396,6 +421,29 @@ sub GenerateSiteMapNew
     {
       if ($skip {$wp}) { next ; }
 
+      $last_month_active = 'n.a.' ;
+      $months_ago_last_active = 'n.a.' ;
+      if (defined $last_month_active {$wp})
+      {
+        my $year  = substr ($lastdump {"zz"},0,4) ; 
+        my $month = substr ($lastdump {"zz"},4,2) ; 
+        my $dumpdate_ord = ord (&yyyymm2b ($year,$month)) ;
+
+        $last_month_active = &m2mmmyyyy ($last_month_active {$wp}) ; # 3 -> 8 -> 21 = Fibonacci numbers
+        $months_ago_last_active = $dumpdate_ord - $last_month_active {$wp} ;
+        if    ($months_ago_last_active > 21) { $last_month_active = "<font color=#FFBBBB>$last_month_active</font>" ; } 
+        elsif ($months_ago_last_active >  8) { $last_month_active = "<font color=#DD8888>$last_month_active</font>" ; } 
+        elsif ($months_ago_last_active >  3) { $last_month_active = "<font color=#882222>$last_month_active</font>" ; } 
+      }
+
+      $listed_wikis++ ;
+      if ($months_ago_last_active ==  0) # active in last month 
+      { $active_wikis1 ++ ; }
+      if ($months_ago_last_active <=  2) # active in last three months 
+      { $active_wikis3 ++ ; }
+      if ($months_ago_last_active <=  11) # active in last twelve months 
+      { $active_wikis12 ++ ; }
+ 
       $wpc = $wp ;
       # if ($wp eq "simple")
       # { $wpc = "se" ; }
@@ -420,8 +468,12 @@ sub GenerateSiteMapNew
           {
             $out_html .= &tr ($views .
                               &tdcb ($out_tbl1_hdr12) .
+                              &tdcb ('Last active') . 
                               ($wikimedia ? &tdcb ("&Sigma;") : &tdlb ("&Sigma;")) .
-                              ($wikimedia ? &tdlb ($out_languages {$wpc} . "&nbsp;(" . $#languages . ")") : "") .
+                            # ($wikimedia ? &tdlb ($out_languages {$wpc} . "&nbsp;(" . $#languages . ")") : "") .
+                            # June 2017, no longer show languages count in this cell
+                            # instead show count for recenty active wikis above the table
+                              ($wikimedia ? &tdlb ($out_languages {$wpc}) : "") .
                               &tdcb ("<a href='$out_url_all'>" . &w($out_site) . "</a>") .
                               &tde.
                               &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
@@ -492,11 +544,12 @@ sub GenerateSiteMapNew
           $views = &tdrb (&w ($views)) ;
         }
   
+        $months_ago_last_active = &tdrb ($months_ago_last_active) ;
         $editors_ge_5   = &tdrb (@MonthlyStats {$wp.$c[2].'avg3'}) ;
         $editors_ge_100 = &tdrb (@MonthlyStats {$wp.$c[3].'avg3'}) ;
         $access_sysop   = &tdrb (@access {"$wp|sysop"}) ;
         $access_bots    = &tdrb (@access {"$wp|bot"}) ;
-        $editors = $editors_ge_5 . $editors_ge_100 . $access_sysop . $access_bots ;
+        $editors = $months_ago_last_active . $editors_ge_5 . $editors_ge_100 . $access_sysop . $access_bots ;
 
         $edits_anonymous = sprintf ("%.0f", 100 * $edits_total_ip {$wp} / ($edits_total {$wp} - $BotEditsArticlesPerWiki {$wp})) . "%" ;
         $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
@@ -526,7 +579,7 @@ sub GenerateSiteMapNew
                           # &tdcb ($out_language_article .
                           # "<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
                             &tdcb (&w($lastdump_short_month {$wp})) .
-                            &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
+                            &tdcb (&w("<a href='../../EN/Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='${dir_all_languages}ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>")) .
                           # &tdcb ("<a href='ChartsWikipedia" . uc($wpc) . ".htm'><img src='../BarCharts.png'></a>") .
@@ -545,18 +598,27 @@ sub GenerateSiteMapNew
         {
           $out_html .= &tr ($views .
                             &tdrb (&w ($totarticles)) .
+                            &tdrb (&w ($last_month_active)) . 
                             (($wikimedia && (!$mode_wx)) ? &tdcb ($wpc2) : &tdlb ($wpc2)) .
                             (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             (  $mode_wx ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             &tdcb ("<a href='" . $out_urls {$wpc} . "'>" . &w($out_site) . "</a>") .
-                            &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
+                            &tdcb (&w("<a href='../../EN/Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>"))) ;
         }
      }
     }
     $out_html .= "</tbody>\n" ;
-    $out_html .= &tr ("<td class=l width=600 colspan=99>$out_included</td>") ;
+    
+    if ($out_included ne '')
+    { 
+      if ($sitemap_new_layout)
+      { $out_included =~ s/\<br\>//g ; }
+
+      $out_html .= &tr ("<td class=l width=600 colspan=99>$out_included</td>") ; 
+    }
+
     $out_html .= "</table>\n" ;
 
     if (($some_languages_only) || ($#languages < 25))
@@ -728,6 +790,11 @@ sub GenerateSiteMapNew
 
   $out_html .= "</tr>" ;
   $out_html .= "</table>\n" ;
+
+  $out_html =~ s/LISTEDWIKIS/$listed_wikis/ ;
+  $out_html =~ s/ACTIVEWIKIS1/$active_wikis1/ ;
+  $out_html =~ s/ACTIVEWIKIS3/$active_wikis3/ ;
+  $out_html =~ s/ACTIVEWIKIS12/$active_wikis12/ ;
 
   $generate_sitemap = $true ;
   &GenerateColophon ($false, $false) ;
@@ -930,7 +997,7 @@ sub GenerateSiteMap
     if ($wp eq "zz")
     {
       $out_html .= &tr (&tdc ("&Sigma;") .
-                        &tdl ($out_languages {$wp} . "&nbsp;(" . $#languages . ")") .
+                        &tdl ($out_languages {$wp}) . # "&nbsp;(" . $#languages . ")") .
                         &tde .
                         &tdc (&w("<a href='TablesWikipedia" . uc($wp) . ".htm'> " . $out_btn_tables . " </a>")) .
                         &tdc (&w("<a href='ChartsWikipedia" . uc($wp) . ".htm'> " . $out_btn_charts . " </a>"))) ;
@@ -1558,6 +1625,7 @@ sub GenerateColophon
                    "Wikistats pages that show monthly trends include that early history.<p>" ; }
 
 # $out_phaseIII =~ s/Phase III/<a href='http:\/\/www.mediawiki.org'>Wikimedia<\/a>/ ;
+
 
   $out_sort_order3 = $out_sort_order . "<br>" ;
   if ((($comparison) && (! $mode_wx) && (! $singlewiki)) || $pageviews)

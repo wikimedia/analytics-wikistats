@@ -183,6 +183,19 @@ sub m2mmdimyyyy #mm dim yyyy (dim = days in month)
   return ($date) ;
 }
 
+sub m2mmmyyyy
+{
+  my @months = qw "Xxx Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec" ;
+  my $month = shift ;
+  abort ("m2mmmyyyy: \$m == 0") if $month == 0 ;
+
+  my $year  = 2000 ;
+  while ($month > 12)
+  { $month -= 12 ; $year ++ ; }
+
+  return (sprintf ("%s %04d", $months [$month], $year)) ; 
+}
+
 # code year,month as monthes since 1 january 2000 (1 byte)
 sub yyyymm2b
 {

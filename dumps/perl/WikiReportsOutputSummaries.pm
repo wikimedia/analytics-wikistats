@@ -92,7 +92,7 @@ sub GenerateSummariesPerWiki
     if ($wp =~ /^zz+$/) 
     { &GeneratePlotActiveWikis ($wp) ; }
 
-  # next if $wp !~ /^zz+$/ and $wp ne 'en' ; # for quick tests
+  # next if $wp !~ /^zz+$/ and $wp ne 'en' ; # for quick tests 
 
     &GeneratePlotPageviews ($wp) ; 
 
@@ -1214,7 +1214,7 @@ sub GeneratePlotActiveWikis
 
   my $wp = shift ;
 
-# &LogT ("GeneratePlotEditors $wp\n") ;
+  &LogT ("GeneratePlotActiveWikis $wp\n") ;
 
   my $file_csv_data_R   = $path_in . "R_PlotData_ActiveWikis.R-data" ;
   my $file_script_R     = $path_in . "R_PlotScript_ActiveWikis.R-in" ;
@@ -1310,8 +1310,9 @@ sub GeneratePlotActiveWikis
   $out_script_plot =~ s/FILE_PNG_RAW/$path_png_raw/g ;
   $out_script_plot =~ s/FILE_SVG/$path_svg/g ;
 
-  $out_script_plot =~ s/COL_DATA/2:7/g ;
-  $out_script_plot =~ s/COL_COUNTS/2:6/g ;
+# $out_script_plot =~ s/COL_DATA/2:7/g ;
+  $out_script_plot =~ s/COL_DATA/2:5/g ;
+  $out_script_plot =~ s/COL_COUNTS/2:4/g ;
 
   $out_script_plot =~ s/CODE/$code/g ;
   $out_script_plot =~ s/MAX_METRIC/active wikis/ ;
@@ -1757,6 +1758,9 @@ sub GeneratePlotArticles
   my @months_en = qw (Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 
   my ($wp,$tot_or_new) = @_ ;
+
+# return if $wp ne 'am' ; # qqq debug
+
   $tot_or_new_lc = lc $tot_or_new ;
 
 # return if $wp =~ /^z+$/ ;
@@ -1860,14 +1864,22 @@ sub GeneratePlotArticles
   else
   { ($metric_max, $metric_max_rounded,          $metric_unit, $metric_unit_text1, $metric_unit_text2) = &SummaryUnitAndScale ($articles_max) ; }
 
-  for ($m = $m_lo - ($m_lo % 12) + 1 ; $m < $m_lo; $m++)
+
+  $m = $m_lo - 11 + $m_lo % 12 ;
+  $date = &m2mmddyyyy ($m) ;
+ print "1 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
+  while ($m < $m_lo)
   {
+# for ($m = $m_lo - ($m_lo % 12) + 1 ; $m < $m_lo; $m++)
+# {
     $date = &m2mmddyyyy ($m) ;
+   print "2 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
     $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
     if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
     { print ARTICLES_OUT "$wp,$date,0,0,0\n" ; }
     else
     { print ARTICLES_OUT "$wp,$date,0\n" ; }
+    $m++ ;
   }
 
   $period = month_year_english_short ($m_lo - ($m_lo % 12 - 1)) . ' ' . month_year_english_short ($m_hi) ; # always start in January
@@ -1968,6 +1980,7 @@ sub GeneratePlotArticles
   $out_script_plot =~ s/PERIOD/$period/g ;
 
   &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+# exit ; # debug
 }
 
 sub SummaryAddIndexes

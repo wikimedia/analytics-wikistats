@@ -696,7 +696,7 @@ if (0)
   $header3 = $header1 ;
   $header3 =~ s/<td rowspan=999><\/td>//g ;
 
-  $out_participation {"header"} = &tdc("<img src='../Location_of_Continents.gif' border=0>") .
+  $out_participation {"header"} = &tdcb("<img src='../Location_of_Continents.gif' border=0>") .
                                   &tdlbt("<small>&nbsp;<img src='../bluebar2_hor.gif' width=15 height=7> Speakers in millions<br>&nbsp;<font color=#909090>(log scale)</font> (<span onclick=\"alert('$hint_speakers');\"><font color=blue>?</font></span>)</small><br><small>&nbsp;<img src='../redbar2_hor.gif' width=15 height=7> Editors per million<br>&nbsp;speakers <font color=#909090>(5+ edits)</font></small>") .
                                   &tdcbt("<small>Prim.+Sec.<br>Speakers<br><font color=#909090>M=millions<br>k=thousands</font></small>") .
                                   &tdcbt("<small>Editors (5+)<br>per million<br>speakers</small>") ;

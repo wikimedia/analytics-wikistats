@@ -195,7 +195,7 @@ sortcol=sortcol.replace(/\\D/g,'') ;
 
 \$('#table2').tablesorter({
   // debug:true,
-  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:false},3:{sorter:false},4:{sorter:'nohtml'},5:{sorter:'nohtml'},6:{sorter:'nohtml'},7:{sorter:false},8:{sorter:'millions'},9:{sorter:'digitsonly'},10:{sorter:'digitsonly'},11:{sorter:'digitsonly'},12:{sorter:'digitsonly'},13:{sorter:'digitsonly'},14:{sorter:'digitsonly'},15:{sorter:'digitsonly'},16:{sorter:'digitsonly'},17:{sorter:'digitsonly'}},
+  headers:{0:{sorter:false},1:{sorter:false},2:{sorter:false},3:{sorter:false},4:{sorter:'nohtml'},5:{sorter:'nohtml'},6:{sorter:'nohtml'},7:{sorter:false},8:{sorter:'millions'},9:{sorter:'digitsonly'},10:{sorter:'digitsonly'},11:{sorter:'digitsonly'},12:{sorter:'digitsonly'},13:{sorter:'digitsonly'},14:{sorter:'digitsonly'},15:{sorter:'digitsonly'},16:{sorter:'digitsonly'},17:{sorter:'digitsonly'},18:{sorter:'digitsonly'}},
   sortList: [[sortcol,ascdesc]]
 });
 </script>

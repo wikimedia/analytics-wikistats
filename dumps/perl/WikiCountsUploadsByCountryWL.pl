@@ -25,15 +25,10 @@
 
   my @bots = &ReadBots ($file_bots) ;
   &ReadCountryNames ($file_names) ; # fills global hash %countries
-
   &ParseXml ($file_xml, $file_counts, $file_uploads, $file_edits, $file_html, $file_trace, $file_errors, @bots) ;
 
   &WriteUploaders ($path_csv) ;
 
-  print "Country names not found\n" ; 
-  foreach $name (sort {$names_unknown {$b} <=> $names_unknown {$a}} keys %names_unknown)
-  { print "'$name': " . $names_unknown {$name} . "x\n" ; }
- 
   print "\nReady\n" ;
   exit ;
 
@@ -178,7 +173,7 @@ sub LookupCountryCode
 
   if (! defined ($country_codes {lc ($name)}))
   {
-    print ("LookupCountryCode: Name '$name' unknown\n") ;
+    # print ("LookupCountryCode: Name '$name' unknown\n") ;
     $names_unknown {$name}++ ;
     return ('xx') ;
   }
@@ -274,18 +269,23 @@ sub ParseXml
 
   # also if this file is to be maintained after all, cut this function into smaller funtions
 
-  $folder_xml = "/mnt/data/xmldatadumps/public/commonswiki/20161001" ;
-  @xml_files = qw (commonswiki-20161001-pages-meta-history1.xml-p000000001p001855684.7z
-                   commonswiki-20161001-pages-meta-history1.xml-p001855685p004288603.7z
-                   commonswiki-20161001-pages-meta-history1.xml-p004288605p006457504.7z
-                   commonswiki-20161001-pages-meta-history2.xml-p006457505p011852935.7z
-                   commonswiki-20161001-pages-meta-history2.xml-p011852936p016129764.7z
-                   commonswiki-20161001-pages-meta-history3.xml-p016129765p023222913.7z
-                   commonswiki-20161001-pages-meta-history3.xml-p023222914p029059062.7z
-                   commonswiki-20161001-pages-meta-history4.xml-p029059063p035492989.7z
-                   commonswiki-20161001-pages-meta-history4.xml-p035492990p043650172.7z
-                   commonswiki-20161001-pages-meta-history4.xml-p043650173p051981353.7z) ;
+  $folder_xml = "/mnt/data/xmldatadumps/public/commonswiki/20161101" ;
+  @xml_files = qw 
+(
+commonswiki-20161101-pages-meta-history1.xml-p000000001p001608222.7z
+commonswiki-20161101-pages-meta-history1.xml-p001608223p004034860.7z
+commonswiki-20161101-pages-meta-history1.xml-p004034861p006457504.7z
+commonswiki-20161101-pages-meta-history2.xml-p006457505p011100345.7z
+commonswiki-20161101-pages-meta-history2.xml-p011100346p016129764.7z
+commonswiki-20161101-pages-meta-history3.xml-p016129765p022489484.7z
+commonswiki-20161101-pages-meta-history3.xml-p022489485p029059062.7z
+commonswiki-20161101-pages-meta-history4.xml-p029059063p034779959.7z
+commonswiki-20161101-pages-meta-history4.xml-p034779961p042970441.7z
+commonswiki-20161101-pages-meta-history4.xml-p042970442p052698313.7z
+) ;
 
+
+  print CSV_OUT "3+ active editors\n" ; 
   $files_xml = 0 ;
   while ($file_xml = shift (@xml_files))
   {
@@ -522,19 +522,20 @@ sub ParseXml
               $trace .= "$wl_year\n" ;
             }
 
-            if (($line =~ /\{\{Wiki[\s_]Loves[\s_]$topic[\s_]*\d*[\s_]*country/i) && (($wl_country eq '--') || ($wl_country eq 'xx') || ($wl_country eq '?'))) 
+            if (($line =~ /\{\{Wiki[\s_]Loves[\s_]$topic[\s_]*\d*[\s_]*(country)?/i) && (($wl_country eq '--') || ($wl_country eq 'xx') || ($wl_country eq '?'))) 
             {
               $trace .= "wl_country_name $line -> " ;
 
               $wl_country = $line ;
-              $wl_country =~ s/^.*?\{\{Wiki[\s_]Loves[\s_]$topic[\s_]*\d*[\s_]*country\|//si ;
+              $wl_country =~ s/^.*?\{\{Wiki[\s_]Loves[\s_]$topic[\s_]*\d*[\s_]*(country)?\|//si ;
               $wl_country =~ s/^([^\}]*).*$/$1/ ;
 
-              $trace .= "$wl_country (from template)\n" ;
+              $trace .= "title '$title' $wl_country (from template)\n" ;
             }
 
             if (($line =~ /\[\[Category\:Images[\s_]from[\s_]Wiki[\s_]Loves[\s_]$topic[\s_]\d+[\s_]in/i) && (($wl_country eq '--') || ($wl_country eq 'xx') || ($wl_country eq '?')) && ($line !~ /<comment>/)) 
             {
+              # print "\n\nline $line\n\n" ;
               $trace .= "wl_country_name $line -> " ;
   
               $wl_country_name = $line ;
@@ -544,9 +545,14 @@ sub ParseXml
 
               $wl_country_name =~ s/C.{1,3}te d'Ivoire/Cote d'Ivoire/g ; # Côte d'Ivoire
               $wl_country_name =~ s/South $topic.*/South $topic/g ; # strange characters at end (?)
-              $wl_country = &LookupCountryCode ($wl_country_name) ; 
-
-              $trace .= "$wl_country (from category) <- $wl_country_name\n" ;
+              $wl_country_check = &LookupCountryCode ($wl_country_name) ; 
+              if ($wl_country_check ne 'xx')
+              { 
+                $wl_country = $wl_country_check ; 
+                $trace .= "title '$title' $wl_country (from category) <- $wl_country_name\n" ;
+              }
+              else
+              { $trace .= "title '$title' 'xx' (from category) <- $wl_country_name\n" ; }
             }
 
             $line = "$page_id,\"$title\",$timestamp,$usertype,\"$user\",$wl_year,$wl_country\n" ;
@@ -557,6 +563,7 @@ sub ParseXml
           { $trace = "nomatch! $line\n" ; }
 
           print TRACE $trace ;
+        # print       "$trace\n" ;
         }
 
         if ($verbose)
@@ -640,7 +647,10 @@ sub ParseXml
     if (defined ($country_names {$country_code}))
     { $country_name = $country_names {$country_code} ; }
     else
-    { $country_name = '--' ; }
+    { 
+      $country_name = '--' ;
+      print "1 Not found country code '$country_code'\n" ;
+    }
 
     @users = keys %{$images_per_year_per_country_per_user_last_rev {$year_country_code}} ;
     $users = $#users + 1 ;
@@ -667,7 +677,10 @@ sub ParseXml
     if (defined ($country_names {$country_code}))
     { $country_name = $country_names {$country_code} ; }
     else
-    { $country_name = '--' ; }
+    { 
+      $country_name = '--' ; 
+      print "2 Not found country code '$country_code'\n" ;
+    }
 
     $line = "[$year,$country_code,$country_name]," . $images_per_year_per_country_last_rev {$key} . "\n" ;
     print CSV_COUNTS $line ;
@@ -686,7 +699,9 @@ sub ParseXml
     if (defined ($country_names {$country_code}))
     { $country_name = $country_names {$country_code} ; }
     else
-    { $country_name = '--' ; }
+    { $country_name = '--' ; 
+      print "3 Not found country code '$country_code'\n" ;
+    }
 
     $line = "$year,$country_code,$country_name," . $images_per_year_per_country_any_rev {$key} . "\n" ;
     print $line ;
@@ -697,6 +712,13 @@ sub ParseXml
 
   print CSV_COUNTS $user_trace ;
 
+  print "Country names not found\n" ; 
+  foreach $name (sort {$names_unknown {$b} <=> $names_unknown {$a}} keys %names_unknown)
+  { 
+    print        "'$name': " . $names_unknown {$name} . "x\n" ; 
+    print ERRORS "'$name': " . $names_unknown {$name} . "x\n" ; 
+  }
+ 
   close ERRORS ;
 
   if ($wl_last_revision_has_template)

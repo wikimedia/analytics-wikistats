@@ -801,7 +801,7 @@ sub ReadBotStats
 # expect following loop everywhere: "foreach $wp (@languages) ... "
 sub WhiteListLanguages
 {
-  $threshold_articles = 10 ;
+  $threshold_articles = 100 ;
   $threshold_edits    = 10 ;
 
   &LogT ("\nWhiteListLanguages\n") ;
@@ -894,16 +894,16 @@ sub WhiteListLanguages
         $wp_ignore_too_small_or_inactive {$wp}++ ;
       }
     }
-    foreach $wp (keys %edit_counts_last_month)
-    {
-      if (($wp_whitelist {$wp} > 0) && ($edit_counts_last_month {$wp} < $threshold_edits))
-      {
-        print "Too few edits: $wp\n" ;	       
-        $wp_whitelist {$wp} = 0 ;
-        $wp_ignore_too_few_edits         {$wp}++ ;
-        $wp_ignore_too_small_or_inactive {$wp}++ ;
-      }
-    }
+  # foreach $wp (keys %edit_counts_last_month)
+  # {
+  #   if (($wp_whitelist {$wp} > 0) && ($edit_counts_last_month {$wp} < $threshold_edits))
+  #   {
+  #     print "Too few edits: $wp\n" ;	       
+  #     $wp_whitelist {$wp} = 0 ;
+  #     $wp_ignore_too_few_edits         {$wp}++ ;
+  #     $wp_ignore_too_small_or_inactive {$wp}++ ;
+  #   }
+  #  }
   }
 
   if ($mode_wx)
@@ -939,14 +939,19 @@ sub WhiteListLanguages
 
   if ($out_included ne '')
   {
+    $out_included     = "Only wikis with at least {xxx} articles are listed. " ;
     $out_included =~ s/\{xxx\}/$threshold_articles/ ;
-    $out_included =~ s/\{yyy\}/$threshold_edits/ ;
+  # $out_included =~ s/\{yyy\}/$threshold_edits/ ;
+    $out_included =~ s/articles/articles (A)/ ;
+  # $out_included =~ s/edits/edits (E)/ ;
 
     $project_cnt = 0 ;
     foreach $wp (sort keys %wp_ignore_too_small_or_inactive)
     {
-      $projects_omitted .= "$wp:<a href='" . $out_urls{$wp} . "'>".$out_languages {$wp}."</a>, " ;
-      if (++ $project_cnt % 7 == 0)
+      my $reason = "<font color=#8888>\(" . (0+$article_counts_last_month {$wp}) . "\)</font>" ;
+    # my $reason = "<font color=#8888>\(" . (0+$article_counts_last_month {$wp}) . "\/" . (0+$edits_last_month {$wp}) . "\)</font>" ;
+      $projects_omitted .= "$wp:<a href='" . $out_urls{$wp} . "'>".$out_languages {$wp}."</a> $reason, " ;
+      if (++ $project_cnt % 4 == 0)
       { $projects_omitted .= "<br>" ; }
     }
 
@@ -955,7 +960,9 @@ sub WhiteListLanguages
     else
     {
       $projects_omitted =~ s/, // ;
-      $out_included = "<small>$out_included<br>$out_not_included: $projects_omitted</small>" ;
+    # $out_included = "<small>$out_included<br>$out_not_included (A\/E): $projects_omitted</small>" ;
+    # $out_included = "<small>$out_included<br>$out_not_included: $projects_omitted</small>" ;
+      $out_included = "<small>$out_included<br>Not listed: $projects_omitted</small>" ;
     }
   }
 }
@@ -1029,6 +1036,8 @@ sub ReadMonthlyStats
       if ($count_5 >= 1) { $wikis_with_editors_with_at_least_x_edits {"$m.1"} ++ ; } 
       if ($count_5 >= 3) { $wikis_with_editors_with_at_least_x_edits {"$m.3"} ++ ; }  
       if ($count_5 >= 5) { $wikis_with_editors_with_at_least_x_edits {"$m.5"} ++ ; } 
+
+      if ($count_5 >= 3) { $last_month_active {"$wp"} = $m ; }  
 
       if ($wikis_with_editors_with_at_least_x_edits {"$m.1"} > $active_wikis_max_1)
       { 
@@ -2008,6 +2017,8 @@ sub ReadMonthlyStats
     }
     @MonthlyStats {$wp.$c[11].'tot'} = $editstot ;
     @MonthlyStats {$wp.$c[11].'+'}   = $editsnew ;
+
+print "$m editstot $editstot, editsnew $editsnew\n" ; # qqqq
     # if ($editstot-$editsnew > 0)
     # { @MonthlyStats {$wp.$c[11].'%'}   = sprintf ("%.0f",100 * ($editsnew / ($editstot-$editsnew))) ; }
     if ($editstot > 0)

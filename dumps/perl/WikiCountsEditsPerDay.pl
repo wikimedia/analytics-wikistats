@@ -26,7 +26,7 @@ sub ReadBots
 }
 
 # count content of edits_XX.txt
-# stat1002:/mnt/data/xmldatadumps/public/fywiki/20160203> zgrep -P "<timestamp>|<username>|<ip>" fywiki-*-stub-meta-history.xml.gz > ~/edits_FY.txt
+# stat10055555t/data/xmldatadumps/public/fywiki/20160203> zgrep -P "<timestamp>|<username>|<ip>" fywiki-*-stub-meta-history.xml.gz > ~/edits_FY.txt
 
 sub ReadEdits
 {

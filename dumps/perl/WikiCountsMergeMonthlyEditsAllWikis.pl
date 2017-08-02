@@ -2,7 +2,7 @@
 
 # to do: bash file filenamen aanpassen ../AllWikis2 etc
 # find entries for user with userid 0 after patching (..AllWisi3.tsv before patching)
-# stat1002:/a/wikistats_git/dumps/csv/csv_mw> grep -P "wb\tms" EditsPerUserMonthNamespaceAllWikis4.tsv | grep -P "\t0\t20"
+# stat1005:/a/wikistats_git/dumps/csv/csv_mw> grep -P "wb\tms" EditsPerUserMonthNamespaceAllWikis4.tsv | grep -P "\t0\t20"
 
   use Time::Local ;
   use Getopt::Std ;

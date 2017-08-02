@@ -435,7 +435,7 @@ sub Comma
 }
 
 
-#stat1002:
+#stat1005:
 #105,072 MB [  +858 titles]
 #105,082 MB [  +596 titles]
 #105,092 MB [ +1012 titles]

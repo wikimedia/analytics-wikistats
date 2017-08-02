@@ -308,7 +308,7 @@
   rmdir $path_temp ; # remove if empty
   if (-d $path_temp)
   {
-  # &LogT ("Temp ${path_temp}\@Ready written\n") ;
+    &LogT ("Temp ${path_temp}\@Ready written\n") ;
     open READY, '>', "$path_temp/\@Ready" ;
     print READY "Ready" ;
     close READY ;

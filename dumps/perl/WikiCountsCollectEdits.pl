@@ -3,38 +3,88 @@
   use Time::Local ;
   use Getopt::Std ;
 
-  $| = 1; # flush output
-  $verbose = 1 ;
+  $verbose = 0 ;
+  $title_on_each_record = 1 ;
 
   my %options ;
-  getopt ("cipw", \%options) ;
-  $path_csv = $options {'c'} ;
+  getopt ("bdioprw", \%options) ;
+
+  if (defined ($options {'c'}))
+  { $write_to_stdout = 1 ; }
+  else
+  { $| = 1; } # flush output
+
+  $path_in  = $options {'i'} ;
+  $path_out = $options {'o'} ;
   $project  = $options {'p'} ;
   $wiki     = $options {'w'} ;
-  $dump     = $options {'i'} ;
-  
-  die "Specify path to csv files as: -c [path]" if ! -d $path_csv ;
-  print "Path to csv files: $path_csv\n" ;
+  $dump     = $options {'d'} ;
+  $runtimes = $options {'r'} ;
+  $silent   = defined ($options {'s'}) ;
 
+  $data = 0 ; # suppress meta messages when output is sent to STD_OUT
+  $meta = 1 ;
+
+  die "Specify path for csv input as: -i [some path]" if $path_in eq '' ;
+  die "Specify path for csv output as: -o [some path]" if $path_out eq '' ;
   die "Specify project code as: -p [wb|wk|wn|wo|wp|wq|ws|wv|wx|wo]" if $project !~ /^(?:wb|wk|wn|wo|wp|wq|ws|wv|wx|wo)$/ ;
-  print "Project code: $project\n" ;
-
   die "Specify wiki code as: -w [some wiki, e.g. enwiki]" if $wiki eq '' ;
-  print "Wiki code: $wiki\n" ;
+  die "Specify dump file as: -d [full path to stub dump] or -r [log file with wikistats runs]" if $dump eq '' and $runtimes eq '' ;
+  die "Specify either dump file as: -d [full path to stub dump] or -r [log file with wikistats runs], not both" if $dump ne '' and $runtimes ne '' ;
 
-  die "Specify dump file as: -i [full path to stub dump]" if $dump eq '' ;
-  die "Input stub dump not found: $dump" if ! -e $dump ;
+  die "Input path not found: $path_in"   if ! -d $path_in ;
+  die "Output path not found: $path_out" if ! -d $path_out ;
 
-  print "Stub dump: $dump\n" ;
+  if ($wiki eq 'wikidatawiki')
+  { $wiki = 'wikidata' ; }
 
-  $file_newest_dumps = "$path_csv/csv_$project/StatisticsNewestDumps.csv" ;
+  &Write ($meta, "Read stats and bot names from input dir: $path_in\n") ; 
+  &Write ($meta, "Write to output dir: $path_out\n") ; 
+  &Write ($meta, "Project code: $project\n") ;
+  &Write ($meta, "Wiki code: $wiki\n") ;
+
+  if ($dump ne '')   
+  {
+    die "Input stub dump not found: $dump" if ! -e $dump ;
+    &Write ($meta, "Stub dump: $dump\n") ;
+  }
+  
+  if ($runtimes ne '')
+  {
+    die "Input log file with wikistats runs not found: $runtimes" if ! -e $runtimes ;
+    &Write ($meta, "Log file with run times: $runtimes\n") ;
+
+    if ($wiki =~ /^wikidata(wiki)?$/)
+    { $wiki2 = 'wikidata' ; }
+    else
+    { ($wiki2 = $wiki) =~ s/wiki.*$// ; }  
+
+    &Write ($meta, "Compare language codes in log file '$runtimes' with '$wiki2' (wiki: '$wiki' -> lang code '$wiki2')\n") ; 
+    &Write ($meta, "Only check stub dumps with extension '\.gz' (easy to extend, see WikiCountsArguments.pm)\n") ;
+    open RUNTIMES, '<', $runtimes || die "Could not open $runtimes" ;
+    while ($line = <RUNTIMES>)
+    {
+      next if $line !~ /xmldatadumps\/public.*?stub-meta-history\.xml\.gz/ ;
+      chomp $line ;
+      ($lang,$date,$age_in_seconds,$timestamp,$extension,$cnt1,$cnt2,$somevar,$cnt3,$cnt4,$cnt5,$cnt6,$mode,$path) = split (',', $line) ;
+      $lang =~ s/ //g ; 
+      next if $wiki2 ne $lang ; 
+    # print "$date $path\n" ;
+      $dump = $path ;
+    }
+    close RUNTIMES ;
+    die "No valid stub dump found for project '$project', wiki '$wiki' in log file '$runtimes'" if $dump eq '' ;
+    &Write ($meta, "Use input dump '$dump'\n\n") ;
+  }
+
+  $file_newest_dumps = "$path_in/csv_$project/StatisticsNewestDumps.csv" ;
   
   open CSV_IN, '<', $file_newest_dumps || die "Could not open $file_newest_dumps" ;
   binmode CSV_IN ;
   @dumplist = <CSV_IN> ;
   close CSV_IN ;
 
-  open CSV_IN, '<', "$path_csv/csv_$project/BotsAll.csv" || die "Could not open $path_csv/csv_$project/BotsAll.csv" ;
+  open CSV_IN, '<', "$path_out/csv_$project/BotsAll.csv" || die "Could not open $path_out/csv_$project/BotsAll.csv" ;
   binmode CSV_IN ;
   @botsall = <CSV_IN> ;
   close CSV_IN ;
@@ -51,20 +101,23 @@
 #  }
   &ProcessDump ($project, $wiki, $dump) ;
 
-  print "\nReady\n" ;
+  &Write ($meta, "\nReady\n") ;
   exit ;
 
 sub ProcessDump
 {
   my ($project,$wiki,$path) = @_ ;
 
-  ($wp = $wiki) =~ s/wik.*$//g ;
+  $wp = $wiki ; 
+  if ($wiki ne 'wikidata')
+  { $wp =~ s/wik.*$//g ; }
 
   my ($ss,$mm,$hh) = (localtime (time))[0,1,2] ;
   my $time = sprintf ("%02d:%02d:%02d", $hh, $mm, $ss) ;
   my $titles = 0 ;
+  my $namespace_found ;
 
-  print "$time Process project '$project', wiki '$wiki', dump '$path'\n\n" ;
+  &Write ($meta, "Process project '$project', wiki '$wiki', dump '$path'\n\n") ;
   $timestart = time ;
 
   my $bots = '' ;
@@ -78,7 +131,7 @@ sub ProcessDump
   }
 
   if ($bots eq '')
-  { print "No line found for $wiki in $path_csv/csv_$project/BotsAll.csv\n" ; }
+  { die ("No line found for $wiki in $path_out/csv_$project/BotsAll.csv\n") ; }
   else
   {
     chomp $bots ;
@@ -97,15 +150,31 @@ sub ProcessDump
     binmode XML ;
   }
   else
-  {  print "Unexpected extension: $path\n" ; exit ; }
+  {  die "Unexpected extension: $path\n" ; }
 
-  $file_out =  "$path_csv/csv_$project/EditsTimestamps" . uc ($wp) . ".csv" ;
-  print "Write output to  $file_out\n\n" ;
-  open CSV_OUT, '>', $file_out || die "Could not open $file_out" ;
-  binmode CSV_OUT ;
-  print CSV_OUT "# record types: n=namespace, t=title, e=edit\n" ; 
-  print CSV_OUT "# record type e:user type,timestamp from xml, timestamp in seconds since 1900, username or ip address\n" ;
-  print CSV_OUT "# user type: R=registered user, B=bot, A=anonymous, -=undefined\n" ;
+  if ($title_on_each_record)
+  { $file_out =  "$path_out/csv_$project/EditsTimestampsTitles" . uc ($wp) . ".csv" ; }
+  else
+  { $file_out =  "$path_out/csv_$project/EditsTimestamps" . uc ($wp) . ".csv" ; }
+
+  if (! $write_to_stdout)
+  {
+    &Write ($meta, "Write output to  $file_out\n\n") ;
+    open CSV_OUT, '>', $file_out || die "Could not open $file_out" ;
+    binmode CSV_OUT ;
+  }
+
+  if ($title_on_each_record)
+  {
+    &Write ($meta, "# record type e:user type,timestamp from xml, timestamp in seconds since 1900, key, namespace, title, username or ip address\n") ;
+    &Write ($meta, "# user type: R=registered user, B=bot, A=anonymous, -=undefined\n") ;
+  }
+  else
+  {
+    &Write ($meta, "# record types: n=namespace, t=title, e=edit\n") ; 
+    &Write ($meta, "# record type e:user type,timestamp from xml, timestamp in seconds since 1900, username or ip address\n") ;
+    &Write ($meta, "# user type: R=registered user, B=bot, A=anonymous, -=undefined\n") ;
+  }
 
   while ($line = <XML>)
   {
@@ -138,6 +207,8 @@ sub ProcessDump
 
     if ($line =~ /<username/) # Q&D: no check on xml level (below <revision>)
     {
+      chomp $line ;
+      $line =~ s/[\x00-\x1F]+//g ;
       if ($line =~ /<username>/) 
       {
         chomp $line ;
@@ -158,8 +229,20 @@ sub ProcessDump
         $usertype = '-' ; 
       }
       
-      print "e $usertype $timestamp $user\n" if $verbose ;
-      print CSV_OUT "e,$usertype,$timestamp,$time_secs,$user\n" ;
+      $title =~ s/,/%2C/g ;
+      $user  =~ s/,/%2C/g ;
+      $namespace_found =~ s/,/%2C/g ;
+
+    # print "e $usertype $timestamp $user\n" if $verbose ;
+      if ($title_on_each_record) 
+      { &Write ($data, "$wiki,e,$usertype,$timestamp,$time_secs," . ($key+0) . ",$namespace_found,$title,$user\n") ; }
+      else
+      { &Write ($data, "$wiki,e,$usertype,$timestamp,$time_secs,$user\n") ; }
+
+      undef ($timestamp) ;
+      undef ($time_secs) ;
+      undef ($user) ;
+
       next ;
     }
 
@@ -176,29 +259,70 @@ sub ProcessDump
     if ($line =~ /<ip>/) # Q&D: no check on xml level (below <revision>)
     {
       chomp $line ;
+      $line =~ s/[\x00-\x1F]+//g ;
       $line =~ s/^\s*// ;
       $line =~ s/\s*$// ;
       ($user = $line) =~ s/<[^>]+>//g ;
       $user =~ s/,/&comma;/g ;
-      print "e A $timestamp $user\n" if $verbose ;
-      print CSV_OUT "e,A,$timestamp,$time_secs,$user\n" ;
+    # print "e A $timestamp $user\n" if $verbose ;
+
+      $title =~ s/,/%2C/g ;
+      $user  =~ s/,/%2C/g ;
+      $namespace_found =~ s/,/%2C/g ;
+
+      if ($title_on_each_record) 
+      { &Write ($data, "$wiki,e,A,$timestamp,$time_secs," . ($key+0) . ",$namespace_found,$title,$user\n") ; }
+      else
+      { &Write ($data, "$wiki,e,A,$timestamp,$time_secs,$user\n") ; }
+
+      undef ($timestamp) ;
+      undef ($time_secs) ;
+      undef ($user) ;
+
       next ;
     }
 
     if ($line =~ /<title>/) # Q&D: no check on xml level (below <page>)
     {
+      undef ($title) ;
+      undef ($namespace_found) ;
+ 
+      chomp $line ;
+      $line =~ s/[\x00-\x1F]+//g ;
       $titles++ ;
       if ($titles % 10000 == 0)
-      { print "." ; }
+      { &Write ($meta, ".") ; }
       if ($titles % 100000 == 0)
-      { print "\n$titles " ; }
+      { &Write ($meta, "\n$titles ") ; }
       chomp $line ;
       $line =~ s/^\s*// ;
       $line =~ s/\s*$// ;
       ($title = $line) =~ s/<[^>]+>//g ;
-      print "t $title\n" if $verbose ;
-      $title =~ s/,/\&comma\;/g ;
-      print CSV_OUT "t,$title\n" ;
+
+      $key = '0' ;
+
+      if ($title =~ /\:/)
+      {
+        foreach $ns_name (@namespaces)
+        {
+         # print "title '$title' matches '$ns_name' ?\n " ;
+          if ($title =~ /^$ns_name\:/)
+          { 
+            $key = $namespaces {$ns_name} ; 
+            $namespace_found = $ns_name ;
+            $title =~ s/^$ns_name\:// ;
+          # print "Found namespace $namespace_found -> key = $key\n" ;
+            last ;
+          }
+        }
+      }
+     
+      $title =~ s/,/\%2C/g ;
+      
+      if (! $title_on_each_record) 
+      { &Write ($data, "$wiki,t,$title\n") ; }
+    # print "t $title\n" if $verbose ;
+
       next ;
     }
 
@@ -206,24 +330,54 @@ sub ProcessDump
     if ($line =~ /<namespace key/) # Q&D: no check on xml level (below <namespaces>)
   #  if ($line =~ /<namespace.*?key/) # Q&D: no check on xml level (below <namespaces>)
     {
-# die ("namespace key") ;    
+      # die ("namespace key") ;    
       chomp $line ;
       $line =~ s/^\s*// ;
       $line =~ s/\s*$// ;
-      ($key = $line) =~ s/^.*?key\="(\-?\d+)".*$/$1/g ;
-      ($namespace = $line) =~ s/<[^>]+>//g ;
+      ($ns_key  = $line) =~ s/^.*?key\="(\-?\d+)".*$/$1/g ;
+      ($ns_name = $line) =~ s/<[^>]+>//g ;
 
-      print "n $key $namespace\n" if $verbose ;
-      $namespace =~ s/,/\&comma\;/g ;
-      print CSV_OUT "n,$key,$namespace\n" ;
+    # $ns_name =~ s/,/\&comma\;/g ;
+      if (! $title_on_each_record) 
+      { &Write ($data, "$wiki,n,$ns_key,$ns_name\n") ; }
+      else
+      { &Write ($meta, "# namespace $ns_key: $ns_name\n") ; }
+
+      if ($ns_key != 0)
+      {
+        $namespaces {$ns_name} = $ns_key ;
+        push @namespaces, $ns_name ; 
+        @namespaces = sort {length ($b) <=> length ($a)} @namespaces ;
+      }
       next ;
     }
 
   }
-  close CSV_OUT ;
 
-  print ("$titles titles, " . &ddhhmmss (time - $timestart). "\n") ;
+  if ($write_to_stdout)
+  { close CSV_OUT ; }
 
+  &Write ($meta, "# $titles titles, " . &ddhhmmss (time - $timestart). "\n") ;
+}
+
+sub Write 
+{
+  my ($meta,$line) = @_ ;
+  return if $meta && $write_to_stdout ;
+  return if $meta && $silent ;
+
+  if ($write_to_stdout)
+  { 
+    if ($lines_to_stdout++ > 0) 
+    { print "\n" ; }
+    $line =~ s/\n$// ;
+    print $line ; 
+  }
+  else
+  {
+    print         $line if $verbose ;
+    print CSV_OUT $line ;
+  }
 }
 
 # overcomplete routine copied form other script of mine for date-time formatting

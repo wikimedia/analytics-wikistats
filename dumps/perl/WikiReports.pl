@@ -235,6 +235,10 @@
   &LogT ("\nRead Monthly Statistics") ;
   &ReadMonthlyStats ;
 
+# &GenerateSummariesPerWiki ('am') ; # debug code, run one section only
+# &GenerateSummariesPerWiki ;        # also debug code, more generic  
+# exit ;                                    
+ 
 #  if (! $job_runs_on_production_server)
 #  {
 #    &LogT ("\nExecute temporary test code!") ;
@@ -274,9 +278,10 @@
     &LogT ("\nGenerate Old Site Map") ;
     &GenerateSiteMap ; 
   }
-
 # &GenerateComparisonTables ;
 
+if (0)
+{
   &LogT ("\nRegion code = '$region', language = '$language'\n") ;
   if (($language eq "en") && ($region eq ''))
   {
@@ -286,6 +291,7 @@
      &ReadRevertHistoryGenerateReports ; 
      &GenerateEditHistoryReports ; 
   }
+}
   
   if (($language eq "en") && (! $mode_wm))
   {
