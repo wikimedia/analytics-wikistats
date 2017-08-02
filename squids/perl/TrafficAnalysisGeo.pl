@@ -1,9 +1,13 @@
 #!/usr/bin/perl
-# derived from stat1002:/a/wikistats_git/squids/perl/SquidReportArchive.pl
+# derived from stat1005:/a/wikistats_git/squids/perl/SquidReportArchive.pl
+# via SquidReportArchiveMap.pl_precursor_for_TrafficAnalysisGeo.pl
+# (first new code added to SquidReportArchive.pl, resulting in interemediate file,
+# then lots of old code removed for now defunct reports)
+
 # removed all code for obsolete reports  
 
 # general remarks:lots of html is built
-# place holders in full caps in the html will be replaced later on with separately built html
+# place holders in full caps in the generated html are replaced later in the code with later generated html
 # example: scan for occurences of WORLDMAP_D3
 
 # for country reports fix:
@@ -17,7 +21,7 @@
 # sub ReadInputCountriesMonthly reads $path_csv_squid_counts_monthly (/a/wikistats_git/squids/csv/SquidDataVisitsPerCountryMonthly.csv)
 
 
-# 2016-07-09 minus
+# 2016-07-09 removed:
 # ExpandAbbreviation
 # FormatCount
 # GetSecondaryDomain
@@ -1409,6 +1413,8 @@ sub GetCountryName
   return ($country) ;
 }
 
+sub CalcPercentages
+{
   &LogSub ("CalcPercentages\n") ;
 
   my $total_opsys           = $total_opsys_mobile           + $total_opsys_non_mobile ;
