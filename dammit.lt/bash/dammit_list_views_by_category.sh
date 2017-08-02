@@ -15,7 +15,7 @@ dammit=$wikistats/dammit.lt
 perl=$dammit/perl
 perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 work=/a/dammit.lt/pagecounts/categorized
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 data=$work/data
 publish=$work/publish
 

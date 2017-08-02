@@ -26,12 +26,13 @@ ulimit -v 2000000
 wikistats=/a/wikistats_git
 dammit=$wikistats/dammit.lt
 
-yyyy_mm=2016-03
-threshold=20
+yyyy_mm=2016-12
+threshold=10
 depth=7
 
- ./dammit_list_views_by_category.sh 'commons.wikimedia.org' 'Wiki_Loves_Monuments'      2015-07    $threshold     'wm-commons' $depth
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'WikiProject_Shakespeare'        2017-03 5 'wp-en' $depth
 exit  
+ ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Africa'                         2016-12 10 'wp-en' $depth
  ./dammit_list_views_by_category.sh 'nl.wikipedia.org' 'Leiden'                         2016-01    $threshold     'wp-nl' $depth
  ./dammit_list_views_by_category.sh 'en.wikipedia.org' 'Leiden'                         2016-01    $threshold     'wp-en' $depth
  ./dammit_list_views_by_category.sh 'es.wikipedia.org' 'Flaviviridae'                   2016-01    $threshold     'wp-es' $depth

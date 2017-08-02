@@ -19,7 +19,7 @@ out=$dumps/out
 log=$projectviews/log_projectviews.txt
 meta=$csv_in/csv_mw/MetaLanguages.csv
 date_switch="201504" # not used now , hard coded in perl file 
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 echo "**************************" | tee -a $report | cat
 echo "Start pageviews_monthly.sh" | tee -a $report | cat

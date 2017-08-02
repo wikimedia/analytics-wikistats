@@ -7,7 +7,7 @@ echo_() {
 echo "$1" | tee -a $logfile| cat 
 }
 
-wikistats=/a/wikistats_git
+wikistats=/srv/stat1002-a/wikistats_git
 dammit=$wikistats/dammit.lt
 perl=$dammit/perl
 perl=/home/ezachte/wikistats/dammit.lt/perl # tests
@@ -15,8 +15,8 @@ bash=$perl/../bash
 logs=$dammit/logs 
 
 input=/mnt/data/xmldatadumps/public/other/pageviews # webstatscollector 3.0 was pagecounts-raw for webstatscollector 1.0
-output=/a/dammit.lt/pagecounts/merged
-temp=/a/dammit.lt/pagecounts/temp
+output=/srv/stat1002-a/dammit.lt/pagecounts/merged
+temp=/srv/stat1002-a/dammit.lt/pagecounts/temp
 dataset1001=dataset1001.wikimedia.org::pagecounts-ez/merged/
 
 yyyymmdd=$(date +"%Y_%m_%d")

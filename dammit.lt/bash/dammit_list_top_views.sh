@@ -6,7 +6,7 @@ dammit=$wikistats/dammit.lt
 perl=$dammit/perl
 perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 logs=$dammit/logs 
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs
 
 
 input=/a/dammit.lt/pagecounts/merged 
