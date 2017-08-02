@@ -47,7 +47,7 @@
 
   if (-d "/mnt/")
   {
-    print "Job runs on stat1002\n" ;
+    print "Job runs on stat1005\n" ;
     $dir_in            = "/a/wikistats" ;
     $dir_html          = "/mnt/htdocs" ;
     $dir_csv           = "/a/wikistats/" ;
