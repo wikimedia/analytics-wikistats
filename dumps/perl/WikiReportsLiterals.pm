@@ -61,6 +61,10 @@ sub SetLanguageInfo
   # latest language name corrections provided by Mark Williamson
   # see also http://meta.wikimedia.org/wiki/Languages
 
+  # July 2017 new updates by Erik Zachte for 20 largest languages from infobox in articles on wp:en
+  # note that nearly all 20 languages were adjusted downward
+  # ideally some day numbers are drawn from wikidata
+
   # numbers in square brackets: number of speakers in millions according to
   # http://en.wikipedia.org/w/index.php?title=List_of_languages_by_number_of_native_speakers&oldid=305926069 (Aug 5 2009)
   # includes secondary speakers (hence adds up to much more than 6 billion)
@@ -95,7 +99,7 @@ sub SetLanguageInfo
   am=>"http://am.wikipedia.org Amharic [25,AF]",
   an=>"http://an.wikipedia.org Aragonese [0.0741,EU]",
   ang=>"http://ang.wikipedia.org Anglo-Saxon [,EU]",
-  ar=>"http://ar.wikipedia.org Arabic [530,AF,AS]",
+  ar=>"http://ar.wikipedia.org Arabic [290,AF,AS]", # was 530 till July 2017
   arc=>"http://arc.wikipedia.org Aramaic [2.2,AS]",
   arz=>"http://arz.wikipedia.org Egyptian Arabic [76,AF]",
   as=>"http://as.wikipedia.org Assamese [13,AS,I]",
@@ -106,17 +110,19 @@ sub SetLanguageInfo
   ba=>"http://ba.wikipedia.org Bashkir [1.2,AS]",
   bar=>"http://bar.wikipedia.org Bavarian [12,EU]",
   bat_smg=>"http://bat-smg.wikipedia.org Samogitian [0.5,EU]",
-  "bat-smg"=>"http://bat-smg.wikipedia.org Samogitian",
+  "bat-smg"=>"http://bat-smg.wikipedia.org Samogitian 0.5,EU]",
   bcl=>"http://bcl.wikipedia.org Central Bicolano [2.5,AS]",
   be=>"http://be.wikipedia.org Belarusian [6.5,EU]",
-  "be-x-old"=>"http://be-x-old.wikipedia.org Belarusian (Tarakievica) [6.5,EU]",
-  be_x_old=>"http://be-x-old.wikipedia.org Belarusian (Tarakievica) [6.5,EU]",
+  "be-tarask"=>"http://be-tarask.wikipedia.org Belarusian (Taraškievic) [6.5,EU]", # was be-x-old
+  be_tarask=>"http://be-tarask.wikipedia.org Belarusian (Taraškievic:) [6.5,EU]",  # was be_x_old
+  "be-x-old"=>"http://be-x-old.wikipedia.org Belarusian (Taraškievic) [6.5,EU]",
+  be_x_old=>"http://be-x-old.wikipedia.org Belarusian (Taraškievic) [6.5,EU]",
   bg=>"http://bg.wikipedia.org Bulgarian [12,EU]",
   bh=>"http://bh.wikipedia.org Bihari [,AS,I]",
   bi=>"http://bi.wikipedia.org Bislama [0.2,OC]",
   bjn=>"http://bjn.wikipedia.org Banjar [3.5,AS]",
   bm=>"http://bm.wikipedia.org Bambara [6,AF]",
-  bn=>"http://bn.wikipedia.org Bengali [230,AS,I]",
+  bn=>"http://bn.wikipedia.org Bengali [237,AS,I]",
   bo=>"http://bo.wikipedia.org Tibetan [7,AS]",
   bpy=>"http://bpy.wikipedia.org Bishnupriya Manipuri [2.2,AS,I]",
   br=>"http://br.wikipedia.org Breton [0.226,EU]",
@@ -143,9 +149,9 @@ sub SetLanguageInfo
   cv=>"http://cv.wikipedia.org Chuvash [1.1,AS]",
   cy=>"http://cy.wikipedia.org Welsh [0.74,EU]",
   da=>"http://da.wikipedia.org Danish [6,EU]",
-  de=>"http://de.wikipedia.org German [185,EU]",
+  de=>"http://de.wikipedia.org German [110,EU]", # was 185 till July 2017
   diq=>"http://diq.wikipedia.org Zazaki [1.6,AS]",
-  dk=>"http://dk.wikipedia.org Danish [6]",
+  dk=>"http://dk.wikipedia.org Danish [5.5,EU]",
   dsb=>"http://dsb.wikipedia.org Lower Sorbian [0.0069,EU]",
   dv=>"http://dv.wikipedia.org Divehi [0.3,AS,I]",
   dz=>"http://dz.wikipedia.org Dzongkha [0.6,AS,I]",
@@ -154,26 +160,26 @@ sub SetLanguageInfo
   eml=>"http://eml.wikipedia.org Emilian-Romagnol [1.56,EU]",
   en=>"http://en.wikipedia.org English [1500,EU,NA,OC,AS,AF]",
   eo=>"http://eo.wikipedia.org Esperanto [2,AL]",
-  es=>"http://es.wikipedia.org Spanish [500,EU,NA,SA,AS,AF]",
+  es=>"http://es.wikipedia.org Spanish [570,EU,NA,SA,AS,AF]", # was 500 till July 2017
   et=>"http://et.wikipedia.org Estonian [1.1,EU]",
   eu=>"http://eu.wikipedia.org Basque [0.635,EU]", # Wikipedia 550,000-720,000
   ext=>"http://ext.wikipedia.org Extremaduran [0.2,EU]",
-  fa=>"http://fa.wikipedia.org Persian [107,AS]",
+  fa=>"http://fa.wikipedia.org Persian [110,AS]",
   ff=>"http://ff.wikipedia.org Fulfulde [13,AF]",
   fi=>"http://fi.wikipedia.org Finnish [6,EU]",
   "fiu-vro"=>"http://fiu-vro.wikipedia.org Voro [0.087,EU]",
   fiu_vro=>"http://fiu-vro.wikipedia.org Voro [0.07,EU]",
   fj=>"http://fj.wikipedia.org Fijian [0.55,OC]",
-  fo=>"http://fo.wikipedia.org Faroese [0.066,EU]", # was Faeroese
-  fr=>"http://fr.wikipedia.org French [200,EU,NA,SA,AS,AF,OC]",
+  fo=>"http://fo.wikipedia.org Faaroese [0.066,EU]", # was Faeroese
+  fr=>"http://fr.wikipedia.org French [274,EU,NA,SA,AS,AF,OC]", # was 200 till July 2017
   frp=>"http://frp.wikipedia.org Arpitan [0.140,EU]",
   frr=>"http://frr.wikipedia.org North Frisian [0.01,EU]",
   fur=>"http://fur.wikipedia.org Friulian [0.6,EU]",
   fy=>"http://fy.wikipedia.org Frisian [0.48,EU]",
   ga=>"http://ga.wikipedia.org Irish [1.205,EU]",
   gan=>"http://gan.wikipedia.org Gan [35,AS,C]",
-  gay=>"http://gay.wikipedia.org Gayo",
-  gd=>"http://gdi.wikipedia.org Scots Gaelic [0.87,EU]", # was Scottish Gaelic
+  gay=>"http://gay.wikipedia.org Gayo [0.3,AS]",
+  gd=>"http://gdi.wikipedia.org Scots Gaelic [0.087,EU]", # was Scottish Gaelic
   gl=>"http://gl.wikipedia.org Galician [2.4,EU]", # was Galego
   glk=>"http://glk.wikipedia.org Gilaki [3.3,AS]",
   gn=>"http://gn.wikipedia.org Guarani [7,SA]",
@@ -185,9 +191,9 @@ sub SetLanguageInfo
   hak=>"http://hak.wikipedia.org Hakka [34,AS,C]",
   haw=>"http://haw.wikipedia.org Hawai'ian [0.024,OC]", # was Hawaiian
   he=>"http://he.wikipedia.org Hebrew [8.2,AS]",
-  hi=>"http://hi.wikipedia.org Hindi [550,AS]",
+  hi=>"http://hi.wikipedia.org Hindi [380,AS]", # was 550 till July 2017
   hif=>"http://hif.wikipedia.org Fiji Hindi [0.400,OC]",
-  ho=>"http://ho.wikipedia.org Hiri Motu",
+  ho=>"http://ho.wikipedia.org Hiri Motu [0.12,AS]",
   hr=>"http://hr.wikipedia.org Croatian [6.2,EU]",
   hsb=>"http://hsb.wikipedia.org Upper Sorbian [0.013,EU]",
   ht=>"http://ht.wikipedia.org Haitian [12,NA]",
@@ -195,8 +201,8 @@ sub SetLanguageInfo
   hy=>"http://hy.wikipedia.org Armenian [5.5,AS]",
   hz=>"http://hz.wikipedia.org Herero [0.13,AF]",
   ia=>"http://ia.wikipedia.org Interlingua [0.0015,AL]",
-  iba=>"http://iba.wikipedia.org Iban",
-  id=>"http://id.wikipedia.org Indonesian [250,AS]",
+  iba=>"http://iba.wikipedia.org Iban [1.49, AS]",
+  id=>"http://id.wikipedia.org Indonesian [199,AS]", # was 250 till July 2017
   ie=>"http://ie.wikipedia.org Interlingue [,AL]",
   ig=>"http://ig.wikipedia.org Igbo [22.5,AF]",
   ii=>"http://ii.wikipedia.org Yi [2,AS,C]",
@@ -206,17 +212,17 @@ sub SetLanguageInfo
   is=>"http://is.wikipedia.org Icelandic [0.33,EU]",
   it=>"http://it.wikipedia.org Italian [70,EU]",
   iu=>"http://iu.wikipedia.org Inuktitut [0.03,NA]",
-  ja=>"http://ja.wikipedia.org Japanese [132,AS]",
+  ja=>"http://ja.wikipedia.org Japanese [125,AS]", # was 132 till July 2017
   jbo=>"http://jbo.wikipedia.org Lojban [,AL]",
-  jv=>"http://jv.wikipedia.org Javanese [80,AS]",
+  jv=>"http://jv.wikipedia.org Javanese [94,AS]", # was 80 till July 2017
   ka=>"http://ka.wikipedia.org Georgian [4.3,EU]",
   kaa=>"http://kaa.wikipedia.org Karakalpak [0.58,AS]",
   kab=>"http://ka.wikipedia.org Kabyle [8,AF]",
-  kaw=>"http://kaw.wikipedia.org Kawi",
+  kaw=>"http://kaw.wikipedia.org Kawi [,AS]",
   kbd=>"http://kbd.wikipedia.org Kabardian [1.6,AS]",
   kg=>"http://kg.wikipedia.org Kongo [7,AF]",
   ki=>"http://ki.wikipedia.org Kikuyu [6.6,AF]",
-  kj=>"http://kj.wikipedia.org Kuanyama",
+  kj=>"http://kj.wikipedia.org Kwanyama [0.67,AF]",
   kk=>"http://kk.wikipedia.org Kazakh [12,AS]",
   kl=>"http://kl.wikipedia.org Greenlandic [0.05,NA]",
   km=>"http://km.wikipedia.org Khmer [18.5,AS]", # was Cambodian
@@ -245,25 +251,25 @@ sub SetLanguageInfo
   lt=>"http://lt.wikipedia.org Lithuanian [3.0,EU]",
   ltg=>"http://ltg.wikipedia.org Latgalian [0.175,EU]", # Wikipedia says 150,000-200,000
   lv=>"http://lv.wikipedia.org Latvian [1.75,EU]",
-  mad=>"http://mad.wikipedia.org Madurese [14]",
+  mad=>"http://mad.wikipedia.org Madurese [15,AS]",
   mai=>"http://mai.wikipedia.org Maithili [30,AS]",
-  mak=>"http://mak.wikipedia.org Makasar [2]",
+  mak=>"http://mak.wikipedia.org Makasar [2.1,AS]",
   map_bms=>"http://map-bms.wikipedia.org Banyumasan [13.5,AS]",
-  "map-bms"=>"http://map-bms.wikipedia.org Banyumasan",
+  "map-bms"=>"http://map-bms.wikipedia.org Banyumasan [13.5,AS]",
   mdf=>"http://mdf.wikipedia.org Moksha [0.39,EU]",
   mg=>"http://mg.wikipedia.org Malagasy [20,AF]",
   mh=>"http://mh.wikipedia.org Marshallese [0.0439,OC]",
   mhr=>"http://mhr.wikipedia.org Eastern Mari [0.47,EU]",
   mi=>"http://mi.wikipedia.org Maori [0.150,OC]",
   min=>"http://min.wikipedia.org Minangkabau [6.5,AS]",
-  minnan=>"http://minnan.wikipedia.org Minnan",
+  minnan=>"http://minnan.wikipedia.org Minnan [47,AS]",
   mk=>"http://mk.wikipedia.org Macedonian [2.5,EU]",
   ml=>"http://ml.wikipedia.org Malayalam [37,AS,I]",
   mn=>"http://mn.wikipedia.org Mongolian [5.2,AS]",
-  mo=>"http://mo.wikipedia.org Moldavian [,EU]",
-  mr=>"http://mr.wikipedia.org Marathi [90,AS,I]",
+  mo=>"http://mo.wikipedia.org Moldovan [,EU]",
+  mr=>"http://mr.wikipedia.org Marathi [73,AS,I]", # was 90 till July 2017
   mrj=>"http://mrj.wikipedia.org Western Mari [0.3,A]",
-  ms=>"http://ms.wikipedia.org Malay [300,AS]",
+  ms=>"http://ms.wikipedia.org Malay [250,AS]", # was 300 till July 2017
   mt=>"http://mt.wikipedia.org Maltese [0.520,EU]",
   mus=>"http://mus.wikipedia.org Muskogee [0.006,NA]",
   mwl=>"http://mwl.wikipedia.org Mirandese [0.015,EU]",
@@ -279,9 +285,9 @@ sub SetLanguageInfo
   ne=>"http://ne.wikipedia.org Nepali [30,AS,I]",
   new=>"http://new.wikipedia.org Nepal Bhasa [0.86,AS,I]",
   ng=>"http://ng.wikipedia.org Ndonga [0.690,AF]",
-  nl=>"http://nl.wikipedia.org Dutch [27,EU,SA]",
+  nl=>"http://nl.wikipedia.org Dutch [28,EU,SA]",
   nov=>"http://nov.wikipedia.org Novial [,AL]",
-  nrm=>"http://nrm.wikipedia.org Norman [,EU]",
+  nrm=>"http://nrm.wikipedia.org Norman [0.1,EU]",
   nn=>"http://nn.wikipedia.org Nynorsk [4.7,EU]", # was Neo-Norwegian
   no=>"http://no.wikipedia.org Norwegian [4.7,EU]",
   nso=>"http://nso.wikipedia.org Northern Sotho [13.8,AF]",
@@ -304,7 +310,7 @@ sub SetLanguageInfo
   pnb=>"http://pnb.wikipedia.org Western Panjabi [60,AS]",
   pnt=>"http://pnt.wikipedia.org Pontic [0.325,EU]",
   ps=>"http://ps.wikipedia.org Pashto [26,AS]",
-  pt=>"http://pt.wikipedia.org Portuguese [290,EU,SA,AF,AS]",
+  pt=>"http://pt.wikipedia.org Portuguese [250,EU,SA,AF,AS]", # was 290 till July 2017
   qu=>"http://qu.wikipedia.org Quechua [10.4,SA]",
   rue=>"http://rue.wikipedia.org Rusyn [0.62,EU]",
   rm=>"http://rm.wikipedia.org Romansh [0.060,EU]", # was Rhaeto-Romance
@@ -314,8 +320,8 @@ sub SetLanguageInfo
   roa_rup=>"http://roa-rup.wikipedia.org Aromanian [0.25,EU]",
   "roa-rup"=>"http://roa-rup.wikipedia.org Aromanian [0.5]",
   roa_tara=>"http://roa-tara.wikipedia.org Tarantino [0.3,EU]",
-  "roa-tara"=>"http://roa-tara.wikipedia.org Tarantino",
-  ru=>"http://ru.wikipedia.org Russian [278,EU,AS]",
+  "roa-tara"=>"http://roa-tara.wikipedia.org Tarantino [0.3,EU]",
+  ru=>"http://ru.wikipedia.org Russian [260,EU,AS]", # was 278 till July 2017
   ru_sib=>"http://ru-sib.wikipedia.org Siberian",
   "ru-sib"=>"http://ru-sib.wikipedia.org Siberian",
   rw=>"http://rw.wikipedia.org Kinyarwanda [12,AF]",
@@ -346,6 +352,7 @@ sub SetLanguageInfo
   sw=>"http://sw.wikipedia.org Swahili [50,AF]",
   szl=>"http://szl.wikipedia.org Silesian [0.510,EU]",
   ta=>"http://ta.wikipedia.org Tamil [66,AS,I]",
+  tcy=>"http://tcy.wikipedia.org Tulu [1.7,AS,I]",
   te=>"http://te.wikipedia.org Telugu [80,AS,I]",
   test=>"http://test.wikipedia.org Test",
   tet=>"http://tet.wikipedia.org Tetum [0.55,AS]",
@@ -353,11 +360,11 @@ sub SetLanguageInfo
   th=>"http://th.wikipedia.org Thai [73,AS]",
   ti=>"http://ti.wikipedia.org Tigrinya [6.7,AF]",
   tk=>"http://tk.wikipedia.org Turkmen [9,AS]",
-  tl=>"http://tl.wikipedia.org Tagalog [90,AS]",
+  tl=>"http://tl.wikipedia.org Tagalog [70,AS]", # was 90 till July 2017
   tlh=>"http://tlh.wikipedia.org Klingon",
   tn=>"http://tn.wikipedia.org Setswana [12.9,AF]",
   to=>"http://to.wikipedia.org Tongan [0.105,OC]",
-  tokipona=>"http://tokipona.wikipedia.org Tokipona",
+  tokipona=>"http://tokipona.wikipedia.org Tokipona [0.0001,AL]",
   tpi=>"http://tpi.wikipedia.org Tok Pisin [5.5,AS]",
   tr=>"http://tr.wikipedia.org Turkish [70,EU,AS]",
   ts=>"http://ts.wikipedia.org Tsonga [16.4,AF]",
@@ -376,7 +383,7 @@ sub SetLanguageInfo
   ve=>"http://ve.wikipedia.org Venda [3.0,AF]",
   vec=>"http://vec.wikipedia.org Venetian [3.9,EU]",
   vep=>"http://vep.wikipedia.org Vepsian [0.0016,EU]",
-  vi=>"http://vi.wikipedia.org Vietnamese [80,AS]",
+  vi=>"http://vi.wikipedia.org Vietnamese [75,AS]", # was 80 till July 2017
   vls=>"http://vls.wikipedia.org West Flemish [1.4,EU]",
   vo=>"http://vo.wikipedia.org Volap&uuml;k [0.000020,AL]",
   wa=>"http://wa.wikipedia.org Walloon [0.6,EU]",
@@ -391,7 +398,7 @@ sub SetLanguageInfo
   zea=>"http://zea.wikipedia.org Zealandic [0.220,EU]",
   zh=>"http://zh.wikipedia.org Chinese [1300,AS]",
   zh_min_nan=>"http://zh-min-nan.wikipedia.org Min Nan [49,AS,C]",
-  "zh-min-nan"=>"http://zh-min-nan.wikipedia.org Min Nan [60]",
+  "zh-min-nan"=>"http://zh-min-nan.wikipedia.org Min Nan [49,AS,C]",
   zh_classical=>"http://zh-classical.wikipedia.org Classical Chinese [,AS,C]",
   "zh-classical"=>"http://zh-classical.wikipedia.org Classical Chinese [,AS,C]",
   zh_yue=>"http://zh-yue.wikipedia.org Cantonese [71,AS,C]",
