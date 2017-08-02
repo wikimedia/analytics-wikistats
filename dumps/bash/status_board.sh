@@ -9,7 +9,7 @@ out=$dumps/out
 report=$dumps/logs/log_pageviews_monthly.txt
 projectcounts=/a/dammit.lt/projectcounts
 # projectcounts=/home/ezachte/test/projectcounts  # tests
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 

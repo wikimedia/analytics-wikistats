@@ -7,7 +7,7 @@ perl=/home/ezachte/wikistats/dumps/perl # tests
 bash=$dumps/bash
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 log=$dumps/logs/log_generate_animation_input_projects_growth.txt
 

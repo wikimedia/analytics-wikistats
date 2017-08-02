@@ -35,7 +35,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 log=$dumps/logs/count_wikis_by_size_by_growth.log
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 

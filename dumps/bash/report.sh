@@ -1,6 +1,6 @@
 #!/bin/bash
-c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
-c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
+# c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
+# c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
 
 wikistats=/a/wikistats_git
 dumps=$wikistats/dumps
@@ -10,7 +10,7 @@ bash=$dumps/bash
 csv=$dumps/csv
 csv_pv=/a/dammit.lt/projectviews/csv
 out=$dumps/out
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 log=$dumps/logs/log_report_sh.txt
 
@@ -174,7 +174,8 @@ do
     echo2 "Run reporting for language $x_upper"
     
     cd $perl
-    c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
+    # c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
+         perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
     cd $bash
     echo2 ""
     echo2 "Copy new and updated files from $out_project -> $htdocs_project"

@@ -7,7 +7,7 @@ mail=$wikistats/mail-lists
 perl=$mail/perl
 perl=/home/ezachte/wikistats/mail-lists/perl # tests 
 out=$mail/out
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 perl ReportMailArchives.pl

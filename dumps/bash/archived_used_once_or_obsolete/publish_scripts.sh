@@ -1,6 +1,6 @@
 #!/bin/sh
 
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 perl=/a/wikistats/scripts/perl
 
 cd $perl

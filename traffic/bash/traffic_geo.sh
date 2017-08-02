@@ -4,7 +4,7 @@ ulimit -v 8000000
 # todo some day: simplify logging
 # logs are now written twice (with variations?), inside the script to name file and here by tee from stdout
 
-wikistats=/a/wikistats_git
+wikistats=/srv/stat1002-a/wikistats_git
 squids=$wikistats/squids
 traffic=$wikistats/traffic
 perl=$traffic/perl
@@ -19,7 +19,7 @@ reports_edits_unsampled=$squids/reports_edits
 logs=$traffic/logs
 meta=$wikistats/squids/csv/meta # for bots views and edits use these 'meta' files (lookup for country/region codes) 
 data_hourly=/mnt/hdfs/wmf/data/archive/projectview/geo/hourly/ 
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 
@@ -221,9 +221,9 @@ if [ "$run_monthly_non_geo_reports" == "yes" ] ; then
         rsync -av *.htm  $htdocs/archive/squid_reports/$month
 fi
 # after vetting reports are now manually rsynced to 
-# - stat1001/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
+# - thorium/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
 
-# - stat1001/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
+# - thorium/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
 
 echo Done
 # note: all gif and js files are also needed locally, that should change to shared location  

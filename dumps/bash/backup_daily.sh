@@ -3,7 +3,7 @@
 dt=$(date +[%Y-%m-%d][%H:%M])
 
 wikistats=/home/ezachte/wikistats
-remote=stat1001.eqiad.wmnet::srv/wikistats/backup/
+remote=thorium.eqiad.wmnet::srv/wikistats/backup/
 
 cd $wikistats
 zipfile=wikistats_scripts_dumps_$dt.zip
@@ -28,12 +28,12 @@ zip -r $zip /a/wikistats_git/dumps/csv/*/StatisticsMonthly.csv
 ls -l $zip
 
 echo Publish
-echo "rsync -av $zip stat1001.eqiad.wmnet::srv/wikistats/backup/StatisticsMonthly.csv"
-rsync -av $zip stat1001.eqiad.wmnet::srv/wikistats/backup/StatisticsMonthly.csv
+echo "rsync -av $zip thorium.eqiad.wmnet::srv/wikistats/backup/StatisticsMonthly.csv"
+rsync -av $zip thorium.eqiad.wmnet::srv/wikistats/backup/StatisticsMonthly.csv
 
 cd /a/wikistats_git/dumps/csv
-echo "rsync -av * stat1001.eqiad.wmnet::srv/wikistats/backup/stat1002/a/wikistats_git/dumps/csv"
-rsync -av --exclude="*Tmp*" --exclude="*Temp*" --exclude="*Log.txt" --exclude="*Errors.txt" stat1001.eqiad.wmnet::srv/wikistats/backup/stat1002/a/wikistats_git/dumps/csv
+echo "rsync -av * thorium.eqiad.wmnet::srv/wikistats/backup/stat1005/a/wikistats_git/dumps/csv"
+rsync -av --exclude="*Tmp*" --exclude="*Temp*" --exclude="*Log.txt" --exclude="*Errors.txt" thorium.eqiad.wmnet::srv/wikistats/backup/stat1005/wikistats_git/dumps/csv
 
 
 

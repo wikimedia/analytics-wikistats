@@ -2,12 +2,17 @@
 
 ulimit -v 100000
 
+date
+echo $http_proxy 
+export http_proxy=http://webproxy.eqiad.wmnet:8080 # Jan 2015 see https://wikitech.wikimedia.org/wiki/Http_proxy
+echo $http_proxy
+
 wikistats=/a/wikistats_git
 perl=$wikistats/dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$wikistats/dumps/csv
 dblists=$wikistats/dumps/dblists/master%20copy # to be fixed: folder has space in name, here as %20
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 clear
 

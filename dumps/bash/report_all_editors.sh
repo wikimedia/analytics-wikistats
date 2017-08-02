@@ -6,7 +6,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
  perl WikiReports.pl -m wm -l en -i $csv/csv_wp/ -o $out/out_wp
@@ -18,6 +18,6 @@ cd $perl
 ## publish draft/live version:
 # rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN/ipvb6c
   rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN/draft
-  rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN
+#  rsync -av $out/out_wp/EN/TablesWikimediaAllProjects*.htm $htdocs/EN
 
 

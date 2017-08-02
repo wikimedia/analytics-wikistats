@@ -46,7 +46,7 @@ echo2 "Publish $project"
 #  en) dir="$dir/EN" ;
 #esac
 
-htdocs="stat1001.eqiad.wmnet::srv/stats.wikimedia.org/$dir/csv"
+htdocs="thorium.eqiad.wmnet::srv/stats.wikimedia.org/$dir/csv"
 csv="/a/wikistats/csv_$1"
 archive="/mnt/data/xmldatadumps/public/other/pagecounts-ez/wikistats" # odd name, temp location
 

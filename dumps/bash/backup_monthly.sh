@@ -10,4 +10,4 @@ dt=$(date +[%Y-%m-%d][%H:%M])
 cd $csv/zip_all
 zip $backup/csv_full_$dt.zip *.zip
 
-rsync -av $backup/*.zip  stat1001.eqiad.wmnet::srv/wikistats/backup/
+rsync -av $backup/*.zip  thorium.eqiad.wmnet::srv/wikistats/backup/

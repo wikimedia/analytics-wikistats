@@ -10,7 +10,7 @@ bash=$dumps/bash
 logs=$dumsp/logs
 csv=$dumps/csv
 out=$dumps/out
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 mode=wp
 lang=en

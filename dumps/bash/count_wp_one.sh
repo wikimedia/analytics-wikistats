@@ -25,8 +25,13 @@ date=auto # 20101231 # auto
 
 #date=20150430
 
-x=dewiki
-project=wp # wx
+x=be_tarask # x=commonswiki
+project=wp 
+perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
+
+exit
+x=tcywiki 
+project=wp 
 perl $perl/WikiCounts.pl $trace $reverts_only $edits_only $force $bz2 -m $project -i $dumps_public/$x -o $csv/csv_$project/ -l $x -d $date -s $php
 
 exit

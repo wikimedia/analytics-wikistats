@@ -53,8 +53,8 @@ cd /a/dammit.lt
 echo "zip -r $backup/scripts_dammit_$dt.zip * -i *.sh *.p*"
 zip       -r $backup/scripts_dammit_$dt.zip * -i *.sh *.p*
 
-echo "rsync -av $backup/* stat1001.eqiad.wmnet::srv/wikistats/backup/"
-rsync -av $backup/* stat1001.eqiad.wmnet::srv/wikistats/backup/
+echo "rsync -av $backup/* thorium.eqiad.wmnet::srv/wikistats/backup/"
+rsync -av $backup/* thorium.eqiad.wmnet::srv/wikistats/backup/
 
 
 

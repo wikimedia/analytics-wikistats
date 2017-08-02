@@ -18,19 +18,19 @@ reports_edits_unsampled=$squids/reports_edits
 logs=$squids/logs
 meta=$csv_sampled/meta # for bots views and edits use these 'meta' files (lookup for country/region codes) 
 data_hourly=/mnt/hdfs/wmf/data/archive/projectview/geo/hourly/ 
-htdocs=stat1001.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 cd $perl
 
 log=$logs/SquidReportArchive.log
 
-month=2016-08
-quarter=2016Q2
+month=2017-05
+quarter=2017Q1
 
 run_collect_country_stats=yes
 run_refresh_from_wikipedia=no
-run_monthly_countries_reports=yes
-run_quarterly_countries_reports=no
+run_monthly_countries_reports=no
+run_quarterly_countries_reports=yes
 run_monthly_non_geo_reports=no
 
 # very loose input validation
@@ -209,9 +209,9 @@ if [ "$run_monthly_non_geo_reports" == "yes" ] ; then
         rsync -av *.htm  $htdocs/archive/squid_reports/$month
 fi
 # after vetting reports are now manually rsynced to 
-# - stat1001/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
+# - thorium/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
 
-# - stat1001/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
+# - thorium/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
 
 echo Done
 # note: all gif and js files are also needed locally, that should change to shared location  
