@@ -30,11 +30,11 @@ use Cwd ;
 use Benchmark qw (timesum timediff timestr timethis timethese cmpthese) ;
 use POSIX ;
 
-$proxy = $ENV {"http_proxy"} ;
+$proxy = $ENV {"https_proxy"} ;
 if ($proxy ne '')
-{ print "Use proxy '$proxy'\n\n" ; }
+{ print "Use proxy address '$proxy'\n\n" ; }
 else
-{ print "No proxy defined in environment var 'http_proxy' !!\n\n" ; }
+{ print "No proxy defined in environment var 'https_proxy' !!\n\n" ; }
 
 sub date_time_english ($) ;
 
