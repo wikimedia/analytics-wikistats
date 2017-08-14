@@ -1,25 +1,32 @@
 #!/bin/sh
+egexit
 
-wikistats=/a/wikistats_git
-dumps=$wikistats/dumps
-perl=$dumps/perl
-perl_dumps=/home/ezachte/wikistats/dumps/perl # tests
-perl_dammit=/home/ezachte/wikistats/dammit.lt/perl 
-report=$dumps/logs/log_pageviews_monthly.txt
+echo_() {
+  echo "$1" | tee -a $logfile| cat
+}
 
-projectcounts=/a/dammit.lt/projectcounts
-projectviews=/a/dammit.lt/projectviews
+yyyymmdd=$(date +"%Y_%m_%d")
 
-csv=$dumps/csv
-csv_in=$dumps/csv
-csv_pv=$projectviews/csv
-#meta=$csv/csv_mw/MetaLanguages.csv
-out=$dumps/out
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/ ; echo_ htdocs=$htdocs
+meta=$csv_in/csv_mw/MetaLanguages.csv                   ; echo_ meta=$meta
 
-log=$projectviews/log_projectviews.txt
-meta=$csv_in/csv_mw/MetaLanguages.csv
+scripts=$WIKISTATS_SCRIPTS                              ; echo_ scripts=$scripts
+perl_dumps=$scripts/dumps/perl                          ; echo_ perl_dumps=$perl_dumps
+perl_dammit=$scripts/dammit.lt/perl                     ; echo_ perl_dammit=$perl_dammit
+
+data_dumps=$WIKISTATS_DATA/dumps                        ; echo_ data_dumps=$data_dumps
+data_dammit=$WIKISTATS_DATA/dammit                      ; echo_ data_dammit=$data_dammit
+projectcounts=$data_dammit/projectcounts                ; echo_ projectcounts=$projectcounts
+projectviews=$data_dammit/projectviews                  ; echo_ projectviews=$projectviews 
+csv=$data_dumps/csv                                     ; echo_ csv=$csv
+csv_in=$data_dumps/csv                                  ; echo_ csv_in=$csv_in
+csv_pv=$data_dammit/projectviews/csv                    ; echo_ csv_pv=$csv_pv
+out=$data_dumps/out
+
+logfile=$data_dumps/logs/pageviews_monthly/log_projectviews_monthly_$yyyymmdd.txt  ; echo_ logfile=$logfile
+report=$data_dumps/logs/pageviews_monthly/log_pageviews_monthly_$yyyymmdd.txt  ; echo_ report=$report
+
 date_switch="201504" # not used now , hard coded in perl file 
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
 
 echo "**************************" | tee -a $report | cat
 echo "Start pageviews_monthly.sh" | tee -a $report | cat
@@ -54,7 +61,7 @@ cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$lis
 # $projectcounts/WhiteListWikis.csv          <- list of valid projects/languages, based on dumps found, see step 0 (perl sub ScanWhiteList)
 # $projectcounts/projectcounts-[yyyy].tar    <- sanitized and tarred version of hourly views per wiki, since 2008  (perl sub ScanTarFiles)
 #                                            source: webstatscollector
-#                                            updated daily by /a/wikistats_git/dammit.lt/bash/dammit_sync.sh
+#                                            updated daily by /home/ezachte/wikistats/dammit.lt/bash/dammit_sync.sh
 #                                            from /mnt/data/xmldatadumps/public/other/pagecounts-raw/yyyy/yyyy-mm/projectcounts*
 #
 #                                            for some months with big data loss, due to server overload, projectcounts files have been repaired,
@@ -67,7 +74,7 @@ cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$lis
 # X: $csv/csv_wp/analytics_chk_page_views_totals_normalized.csv
 # X: $csv/csv_[project]/PageViewsPer[$period][All][Normalized].csv 
 #    $period=[Hour/Day/Week/Weekday/Month]                           -> used for ad hoc analysis, not in regular reports, except monthly version,
-#                                                                        daily job /a/wikistats_git/dumps/bash/pageviews_monthly.sh updates all reports
+#                                                                        daily job /home/ezachte/wikistats/dumps/bash/pageviews_monthly.sh updates all reports
 #                                                                        listed at http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm from 
 #                                                                        ../PageViewsPerMonth[All][Normalized].csv
 
@@ -102,9 +109,10 @@ cat csv_wb/$list csv_wk/$list csv_wn/$list csv_wo/$list csv_wp/$list csv_wq/$lis
 # -w = folder for WhiteListWikis.csv (valid language codes)
 
 cd $projectviews
-perl $perl_dammit/DammitSummarizeProjectViews.pl -i $projectcounts -j $projectviews -o $csv_pv -w $projectcounts -m $meta -s $date_switch | tee $log | cat
+perl $perl_dammit/DammitSummarizeProjectViews.pl -i $projectcounts -j $projectviews -o $csv_pv -w $projectcounts -m $meta -s $date_switch | tee $logfile | cat
 zip projectviews_csv.zip csv/csv*/projectviews_* log*projectviews*
 rsync -av -ipv4 projectviews_csv.zip  dataset1001.wikimedia.org::pagecounts-ez/projectviews
+
 # exit # tests only 
 
 # -l = language (en:English)
@@ -120,7 +128,7 @@ rsync -av -ipv4 projectviews_csv.zip  dataset1001.wikimedia.org::pagecounts-ez/p
 date | tee -a $report | cat
 cd $perl_dumps 
 
-perl WikiReports.pl -v n -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp -n | tee -a $report | cat  
+perl WikiReports.pl -v n -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp -n | tee -a $report | cat 
 perl WikiReports.pl -v n -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp    | tee -a $report | cat
 perl WikiReports.pl -v m -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp -n | tee -a $report | cat 
 perl WikiReports.pl -v m -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp    | tee -a $report | cat 

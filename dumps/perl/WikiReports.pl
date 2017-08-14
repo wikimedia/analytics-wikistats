@@ -28,7 +28,7 @@
 #
   print "WikiReports.pl\n" ;
 
-  use lib "/home/ezachte/lib" ;
+  use lib "/home/ezachte/wikistats/dumps/perl" ;
   use EzLib ;
   $trace_on_exit = $true ;
   $trace_on_exit_concise = $true ;

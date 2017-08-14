@@ -21,7 +21,7 @@
   use Archive::Tar;
   $tar = Archive::Tar->new;
 
-  use lib "/home/ezachte/lib" ;
+  use lib "/home/ezachte/wikistats/dammit.lt/perl" ;
   use EzLib ;
   $trace_on_exit = $true ;
   ez_lib_version (4) ;
