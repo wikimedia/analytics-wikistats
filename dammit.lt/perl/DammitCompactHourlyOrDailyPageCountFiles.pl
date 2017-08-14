@@ -588,8 +588,10 @@ sub CheckHoursMissing
 sub AttachLibraries
 {
   print "\nAttachLibraries\n" ;
-# use lib "/home/ezachte/lib" ; # moved to ../perl
+# use lib "/home/ezachte/wikistats/lib" ;
+  use lib "." ;
   use EzLib ;
+
   $trace_on_exit = $true ;
   ez_lib_version (15) ; # check if EzLib is recent enough on this server
 

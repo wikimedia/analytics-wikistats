@@ -1,0 +1,53 @@
+folder 'dammit.lt' is named after original pageview files, which were produced by Domas Mituzas (nickname 'dammit'), from Lituania ('.lt')
+
+monthly page views reports were originally based on dammit projectcounts files
+http://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm
+http://stats.wikimedia.org/cgi-bin/search_portal.pl?search=monthly+page+views+color+coded
+
+functionality:
+
+A: Processes pageview data, produces higher aggregates, highly compressed and corrected for outages. 
+   Compact hourly files, with pageviews per article, into one daily file, and later into one monthly file
+   while retaining hourly precision, in a sparse table per page title
+   Huge compaction is achieved as each monthly file contains each page title only once, 
+   where hourly files together contain the title up to ~24*31 = up to 744 times
+
+../bash/dammit_compact_daily.sh   # merges  24 hourly files into 1 daily file,   daily cron job by user ezachte
+../bash/dammit_compact_monthly.sh # merges ~31 daily  files into 1 monthly file, invoked by dammit_compact_daily.sh
+
+both use same perl file 
+../perl/DammitCompactHourlyOrDailyPageCountFiles.pl 
+
+output: [3] 
+
+in daily step hourly files are validated, patched, sorted, then merged and rsynched to public site [3]
+in monthly step daily files are patched, sorted, merged
+both steps calculate totals which have been compensated (by extrapolation) for missing hourly/daily files
+
+see 
+[1] https://dumps.wikimedia.org/other/analytics/            # overview
+[2] https://dumps.wikimedia.org/other/pagecounts-ez/        # introduction
+[3] https://dumps.wikimedia.org/other/pagecounts-ez/merged/ # data
+
+monthly data are stored in [3] in two datasets:
+pagecounts-yyyy-mm-views-ge-5.bz2            ('views ge 5' means titles with less than 5 views per month have been filtered out)
+pagecounts-yyyy-mm-views-ge-5-totals.bz2     (based on previous file, now hourly counts removed, monthly otals only)
+
+daily data are stored in sub-folders of [3] ../yyyy/yyyy-mm/..
+
+================================================================================================================================
+
+B1: collect new hourly projectviews and pagecounts files, and add them to large tar file, one for each year 
+
+../bash/dammit_sync.sh
+invokes
+../perl/DammitSyncProjectCounts.pl
+
+B2: parse yearly tar files (from B1), one hourly file at a time, and produce counts in a variety of aggregation levels
+ 
+../bash/dammit_projectviews_monthly.sh (see this bash file for extensive comments)
+invokes 
+../dammit.lt/perl/DammitSummarizeProjectViews.pl (to produce many csv files with counts)
+../dumps/perl/WikiReports.pl                     (each of 60+ runs builds one html report, see https://stats.wikimedia.org/EN/TablesPageViewsSitemap.htm)
+                                                 (it reuses reporting section built for dumps, now for views (-v signals go in views mode)
+daily cron job by user ezachte 
