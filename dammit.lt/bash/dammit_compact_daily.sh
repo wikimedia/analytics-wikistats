@@ -17,7 +17,7 @@ data=$WIKISTATS_DATA/dammit                             ; echo_ data=$data
 perl=$scripts/perl                                      ; echo_ perl=$perl 
 bash=$scripts/bash                                      ; echo_ bash=$bash
 output=$data/pagecounts/merged                          ; echo_ output=$output
-logs=$data/logs                                         ; echo_ logs=$logs
+logs=$data/logs/compact_daily                           ; echo_ logs=$logs
 temp=$data/temp                                         ; echo_ temp=$temp
 
 yyyymmdd=$(date +"%Y_%m_%d")
