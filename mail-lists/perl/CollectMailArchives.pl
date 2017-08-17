@@ -1,10 +1,9 @@
 #!/usr/bin/perl
 
 # Requires CPAN modules: Crypt::SSLeay IO::Socket::SSL LWP::Protocol::https
-# Requires: EzLib.pm from analytics/wikistats/analytics/perl/EzLib.pm
+# Requires: EzLib.pm 
 
-# use lib "/[.. path ..]/lib" ;
-# use lib "/home/ezachte/lib" ;
+  use lib "/home/ezachte/wikistats/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
 
@@ -20,12 +19,14 @@
   {
     # to do : undo hard coded paths 
     print "Job runs on $hostname\n" ;
-    $root     = "/a/wikistats_git/mail-lists/lists" ;
-    $file_log = "/home/ezachte/wikistats/mail-lists/logs/LogCollectMailArchives_" . 
-                sprintf ("%4d_%02d_%02d_%02d_%02d",$year+1900,$mon+1,$day,$hour,$min) . ".txt" ;
+    $root     = "/home/ezachte/wikistats_data/mail-lists/lists" ; # to do: make command line argument
+  # $file_log = "/home/ezachte/wikistats_data/mail-lists/logs/collect/log_collect_mail_archives_" . 
+                sprintf ("%4d_%02d_%02d",$year+1900,$mon+1,$day) . ".txt" ;
   }
   else
   { die "Job now supposed to run on WMF server" ; }
+
+# old code for my server, where script ran for many years 
 # if (-e '/[.. path ..]')
 # {
 #   $root = '/[.. path ..]/@lists' ;
@@ -38,9 +39,9 @@
 # }
 
 # &OpenLog ;
-  print "Log to $file_log\n\n" ;
-  open  FILE_LOG, '>', $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  print FILE_LOG "\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n" ;
+# print "Log to $file_log\n\n" ;
+# open  FILE_LOG, '>', $file_log || abort ("Log file '$file_log' could not be opened.") ;
+# print FILE_LOG "\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n" ;
 
   $content =~ s/\x09+\x20+/ /g ;
   $content =~ s/\x09+/ /g ;
@@ -54,7 +55,7 @@
 
   &Log ("Ready fetching archives\n\n") ;
 
-  close FILE_LOG ;
+# close FILE_LOG ;
   print "\n\nReady" ;
   exit ;
 
@@ -240,8 +241,8 @@ sub SaveFile
   }
 }
 
-sub OpenLog
-{
+#sub OpenLog
+#{
 # lines obsolete, needed for server with no shell access
 # $fileage  = -M $file_log ;
 # if ($fileage > 5)
@@ -260,14 +261,18 @@ sub OpenLog
 # }
 # open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
 # close "FILE_LOG" ; # first update timestamp only to show job is running (no shell access)
-  print "Log to $file_log\n\n" ;
-  open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  &Log ("\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n") ;
-}
+
+# lines obsolete, needed for explicit logging to file under control of perl scripts   
+# print "Log to $file_log\n\n" ;
+#  open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#  &Log ("\n\n===== CollectMailArchivesWikiCounts / " . date_time_english (time) . " =====\n\n") ;
+#}
 
 sub Log
 {
   $msg = shift ;
   print $msg ;
-  print FILE_LOG $msg ;
+
+# lines obsolete, needed for explicit logging to file under control of perl scripts   
+# print FILE_LOG $msg ;
 }

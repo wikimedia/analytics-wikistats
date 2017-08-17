@@ -4,24 +4,28 @@
 # uses name z from 'From:x at y (z)' ,
 
   use MIME::Base64;
+  use Net::Domain qw (hostname);
 
   $| = 1; # flush screen output
 
   $false    = 0 ;
   $true     = 1 ;
   
+  $hostname=`hostname` ;
+
   $timestarted = time ;
   ($sec,$min,$hour,$day,$mon,$year,$wday,$yday,$isdst) = localtime($timestarted);
   $period_now = ($year+1900)*12+($mon+1) ;
 
   if (-d "/mnt")
   {
+
     # to do : undo hard coded paths
     print "Job runs on $hostname\n" ;
-    $path_in  = "/a/wikistats_git/mail-lists/lists" ;
-    $path_out = "/a/wikistats_git/mail-lists/out" ;
-    $file_log = "/home/ezachte/wikistats/mail-lists/logs/LogReportsMailArchives_" .
-                sprintf ("%4d_%02d_%02d_%02d_%02d",$year+1900,$mon+1,$day,$hour,$min) . ".txt" ;
+    $path_in  = "/home/ezachte/wikistats_data/mail-lists/lists" ;
+    $path_out = "/home/ezachte/wikistats_data/mail-lists/out" ;
+  # $file_log = "/home/ezachte/wikistats_data/mail-lists/logs/report/log_reports_mail_archives_" .
+  #             sprintf ("%4d_%02d_%02d",$year+1900,$mon+1,$day) . ".txt" ;
   }
   else
   { die "Job now supposed to run on WMF server" ; }  
@@ -47,7 +51,7 @@
   if (!-e $path_out) { die "Folder $path_out no found\n" ; }
 
   &Init ;
-  &OpenLog ;
+# &OpenLog ;
   &ScanFolder ($path_in) ;
 
   &Log ("\nWrite List Stats\n") ;
@@ -73,9 +77,9 @@
 
   &WriteAliasList ;
 
+  &WriteListIndex ;
   &Log ("\nExecution took " . (time - $timestarted) . " seconds\n") ;
   &Log ("\nReady") ;
-  &WriteListIndex ;
   exit ;
 
 sub Init
@@ -912,8 +916,8 @@ sub WriteListIndex
              "<b>April 2009: The colouring scheme is somewhat outdated. You can help by sending corrections to the mail address below.</b></small>" ;
 
   &WritePage ("index", $false, '') ;
-  &WritePage ("Index", $false, '') ;
-  &WritePage ("\_Index", $false, '') ;
+  &WritePage ("Index", $false, '') ;   # why was this ?
+  &WritePage ("\_Index", $false, '') ; # why was this ?
 }
 
 sub WriteAliasList
@@ -1136,34 +1140,34 @@ sub GetDateTimeEnglishShort
           " " . sprintf ("%2d:%02d", $hour, $min)) ;
 }
 
-sub OpenLog
-{
-  $fileage  = -M $file_log ;
-  if ($fileage > 5)
-  {
-    open "FILE_LOG", "<", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-    @log = <FILE_LOG> ;
-    close "FILE_LOG" ;
-    $lines = 0 ;
-    open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-    foreach $line (@log)
-    {
-      if (++$lines >= $#log - 5000)
-      { print FILE_LOG $line ; }
-    }
-    close "FILE_LOG" ;
-  }
-  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  close FILE_LOG ; # first update timestamp only
-  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
-  &Log ("\n\n===== Scan Mailing List Stats / " . &GetDateTimeEnglishShort (time) . " =====\n\n") ;
-}
+#sub OpenLog
+#{
+#  $fileage  = -M $file_log ;
+#  if ($fileage > 5)
+#  {
+#    open "FILE_LOG", "<", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#    @log = <FILE_LOG> ;
+#    close "FILE_LOG" ;
+#    $lines = 0 ;
+#    open "FILE_LOG", ">", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#    foreach $line (@log)
+#    {
+#      if (++$lines >= $#log - 5000)
+#      { print FILE_LOG $line ; }
+#    }
+#    close "FILE_LOG" ;
+#  }
+#  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#  close FILE_LOG ; # first update timestamp only
+#  open "FILE_LOG", ">>", $file_log || abort ("Log file '$file_log' could not be opened.") ;
+#  &Log ("\n\n===== Scan Mailing List Stats / " . &GetDateTimeEnglishShort (time) . " =====\n\n") ;
+#}
 
 sub Log
 {
   $msg = shift ;
   print $msg ;
-  print FILE_LOG $msg ;
+# print FILE_LOG $msg ;
 }
 
 #sub WinCode1250
