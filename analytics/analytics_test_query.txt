@@ -1,7 +1,0 @@
-USE `analytics` ;
-
-
-DESCRIBE page_views ;
-
-SELECT date, project_code,language_code FROM page_views
-WHERE project_code = 'wp' AND language_code = 'en' ; 
