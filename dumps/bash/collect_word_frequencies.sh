@@ -13,5 +13,5 @@ dumps_public=/mnt/data/xmldatadumps/public
 
 cd $perl
 
-nice perl WikiDumpCollect.pl
+nice perl WikiCollectWordFrequencies.pl
 
