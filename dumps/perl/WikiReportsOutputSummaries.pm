@@ -347,7 +347,7 @@ sub GetSummaryPerWiki
   }
 
   $out_style2 = $out_style ;
-  $out_style2 =~ s/td   {white-space:nowrap;/td   {font-size:12px; white-space:nowrap;/ ;
+  $out_style2 =~ s/td\s*\{white-space:nowrap;/td   {font-size:12px; white-space:nowrap;/ ;
   $out_style2 =~ s/body\s*\{.*?\}/body {font-family:arial,sans-serif;background-color:#C0C0C0}/ ;
 
   $plot_binaries1      = 'PlotBinaries'      . uc ($wp) . '1.png' ;
@@ -2420,6 +2420,8 @@ __HTML_SUMMARY_BINARIES__
 
 sub GeneratePlotCallR
 {
+  return ; # Aug 2017: temporary disabled after migration to stat1005: 'stack smashing detected'
+
   my ($script, $file_script) = @_ ;
 
   ($file_script_out = $file_script) =~ s/R-in/R-out/ ;

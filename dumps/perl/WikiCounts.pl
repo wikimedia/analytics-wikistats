@@ -9,7 +9,8 @@
 # See the GNU General Public License for more details, at
 # http://www.fsf.org/licenses/gpl.html
 
-# Disclaimer: most of these sources have been developed in limited free time.
+# Disclaimer: most of these sources have been developed in limited free time, well before Wikimedia Foundation existed.
+# No Analytics colleagues yet who might have benefited from a more structured approach. 
 # Over the years complexity of the sources grew, sometimes at the expense of maintainability.
 # Some design decisions have not scaled well.
 # Some parts of the code are hard to read due to overly concise or obscure variable names
@@ -19,12 +20,19 @@
 # Sometimes obsolete code has been commented out rather than deleted to ease re-activation.
 # Version numbering has been inconsistent.
 # Some code contains hard coded file paths mainly to Erik's test environment (Windows)
+# Most code doesn't run with warnings or strict. 
+# My bad, mostly because I didn't need it at the time (great validation in Windows perl IDE OptiPerl),
+# and scripts were never meant to survive for that long. 
 
 # On the bright side:
 # Most code produces a decent audit trail, which can help understand process flow.
-# The scripts have been modified again and again to cope with ever more colossal input files,
-# without overtaxing system resources. (e.g. by externalizing huge memory structures)
 # Great care has been taken to produce output that is tuned to each specific project.
+
+# Mixed blessing:
+# The scripts have been modified again and again to cope with ever more colossal input files,
+# without overtaxing system resources (e.g. by externalizing huge memory structures) 
+# Of course resource constraints are totally different than say 10-15 years ago, 
+# so these optimizations might now be seen as unnecessary complicating code.
 
 # Rudimentary documentations at:
 # http://meta.wikimedia.org/wiki/Wikistats
@@ -68,6 +76,8 @@
 
   # use warnings ;
   # use strict ;
+
+  use lib "." ; # hmm this wasn't needed on stat1002, how come?
 
   use WikiCountsArguments ;
   use WikiCountsBooks ;

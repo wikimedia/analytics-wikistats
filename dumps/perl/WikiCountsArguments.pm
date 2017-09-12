@@ -164,10 +164,10 @@ sub SetEnvironment
 
   if (! -d $path_out)
   { mkdir $path_out, 0777 ; }
-
-  $path_temp = $path_out ;
-  $path_temp =~ s/(\/.*?\/.*?\/).*/$1/ ;
-  $path_temp .= "tmp" ;
+  
+  $path_temp = "$path_out/../../temp" ;   # changed after migration to stat1005
+# $path_temp =~ s/(\/.*?\/.*?\/).*/$1/ ;
+# $path_temp .= "../temp" ;
 
   $file_log      = $path_out . "WikiCountsLog.txt" ;
   $file_errors   = $path_out . "WikiCountsErrors.txt" ;
@@ -261,7 +261,7 @@ sub SetEnvironment
   if ($path_in =~ /\/\d{8,8}[\/\\]$/)
   {
     ($dumpdir = $path_in) =~ /(\d{8,8})[\/\\]$/ ;
-    &LogT ("Process dump from explicitly named dir: $dumpdir\n") ;
+    &LogT ("Process dump from explicitly named dir: '$dumpdir'\n") ;
   }
   else
   {
@@ -702,15 +702,15 @@ sub SetProofReadNameSpaces
 sub PrepTempDir
 {
   &LogT ("PrepTempDir\n") ;
-  print "Temp   $path_temp\n" ;
+  print "Temp dir: '$path_temp'\n" ;
 
   if (! -d $path_temp)
   {
-    print "Temp   $path_temp not found ->\n" ;
+    print "Temp dir '$path_temp' not found ->\n" ;
     $path_temp = $path_out ;
     $path_temp =~ s/\/[^\/]*\/$/\// ;
     $path_temp .= "temp" ;
-    print "Temp   $path_temp\n" ;
+    print "Temp dir: '$path_temp'\n" ;
   }
 
   if ($path_temp =~ /\\/)
@@ -756,13 +756,13 @@ sub PrepTempDir
   {
     mkdir $path_temp, 0770 ;
     if (-d $path_temp)
-    { print "Temp   $path_temp created\n" ; }
+    { print "Temp dir '$path_temp' created\n" ; }
     else
-    { abort ("Temp   $path_temp not found and could not be created.") ; }
+    { abort ("Temp dir '$path_temp' not found and could not be created.") ; }
   }
   else
   {
-    print "\nTemp   $path_temp already exists -> clear\n" ;
+    print "\nTemp dir '$path_temp' already exists -> clear\n" ;
     opendir (DIR, $path_temp) or die "can't opendir $path_temp: $!";
     while (defined ($file = readdir(DIR)))
     {
@@ -778,14 +778,13 @@ sub PrepTempDir
 # to do: if (! edits_only) overrule full archive format of choice (7z or bz2) when only other full archive dump completed succesfully
 sub SetDumpDir
 {
-  &LogT ("SetDumpDir\n") ;
   my ($dumpdate, $language) = @_ ;
+  &LogT ("SetDumpDir dumpdate:$dumpdate language:$language\n") ;
+
   my ($dumpdir,$dir,$file,$scandir,$status) ;
 
   @files = glob "$path_in*" ;
-  &LogT ("SetDumpDir\n\n") ;
-
-  &LogT ("Check folders in $path_in\n\n") ;
+  &LogT ("Check folders in \$path_in $path_in\n\n") ;
 
   foreach $file (@files)
   {
@@ -894,7 +893,7 @@ sub SetDumpDir
 
   if ($dumpdir ne "")
   { $path_in .= "$dumpdir/" ; }
-  &LogT ("\nUse folder $path_in\n\n") ;
+  &LogT ("\nUse folder \$path_in $path_in\n\n") ;
   
   return ($dumpdir) ;
 }
