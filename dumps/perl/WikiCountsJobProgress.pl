@@ -27,8 +27,8 @@
   $dir_out    = $options {'o'} ;
   $dir_usage  = $options {'u'} ;
   $dir_perl   = $options {'p'} ;
-    
-  die "Specify dir to dammit.lt files as: -d [path]" if ! -d $dir_dammit ;
+
+  die "Specify dir to dammit files as: -d [path]"    if ! -d $dir_dammit ;
   die "Specify dir to dumps as: -i [path]"           if ! -d $dir_dumps ;
   die "Specify dir to output files as: -o [path]"    if ! -d $dir_out ;
   die "Specify dir to scan for usage as: -u [path]"  if ! -d $dir_usage ;
@@ -55,7 +55,7 @@
   $dir_csv           = "$dir_dumps/csv/" ;
   $dir_dblists       = "$dir_dumps/dblists" ;
 
-  $file_log          = "$dir_dumps/logs/log_wikistats_concise.txt" ;
+# $file_log          = "$dir_dumps/logs/job_progress/log_wikistats_job_progress.txt" ;
   
   $dir_projectcounts = "$dir_dammit/projectcounts" ;
   $dir_pagecounts    = "$dir_dammit/pagecounts" ;
@@ -84,24 +84,24 @@
   ($year,$month) = ($month > 1) ? ($year,$month-1) : ($year-1, 12) ;
   $month_minus_4 = $months [$month] . " "  . $year ;
 
-  if (-e $file_log)
-  {
-    open LOG, '<', $file_log ;
-    while ($line = <LOG>)
-    {
-      if (($line =~ / w.: /) || ($line =~ /suspended/))
-      { undef @log ; undef @log2 ; $log_header = $line ; }
-      else
-      {
-        if (($line !~ /^\s*$/) && ($line !~ / 0 min, \d sec/)) # '0 min, 0 sec' means job is skipped
-        {
-          push @log, $line ;
-          unshift @log2, $line ;
-        }
-      }
-    }
-    close LOG ;
-  }
+# if (-e $file_log)
+# {
+#   open LOG, '<', $file_log ;
+#   while ($line = <LOG>)
+#   {
+#     if (($line =~ / w.: /) || ($line =~ /suspended/))
+#     { undef @log ; undef @log2 ; $log_header = $line ; }
+#     else
+#     {
+#       if (($line !~ /^\s*$/) && ($line !~ / 0 min, \d sec/)) # '0 min, 0 sec' means job is skipped
+#       {
+#         push @log, $line ;
+#         unshift @log2, $line ;
+#       }
+#     }
+#   }
+#   close LOG ;
+#  }
 
   &ReadJobHistory ($dir_csv, "wb") ;
   &ReadJobHistory ($dir_csv, "wk") ;
