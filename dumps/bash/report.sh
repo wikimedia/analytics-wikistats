@@ -1,222 +1,253 @@
-#!/bin/bash
-# c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
-# c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
+#!/bin/bash -x
+# -x : xtrace each line in this file, toggle xtrace off/on with 'set +x/-x'
+# avoid -x in echo statements (looks messy in log, even if doing so it makes bash file a bit more messy)
 
-wikistats=/a/wikistats_git
-dumps=$wikistats/dumps
-perl=$dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl # tests
-bash=$dumps/bash
-csv=$dumps/csv
-csv_pv=/a/dammit.lt/projectviews/csv
-out=$dumps/out
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+ulimit -v 1000000
 
-log=$dumps/logs/log_report_sh.txt
-
-# Update English reports for project $1 whenever input csv files are newer than html reports
-# Update reports for other 25+ languages at most once a month, to economize processing time 
-# Whenever Englisgh reports have been updated run archive job
-
-interval=0  # only update non-English reports once per 'interval' days 
-force_run_report=1
 projectcode="$1"
-mode_publish="$2"
+yyyymmddhhnn=$(date +"%Y_%m_%d__%H_%M")
+log_dir=$WIKISTATS_DATA/dumps/logs/report_one_project ; mkdir -m 775 $log_dir >/dev/null 2>&1
+log=$log_dir/log_report_one_project_${projectcode}_$yyyymmddhhnn.txt
+exec 1>> $log 2>&1 # send stdout/stderr to file
 
-function echo2 {
-  echo $1
-  echo $1 >> $log
-}
+projectcode="$1"  # repeat for log file
+mode_publish="$2" # 'final' will publish reports in default location, otherwise in subfolder ../drafts/.. for manual vetting
 
-clear 
-echo2 "exec 'report.sh $1 $2 $3 $4 $5'"
+{ set +x; } 2>/dev/null # trace bash commands off for echos
+echo -e "\nArguments for report.sh: 1:'$1', 2:'$2', 3:'$3', 4:'$4', 5:'$5'"
 
-# Validate project code
-if [[ "$projectcode" = "wb" || "$projectcode" = "wk" || "$projectcode" = "wn" || "$projectcode" = "wp" || "$projectcode" = "wq" || "$projectcode" = "ws" || "$projectcode" = "wv" || "$projectcode" = "wx" || "$projectcode" = "wo" ]]
-then
-  echo "Process project code $1"
-else
-  echo "Invalid project code: specify wb (wikibooks), wk (wiktionary), wn (wikinews), wo (wikivoyage), wp (wikipedia), wq (wikiquote), ws (wikisource), wv (wikiversity), wx (wikispecial: commons, meta...)" ; exit
+if [[ "$projectcode" =~ wb|wk|wn|wp|wq|ws|wv|wx|wo ]]
+  then
+    echo -e "\nProcess project code $1"
+  else
+    echo -e "\nInvalid project code: specify wb (wikibooks), wk (wiktionary), wn (wikinews), wo (wikivoyage), wp (wikipedia), wq (wikiquote), ws (wikisource), wv (wikiversity), wx (wikispecial: commons, meta...)" ; exit
 fi
+echo
+set -x
 
-# Determine publication mode 
+htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/ # publish reports on this server
+
+wikistats=$WIKISTATS_SCRIPTS
+perl=$wikistats/dumps/perl
+bash=$wikistats/dumps/bash
+
+wikistats_data=$WIKISTATS_DATA
+out=$wikistats_data/dumps/out
+csv=$wikistats_data/dumps/csv
+csv_pv=$wikistats_data/dammit/projectviews/csv
+dblists=$wikistats_data/dumps/dblists      # list of wikis in a project, see also below
+
+{ set +x; } 2>/dev/null
+echo -e "\nUpdate English reports for project '$projectcode' whenever input csv files are newer than html reports"
+echo -e "Update reports for other 25+ languages at most once a month, to economize processing time" 
+echo -e "Whenever English reports have been updated run archive job (not active now)"
+echo -e "Only update non-English reports once per 'interval' days" 
+echo -e "force_run_report determines if report are always generated, init at 1 (= yes)\n" 
+set -x
+
+interval=0   
+force_run_report=1
+
+# why 'draft' reports?
+# many years ago, the process was fully automated, then a mishap occurred that made all counts far too low
+# as this process always regenerates all reports for all historic months the last month wasn't detected as outlier
+# instead some people assumed this was on purpose and all previous cycles had been totally wrong
+# without asking me, an alarmistic article was submitted to the German equivalent of the Signpost
+# hence since then there is always a manual vetting phase before publishing the final stats
+# (add command line option 'final' to report.sh, as is done in report_all.sh)
+
+{ set +x; } 2>/dev/null 
+echo -e "\nDetermine publication mode, based on \$mode_publish, which is '$mode_publish'"
 if [[ "$mode_publish" == "final" ]]
 then
-  echo Publish final reports 	
+  echo -e "Publish final reports" 	
 else
-  echo Publish draft reports 	
+  echo -e "Publish draft reports" 	
 fi	
 
-echo2 ""
-echo2 "========================================================================" 
-echo2 ""
-date >> $log
-
 #if [ "$1" == "" ] ; then
-#  echo2 "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
+#  echo -e "Project code missing! Specify as 1st argument one of wb,wk,wn,wo,wp,wq,ws,wv,wx"
 #  exit
 #fi  
- 
-# Abort when 2nd argument specifies a threshold in days, which is not met
-# This prevents costly reporting step when new month has just started and most counting still needs to be done
 
+{ set +x; } 2>/dev/null
+echo -e "\nAbort when 2nd argument specifies a threshold for day of month which is not met"
+echo -e "This prevents costly reporting step when new month has just started and most counting still needs to be done"
 abort_before=$2
-day_of_month=$(date +"%d")
-if [ $day_of_month -lt ${abort_before:=0} ] ; then
-  echo2 "report.sh: day of month $day_of_month lt $abort_before - exit"
-  exit
-fi
-
 if [ "$abort_before" != "" ] ; then
-  echo2 "Day of month $day_of_month le $abort_before - continue"
+  echo -e "Threshold day of month specified: abort before day of month '$abort_before'" 
+  day_of_month=$(date +"%d")
+  if [ $day_of_month -lt ${abort_before:=0} ] ; then
+    echo -e "Day of month '$day_of_month' lt threshold '$abort_before' -> exit\n" 
+    exit
+  else
+    echo -e "Day of month '$day_of_month' equal of above threshold $abort_before -> continue\n" 
+  fi
+  else
+    echo -e "No threshold day of month specified -> continue\n" 
 fi  
+set -x
 
 # Once in a while update and cache language names in so many target languages
 # Sources are TranslateWiki and interwiki links on English Wikipedia 
-./sync_language_files.sh 
+# ./sync_language_files.sh 
 
 do_zip=0 # trigger archive step ?
 
+{ set +x; } 2>/dev/null
 case "$projectcode" in 
-  wb) project='Wikibooks' ;     dir='wikibooks' ;;
-  wk) project='Wiktionaries' ;  dir='wiktionary' ;;
-  wn) project='Wikinews' ;      dir='wikinews' ;;
-  wo) project='Wikivoyage' ;    dir='wikivoyage' ;;
-  wp) project='Wikipedias' ;    dir='.' ;;
-  wq) project='Wikiquotes' ;    dir='wikiquote' ;;
-  ws) project='Wikisources' ;   dir='wikisource' ;;
-  wv) project='Wikiversities' ; dir='wikiversity' ;;
-  wx) project='Wikispecial' ;   dir='wikispecial' ;;
-  *)  project='unknown' ;       dir='...' ;;
-esac  
-echo2 "Generate and publish reports for project $project" 
+  wb) project='Wikibooks' ;   dir='wikibooks' ;;
+  wk) project='Wiktionary' ;  dir='wiktionary' ;;
+  wn) project='Wikinews' ;    dir='wikinews' ;;
+  wo) project='Wikivoyage' ;  dir='wikivoyage' ;;
+  wp) project='Wikipedia' ;   dir='.' ;;
+  wq) project='Wikiquotes' ;  dir='wikiquote' ;;
+  ws) project='Wikisource' ;  dir='wikisource' ;;
+  wv) project='Wikiversity' ; dir='wikiversity' ;;
+  wx) project='Wikispecial' ; dir='wikispecial' ;;
+  *)  project='unknown' ;     dir='...' ;;
+esac 
+echo -e "projectcode -> $project, dir = $dir\n" 
+set -x
 
-# for x in en # test
-for x in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+{ set +x; } 2>/dev/null ; 
+echo -e "\nNow start doing something" 
+echo -e "======================================================="
+echo -e "Generate and publish reports for project $projectcode=$project\n"  
+set -x
+
+for langcode in en # test
+# for langcode in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
-  echo2 ""
-  echo2 ">>> loop with $projectcode:$x"
-  echo2 ""
+  { set +x; } 2>/dev/null  
+  echo -e "\n>>> loop with $projectcode:$langcode\n"
 
-  if [[ "$x" != "en" ]]
+  if [[ "$langcode" != "en" ]] 
   then	  
     if [[ "$mode_publish" != "final" ]]
     then
-      echo2 "Only process target language in draft mode"
-      echo2 ""    
+      echo -e "Only process target language in draft mode\n"
       exit	  
     fi
   fi  
+  set -x
 
-  # Get timestamp last reports for language x
-
-  x_upper=$( echo "$x" | tr '[:lower:]' '[:upper:]' )	
+  { set +x; } 2>/dev/null ; echo -e "\n\nGet timestamp last reports for language $langcode" >> $log ; set -x
+  langcode_upper=$( echo -e "$langcode" | tr '[:lower:]' '[:upper:]' )	
   
-# Set source and destination paths for publishing reports
-  out_project=$out/out_$1/$x_upper 
-  htdocs_project=$htdocs/$dir/$x_upper
+  { set +x; } 2>/dev/null ; echo -e "\n\nSet source and destination paths for publishing reports" >> $log ; set -x
+  out_project=$out/out_$1/$langcode_upper 
+  htdocs_project=$htdocs/$dir/$langcode_upper
   if [[ "$mode_publish" != "final" ]]
   then
     htdocs_project=$htdocs_project/draft
   fi
 
-  echo2 "Target folder $out_project"
   
-  file=$out/out_$1/$x_upper/#index.html	
+  { set +x; } 2>/dev/null  
+  echo -e "\n\nTarget folder $out_project" >> $log 
+  file=$out/out_$1/$langcode_upper/index.html	
   now=`date +%s`
   prevrun=`stat -c %Y $file`
   let secs_out="$now - $prevrun" 
   let days_out="$secs_out/86400"
-  
-  echo2 "File $file generated $days_out days ago"
-  
-  # Get timestamp for most recent csv files 
+  echo -e "days_out=$days_out days" >> $log 
+  echo -e "File '$file' generated $days_out days ago\n" >> $log 
 
+  echo -e "Get timestamp for most recent csv files" >> $log 
   file=$csv/csv_$1/StatisticsLog.csv	
   now=`date +%s`
   prevrun=`stat -c %Y $file`
   let secs_csv="$now - $prevrun" 
-  let days_csv="$secs_csv/86400"
+  let days_csv="$secs_csv/86400" 
+  echo -e "File '$file' generated $days_csv days ago\n\n" >> $log 
+
+  echo -e "Check if reports need to be run now for language $langcode" >> $log
   
-  echo2 "File $file generated $days_csv days ago"
-  
-  # Check if reports need to be run now for language x
   run_report=0
+
   if [ $force_run_report -ne 0 ] ; then
-    echo2 "Forced run of reports"					
+    echo -e "Forced run of reports"					
     run_report=1		
     do_zip=1 
   else  
     if [ "$secs_csv" -lt "$secs_out" ] ; then
-      echo2 "Csv files are newer than reports ... "
+      echo -e "Csv files are newer than reports ... "
 
-      if [ "$x" == "en" ] ; then
+      if [ "$langcode" == "en" ] ; then
         do_zip=1
         run_report=1
       else  
-        echo2 "$days_out days since reports were generated, reporting interval is $interval days"  
+        echo -e "$days_out days since reports were generated, reporting interval is $interval days"  
         if [ $days_out -gt $interval ] ; then
           run_report=1
         else
           if [ "$force_run_report" -ne 0 ] ; then
-            echo2 "Skip reporting for non-English languages, only update these once every $interval days"
+            echo -e "Skip reporting for non-English languages, only update these once every $interval days"
           fi							
         fi	
       fi  
     else
-      echo2 "Reports for language code '$x' are up to date -> skip reporting"			
+      echo -e "Reports for language code '$langcode' are up to date -> skip reporting"			
     fi  
   fi
+  echo -e "run_report=$run_report, do_zip=$do_zip\n\n"			
 
-  # If reporting needed now, do it now 
-  
   if [ $run_report -eq 1 ] ; then
-    echo2 "Run reporting for language $x_upper"
+    echo -e "Generate reports for language $langcode_upper"
     
+    set -x ; 
     cd $perl
-    # c1 perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
-         perl WikiReports.pl -m $1 -l $x -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
+    perl WikiReports.pl -m $1 -l $langcode -i $csv/csv_$1/ -j $csv_pv/csv_$1 -o $out/out_$1
     cd $bash
-    echo2 ""
-    echo2 "Copy new and updated files from $out_project -> $htdocs_project"
+    { set +x; } 2>/dev/null ; 
+
+    echo -e "\n\nCopy new and updated files\nfrom $out_project\nto $htdocs_project\n" 
   
-    if [ "$x" == "en" ] ; then
+    if [ "$langcode" == "en" ] ; then
       if [[ "$mode_publish" == "final" ]]
       then	      
-        echo "Publish final en >> rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
-        rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
-  
-	echo2 "List files (except charts) from target folder older than a day"
-        find $htdocs_project/ -mtime +1 | xargs ls -l | grep -P -v 'svg|png' # rather than 'ls -l $htdocs'
+	echo -e "List files (except charts) from target folder older than a day"
+        set -x ; 
+        find $out_project/ -mtime +1 | xargs ls -l | grep -P -v 'svg|png' # rather than 'ls -l [dir]' 
+        { set +x; } 2>/dev/null ; 
+
+        echo -e "Publish final en"
       else
-        echo "Publish draft en >> rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat"
-        rsync -av $out_project/* $htdocs_project/ | tee -a $log | cat
+        echo -e "Publish draft en"
       fi	      
     else  
       if [[ "$mode_publish" == "final" ]]
       then	      
-        echo "Publish final $projectcode >> rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat"
-        rsync -a  $out_project/* $htdocs_project/ | tee -a $log | cat
+        echo -e "Publish final $projectcode"
       fi	
     fi
+
+    filecount=`ls -l $out_project | grep -v ^1 | wc -l`
+    echo -e "\nFile count in $out_project is $filecount\n" 
+
+    echo rsync -av $out_project/\* $htdocs_project/ 
+    rsync -av $out_project/* $htdocs_project/ 
   fi
-
+  
+  echo -e "\n>>> end of loop with $projectcode:$langcode\n"
+set -x
 done
+{ set +x; } 2>/dev/null ; 
 
-# Generate category overviews (deactivated, reports became too large)
+# Generate category overviews (deactivated, reports became too large, lines kept for reference)
 # perl $perl/WikiReports.pl -c -m $1 -l en -i $csv/csv_$1/ -o $out/out_$1 
 
-echo2 ""
+echo
 
 # Archive English reports
 #if [ $do_zip -eq 1 ] ; then
-#  echo2 "Archive new English reports" 
+#  echo -e "Archive new English reports" 
 #  cd $bash
 #  ./zip_out.sh $1
 #else
-#  echo2 "No English reports built. Skip zip phase"							
+#  echo "No English reports built. Skip zip phase"							
 #fi  
 
-echo2 ""
-echo2 "Ready" 
+echo -e "\nReady" 
 

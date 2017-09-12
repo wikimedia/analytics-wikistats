@@ -1,20 +1,20 @@
-#!/bin/sh
+#!/bin/sh -x
 
-ulimit -v 100000
+yyyymmdd=$(date +"%Y_%m_%d")
+
+wikistats=$WIKISTATS_SCRIPTS
+wikistats_data=$WIKISTATS_DATA
+
+logfile=$wikistats_data/dumps/logs/namespaces/log_namespaces_$yyyymmdd.txt
+exec 1> $logfile 2>&1 # send stdout/stderr to file
 
 date
-echo $http_proxy 
 export http_proxy=http://webproxy.eqiad.wmnet:8080 # Jan 2015 see https://wikitech.wikimedia.org/wiki/Http_proxy
-echo $http_proxy
 
-wikistats=/a/wikistats_git
-perl=$wikistats/dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl # tests
-csv=$wikistats/dumps/csv
+perl=$wikistats/dumps/perl 
+csv=$wikistats_data/dumps/csv
 dblists=$wikistats/dumps/dblists/master%20copy # to be fixed: folder has space in name, here as %20
 htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
-
-clear
 
 cd $csv/csv_mw
 cp StatisticsContentNamespacesExtraNamespaces.csv StatisticsContentNamespacesExtraNamespaces.bak

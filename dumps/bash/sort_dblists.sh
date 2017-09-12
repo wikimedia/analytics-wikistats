@@ -1,11 +1,16 @@
-#!/bin/sh
+#!/bin/sh -x
 
-wikistats=/a/wikistats_git
-dumps=$wikistats/dumps
-perl=$dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl # tests
-csv=$dumps/csv
-dblists=$dumps/dblists
+yyyymmdd=$(date +"%Y_%m_%d")
+
+wikistats=$WIKISTATS_SCRIPTS
+wikistats_data=$WIKISTATS_DATA
+
+logfile=$wikistats_data/dumps/logs/dblists/log_dblists_$yyyymmdd.txt
+exec 1> $logfile 2>&1 # send stdout/stderr to file
+
+perl=$wikistats/dumps/perl
+csv=$wikistats_data/dumps/csv
+dblists=$wikistats_data/dumps/dblists
 
 # dblists are 
 
@@ -15,7 +20,7 @@ dblists=$dumps/dblists
 # so I'd rather vet new wiki codes myself (EZ).
 
 # Update Jan 2012:
-# As these files are updated by script (to sort wikis by size on each run)
+# As these files are updated by a script (to sort wikis by size on each run)
 # which causes git warnings, there is now a folder 'master copy'
 
 # Update Jan 2013:
