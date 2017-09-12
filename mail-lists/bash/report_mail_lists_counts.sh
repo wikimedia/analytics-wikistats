@@ -44,7 +44,7 @@ perl ReportMailArchives.pl  > $logfile_report  2>&1     # to do: replace hardcod
 cd $out
 rsync -a -r -v *.htm* $htdocs/mail-lists >> $logfile_job 2>&1 ; set -x
 
-{ set +x; } 2>/dev/null ; echo "\n=== Zip data ==="
+{ set +x; } 2>/dev/null ; echo "\n=== Zip data ===" ; set -x
 
 cd $lists
 zip -q $backup_folder/$zipfile * 
