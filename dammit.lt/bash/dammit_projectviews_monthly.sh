@@ -1,14 +1,13 @@
 #!/bin/sh
-egexit
 
 echo_() {
+echo report=$report
   echo "$1" | tee -a $logfile| cat
 }
 
 yyyymmdd=$(date +"%Y_%m_%d")
 
 htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/ ; echo_ htdocs=$htdocs
-meta=$csv_in/csv_mw/MetaLanguages.csv                   ; echo_ meta=$meta
 
 scripts=$WIKISTATS_SCRIPTS                              ; echo_ scripts=$scripts
 perl_dumps=$scripts/dumps/perl                          ; echo_ perl_dumps=$perl_dumps
@@ -22,6 +21,7 @@ csv=$data_dumps/csv                                     ; echo_ csv=$csv
 csv_in=$data_dumps/csv                                  ; echo_ csv_in=$csv_in
 csv_pv=$data_dammit/projectviews/csv                    ; echo_ csv_pv=$csv_pv
 out=$data_dumps/out
+meta=$csv_in/csv_mw/MetaLanguages.csv                   ; echo_ meta=$meta
 
 logfile=$data_dumps/logs/pageviews_monthly/log_projectviews_monthly_$yyyymmdd.txt  ; echo_ logfile=$logfile
 report=$data_dumps/logs/pageviews_monthly/log_pageviews_monthly_$yyyymmdd.txt  ; echo_ report=$report
@@ -125,6 +125,7 @@ rsync -av -ipv4 projectviews_csv.zip  dataset1001.wikimedia.org::pagecounts-ez/p
 # -v = views (n:non-mobile, m:mobile, c:combined)
 # -s = source (s:squids, d:dammit) for page views only -s d = default
 
+echo report=$report
 date | tee -a $report | cat
 cd $perl_dumps 
 
