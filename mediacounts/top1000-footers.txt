@@ -1,0 +1,13 @@
+
+Main documentation: https://wikitech.wikimedia.org/wiki/Analytics/Data/Mediacounts
+Based on RFC: https://www.mediawiki.org/wiki/Requests_for_comment/Media_file_request_counts
+
+Sources:
+UDF code: https://git.wikimedia.org/blob/analytics%2Frefinery%2Fsource.git/39e34a059d2e7215c84779052a4dd5d963955d5f/refinery-core%2Fsrc%2Fmain%2Fjava%2Forg%2Fwikimedia%2Fanalytics%2Frefinery%2Fcore%2FMediaFileUrlParser.java
+Test case: https://git.wikimedia.org/blob/analytics%2Frefinery%2Fsource.git/39e34a059d2e7215c84779052a4dd5d963955d5f/refinery-core%2Fsrc%2Ftest%2Fjava%2Forg%2Fwikimedia%2Fanalytics%2Frefinery%2Fcore%2FTestMediaFileUrlParser.java
+Base name normalization: https://git.wikimedia.org/blob/analytics%2Frefinery%2Fsource.git/39e34a059d2e7215c84779052a4dd5d963955d5f/refinery-core%2Fsrc%2Fmain%2Fjava%2Forg%2Fwikimedia%2Fanalytics%2Frefinery%2Fcore%2FPercentEncoder.java
+Main hive query: https://git.wikimedia.org/blob/analytics%2Frefinery.git/68373b442a032ab996f95ca6de983e5bfe559ef5/oozie%2Fmediacounts%2Farchive%2Farchive_mediacounts.hql
+
+The above four URLs are for the currently deployed code. They do not change their content if new code gets deployed. URLs that change along with deployments are: https://git.wikimedia.org/blob/analytics%2Frefinery%2Fsource.git/HEAD/refinery-core%2Fsrc%2Fmain%2Fjava%2Forg%2Fwikimedia%2Fanalytics%2Frefinery%2Fcore%2FMediaFileUrlParser.java
+
+Initial design and realization: Erik Zachte & Christian Aistleitner 
