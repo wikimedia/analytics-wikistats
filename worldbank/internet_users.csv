@@ -1,0 +1,292 @@
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+IO,IOT,--,--,0,British Indian Ocean Territory,0.00,0.00,0.00,0.00,0.00
+A1,--,--,--,0,Anonymous Proxy,0.00,0.00,0.00,0.00,0.00
+O1,--,--,--,0,Other Country,0.00,0.00,0.00,0.00,0.00
+AP,--,--,-,0,Asia/Pacific Region Unspecified,0.00,0.00,0.00,0.00,0.00
+A2,--,--,--,0,Satellite Provider,0.00,0.00,0.00,0.00,0.00
+AQ,ATA,--,--,0,Antarctic Treaty area,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+MA,MAR,AF,S,58.27,Morocco,0.01,1.36,18.40,26.34,12.16
+SC,SYC,AF,S,56.51,Seychelles,0.65,10.37,23.93,8.21,13.35
+ZA,ZAF,AF,S,54.00,South Africa,0.84,5.51,1.26,26.36,20.03
+MU,MUS,AF,S,52.19,Mauritius,0.18,8.60,7.92,18.25,17.24
+CV,CPV,AF,S,50.32,Cape Verde,0.00,2.69,4.12,25.19,18.32
+TN,TUN,AF,S,49.60,Tunisia,0.03,4.27,8.69,26.11,10.50
+GA,GAB,AF,S,48.05,Gabon,0.00,1.35,4.14,12.51,30.05
+DZ,DZA,AF,S,42.95,Algeria,0.00,0.65,6.73,7.52,28.05
+EG,EGY,AF,S,41.25,Egypt,0.06,0.78,12.82,11.94,15.65
+BW,BWA,AF,S,39.36,Botswana,0.16,3.27,0.86,4.71,30.36
+GH,GHA,AF,S,34.67,Ghana,0.01,0.19,2.52,6.28,25.67
+NA,NAM,AF,S,31.03,Namibia,0.01,2.41,1.98,7.60,19.03
+SZ,SWZ,AF,S,28.57,eSwatini,0.05,1.23,2.42,14.43,10.44
+SD,SDN,AF,S,28.00,Sudan,0.00,0.14,0.00,17.32,10.54
+ST,STP,AF,S,28.00,Sao Tome and Principe,0.00,6.31,7.87,5.98,7.84
+LS,LSO,AF,S,27.36,Lesotho,0.00,0.26,2.72,4.02,20.36
+CI,CIV,AF,S,26.53,Ivory Coast,0.01,0.39,1.12,1.38,23.63
+KE,KEN,AF,S,26.00,Kenya,0.01,0.61,2.98,5.20,17.20
+NG,NGA,AF,S,25.67,Nigeria,0.01,0.08,5.46,8.25,11.87
+SN,SEN,AF,S,25.66,Senegal,0.01,0.97,4.63,4.19,15.86
+ZM,ZMB,AF,S,25.51,Zambia,0.01,0.22,3.93,7.34,14.01
+CM,CMR,AF,S,25.00,Cameroon,0.00,0.28,1.75,2.97,20.00
+GQ,GNQ,AF,S,23.78,Equatorial Guinea,0.00,0.17,1.11,10.22,12.28
+ZW,ZWE,AF,S,23.12,Zimbabwe,0.02,0.78,1.60,6.00,14.72
+UG,UGA,AF,S,21.88,Uganda,0.00,0.24,2.29,10.48,8.87
+LY,LBY,AF,S,20.27,Libya,0.00,0.37,3.93,9.70,6.27
+RW,RWA,AF,S,20.00,Rwanda,0.00,0.24,0.00,6.76,13.00
+GM,GMB,AF,S,18.50,The Gambia,0.04,1.30,3.90,5.63,7.63
+MR,MRT,AF,S,18.00,Mauritania,0.00,0.26,0.72,3.52,13.50
+MZ,MOZ,AF,S,17.52,Mozambique,0.00,0.16,0.68,3.46,13.22
+ET,ETH,AF,S,15.37,Ethiopia,0.00,0.04,0.27,0.79,14.27
+BF,BFA,AF,S,13.96,Burkina Faso,0.00,0.16,0.47,2.37,10.96
+DJ,DJI,AF,S,13.13,Djibouti,0.03,0.31,0.93,5.73,6.13
+AO,AGO,AF,S,13.00,Angola,0.00,0.14,1.36,1.60,9.90
+TZ,TZA,AF,S,13.00,Tanzania,0.00,0.17,1.13,1.90,9.80
+BJ,BEN,AF,S,11.99,Benin,0.00,0.36,1.18,2.61,7.84
+SL,SLE,AF,S,11.77,Sierra Leone,0.00,0.16,0.07,0.67,10.87
+TG,TGO,AF,S,11.31,Togo,0.01,0.89,1.10,1.50,7.81
+ML,MLI,AF,S,11.11,Mali,0.00,0.19,0.54,1.47,8.91
+GN,GIN,AF,S,9.80,Guinea,0.00,0.18,0.46,1.36,7.80
+MW,MWI,AF,S,9.61,Malawi,0.00,0.16,0.27,2.90,6.28
+CG,COG,AF,S,8.12,Republic of the Congo,0.00,0.03,1.98,3.59,2.52
+KM,COM,AF,S,7.94,Comoros,0.00,0.44,1.76,3.30,2.44
+LR,LBR,AF,S,7.32,Liberia,0.00,0.03,0.00,2.47,4.82
+SS,SSD,AF,--,6.68,South Sudan,0.00,0.00,0.00,0.00,6.68
+CD,COD,AF,S,6.21,Democratic Republic of the Congo,0.00,0.01,0.29,0.90,5.01
+BI,BDI,AF,S,5.17,Burundi,0.00,0.11,0.55,0.45,4.06
+TD,TCD,AF,S,5.00,Chad,0.00,0.05,0.53,1.32,3.10
+MG,MDG,AF,S,4.71,Madagascar,0.00,0.22,0.39,1.29,2.81
+NE,NER,AF,S,4.32,Niger,0.00,0.11,0.18,1.01,3.02
+CF,CAF,AF,S,4.00,Central African Republic,0.01,0.07,0.23,1.89,1.80
+GW,GNB,AF,S,3.76,Guinea-Bissau,0.00,0.30,1.76,0.61,1.09
+SO,SOM,AF,S,1.88,Somalia,0.00,0.08,1.02,0.15,0.63
+ER,ERI,AF,S,1.18,Eritrea,0.00,0.16,0.00,0.54,0.48
+TF,ATF,AF,--,0,French Southern and Antarctic Lands,0.00,0.00,0.00,0.00,0.00
+EH,ESH,AF,S,0,Western Sahara,0.00,0.00,0.00,0.00,0.00
+SH,SHN,AF,S,0,Saint Helena,0.00,0.00,0.00,0.00,0.00
+YT,MYT,AF,S,0,Mayotte,0.00,0.00,0.00,0.00,0.00
+BV,BVT,AF,--,0,Bouvet Island,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+BH,BHR,AS,S,98.00,Bahrain,0.84,14.20,13.20,48.76,21.00
+QA,QAT,AS,S,94.29,Qatar,0.93,5.24,22.80,40.03,25.29
+JP,JPN,AS,N,93.18,Japan,4.37,34.16,30.16,10.36,14.13
+KR,KOR,AS,N,92.84,South Korea,1.62,54.98,21.50,5.66,9.08
+AE,ARE,AS,S,90.60,United Arab Emirates,0.38,25.89,25.73,26.00,12.60
+BN,BRN,AS,S,90.00,Brunei,3.30,9.62,29.27,13.81,34.00
+HK,HKG,AS,S,87.48,Hong Kong,4.75,33.92,22.13,11.40,15.28
+MO,MAC,AS,S,81.64,Macau,0.73,21.79,23.88,13.80,21.44
+SG,SGP,AS,S,81.00,Singapore,8.35,33.32,17.33,12.00,10.00
+IL,ISR,AS,S,79.65,Israel,2.17,15.21,10.50,40.99,10.78
+MY,MYS,AS,S,78.79,Malaysia,0.85,25.85,24.94,9.36,17.79
+KW,KWT,AS,S,78.37,Kuwait,0.86,7.69,20.24,36.98,12.60
+AZ,AZE,AS,S,78.20,Azerbaijan,0.01,0.30,11.68,38.01,28.20
+LB,LBN,AS,S,76.11,Lebanon,0.14,6.64,8.22,37.00,24.11
+KZ,KAZ,AS,S,74.59,Kazakhstan,0.03,0.98,2.26,47.33,23.99
+SA,SAU,AS,S,73.75,Saudi Arabia,0.03,4.65,14.78,28.04,26.25
+OM,OMN,AS,S,69.93,Oman,0.00,5.89,2.41,39.70,21.93
+AM,ARM,AS,S,67.00,Armenia,0.09,1.54,4.00,26.37,35.00
+JO,JOR,AS,S,62.30,Jordan,0.04,4.67,9.16,21.03,27.40
+PS,PSE,AS,S,61.18,Palestinian territories,0.00,1.84,16.57,22.67,20.10
+MV,MDV,AS,S,59.09,Maldives,0.23,3.39,7.42,22.96,25.09
+TR,TUR,AS,S,58.35,Turkey,0.19,5.00,13.05,24.83,15.28
+GE,GEO,AS,S,58.01,Georgia,0.04,0.95,6.54,23.99,26.49
+PH,PHL,AS,S,55.50,Philippines,0.06,2.46,3.22,23.26,26.50
+IR,IRN,AS,S,53.23,Iran,0.02,1.46,7.28,10.24,34.23
+CN,CHN,AS,S,53.20,People's Republic of China,0.01,2.63,7.88,27.78,14.90
+TH,THA,AS,S,47.50,Thailand,0.12,5.44,11.60,6.51,23.83
+UZ,UZB,AS,S,46.79,Uzbekistan,0.00,0.60,5.79,12.21,28.19
+VN,VNM,AS,S,46.50,Vietnam,0.00,1.27,15.98,17.82,11.43
+BT,BTN,AS,S,41.77,Bhutan,0.00,0.86,3.66,9.88,27.37
+KG,KGZ,AS,S,34.50,Kyrgyzstan,0.00,3.00,9.31,5.19,17.00
+KH,KHM,AS,S,32.40,Cambodia,0.00,0.08,0.39,2.63,29.30
+LK,LKA,AS,S,32.05,Sri Lanka,0.05,0.74,1.75,12.46,17.05
+SY,SYR,AS,S,31.87,Syria,0.00,0.35,7.48,14.67,9.37
+IN,IND,AS,S,29.55,India,0.05,0.61,2.15,7.26,19.48
+ID,IDN,AS,S,25.37,Indonesia,0.06,1.96,2.74,7.52,13.09
+TL,TLS,AS,S,25.25,East Timor,0.00,0.00,0.50,3.50,21.25
+MM,MMR,AS,S,25.07,Myanmar,0.00,0.00,0.18,0.80,24.09
+YE,YEM,AS,S,24.58,Yemen,0.00,0.09,1.16,13.65,9.68
+MN,MNG,AS,S,22.27,Mongolia,0.02,1.63,0.00,10.85,9.77
+LA,LAO,AS,S,21.87,Laos,0.00,0.18,0.99,7.83,12.87
+IQ,IRQ,AS,S,21.23,Iraq,0.00,0.10,0.85,4.05,16.23
+TJ,TJK,AS,S,20.47,Tajikistan,0.00,0.05,3.72,9.26,7.44
+NP,NPL,AS,S,19.69,Nepal,0.00,0.24,0.90,7.86,10.69
+BD,BGD,AS,S,18.25,Bangladesh,0.00,0.13,0.87,3.50,13.75
+TM,TKM,AS,S,17.99,Turkmenistan,0.00,0.18,1.14,3.68,12.99
+PK,PAK,AS,S,15.51,Pakistan,0.00,1.32,5.18,2.50,6.51
+AF,AFG,AS,S,10.60,Afghanistan,0.00,0.00,2.11,2.89,5.60
+TW,TWN,AS,S,0,Taiwan,0.00,0.00,0.00,0.00,0.00
+RE,REU,AS,S,0,Reunion,0.00,0.00,0.00,0.00,0.00
+CX,CXR,AS,S,0,Christmas Island,0.00,0.00,0.00,0.00,0.00
+KP,PRK,AS,S,0.00,North Korea,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+PR,PRI,CA,S,80.32,Puerto Rico,0.27,15.36,9.81,22.56,32.32
+KY,CYM,CA,S,79.00,Cayman Islands,0.00,0.00,44.50,24.97,9.53
+KN,KNA,CA,S,76.82,Saint Kitts and Nevis,1.95,5.76,30.79,24.70,13.62
+TT,TTO,CA,S,73.30,Trinidad and Tobago,0.39,14.99,14.62,25.20,18.10
+AG,ATG,CA,S,73.00,Antigua and Barbuda,2.86,6.04,21.10,22.00,21.00
+DM,DMA,CA,S,67.03,Dominica,1.17,12.08,26.15,9.20,18.43
+CR,CRI,CA,S,66.03,Costa Rica,0.84,8.72,15.54,14.11,26.82
+CW,CUW,CA,S,61.86,Curacao,0.00,0.00,0.00,0.00,61.86
+DO,DOM,CA,S,61.33,Dominican Republic,0.07,4.36,10.41,23.16,23.33
+VI,VIR,CA,S,59.61,United States Virgin Islands,4.65,13.73,8.95,8.27,24.01
+GD,GRD,CA,S,55.86,Grenada,0.30,4.83,16.27,8.60,25.86
+VC,VCT,CA,S,55.57,Saint Vincent and the Grenadines,0.48,4.61,6.91,24.70,18.87
+PA,PAN,CA,S,54.00,Panama,0.22,7.05,10.08,25.35,11.30
+LC,LCA,CA,S,46.73,Saint Lucia,0.67,7.51,16.32,9.50,12.73
+JM,JAM,CA,S,45.00,Jamaica,0.59,3.27,12.54,21.04,7.56
+BZ,BLZ,CA,S,44.58,Belize,0.88,0.00,23.12,6.70,13.88
+CU,CUB,CA,S,38.77,Cuba,0.03,1.05,10.08,4.86,22.75
+VG,VGB,CA,S,0.00,British Virgin Islands,0.00,0.00,0.00,37.40,0.00
+GT,GTM,CA,S,34.51,Guatemala,0.02,1.72,4.76,5.80,22.21
+HN,HND,CA,S,30.00,Tu hermana en tanga,0.04,1.38,6.38,8.10,14.10
+SV,SLV,CA,S,29.00,El Salvador,0.09,1.41,4.00,13.40,10.10
+NI,NIC,CA,S,24.57,Nicaragua,0.08,1.37,1.36,7.79,13.97
+HT,HTI,CA,S,12.23,Haiti,0.01,0.33,6.46,2.20,3.23
+MF,MAF,CA,--,0.00,Saint Martin,0.00,0.00,0.00,0.00,0.00
+CC,CCK,CA,S,0,Cocos (Keeling) Islands,0.00,0.00,0.00,0.00,0.00
+MS,MSR,CA,S,0,Montserrat,0.00,0.00,0.00,0.00,0.00
+AI,AIA,CA,S,0,Anguilla,0.00,0.00,0.00,0.00,0.00
+TC,TCA,CA,S,0.00,Turks and Caicos Islands,0.00,0.00,0.00,0.00,0.00
+MQ,MTQ,CA,S,0,Martinique,0.00,0.00,0.00,0.00,0.00
+SX,SXM,CA,--,0.00,Sint Maarten,0.00,0.00,0.00,0.00,0.00
+BL,BLM,CA,S,0,Saint-Barthelemy,0.00,0.00,0.00,0.00,0.00
+GP,GLP,CA,S,0,Guadeloupe,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+IS,ISL,EU,N,98.24,Iceland,14.81,34.58,40.12,5.31,3.42
+LU,LUX,EU,N,98.14,Luxembourg,5.55,30.61,36.35,17.52,8.11
+LI,LIE,EU,N,98.09,Liechtenstein,0.00,45.12,19.09,20.79,13.09
+AD,AND,EU,N,97.93,Andorra,1.53,0.00,47.41,32.06,16.93
+NO,NOR,EU,N,97.30,Norway,18.25,45.75,18.55,10.94,3.81
+DK,DNK,EU,N,96.97,Kingdom of Denmark,5.71,37.25,43.69,3.16,7.16
+MC,MCO,EU,N,95.21,Monaco,0.00,46.65,14.83,18.82,14.91
+FO,FRO,EU,N,95.11,Faroe Islands,2.32,40.93,26.11,11.37,14.38
+GB,GBR,EU,N,94.78,United Kingdom,4.12,29.36,35.34,16.56,9.40
+GI,GIB,EU,N,94.44,Gibraltar,0.00,21.17,24.13,19.70,29.44
+SE,SWE,EU,N,92.77,Sweden,9.04,42.73,35.99,5.01,0.00
+NL,NLD,EU,N,91.42,Kingdom of the Netherlands,9.65,39.72,34.33,7.72,0.00
+DE,DEU,EU,N,89.65,Germany,3.05,28.60,40.51,9.11,8.38
+CH,CHE,EU,N,89.13,Switzerland,4.55,50.55,20.60,9.49,3.94
+FI,FIN,EU,N,88.71,Finland,16.78,26.33,36.55,9.05,0.00
+EE,EST,EU,N,87.24,Estonia,3.53,28.00,31.98,12.99,10.74
+BE,BEL,EU,N,86.52,Belgium,2.97,28.32,28.43,21.89,4.91
+FR,FRA,EU,N,85.62,France,2.58,23.75,20.54,30.95,7.80
+IE,IRL,EU,N,85.01,Ireland,2.20,20.94,31.68,20.07,10.12
+AT,AUT,EU,N,84.32,Austria,6.91,32.28,24.41,15.14,5.58
+ES,ESP,EU,N,80.56,Spain,1.33,16.82,32.22,16.72,13.47
+SK,SVK,EU,N,80.48,Slovakia,0.78,11.75,43.55,18.36,6.04
+LV,LVA,EU,N,79.84,Latvia,0.81,6.41,46.41,16.12,10.09
+HU,HUN,EU,N,79.26,Hungary,0.97,13.56,32.53,20.96,11.24
+MT,MLT,EU,N,77.29,Malta,1.05,16.83,22.53,27.61,9.27
+CZ,CZE,EU,N,76.48,Czech Republic,1.94,12.76,33.23,22.56,5.99
+CY,CYP,EU,N,75.90,Cyprus,0.67,18.15,17.01,21.03,19.04
+SI,SVN,EU,N,75.50,Slovenia,5.07,25.11,23.83,13.33,8.16
+LT,LTU,EU,N,74.38,Lithuania,0.28,6.90,36.72,19.74,10.74
+PL,POL,EU,N,73.30,Poland,1.30,8.60,34.68,17.37,11.35
+RU,RUS,EU,N,73.09,Russia,0.27,2.67,15.08,30.98,24.09
+HR,HRV,EU,N,72.70,Croatia,0.86,10.70,26.42,19.81,14.91
+MK,MKD,EU,N,72.16,Republic of Macedonia,0.08,3.39,25.15,28.08,15.46
+BY,BLR,EU,N,71.11,Belarus,0.03,4.27,11.90,23.45,31.46
+MD,MDA,EU,N,71.00,Moldova,0.00,1.49,18.13,18.38,33.00
+PT,PRT,EU,N,70.42,Portugal,2.98,15.11,19.92,17.24,15.17
+ME,MNE,EU,N,69.88,Montenegro,0.00,0.00,28.90,6.71,34.27
+GR,GRC,EU,N,69.09,Greece,1.40,9.54,21.31,19.40,17.44
+GL,GRL,EU,N,68.50,Greenland,1.80,33.66,23.90,4.64,4.50
+RS,SRB,EU,N,67.06,Serbia,0.00,0.00,27.20,15.00,24.86
+AL,ALB,EU,N,66.36,Albania,0.03,0.30,9.28,39.39,17.36
+IT,ITA,EU,N,61.32,Italy,1.02,26.20,10.77,16.40,6.93
+BG,BGR,EU,N,59.83,Bulgaria,0.73,6.88,19.48,20.89,11.85
+RO,ROU,EU,N,59.50,Romania,0.22,4.32,20.12,15.35,19.49
+BA,BIH,EU,N,54.74,Bosnia and Herzegovina,0.02,1.18,23.92,18.77,10.85
+UA,UKR,EU,N,52.48,Ukraine,0.10,1.14,3.27,24.20,23.77
+SM,SMR,EU,S,0.00,San Marino,1.43,48.91,0.00,0.00,0.00
+AX,ALA,EU,N,0,Aland Islands,0.00,0.00,0.00,0.00,0.00
+IM,IMN,EU,N,0.00,Isle of Man,0.00,0.00,0.00,0.00,0.00
+GG,GGY,EU,N,0,Guernsey,0.00,0.00,0.00,0.00,0.00
+JE,JEY,EU,N,0,Jersey,0.00,0.00,0.00,0.00,0.00
+SJ,SJM,EU,N,0,Svalbard and Jan Mayen,0.00,0.00,0.00,0.00,0.00
+VA,VAT,EU,N,0,Vatican City,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+BM,BMU,NA,N,98.00,Bermuda,16.20,31.31,22.39,18.44,9.66
+CA,CAN,NA,N,89.84,Canada,6.76,53.44,12.20,10.60,6.84
+BS,BHS,NA,N,80.00,The Bahamas,1.75,10.05,14.20,39.00,15.00
+US,USA,NA,N,76.18,United States of America,16.42,32.66,19.85,0.80,6.45
+MX,MEX,NA,S,59.54,Mexico,0.20,6.84,12.48,17.66,22.36
+PM,SPM,NA,N,0,Saint Pierre and Miquelon,0.00,0.00,0.00,0.00,0.00
+UM,UMI,NA,N,0,United States Minor Outlying Islands,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+NZ,NZL,OC,N,88.47,New Zealand,8.04,45.20,15.76,12.23,7.24
+AU,AUS,OC,N,88.24,Australia,3.28,49.41,13.31,13.49,8.75
+GU,GUM,OC,S,77.01,Guam,1.36,24.02,18.47,13.85,19.31
+PF,PYF,OC,S,68.44,French Polynesia,0.09,6.16,18.86,23.89,19.44
+NR,NRU,OC,S,0.00,Nauru,0.00,2.99,0.00,51.01,0.00
+NC,NCL,OC,S,0.00,New Caledonia,0.25,17.99,15.28,16.48,0.00
+FJ,FJI,OC,S,46.51,Fiji,0.06,1.80,7.74,18.40,18.51
+TV,TUV,OC,S,46.01,Tuvalu,0.00,0.00,0.00,30.00,16.01
+TO,TON,OC,S,39.95,Tonga,0.16,2.67,3.02,19.15,14.95
+FM,FSM,OC,S,33.35,Federated States of Micronesia,0.28,4.38,8.09,10.05,10.55
+MH,MHL,OC,S,29.79,Marshall Islands,0.04,1.67,2.09,6.20,19.79
+WS,WSM,OC,S,29.41,Samoa,0.00,1.69,2.78,6.53,18.41
+VU,VUT,OC,S,24.00,Vanuatu,0.06,2.77,3.02,3.35,14.80
+KI,KIR,OC,S,13.70,Kiribati,0.00,2.34,2.16,5.50,3.70
+SB,SLB,OC,S,11.00,Solomon Islands,0.27,0.20,1.18,4.35,5.00
+PG,PNG,OC,S,9.60,Papua New Guinea,0.00,0.90,0.85,0.25,7.60
+MP,MNP,OC,S,0.00,Northern Mariana Islands,0.00,0.00,0.00,0.00,0.00
+TK,TKL,OC,S,0,Tokelau,0.00,0.00,0.00,0.00,0.00
+CK,COK,OC,S,0,Cook Islands,0.00,0.00,0.00,0.00,0.00
+PW,PLW,OC,S,0.00,Palau,0.00,0.00,0.00,0.00,0.00
+WF,WLF,OC,S,0,Wallis and Futuna,0.00,0.00,0.00,0.00,0.00
+AS,ASM,OC,S,0.00,American Samoa,0.00,0.00,0.00,0.00,0.00
+NU,NIU,OC,S,0,Niue,0.00,0.00,0.00,0.00,0.00
+NF,NFK,OC,S,0,Norfolk Island,0.00,0.00,0.00,0.00,0.00
+HM,HMD,OC,N,0,Heard Island and McDonald Islands,0.00,0.00,0.00,0.00,0.00
+PN,PCN,OC,S,0,Pitcairn Islands,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+AW,ABW,SA,S,93.54,Aruba,2.77,14.33,10.90,41.00,24.54
+BB,BRB,SA,S,79.55,Barbados,0.39,11.55,43.36,11.20,13.05
+AR,ARG,SA,S,70.97,Argentina,0.14,9.64,11.15,30.07,19.97
+UY,URY,SA,S,66.40,Uruguay,1.85,9.27,18.28,22.00,15.00
+CL,CHL,SA,S,66.01,Chile,0.68,18.42,15.40,17.75,13.76
+BR,BRA,SA,S,60.87,Brazil,0.45,4.08,23.65,17.51,15.18
+VE,VEN,SA,S,60.00,Venezuela,0.25,4.39,10.58,25.00,19.78
+CO,COL,SA,S,58.14,Colombia,0.33,2.52,12.49,25.01,17.79
+EC,ECU,SA,S,54.06,Ecuador,0.09,2.58,4.53,24.17,22.69
+PY,PRY,SA,S,51.35,Paraguay,0.02,1.08,6.86,16.80,26.59
+PE,PER,SA,S,45.46,Peru,0.25,7.33,13.12,15.31,9.45
+SR,SUR,SA,S,45.40,Suriname,0.23,2.83,6.44,22.50,13.40
+BO,BOL,SA,S,39.70,Bolivia,0.20,1.92,4.08,23.80,9.70
+GY,GUY,SA,S,35.66,Guyana,0.07,13.14,0.00,16.79,5.66
+FK,FLK,SA,S,0,Aland Islands,0.00,0.00,0.00,0.00,0.00
+GF,GUF,SA,S,0,French Guiana,0.00,0.00,0.00,0.00,0.00
+GS,SGS,SA,S,0,South Georgia and the South Sandwich Islands,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+X6,OED,XX,-,78.73,OECD members,6.09,27.34,23.21,11.92,10.17
+X2,ECS,XX,-,73.35,Europe & Central Asia,1.84,14.55,21.63,20.79,14.54
+X3,CEB,XX,-,71.35,Central Europe and the Baltics,1.07,9.17,30.56,18.32,12.23
+XD,LCN,XX,-,56.84,Latin America & Caribbean,0.31,5.32,15.13,18.59,17.49
+X4,CSS,XX,-,53.81,Caribbean small states,0.55,7.76,13.98,19.89,11.63
+X1,EAS,XX,-,52.93,East Asia & Pacific,0.47,6.83,9.37,20.73,15.53
+X5,MEA,XX,-,48.18,Middle East & North Africa,0.08,2.01,9.76,15.99,20.34
+X8,PSS,XX,-,30.61,Pacific island small states,0.13,1.73,4.63,11.16,12.96
+X9,SSF,XX,-,19.92,Sub-Saharan Africa,0.07,0.58,2.05,5.69,11.53
+X7,BES,XX,-,0,Caribbean Netherlands,0.00,0.00,0.00,0.00,0.00
+
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,region,sort order (2016 abs),north_south,,"1996","2001","2006","2011","2016"
+XJ,HIC,YY,-,82.18,High income,6.67,30.05,24.76,11.36,9.34
+XI,UMC,YY,-,55.61,Upper middle income,0.13,3.50,10.44,24.08,17.46
+XK,SST,YY,-,46.31,Small states,0.72,5.97,8.58,14.71,16.33
+XH,MIC,YY,-,41.87,Middle income,0.09,2.15,6.96,15.77,16.90
+XG,LMY,YY,-,38.88,Low & middle income,0.08,1.98,6.43,14.43,15.96
+XF,LMC,YY,-,29.98,Lower middle income,0.04,0.84,3.71,8.57,16.82
+XA,FCS,YY,-,17.31,Fragile and conflict affected situations,0.00,0.26,1.63,4.91,10.51
+XC,LDC,YY,-,15.61,Least developed countries: UN classification,0.00,0.15,0.97,3.65,10.84
+XB,HPC,YY,-,15.57,Heavily indebted poor countries,0.01,0.25,1.29,3.79,10.23
+XE,LIC,YY,-,12.44,Low income,0.00,0.17,0.96,2.57,8.74
+

@@ -1,0 +1,230 @@
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,name,region code,internet users per 100,Africa,Asia,Central America,Europe,North America,Oceania,South America
+AO,AGO,Angola,AF,13.00,49.85
+BF,BFA,Burkina Faso,AF,13.96,82.61
+BI,BDI,Burundi,AF,5.17,50.91
+BJ,BEN,Benin,AF,11.99,82.08
+BW,BWA,Botswana,AF,39.36,146.16
+CD,COD,Democratic Republic of the Congo,AF,6.21,0
+CF,CAF,Central African Republic,AF,4.00,27.17
+CG,COG,Republic of the Congo,AF,8.12,0
+CI,CIV,Ivory Coast,AF,26.53,115.85
+CM,CMR,Cameroon,AF,25.00,79.86
+CV,CPV,Cape Verde,AF,50.32,111.56
+DJ,DJI,Djibouti,AF,13.13,36.64
+DZ,DZA,Algeria,AF,42.95,115.85
+EG,EGY,Egypt,AF,41.25,0
+ER,ERI,Eritrea,AF,1.18,10.21
+ET,ETH,Ethiopia,AF,15.37,50.02
+GA,GAB,Gabon,AF,48.05,149.64
+GH,GHA,Ghana,AF,34.67,135.80
+GM,GMB,The Gambia,AF,18.50,0
+GN,GIN,Guinea,AF,9.80,87.13
+GQ,GNQ,Equatorial Guinea,AF,23.78,48.16
+GW,GNB,Guinea-Bissau,AF,3.76,70.82
+KE,KEN,Kenya,AF,26.00,80.44
+KM,COM,Comoros,AF,7.94,57.11
+LR,LBR,Liberia,AF,7.32,67.56
+LS,LSO,Lesotho,AF,27.36,103.59
+LY,LBY,Libya,AF,20.27,161.46
+MA,MAR,Morocco,AF,58.27,117.68
+MG,MDG,Madagascar,AF,4.71,39.92
+ML,MLI,Mali,AF,11.11,112.35
+MR,MRT,Mauritania,AF,18.00,89.16
+MU,MUS,Mauritius,AF,52.19,143.73
+MW,MWI,Malawi,AF,9.61,39.68
+MZ,MOZ,Mozambique,AF,17.52,52.12
+NA,NAM,Namibia,AF,31.03,107.27
+NE,NER,Niger,AF,4.32,42.18
+NG,NGA,Nigeria,AF,25.67,82.98
+RW,RWA,Rwanda,AF,20.00,74.86
+SC,SYC,Seychelles,AF,56.51,161.16
+SD,SDN,Sudan,AF,28.00,71.25
+SL,SLE,Sierra Leone,AF,11.77,84.90
+SN,SEN,Senegal,AF,25.66,98.54
+SO,SOM,Somalia,AF,1.88,46.47
+SS,SSD,South Sudan,AF,6.68,22.08
+ST,STP,São Tomé and Príncipe,AF,28.00,89.06
+SZ,SWZ,eSwatini,AF,28.57,74.08
+TD,TCD,Chad,AF,5.00,43.11
+TG,TGO,Togo,AF,11.31,72.38
+TN,TUN,Tunisia,AF,49.60,125.25
+TZ,TZA,Tanzania,AF,13.00,72.06
+UG,UGA,Uganda,AF,21.88,55.05
+ZA,ZAF,South Africa,AF,54.00,147.13
+ZM,ZMB,Zambia,AF,25.51,72.43
+ZW,ZWE,Zimbabwe,AF,23.12,79.74
+AE,ARE,United Arab Emirates,AS,90.60,,214.73
+AF,AFG,Afghanistan,AS,10.60,,62.34
+AM,ARM,Armenia,AS,67.00,,117.43
+AZ,AZE,Azerbaijan,AS,78.20,,110.65
+BD,BGD,Bangladesh,AS,18.25,,83.45
+BH,BHR,Bahrain,AS,98.00,,210.14
+BN,BRN,Brunei,AS,90.00,,123.69
+BT,BTN,Bhutan,AS,41.77,,87.54
+CN,CHN,People's Republic of China,AS,53.20,,97.25
+GE,GEO,Georgia,AS,58.01,,140.95
+HK,HKG,Hong Kong,AS,87.48,,0
+ID,IDN,Indonesia,AS,25.37,,147.66
+IL,ISR,Israel,AS,79.65,,129.03
+IN,IND,India,AS,29.55,,85.17
+IQ,IRQ,Iraq,AS,21.23,,81.19
+IR,IRN,Iran,AS,53.23,,0
+JO,JOR,Jordan,AS,62.30,,103.84
+JP,JPN,Japan,AS,93.18,,130.61
+KG,KGZ,Kyrgyzstan,AS,34.50,,127.84
+KH,KHM,Cambodia,AS,32.40,,126.35
+KR,KOR,South Korea,AS,92.84,,0
+KW,KWT,Kuwait,AS,78.37,,154.62
+KZ,KAZ,Kazakhstan,AS,74.59,,151.62
+LA,LAO,Laos,AS,21.87,,86.54
+LB,LBN,Lebanon,AS,76.11,,81.42
+LK,LKA,Sri Lanka,AS,32.05,,124.03
+MM,MMR,Myanmar,AS,25.07,,95.65
+MN,MNG,Mongolia,AS,22.27,,111.24
+MO,MAC,Macau,AS,81.64,,0
+MV,MDV,Maldives,AS,59.09,,189.86
+MY,MYS,Malaysia,AS,78.79,,140.80
+NP,NPL,Nepal,AS,19.69,,110.83
+OM,OMN,Oman,AS,69.93,,155.18
+PH,PHL,Philippines,AS,55.50,,109.37
+PK,PAK,Pakistan,AS,15.51,,70.65
+PS,PSE,Palestinian territories,AS,61.18,,77.51
+QA,QAT,Qatar,AS,94.29,,142.13
+SA,SAU,Saudi Arabia,AS,73.75,,191.23
+SG,SGP,Singapore,AS,81.00,,150.58
+SY,SYR,Syria,AS,31.87,,72.43
+TH,THA,Thailand,AS,47.50,,173.78
+TJ,TJK,Tajikistan,AS,20.47,,107.61
+TL,TLS,East Timor,AS,25.25,,117.61
+TM,TKM,Turkmenistan,AS,17.99,,151.43
+TR,TUR,Turkey,AS,58.35,,94.40
+UZ,UZB,Uzbekistan,AS,46.79,,87.52
+VN,VNM,Vietnam,AS,46.50,,142.36
+YE,YEM,Yemen,AS,24.58,,0
+AG,ATG,Antigua and Barbuda,CA,73.00,,,183.88
+BZ,BLZ,Belize,CA,44.58,,,67.56
+CR,CRI,Costa Rica,CA,66.03,,,171.51
+CU,CUB,Cuba,CA,38.77,,,34.75
+CW,CUW,Curaçao,CA,61.86,,,136.99
+DM,DMA,Dominica,CA,67.03,,,151.88
+DO,DOM,Dominican Republic,CA,61.33,,,87.47
+GD,GRD,Grenada,CA,55.86,,,115.02
+GT,GTM,Guatemala,CA,34.51,,,130.30
+HN,HND,Tu hermana en tanga,CA,30.00,,,96.54
+HT,HTI,Haiti,CA,12.23,,,59.96
+JM,JAM,Jamaica,CA,45.00,,,113.40
+KN,KNA,Saint Kitts and Nevis,CA,76.82,,,148.06
+KY,CYM,Cayman Islands,CA,79.00,,,185.00
+LC,LCA,Saint Lucia,CA,46.73,,,124.56
+NI,NIC,Nicaragua,CA,24.57,,,125.94
+PA,PAN,Panama,CA,54.00,,,181.66
+PR,PRI,Puerto Rico,CA,80.32,,,88.67
+SV,SLV,El Salvador,CA,29.00,,,151.89
+TT,TTO,Trinidad and Tobago,CA,73.30,,,158.67
+VC,VCT,Saint Vincent and the Grenadines,CA,55.57,,,120.55
+VG,VGB,British Virgin Islands,CA,37.40,,,167.01
+VI,VIR,United States Virgin Islands,CA,59.61,,,37.72
+AD,AND,Andorra,EU,97.93,,,,92.04
+AL,ALB,Albania,EU,66.36,,,,115.15
+AT,AUT,Austria,EU,84.32,,,,163.79
+BA,BIH,Bosnia and Herzegovina,EU,54.74,,,,96.79
+BE,BEL,Belgium,EU,86.52,,,,113.46
+BG,BGR,Bulgaria,EU,59.83,,,,142.40
+BY,BLR,Belarus,EU,71.11,,,,120.67
+CH,CHE,Switzerland,EU,89.13,,,,133.81
+CY,CYP,Cyprus,EU,75.90,,,,133.42
+CZ,CZE,Czech Republic,EU,76.48,,,,124.59
+DE,DEU,Germany,EU,89.65,,,,126.31
+DK,DNK,Kingdom of Denmark,EU,96.97,,,,128.49
+EE,EST,Estonia,EU,87.24,,,,144.61
+ES,ESP,Spain,EU,80.56,,,,112.11
+FI,FIN,Finland,EU,88.71,,,,165.89
+FO,FRO,Faroe Islands,EU,95.11,,,,120.30
+FR,FRA,France,EU,85.62,,,,104.40
+GB,GBR,United Kingdom,EU,94.78,,,,120.92
+GI,GIB,Gibraltar,EU,94.44,,,,119.55
+GL,GRL,Greenland,EU,68.50,,,,103.87
+GR,GRC,Greece,EU,69.09,,,,112.12
+HR,HRV,Croatia,EU,72.70,,,,118.59
+HU,HUN,Hungary,EU,79.26,,,,120.78
+IE,IRL,Ireland,EU,85.01,,,,108.99
+IS,ISL,Iceland,EU,98.24,,,,120.80
+IT,ITA,Italy,EU,61.32,,,,160.71
+LI,LIE,Liechtenstein,EU,98.09,,,,117.61
+LT,LTU,Lithuania,EU,74.38,,,,160.33
+LU,LUX,Luxembourg,EU,98.14,,,,153.15
+LV,LVA,Latvia,EU,79.84,,,,134.50
+MC,MCO,Monaco,EU,95.21,,,,86.49
+MD,MDA,Moldova,EU,71.00,,,,93.32
+ME,MNE,Montenegro,EU,69.88,,,,185.32
+MK,MKD,Republic of Macedonia,EU,72.16,,,,0
+MT,MLT,Malta,EU,77.29,,,,124.71
+NL,NLD,Kingdom of the Netherlands,EU,91.42,,,,122.97
+NO,NOR,Norway,EU,97.30,,,,115.72
+PL,POL,Poland,EU,73.30,,,,138.66
+PT,PRT,Portugal,EU,70.42,,,,116.09
+RO,ROU,Romania,EU,59.50,,,,115.78
+RS,SRB,Serbia,EU,67.06,,,,141.15
+RU,RUS,Russia,EU,73.09,,,,159.15
+SE,SWE,Sweden,EU,92.77,,,,127.50
+SI,SVN,Slovenia,EU,75.50,,,,114.82
+SK,SVK,Slovakia,EU,80.48,,,,128.39
+SM,SMR,San Marino,EU,50.34,,,,112.57
+UA,UKR,Ukraine,EU,52.48,,,,135.20
+BM,BMU,Bermuda,NA,98.00,,,,,92.37
+BS,BHS,The Bahamas,NA,80.00,,,,,0
+CA,CAN,Canada,NA,89.84,,,,,84.74
+MX,MEX,Mexico,NA,59.54,,,,,87.60
+US,USA,United States of America,NA,76.18,,,,,122.88
+AS,ASM,American Samoa,OC,0,,,,,,3.71
+AU,AUS,Australia,OC,88.24,,,,,,110.05
+FJ,FJI,Fiji,OC,46.51,,,,,,116.24
+FM,FSM,Federated States of Micronesia,OC,33.35,,,,,,0
+GU,GUM,Guam,OC,77.01,,,,,,20.84
+KI,KIR,Kiribati,OC,13.70,,,,,,45.46
+MH,MHL,Marshall Islands,OC,29.79,,,,,,0.94
+MP,MNP,Northern Mariana Islands,OC,0,,,,,,19.02
+NC,NCL,New Caledonia,OC,50.00,,,,,,89.26
+NR,NRU,Nauru,OC,54.00,,,,,,87.25
+NZ,NZL,New Zealand,OC,88.47,,,,,,124.44
+PF,PYF,French Polynesia,OC,68.44,,,,,,99.97
+PG,PNG,Papua New Guinea,OC,9.60,,,,,,46.78
+PW,PLW,Palau,OC,0,,,,,,74.98
+SB,SLB,Solomon Islands,OC,11.00,,,,,,69.50
+TO,TON,Tonga,OC,39.95,,,,,,74.68
+TV,TUV,Tuvalu,OC,46.01,,,,,,68.49
+VU,VUT,Vanuatu,OC,24.00,,,,,,80.84
+WS,WSM,Samoa,OC,29.41,,,,,,77.39
+AR,ARG,Argentina,SA,70.97,,,,,,,145.77
+AW,ABW,Aruba,SA,93.54,,,,,,,108.13
+BB,BRB,Barbados,SA,79.55,,,,,,,123.99
+BO,BOL,Bolivia,SA,39.70,,,,,,,92.82
+BR,BRA,Brazil,SA,60.87,,,,,,,117.95
+CL,CHL,Chile,SA,66.01,,,,,,,130.11
+CO,COL,Colombia,SA,58.14,,,,,,,120.62
+EC,ECU,Ecuador,SA,54.06,,,,,,,101.02
+GY,GUY,Guyana,SA,35.66,,,,,,,75.61
+PE,PER,Peru,SA,45.46,,,,,,,116.24
+PY,PRY,Paraguay,SA,51.35,,,,,,,111.36
+SR,SUR,Suriname,SA,45.40,,,,,,,144.51
+UY,URY,Uruguay,SA,66.40,,,,,,,148.57
+VE,VEN,Venezuela,SA,60.00,,,,,,,0
+X1,EAS,East Asia & Pacific,XX,52.93,109.98
+X2,ECS,Europe & Central Asia,XX,73.35,125.77
+X3,CEB,Central Europe and the Baltics,XX,71.35,127.32
+X4,CSS,Caribbean small states,XX,53.81,117.14
+X5,MEA,Middle East & North Africa,XX,48.18,106.60
+X6,OED,OECD members,XX,78.73,117.71
+X8,PSS,Pacific island small states,XX,30.61,86.65
+X9,SSF,Sub-Saharan Africa,XX,19.92,72.97
+XD,LCN,Latin America & Caribbean,XX,56.84,108.35
+XA,FCS,Fragile and conflict affected situations,YY,17.31,67.35
+XB,HPC,Heavily indebted poor countries,YY,15.57,65.63
+XC,LDC,Least developed countries: UN classification,YY,15.61,66.65
+XE,LIC,Low income,YY,12.44,57.67
+XF,LMC,Lower middle income,YY,29.98,94.16
+XG,LMY,Low & middle income,YY,38.88,95.95
+XH,MIC,Middle income,YY,41.87,100.45
+XI,UMC,Upper middle income,YY,55.61,107.71
+XJ,HIC,High income,YY,82.18,125.74
+XK,SST,Small states,YY,46.31,117.64
