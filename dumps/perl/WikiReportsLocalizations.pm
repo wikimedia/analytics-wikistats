@@ -457,7 +457,7 @@ sub GetLanguageNamesFromSVN
   if ($language eq "tg") { $language2 = "tg_cyrl" ; }
   if ($language eq "zh") { $language2 = "zh_hans" ; }
 
-  my $raw_url = "http://svn.wikimedia.org/viewvc/mediawiki/trunk/extensions/cldr/LanguageNames" . ucfirst ($language2) . ".php?view=co&content-type=text%2Fplain" ;
+  my $raw_url = "https://phabricator.wikimedia.org/diffusion/ECLD/browse/master/CldrNames/" . ucfirst ($language2) . ".php?view=raw" ;
 
   my ($content, $attempts) ;
 
@@ -470,7 +470,7 @@ sub GetLanguageNamesFromSVN
   $ua->timeout(60);
 
   my $req = HTTP::Request->new(GET => $url);
-  $req->referer ("http://www.wikipedia.org");
+  $req->referer ("https://www.wikipedia.org");
 
   my $success = $false ;
 
