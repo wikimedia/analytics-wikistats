@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use Text::CSV_XS;
 # to do
 
 # data for Egypt and Venezuela exist , see this script line 500
@@ -32,7 +33,7 @@
   our $dev_mode = $false ;
 
   our $worldbank_names_override = $false ; 
-  our $do_not_import_years_before = 1980 ;
+  our $do_not_import_years_before = 2000 ;
   our $only_allow_new_codes = '*' ;
   our $add_derived_values = $true ; 
   our $maxmind_extra_codes = "A1,A2,AP,EU,O1" ;
@@ -53,18 +54,23 @@
   my %region_codes ;
   my %messages ;
 
-  my $folder = 'd:\\@Wikimedia\datamaps\datafiles\meta' ; # test folder in Windows
+# my $folder = 'd:\\@Wikimedia\datamaps\datafiles\meta' ; # test folder in Windows
+  my $folder = '/home/ezachte/wikistats/worldbank' ;      # folder on Wikimedia server
 
 # this script processes local copies of the files, download can be done in bash file
 
   my $file_json_population              = "$folder/SP.POP.TOTL.json" ;
   my $file_json_internet_users          = "$folder/IT.NET.USER.json" ;
+
   my $file_csv_internet_users           = "$folder/API_IT.NET.USER.ZS_DS2_en_csv_v2.csv" ;
   my $file_csv_mobile_subscriptions     = "$folder/API_IT.CEL.SETS.P2_DS2_en_csv_v2.csv" ;
+  my $file_csv_gdp_per_capita           = "$folder/API_NY.GDP.PCAP.KD_DS2_en_csv_v2_9908764.csv" ;
+  
   my $file_csv_out                      = "$folder/geo_codes_countries.csv" ;
   my $file_csv_out_internet_users       = "$folder/internet_users.csv" ;
   my $file_csv_out_mobile_subscriptions = "$folder/mobile_subscriptions.csv" ;
   my $file_csv_out_internet_plus_mobile = "$folder/internet_plus_mobile_subscriptions.csv" ;
+  my $file_csv_out_gdp_plus_mobile      = "$folder/gdp_plus_mobile_subscriptions.csv" ;
   
   my $file_json_out                     = "$folder/demographics.json" ;
   my $file_country_stats                = "$folder/datamaps-country-stats.csv" ; # not for WiViVi viz. (yet), so not actually for datamaps, calling it this to keep files names uniform
@@ -90,13 +96,25 @@
   my $key_abbreviations                        = 'abbreviations' ;
   my $key_north_south                          = 'north_south' ;
   my $key_population                           = 'population' ;
+  my $key_data                                 = 'data' ; 
+  my $key_license                              = 'license' ; 
+  my $key_code                                 = 'code' ; 
+  my $key_notes                                = 'notes' ; 
   my $key_population_inc_perc                  = "$key_population $inc_perc" ;
   my $key_internet_users                       = 'internet users per 100' ;
   my $key_internet_users_inc_perc_points       = "$key_internet_users $inc_perc_points" ;
   my $key_mobile_subscriptions                 = 'mobile subscriptions per 100' ;
   my $key_mobile_subscriptions_inc_perc_points = "$key_mobile_subscriptions $inc_perc_points" ;
+  my $key_gdp_per_capita                       = 'GDP per capita' ;
+  my $key_gdp_per_capita_inc_perc              = "$key_gdp_per_capita $inc_perc" ;
+  my $key_population_counts                    = 'population counts' ;
+  my $key_internet_users_per_100               = 'internet users per 100' ;
+  my $key_mobile_subscriptions_per_100         = 'mobile subscriptions per 100' ;
+  my $key_gdp_per_capita_constant_us_dollars   = 'GDP per capita (constant 2010 USD)' ;
   
   my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time);
+  my $year_now = $year + 1900 ;
+  
   $json_out {$key_about} {'file_generated'} = sprintf ("%4d-%02d-%02d %02d:%02d",$year+1900,$mon+1,$mday,$hour,$min) ;
 
   $json_out {$key_about} {'layout'} = {'version'  => '0.1',
@@ -110,11 +128,14 @@
   $json_out {$key_about} {$key_abbreviations} {$inc_perc}        = "increase as percentage (3->3.3 is +10% , but +0.3 %%)" ;
   $json_out {$key_about} {$key_abbreviations} {$inc_perc_points} = "increase as percentage points (3->3.3 is +10% , but +0.3 %%)" ;
 
-  $json_out {$key_about} {$key_codes} {'1'} = "primary key for countries is ISO 3166-1 alpha-2, see also https://en.wikipedia.org/wiki/ISO_3166" ;
-  $json_out {$key_about} {$key_codes} {'2'} = "extra codes stored for countries are ISO 3166-1 alpha-3, region code, north_south code" ;
-  $json_out {$key_about} {$key_codes} {'3'} = "ISO 3166-1 alpha-2 codes without ISO 3166 alpha-3 code are non-country codes, either from MaxMind or World Bank" ;
-  $json_out {$key_about} {$key_codes} {'4'} = "For MaxMind see http://www.maxmind.com/app/iso3166; non country codes as used by MaxMind: $maxmind_extra_codes" ;
-  $json_out {$key_about} {$key_codes} {'5'} = "For World Bank see \{$key_about\} \{$key_sources\} \{$key_world_bank\}" ;
+  $json_out {$key_about} {$key_codes} {'0'} = "This json file is about World Bank demographics in a Wikimedia context" ;
+  $json_out {$key_about} {$key_codes} {'1'} = "Codes stored for countries are ISO 3166-1 alpha-2, ISO 3166-1 alpha-3, region code, north_south code, see also https://en.wikipedia.org/wiki/ISO_3166" ;
+  $json_out {$key_about} {$key_codes} {'2'} = "Primary key for countries is ISO 3166-1 alpha-2, for custom codes (starting with 'X') see 'geo_codes_countries.csv'" ;
+  $json_out {$key_about} {$key_codes} {'4'} = "Note that some World Bank files use ISO 3166-1 alpha-2 (as does MaxMind), others use ISO 3166-1 alpha-3" ;
+  $json_out {$key_about} {$key_codes} {'5'} = "ISO 3166-1 alpha-2 codes without ISO 3166 alpha-3 code are non-country codes from MaxMind" ;
+  $json_out {$key_about} {$key_codes} {'6'} = "For MaxMind see http://www.maxmind.com/app/iso3166; non country codes as used by MaxMind: $maxmind_extra_codes" ;
+  $json_out {$key_about} {$key_codes} {'7'} = "For World Bank see \{$key_about\} \{$key_sources\} \{$key_world_bank\}" ;
+  $json_out {$key_about} {$key_codes} {'8'} = "For every country or region key \{years\} \{latest\} contains copy of data for last year with all metrics available" ;
 
   if ($worldbank_names_override)
   { $json_out {$key_about} {$key_options} {'1'} = "\$worldbank_names_override == \$true  => World Bank names override Wikistats names" ; }
@@ -128,20 +149,25 @@
   else
   { $json_out {$key_about} {$key_options} {'4'} = "Do not add derived values (like YoY growth percentage)" ; }
 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'population counts'}   {'data'}    = "https://api.worldbank.org/v2/en/country/all/indicator/SP.POP.TOTL?format=json&per_page=20000&source=2" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'population counts'}   {'license'} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'population counts'}   {'code'}    = "SP.POP.TOTL" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'population counts'}   {'notes'}   = "country id is ISO 3166-1 alpha2" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_population_counts}   {$key_data}    = "https://api.worldbank.org/v2/en/country/all/indicator/SP.POP.TOTL?format=json&per_page=20000&source=2" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_population_counts}   {$key_license} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_population_counts}   {$key_code}    = "SP.POP.TOTL" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_population_counts}   {$key_notes}   = "country id is ISO 3166-1 alpha2" ; 
 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'internet users per 100'} {'data'}    = "https://data.worldbank.org/indicator/it.net.user.zs" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'internet users per 100'} {'license'} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'internet users per 100'} {'code'}    = "IT.NET.USER.ZS" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'internet users per 100'} {'notes'}   = "country id is ISO 3166-1 alpha3" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_internet_users_per_100} {$key_data}    = "https://data.worldbank.org/indicator/it.net.user.zs" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_internet_users_per_100} {$key_license} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_internet_users_per_100} {$key_code}    = "IT.NET.USER.ZS" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_internet_users_per_100} {$key_notes}   = "country id is ISO 3166-1 alpha3" ; 
 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'mobile subscriptions per 100'} {'data'}    = "https://data.worldbank.org/indicator/IT.CEL.SETS.P2?" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'mobile subscriptions per 100'} {'license'} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'mobile subscriptions per 100'} {'code'}    = "IT.CEL.SETS.P2" ; 
-  $json_out {$key_about} {$key_sources} {$key_world_bank} {'mobile subscriptions per 100'} {'notes'}   = "country id is ISO 3166-1 alpha3" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_mobile_subscriptions_per_100} {$key_data}    = "https://data.worldbank.org/indicator/IT.CEL.SETS.P2?" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_mobile_subscriptions_per_100} {$key_license} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_mobile_subscriptions_per_100} {$key_code}    = "IT.CEL.SETS.P2" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_mobile_subscriptions_per_100} {$key_notes}   = "country id is ISO 3166-1 alpha3" ; 
+
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_gdp_per_capita_constant_us_dollars} {$key_data}    = "https://data.worldbank.org/indicator/NY.GDP.PCAP.KD" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_gdp_per_capita_constant_us_dollars} {$key_license} = "CC BY-4.0, for details see https://datacatalog.worldbank.org/public-licenses#cc-by" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_gdp_per_capita_constant_us_dollars} {$key_code}    = "NY.GDP.PCAP.KD" ; 
+  $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_gdp_per_capita_constant_us_dollars} {$key_notes}   = "country id is ISO 3166-1 alpha3" ; 
 
   $json_out {$key_about} {$key_sources} {$key_world_bank} {'search'}                 = "https://datacatalog.worldbank.org/search" ; 
   
@@ -157,9 +183,14 @@
   &ImportPopulationCounts ;
   &ImportInternetUserPercentages ;
   &ImportMobileSubscriptions ;
-  &ExportInternetUserPercentages ;
-  &ExportMobileSubscriptionsPercentages ;
+  &ImportGdpPerCapita ;
+  
+  &DetermineLatestYearWithFullData ;
+  
+# &ExportInternetUserPercentages ;
+# &ExportMobileSubscriptionsPercentages ;
   &ExportInternetPlusMobileSubscriptions ;
+  &ExportGDPplusMobileSubscriptions ;
 
   &WriteJsonFile ;
   
@@ -167,17 +198,20 @@
   foreach my $message (sort keys %messages) # Q&D way to avoid long series of duplicate messages, findings will be reported out of order 
   { print "$message\n" ; }
   
-
+# extra visual cue to signal completion (bell character is silenced in Komodo IDE)
+  print 'X ' x 40 . "\n\n" ; 
+  print 'X ' x 40 . "\n\n" ; 
+  print 'X ' x 40 . "\n\n" ; 
   print "\n\nReady" ;
   
   exit ;
 
 sub WriteJsonFile
 {
- $json_all {'about'}     = \%json_about ;
- $json_all {'countries'} = \%json_countries ;
- $json_all {'regions'}   = \%json_regions ;
- $json_all {'languages'} = \%json_languages ;
+  $json_all {'about'}     = \%json_about ;
+  $json_all {'countries'} = \%json_countries ;
+  $json_all {'regions'}   = \%json_regions ;
+  $json_all {'languages'} = \%json_languages ;
 
 # print $json_out->pretty->canonical->encode(\%json_all);
 
@@ -185,9 +219,27 @@ sub WriteJsonFile
   print JSON_OUT $json_out->pretty->canonical->encode(\%json_out);
   close JSON_OUT ;
 
-  my $json_file_size = -s $file_json_out
-  ;
+  my $json_file_size = -s $file_json_out ;
   print "\nFile $file_json_out: size $json_file_size bytes\n" ;
+
+  my $json_text_demographics = do
+  {
+    open (my $json_fh, "<:encoding(UTF-8)", $file_json_out) or die("Can't open \$file_json_out\": $!\n");
+    local $/;
+    <$json_fh>
+  };
+  $json_text_demographics =~ s/[^\x00-\x7f]//g ; # drop 'wide characters'
+
+  my $json = JSON->new ;
+  my $data = $json->decode ($json_text_demographics) ;
+  foreach my $iso2 (sort keys %{$data -> {'countries'}})
+  {
+    my $year = $data -> {'countries'}{$iso2}{'years'}{'latest'}{'year'} ;
+    if (! defined $year)
+    { print "\$year not defined for: '$iso2'\n" ; }
+    # else
+    # {  print "$iso2 $year\n"; }
+  }
 }
 
 sub ImportCountriesISO2
@@ -273,6 +325,7 @@ sub ImportCountriesNames
     open NAMES, '<', $file_names ;
     while ($line = <NAMES>)
     {
+       next if $line =~ /iso3166_1_a2/ ; # headers
        chomp $line ;
        ($iso2,$iso3,$name) = split (',', $line) ;
         $json_out {$key_countries} {$iso2} {$key_names} {$code} = $name ;
@@ -322,7 +375,10 @@ sub ReadCsvGeoCodes
     my ($iso2,$iso3,$region_code,$north_south_code,$name) = split (',', $line) ;
     $region_codes {$region_code} ++ ;
     $name =~ s/"//g ; # fix typos
-    
+
+    if ($iso2 =~ /^X/) # list custom codes
+    { $json_out {$key_about} {$key_codes} {'3'} .= "$iso2:$iso3, " ; }
+
     $json_out {$key_countries} {$iso2} {$key_codes} {$key_iso3}        = $iso3 ; 
     $json_out {$key_countries} {$iso2} {$key_names} {'en'}             = $name ;
     $json_out {$key_countries} {$iso2} {$key_codes} {$key_region}      = $region_code ; 
@@ -332,6 +388,7 @@ sub ReadCsvGeoCodes
     $iso2_by_iso3 {$iso3} = $iso2 ;
     $iso2_codes   {$iso2} ++ ;
   }
+  $json_out {$key_about} {$key_codes} {'3'} =~ s/,$// ; # remove last comma
 }
 
 sub WriteCsvGeoCodes
@@ -459,11 +516,11 @@ sub ImportPopulationCounts
       }
     }  
 
-    my $year = $most_recent_year {$iso2} ;
-    $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}       = $year ;
-    $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_population} = $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_population} ;
-    if ($add_derived_values)
-    { $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_population_inc_perc} = $json_out {$key_countries} {$iso2} {$key_years} {$year} {'population inc.perc.'} ; }
+    # my $year = $most_recent_year {$iso2} ;
+    # $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}       = $year ;
+    # $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_population} = $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_population} ;
+    # if ($add_derived_values)
+    # { $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_population_inc_perc} = $json_out {$key_countries} {$iso2} {$key_years} {$year} {'population inc.perc.'} ; }
   }
 }
 
@@ -474,15 +531,23 @@ sub ImportInternetUserPercentages
   my ($line, $id, $iso2, $iso3, $description, $code, $name, $year, $year_max, $percentage, @years, @year_data, $year_data, $year_data_prev, $delta_percent_points) ;
   my ($dummy1, $dummy2, $dummy3, $dummy4) ;
 
-  my %most_recent_year ;
   $year_max = 0 ;
 
   die "file not found '$file_csv_internet_users'" if ! -e $file_csv_internet_users ;
+
+# https://perlmaven.com/how-to-read-a-csv-file-using-perl
   open FILE_CSV, '<', $file_csv_internet_users ;
 
   while ($line = <FILE_CSV>)
   {
      chomp $line ;
+
+     # take care of commas inside names
+     # to do: use Text::CSV_XS instead
+     $line =~ s/"\,\s*$/"/g ; # remove comma at end of line
+     $line =~ s/","/"~"/g ;   # replace field separators
+     $line =~ s/,/;/g ;       # replace other commas
+     $line =~ s/"~"/","/g ;   # restore field separators
      
      if ($line =~ /Last Updated Date/)
      {
@@ -525,9 +590,11 @@ sub ImportInternetUserPercentages
      # print "years " . join (':', @years) . "\n" ;
        if ((! defined $iso2) || ($iso2 eq ''))
        {
-         $iso2 = "_$iso3" ;
-         # messages {"020 World Bank IT.NET.USER.ZS id: iso2 not (yet) known for iso3 $iso3 => skip"} ++ ;
-         # next ;
+         # $iso2 = "_$iso3" ; # debug
+         # print "1 '$iso3' -> '$iso2' \n" ;
+        
+         $messages {"020 no custom iso2 code ('starting with 'X') found for World Bank IT.NET.USER.ZS id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
+         next ;
        }
        
        $year_data_prev = '' ;
@@ -536,7 +603,7 @@ sub ImportInternetUserPercentages
          $year_data = shift (@year_data) ;
          next if $year < $do_not_import_years_before ;
 
-         if ((defined $year_data) && ($year_data ne ''))
+         if ((defined $year_data) && ($year_data ne '') && ($year_data != 0))
          {
            $year_data = sprintf ("%.2f", $year_data) ;
            $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_internet_users} = $year_data ;
@@ -549,14 +616,14 @@ sub ImportInternetUserPercentages
            $year_data_prev = $year_data ;
          }  
        }
-       $year = $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}  ;
-       if ((defined $year) && ($year =~ /^\d\d\d\d$/))
-       {
-         $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users} =
-         $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users} ;
-         $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users_inc_perc_points} =
-         $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users_inc_perc_points} ;
-       }
+       # $year = $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}  ;
+       # if ((defined $year) && ($year =~ /^\d\d\d\d$/))
+       # {
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users} ;
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users_inc_perc_points} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users_inc_perc_points} ;
+       # }
        
      }
   }
@@ -570,7 +637,6 @@ sub ImportMobileSubscriptions
   my ($line, $id, $iso2, $iso3, $description, $code, $name, $year, $year_max, $percentage, @years, @year_data, $year_data, $year_data_prev, $delta_percent_points) ;
   my ($dummy1, $dummy2, $dummy3, $dummy4) ;
 
-  my %most_recent_year ;
   $year_max = 0 ;
   die "file not found '$file_csv_mobile_subscriptions'" if ! -e $file_csv_mobile_subscriptions ;
   open FILE_CSV, '<', $file_csv_mobile_subscriptions ;
@@ -578,6 +644,14 @@ sub ImportMobileSubscriptions
   while ($line = <FILE_CSV>)
   {
      chomp $line ;
+
+     # take care of commas inside names
+     # to do: use Text::CSV_XS instead
+     $line =~ s/"\,\s*$/"/g ; # remove comma at end of line
+     $line =~ s/","/"~"/g ;   # replace field separators
+     $line =~ s/,/;/g ;       # replace other commas
+     $line =~ s/"~"/","/g ;   # restore field separators
+     
      if ($line =~ /Last Updated Date/)
      {
         my ($text,$date) = split (',', $line) ;
@@ -606,9 +680,10 @@ sub ImportMobileSubscriptions
      # print "years " . join (':', @years) . "\n" ;
        if ((! defined $iso2) || ($iso2 eq ''))
        {
-         $iso2 = "_$iso3" ;
-       # $messages {"021 World Bank IT.CEL.SETS.P2 id: iso2 not (yet) known for iso3 $iso3 => skip"} ++ ;
-       # next ;
+       # $iso2 = "_$iso3" ;
+       # print "2 '$iso3' -> '$iso2' \n" ;
+          $messages {"021 no custom iso2 code ('starting with 'X') found for World Bank IT.CEL.SETS.P2 id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
+          next ;
        }
        
        $year_data_prev = '' ;
@@ -631,18 +706,194 @@ sub ImportMobileSubscriptions
            $year_data_prev = $year_data ;
          }  
        }
-       $year = $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}  ;
-       if ((defined $year) && ($year =~ /^\d\d\d\d$/))
+       # $year = $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}  ;
+       # if ((defined $year) && ($year =~ /^\d\d\d\d$/))
+       # {
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_mobile_subscriptions} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_mobile_subscriptions} ;
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_mobile_subscriptions_inc_perc_points} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_mobile_subscriptions_inc_perc_points} ;
+       # }
+    }
+  }
+   close FILE_CSV ;
+}
+
+sub ImportGdpPerCapita
+{
+  print "\n\nsub ImportGdpPerCapita\n\n" ;
+
+  my ($line, $id, $iso2, $iso3, $description, $code, $name, $year, $year_max, $percentage, @years, @year_data, $year_data, $year_data_prev, $delta_percent) ;
+  my ($dummy1, $dummy2, $dummy3, $dummy4) ;
+
+  $year_max = 0 ;
+
+  die "file not found '$file_csv_gdp_per_capita'" if ! -e $file_csv_gdp_per_capita ;
+
+# https://perlmaven.com/how-to-read-a-csv-file-using-perl
+  open FILE_CSV, '<', $file_csv_gdp_per_capita ;
+
+  while ($line = <FILE_CSV>)
+  {
+     chomp $line ;
+
+     # take care of commas inside names
+     # to do: use Text::CSV_XS instead
+     $line =~ s/"\,\s*$/"/g ; # remove comma at end of line
+     $line =~ s/","/"~"/g ;   # replace field separators
+     $line =~ s/,/;/g ;       # replace other commas
+     $line =~ s/"~"/","/g ;   # restore field separators
+     
+     if ($line =~ /Last Updated Date/)
+     {
+        my ($text,$date) = split (',', $line) ;
+        $date =~ s/"//g ;
+        $json_out {$key_about} {$key_sources} {$key_world_bank} {$key_internet_users} {$key_last_updated} = $date ;
+        next ;
+     }
+     
+     if ($line =~ /Country Name/)
+     {
+       $line =~ s/\"//g ;
+       ($dummy1, $dummy2, $dummy3, $dummy4, @years) = split (',', $line) ;
+       next ;
+     }
+
+     if ($line =~ /GDP per capita/)
+     {
+       chomp $line ;
+     # $line =~ s/\"//g ;
+       ($name,$iso3,$description,$code,@year_data) = split ('\",\"', $line) ;
+       $name        =~ s/\"//g ; 
+       $name        =~ s/,//g ; 
+       $iso3        =~ s/\"//g ; 
+       $description =~ s/\"//g ; 
+       $description =~ s/,//g ; 
+       $code        =~ s/\"//g ;
+       foreach my $year_data (@year_data)
        {
-         $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_mobile_subscriptions} =
-         $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_mobile_subscriptions} ;
-         $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_mobile_subscriptions_inc_perc_points} =
-         $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_mobile_subscriptions_inc_perc_points} ;
+         $year_data =~ s/\"//g ;
+         $year_data =~ s/,//g ;
+         $year_data = 0 if $year_data eq '' ;
        }
+     # print "1 '$name', 2 '$iso3', 3 '$description', 4 '$code', 5'" . join (':',@year_data) . "'\n" ;
+
+     # next if $iso3 !~ /NLD/ ; # debug only
+
+       $iso2 = $iso2_by_iso3 {$iso3} ;
+     # print "name $name, iso2 $iso2, iso3 $iso3, description $description, code $code," . join (':', @year_data) . "\n" ;
+     # print "years " . join (':', @years) . "\n" ;
+       if ((! defined $iso2) || ($iso2 eq ''))
+       {
+         # $iso2 = "_$iso3" ; # debug
+         # print "1 '$iso3' -> '$iso2' \n" ;
+        
+         $messages {"022 no custom iso2 code ('starting with 'X') found for World Bank NY.GDP.PCAP.KD id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
+         next ;
+       }
+       
+       $year_data_prev = '' ;
+       foreach $year (@years)
+       {
+         $year_data = shift (@year_data) ;
+         next if $year < $do_not_import_years_before ;
+
+         if ((defined $year_data) && ($year_data ne '') && ($year_data != 0))
+         {
+           $year_data = sprintf ("%.2f", $year_data) ;
+           $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_gdp_per_capita} = $year_data ;
+           
+           if ($year_data_prev ne '')
+           {
+             $delta_percent = sprintf ("%.2f", 100 * ($year_data - $year_data_prev) / $year_data_prev) ;
+             $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_gdp_per_capita_inc_perc} = $delta_percent ;
+           }
+           $year_data_prev = $year_data ;
+         }  
+       }
+       # $year = $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year}  ;
+       # if ((defined $year) && ($year =~ /^\d\d\d\d$/))
+       # {
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users} ;
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_internet_users_inc_perc_points} =
+       #   $json_out {$key_countries} {$iso2} {$key_years} {$year}       {$key_internet_users_inc_perc_points} ;
+       # }
        
      }
   }
    close FILE_CSV ;
+  
+  
+}
+
+sub DetermineLatestYearWithFullData
+{
+  my ($iso2, $year_min, $year_last_data_population, $year_last_data_internet_users, $year_last_data_mobile_subscriptions, $year_last_data_gdp_per_capita, $year_last_complete) ;
+  foreach $iso2 (sort {$json_out {$key_countries} {$a} {$key_codes} {$key_region} . $a cmp
+                       $json_out {$key_countries} {$b} {$key_codes} {$key_region} . $b} keys %iso2_codes)
+  {
+    $year_min = 1950 ;
+    
+    if ($do_not_import_years_before > $year_min)
+    { $year_min = $do_not_import_years_before ; }
+    
+    $year_last_complete                  = $year_min ;
+    $year_last_data_population           = $year_min ;
+    $year_last_data_internet_users       = $year_min ;
+    $year_last_data_mobile_subscriptions = $year_min ;
+    $year_last_data_gdp_per_capita       = $year_min ;
+    
+    for ($year = $year_min ; $year <= $year_now ; $year++)
+    {
+      if (defined $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_population})
+      { $year_last_data_population = $year ; }
+      if (defined $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_internet_users})
+      { $year_last_data_internet_users = $year ; }
+      if (defined $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_mobile_subscriptions}) 
+      { $year_last_data_mobile_subscriptions = $year ; }
+      if (defined $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_gdp_per_capita}) 
+      { $year_last_data_gdp_per_capita = $year ; }
+      if (($year_last_data_population == $year) &&       
+          ($year_last_data_internet_users == $year) &&       
+          ($year_last_data_mobile_subscriptions == $year) &&
+          ($year_last_data_gdp_per_capita == $year))
+      { $year_last_complete = $year ; }
+    }
+
+    if ($year_last_complete == $year_min) 
+    {
+      print "iso2 $iso2 no complete data for any year: " . $json_out {$key_countries} {$iso2} {$key_names} {'en'} . "\n" ;
+      print "iso2 $iso2 population $year_last_data_population, internet users $year_last_data_internet_users, " .
+                        "mobile subscriptions $year_last_data_mobile_subscriptions, gdp_per_capita $year_last_data_gdp_per_capita\n" ;
+    }
+    else
+    {
+      $json_out {$key_countries} {$iso2} {$key_years} {$key_latest} {$key_year} = $year_last_complete ;
+
+      $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_population} =
+      $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_population} ;
+      $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_internet_users} =
+      $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_internet_users} ;
+      $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_mobile_subscriptions} =
+      $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_mobile_subscriptions} ;
+      $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_gdp_per_capita} =
+      $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_gdp_per_capita} ;
+
+      if ($add_derived_values)
+      {
+        $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_population_inc_perc} =
+        $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_population_inc_perc} ;
+        $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_internet_users_inc_perc_points} =
+        $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_internet_users_inc_perc_points} ;
+        $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_mobile_subscriptions_inc_perc_points} =
+        $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_mobile_subscriptions_inc_perc_points} ;
+        $json_out {$key_countries} {$iso2} {$key_years} {$key_latest}         {$key_gdp_per_capita_inc_perc} =
+        $json_out {$key_countries} {$iso2} {$key_years} {$year_last_complete} {$key_gdp_per_capita_inc_perc} ;
+      }
+      # print "iso2 $iso2 year last complete $year_last_complete\n" ;
+    }
+  }
 }
 
 # World Bank countries by income
@@ -866,3 +1117,57 @@ sub ExportInternetPlusMobileSubscriptions
   close CSV_OUT ;
 }
 
+sub ExportGDPplusMobileSubscriptions
+{
+  my ($iso2,$iso3,$name,$region_code,$region_code2,$region_code_prev,$north_south_code,$year,$year_columns,$year_data,$perc,$perc_prev,$perc_delta,$perc_absolute,$gdp_per_capita,$mobile_subscriptions,@year_data,%mobile_subscriptions) ;
+
+  open CSV_OUT, '>', $file_csv_out_gdp_plus_mobile ;
+
+  print CSV_OUT "iso-3166-1 alpha-2,iso-3166-1 alpha-3,name,region code,gdp per capita in usd,Africa,Asia,Central America,Europe,North America,Oceania,South America\n" ; 
+
+  $year_columns = '' ;
+  for ($year = 1996 ; $year <= 2016 ; $year += 5 ) # make start year future-proof (last year with data minus ? x 5)
+  { $year_columns .= "\"$year\"," ; }
+  $year_columns =~ s/,$// ;
+  
+  # sort by region code, and within that iso-3166-1 alpha-2
+  foreach $iso2 (sort {$json_out {$key_countries} {$a} {$key_codes} {$key_region} . $a cmp
+                       $json_out {$key_countries} {$b} {$key_codes} {$key_region} . $b} keys %iso2_codes)
+  {
+    $gdp_per_capita       = 0 ;
+    $mobile_subscriptions = 0 ;
+    
+    $iso3        = $json_out {$key_countries} {$iso2} {$key_codes} {$key_iso3} ;
+    $region_code = $json_out {$key_countries} {$iso2} {$key_codes} {$key_region} ;
+    $name        = $json_out {$key_countries} {$iso2} {$key_names} {'en'} ;
+    
+    for ($year = 1996 ; $year <= 2016 ; $year += 5 ) # make start year future proof
+    {
+      my $gdp_per_capita2 = $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_gdp_per_capita} ;
+      $gdp_per_capita2 = 0 if ! defined $gdp_per_capita2 ;
+      
+      if ($gdp_per_capita2 > $gdp_per_capita)
+      { $gdp_per_capita = $gdp_per_capita2 ; }
+
+      my $mobile_subscriptions2 = $json_out {$key_countries} {$iso2} {$key_years} {$year} {$key_mobile_subscriptions} ;
+      $mobile_subscriptions2 = 0 if ! defined $mobile_subscriptions2 ;
+      
+      if ($mobile_subscriptions2 > $mobile_subscriptions)
+      { $mobile_subscriptions = $mobile_subscriptions2 ; }
+    }
+    
+    next if $gdp_per_capita == 0 and $mobile_subscriptions == 0 ;
+    
+    # every region into its own column, for region-colored scatter plot
+       if ($region_code eq 'AS') { $mobile_subscriptions = ",$mobile_subscriptions" ; }
+    elsif ($region_code eq 'CA') { $mobile_subscriptions = ",,$mobile_subscriptions" ; }
+    elsif ($region_code eq 'EU') { $mobile_subscriptions = ",,,$mobile_subscriptions" ; }
+    elsif ($region_code eq 'NA') { $mobile_subscriptions = ",,,,$mobile_subscriptions" ; }
+    elsif ($region_code eq 'OC') { $mobile_subscriptions = ",,,,,$mobile_subscriptions" ; }
+    elsif ($region_code eq 'SA') { $mobile_subscriptions = ",,,,,,$mobile_subscriptions" ; }
+    
+    print CSV_OUT "$iso2,$iso3,$name,$region_code,$gdp_per_capita,$mobile_subscriptions\n" ;
+  }  
+  
+  close CSV_OUT ;
+}
