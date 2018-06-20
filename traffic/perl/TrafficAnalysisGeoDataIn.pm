@@ -49,7 +49,6 @@ sub ReadCountryCodes
   $country_codes {'XX'} = 'Unknown5' ;
   $country_codes {'-P'} = 'IPv6' ;
   $country_codes {'-X'} = 'Unknown6' ;
-  $country_codes {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
 }
 
 sub ReadCountryCodesISO3
@@ -65,6 +64,7 @@ sub ReadCountryCodesISO3
       chomp ($line) ;
       ($code,$name) = split (',',$line,2) ;
       $name =~ s/"//g ;
+      $name =~ s/\s+$//g ; # remove trailing spaces
       $country_codes_iso3 {$code} = $name ;
       $country_names_iso3 {$name} = $code ;
     # print "$code => $name\n" ;
@@ -74,13 +74,15 @@ sub ReadCountryCodesISO3
 
 sub AddExtraCountryNames_iso3
 { 
+if (0)
+{
 # add entries for country names spelled differently in $file_csv_country_codes 
   $country_names_iso3 {'Bolivia'}                 = 'BOL' ;
   $country_names_iso3 {'Brunei'}                  = 'BRN' ;
-  $country_names_iso3 {'Burma'}                   = 'MMR' ;
+# $country_names_iso3 {'Burma'}                   = 'MMR' ;
   $country_names_iso3 {'Cape Verde'}              = 'CPV' ;
   $country_names_iso3 {'Caribbean Netherlands'}   = 'XXX' ;
-  $country_names_iso3 {'Congo Dem. Rep.'}         = 'COD' ;
+  $country_names_iso3 {'Congo Dem.Rep.'}          = 'COD' ;
   $country_names_iso3 {'Congo Rep.'}              = 'COG' ;
   $country_names_iso3 {"Cote d'Ivoire"}           = 'CIV' ;
   $country_names_iso3 {'Falkland Islands'}        = 'FLK' ;
@@ -94,7 +96,7 @@ sub AddExtraCountryNames_iso3
   $country_names_iso3 {'Sint Maarten'}            = 'SXM' ;
   $country_names_iso3 {'South Korea'}             = 'KOR' ;
   $country_names_iso3 {'Syria'}                   = 'SYR' ;
-  $country_names_iso3 {'São Tomé and Príncipe'}   = 'STP' ;
+  $country_names_iso3 {'Sao Tome and Principe'}   = 'STP' ;
   $country_names_iso3 {'Taiwan'}                  = 'TWN' ;
   $country_names_iso3 {'Tanzania'}                = 'TZA' ;
   $country_names_iso3 {'United States'}           = 'USA' ;
@@ -103,6 +105,7 @@ sub AddExtraCountryNames_iso3
   $country_names_iso3 {'Vietnam'}                 = 'VNM' ;
   $country_names_iso3 {'Virgin Islands, UK'}      = 'VGB' ;
   $country_names_iso3 {'Virgin Islands, US'}      = 'VIR' ;
+}
 }
 
 sub ReadCsv
@@ -158,7 +161,6 @@ sub ReadInputCountryNames
   $country_names {'--'} = 'Unknown8' ;
   $country_names {'-P'} = 'IPv6' ;
   $country_names {'-X'} = 'Unknown9' ;
-  $country_names {'AN'} = 'Netherlands Antilles' ; # not yet in MaxMind database
   $country_names {"XX"} = "Unknown10" ;
 
   foreach $line (@csv)
@@ -172,6 +174,9 @@ sub ReadInputCountryNames
     $line =~ s/[\x00-\x1f]//g ;
     $line =~ s/UNDEFINED/Undefined/g ;
     $line =~ s/territories/Territories/ ;
+
+if (0)
+{
     $line =~ s/(Falkland Islands).*$/$1/g ; # - (Malvinas)
     $line =~ s/Reunion/Réunion/ ;
     $line =~ s/Aland Islands/Åland Islands/ ;
@@ -199,7 +204,7 @@ sub ReadInputCountryNames
     $line =~ s/Tanzania, United Republic of/Tanzania/ ;
     $line =~ s/Virgin Islands, British/Virgin Islands, UK/ ;
     $line =~ s/Virgin Islands, U.S./Virgin Islands, US/ ;
-
+}
     # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
     ($country_code,$country_name) = split (',', $line,2) ;
 
@@ -223,10 +228,54 @@ sub ReadInputCountryNames
   }
 }
 
+sub ReadCsvGeoInfo
+{
+  my ($iso2,$iso3,$region_code,$north_south_code,$country_name,$article_title,$width,$height) ;
+
+  die ("Could not open '$path_meta/$file_csv_geocodes'") if ! -e "$path_meta/$file_csv_geocodes" ;
+
+  open CSV_GEOINFO, '<', "$path_meta/$file_csv_geocodes" ;
+
+  while ($line = <CSV_GEOINFO>)
+  {
+    next if $line =~ /^\#/ ; # skip comments
+    chomp $line ;
+
+    if ($line =~ /^C/) # country info
+    {
+      ($rectype,$iso2,$iso3,$region_code,$north_south_code,$country_name,$population,$connected,$article_title,$icon,$width,$h    eight) = split (',', $line) ;
+      $country_names {$iso2} = $country_name ;
+      $country_names_iso3 {$country_name} = $iso3 ;
+      $region_codes {$iso2} = $region_code ;
+      $north_south_codes {$iso2} = $north_south_code ;
+
+      $country_meta_info = "$article_title,$icon,$population,$connected";
+      $country_meta_info {$country_name} = $country_meta_info ;
+#     $article_url =~ s/^.*wiki\/// ; # extract the actual page title from html
+#     $article_url =~ s/\'.*$// ;
+#     $article_title = $article_url ;
+#     ($width  = $icon) =~s/^.* (width=\d+).*$/$1/ ;
+#     ($height = $icon) =~s/^.* (height=\d+).*$/$1/ ;
+
+#     $icon =~s/^.*commons\/thumb/commons\/thumb/ ;
+#     $icon =~ s/\'.*$// ;
+#     $icon =~s/^.*commons\/thumb/commons\/thumb/ ;
+
+      print "$iso2: no country name\n"     if $country_name     =~ /^\-?$/ ;
+      print "$iso2: no iso3\n"             if $iso3             =~ /^\-?$/ ;
+      print "$iso2: no region code\n"      if $region_code      =~ /^\-?$/ ;
+      print "$iso2: no north/south code\n" if $north_south_code =~ /^\-?$/ ;
+      print "$iso2: no population\n"       if $population       =~ /^\-?$/ ;
+      print "$iso2: no connected\n"        if $connected        =~ /^\-?$/ ;
+    }
+  }
+  close CSV_GEOINFO ;
+}
+
 sub ReadWorldBankDemographics
 {
   my $file_json_demographics = shift ;
-  print "\n\nReadWorldBankDemographics, read from \n$file_json_demographics\n\n";
+  print "\n\nReadWorldBankDemographics\nRead from '$file_json_demographics'\n\n";
 
   my $json_text_demographics = do
   {
@@ -279,8 +328,7 @@ sub ReadInputCountryInfo
 
     if ($connected_wikipedia eq '-')
     { 
-      $ip_connections_unknown .= "$country, " ; 
-      $ip_connections_unknown .= "$country, " ; 
+      $ip_connections_unknown .= "* $country\n" ; 
       # print "internet connections unknown: $country\n" ; 
     }
 
@@ -331,7 +379,7 @@ sub ReadInputCountryInfo
     $code = $country_names_iso3 {$country} ;
     if ($code eq '')
     { 
-      $iso3_code_unknown .= "$country, " ; 
+      $iso3_code_unknown .= "* $country, " ; 
       # print "No ISO3 code for country $country\n" ; 
     }
 
@@ -341,13 +389,13 @@ sub ReadInputCountryInfo
 
   if ($ip_connections_unknown ne '')
   {
-    $ip_connections_unknown =~ s/, $// ;
-    &LogDetail ("\nip connections unknown for:\n$ip_connections_unknown\n\n") ;
+    $ip_connections_unknown =~ s/,\s*$// ;
+    &LogDetail ("\n\nip connections unknown for:\n$ip_connections_unknown\n\n") ;
   }
 
   if ($iso3_code_unknown ne '')
   {
-    $iso3_code_unknown =~ s/, $// ;
+    $iso3_code_unknown =~ s/,\s*$// ;
     &LogDetail ("\nno iso3 code for:\n$iso3_code_unknown\n\n") ;
   }
 
@@ -771,7 +819,7 @@ sub Normalize
 
 sub ReadLanguageInfo
 {
-  &LogSub ("\&ReadLanguageInfo\n") ;
+  &LogSub ("ReadLanguageInfo\n") ;
 
   my @csv = &ReadCsv ("$path_meta/LanguageInfo.csv") ;
 

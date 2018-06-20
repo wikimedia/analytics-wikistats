@@ -52,8 +52,6 @@
 # hsv_to_rgb
 # isMobile
 
-# 2016-07-17 minus
-
 # 2016-07-18 minus
 # CalcPercentages 
 # HtmlFormWithPerc
@@ -167,7 +165,6 @@
     $ua->agent('Wikipedia Wikicounts job');
     $ua->timeout(60);
 
-
     &LogSub ("Ready\n\n") ;
     exit ;
   }
@@ -213,12 +210,9 @@
   }
   else { &LogDetail ("No valid run option found. Specify -c [-q ..]| -m ..| -d ..| -w") ; exit ; }
 
-  if ($quarter_only ne '')
-  { $path_reports = "$path_reports/$quarter_only" ; }
-  elsif ($reportmonth ne '')
-  { $path_reports = "$path_reports/$reportmonth" ; }
-  elsif ($reportcountries)
-  { $path_reports = "$path_reports/countries" ; }
+  if ($quarter_only ne '')   { $path_reports = "$path_reports/$quarter_only" ; }
+  elsif ($reportmonth ne '') { $path_reports = "$path_reports/$reportmonth" ; }
+  elsif ($reportcountries)   { $path_reports = "$path_reports/countries" ; }
 
   &LogDetail ("Write report to $path_reports\n") ;
 
@@ -235,17 +229,15 @@
 
   &ReadLanguageInfo ;
 
-  &ReadInputRegionCodes ;
-  &ReadCountryCodesISO3 ;
-  &ReadInputCountryNames ;
-  &ReadInputCountryInfo ;
-  # &ReadCountryCodes ;
-  &WriteCsvGeoInfo ; # one time: merge these csv input files 
+# &ReadInputRegionCodes ;
+# &ReadCountryCodesISO3 ;
+# &ReadInputCountryNames ;
+# &ReadInputCountryInfo ;
+# # &ReadCountryCodes ;
+# &WriteCsvGeoInfo ; # one time: merge these csv input files into one csv file, henceforth to be maintained manually
 
   &ReadCsvGeoInfo ; # from now on use this more complete csv file
-
 exit ;
-
 
   if ($reportcountries)
   {
@@ -337,7 +329,9 @@ exit ;
   close "FILE_LOG" ;
 
   &LogDetail ("\nReady\n\n") ;
-  exit ;
+exit ;
+
+
 
 sub ReportCountries
 {
@@ -392,12 +386,15 @@ sub ReportCountries
 
 
 
-  &WriteCsvDataMapInfoPerCountry ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, $cutoff_percentage = 0.1, $show_logcount = $true,  $sample_rate) ;
+  &WriteCsvDataMapInfoPerCountry ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, 
+                                  $cutoff_percentage = 0.1, $show_logcount = $true,  $sample_rate) ;
   &WriteCsvDataMapInfoPerRegion   ($sample_rate) ;
   &WriteCsvDataMapInfoPerLanguage ($sample_rate) ;
 
   # input for http://gunn.co.nz/map/, for now hardcoded quarter
-  &WriteCsvFilePerCountryDensity ($views_edits, '2013 Q2', \%requests_per_quarter_per_country, $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person", $sample_rate) ;
+  &WriteCsvFilePerCountryDensity ($views_edits, '2013 Q2', \%requests_per_quarter_per_country, 
+                                  $max_requests_per_connected_us_month, "Wikipedia " . lc $views_edits . " per person", 
+                                  $sample_rate) ;
 
   &PrepHtml ($reports_set_countries, $sample_rate) ;
   &SetPeriod ;
@@ -419,9 +416,9 @@ sub ReportCountries
 # ($links_edits = $links) =~ s/Views/Edits/g ;
 
   $links_edits = "<p>&nbsp;<b>Page Edits Per Country</b> - " .
-           "<font color=red>Data no longer available</font> / " .
-           "<b>Page Edits Per Wikipedia Language - </b> " .
-           "<font color=red>Data no longer available</font>" ;
+                 "<font color=red>Data no longer available</font> / " .
+                 "<b>Page Edits Per Wikipedia Language - </b> " .
+                 "<font color=red>Data no longer available</font>" ;
 
   $links = "$links_views\n$links_edits\n" ;
 
@@ -429,16 +426,14 @@ sub ReportCountries
   &WriteReportPerCountryOverview ($title, $views_edits, &UnLink ($links,$offset_links+1),$sample_rate) ;
 
   $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Breakdown" ;
-
-
-
-
   if ($sample_rate == 1)
   { &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 10000, $cutoff_percentage = 0.1, $show_logcount = $false, $sample_rate) ; }
   else
   {
-    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 100, $cutoff_percentage =   1, $show_logcount = $false, $sample_rate) ;
-    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, $cutoff_percentage = 0.1, $show_logcount = $true,  $sample_rate) ;
+    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests = 100, 
+                                     $cutoff_percentage = 1, $show_logcount = $false, $sample_rate) ;
+    &WriteReportPerCountryBreakdown ($title, $views_edits, &UnLink ($links,$offset_links+2),$cutoff_requests =  10, 
+                                     $cutoff_percentage = 0.1, $show_logcount = $true, $sample_rate) ;
   }
 
 # $title = "$title_main - Wikipedia <font color=#008000>$views_edits Per Country</font> - Trends" ; # deprecated, too unreliable
@@ -521,7 +516,7 @@ sub Percentage
   return ($perc) ;
 }
 
-sub Perc2Bar # qqqq
+sub Perc2Bar 
 {
   my ($perc,$color,$height) = @_ ;
   my  $bar = "&nbsp;" ;
@@ -535,7 +530,8 @@ sub Perc2Bar # qqqq
   return ($bar) ;
 }
 
-#   format: function(s) { return $.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/\\&nbsp\\;/g,"").replace(/M/i,"000000").replace(/&#1052;/,"000000").replace(/K/i,"000").replace(/&#1050;/i,"000")); },
+# format: function(s) { return $.tablesorter.formatFloat(s.replace(/<[^>]*>/g,"").replace(/\\&nbsp\\;/g,"").replace(/M/i,"000000").replace(/&#1052;/,"000000").replace(/K/i,"000").replace(/&#1050;/i,"000")); },
+
 
 # determine significant decimales (at most 3)
 sub i2SigDec 
