@@ -1,0 +1,232 @@
+iso-3166-1 alpha-2,iso-3166-1 alpha-3,name,region code,gdp per capita in usd,Africa,Asia,Central America,Europe,North America,Oceania,South America
+AO,AGO,Angola,AF,3582.65,49.85
+BF,BFA,Burkina Faso,AF,663.91,82.61
+BI,BDI,Burundi,AF,233.52,50.91
+BJ,BEN,Benin,AF,837.34,82.08
+BW,BWA,Botswana,AF,7483.17,146.16
+CD,COD,Congo Dem. Rep.,AF,387.97,36.69
+CF,CAF,Central African Republic,AF,458.33,27.17
+CG,COG,Congo Rep.,AF,2798.07,105.82
+CI,CIV,Ivory Coast,AF,1552.77,115.85
+CM,CMR,Cameroon,AF,1495.44,79.86
+CV,CPV,Cape Verde,AF,3452.95,111.56
+DJ,DJI,Djibouti,AF,1361.57,36.64
+DZ,DZA,Algeria,AF,4827.72,115.85
+EG,EGY,Egypt,AF,2724.40,102.20
+ER,ERI,Eritrea,AF,603.11,10.21
+ET,ETH,Ethiopia,AF,511.19,50.02
+GA,GAB,Gabon,AF,10098.60,149.64
+GH,GHA,Ghana,AF,1707.66,135.80
+GM,GMB,The Gambia,AF,543.78,139.23
+GN,GIN,Guinea,AF,735.72,87.13
+GQ,GNQ,Equatorial Guinea,AF,17461.55,48.16
+GW,GNB,Guinea-Bissau,AF,582.37,70.82
+KE,KEN,Kenya,AF,1143.07,80.44
+KM,COM,Comoros,AF,805.16,57.11
+LR,LBR,Liberia,AF,389.55,67.56
+LS,LSO,Lesotho,AF,1352.48,103.59
+LY,LBY,Libya,AF,11175.13,161.46
+MA,MAR,Morocco,AF,3204.86,117.68
+MG,MDG,Madagascar,AF,442.14,39.92
+ML,MLI,Mali,AF,745.87,112.35
+MR,MRT,Mauritania,AF,1296.01,89.16
+MU,MUS,Mauritius,AF,9822.01,143.73
+MW,MWI,Malawi,AF,481.45,39.68
+MZ,MOZ,Mozambique,AF,515.39,52.12
+NA,NAM,Namibia,AF,6045.22,107.27
+NE,NER,Niger,AF,391.13,42.18
+NG,NGA,Nigeria,AF,2455.92,82.98
+RW,RWA,Rwanda,AF,738.64,74.86
+SC,SYC,Seychelles,AF,13963.59,161.16
+SD,SDN,Sudan,AF,1924.00,71.25
+SL,SLE,Sierra Leone,AF,455.59,84.90
+SN,SEN,Senegal,AF,1092.25,98.54
+SO,SOM,Somalia,AF,0,46.47
+SS,SSD,South Sudan,AF,1435.33,22.08
+ST,STP,Sao Tome and Principe,AF,1283.89,89.06
+SZ,SWZ,Swaziland,AF,3906.26,74.08
+TD,TCD,Chad,AF,868.00,43.11
+TG,TGO,Togo,AF,558.12,72.38
+TN,TUN,Tunisia,AF,4265.37,125.25
+TZ,TZA,Tanzania,AF,867.06,72.06
+UG,UGA,Uganda,AF,662.43,55.05
+ZA,ZAF,South Africa,AF,7488.99,147.13
+ZM,ZMB,Zambia,AF,1627.27,72.43
+ZW,ZWE,Zimbabwe,AF,1264.43,79.74
+AE,ARE,United Arab Emirates,AS,60434.67,,214.73
+AF,AFG,Afghanistan,AS,617.89,,62.34
+AM,ARM,Armenia,AS,3932.55,,117.43
+AZ,AZE,Azerbaijan,AS,5861.51,,110.65
+BD,BGD,Bangladesh,AS,1029.58,,83.45
+BH,BHR,Bahrain,AS,22416.08,,210.14
+BN,BRN,Brunei,AS,37401.05,,123.69
+BT,BTN,Bhutan,AS,2801.28,,87.54
+CN,CHN,China,AS,6893.78,,97.25
+GE,GEO,Georgia,AS,4084.00,,140.95
+HK,HKG,Hong Kong,AS,36776.21,,240.80
+ID,IDN,Indonesia,AS,3974.06,,147.66
+IL,ISR,Israel,AS,33677.46,,129.03
+IN,IND,India,AS,1861.49,,85.17
+IQ,IRQ,Iraq,AS,5695.68,,81.19
+IR,IRN,Iran,AS,6733.91,,100.30
+JO,JOR,Jordan,AS,3578.77,,103.84
+JP,JPN,Japan,AS,47660.89,,130.61
+KG,KGZ,Kyrgyzstan,AS,1038.85,,127.84
+KH,KHM,Cambodia,AS,1079.11,,126.35
+KP,PRK,North Korea,AS,0,,14.21
+KR,KOR,South Korea,AS,25458.89,,120.68
+KW,KWT,Kuwait,AS,49268.26,,154.62
+KZ,KAZ,Kazakhstan,AS,10582.50,,151.62
+LA,LAO,Laos,AS,1642.73,,86.54
+LB,LBN,Lebanon,AS,8450.11,,81.42
+LK,LKA,Sri Lanka,AS,3759.23,,124.03
+MM,MMR,Myanmar,AS,1408.14,,95.65
+MN,MNG,Mongolia,AS,3906.12,,111.24
+MO,MAC,Macau,AS,62279.49,,321.80
+MV,MDV,Maldives,AS,8416.94,,189.86
+MY,MYS,Malaysia,AS,11031.82,,140.80
+NP,NPL,Nepal,AS,685.12,,110.83
+OM,OMN,Oman,AS,19308.42,,155.18
+PH,PHL,Philippines,AS,2753.35,,109.37
+PK,PAK,Pakistan,AS,1178.80,,70.65
+PS,PSE,Palestinian territories,AS,2576.88,,77.51
+QA,QAT,Qatar,AS,72670.96,,142.13
+SA,SAU,Saudi Arabia,AS,21395.36,,191.23
+SG,SGP,Singapore,AS,52600.64,,150.58
+SY,SYR,Syria,AS,0,,72.43
+TH,THA,Thailand,AS,5901.88,,173.78
+TJ,TJK,Tajikistan,AS,968.39,,107.61
+TL,TLS,East Timor,AS,939.80,,117.61
+TM,TKM,Turkmenistan,AS,6986.86,,151.43
+TR,TUR,Turkey,AS,14116.98,,94.40
+UZ,UZB,Uzbekistan,AS,1961.48,,87.52
+VN,VNM,Vietnam,AS,1735.29,,142.36
+YE,YEM,Yemen,AS,1219.01,,59.57
+AG,ATG,Antigua and Barbuda,CA,14325.48,,,183.88
+BZ,BLZ,Belize,CA,4424.44,,,67.56
+CR,CRI,Costa Rica,CA,9714.10,,,171.51
+CU,CUB,Cuba,CA,5824.10,,,34.75
+CW,CUW,Curacao,CA,0,,,136.99
+DM,DMA,Dominica,CA,6880.63,,,151.88
+DO,DOM,Dominican Republic,CA,6909.13,,,87.47
+GD,GRD,Grenada,CA,8676.34,,,115.02
+GT,GTM,Guatemala,CA,3100.21,,,130.30
+HN,HND,Honduras,CA,2137.81,,,96.54
+HT,HTI,Haiti,CA,746.41,,,59.96
+JM,JAM,Jamaica,CA,5039.41,,,113.40
+KN,KNA,St. Kitts and Nevis,CA,15657.22,,,148.06
+KY,CYM,Cayman Islands,CA,0,,,185.00
+LC,LCA,St. Lucia,CA,8220.79,,,124.56
+NI,NIC,Nicaragua,CA,1946.37,,,125.94
+PA,PAN,Panama,CA,10982.37,,,181.66
+PR,PRI,Puerto Rico,CA,27293.35,,,88.67
+SV,SLV,El Salvador,CA,3802.86,,,151.89
+TT,TTO,Trinidad and Tobago,CA,16551.49,,,158.67
+VC,VCT,St. Vincent and the Grenadines,CA,6676.62,,,120.55
+VG,VGB,Virgin Islands (BR),CA,0,,,167.01
+VI,VIR,Virgin Islands (US),CA,40472.66,,,37.72
+AD,AND,Andorra,EU,49708.40,,,,92.04
+AL,ALB,Albania,EU,4684.97,,,,115.15
+AT,AUT,Austria,EU,48106.49,,,,163.79
+BA,BIH,Bosnia and Herzegovina,EU,5377.84,,,,96.79
+BE,BEL,Belgium,EU,45469.71,,,,113.46
+BG,BGR,Bulgaria,EU,7967.71,,,,142.40
+BY,BLR,Belarus,EU,6375.35,,,,120.67
+CH,CHE,Switzerland,EU,76691.12,,,,133.81
+CY,CYP,Cyprus,EU,31415.82,,,,133.42
+CZ,CZE,Czech Republic,EU,21894.11,,,,124.59
+DE,DEU,Germany,EU,45845.53,,,,126.31
+DK,DNK,Denmark,EU,60892.77,,,,128.49
+EE,EST,Estonia,EU,18094.59,,,,144.61
+ES,ESP,Spain,EU,31865.37,,,,112.11
+FI,FIN,Finland,EU,47171.02,,,,165.89
+FO,FRO,Faroe Islands,EU,0,,,,120.30
+FR,FRA,France,EU,42015.74,,,,104.40
+GB,GBR,United Kingdom,EU,42039.74,,,,120.92
+GI,GIB,Gibraltar,EU,0,,,,119.55
+GL,GRL,Greenland,EU,41147.97,,,,103.87
+GR,GRC,Greece,EU,29176.39,,,,112.12
+HR,HRV,Croatia,EU,14452.14,,,,118.59
+HU,HUN,Hungary,EU,14997.20,,,,120.78
+IE,IRL,Ireland,EU,69974.10,,,,108.99
+IM,IMN,Isle of Man,EU,76836.27,,,,0
+IS,ISL,Iceland,EU,48995.17,,,,120.80
+IT,ITA,Italy,EU,37872.17,,,,160.71
+LI,LIE,Liechtenstein,EU,0,,,,117.61
+LT,LTU,Lithuania,EU,15945.52,,,,160.33
+LU,LUX,Luxembourg,EU,108600.93,,,,153.15
+LV,LVA,Latvia,EU,14734.46,,,,134.50
+MC,MCO,Monaco,EU,0,,,,86.49
+MD,MDA,Moldova,EU,2062.71,,,,93.32
+ME,MNE,Montenegro,EU,7492.86,,,,185.32
+MK,MKD,Macedonia,EU,5222.83,,,,106.80
+MT,MLT,Malta,EU,26577.66,,,,124.71
+NL,NLD,Netherlands,EU,52267.73,,,,122.97
+NO,NOR,Norway,EU,90288.82,,,,115.72
+PL,POL,Poland,EU,15065.97,,,,138.66
+PT,PRT,Portugal,EU,22444.07,,,,116.09
+RO,ROU,Romania,EU,10065.49,,,,115.78
+RS,SRB,Serbia,EU,5852.38,,,,141.15
+RU,RUS,Russia,EU,11279.63,,,,159.15
+SE,SWE,Sweden,EU,56473.02,,,,127.50
+SI,SVN,Slovenia,EU,24460.40,,,,114.82
+SK,SVK,Slovakia,EU,19275.09,,,,128.39
+SM,SMR,San Marino,EU,79802.98,,,,112.57
+UA,UKR,Ukraine,EU,3138.47,,,,135.20
+XK,XKX,Kosovo,EU,3890.07,,,,32.30
+BM,BMU,Bermuda,NA,91944.87,,,,,92.37
+BS,BHS,The Bahamas,NA,24958.65,,,,,92.07
+CA,CAN,Canada,NA,50407.34,,,,,84.74
+MX,MEX,Mexico,NA,9707.91,,,,,87.60
+US,USA,United States,NA,52364.24,,,,,122.88
+AS,ASM,American Samoa,OC,10442.73,,,,,,3.71
+AU,AUS,Australia,OC,55478.58,,,,,,110.05
+FJ,FJI,Fiji,OC,4195.97,,,,,,116.24
+FM,FSM,Micronesia Fed. States,OC,2961.79,,,,,,26.67
+GU,GUM,Guam,OC,32013.77,,,,,,20.84
+KI,KIR,Kiribati,OC,1685.99,,,,,,45.46
+MH,MHL,Marshall Islands,OC,3373.95,,,,,,0.94
+MP,MNP,Northern Mariana Islands,OC,19115.38,,,,,,19.02
+NC,NCL,New Caledonia,OC,0,,,,,,89.26
+NR,NRU,Nauru,OC,9650.57,,,,,,87.25
+NZ,NZL,New Zealand,OC,36521.96,,,,,,124.44
+PF,PYF,French Polynesia,OC,0,,,,,,99.97
+PG,PNG,Papua New Guinea,OC,2436.18,,,,,,46.78
+PW,PLW,Palau,OC,10909.90,,,,,,74.98
+SB,SLB,Solomon Islands,OC,1479.34,,,,,,69.50
+TO,TON,Tonga,OC,3792.29,,,,,,74.68
+TV,TUV,Tuvalu,OC,3402.72,,,,,,68.49
+VU,VUT,Vanuatu,OC,2932.87,,,,,,80.84
+WS,WSM,Samoa,OC,3782.40,,,,,,77.39
+AR,ARG,Argentina,SA,10780.02,,,,,,,145.77
+AW,ABW,Aruba,SA,0,,,,,,,108.13
+BB,BRB,Barbados,SA,16502.69,,,,,,,123.99
+BO,BOL,Bolivia,SA,2457.63,,,,,,,92.82
+BR,BRA,Brazil,SA,11559.21,,,,,,,117.95
+CL,CHL,Chile,SA,15019.63,,,,,,,130.11
+CO,COL,Colombia,SA,7525.86,,,,,,,120.62
+EC,ECU,Ecuador,SA,5191.10,,,,,,,101.02
+GY,GUY,Guyana,SA,3783.54,,,,,,,75.61
+PE,PER,Peru,SA,6089.40,,,,,,,116.24
+PY,PRY,Paraguay,SA,3925.56,,,,,,,111.36
+SR,SUR,Suriname,SA,8698.30,,,,,,,144.51
+UY,URY,Uruguay,SA,14010.00,,,,,,,148.57
+VE,VEN,Venezuela,SA,13902.45,,,,,,,97.69
+X1,EAS,East Asia & Pacific,XX,9538.69,109.98
+X2,ECS,Europe & Central Asia,XX,25136.24,125.77
+X3,CEB,Central Europe and the Baltics,XX,14754.55,127.32
+X4,CSS,Caribbean small states,XX,8766.85,117.14
+X5,MEA,Middle East & North Africa,XX,7724.73,106.60
+X6,OED,OECD members,XX,38438.33,117.71
+X8,PSS,Pacific island small states,XX,3200.56,86.65
+X9,SSF,Sub-Saharan Africa,XX,1638.51,72.97
+XD,LCN,Latin America & Caribbean,XX,9239.22,108.35
+XA,FCS,Fragile and conflict affected situations,YY,1521.85,67.35
+XB,HPC,Heavily indebted poor countries,YY,853.20,65.63
+XC,LDC,Least developed countries: UN classification,YY,889.20,66.65
+XE,LIC,Low income,YY,598.59,57.67
+XF,LMC,Lower middle income,YY,2117.21,94.16
+XG,LMY,Low & middle income,YY,4383.41,95.95
+XH,MIC,Middle income,YY,4829.41,100.45
+XI,UMC,Upper middle income,YY,7998.46,107.71
+XJ,HIC,High income,YY,42167.41,125.74

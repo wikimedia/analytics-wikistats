@@ -1,0 +1,274 @@
+# codes A1,A2,AP,EU,O1 are non country codes from MaxMind, see http://www.maxmind.com/app/iso3166# iso-3166-1 alpha-2 codes for which no iso-3166-1 alpha-3 codes exists are from MaxMind or if only iso-3166-1 alpha-3 they are from World Bank (region instead of country codes) (here assigned X1,X2,etc)
+# iso-3166-1 alpha-2,iso-3166-1 alpha-3,region code, north-south code,name
+A1,--,--,--,Anonymous Proxy
+A2,--,--,--,Satellite Provider
+AD,AND,EU,N,Andorra
+AE,ARE,AS,S,United Arab Emirates
+AF,AFG,AS,S,Afghanistan
+AG,ATG,CA,S,Antigua and Barbuda
+AI,AIA,CA,S,Anguilla
+AL,ALB,EU,N,Albania
+AM,ARM,AS,S,Armenia
+AO,AGO,AF,S,Angola
+AP,--,--,-,Asia/Pacific Region Unspecified
+AQ,ATA,--,--,Antarctic Treaty area
+AR,ARG,SA,S,Argentina
+AS,ASM,OC,S,American Samoa
+AT,AUT,EU,N,Austria
+AU,AUS,OC,N,Australia
+AW,ABW,SA,S,Aruba
+AX,ALA,EU,N,Aland Islands
+AZ,AZE,AS,S,Azerbaijan
+BA,BIH,EU,N,Bosnia and Herzegovina
+BB,BRB,SA,S,Barbados
+BD,BGD,AS,S,Bangladesh
+BE,BEL,EU,N,Belgium
+BF,BFA,AF,S,Burkina Faso
+BG,BGR,EU,N,Bulgaria
+BH,BHR,AS,S,Bahrain
+BI,BDI,AF,S,Burundi
+BJ,BEN,AF,S,Benin
+BL,BLM,CA,S,Saint-Barthélemy
+BM,BMU,NA,N,Bermuda
+BN,BRN,AS,S,Brunei
+BO,BOL,SA,S,Bolivia
+BR,BRA,SA,S,Brazil
+BS,BHS,NA,N,The Bahamas
+BT,BTN,AS,S,Bhutan
+BV,BVT,AF,--,Bouvet Island
+BW,BWA,AF,S,Botswana
+BY,BLR,EU,N,Belarus
+BZ,BLZ,CA,S,Belize
+CA,CAN,NA,N,Canada
+CC,CCK,CA,S,Cocos (Keeling) Islands
+CD,COD,AF,S,Congo Dem. Rep.
+CF,CAF,AF,S,Central African Republic
+CG,COG,AF,S,Congo Rep.
+CH,CHE,EU,N,Switzerland
+CI,CIV,AF,S,Ivory Coast
+CK,COK,OC,S,Cook Islands
+CL,CHL,SA,S,Chile
+CM,CMR,AF,S,Cameroon
+CN,CHN,AS,S,China
+CO,COL,SA,S,Colombia
+CR,CRI,CA,S,Costa Rica
+CU,CUB,CA,S,Cuba
+CV,CPV,AF,S,Cape Verde
+CW,CUW,CA,S,Curacao
+CX,CXR,AS,S,Christmas Island
+CY,CYP,EU,N,Cyprus
+CZ,CZE,EU,N,Czech Republic
+DE,DEU,EU,N,Germany
+DJ,DJI,AF,S,Djibouti
+DK,DNK,EU,N,Denmark
+DM,DMA,CA,S,Dominica
+DO,DOM,CA,S,Dominican Republic
+DZ,DZA,AF,S,Algeria
+EC,ECU,SA,S,Ecuador
+EE,EST,EU,N,Estonia
+EG,EGY,AF,S,Egypt
+EH,ESH,AF,S,Western Sahara
+ER,ERI,AF,S,Eritrea
+ES,ESP,EU,N,Spain
+ET,ETH,AF,S,Ethiopia
+X1,EAS,XX,-,East Asia & Pacific
+X2,ECS,XX,-,Europe & Central Asia
+X3,CEB,XX,-,Central Europe and the Baltics
+X4,CSS,XX,-,Caribbean small states
+X5,MEA,XX,-,Middle East & North Africa
+X6,OED,XX,-,OECD members
+X7,BES,XX,-,Caribbean Netherlands
+X8,PSS,XX,-,Pacific island small states
+X9,SSF,XX,-,Sub-Saharan Africa
+XA,FCS,YY,-,Fragile and conflict affected situations
+XB,HPC,YY,-,Heavily indebted poor countries
+XC,LDC,YY,-,Least developed countries: UN classification
+XD,LCN,XX,-,Latin America & Caribbean
+XE,LIC,YY,-,Low income
+XF,LMC,YY,-,Lower middle income
+XG,LMY,YY,-,Low & middle income
+XH,MIC,YY,-,Middle income
+XI,UMC,YY,-,Upper middle income
+XJ,HIC,YY,-,High income
+XK,XKX,EU,-,Kosovo
+FI,FIN,EU,N,Finland
+FJ,FJI,OC,S,Fiji
+FK,FLK,SA,S,Falkland Islands
+FM,FSM,OC,S,Micronesia Fed. States
+FO,FRO,EU,N,Faroe Islands
+FR,FRA,EU,N,France
+GA,GAB,AF,S,Gabon
+GB,GBR,EU,N,United Kingdom
+GD,GRD,CA,S,Grenada
+GE,GEO,AS,S,Georgia
+GF,GUF,SA,S,French Guiana
+GG,GGY,EU,N,Guernsey
+GH,GHA,AF,S,Ghana
+GI,GIB,EU,N,Gibraltar
+GL,GRL,EU,N,Greenland
+GM,GMB,AF,S,The Gambia
+GN,GIN,AF,S,Guinea
+GP,GLP,CA,S,Guadeloupe
+GQ,GNQ,AF,S,Equatorial Guinea
+GR,GRC,EU,N,Greece
+GS,SGS,SA,S,South Georgia and the South Sandwich Islands
+GT,GTM,CA,S,Guatemala
+GU,GUM,OC,S,Guam
+GW,GNB,AF,S,Guinea-Bissau
+GY,GUY,SA,S,Guyana
+HK,HKG,AS,S,Hong Kong
+HM,HMD,OC,N,Heard Island and McDonald Islands
+HN,HND,CA,S,Honduras
+HR,HRV,EU,N,Croatia
+HT,HTI,CA,S,Haiti
+HU,HUN,EU,N,Hungary
+ID,IDN,AS,S,Indonesia
+IE,IRL,EU,N,Ireland
+IL,ISR,AS,S,Israel
+IM,IMN,EU,N,Isle of Man
+IN,IND,AS,S,India
+IO,IOT,--,--,British Indian Ocean Territory
+IQ,IRQ,AS,S,Iraq
+IR,IRN,AS,S,Iran
+IS,ISL,EU,N,Iceland
+IT,ITA,EU,N,Italy
+JE,JEY,EU,N,Jersey
+JM,JAM,CA,S,Jamaica
+JO,JOR,AS,S,Jordan
+JP,JPN,AS,N,Japan
+KE,KEN,AF,S,Kenya
+KG,KGZ,AS,S,Kyrgyzstan
+KH,KHM,AS,S,Cambodia
+KI,KIR,OC,S,Kiribati
+KM,COM,AF,S,Comoros
+KN,KNA,CA,S,St. Kitts and Nevis
+KP,PRK,AS,S,North Korea
+KR,KOR,AS,N,South Korea
+KW,KWT,AS,S,Kuwait
+KY,CYM,CA,S,Cayman Islands
+KZ,KAZ,AS,S,Kazakhstan
+LA,LAO,AS,S,Laos
+LB,LBN,AS,S,Lebanon
+LC,LCA,CA,S,St. Lucia
+LI,LIE,EU,N,Liechtenstein
+LK,LKA,AS,S,Sri Lanka
+LR,LBR,AF,S,Liberia
+LS,LSO,AF,S,Lesotho
+LT,LTU,EU,N,Lithuania
+LU,LUX,EU,N,Luxembourg
+LV,LVA,EU,N,Latvia
+LY,LBY,AF,S,Libya
+MA,MAR,AF,S,Morocco
+MC,MCO,EU,N,Monaco
+MD,MDA,EU,N,Moldova
+ME,MNE,EU,N,Montenegro
+MF,MAF,CA,--,St. Martin
+MG,MDG,AF,S,Madagascar
+MH,MHL,OC,S,Marshall Islands
+MK,MKD,EU,N,Macedonia
+ML,MLI,AF,S,Mali
+MM,MMR,AS,S,Myanmar
+MN,MNG,AS,S,Mongolia
+MO,MAC,AS,S,Macau
+MP,MNP,OC,S,Northern Mariana Islands
+MQ,MTQ,CA,S,Martinique
+MR,MRT,AF,S,Mauritania
+MS,MSR,CA,S,Montserrat
+MT,MLT,EU,N,Malta
+MU,MUS,AF,S,Mauritius
+MV,MDV,AS,S,Maldives
+MW,MWI,AF,S,Malawi
+MX,MEX,NA,S,Mexico
+MY,MYS,AS,S,Malaysia
+MZ,MOZ,AF,S,Mozambique
+NA,NAM,AF,S,Namibia
+NC,NCL,OC,S,New Caledonia
+NE,NER,AF,S,Niger
+NF,NFK,OC,S,Norfolk Island
+NG,NGA,AF,S,Nigeria
+NI,NIC,CA,S,Nicaragua
+NL,NLD,EU,N,Netherlands
+NO,NOR,EU,N,Norway
+NP,NPL,AS,S,Nepal
+NR,NRU,OC,S,Nauru
+NU,NIU,OC,S,Niue
+NZ,NZL,OC,N,New Zealand
+O1,--,--,--,Other Country
+OM,OMN,AS,S,Oman
+PA,PAN,CA,S,Panama
+PE,PER,SA,S,Peru
+PF,PYF,OC,S,French Polynesia
+PG,PNG,OC,S,Papua New Guinea
+PH,PHL,AS,S,Philippines
+PK,PAK,AS,S,Pakistan
+PL,POL,EU,N,Poland
+PM,SPM,NA,N,St. Pierre and Miquelon
+PN,PCN,OC,S,Pitcairn Islands
+PR,PRI,CA,S,Puerto Rico
+PS,PSE,AS,S,Palestinian territories
+PT,PRT,EU,N,Portugal
+PW,PLW,OC,S,Palau
+PY,PRY,SA,S,Paraguay
+QA,QAT,AS,S,Qatar
+RE,REU,AS,S,Réunion
+RO,ROU,EU,N,Romania
+RS,SRB,EU,N,Serbia
+RU,RUS,EU,N,Russia
+RW,RWA,AF,S,Rwanda
+SA,SAU,AS,S,Saudi Arabia
+SB,SLB,OC,S,Solomon Islands
+SC,SYC,AF,S,Seychelles
+SD,SDN,AF,S,Sudan
+SE,SWE,EU,N,Sweden
+SG,SGP,AS,S,Singapore
+SH,SHN,AF,S,St. Helena
+SI,SVN,EU,N,Slovenia
+SJ,SJM,EU,N,Svalbard and Jan Mayen
+SK,SVK,EU,N,Slovakia
+SL,SLE,AF,S,Sierra Leone
+SM,SMR,EU,S,San Marino
+SN,SEN,AF,S,Senegal
+SO,SOM,AF,S,Somalia
+SR,SUR,SA,S,Suriname
+SS,SSD,AF,--,South Sudan
+ST,STP,AF,S,Sao Tome and Principe
+SV,SLV,CA,S,El Salvador
+SX,SXM,CA,--,Sint Maarten
+SY,SYR,AS,S,Syria
+SZ,SWZ,AF,S,Swaziland
+TC,TCA,CA,S,Turks and Caicos Islands
+TD,TCD,AF,S,Chad
+TF,ATF,AF,--,French Southern and Antarctic Lands
+TG,TGO,AF,S,Togo
+TH,THA,AS,S,Thailand
+TJ,TJK,AS,S,Tajikistan
+TK,TKL,OC,S,Tokelau
+TL,TLS,AS,S,East Timor
+TM,TKM,AS,S,Turkmenistan
+TN,TUN,AF,S,Tunisia
+TO,TON,OC,S,Tonga
+TR,TUR,AS,S,Turkey
+TT,TTO,CA,S,Trinidad and Tobago
+TV,TUV,OC,S,Tuvalu
+TW,TWN,AS,S,Taiwan
+TZ,TZA,AF,S,Tanzania
+UA,UKR,EU,N,Ukraine
+UG,UGA,AF,S,Uganda
+UM,UMI,NA,N,United States Minor Outlying Islands
+US,USA,NA,N,United States
+UY,URY,SA,S,Uruguay
+UZ,UZB,AS,S,Uzbekistan
+VA,VAT,EU,N,Vatican City
+VC,VCT,CA,S,St. Vincent and the Grenadines
+VE,VEN,SA,S,Venezuela
+VG,VGB,CA,S,Virgin Islands (BR)
+VI,VIR,CA,S,Virgin Islands (US)
+VN,VNM,AS,S,Vietnam
+VU,VUT,OC,S,Vanuatu
+WF,WLF,OC,S,Wallis and Futuna
+WS,WSM,OC,S,Samoa
+YE,YEM,AS,S,Yemen
+YT,MYT,AF,S,Mayotte
+ZA,ZAF,AF,S,South Africa
+ZM,ZMB,AF,S,Zambia
+ZW,ZWE,AF,S,Zimbabwe
