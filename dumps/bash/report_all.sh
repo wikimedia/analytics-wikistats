@@ -1,15 +1,17 @@
 #!/bin/bash
+# script migrated to stat1005
 
-destination="draft"
-if [ "$1" == "final" ] 
+# publish wikistats dump_based reports, destination 'draft' sends report to ../draft/.. location for manual vetting
+
+destination='draft'
+if [ "$1" == 'final' ] 
 then
   destination='final'
 fi
 
 echo destination:$destination
 
-#wikistats=/a/wikistats_git
-wikistats=/home/ezachte/wikistats
+wikistats=$WIKISTATS_SCRIPTS
 cd $wikistats/dumps/bash
 
 ./report.sh wb $destination
@@ -22,3 +24,8 @@ cd $wikistats/dumps/bash
 ./report.sh wx $destination
 ./report.sh wp $destination
 ./report_regions.sh wp $destination
+
+# zip and copy csv files and html output to folder /srv/dumps/wikistats_1
+# that folder is rsynced hourly to http://dumps.wikimedia.org/other/wikistats_1
+cd $wikistats/backup
+./zip_all.sh

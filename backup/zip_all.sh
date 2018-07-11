@@ -1,7 +1,7 @@
 #!/bin/bash
 
-wikistats=/a/wikistats_git
-cd $wikistats/dumps/bash
+wikistats=$WIKISTATS_SCRIPTS
+cd $wikistats/backup
 
 ./zip_csv.sh wb
 ./zip_csv.sh wk
@@ -23,4 +23,3 @@ cd $wikistats/dumps/bash
 ./zip_out.sh ws
 ./zip_out.sh wv
 ./zip_out.sh wx
-
