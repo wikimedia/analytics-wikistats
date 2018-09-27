@@ -15,7 +15,7 @@
 # for request data (= page views) shortening still provides some fuzziness on purpose 
 
 # temporary code: write all codes for countries to one csv file, which replaces a handful on partial csv files in meta folder
-sub WriteCsvGeoInfo
+sub WriteGeoInfoWikimedia
 {
   my ($iso2,$iso3,$region_code,$north_south_code,$country_name,$article_title,$width,$height) ;
 
@@ -29,10 +29,13 @@ sub WriteCsvGeoInfo
   print CSV_GEOINFO "# from ../csv/meta/CountryInfo.csv: population, connected, wp/en article title," . 
                     " icon (merged by country name) (data originally from wp/en)\n";
   print CSV_GEOINFO "# C:country info, R:region info, L:language info, F: flag info\n" ;
+  print CSV_GEOINFO "# population counts in this file from wp-en List_of_countries_by_population\n"; 
+  print CSV_GEOINFO "# perc internet users (connected) in this file from wp-en List_of_countries_by_number_of_Internet_users\n"; 
   print CSV_GEOINFO "record type,ISO_3166-1 alpha-2,ISO_3166-1 alpha-3,region,N/S,country name,population,". 
                     "connected,wp/en article title,icon file,icon width,icon height\n" ;
   
-  foreach $iso2 (sort keys %country_names)  
+# foreach $iso2 (sort keys %country_names)  
+  foreach $iso2 (sort keys %iso2_codes)  
   {
     next if $iso2 eq 'A1' or # MaxMind 'Anonymous Proxy'
             $iso2 eq 'A2' or # MaxMind 'Satellite Provider' 
@@ -45,10 +48,13 @@ sub WriteCsvGeoInfo
             $iso2 =~ /^\-+$/ ; # only one or more dahses
 
     $country_name     = $country_names {$iso2} ;
-    $iso3             = $country_names_iso3 {$country_name} ;
+  # $iso3             = $country_names_iso3 {$country_name} ;
+  # $iso3             = $country_names_iso3 {$iso2} ;
+    $iso3             = $country_iso3 {$iso2} ;
     $region_code      = $region_codes {$iso2} ;
     $north_south_code = $north_south_codes {$iso2} ;
-    $country_meta_info = $country_meta_info {$country_name} ;
+  # $country_meta_info = $country_meta_info {$country_name} ;
+    $country_meta_info = $country_meta_info {$iso2} ;
     my ($article_url,$icon,$population,$connected) = split (',', $country_meta_info) ;
     $article_url =~ s/^.*wiki\/// ; # extract the actual page title from html
     $article_url =~ s/\'.*$// ;
@@ -165,7 +171,9 @@ sub WriteCsvDataMapInfoPerCountry
 {
   &LogSub ("WriteCsvDataMapInfoPerCountry\n") ;
 
-  &AddExtraCountryNames_iso3 ;
+  # &AddExtraCountryNames_iso3 ; # obsolete ?
+
+  my ($iso2, $iso3) ;
 
   $folder_scripts = "//stats.wikimedia.org/wikimedia/squids/scripts/" ;
   $html =~ s/WORLDMAP_D3/<script src="$folder_scripts\/d3.min.js"><\/script>\n<script src="$folder_scripts\/topojson.min.js"><\/script>\n<script src="$folder_scripts\/datamaps.world.hires.min.js"><\/script>\n<script src="$folder_scripts\/options.js"><\/script>\n/ ;
@@ -182,7 +190,9 @@ sub WriteCsvDataMapInfoPerCountry
 
     $requests_this_country  = $requests_recently_per_country {$country} ;
 
-    $country_meta = $country_meta_info {$country} ;
+  # $country_meta = $country_meta_info {$country} ;
+    $iso2 = $country_iso2_from_name {$country} ;
+    $country_meta = $country_meta_info {$iso2} ;
 
     my ($link,$icon,$population,$connected) = split (',', $country_meta) ;
 
@@ -207,21 +217,22 @@ sub WriteCsvDataMapInfoPerCountry
   # $population2 = &i2KM1 ($population) ;
     $population2 = $population ; # see csv_shorten_demographics above 
 
-    $code_iso3 = $country_names_iso3 {$country} ;
-    if ($code_iso3 eq '')
+  # $iso3 = $country_names_iso3 {$country} ;
+    $iso3 = $country_iso3 {$iso2} ;
+    if ($iso3 eq '')
     { 
       print "no iso3166 code for '$country'\n" ; 
-      $code_iso3 = 'XXX' ; 
+      $iso3 = 'XXX' ; 
     }
     
     ($perc2 = $perc) =~ s/\%// ; 
 
     $icon =~ s/"/'/g ;
-    $d3_csv_countries  .= "$code_iso3,$requests_per_capita,$perc2,$requests_this_country2,$population2,$connected2,," ;  
+    $d3_csv_countries  .= "$iso3,$requests_per_capita,$perc2,$requests_this_country2,$population2,$connected2,," ;  
 
-    $json_flags .= "{ \"ISO3\": \"$code_iso3\", \"flag\": \"$icon\" },\n" ;
+    $json_flags .= "{ \"ISO3\": \"$iso3\", \"flag\": \"$icon\" },\n" ;
     $icon =~ s/,/\%2C/g ;
-    $csv_flags  .= "$code_iso3,$icon\n" ;
+    $csv_flags  .= "$iso3,$icon\n" ;
 
     $perc_tot = 0;
     $requests_used = 0 ;
@@ -250,7 +261,7 @@ sub WriteCsvDataMapInfoPerCountry
       ($perc2 = $perc) =~ s/\%// ;
   
       if ($perc2 >= 0.1)     
-      { $requests_perc {$languages [$l]} .= "$code_iso3:$perc2;" ; }
+      { $requests_perc {$languages [$l]} .= "$iso3:$perc2;" ; }
 
       $language = $languages [$l] ;
       if ($out_languages {$language} ne "")
@@ -306,6 +317,7 @@ sub WriteCsvDataMapInfoPerRegion
 {
   &LogSub ("WriteCsvDataMapInfoPerRegion\n") ;
 
+  my ($iso2, $iso3) ;
   my ($sample_rate) = @_ ;
   my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
   my (@index_countries,@csv_countries) ;
@@ -321,7 +333,8 @@ sub WriteCsvDataMapInfoPerRegion
   foreach $country_code (keys_sorted_by_value_num_desc %requests_recently_per_country_code)
   {
     my ($country,$code) = split ('\|', $country_code) ;
-    my $code_iso3 = $country_names_iso3 {$country} ;
+  # my $iso3 = $country_names_iso3 {$country} ;
+    my $iso3 = $country_iso3 {$country_iso2_from_name {$country}} ;
 
     my $region_code      = $region_codes {$code} ;
     if ($region_code eq '')
@@ -427,7 +440,7 @@ sub WriteCsvDataMapInfoPerRegion
     $index =  $d3_csv_entries {$region_code} ;
     
     $d3_csv_regions2 {$region_code} .= 
-      "$index:$code_iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
+      "$index:$iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
    
     $d3_csv_entries {'W'} ++ ;
     if ($d3_csv_entries {'W'} <= $d3_csv_rows_max)
@@ -435,7 +448,7 @@ sub WriteCsvDataMapInfoPerRegion
       $index =  $d3_csv_entries {'W'} ;
 
       $d3_csv_regions2 {'W'} .= 
-      "$index:$code_iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
+      "$index:$iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
     }
 
     $d3_csv_entries {$north_south_code} ++ ;
@@ -444,7 +457,7 @@ sub WriteCsvDataMapInfoPerRegion
       $index =  $d3_csv_entries {$north_south_code} ;
 
       $d3_csv_regions2 {$north_south_code} .= 
-        "$index:$code_iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
+        "$index:$iso3:$country2:$north_south_name:$population2:$perc_population:$perc_connected:$requests_this_country2:$perc_share_total2|" ;
     }
     
     if ($verbose)
@@ -542,15 +555,17 @@ sub WriteCsvDataMapInfoPerRegion
 
 sub WriteCsvDataMapInfoPerLanguage
 {
+  &LogSub ("WriteCsvDataMapInfoPerLanguage\n") ;
+
   my ($sample_rate) = @_ ;
 
-  my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot) ;
+  my ($link_country,$population,$icon,$bar,$bars,$bar_width,$perc,$perc_tot,$perc_global,$requests_tot, $iso2, $iso3) ;
 
-  foreach $country_code_iso2 (keys %country_names)
+  foreach $iso2 (keys %country_names)
   { 
-    $country_name = $country_names {$country_code_iso2} ;
-    $country_codes_iso2 {$country_name}  = $country_code_iso2 ; 
-  # print "1 code $country_code_iso2 name $country_name\n" ;
+    $country_name = $country_names {$iso2} ;
+    $country_codes_iso2 {$country_name}  = $iso2 ; 
+  # print "1 code $iso2 name $country_name\n" ;
   }
 
   # for best contrast some colors differ per bubble (we know their position and hence the color of their background, e.g. ocean, dark country) 

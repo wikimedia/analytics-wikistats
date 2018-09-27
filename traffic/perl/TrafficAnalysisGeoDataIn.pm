@@ -27,86 +27,86 @@
 # so for WiViVi shortening needs to be done in javascript 
 # for request data (= page views) shortening still provides some fuzziness on purpose 
 
-sub ReadCountryCodes
-{
-  &LogSub ("ReadCountryCodes\n") ;
+# replaced by new ReadCsvGeoInfo
+# sub ReadCountryCodes
+# {
+#   &LogSub ("ReadCountryCodes\n") ;
+#
+#   my @csv = ReadCsv ("$path_meta/$file_csv_country_codes") ;
+#
+#   foreach $line (@csv)
+#   {
+#     if ($line =~ /^[A-Z]/)
+#     {
+#       chomp ($line) ;
+#       ($code,$name) = split (',',$line,2) ;
+#       $country_codes {$code} = unicode_to_html ($name) ;
+#       # print "$code => $name\n" ;
+#     }
+#   }
+# 
+#   $country_codes {'-'}  = 'Unknown3' ;
+#   $country_codes {'--'} = 'Unknown4' ;
+#   $country_codes {'XX'} = 'Unknown5' ;
+#   $country_codes {'-P'} = 'IPv6' ;
+#   $country_codes {'-X'} = 'Unknown6' ;
+# }
 
-  my @csv = ReadCsv ("$path_meta/$file_csv_country_codes") ;
+# replaced by new ReadCsvGeoInfo
+# sub ReadCountryCodesISO3
+# {
+#   &LogSub ("ReadCountryCodesISO3\n") ;
+#  
+#   my @csv = &ReadCsv ("$path_meta/CountryCodesISO3.csv") ;
+#
+#   foreach $line (@csv)
+#   {
+#     if ($line =~ /^[A-Z]/)
+#     {
+#       chomp ($line) ;
+#       ($code,$name) = split (',',$line,2) ;
+#       $name =~ s/"//g ;
+#       $name =~ s/\s+$//g ; # remove trailing spaces
+#       $country_codes_iso3 {$code} = $name ;
+#       $country_names_iso3 {$name} = $code ;
+#     # print "$code => $name\n" ;
+#     }
+#   }
+# }
 
-  foreach $line (@csv)
-  {
-    if ($line =~ /^[A-Z]/)
-    {
-      chomp ($line) ;
-      ($code,$name) = split (',',$line,2) ;
-      $country_codes {$code} = unicode_to_html ($name) ;
-      # print "$code => $name\n" ;
-    }
-  }
-
-  $country_codes {'-'}  = 'Unknown3' ;
-  $country_codes {'--'} = 'Unknown4' ;
-  $country_codes {'XX'} = 'Unknown5' ;
-  $country_codes {'-P'} = 'IPv6' ;
-  $country_codes {'-X'} = 'Unknown6' ;
-}
-
-sub ReadCountryCodesISO3
-{
-  &LogSub ("ReadCountryCodesISO3\n") ;
-  
-  my @csv = &ReadCsv ("$path_meta/CountryCodesISO3.csv") ;
-
-  foreach $line (@csv)
-  {
-    if ($line =~ /^[A-Z]/)
-    {
-      chomp ($line) ;
-      ($code,$name) = split (',',$line,2) ;
-      $name =~ s/"//g ;
-      $name =~ s/\s+$//g ; # remove trailing spaces
-      $country_codes_iso3 {$code} = $name ;
-      $country_names_iso3 {$name} = $code ;
-    # print "$code => $name\n" ;
-    }
-  }
-}
-
-sub AddExtraCountryNames_iso3
-{ 
-if (0)
-{
+# replaced by new ReadCsvGeoInfo
+# sub AddExtraCountryNames_iso3
+# { 
 # add entries for country names spelled differently in $file_csv_country_codes 
-  $country_names_iso3 {'Bolivia'}                 = 'BOL' ;
-  $country_names_iso3 {'Brunei'}                  = 'BRN' ;
-# $country_names_iso3 {'Burma'}                   = 'MMR' ;
-  $country_names_iso3 {'Cape Verde'}              = 'CPV' ;
-  $country_names_iso3 {'Caribbean Netherlands'}   = 'XXX' ;
-  $country_names_iso3 {'Congo Dem.Rep.'}          = 'COD' ;
-  $country_names_iso3 {'Congo Rep.'}              = 'COG' ;
-  $country_names_iso3 {"Cote d'Ivoire"}           = 'CIV' ;
-  $country_names_iso3 {'Falkland Islands'}        = 'FLK' ;
-  $country_names_iso3 {'Iran'}                    = 'IRN' ;
-  $country_names_iso3 {'Laos'}                    = 'LAO' ;
-  $country_names_iso3 {'Macedonia'}               = 'MKD' ;
-  $country_names_iso3 {'Micronesia'}              = 'FSM' ;
-  $country_names_iso3 {'Moldova'}                 = 'MDA' ;
-  $country_names_iso3 {'Palestinian Territories'} = 'PSE' ;
-  $country_names_iso3 {'Russia'}                  = 'RUS' ;
-  $country_names_iso3 {'Sint Maarten'}            = 'SXM' ;
-  $country_names_iso3 {'South Korea'}             = 'KOR' ;
-  $country_names_iso3 {'Syria'}                   = 'SYR' ;
-  $country_names_iso3 {'Sao Tome and Principe'}   = 'STP' ;
-  $country_names_iso3 {'Taiwan'}                  = 'TWN' ;
-  $country_names_iso3 {'Tanzania'}                = 'TZA' ;
-  $country_names_iso3 {'United States'}           = 'USA' ;
-  $country_names_iso3 {'Vatican City'}            = 'VAT' ;
-  $country_names_iso3 {'Venezuela'}               = 'VEN' ;
-  $country_names_iso3 {'Vietnam'}                 = 'VNM' ;
-  $country_names_iso3 {'Virgin Islands, UK'}      = 'VGB' ;
-  $country_names_iso3 {'Virgin Islands, US'}      = 'VIR' ;
-}
-}
+#   $country_names_iso3 {'Bolivia'}                 = 'BOL' ;
+#   $country_names_iso3 {'Brunei'}                  = 'BRN' ;
+#   $country_names_iso3 {'Burma'}                   = 'MMR' ;
+#   $country_names_iso3 {'Cape Verde'}              = 'CPV' ;
+#   $country_names_iso3 {'Caribbean Netherlands'}   = 'XXX' ;
+#   $country_names_iso3 {'Congo Dem.Rep.'}          = 'COD' ;
+#   $country_names_iso3 {'Congo Rep.'}              = 'COG' ;
+#   $country_names_iso3 {"Cote d'Ivoire"}           = 'CIV' ;
+#   $country_names_iso3 {'Falkland Islands'}        = 'FLK' ;
+#   $country_names_iso3 {'Iran'}                    = 'IRN' ;
+#   $country_names_iso3 {'Laos'}                    = 'LAO' ;
+#   $country_names_iso3 {'Macedonia'}               = 'MKD' ;
+#   $country_names_iso3 {'Micronesia'}              = 'FSM' ;
+#   $country_names_iso3 {'Moldova'}                 = 'MDA' ;
+#   $country_names_iso3 {'Palestinian Territories'} = 'PSE' ;
+#   $country_names_iso3 {'Russia'}                  = 'RUS' ;
+#   $country_names_iso3 {'Sint Maarten'}            = 'SXM' ;
+#   $country_names_iso3 {'South Korea'}             = 'KOR' ;
+#   $country_names_iso3 {'Syria'}                   = 'SYR' ;
+#   $country_names_iso3 {'Sao Tome and Principe'}   = 'STP' ;
+#   $country_names_iso3 {'Taiwan'}                  = 'TWN' ;
+#   $country_names_iso3 {'Tanzania'}                = 'TZA' ;
+#   $country_names_iso3 {'United States'}           = 'USA' ;
+#   $country_names_iso3 {'Vatican City'}            = 'VAT' ;
+#   $country_names_iso3 {'Venezuela'}               = 'VEN' ;
+#   $country_names_iso3 {'Vietnam'}                 = 'VNM' ;
+#   $country_names_iso3 {'Virgin Islands, UK'}      = 'VGB' ;
+#   $country_names_iso3 {'Virgin Islands, US'}      = 'VIR' ;
+# }
 
 sub ReadCsv
 {
@@ -137,99 +137,101 @@ sub ReadCsv
   return (@csv) ;
 }
 
-sub ReadInputRegionCodes
+# replaced by new ReadCsvGeoInfo
+# sub ReadInputRegionCodes
+# {
+#   &LogSub ("ReadInputRegionCodes\n") ;
+#
+#   my @csv = &ReadCsv ("$path_meta/RegionCodes.csv") ;
+# 
+#   foreach $line (@csv)
+#   {
+#     ($country_code,$region_code,$north_south_code) = split (',', $line) ;
+#     $region_codes      {$country_code} = $region_code ;
+#     $north_south_codes {$country_code} = $north_south_code ;
+#   }
+# }
+
+# replaced by new ReadCsvGeoInfo
+# sub ReadInputCountryNames
+# {
+#   &LogSub ("ReadInputCountryNames\n") ;
+#
+#   my @csv = &ReadCsv ("$path_meta/CountryCodes.csv") ;
+#
+#   $country_names {'-'}  = 'Unknown7' ;
+#   $country_names {'--'} = 'Unknown8' ;
+#   $country_names {'-P'} = 'IPv6' ;
+#   $country_names {'-X'} = 'Unknown9' ;
+#   $country_names {"XX"} = "Unknown10" ;
+#
+#   foreach $line (@csv)
+#   {
+#     chomp $line ;
+#
+#     next if $line =~ /^#/ ;
+#
+#     $line =~ s/\"//g ;
+#
+#     $line =~ s/[\x00-\x1f]//g ;
+#     $line =~ s/UNDEFINED/Undefined/g ;
+#     $line =~ s/territories/Territories/ ;
+#
+#     $line =~ s/(Falkland Islands).*$/$1/g ; # - (Malvinas)
+#     $line =~ s/Reunion/Réunion/ ;
+#     $line =~ s/Aland Islands/Åland Islands/ ;
+#     $line =~ s/Bonaire, Saint Eustatius and Saba/Caribbean Netherlands/ ;
+#     $line =~ s/Congo, The Democratic Republic of the/Congo Dem. Rep./ ;
+#     $line =~ s/Congo$/Congo Rep./ ;
+#     $line =~ s/Curacao/Curaçao/ ;
+#     $line =~ s/Brunei Darussalam/Brunei/ ;
+#     $line =~ s/Holy See.*$/Vatican City/ ;
+#     $line =~ s/Iran, Islamic Republic of/Iran/ ;
+#     $line =~ s/Korea, Democratic People's Republic of/North Korea/ ;
+#     $line =~ s/Korea, Republic of/South Korea/ ;
+#     $line =~ s/Lao People's Democratic Republic/Laos/ ;
+#     $line =~ s/Libyan Arab Jamahiriya/Libya/ ;
+#     $line =~ s/Micronesia, Federated States of/Micronesia/ ;
+#     $line =~ s/Moldova, Republic of/Moldova/ ;
+#     $line =~ s/Myanmar/Burma/ ;
+#     $line =~ s/Palestinian Territory/Palestinian Territories/ ;
+#     $line =~ s/Pitcairn/Pitcairn Islands/ ;
+#     $line =~ s/Russian Federation/Russia/ ;
+#     $line =~ s/American American Samoa/American Samoa/ ;
+#     $line =~ s/Saint Bartelemey/Saint Barthélemy/ ;
+#     $line =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
+#     $line =~ s/Syrian Arab Republic/Syria/ ;
+#     $line =~ s/Tanzania, United Republic of/Tanzania/ ;
+#     $line =~ s/Virgin Islands, British/Virgin Islands, UK/ ;
+#     $line =~ s/Virgin Islands, U.S./Virgin Islands, US/ ;
+#    
+#     # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
+#     ($country_code,$country_name) = split (',', $line,2) ;
+#
+#     $country_name =~ s/"//g ;
+#
+#     # next if $country_name eq "Anonymous Proxy" ;
+#     # next if $country_name eq "Satellite Provider" ;
+#     # next if $country_name eq "Other Country" ;
+#     # next if $country_name eq "Asia/Pacific Region" ;
+#     # next if $country_name eq "Europe" ;
+#
+# #    if ($country_meta_info {$country}  eq "")
+# #    {
+# #      if ($country_meta_info_not_found_reported {$country} ++ == 0)
+# #      { print "Meta info not found for country '$country'\n" ; }
+# #    }
+#
+#     $country_names_found {$country_name} ++ ;
+#     $country_names       {$country_code} = $country_name ;
+#     $country_codes_all   {"$country_name|$country_code"} ++ ;
+#   }
+# }
+
+sub ReadGeoInfoWikimedia
 {
-  &LogSub ("ReadInputRegionCodes\n") ;
+  &LogSub ("ReadGeoInfoWikimedia\n") ;
 
-  my @csv = &ReadCsv ("$path_meta/RegionCodes.csv") ;
-
-  foreach $line (@csv)
-  {
-    ($country_code,$region_code,$north_south_code) = split (',', $line) ;
-    $region_codes      {$country_code} = $region_code ;
-    $north_south_codes {$country_code} = $north_south_code ;
-  }
-}
-
-sub ReadInputCountryNames
-{
-  &LogSub ("ReadInputCountryNames\n") ;
-
-  my @csv = &ReadCsv ("$path_meta/CountryCodes.csv") ;
-
-  $country_names {'-'}  = 'Unknown7' ;
-  $country_names {'--'} = 'Unknown8' ;
-  $country_names {'-P'} = 'IPv6' ;
-  $country_names {'-X'} = 'Unknown9' ;
-  $country_names {"XX"} = "Unknown10" ;
-
-  foreach $line (@csv)
-  {
-    chomp $line ;
-
-    next if $line =~ /^#/ ;
-
-    $line =~ s/\"//g ;
-
-    $line =~ s/[\x00-\x1f]//g ;
-    $line =~ s/UNDEFINED/Undefined/g ;
-    $line =~ s/territories/Territories/ ;
-
-if (0)
-{
-    $line =~ s/(Falkland Islands).*$/$1/g ; # - (Malvinas)
-    $line =~ s/Reunion/Réunion/ ;
-    $line =~ s/Aland Islands/Åland Islands/ ;
-    $line =~ s/Bonaire, Saint Eustatius and Saba/Caribbean Netherlands/ ;
-    $line =~ s/Congo, The Democratic Republic of the/Congo Dem. Rep./ ;
-    $line =~ s/Congo$/Congo Rep./ ;
-    $line =~ s/Curacao/Curaçao/ ;
-    $line =~ s/Brunei Darussalam/Brunei/ ;
-    $line =~ s/Holy See.*$/Vatican City/ ;
-    $line =~ s/Iran, Islamic Republic of/Iran/ ;
-    $line =~ s/Korea, Democratic People's Republic of/North Korea/ ;
-    $line =~ s/Korea, Republic of/South Korea/ ;
-    $line =~ s/Lao People's Democratic Republic/Laos/ ;
-    $line =~ s/Libyan Arab Jamahiriya/Libya/ ;
-    $line =~ s/Micronesia, Federated States of/Micronesia/ ;
-    $line =~ s/Moldova, Republic of/Moldova/ ;
-    $line =~ s/Myanmar/Burma/ ;
-    $line =~ s/Palestinian Territory/Palestinian Territories/ ;
-    $line =~ s/Pitcairn/Pitcairn Islands/ ;
-    $line =~ s/Russian Federation/Russia/ ;
-    $line =~ s/American American Samoa/American Samoa/ ;
-    $line =~ s/Saint Bartelemey/Saint Barthélemy/ ;
-    $line =~ s/Sao Tome and Principe/São Tomé and Príncipe/ ;
-    $line =~ s/Syrian Arab Republic/Syria/ ;
-    $line =~ s/Tanzania, United Republic of/Tanzania/ ;
-    $line =~ s/Virgin Islands, British/Virgin Islands, UK/ ;
-    $line =~ s/Virgin Islands, U.S./Virgin Islands, US/ ;
-}
-    # ($country_code,$region_code,$north_south_code,$country_name) = split (',', $line,4) ;
-    ($country_code,$country_name) = split (',', $line,2) ;
-
-    $country_name =~ s/"//g ;
-
-    # next if $country_name eq "Anonymous Proxy" ;
-    # next if $country_name eq "Satellite Provider" ;
-    # next if $country_name eq "Other Country" ;
-    # next if $country_name eq "Asia/Pacific Region" ;
-    # next if $country_name eq "Europe" ;
-
-#    if ($country_meta_info {$country}  eq "")
-#    {
-#      if ($country_meta_info_not_found_reported {$country} ++ == 0)
-#      { print "Meta info not found for country '$country'\n" ; }
-#    }
-
-    $country_names_found {$country_name} ++ ;
-    $country_names       {$country_code} = $country_name ;
-    $country_codes_all   {"$country_name|$country_code"} ++ ;
-  }
-}
-
-sub ReadCsvGeoInfo
-{
   my ($iso2,$iso3,$region_code,$north_south_code,$country_name,$article_title,$width,$height) ;
 
   die ("Could not open '$path_meta/$file_csv_geocodes'") if ! -e "$path_meta/$file_csv_geocodes" ;
@@ -241,41 +243,54 @@ sub ReadCsvGeoInfo
     next if $line =~ /^\#/ ; # skip comments
     chomp $line ;
 
-    if ($line =~ /^C/) # country info
+    if ($line =~ /^C/) # country info # June 2018 only record type in the file
     {
-      ($rectype,$iso2,$iso3,$region_code,$north_south_code,$country_name,$population,$connected,$article_title,$icon,$width,$h    eight) = split (',', $line) ;
-      $country_names {$iso2} = $country_name ;
-      $country_names_iso3 {$country_name} = $iso3 ;
-      $region_codes {$iso2} = $region_code ;
-      $north_south_codes {$iso2} = $north_south_code ;
+      ($rectype,$iso2,$iso3,$region_code,$north_south_code,$country_name,$population,$connected,$article_title,
+                                                                                          $icon,$width,$height) = split (',', $line) ;
+# print "A $iso2: $icon $width $height\n" if $icon =~ /src.*img/ ; 
+print "A $iso2: $icon $width $height\n" ; 
 
+      $iso2_codes {$iso2} ++ ;
+      $iso3_codes {$iso3} ++ ;
+
+      $country_name  =~ s/\%2C/,/g ;
+
+      $country_names            {$iso2}         = $country_name ;
+    # $country_names_iso3       {$country_name} = $iso3 ;
+      $country_iso2_from_name   {$country_name} = $iso2 ;
+      $country_iso3             {$iso2}         = $iso3 ;
+      $region_codes             {$iso2}         = $region_code ;
+      $north_south_codes        {$iso2}         = $north_south_code ;
+      $connected_perc = '--' ;
+      if (($population > 0) && ($connected > 0))
+      { $connected_perc = sprintf ("%.2f", 100 * $connected / $population) ; } ;
+      $connected_perc_wikipedia {$iso2} = $connected_perc ;
+
+      $article_url = "<a href='://en.wikipedia.org/wiki/$article_title'>$country_name<\/a>" ; 
+      $icon        = "<img src='//upload.wikimedia.org/wikipedia/$icon' $width $height border=1>" ;
       $country_meta_info = "$article_title,$icon,$population,$connected";
-      $country_meta_info {$country_name} = $country_meta_info ;
-#     $article_url =~ s/^.*wiki\/// ; # extract the actual page title from html
-#     $article_url =~ s/\'.*$// ;
-#     $article_title = $article_url ;
-#     ($width  = $icon) =~s/^.* (width=\d+).*$/$1/ ;
-#     ($height = $icon) =~s/^.* (height=\d+).*$/$1/ ;
 
-#     $icon =~s/^.*commons\/thumb/commons\/thumb/ ;
-#     $icon =~ s/\'.*$// ;
-#     $icon =~s/^.*commons\/thumb/commons\/thumb/ ;
+    # $country_meta_info {$country_name} = $country_meta_info ;
+      $country_meta_info {$iso2}         = $country_meta_info ;
+print "B: $iso2 $country_meta_info\n" if $icon =~ /src.*img/ ; 
 
-      print "$iso2: no country name\n"     if $country_name     =~ /^\-?$/ ;
-      print "$iso2: no iso3\n"             if $iso3             =~ /^\-?$/ ;
-      print "$iso2: no region code\n"      if $region_code      =~ /^\-?$/ ;
-      print "$iso2: no north/south code\n" if $north_south_code =~ /^\-?$/ ;
-      print "$iso2: no population\n"       if $population       =~ /^\-?$/ ;
-      print "$iso2: no connected\n"        if $connected        =~ /^\-?$/ ;
+      print "$iso2: no country name\n"                     if $country_name     =~ /^\-?$/ ;
+      print "$iso2: '$country_name' No iso3 code\n"        if $iso3             =~ /^\-?$/ ;
+      print "$iso2: '$country_name' No region code\n"      if $region_code      =~ /^\-?$/ ;
+      print "$iso2: '$country_name' No north/south code\n" if $north_south_code =~ /^\-?$/ ;
+      print "$iso2: '$country_name' No population\n"       if $population       =~ /^\-?$/ ;
+      print "$iso2: '$country_name' No connected\n"        if $connected        =~ /^\-?$/ ;
     }
   }
   close CSV_GEOINFO ;
 }
 
-sub ReadWorldBankDemographics
+sub ReadGeoInfoWorldBank
 {
+  &LogSub ("ReadGeoInfoWorldBank\n") ;
+
   my $file_json_demographics = shift ;
-  print "\n\nReadWorldBankDemographics\nRead from '$file_json_demographics'\n\n";
+  print "Read from '$file_json_demographics'\n";
 
   my $json_text_demographics = do
   {
@@ -291,101 +306,141 @@ sub ReadWorldBankDemographics
   foreach my $iso2 (sort keys %{$data -> {'countries'}})
   { 
     next if $iso2 !~ /^[A-Z0-9]{2,2}$/ ; # invalid entries ? like '_ China', '_OSS', 'iso3166_1_a2' -> check&fix !!!
-    my $name = $data -> {'countries'} {$iso2} {'names'} {'en'} ;
-    if ((! defined $name) || ($name eq ''))
+
+    $iso2_codes {$iso2} ++ ;
+    $iso3_codes {$iso3} ++ ;
+
+    my $country_name = $data -> {'countries'} {$iso2} {'names'} {'en'} ;
+    $country_name =~ s/,/./g ; 
+    if ((! defined $country_name) || ($country_name eq ''))
     { print "Name missing for iso2 $iso2\n" ; next ; }
 
-    $population     {$name} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'population'} ;
-    $connected_perc {$name} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'internet users per 100'} ;
-    $connected      {$name} = sprintf ("%.1f",($connected_perc {$name} / 100) * $population {$name}) ;
+  # $population_worldbank     {$country_name} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'population'} ;
+  # $connected_perc_worldbank {$country_name} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'internet users per 100'} ;
+  # $connected_worldbank      {$country_name} = sprintf ("%.0f",($connected_perc_worldbank {$country_name} / 100) *
+  #                                             $population_worldbank {$country_name}) ;
+
+    $data_from_year_worldbank {$iso2} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'year'} ;
+    $population_worldbank     {$iso2} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'population'} ;
+    $connected_perc_worldbank {$iso2} = $data -> {'countries'} {$iso2} {'years'} {'latest'} {'internet users per 100'} ;
+    $connected_worldbank      {$iso2} = sprintf ("%.0f",($connected_perc_worldbank {$iso2} / 100) *
+                                                $population_worldbank {$iso2}) ;
    
-    print "$iso2: $name " . $population {$name} . ", " . $connected {$name} . "\n"; # debug only
+  # if ($population_worldbank {$country_name} eq '')
+  # { $population_worldbank {$country_name} = "--" ; }
+  # if ($connected_worldbank  {$country_name} eq '')
+  # { $connected_worldbank  {$country_name} = "--" ; }
+  # if ($connected_perc_worldbank  {$country_name} eq '')
+  # { $connected_perc_worldbank {$country_name} = "--" ; }
+
+    if ($population_worldbank {$iso2} eq '')
+    { $population_worldbank {$iso2} = "--" ; }
+    if ($connected_worldbank  {$iso2} eq '')
+    { $connected_worldbank  {$iso2} = "--" ; }
+    if ($connected_perc_worldbank  {$iso2} eq '')
+    { $connected_perc_worldbank {$iso2} = "--" ; }
+
+  # my $line = "$iso2: '$country_name': " . "pop. " . $population_worldbank     {$country_name} . ", " . 
+  #                                         "conn. " . $connected_worldbank      {$country_name} . " = " . 
+  #                                         $connected_perc_worldbank {$country_name} . "%\n"; # debug only
+  
+    my $line = "$iso2: '$country_name': " . "pop. " . $population_worldbank     {$iso2} . ", " . 
+                                            "conn. " . $connected_worldbank      {$iso2} . " = " . 
+                                            $connected_perc_worldbank {$iso2} . "%\n"; # debug only
+
+    print $line if $line =~ /\-\-/ or $line =~ / 0 / or $line =~/0\.0/ ; # debug only
   }
 }
 
-
-sub ReadInputCountryInfo
+# combine meta data from local file (article url, flag icon) with data from worldbank (population, connected)
+sub MergeMetaInfo
 {
-  &LogSub ("\&ReadInputCountryInfo\n") ;
+  &LogSub ("MergeMetaInfo\n") ;
 
+  my ($iso2, $country_name, $country_meta_info) ;
+
+  # Wikipedia dempgraphics originally come from 
   # http://en.wikipedia.org/wiki/List_of_countries_by_population
   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
 
-  my @csv = &ReadCsv ("$path_meta/CountryInfo.csv") ;
-  open PERC,'>',"$path_meta/DifferenceWikipediaWorldBank.csv" ;  
-  print PERC "country,pop. wikipedia,pop. world bank, pop. diff,,connected wikipedia,connected world bank,connected diff\n";  
+  # Show differences between figures from Wikipedia and from World Bank (population and perc connected)
+  open DIFF,'>',"$path_meta/DifferenceWikipediaWorldBank.csv" ;  
 
-  foreach $line (@csv)
+  $line = "iso2,country name,pop. wikipedia,pop. world bank,pop. % diff,,conn. wikipedia,conn. perc. wikipedia,conn. world bank,conn. perc. worldbank,conn. % diff,,worldbank data for year\n";  
+
+  print DIFF $line ;
+  print      $line ;
+
+# foreach $iso2 (sort keys %country_names)
+  foreach $iso2 (sort keys %iso2_codes)
   {
-    chomp $line ;
-    $line =~ s/[\x00-\x1f]//g ;
+    $country_name = $country_names {$iso2} ;
+  # $country_meta_info = $country_meta_info {$country_name} ;
+    $country_meta_info = $country_meta_info {$iso2} ;
 
-    my ($country,$population_wikipedia,$connected_wikipedia,$article_url,$icon_url,$icon_width,$icon_height) = split ',', $line ;
-  # $icon =~ s/\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb///upload.wikimedia.org/wikipedia/commons/thumb/g ;
-  # $icon =~ s/\/\/upload.wikimedia.org\/wikipedia\/en\/thumb///upload.wikimedia.org/wikipedia/en/thumb/g ;
-
-    $country =~ s/\%2C/,/g ;
-
-    if ($connected_wikipedia eq '-')
+    if ($country_meta_info eq '') 
     { 
-      $ip_connections_unknown .= "* $country\n" ; 
-      # print "internet connections unknown: $country\n" ; 
+      $no_meta_info .= "$iso2,";
+      next ;
     }
 
-    $connected_wikipedia =~ s/\-/../g ;
+    ($article_url,$icon,$population_wikipedia,$connected_wikipedia) = split (',', $country_meta_info) ;
+print "1 icon $icon\n" if $icon =~ /src.*img/ ; 
+
+
+
+    $connected_wikipedia =~ s/\-/--/g ;
 
     # 2018 June
     # from now on use json file with world bank data for population and %connected (=internet users per 100)
 
-    $icon = "<img src='$icon_url' width=$icon_width height=$icon_height border=1>" ;
+  # $icon = "<img src='$icon_url' width=$icon_width height=$icon_height border=1>" ;
 
     $population_wikipedia =~ s/\_//g ; # remove interpunction
     $connected_wikipedia  =~ s/\_//g ;
 
-    my $population_world_bank = $population {$country} ;
-    my $connected_world_bank  = $connected  {$country} ;
+  # my $population_worldbank = $population_worldbank {$country_name} ;
+  # my $connected_worldbank  = $connected_worldbank  {$country_name} ;
+    
+    my $population_worldbank     = $population_worldbank {$iso2} ;
+    my $connected_worldbank      = $connected_worldbank  {$iso2} ;
+    my $data_from_year_worldbank = $data_from_year_worldbank {$iso2} ; 
     
     my $population = $population_wikipedia ;
     my $connected  = $connected_wikipedia ;
 
-    my $perc_population = '..';    
-    my $perc_connected  = '..';    
+    my $diff_perc_population = '--';    
+    my $diff_perc_connected  = '--';    
 
-    if ($population_world_bank > 0)
-    { $perc_population = sprintf ("%.1f", 100 * $population_wikipedia / $population_world_bank) ; }
-    if ($connected_world_bank > 0)
-    { $perc_connected = sprintf ("%.1f", 100 * $connected_wikipedia / $connected_world_bank) ; }
+    if ($population_worldbank > 0)
+    { $diff_perc_population = sprintf ("%.1f", 100 * $population_wikipedia / $population_worldbank) ; }
 
-    print PERC "$country,$population_wikipedia,$population_world_bank,$perc_population\%,,$connected_wikipedia,$connected_world_bank,$perc_connected\%\n" ;
-    print "$country,$population_wikipedia,$population_world_bank,$perc_population\%,,$connected_wikipedia,$connected_world_bank,$perc_connected\%\n" ;
+    if ($connected_worldbank > 0)
+    { $diff_perc_connected  = sprintf ("%.1f", 100 * $connected_wikipedia / $connected_worldbank) ; }
 
-    $country_meta_info {$country} = "$article_url,$icon,$population,$connected" ;
+    $connected_perc_wikipedia = $connected_perc_wikipedia {$iso2} ;
+    $connected_perc_worldbank = $connected_perc_worldbank {$iso2} ;
 
-    $country_alias = '' ;
- 
-    # name on wiki page                  # name on datamaps viz.
-       if ($country eq 'The Gambia')     { $country_alias = 'Gambia' ; }
-    elsif ($country eq 'The Bahamas')    { $country_alias = 'Bahamas' ; }
-    elsif ($country eq 'Samoa')          { $country_alias = 'American Samoa' ; }
-    elsif ($country eq 'American Samoa') { $country_alias = 'Samoa' ; }
-    elsif ($country eq 'American American Samoa')         { $country_alias = 'American Samoa' ; }
-    elsif ($country eq 'East Timor')     { $country_alias = 'Timor-Leste' ; }
-    elsif ($country eq 'Macau')          { $country_alias = 'Macao' ; }
-    elsif ($country =~ '^R..?union')     { $country_alias = 'Réunion' ; }
+    my $line = "$iso2,$country_name,$population_wikipedia,$population_worldbank,$diff_perc_population\%,," . 
+               "$connected_wikipedia,$connected_perc_wikipedia,$connected_worldbank,$connected_perc_worldbank,$diff_perc_connected\%,,$data_from_year_worldbank\n" ;
 
-    if ($country_alias ne '')
-    { $country_meta_info {$country_alias} = "$article_url,$icon,$population,$connected" ; }
-   
-    $code = $country_names_iso3 {$country} ;
-    if ($code eq '')
-    { 
-      $iso3_code_unknown .= "* $country, " ; 
-      # print "No ISO3 code for country $country\n" ; 
-    }
+    # $line = "$iso2,$population_wikipedia,$population_worldbank,$diff_perc_population\n" ; # debug
+    # $line = "$iso2,$connected_wikipedia,$connected_worldbank,$diff_perc_connected\n" ;    # debug
 
-    if ($country eq "United States")
-    { ($connected_us = $connected) =~ s/_//g  ; }
+    print DIFF $line ;
+    print      $line ;
+
+  # $country_meta_info {$country_name} = "$article_url,$icon,$population,$connected" ;
+    $country_meta_info {$iso2}         = "$article_url,$icon,$population,$connected" ;
+
+print "2 icon $icon\n" if $icon =~ /src.*img/ ; 
+
+  # AddCountryAlias ($country_name,$article_url,$icon,$population,$connected) ; # no longer needed ?
   }
+
+  close DIFF ;
+
+  # &ValidateCountryNames ; # obsolete ?
 
   if ($ip_connections_unknown ne '')
   {
@@ -393,51 +448,167 @@ sub ReadInputCountryInfo
     &LogDetail ("\n\nip connections unknown for:\n$ip_connections_unknown\n\n") ;
   }
 
+  &LogDetail ("\nNo meta info in \$country_meta_info for iso2 codes:\n$no_meta_info\n\n") ;
+
   if ($iso3_code_unknown ne '')
   {
     $iso3_code_unknown =~ s/,\s*$// ;
-    &LogDetail ("\nno iso3 code for:\n$iso3_code_unknown\n\n") ;
+    &LogDetail ("\nNo iso3 code for:\n$iso3_code_unknown\n\n") ;
   }
-
-  close PERC ;
-
-  &ValidateCountryNames ;
 }
 
-sub ValidateCountryNames
+# replaced by MergeMetaInfo
+# sub ReadInputCountryInfo
+# {
+#   &LogSub ("\&ReadInputCountryInfo\n") ;
+# 
+#   # http://en.wikipedia.org/wiki/List_of_countries_by_population
+#   # http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users
+#
+#   my @csv = &ReadCsv ("$path_meta/CountryInfo.csv") ;
+#
+#   open PERC,'>',"$path_meta/DifferenceWikipediaWorldBank.csv" ;  
+#   print PERC "country,pop. wikipedia,pop. world bank, pop. diff,,connected wikipedia,connected world bank,connected diff\n";  
+#
+#   foreach $line (@csv)
+#   {
+#     chomp $line ;
+#     $line =~ s/[\x00-\x1f]//g ;
+#
+#     my ($country,$population_wikipedia,$connected_wikipedia,$article_url,$icon_url,$icon_width,$icon_height) = split ',', $line ;
+#   # $icon =~ s/\/\/upload.wikimedia.org\/wikipedia\/commons\/thumb///upload.wikimedia.org/wikipedia/commons/thumb/g ;
+#   # $icon =~ s/\/\/upload.wikimedia.org\/wikipedia\/en\/thumb///upload.wikimedia.org/wikipedia/en/thumb/g ;
+#
+#     $country =~ s/\%2C/,/g ;
+#
+#     if ($connected_wikipedia eq '-')
+#     { 
+#       $ip_connections_unknown .= "* $country\n" ; 
+#       # print "internet connections unknown: $country\n" ; 
+#     }
+#
+#     $connected_wikipedia =~ s/\-/--/g ;
+#
+#     # 2018 June
+#     # from now on use json file with world bank data for population and %connected (=internet users per 100)
+# 
+#     $icon = "<img src='$icon_url' width=$icon_width height=$icon_height border=1>" ;
+# 
+#     $population_wikipedia =~ s/\_//g ; # remove interpunction
+#     $connected_wikipedia  =~ s/\_//g ;
+# 
+#     my $population_worldbank = $population_worldbank {$country} ;
+#     my $connected_worldbank  = $connected_worldbank  {$country} ;
+#     
+#     my $population = $population_wikipedia ;
+#     my $connected  = $connected_wikipedia ;
+# 
+#     my $perc_population = '--';    
+#     my $perc_connected  = '--';    
+# 
+#     if ($population_worldbank > 0)
+#     { $perc_population = sprintf ("%.1f", 100 * $population_wikipedia / $population_worldbank) ; }
+#     if ($connected_worldbank > 0)
+#     { $perc_connected = sprintf ("%.1f", 100 * $connected_wikipedia / $connected_worldbank) ; }
+#
+#     print PERC "$country,$population_wikipedia,$population_worldbank,$perc_population\%,,$connected_wikipedia,$connected_worldbank,$perc_connected\%\n" ;
+#     print "$country,$population_wikipedia,$population_worldbank,$perc_population\%,,$connected_wikipedia,$connected_worldbank,$perc_connected\%\n" ;
+# 
+#     $country_meta_info {$country} = "$article_url,$icon,$population,$connected" ;
+#
+#     AddCountryAlias ($country,$article_url,$icon,$population,$connected) ; # no longer needed ?
+#   }
+#   
+#   close PERC ;
+#
+# # &ValidateCountryNames ; # obsolete ?
+# 
+#   if ($ip_connections_unknown ne '')
+#   {
+#     $ip_connections_unknown =~ s/,\s*$// ;
+#     &LogDetail ("\n\nip connections unknown for:\n$ip_connections_unknown\n\n") ;
+#   }
+#
+#   if ($iso3_code_unknown ne '')
+#   {
+#     $iso3_code_unknown =~ s/,\s*$// ;
+#     &LogDetail ("\nno iso3 code for:\n$iso3_code_unknown\n\n") ;
+#   }
+# }
+
+# no longer needed ?
+sub AddCountryAlias
 {
-  &LogSub ("ValidateCountryNames\n") ;
+  return ;
+  my ($country_name,$article_url,$icon,$population,$connected) = @_ ;
 
-  &LogDetail ("Compare country names in two hash arrays:\n\n") ;
-  &LogDetail ("Countries in \%country_names_found not found in \%country_meta_info:\n\n") ;
+  my ($iso2,$iso3,$country_alias) ;
+ 
+  # name on wiki page                  # name on datamaps viz.
+     if ($country_name eq 'The Gambia')     { $country_alias = 'Gambia' ; }
+  elsif ($country_name eq 'The Bahamas')    { $country_alias = 'Bahamas' ; }
+  elsif ($country_name eq 'Samoa')          { $country_alias = 'American Samoa' ; }
+  elsif ($country_name eq 'American Samoa') { $country_alias = 'Samoa' ; }
+  elsif ($country_name eq 'American American Samoa')         { $country_alias = 'American Samoa' ; }
+  elsif ($country_name eq 'East Timor')     { $country_alias = 'Timor-Leste' ; }
+  elsif ($country_name eq 'Macau')          { $country_alias = 'Macao' ; }
+  elsif ($country_name =~ '^R..?union')     { $country_alias = 'Reunion' ; }
 
-  &LogBreak ;
-  foreach $country (sort keys %country_names_found)
-  {
-    if ($country_meta_info {$country} eq '')
-    { &LogList ("$country\n") ; }
+  if ($country_alias ne '')
+  { $country_meta_info {$country_alias} = "$article_url,$icon,$population,$connected" ; }
+   
+# $iso3 = $country_names_iso3 {$country_iso2_from_name {$country}} ;
+  $iso3 = $country_iso3 {$country_iso2_from_name {$country}} ;
+
+  if ($iso3 eq '')
+  { 
+    $iso3_code_unknown .= "* $country_name, " ; 
+    # print "No ISO3 code for iso2 $iso2, country $country_name\n" ; 
   }
-  &LogBreak ;
 
-  &LogDetail ("Countries in \%country_meta_info not found in \%country_names_found:\n\n") ;
-  &LogBreak ;
-  foreach $country (sort keys %country_meta_info)
-  {
-    if ($country_names_found {$country} eq '')
-    { &LogList ("$country\n") ; }
-  }
-  &LogBreak ;
+  if ($country eq "United States")
+  { ($connected_us = $connected) =~ s/_//g  ; }
 }
+
+# sub ValidateCountryNames
+# {
+#   &LogSub ("ValidateCountryNames\n") ;
+# 
+#   &LogDetail ("Compare country names in two hash arrays:\n\n") ;
+#   &LogDetail ("Countries in \%country_names_found not found in \%country_meta_info:\n\n") ;
+# 
+#   &LogBreak ;
+#   foreach $country (sort keys %country_names_found)
+#   {
+#     if ($country_meta_info {$country} eq '')
+#     { &LogList ("$country\n") ; }
+#   }
+#   &LogBreak ;
+# 
+#   &LogDetail ("Countries in \%country_meta_info not found in \%country_names_found:\n\n") ;
+#   &LogBreak ;
+#   foreach $country (sort keys %country_meta_info)
+#   {
+#     if ($country_names_found {$country} eq '')
+#     { &LogList ("$country\n") ; }
+#   }
+#   &LogBreak ;
+# }
 
 sub CollectRegionCounts
 {
   &LogSub ("CollectRegionCounts\n") ;
 
-  my ($country_code, $region_code, $north_south_code, $country_name) ;
-  foreach $country_code (keys %country_names)
+# my ($country_code, $region_code, $north_south_code, $country_name) ;
+  my ($iso2, $region_code, $north_south_code, $country_name) ;
+# foreach $country_code (keys %country_names)
+  foreach $iso2 (sort keys %iso2_codes)
   {
-    $country_name = $country_names {$country_code} ;
-    $country_meta = $country_meta_info {$country_name} ;
+  # $country_name = $country_names {$country_code} ;
+  # $country_meta = $country_meta_info {$country_name} ;
+
+    $country_name = $country_names {$iso2} ;
+    $country_meta = $country_meta_info {$iso2} ;
 
     next if $link =~ /^\*$/ ;
     my ($link,$icon,$population,$connected) = split (',', $country_meta) ;
@@ -447,8 +618,10 @@ sub CollectRegionCounts
   # &LogList ("name $country_name\n") ;
   # &LogList ("meta $country_meta\n") ;
 
-    $region_code      = $region_codes      {$country_code} ;
-    $north_south_code = $north_south_codes {$country_code} ;
+  # $region_code      = $region_codes      {$country_code} ;
+  # $north_south_code = $north_south_codes {$country_code} ;
+    $region_code      = $region_codes      {$iso2} ;
+    $north_south_code = $north_south_codes {$iso2} ;
 
     $population =~ s/_//g ;
     $connected  =~ s/_//g ;
@@ -462,7 +635,8 @@ sub CollectRegionCounts
     $population_per_region {$north_south_code} += $population ;
     $connected_per_region  {$north_south_code} += $connected ;
 
-    # print "CODE $country_code NAME $country_name POP $population, $CONN $connected REGION $region_code NS $north_south_code PPR ${population_per_region {$region_code}}\n" ;
+    ## print "CODE $country_code NAME $country_name POP $population, $CONN $connected REGION $region_code NS $north_south_code PPR ${population_per_region {$region_code}}\n" ;
+    # print "CODE $iso2 NAME $country_name POP $population, $CONN $connected REGION $region_code NS $north_south_code PPR ${population_per_region {$region_code}}\n" ;
   }
 
   if ($population_tot == 0)
@@ -784,7 +958,7 @@ sub GetCountryName
 
     $country = "?? (code $code)" ;
     if ($country_code_not_specified_reported {$code}++ == 0)  
-    { &LogList ("country name not specified for $code\n") ; }
+    { &LogList ("country name not specified for iso2 $code\n") ; }
 
     $invalid_country_codes++ ;
   }
@@ -831,14 +1005,14 @@ sub ReadLanguageInfo
     chomp $line ;
     $line =~ s/ /\&nbsp;/g ;
 
-    ($code,$name,$url,$speakers,$regions,$comment) = split (',', $line) ;
+    ($lang_code,$name,$url,$speakers,$regions,$comment) = split (',', $line) ;
 
-    $out_urls      {$code} = $url ;
-    $out_languages {$code} = $name ;
-    $out_article   {$code} = "://en.wikipedia.org/wiki/" . $out_languages {$key} . "_language" ;
-    $out_article   {$code} =~ s/ /_/g ;
-    $out_speakers  {$code} = $speakers ;
-    $out_regions   {$code} = $regions ;
+    $out_urls      {$lang_code} = $url ;
+    $out_languages {$lang_code} = $name ;
+    $out_article   {$lang_code} = "://en.wikipedia.org/wiki/" . $out_languages {$key} . "_language" ;
+    $out_article   {$lang_code} =~ s/ /_/g ;
+    $out_speakers  {$lang_code} = $speakers ;
+    $out_regions   {$lang_code} = $regions ;
   }
 
   $out_languages {"www"} = "Portal" ;
@@ -855,29 +1029,47 @@ sub GetLanguageInfo
   return ($language_name,$anchor_language) ;
 }
  
+# previously called with country name, now with iso2 code 
+# (but cater for old invocation until all code is migrated)
 sub CountryMetaInfo
 {
   my $country = shift ;
-  $country =~ s/"//g ;
 
-  my ($link_country,$icon,$population) ;
+  my ($link_country,$icon,$population,$iso2) ;
 
-  if ($country_meta_info {$country}  eq "")
+  if (length ($country) > 2)
+  { 
+    $country =~ s/"//g ;
+    $iso2 = $country_iso2_from_name {$country} ;
+  }
+  else 
+  { $iso2 = $country ; }
+
+# if ($country_meta_info {$country}  eq "")
+  if ($country_meta_info {$iso2}  eq "")
   {
-    $country_meta_info_not_found_reported {$country} ++ ;
-    if ($country_meta_info_not_found_reported {$country} == 1)
-    { &LogDetail ("Meta info not found for country $country\n") ; }
- 
-    return ($country,'','..','..') ;
+  # $country_meta_info_not_found_reported {$country} ++ ;
+  # if ($country_meta_info_not_found_reported {$country} == 1)
+  # { &LogDetail ("Meta info not found for country $country\n") ; }
+  
+    $country_meta_info_not_found_reported {$iso2} ++ ;
+    if ($country_meta_info_not_found_reported {$iso2} == 1)
+    { &LogDetail ("Meta info not found for iso2 code $iso2\n") ; }
+    $country = $country_names {$iso2} ; 
+    return ($country,'','--','--') ;
   }
   else
   {
-    ($link_country,$icon,$population,$connected) = split ',', $country_meta_info {$country} ;
+  # ($link_country,$icon,$population,$connected) = split ',', $country_meta_info {$country} ;
+    ($link_country,$icon,$population,$connected) = split ',', $country_meta_info {$iso2} ;
 
     $population =~ s/_//g ;
     $connected =~ s/_//g ;
  
     $link_country =~ s/\%2C/,/g ;
+    $link_country =~ s/_/ /g ;
+    $link_country = "<a href='http://en.wikipedia.org/wiki/$link_country'>$link_country</a>" ; 
+
     $icon         =~ s/\%2C/,/g ;
 
     return ($link_country,$icon,$population,$connected) ;

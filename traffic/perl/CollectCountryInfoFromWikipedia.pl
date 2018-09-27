@@ -11,13 +11,18 @@
 
   $| = 1; # Flush output
 
-  use EzLib ;
   use Time::Local ;
   use Cwd;
-  use LWP::Simple qw($ua get);
+# use LWP::Simple qw($ua get);
+  use LWP::UserAgent;
+  use HTTP::Request ;
+  use HTTP::Response ;
+  use URI::Heuristic ;
 
   my $true = 1 ;
 
+  use lib "/home/ezachte/lib" ;
+  use EzLib ;
   our $trace_on_exit = $true ;
   ez_lib_version (2) ;
   
@@ -26,19 +31,23 @@
   getopt ("m", \%options) ;
 
   our $path_meta = $options {"m"} ; 
-  our $file_csv_country_meta_info = "CountryInfo.csv" ;
+# our $file_csv_country_meta_info = "CountryInfo.csv" ;
+  our $file_csv_country_meta_info = "GeoInfo.csv" ;
 
   our $comma = '%2C' ; # avoid commas in data in csv file
 
-  die ("Specify meta folder as -m [..]") if not defined $path_meta ;
-  die ("Meta folder not found")          if ! -d $path_meta ;
+  die ("Specify meta folder as -m [..]")      if not defined $path_meta ;
+  die ("Meta folder not found: '$path_meta'") if ! -d $path_meta ;
 
-  $ua->agent('Wikipedia Wikicounts job');
+  my $ua = LWP::UserAgent->new();
+  $ua->proxy(["http", "https"], $ENV{"http_proxy"}); 
+  $ua->agent('Wikimedia Perl job / EZ');
   $ua->timeout(60);
 
   &ArchiveCountryInfo ;
   &ReadWikipediaCountriesByPopulation ;
   &ReadWikipediaCountriesByInternetUsers ;
+  &ReadCountryInfo ;
   &WriteCountryInfo ;
 
   print "\n\nReady\n\n" ;
@@ -85,8 +94,13 @@ sub ReadWikipediaCountriesByPopulation
   my ($html,$line,$url,$icon,$icon_url,$icon_width,$icon_height,$country,$title,$population,$article_url) ;
   my @cells ;
 
-  $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
-  $html = get $url || abort ("Timed out!") ;
+# $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_population';
+# $html = get $url || abort ("Timed out!") ;
+  $url = URI::Heuristic::uf_urlstr('http://en.wikipedia.org/wiki/List_of_countries_by_population');
+  $req = HTTP::Request->new(GET => $url) ;
+  $req->referrer ('Wikimedia Perl job / EZ') ;  
+  $response = $ua->request($req) ;
+  $html = $response->content();
 
   # split file on <tr>'s, remove everything after </tr>
   $html =~ s/\n/\\n/gs ;
@@ -141,6 +155,8 @@ sub ReadWikipediaCountriesByPopulation
     { $title = "n.a." ; }
 
     ($population = $cells [3]) =~ s/<td[^>]*>(.*?)<.*$/$1/, $population =~ s/,/_/g ;
+    $population =~ s/_//g ;
+
   # print "\nPOP $population\n\n" ;
 
     $country  =~ s/,/$comma/g ;
@@ -149,7 +165,8 @@ sub ReadWikipediaCountriesByPopulation
 
     $country = &NormalizeCountryName ($country) ;
   # print "country: $country\nlink: $article_url\npopulation: $population\nconnected: $connected\nicon: $icon\n\n" ;
-    $countries {$country} = "$country,$population,connected,$article_url,$icon_url,$icon_width,$icon_height\n" ;
+    $countries  {$country} = "$country,$population,connected,$article_url,$icon_url,$icon_width,$icon_height\n" ;
+    $population {$country} = $population ;
   }
 }
 
@@ -160,8 +177,14 @@ sub ReadWikipediaCountriesByInternetUsers
   my ($html,$line,$url,$country,$data,$connected) ;
   my @cells ;
 
-  $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users';
-  $html = get $url || abort ("Timed out!") ;
+# $url = 'http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users';
+# $html = get $url || abort ("Timed out!") ;
+
+  $url = URI::Heuristic::uf_urlstr('http://en.wikipedia.org/wiki/List_of_countries_by_number_of_Internet_users');
+  $req = HTTP::Request->new(GET => $url) ;
+  $req->referrer ('Wikimedia Perl job / EZ') ;  
+  $response = $ua->request($req) ;
+  $html = $response->content();
 
   # split file on <tr>'s, remove all behind </tr>
   $html =~ s/\n/\\n/gs ;
@@ -188,11 +211,13 @@ sub ReadWikipediaCountriesByInternetUsers
 
     $connected = $cells [2] ;
     $connected =~ s/<td[^>]*>(.*?)<.*$/$1/, $connected =~ s/,/_/g ;
+    $connected =~ s/_//g ;
     # print "POP $population\n\n" ;
 
     # print "Country: $country\nconnected: '$connected'\n\n" ;
 
     $countries {$country} =~ s/connected/$connected/ ;
+    $connected {$country} = $connected ;
   }
 
   foreach $country (sort keys %countries)
@@ -207,6 +232,34 @@ sub ReadWikipediaCountriesByInternetUsers
   }
 }
 
+sub ReadCountryInfo
+{
+  print "\n\&ReadCountryInfo\nRead $path_meta/$file_csv_country_meta_info\n\n" ;
+
+  open IN, '<',"$path_meta/$file_csv_country_meta_info" ;
+  while ($line = <IN>)
+  {
+    if ($line !~ /^C/) # record with country info ?
+    {
+      push @lines, $line ; 
+      next ;
+    }
+
+    my ($rectype, $iso2, $iso3, $region, $north_south, $country, $population, $connected, $remainder) = split (',', $line, 9) ;
+
+    if ($population {$country} ne '')
+    { $population = $population {$country} ; } 
+  
+    if ($connected {$country} ne '')
+    { $connected = $connected {$country} ; } 
+  
+    $line = "$rectype,$iso2,$iso3,$region,$north_south,$country,$population,$connected,$remainder" ;
+    push @lines, $line ; 
+  }
+
+  close IN ;
+}
+
 sub WriteCountryInfo
 {
   print "\n\&WriteCountryInfo\nWrite $path_meta/$file_csv_country_meta_info\n\n" ;
@@ -214,14 +267,10 @@ sub WriteCountryInfo
   my $country ;
 
   open OUT, '>', "$path_meta/$file_csv_country_meta_info" ;
-  print OUT "#generated by ../wikistats/traffic/perl/CollectCountryInfoFromWikipedia.pl\n" ;
-  print OUT "#which is called by ../wikistats/traffic/bash/collect_country_info_from_wikipedia.sh\n" ;
-  print OUT "#country name,population,connected to internet,article_url,flag_url,flag_width,flag_height\n" ;
 
-  foreach $country (sort keys %countries)
+  foreach $line (@lines)
   { 
-    print OUT $countries {$country} ; 
-  # print     $countries {$country} . "\n" ; 
+    print OUT $line ; 
   }
 
   close OUT ;

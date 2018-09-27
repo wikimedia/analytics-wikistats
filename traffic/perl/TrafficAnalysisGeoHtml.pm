@@ -707,8 +707,9 @@ sub WriteReportPerCountryBreakdown
 {
   &LogSub ("WriteReportPerCountryBreakDown\n") ;
 
-  &AddExtraCountryNames_iso3 ;
+  # &AddExtraCountryNames_iso3 ; # obsolete ?
 
+  my ($iso2, $iso3) ;
   my @index_countries ;
   my $views_edits_lc = lc $views_edits ;
 
@@ -759,9 +760,10 @@ sub WriteReportPerCountryBreakdown
 
     $requests_this_country  = $requests_recently_per_country {$country} ;
 
+    $iso2 = $country_iso2_from_name {$country} ;
 #   $country_name = $country_names {$country_code} ;
 #   $country_meta = $country_meta_info {$country_name} ;
-    $country_meta = $country_meta_info {$country} ;
+    $country_meta = $country_meta_info {$iso2} ;
 
     my ($link,$icon,$population,$connected) = split (',', $country_meta) ;
     $population  =~ s/_//g ;
@@ -781,16 +783,18 @@ sub WriteReportPerCountryBreakdown
     if ($requests_recently_all > 0)
     { $perc = &Percentage ($requests_this_country / $requests_recently_all) ; }
 
-    ($link_country,$icon,$population) = &CountryMetaInfo ($country) ;
+  # ($link_country,$icon,$population) = &CountryMetaInfo ($country) ;
+    ($link_country,$icon,$population) = &CountryMetaInfo ($iso2) ;
 
-    $code_iso3 = $country_names_iso3 {$country} ;
-    if ($code_iso3 eq '')
+  # $iso3 = $country_names_iso3 {$country} ;
+    $iso3 = $country_iso3 {$iso2} ;
+    if ($iso3 eq '')
     { 
       print "no iso3166 code for '$country'\n" ; 
-      $code_iso3 = 'XXX' ; 
+      $iso3 = 'XXX' ; 
     }
     
-    # print "country $country -> $code_iso3\n" ;
+    # print "country $country -> iso3 $iso3\n" ;
 
     $icon =~ s/"/'/g ;
  
@@ -1544,7 +1548,7 @@ have also been migrated to Wikimedia Foundation's new hadoop-based infrastructur
 sub PrepLanguageBubbleDetailsPerCountry 
 {
   my ($language,$sample_rate) = @_ ;
-  my ($html, $viewfreq_per_country) ; ;
+  my ($html, $viewfreq_per_country, $iso2, $iso3) ;
 
   my %totals_per_country  = %{$requests_recently_per_language_per_country {$language}} ;
   my $totals_per_language = $requests_recently_per_language {$language} * $sample_rate ;
@@ -1561,11 +1565,13 @@ sub PrepLanguageBubbleDetailsPerCountry
     $country_meta = $country_meta_info {$country_name} ;
     my ($link,$icon,$population,$connected) = split (',', $country_meta) ;
 
-    $country_code_iso2 = $country_codes_iso2 {$country_name} ;
-    $country_code_iso3 = $country_names_iso3 {$country_name} ;
+  # $iso2 = $country_codes_iso2     {$country_name} ;
+    $iso2 = $country_iso2_from_name {$country_name} ;
+  # $iso3 = $country_names_iso3     {$country_name} ;
+    $iso3 = $country_iso3           {$iso2} ;
 
-    $region_code      = $region_codes      {$country_code_iso2} ;
-    $north_south_code = $north_south_codes {$country_code_iso2} ;
+    $region_code      = $region_codes      {$iso2} ;
+    $north_south_code = $north_south_codes {$iso2} ;
 
     $requests = $requests_recently_per_language_per_country {$language} {$country_name} * $sample_rate ;
     
@@ -1578,9 +1584,9 @@ sub PrepLanguageBubbleDetailsPerCountry
 
     $country2 = &ShortenForHoverbox ($country_name) ;
 
-    $html .= "$countries:$country_code_iso3:$country2:$north_south_code:$region_code:$requests:$share_requests|" ;
+    $html .= "$countries:$iso3:$country2:$north_south_code:$region_code:$requests:$share_requests|" ;
 
-    $viewfreq_per_country .= "$country_code_iso3:$share_requests2;" ; # qqqq
+    $viewfreq_per_country .= "$iso3:$share_requests2;" ; # qqqq
   }
 
   $viewfreq_per_country =~ s/;$// ;

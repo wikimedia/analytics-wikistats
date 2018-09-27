@@ -1,29 +1,17 @@
 #!/usr/bin/perl
 
-# restructure along the lines of 
-# ref http://www.explainingprogress.com/wp-content/uploads/datamaps/uploaded_gdpPerCapita2011_PWTrgdpe/gdpPerCapita2011_PWTrgdpe.html
-# https://ourworldindata.org/
+# Data files generated are used for WiViVi (which BTW owes much to https://ourworldindata.org/)
 
-# cd /srv/stats.wikimedia.org/htdocs/archive/squid_reports/2016-06/draft	
+# To do?: scaling iframe http://jsfiddle.net/Masau/7WRHM/
 
-# scaling iframe http://jsfiddle.net/Masau/7WRHM/
-
-# derived from stat1005:../perl/SquidReportArchive.pl
+# Derived from stat1005:../perl/SquidReportArchive.pl
 # removed all code for obsolete reports  
 
-# general remarks:lots of html is built
-# place holders in full caps in the html will be replaced later on with separately built html
+# General remarks:lots of html is built with place holders in full caps in the html 
+# these will be replaced later in the script with actual html
 # example: scan for occurences of WORLDMAP_D3
 
-# for country reports fix:
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46205   fixed
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46267
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46277
-# https://bugzilla.wikimedia.org/show_bug.cgi?id=46289
-
-# -v -q 2012q3 -c -i "w:/# out stat1/squid/csv" -o "w:/# out test/squid/reports" -l . -a "w:/# out stat1/squid/csv/meta"
-
-# sub ReadInputCountriesMonthly reads $path_csv_counts_monthly (/a/wikistats_git/squids/csv/SquidDataVisitsPerCountryMonthly.csv)
+# Relict of the past: some hashes use iso2 code for country, others use country name. Some day make all use iso2 code
 
 # 2016-07-09 minus
 # ExpandAbbreviation
@@ -66,6 +54,8 @@
 # csv files are now also post processed into json file, which could benefit from more detailed figures
 # so for WiViVi shortening needs to be done in javascript 
 # for request data (= page views) shortening still provides some fuzziness on purpose 
+
+# 2018-06 handful of local csv files with meta data replaced by one: GeoInfo.csv  
 
   $| = 1; # Flush output
 
@@ -225,19 +215,19 @@
     mkdir ($path_reports) || die "Unable to create directory $path_reports\n" ;
   }
 
-  &ReadWorldBankDemographics ($file_worldbank) ;
-
-  &ReadLanguageInfo ;
+  &ReadGeoInfoWorldBank ($file_worldbank) ;
 
 # &ReadInputRegionCodes ;
 # &ReadCountryCodesISO3 ;
 # &ReadInputCountryNames ;
 # &ReadInputCountryInfo ;
 # # &ReadCountryCodes ;
-# &WriteCsvGeoInfo ; # one time: merge these csv input files into one csv file, henceforth to be maintained manually
+# &WriteGeoInfoWikimedia ; # one time: merge these csv input files into one csv file, henceforth to be maintained manually
 
-  &ReadCsvGeoInfo ; # from now on use this more complete csv file
-exit ;
+  &ReadGeoInfoWikimedia ; # from now on use this more complete csv file
+  &MergeMetaInfo ;  # combine meta info: from local file: article url, flag icon, from worldbank: population, connected
+
+  &ReadLanguageInfo ;
 
   if ($reportcountries)
   {
