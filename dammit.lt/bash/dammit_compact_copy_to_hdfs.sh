@@ -12,11 +12,22 @@
 # Exit Code:
 # Returns 0 on success and -1 on error.
 
-yyyy='2017'
-echo put dammit files into hdfs
-merged='ezachte/wikistats_data/dammit/pagecounts/merged/'
-echo merged=$merged
+yyyy='2017' # <--- update yearly !!!
 
-cd /home/$merged
-hdfs dfs -put -f -p ./$yyyy /user/$merged 
-hdfs dfs -ls -R /user/$merged > /home/$merged/files_in_hdfs 
+echo put dammit files into hdfs
+
+merged_local='/srv/dumps/pagecounts-ez/merged/'
+merged_hdfs='/user/wikistats_data/dammit/pagecounts/'
+
+echo merged_local=$merged_local
+echo merged_hdfs=$merged_hdfs
+
+cd $merged_local
+ls -l
+
+ hdfs dfs -put -f -p ./$yyyy $merged_hdfs
+#hdfs dfs -put -f -p ./pagecounts-2017-11-views-ge-5.bz2 /user/$merged2 # test
+ hdfs dfs -ls -R $merged_hdfs > $merged_local/files_in_hdfs
+
+# to do: verify that files were uploaded to hdfs (how? parse file 'files_in_hdfs'?)
+# if uploaded correctly, delete automatically from $merged

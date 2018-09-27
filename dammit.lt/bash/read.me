@@ -1,1 +1,6 @@
-read 'cellar' as 'no longer used, archived'
+Read 'cellar' as 'no longer used, archived'
+
+Use dammit_compact_copy_to_hdfs.sh to make a backup copy of compacted pagecounts files to hdfs, after which they can be deleted from wikistats_data/dammit/pagecounts/merged (first check if copy was succesful, via file files_in_hdfs) 
+These files are also in public folder https://dumps.wikimedia.org/other/pagecounts-ez/merged/
+Please treat these files as of long term significance, future data archeologists will thank you for that!
+This long term data preservation project was initiated by community members, and WMF took over later. Compare to Twitter archive maintained by US Library of Congress, a treasure trove for data-aware historians to build a ZeitGeist.

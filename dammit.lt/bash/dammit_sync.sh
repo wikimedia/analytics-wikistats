@@ -9,7 +9,7 @@ echo_() {
 
 yyyymmdd=$(date +"%Y_%m_%d")
 
-dataset1001=dataset1001.wikimedia.org::pagecounts-ez        ; echo dataset1001=$dataset1001
+dataset1001=/srv/dumps/pagecounts-ez        ; echo dataset1001=$dataset1001
 xmldatadumps=/mnt/data/xmldatadumps/public/other            ; echo xmldatadumps=$xmldatadumps
 
 perl=$WIKISTATS_SCRIPTS/dammit.lt/perl                      ; echo_ perl=$perl

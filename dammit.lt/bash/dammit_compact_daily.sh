@@ -1,60 +1,55 @@
-#!/bin/bash
+#! /bin/bash -x
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
+
 ulimit -v 2000000
 
-# c1()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;32m$&\e[0m/g') # colorize output green
-# c2()(set -o pipefail;"$@" | perl -pe 's/.*/\e[1;33m$&\e[0m/g') # colorize output yellow
-
-echo_() { 
-  echo "$1" | tee -a $logfile| cat 
-}
-
-input=/mnt/data/xmldatadumps/public/other/pageviews     ; echo_ input=$input   # webstatscollector 3.0 (was pagecounts-raw for webstatscollector 1.0)
-public=dataset1001.wikimedia.org::pagecounts-ez/merged/ ; echo_ public=$public # https://dumps.wikimedia.org/other/pagecounts-ez/merged/ 
-echo_
-
-scripts=$WIKISTATS_SCRIPTS/dammit.lt                    ; echo_ scripts=$scripts
-data=$WIKISTATS_DATA/dammit                             ; echo_ data=$data  
-perl=$scripts/perl                                      ; echo_ perl=$perl 
-bash=$scripts/bash                                      ; echo_ bash=$bash
-output=$data/pagecounts/merged                          ; echo_ output=$output
-logs=$data/logs/compact_daily                           ; echo_ logs=$logs
-temp=$data/temp                                         ; echo_ temp=$temp
-
 yyyymmdd=$(date +"%Y_%m_%d")
-logfile=$logs/compact_daily_$yyyymmdd.log               ; echo_ logfile=$logfile
-logfile_summary=$logs/_summary_compact_daily_jobs.log   ; echo_ logfile_summary=$logfile_summary
 
-# extra step, in case yesterdays job did not finish normally
-echo_
-date | tee -a $logfile | cat
-echo_
+wikistats=$WIKISTATS_SCRIPTS
+wikistats_data=$WIKISTATS_DATA
 
-# echo_ "rsync -arv --include=*.bz2 $output/* $public"
-## -a archive mode, -r recursive, -v verbose, -O do not try to upd dir timestamp
-#rsync -arv --include=*.bz2 $output/* $public | tee -a $logfile | cat
-#exit
+logfile=$wikistats_data/dammit/logs/compact_daily/log_compact_daily_$yyyymmdd.txt
+exec 1> $logfile 2>&1 # send stdout/stderr to file
+maxage=21
 
-echo_ "Remove old temp files from $temp"
+input=/mnt/data/xmldatadumps/public/other/pageviews     # webstatscollector 3.0 (was pagecounts-raw for webstatscollector 1.0)
+public=/srv/dumps/pagecounts-ez/merged/ # https://dumps.wikimedia.org/other/pagecounts-ez/merged/ 
+
+scripts=$WIKISTATS_SCRIPTS/dammit.lt               
+data=$WIKISTATS_DATA/dammit       
+perl=$scripts/perl           
+bash=$scripts/bash                
+output=$data/pagecounts/merged        
+logs=$data/logs/compact_daily      
+temp=$data/temp          
+
+{ set +x; } 2>/dev/null ; echo -e "\n>> Start with rsync, in case yesterdays job did not finish normally <<\n" ; set -x
+
+# -a archive mode, -r recursive, -v verbose, -O do not try to upd dir timestamp
+#rsync -arm --stats --include=*.bz2 $output $public 
+rsync -ar -ipv4 --stats --include=*.bz2 --exclude=*~ $output/* $public 
+
+{ set +x; } 2>/dev/null ; echo -e "\n>> Remove old temp files *sorted/*patched from $temp <<\n" ; set -x
+
 cd $temp
-rm *sorted
-rm *patched
-echo_ 
+rm -f *sorted
+rm -f *patched
 
-cd $perl
-maxage=21 # process files for last .. completed days (runs daily, so should have one day of work to do)
-echo_ "Consolidate pagecount files into one daily file for last $maxage completed days"
+{ set +x; } 2>/dev/null ; echo -e "\n>> Process files for last $maxage completed days (runs daily, so should have one day of work to do) <<\n" ; set -x
 
 # date > $bash/dammit_compact_daily.semaphore
 # flock -n = non block lock
-cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat"
-echo_ "cmd:'$cmd'"
-echo_
+
+cd $perl
+cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode -a $maxage -i $input -o $output -t $temp"
+
 flock -n -e $bash/dammit_compact_daily.semaphore -c "$cmd" || { echo "Script is already running: lock on ../bash/dammit_compact_daily.semaphore" ; exit 1 ; } >&2
 
-$bash/dammit_compact_monthly.sh # If dammit_compact_monthly.sh fails, we continue nonetheless, to get new daily files rsynced
+{ set +x; } 2>/dev/null ; echo -e ">> Invoke dammit_compact_monthly.sh, and see if monthly file should be generated <<\n" ; set -x
+$bash/dammit_compact_monthly.sh 
 
-echo_ "Publish new files\n"
-rsync -arv -ipv4 --include=*.bz2 $output/* $public  | tee -a $logfile | cat
+{ set +x; } 2>/dev/null ; echo -e ">> Continue even if ../bash/dammit_compact_monthly.sh failed, to get new daily files rsynced <<" ; set -x
+{ set +x; } 2>/dev/null ; echo -e ">> Publish new files <<\n" ; set -x
 
-
-#grep ">>" $logs/*.log
+rsync -ar -ipv4 --include=*.bz2 --exclude=*~ $output/* $public  

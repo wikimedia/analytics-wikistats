@@ -315,7 +315,7 @@ sub ParseArguments
 
   print "Input  folder: $path_in1\n" ;
   print "Input  folder 2: $path_in2\n" ;
-  print "Output folder: $path_out\n" ;
+  print "Output folder: $path_csv\n" ;
   print "White list in: $path_white\n" ;
   print "Select project: $select_project\n" ;
   print "Select language: $select_language\n" ;
