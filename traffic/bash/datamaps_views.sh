@@ -8,7 +8,7 @@ month=2018-09
 quarter=2018Q3
 
 run_refresh_from_wikipedia=no # do so once every few months
-run_collect_country_stats=no # set to 'no' to speed up repeated tests on one day, don forget to reactivate
+run_collect_country_stats=yes # set to 'no' to speed up repeated tests on one day, don forget to reactivate
 
 # announce script name/arguments and (file name compatible) start time
 { set +x; } 2>/dev/null ;
