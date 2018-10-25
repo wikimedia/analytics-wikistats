@@ -1,4 +1,7 @@
-#!/bin/sh -x
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
+
 # daily run of wikistats for staff wikis
 # no longer active
 

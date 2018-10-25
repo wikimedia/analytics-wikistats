@@ -1,14 +1,18 @@
 #!/bin/sh
+# script migrated to stat1005
+
 ulimit -v 8000000
  
 clear
-wikistats=/a/wikistats_git
+
+wikistats=$WIKISTATS_SCRIPTS
+wikistats_data=$WIKISTATS_DATA
+
 dumps=$wikistats/dumps
 perl=$dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl # tests
-csv=$dumps/csv
+csv=$wikistats_data/dumps/csv
 
-log=$dumps/logs/count_merge_editors.log
+log=$wikistats_data/dumps/logs/count_merge_editors.log
 
 cd $perl
 

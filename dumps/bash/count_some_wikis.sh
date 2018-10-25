@@ -1,11 +1,12 @@
-#!/bin/bash -x
-# -x : trace each line in this file, toggle trace off/on with 'set +x/-x', avoid -x in echo statements (looks messy in log)
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005  
 
 # collect counts from dumps for one or more specific wikis (like count.sh does for entire project)
 # adjust following three lines:
 project=wp 
 suffix=wiki # or wikibooks, wiktionary, etc
-codes="en" # codes separated by spaces, e.g. "ab cd ef"
+codes="atj" # codes separated by spaces, e.g. "ab cd ef"
 
 ulimit -v 8000000
 clear

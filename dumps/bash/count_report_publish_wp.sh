@@ -1,4 +1,6 @@
 #!/bin/sh
+echo not migrated yet to new server -> abort
+exit
 
 ulimit -v 8000000
 

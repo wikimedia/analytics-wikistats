@@ -1,4 +1,7 @@
-#!/bin/sh -x
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
+
 ulimit -v 1000000
 
 # generate progress reports (public, extended, synopsis) for processing dumps

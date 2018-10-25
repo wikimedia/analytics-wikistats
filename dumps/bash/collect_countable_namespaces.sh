@@ -1,4 +1,6 @@
-#!/bin/sh -x
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
 yyyymmdd=$(date +"%Y_%m_%d")
 
@@ -10,6 +12,7 @@ exec 1> $logfile 2>&1 # send stdout/stderr to file
 
 date
 export http_proxy=http://webproxy.eqiad.wmnet:8080 # Jan 2015 see https://wikitech.wikimedia.org/wiki/Http_proxy
+export https_proxy=http://webproxy.eqiad.wmnet:8080
 
 perl=$wikistats/dumps/perl 
 csv=$wikistats_data/dumps/csv

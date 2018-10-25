@@ -1,19 +1,28 @@
-#!/bin/sh
+#! /bin/bash -x
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
-ulimit -v 1000000
+yyyymmdd=$(date +"%Y_%m_%d")
 
-wikistats=/a/wikistats_git
+wikistats=$WIKISTATS_SCRIPTS
+wikistats_data=$WIKISTATS_DATA
+
+logfile=$wikistats_data/dumps/logs/collect_edits/log_collect_edits_$yyyymmdd.txt
+exec 1> $logfile 2>&1 # send stdout/stderr to file
+
 dumps=$wikistats/dumps
-perl=$dumps/perl
-perl=/home/ezachte/wikistats/dumps/perl
-csv=$dumps/csv
-input=/mnt/data/xmldatadumps/public/nlwikivoyage/20170301/nlwikivoyage-20170301-stub-meta-history.xml.gz
-log=$csv/StatisticsLogCollectEdits.txt 
+perl=$wikistats/dumps/perl
+csv=$wikistats_data/dumps/csv
+dblists=$wikistats_data/dumps/dblists
+
+input=/mnt/data/xmldatadumps/public/dewiki/20171001/dewiki-20171001-stub-meta-history.xml.gz
+
 cd $perl
 # perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wo -w nlwikivoyage -d $input -c | grep "Wikipedia,Template namespace" > wp_en_edits_template_namespace.txt
-# perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wo -w zhwikivoyage -d $input 
+ perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wp -w dewiki -d $input 
 
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wn -w fiwikinews -r $csv/csv_wn/StatisticsLogRunTime.csv -s 
+# perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wp -w dewiki -r $csv/csv_wp/StatisticsLogRunTime.csv -s 
+echo "ready"
 exit
 
 rm $csv/csv_wb/EditsTimestampsTitlesAll.csv
@@ -28,53 +37,53 @@ rm $csv/csv_wx/EditsTimestampsTitlesAll.csv
 
 exit
 
- perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wx -w wikidatawiki -r $csv/csv_wx/StatisticsLogRunTime.csv -s >> $log
+ perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wx -w wikidatawiki -r $csv/csv_wx/StatisticsLogRunTime.csv -s 
 exit
 
-date > $log
-dblist="/a/wikistats_git/dumps/dblists/wikibooks.dblist" 
+date 
+dblist="$dblists/wikibooks.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wb -w $wiki -r $csv/csv_wb/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wb -w $wiki -r $csv/csv_wb/StatisticsLogRunTime.csv -s 
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikinews.dblist" 
+dblist="$dblists/wikinews.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wn -w $wiki -r $csv/csv_wn/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wn -w $wiki -r $csv/csv_wn/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikiquote.dblist" 
+dblist="$dblists/wikiquote.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wq -w $wiki -r $csv/csv_wq/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wq -w $wiki -r $csv/csv_wq/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikisource.dblist" 
+dblist="$dblists/wikisource.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p ws -w $wiki -r $csv/csv_ws/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p ws -w $wiki -r $csv/csv_ws/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikiversity.dblist" 
+dblist="$dblists/wikiversity.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wv -w $wiki -r $csv/csv_wv/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wv -w $wiki -r $csv/csv_wv/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikivoyage.dblist" 
+dblist="$dblists/wikivoyage.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wo -w $wiki -r $csv/csv_wo/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wo -w $wiki -r $csv/csv_wo/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wiktionary.dblist" 
+dblist="$dblists/wiktionary.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wk -w $wiki -r $csv/csv_wk/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wk -w $wiki -r $csv/csv_wk/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/wikipedia.dblist" 
+dblist="$dblists/wikipedia.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wp -w $wiki -r $csv/csv_wp/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wp -w $wiki -r $csv/csv_wp/StatisticsLogRunTime.csv -s
 done < $dblist 
 
-dblist="/a/wikistats_git/dumps/dblists/special.dblist" 
+dblist="$dblists/special.dblist" 
 while read wiki ; do  
-  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wx -w $wiki -r $csv/csv_wx/StatisticsLogRunTime.csv -s >> $log
+  perl WikiCountsCollectEdits.pl -i $csv -o $csv -p wx -w $wiki -r $csv/csv_wx/StatisticsLogRunTime.csv -s
 done < $dblist
 
 date
@@ -106,5 +115,5 @@ cat $csv/csv_wx/EditsTimestampsTitles*.csv >> $csv/csv_mw/EditsTimestampsTitlesA
 ls -l $csv/csv_mw/EditsTimestampsTitlesAll.csv
 date
 
-date >> $log 
-echo "ready" >> $log
+date  
+echo "ready" 

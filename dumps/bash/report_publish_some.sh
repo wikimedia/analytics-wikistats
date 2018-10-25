@@ -1,4 +1,6 @@
-#!/bin/sh
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
 ulimit -v 8000000
 clear

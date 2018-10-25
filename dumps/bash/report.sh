@@ -1,17 +1,27 @@
-#!/bin/bash -x
-# -x : xtrace each line in this file, toggle xtrace off/on with 'set +x/-x'
-# avoid -x in echo statements (looks messy in log, even if doing so it makes bash file a bit more messy)
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
-ulimit -v 1000000
-
-projectcode="$1"
 yyyymmddhhnn=$(date +"%Y_%m_%d__%H_%M")
-log_dir=$WIKISTATS_DATA/dumps/logs/report_one_project ; mkdir -m 775 $log_dir >/dev/null 2>&1
-log=$log_dir/log_report_one_project_${projectcode}_$yyyymmddhhnn.txt
-exec 1>> $log 2>&1 # send stdout/stderr to file
 
-projectcode="$1"  # repeat for log file
-mode_publish="$2" # 'final' will publish reports in default location, otherwise in subfolder ../drafts/.. for manual vetting
+# announce script name/arguments and (file name compatible) start time
+{ set +x; } 2>/dev/null ;
+b="##########" ; bar="$b$b$b$b$b$b$b$b$b$b" # will be invoked many times by parent script, hence this separator line
+me=`basename "$0"` ; args=${@} ; yyyymmddhhnn=$(date +"%Y_%m_%d__%H_%M") ; job="## $yyyymmddhhnn Job:$me args='$args' ##" ;
+echo -e "$bar\n$hr\n$job\n" ;
+set -x
+
+ulimit -v 2000000
+# ulimit -s 32768
+# keep logging dewstination 'as is', may already be redirected by calling bash file 'count_report_publish.sh'
+#log_dir=$WIKISTATS_DATA/dumps/logs/report_one_project ; mkdir -m 775 $log_dir >/dev/null 2>&1
+#log=$log_dir/log_report_one_project_${projectcode}_$yyyymmddhhnn.txt
+#exec 1>> $log 2>&1 # send stdout/stderr to file
+#projectcode="$1"  # repeat for log file
+#{ set +x; } 2>/dev/null ; echo $job ; set -x # repeat for log file
+
+projectcode=$1
+mode_publish=$2
 
 { set +x; } 2>/dev/null # trace bash commands off for echos
 echo -e "\nArguments for report.sh: 1:'$1', 2:'$2', 3:'$3', 4:'$4', 5:'$5'"
@@ -116,8 +126,8 @@ echo -e "======================================================="
 echo -e "Generate and publish reports for project $projectcode=$project\n"  
 set -x
 
-for langcode in en # test
-# for langcode in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
+# for langcode in en # test
+for langcode in en de ast bg br ca cs da eo es fr he hu id it ja nl nn pl pt ro ru sk sl sr sv wa zh ;
 do
   { set +x; } 2>/dev/null  
   echo -e "\n>>> loop with $projectcode:$langcode\n"
@@ -132,10 +142,10 @@ do
   fi  
   set -x
 
-  { set +x; } 2>/dev/null ; echo -e "\n\nGet timestamp last reports for language $langcode" >> $log ; set -x
+  { set +x; } 2>/dev/null ; echo -e "\n\nGet timestamp last reports for language $langcode" 
   langcode_upper=$( echo -e "$langcode" | tr '[:lower:]' '[:upper:]' )	
   
-  { set +x; } 2>/dev/null ; echo -e "\n\nSet source and destination paths for publishing reports" >> $log ; set -x
+  { set +x; } 2>/dev/null ; echo -e "\n\nSet source and destination paths for publishing reports" 
   out_project=$out/out_$1/$langcode_upper 
   htdocs_project=$htdocs/$dir/$langcode_upper
   if [[ "$mode_publish" != "final" ]]
@@ -145,24 +155,24 @@ do
 
   
   { set +x; } 2>/dev/null  
-  echo -e "\n\nTarget folder $out_project" >> $log 
+  echo -e "\n\nTarget folder $out_project" 
   file=$out/out_$1/$langcode_upper/index.html	
   now=`date +%s`
   prevrun=`stat -c %Y $file`
   let secs_out="$now - $prevrun" 
   let days_out="$secs_out/86400"
-  echo -e "days_out=$days_out days" >> $log 
-  echo -e "File '$file' generated $days_out days ago\n" >> $log 
+  echo -e "days_out=$days_out days" 
+  echo -e "File '$file' generated $days_out days ago\n" 
 
-  echo -e "Get timestamp for most recent csv files" >> $log 
+  echo -e "Get timestamp for most recent csv files" 
   file=$csv/csv_$1/StatisticsLog.csv	
   now=`date +%s`
   prevrun=`stat -c %Y $file`
   let secs_csv="$now - $prevrun" 
   let days_csv="$secs_csv/86400" 
-  echo -e "File '$file' generated $days_csv days ago\n\n" >> $log 
+  echo -e "File '$file' generated $days_csv days ago\n\n" 
 
-  echo -e "Check if reports need to be run now for language $langcode" >> $log
+  echo -e "Check if reports need to be run now for language $langcode" 
   
   run_report=0
 
