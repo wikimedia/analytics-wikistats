@@ -2,9 +2,13 @@
 # read more about set -x/+x (and why used) in ../../wikistats/read.me
 # script migrated to stat1005
 
-# this job collects data (csv,json) for visualization WiViVi, currently at https://stats.wikimedia.org/wikimedia/animations/wivivi/wivivi.html
+# this job collects data (csv,json) for visualization WiViVi, currently at https://stats.wikimedia.org/wikimedia/animations/wivivi/wivivi.html and also updates the html reports which preceded WiViVi
 
-month=2018-088888888r=2018Q1
+month=2018-09
+quarter=2018Q3
+
+run_refresh_from_wikipedia=no # do so once every few months
+run_collect_country_stats=no # set to 'no' to speed up repeated tests on one day, don forget to reactivate
 
 # announce script name/arguments and (file name compatible) start time
 { set +x; } 2>/dev/null ;
@@ -51,9 +55,6 @@ echo -e "\nsend log to $log_file"
 # exec >> $log_file 2>&1 # send stdout/stderr to file
 echo -e "$job\n" ; # repeated after exec to reroute log
 set -x
-
-run_refresh_from_wikipedia=no # do so once every few months
-# run_collect_country_stats=no # set to 'no' to speed up repeated tests on one day
 
 # very loose input validation
 { set +x; } 2>/dev/null ; 
