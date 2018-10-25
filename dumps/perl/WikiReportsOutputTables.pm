@@ -122,6 +122,9 @@ if (0)
     $access {"$wp|$level"} = $count ;
   }
 
+  print "Write '$file_csv_participation'\n" ;  
+  open CSV_PARTICIPATION, '>', $file_csv_participation ; 
+ 
   my $rows ;
   foreach $wp (@languages)
   {
@@ -294,10 +297,11 @@ if (0)
 #        { $edits_perc = "$edits_perc%" ; }
 #      }
 
-      $articles_new   = @MonthlyStats {$wp.$c[1].'avg3'} ;
-      $editors_ge_5   = @MonthlyStats {$wp.$c[2].'avg3'} ;
-      $editors_ge_100 = @MonthlyStats {$wp.$c[3].'avg3'} ;
-      $edits_average  = @MonthlyStats {$wp.$MonthlyStatsWpStop{$wp}.$c[7]} ;
+      $articles_new        = @MonthlyStats {$wp.$c[1].'avg3'} ;
+      $editors_ge_5        = @MonthlyStats {$wp.$c[2].'avg3'} ;
+      $editors_ge_5_avg12  = @MonthlyStats {$wp.$c[2].'avg12'} ;
+      $editors_ge_100      = @MonthlyStats {$wp.$c[3].'avg3'} ;
+      $edits_average       = @MonthlyStats {$wp.$MonthlyStatsWpStop{$wp}.$c[7]} ;
 
       $cnt = @MonthlyStats {$wp.$c[11].'tot'} ;
       if ($cnt > 0)
@@ -353,12 +357,21 @@ if (0)
       {
         $regions = $out_regions {$wp} ;
 
+        # Sep 2018: change to average active editors for last 12 months, was 3 months, but only for participation.csv  
         if ($out_speakers {$wp} == 0)
-        { $participation = "" ; }
+        { 
+          $participation       = "" ; 
+          $participation_avg12 = "" ; 
+        }
         else
-        { $participation = sprintf ("%.1f", $editors_ge_5 / $out_speakers {$wp}) ; }
+        { 
+          $participation       = sprintf ("%.3f", $editors_ge_5       / $out_speakers {$wp}) ; 
+          $participation_avg12 = sprintf ("%.3f", $editors_ge_5_avg12 / $out_speakers {$wp}) ; 
+        }
 
         push @participations, "$wp,${out_languages {$wp}},${out_speakers {$wp}},$editors_ge_5,$participation,$regions\n" ;
+        ($regions2 = $regions) =~ s/,/;/g ;
+        print CSV_PARTICIPATION "$wp,${out_languages {$wp}},${out_speakers {$wp}},$editors_ge_5,$participation_avg12,$regions2\n" ;
 
         $speakers = &i2KM2 ($out_speakers {$wp} * 1000000) ;
         if ($out_speakers {$wp} == 0)
@@ -640,6 +653,7 @@ if (0)
       { $out_html_concise .= &tr_hr ; }
    }
   }
+  close CSV_PARTICIPATION ;
 
   $out_html = $out_html_start ;
 
@@ -892,9 +906,9 @@ if (0)
   print FILE_OUT &AlignPerLanguage ($out_html) ;
   close "FILE_OUT" ;
 
-  open  FILE_OUT, '>', $file_csv_participation ;
-  print FILE_OUT @participations ;
-  close FILE_OUT ;
+# open  FILE_OUT, '>', $file_csv_participation ;
+# print FILE_OUT @participations ;
+# close FILE_OUT ;
 }
 
 sub GenerateBotSummary
@@ -1469,7 +1483,9 @@ sub GenerateTablesPerWiki
     $out_toc .= " / <a href='#zeitgeist'>Zeitgeist</a>" ;
   }
 
-  &GenerateHtmlStartWikipediaReport ($wp, "Tables", $out_zoom_buttons, $out_toc) ;
+  $out_msg_deep_wikistats2 = "<p>&nbsp;&nbsp;You can go directly to " . &GetDeepLinkWikistats2 ($wp) ;
+
+  &GenerateHtmlStartWikipediaReport ($wp, "Tables", $out_zoom_buttons, $out_toc, $out_msg_deep_wikistats2) ;
 # if ($wikimedia && ($wp eq "en") && $mode_wp)
 # { $out_html .= "<br><font color=#C00000>Note: for the English Wikipedia data for months after Sep 2006 are based on a partial database dump (only event meta data, no article contents).<br>" .
 #                 "Therefore some information for those months can not yet be shown.</font><br>" ; }
@@ -1574,9 +1590,13 @@ sub GenerateTablesPerWiki
   &GenerateTableAnonymousUsers ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableAnonymousUsers"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableMostActiveBots ($wp) ;
-  if ($mode_wp)
-  { &GenerateTableSizeDistribution ($wp) ; }
-  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableSizeDistribution"} += $t1 - $t0 ; $t0 = $t1 ; }
+
+
+  # EZ Oct 2018: disabled this, as no-one ever commented on this, except one person, it just adds to byte size of page
+  # if ($mode_wp)
+  # { &GenerateTableSizeDistribution ($wp) ; }
+  # if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableSizeDistribution"} += $t1 - $t0 ; $t0 = $t1 ; }
+
   &GenerateTableNamespaces ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableNamespaces"} += $t1 - $t0 ; $t0 = $t1 ; }
   &GenerateTableEditsPerArticle ($wp) ;
@@ -3401,6 +3421,8 @@ sub GenerateTableAnonymousUsers
 
 sub GenerateTableSizeDistribution
 {
+  return ; # EZ Oct 2018: disabled this, as no-one ever commented on this, except one person, just adds to byte size of page
+
   my $wp = shift ;
 
   if ($wp =~ /^zzz?$/)
@@ -4431,7 +4453,7 @@ sub GenerateComparisonTable
   if ($pageviews)
   {
     &GenerateComparisonTableEditPlots ;
-  # &GenerateComparisonTableYearlyGrowth (0) ;
+    &GenerateComparisonTableYearlyGrowth (0) ; # EZ re-enabled Oct 2018, now all last 24 months use same definition
     &GenerateComparisonTableViewRates (0) ;
     &GenerateComparisonTableSparklinesWithBars ;
   }

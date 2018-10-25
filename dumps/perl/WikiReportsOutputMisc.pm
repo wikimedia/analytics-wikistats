@@ -603,7 +603,8 @@ sub GenerateSiteMapNew
                             (((! $mode_wx) && (! $singlewiki)) ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             (  $mode_wx ? ($wikimedia ? &tdlb ($out_language_name) : "") : "") .
                             &tdcb ("<a href='" . $out_urls {$wpc} . "'>" . &w($out_site) . "</a>") .
-                            &tdcb (&w("<a href='../../EN/Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
+                          # &tdcb (&w("<a href='../../EN/Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
+                            &tdcb (&w("<a href='Summary" . uc($wpc) . ".htm'> " . $out_summary . " </a>")) .
                             &tdcb (&w("<a href='TablesWikipedia" . uc($wpc) . ".htm'> " . $out_btn_tables . " </a>")) .
                             &tdcb (&w("<a href='ChartsWikipedia" . uc($wpc) . ".htm'> " . $out_btn_charts . " </a>"))) ;
         }
@@ -1057,6 +1058,8 @@ sub GenerateHtmlStartWikipediaReport
   my $pagetype = shift ;
   my $out_zoom_buttons = shift ;
   my $out_msg = shift ;
+  my $deep_link_wikistats2 = shift ;
+
   my $out_page_title ;
   my $out_page_subtitle ;
   my $out_html_title ;
@@ -1160,6 +1163,8 @@ sub GenerateHtmlStartWikipediaReport
                       $out_page_title,  $out_page_subtitle, $out_explanation,
                       $out_button_prev, $out_button_next,   $out_button_switch,
                       $out_crossref,    $out_msg) ;
+  
+  $out_html =~ s/<\/td><\/tr><\/table>/$deep_link_wikistats2<\/td><\/tr><\/table>/ ;
 }
 
 sub GenerateHtmlStartComparisonPlots
@@ -1577,16 +1582,36 @@ sub GenerateHtmlStart
   {
     my $sp2 = "&nbsp;&nbsp;" ;
 
-    $out_html .= "<table><tr><td colspan=999 style='background-color:#CC8;text-align:left'>" .
-                 "<font color=#000000>&nbsp;<br>$sp2" .
-                 "<b>May 2016: The major overhaul of Wikistats reports has entered a new phase.</b>$sp2<p>" .
-                 "${sp2}First phase focused on migrating the traffic analysis reports to our new infrastructure. Those are operational now.$sp2<br> " .
-                 "${sp2}The Analytics Team will now proceed to also migrate data collection and reporting about wiki content and contributors.$sp2<br> " .
-                 "${sp2}First results are expected later this year.$sp2<p>" .
-                 "${sp2}More info at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'>this announcement</a><br>" .
-                 "${sp2}You can see the first wireframes for Wikistats 2.0 and " .
-                 "<a href='https://www.mediawiki.org/wiki/Wikistats_2.0_Design_Project/RequestforFeedback/Round1'>comment on the design here.</a></font>$sp2" .
+    $link_wikistats_2 = "<a href='https://stats.wikimedia.org/v2/#/all-projects'>Wikistats 2</a>" ;
+    $link_survey      = "<a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'>survey</a>" ;
+    $link_feedback    = "<a href='https://wikitech.wikimedia.org/wiki/Talk:Analytics/Systems/Wikistats'>feedback and suggestions</a>" ; 
+
+    $out_html .= "<table width=1000><tr><td colspan=999 style='background-color:#DD8;text-align:left'>" .
+                 "<font color=#107000>&nbsp;<br>$sp2" .
+                 "<b>Dec 2017: WMF Analytics Team is happy to announce the first release of $link_wikistats_2</font></b>$sp2<p>" .
+                 "<p>${sp2}Wikistats has been redesigned for architectural simplicity, faster data processing, " . 
+                 "and a more dynamic and interactive user experience. The data used in the reports will also be made available for external processing.${sp2}" . 
+                 "<p>${sp2}First goal is to match the numbers of the current system, and to provide the most important reports, " . 
+                 "as decided by the Wikistats community (see $link_survey).${sp2}".
+                 "<br>${sp2}Over time, we will continue to migrate reports and add new ones that you find useful. " . 
+                 "We can also analyze the data in new and interesting ways, " . 
+                 "and look forward to hearing your $link_feedback.${sp2}" .
                  "</td></tr></table>$sp2<br>" ;
+
+# request for comments banner shown March 2017-November 2017
+
+#    $out_html .= "<table><tr><td colspan=999 style='background-color:#CC8;text-align:left'>" .
+#                 "<font color=#000000>&nbsp;<br>$sp2" .
+#                 "<b>May 2016: The major overhaul of Wikistats reports has entered a new phase.</b>$sp2<p>" .
+#                 "${sp2}First phase focused on migrating the traffic analysis reports to our new infrastructure. Those are operational now.$sp2<br> " .
+#                 "${sp2}The Analytics Team will now proceed to also migrate data collection and reporting about wiki content and contributors.$sp2<br> " .
+#                 "${sp2}First results are expected later this year.$sp2<p>" .
+#                 "${sp2}More info at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'>this announcement</a><br>" .
+#                 "${sp2}You can see the first wireframes for Wikistats 2.0 and " .h
+#                 "<a href='https://www.mediawiki.org/wiki/Wikistats_2.0_Design_Project/RequestforFeedback/Round1'>comment on the design here.</a></font>$sp2" .
+#                 "</td></tr></table>$sp2<br>" ;
+
+# survey banner shown September 2016 - February 2017
 
 # survey banner shown September 2016 - February 2017
 # "${sp2}You can still tell us which reports you want to see preserved, in this " .
@@ -1594,6 +1619,7 @@ sub GenerateHtmlStart
 # "</td></tr></table>$sp2<br>" ;
 
 # original banner shown in 2016 May-Aug
+
 #   $out_html .= "<table><tr><td colspan=999 style='background-color:#000;text-align:left'>" . 
 #                "<font color=#00FF00>&nbsp;<br><h3><big>&nbsp;&nbsp;May 2016: Wikistats' days will be over soon. A successor is in the works.&nbsp;</h3></big></h3><br>&nbsp;&nbsp;" .
 #                "<b>Read more at <a href='http://infodisiac.com/blog/2016/05/wikistats-days-will-be-over-soon-long-live-wikistats-2-0/'><font color=#A0A0FF>this announcement</font></a>. " . 

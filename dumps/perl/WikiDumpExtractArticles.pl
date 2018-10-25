@@ -15,26 +15,34 @@
 
   my $time_format = '%2d hrs %2d min %2d sec' ;
 
-# Q&D script, (for now, as ad hoc script) hard coded paths
-# my $dir_dumps_in = "w:/# In Dumps" ; #  tests on EZ PC
-  my $dir_dumps_in = "/mnt/data/xmldatadumps/public/dewiki/20131008" ;
+  use Getopt::Std ;
+  my %options ;
+  getopt ("ios", \%options) ;
+  our $dir_dumps_in  = $options {"i"} ;
+  our $dir_dumps_out = $options {"o"} ;
+  our $file_select_titles = $options {"s"} ; # select these titles from total dump
 
-# my $dir_dumps_out = "w:/# In Dumps" ; #  tests on EZ PC
-  my $dir_dumps_out = "/a/wikistats_git/dumps/tmp" ; # OK , not a csv file, but all generated files are here
+  die "input folder not specified (use -i)"  if $dir_dumps_in  eq '' ; 
+  die "output folder not specified (use -o)" if $dir_dumps_out eq '' ; 
+  die "input file not specified for titles to select (use -s)" if $file_select_titles eq '' ; 
 
-# my $dir_csv   = "w:/# Out Stat1/csv_wp" ; # tests on EZ PC
-  my $dir_csv   = "/a/wikistats_git/dumps/csv/csv_wp" ;
-  my $file_titles  = "$dir_csv/Wiki-Studie-100-Wirkstoffe.txt" ;
+  die "input folder '$dir_dumps_in' not found"     if ! -d $dir_dumps_in ; 
+  die "output folder '$dir_dumps_out' not found"   if ! -d $dir_dumps_out ; 
+  die "input file '$file_select_titles' not found" if ! -e $file_select_titles ; 
+
+  print "dir_dumps_in:  '$dir_dumps_in'\n" ;
+  print "dir_dumps_out: '$dir_dumps_out'\n" ;
+  print "file_titles:   '$file_select_titles'\n" ;
 
   our @dumps = &CollectDumps ($dir_dumps_in) ;
   my $file_extract = $dumps [0] ;
   $file_extract =~ s/.*\/// ;
-  $file_extract =~ s/history.*$/history_extract3.txt/ ;
+  $file_extract =~ s/history.*$/history_extract3.xml/ ;
   $file_extract = "$dir_dumps_out/$file_extract" ;
 
-  print "File titles:  '$file_titles'\n" ;
+  print "File titles:  '$file_select_titles'\n" ;
   print "File extract: '$file_extract'\n" ;
-  my $total_titles_to_select = &ReadTitles  ($file_titles) ;
+  my $total_titles_to_select = &ReadTitles  ($file_select_titles) ;
   my $titles_selected = &ExtractDump ($file_extract) ;
 
   my $perc_titles_selected = 0 ;
@@ -79,17 +87,18 @@ sub CollectDumps
 
 sub ReadTitles
 {
-  my ($file_titles) = @_ ;
+  my ($file_select_titles) = @_ ;
   my ($line) ;
 
-  open TITLES, '<', $file_titles || die "File could not be read: '$file_titles'\n" ;
+  open TITLES, '<', $file_select_titles || die "File could not be read: '$file_select_titles'\n" ;
   while ($line = <TITLES>)
   {
+# next if $line !~ /^American/i ;
     chomp $line ;
     $line =~ s/\s*$//g ;
     next if $line =~ /^\s*$/ ;
     $select_titles {lc ($line)} = $true ;
-    print "select '$line'\n" ;
+    print "list: select '$line'\n" ;
   }
 
   my @keys = sort keys %select_titles ;
@@ -163,16 +172,19 @@ sub ExtractDumpFile
     {
       chomp $line ;
 
+
       $titles++ ;
-      print "." ; 
-      if ($titles % 100 == 0)
-      { print "\ndone " . &commify ($titles) . " titles in " . &ddhhmmss (time-$timestart, $time_format) . ", in " . &MB ($bytes_processed) . " MB \n" ; }
+      # print "." ; 
+      if ($titles % 10000 == 0)
+    # { print "\ndone " . &commify ($titles) . " titles in " . &ddhhmmss (time-$timestart, $time_format) . ", in " . &MB ($bytes_processed) . " MB \n" ; }
+      { print   "done " . &commify ($titles) . " titles in " . &ddhhmmss (time-$timestart, $time_format) . ", in " . &MB ($bytes_processed) . " MB \n" ; }
 
       $title = $line ;
       $title =~ s/^.*?<title[^>]*>\s*// ;
       $title =~ s/\s*<\/title>.*$// ;
-# print "title $title\n" ;
-# sleep (2) ;
+      $title =~ s/ /_/g ;
+# next if $title !~ /^American/i ;
+# print "dump: title '$title'\n" ;
       my $size_article_history = &MB ($bytes_processed - $bytes_processed_prev) ;
       if ($size_article_history > 100) # otry ($titles > 1) && ($titles < 10000))      
       {	print "\n$size_article_history MB: '$title_prev'\n" ; }     
@@ -188,6 +200,8 @@ sub ExtractDumpFile
         print EXTRACT "  <page>\n" ;
       # print         "  <page>\n" ;
       }
+      else
+      { print "not selected\n" ; }
     }
     if ($select_title)
     { 

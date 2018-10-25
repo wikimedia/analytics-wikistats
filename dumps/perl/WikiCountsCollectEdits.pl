@@ -294,10 +294,11 @@ sub ProcessDump
       { &Write ($meta, ".") ; }
       if ($titles % 100000 == 0)
       { &Write ($meta, "\n$titles ") ; }
-      chomp $line ;
-      $line =~ s/^\s*// ;
-      $line =~ s/\s*$// ;
+
       ($title = $line) =~ s/<[^>]+>//g ;
+      $title =~ s/^\s*// ;
+      $title =~ s/\s*$// ;
+      $title =~ s/ /_/g ;
 
       $key = '0' ;
 

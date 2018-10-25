@@ -63,10 +63,10 @@ sub SetLanguageInfo
 
   # July 2017 new updates by Erik Zachte for 20 largest languages from infobox in articles on wp:en
   # note that nearly all 20 languages were adjusted downward
-  # ideally some day numbers are drawn from wikidata
+  # ideally (some day, now now) numbers will be drawn from wikidata
 
   # numbers in square brackets: number of speakers in millions according to
-  # http://en.wikipedia.org/w/index.php?title=List_of_languages_by_number_of_native_speakers&oldid=305926069 (Aug 5 2009)
+  # http://en.wikipedia.org/w/index.php?title=List_of_languages_by_total_number_of_speakers
   # includes secondary speakers (hence adds up to much more than 6 billion)
   %wikipedias = (
 # mediawiki=>"http://wikimediafoundation.org Wikimedia",
@@ -99,11 +99,12 @@ sub SetLanguageInfo
   am=>"http://am.wikipedia.org Amharic [25,AF]",
   an=>"http://an.wikipedia.org Aragonese [0.0741,EU]",
   ang=>"http://ang.wikipedia.org Anglo-Saxon [,EU]",
-  ar=>"http://ar.wikipedia.org Arabic [290,AF,AS]", # was 530 till July 2017
+  ar=>"http://ar.wikipedia.org Arabic [422,AF,AS]", # was 530 till July 2017
   arc=>"http://arc.wikipedia.org Aramaic [2.2,AS]",
   arz=>"http://arz.wikipedia.org Egyptian Arabic [76,AF]",
   as=>"http://as.wikipedia.org Assamese [13,AS,I]",
   ast=>"http://ast.wikipedia.org Asturian [0.450,EU]",
+  atj=>"http://atj.wikipedia.org Atikamekw [0.008,NA]",
   av=>"http://av.wikipedia.org Avar [0.76,EU]",
   ay=>"http://ay.wikipedia.org Aymara [2.8,SA]",
   az=>"http://az.wikipedia.org Azeri [27,AS]",
@@ -122,7 +123,7 @@ sub SetLanguageInfo
   bi=>"http://bi.wikipedia.org Bislama [0.2,OC]",
   bjn=>"http://bjn.wikipedia.org Banjar [3.5,AS]",
   bm=>"http://bm.wikipedia.org Bambara [6,AF]",
-  bn=>"http://bn.wikipedia.org Bengali [237,AS,I]",
+  bn=>"http://bn.wikipedia.org Bengali [261.8,AS,I]",
   bo=>"http://bo.wikipedia.org Tibetan [7,AS]",
   bpy=>"http://bpy.wikipedia.org Bishnupriya Manipuri [2.2,AS,I]",
   br=>"http://br.wikipedia.org Breton [0.226,EU]",
@@ -131,7 +132,7 @@ sub SetLanguageInfo
   bxr=>"http://bxr.wikipedia.org Buryat [0.33,AS]",
   ca=>"http://ca.wikipedia.org Catalan [9,EU]",
   cbk_zam=>"http://cbk-zam.wikipedia.org Chavacano [1.2,AS]",
-  "cbk-zam"=>"http://cbk-zam.wikipedia.org Chavacano",
+  "cbk-zam"=>"http://cbk-zam.wikipedia.org Chavacano [1.2,AS]",
   cdo=>"http://cdo.wikipedia.org Min Dong [9.1,AS,C]",
   ce=>"http://ce.wikipedia.org Chechen [1.4,EU]",
   ceb=>"http://ceb.wikipedia.org Cebuano [20,AS]",
@@ -149,7 +150,7 @@ sub SetLanguageInfo
   cv=>"http://cv.wikipedia.org Chuvash [1.1,AS]",
   cy=>"http://cy.wikipedia.org Welsh [0.74,EU]",
   da=>"http://da.wikipedia.org Danish [6,EU]",
-  de=>"http://de.wikipedia.org German [110,EU]", # was 185 till July 2017
+  de=>"http://de.wikipedia.org German [132,EU]", # was 185 till July 2017
   diq=>"http://diq.wikipedia.org Zazaki [1.6,AS]",
   dk=>"http://dk.wikipedia.org Danish [5.5,EU]",
   dsb=>"http://dsb.wikipedia.org Lower Sorbian [0.0069,EU]",
@@ -158,9 +159,9 @@ sub SetLanguageInfo
   ee=>"http://ee.wikipedia.org Ewe [3.5,AF]",
   el=>"http://el.wikipedia.org Greek [15,EU]",
   eml=>"http://eml.wikipedia.org Emilian-Romagnol [1.56,EU]",
-  en=>"http://en.wikipedia.org English [1500,EU,NA,OC,AS,AF]",
+  en=>"http://en.wikipedia.org English [1121,EU,NA,OC,AS,AF]",
   eo=>"http://eo.wikipedia.org Esperanto [2,AL]",
-  es=>"http://es.wikipedia.org Spanish [570,EU,NA,SA,AS,AF]", # was 500 till July 2017
+  es=>"http://es.wikipedia.org Spanish [513,EU,NA,SA,AS,AF]", # was 500 till July 2017
   et=>"http://et.wikipedia.org Estonian [1.1,EU]",
   eu=>"http://eu.wikipedia.org Basque [0.635,EU]", # Wikipedia 550,000-720,000
   ext=>"http://ext.wikipedia.org Extremaduran [0.2,EU]",
@@ -170,8 +171,8 @@ sub SetLanguageInfo
   "fiu-vro"=>"http://fiu-vro.wikipedia.org Voro [0.087,EU]",
   fiu_vro=>"http://fiu-vro.wikipedia.org Voro [0.07,EU]",
   fj=>"http://fj.wikipedia.org Fijian [0.55,OC]",
-  fo=>"http://fo.wikipedia.org Faaroese [0.066,EU]", # was Faeroese
-  fr=>"http://fr.wikipedia.org French [274,EU,NA,SA,AS,AF,OC]", # was 200 till July 2017
+  fo=>"http://fo.wikipedia.org Faroese [0.066,EU]", # was Faeroese, then Faaroese
+  fr=>"http://fr.wikipedia.org French [285,EU,NA,SA,AS,AF,OC]", # was 200 till July 2017
   frp=>"http://frp.wikipedia.org Arpitan [0.140,EU]",
   frr=>"http://frr.wikipedia.org North Frisian [0.01,EU]",
   fur=>"http://fur.wikipedia.org Friulian [0.6,EU]",
@@ -187,11 +188,11 @@ sub SetLanguageInfo
   got=>"http://got.wikipedia.org Gothic [,EU]",
   gu=>"http://gu.wikipedia.org Gujarati [46,AS,I]",
   gv=>"http://gv.wikipedia.org Manx [0.00015,EU]", # was Manx Gaelic
-  ha=>"http://ha.wikipedia.org Hausa [39,AF]",
+  ha=>"http://ha.wikipedia.org Hausa [63.1,AF]",
   hak=>"http://hak.wikipedia.org Hakka [34,AS,C]",
   haw=>"http://haw.wikipedia.org Hawai'ian [0.024,OC]", # was Hawaiian
   he=>"http://he.wikipedia.org Hebrew [8.2,AS]",
-  hi=>"http://hi.wikipedia.org Hindi [380,AS]", # was 550 till July 2017
+  hi=>"http://hi.wikipedia.org Hindi [442,AS]", # wp:en/Hindi /  was 380 until Sep 2018 / was 550 till July 2017
   hif=>"http://hif.wikipedia.org Fiji Hindi [0.400,OC]",
   ho=>"http://ho.wikipedia.org Hiri Motu [0.12,AS]",
   hr=>"http://hr.wikipedia.org Croatian [6.2,EU]",
@@ -210,11 +211,11 @@ sub SetLanguageInfo
   ilo=>"http://ilo.wikipedia.org Ilokano [10,AS]",
   io=>"http://io.wikipedia.org Ido [0.00015,AL]",
   is=>"http://is.wikipedia.org Icelandic [0.33,EU]",
-  it=>"http://it.wikipedia.org Italian [70,EU]",
+  it=>"http://it.wikipedia.org Italian [67.8,EU]",
   iu=>"http://iu.wikipedia.org Inuktitut [0.03,NA]",
-  ja=>"http://ja.wikipedia.org Japanese [125,AS]", # was 132 till July 2017
+  ja=>"http://ja.wikipedia.org Japanese [128.3,AS]", # was 132 till July 2017
   jbo=>"http://jbo.wikipedia.org Lojban [,AL]",
-  jv=>"http://jv.wikipedia.org Javanese [94,AS]", # was 80 till July 2017
+  jv=>"http://jv.wikipedia.org Javanese [84.3,AS]", # was 80 till July 2017
   ka=>"http://ka.wikipedia.org Georgian [4.3,EU]",
   kaa=>"http://kaa.wikipedia.org Karakalpak [0.58,AS]",
   kab=>"http://ka.wikipedia.org Kabyle [8,AF]",
@@ -227,7 +228,7 @@ sub SetLanguageInfo
   kl=>"http://kl.wikipedia.org Greenlandic [0.05,NA]",
   km=>"http://km.wikipedia.org Khmer [18.5,AS]", # was Cambodian
   kn=>"http://kn.wikipedia.org Kannada [47,AS,I]",
-  ko=>"http://ko.wikipedia.org Korean [78,AS]",
+  ko=>"http://ko.wikipedia.org Korean [77.2,AS]",
   koi=>"http://koi.wikipedia.org Komi-Permyak [0.063,EU]",
   kr=>"http://kr.wikipedia.org Kanuri [4.2,AF]",
   ks=>"http://ks.wikipedia.org Kashmiri [4.6,AS,I]",
@@ -267,9 +268,9 @@ sub SetLanguageInfo
   ml=>"http://ml.wikipedia.org Malayalam [37,AS,I]",
   mn=>"http://mn.wikipedia.org Mongolian [5.2,AS]",
   mo=>"http://mo.wikipedia.org Moldovan [,EU]",
-  mr=>"http://mr.wikipedia.org Marathi [73,AS,I]", # was 90 till July 2017
+  mr=>"http://mr.wikipedia.org Marathi [74.7,AS,I]", # was 90 till July 2017
   mrj=>"http://mrj.wikipedia.org Western Mari [0.3,A]",
-  ms=>"http://ms.wikipedia.org Malay [250,AS]", # was 300 till July 2017
+  ms=>"http://ms.wikipedia.org Malay [281,AS]", # was 300 till July 2017
   mt=>"http://mt.wikipedia.org Maltese [0.520,EU]",
   mus=>"http://mus.wikipedia.org Muskogee [0.006,NA]",
   mwl=>"http://mwl.wikipedia.org Mirandese [0.015,EU]",
@@ -288,8 +289,8 @@ sub SetLanguageInfo
   nl=>"http://nl.wikipedia.org Dutch [28,EU,SA]",
   nov=>"http://nov.wikipedia.org Novial [,AL]",
   nrm=>"http://nrm.wikipedia.org Norman [0.1,EU]",
-  nn=>"http://nn.wikipedia.org Nynorsk [4.7,EU]", # was Neo-Norwegian
-  no=>"http://no.wikipedia.org Norwegian [4.7,EU]",
+  nn=>"http://nn.wikipedia.org Nynorsk [0.4,EU]", # was Neo-Norwegian
+  no=>"http://no.wikipedia.org Norwegian [5.2,EU]",
   nso=>"http://nso.wikipedia.org Northern Sotho [13.8,AF]",
   nv=>"http://nv.wikipedia.org Navajo [0.170,NA]",
   ny=>"http://ny.wikipedia.org Chichewa [9.3,AF]",
@@ -297,7 +298,7 @@ sub SetLanguageInfo
   om=>"http://om.wikipedia.org Oromo [25.5,AF]",
   or=>"http://or.wikipedia.org Oriya [31,AS,I]",
   os=>"http://os.wikipedia.org Ossetic [0.57,AS]",
-  pa=>"http://pa.wikipedia.org Punjabi [104,AS,I]",
+  pa=>"http://pa.wikipedia.org Punjabi [148.3,AS,I]",
   pag=>"http://pag.wikipedia.org Pangasinan [1.5,AS]",
   pam=>"http://pam.wikipedia.org Kapampangan [1.9,AS]",
   pap=>"http://pap.wikipedia.org Papiamentu [0.271,SA]",
@@ -310,7 +311,7 @@ sub SetLanguageInfo
   pnb=>"http://pnb.wikipedia.org Western Panjabi [60,AS]",
   pnt=>"http://pnt.wikipedia.org Pontic [0.325,EU]",
   ps=>"http://ps.wikipedia.org Pashto [26,AS]",
-  pt=>"http://pt.wikipedia.org Portuguese [250,EU,SA,AF,AS]", # was 290 till July 2017
+  pt=>"http://pt.wikipedia.org Portuguese [236.5,EU,SA,AF,AS]", # was 290 till July 2017
   qu=>"http://qu.wikipedia.org Quechua [10.4,SA]",
   rue=>"http://rue.wikipedia.org Rusyn [0.62,EU]",
   rm=>"http://rm.wikipedia.org Romansh [0.060,EU]", # was Rhaeto-Romance
@@ -321,7 +322,7 @@ sub SetLanguageInfo
   "roa-rup"=>"http://roa-rup.wikipedia.org Aromanian [0.5]",
   roa_tara=>"http://roa-tara.wikipedia.org Tarantino [0.3,EU]",
   "roa-tara"=>"http://roa-tara.wikipedia.org Tarantino [0.3,EU]",
-  ru=>"http://ru.wikipedia.org Russian [260,EU,AS]", # was 278 till July 2017
+  ru=>"http://ru.wikipedia.org Russian [264.3,EU,AS]", # was 278 till July 2017
   ru_sib=>"http://ru-sib.wikipedia.org Siberian",
   "ru-sib"=>"http://ru-sib.wikipedia.org Siberian",
   rw=>"http://rw.wikipedia.org Kinyarwanda [12,AF]",
@@ -349,15 +350,15 @@ sub SetLanguageInfo
   stq=>"http://stq.wikipedia.org Saterland Frisian [0.001,EU]",
   su=>"http://su.wikipedia.org Sundanese [27,AS]",
   sv=>"http://sv.wikipedia.org Swedish [10,EU]",
-  sw=>"http://sw.wikipedia.org Swahili [50,AF]",
+  sw=>"http://sw.wikipedia.org Swahili [98.3,AF]",
   szl=>"http://szl.wikipedia.org Silesian [0.510,EU]",
-  ta=>"http://ta.wikipedia.org Tamil [66,AS,I]",
+  ta=>"http://ta.wikipedia.org Tamil [74.6,AS,I]",
   tcy=>"http://tcy.wikipedia.org Tulu [1.7,AS,I]",
-  te=>"http://te.wikipedia.org Telugu [80,AS,I]",
+  te=>"http://te.wikipedia.org Telugu [79.7,AS,I]",
   test=>"http://test.wikipedia.org Test",
   tet=>"http://tet.wikipedia.org Tetum [0.55,AS]",
   tg=>"http://tg.wikipedia.org Tajik [7.9,AS]",
-  th=>"http://th.wikipedia.org Thai [73,AS]",
+  th=>"http://th.wikipedia.org Thai [60.5,AS]",
   ti=>"http://ti.wikipedia.org Tigrinya [6.7,AF]",
   tk=>"http://tk.wikipedia.org Turkmen [9,AS]",
   tl=>"http://tl.wikipedia.org Tagalog [70,AS]", # was 90 till July 2017
@@ -366,7 +367,7 @@ sub SetLanguageInfo
   to=>"http://to.wikipedia.org Tongan [0.105,OC]",
   tokipona=>"http://tokipona.wikipedia.org Tokipona [0.0001,AL]",
   tpi=>"http://tpi.wikipedia.org Tok Pisin [5.5,AS]",
-  tr=>"http://tr.wikipedia.org Turkish [70,EU,AS]",
+  tr=>"http://tr.wikipedia.org Turkish [78.9,EU,AS]",
   ts=>"http://ts.wikipedia.org Tsonga [16.4,AF]",
   tt=>"http://tt.wikipedia.org Tatar [8,AS]",
   tum=>"http://tum.wikipedia.org Tumbuka [2.6,AF]",
@@ -378,31 +379,31 @@ sub SetLanguageInfo
   udm=>"http://udm.wikipedia.org Udmurt [0.340,AS]",
   ug=>"http://ug.wikipedia.org Uyghur [10,AS,C]",
   uk=>"http://uk.wikipedia.org Ukrainian [45,EU]",
-  ur=>"http://ur.wikipedia.org Urdu [60,AS,I]",
+  ur=>"http://ur.wikipedia.org Urdu [66,AS,I]", # wp:en/Urdu
   uz=>"http://uz.wikipedia.org Uzbek [23.5,AS]",
   ve=>"http://ve.wikipedia.org Venda [3.0,AF]",
   vec=>"http://vec.wikipedia.org Venetian [3.9,EU]",
   vep=>"http://vep.wikipedia.org Vepsian [0.0016,EU]",
-  vi=>"http://vi.wikipedia.org Vietnamese [75,AS]", # was 80 till July 2017
+  vi=>"http://vi.wikipedia.org Vietnamese [67.9,AS]", # was 80 till July 2017
   vls=>"http://vls.wikipedia.org West Flemish [1.4,EU]",
   vo=>"http://vo.wikipedia.org Volap&uuml;k [0.000020,AL]",
   wa=>"http://wa.wikipedia.org Walloon [0.6,EU]",
   war=>"http://war.wikipedia.org Waray-Waray [2.6,AS]",
   wo=>"http://wo.wikipedia.org Wolof [4.2,AF]",
-  wuu=>"http://wuu.wikipedia.org Wu [77,AS,C]",
+  wuu=>"http://wuu.wikipedia.org Wu [80.7,AS,C]",
   xal=>"http://xal.wikipedia.org Kalmyk [0.805,EU]",
   xh=>"http://xh.wikipedia.org Xhosa [7.9,AF]",
   yi=>"http://yi.wikipedia.org Yiddish [3.2,W]",
   yo=>"http://yo.wikipedia.org Yoruba [25,AF]",
   za=>"http://za.wikipedia.org Zhuang [14,AS,C]",
   zea=>"http://zea.wikipedia.org Zealandic [0.220,EU]",
-  zh=>"http://zh.wikipedia.org Chinese [1300,AS]",
-  zh_min_nan=>"http://zh-min-nan.wikipedia.org Min Nan [49,AS,C]",
-  "zh-min-nan"=>"http://zh-min-nan.wikipedia.org Min Nan [49,AS,C]",
+  zh=>"http://zh.wikipedia.org Chinese [1107,AS]",
+  zh_min_nan=>"http://zh-min-nan.wikipedia.org Min Nan [50.1,AS,C]",
+  "zh-min-nan"=>"http://zh-min-nan.wikipedia.org Min Nan [50.1,AS,C]",
   zh_classical=>"http://zh-classical.wikipedia.org Classical Chinese [,AS,C]",
   "zh-classical"=>"http://zh-classical.wikipedia.org Classical Chinese [,AS,C]",
-  zh_yue=>"http://zh-yue.wikipedia.org Cantonese [71,AS,C]",
-  "zh-yue"=>"http://zh-yue.wikipedia.org Cantonese [71,AS,C]",
+  zh_yue=>"http://zh-yue.wikipedia.org Cantonese [73.7,AS,C]",
+  "zh-yue"=>"http://zh-yue.wikipedia.org Cantonese [73.7,AS,C]",
   zu=>"http://zu.wikipedia.org Zulu [26,AF]",
   zz=>"&nbsp; All&nbsp;languages",
   zzz=>"&nbsp; All&nbsp;languages except English"
@@ -634,6 +635,37 @@ sub GetProjectBaseUrl
 
   # print "GetProjectBaseUrl wp $wp base $base\n" ;
   return $base ;
+}
+
+sub GetDeepLinkWikistats2
+{
+  my $wp = shift ;
+  my $lang = $out_languages {$wp} ;
+  my $name = "Wiki unspecified for code '$wp'" ;
+  my $url ;
+
+  if ($mode_wb) { $name = "Wikibooks $lang"   ;  $domain = "$wp.wikibooks.org"   ; }
+  if ($mode_wk) { $name = "Wiktionary $lang"  ;  $domain = "$wp.wiktionary.org"  ; }
+  if ($mode_wn) { $name = "Wikinews $lang"    ;  $domain = "$wp.wikinews.org"    ; }
+  if ($mode_wo) { $name = "Wikivoyage $lang"  ;  $domain = "$wp.wikivoyage.org"  ; } 
+  if ($mode_wp) { $name = "Wikipedia $lang"   ;  $domain = "$wp.wikipedia.org"   ; }
+  if ($mode_wq) { $name = "Wikiquote $lang"   ;  $domain = "$wp.wikiquote.org"   ; }
+  if ($mode_ws) { $name = "Wikisource $lang"  ;  $domain = "$wp.wikisource.org"  ; }
+  if ($mode_wv) { $name = "Wikiversity $lang" ;  $domain = "$wp.wikiversity.org" ; }
+
+  if ($mode_wx)
+  {
+    if ($wp eq "sources")                      { $domain = "wikisource.org" ; }
+    elsif ($wp eq "sep11")                     { $domain = "sep11.wikimedia.org" ; }
+    elsif ($wp eq "foundation")                { $domain = "wikimediafoundation.org" ; }
+    elsif ($wp =~ /(\w\w+)(wikimedia)/)        { $domain = "$wp wiki" ; }
+    elsif ($wp eq "species")                   { $domain = "$wp.unspecified.org" ; }
+    elsif ($wp eq "mediawiki")                 { $domain = "mediawiki.org" ; }
+    elsif ($wp eq "wikidata")                  { $domain = "wikidata.org" ; }
+  }
+
+  my $link = "<a href='https://stats.wikimedia.org/v2/#/$domain'>$name</a>" ;
+  return $link ;
 }
 
 1;

@@ -209,7 +209,9 @@ sub AssumeBots
     foreach $bot (split (',', $unflaggedbots))
     { $bots {$bot} ++ ; }
 
-    $bots {'Kolega2357'} ++ ; # 2016-09: manually added 14M edits, 4.5M in last month
+    $bots {'Kolega2357'}  ++ ; # 2016-09: manually added 14M edits, 4.5M in last month
+    $bots {'Interwicket'} ++ ; # 2018-10: reported as bot by JackPotte
+    $bots {'BotRenard'}   ++ ; # 2018-10: reported as bot by JackPotte
   }
 
   &LogT ("Also assume certain accounts are bots, based on previously stored bots for all projects\n") ;

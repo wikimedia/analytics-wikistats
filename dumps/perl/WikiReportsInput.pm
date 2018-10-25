@@ -339,6 +339,7 @@ else
   $file_csv_binaries_stats          = $path_in . "StatisticsPerBinariesExtension.csv" ;
   $file_csv_language_codes          = $path_in . "LanguageCodes.csv" ;
   $file_csv_zeitgeist               = $path_in . "ZeitGeist.csv" ;
+  $file_csv_participation           = $path_in . "Participations.csv" ;
 
   $file_csv_pageviewsmonthly        = $path_pv . "projectviews_per_month_all.csv" ;
   $file_csv_pageviewsmonthly_merged = $path_pv . "projectviews_per_month_all_merged_mobile_zero.csv" ;
@@ -801,6 +802,8 @@ sub ReadBotStats
 # expect following loop everywhere: "foreach $wp (@languages) ... "
 sub WhiteListLanguages
 {
+# $threshold_articles = 0 ; # generate all reports (debug)
+# $threshold_edits    = 0 ; # generate all reports (debug) 
   $threshold_articles = 100 ;
   $threshold_edits    = 10 ;
 
@@ -2005,6 +2008,11 @@ sub ReadMonthlyStats
       { @MonthlyStats {$wp.$c[$f].'avg3'} += @MonthlyStats {$wp.$m.$c[$f]} ; }
       @MonthlyStats {$wp.$c[$f].'avg3'} /= 3 ;
       @MonthlyStats {$wp.$c[$f].'avg3'} = sprintf ("%.0f", @MonthlyStats {$wp.$c[$f].'avg3'}) ;
+
+      foreach $m ($m3, $m3-1, $m3-2, $m3-3, $m3-4, $m3-5, $m3-6, $m3-7, $m3-8, $m3-9, $m3-10, $m3-11)
+      { @MonthlyStats {$wp.$c[$f].'avg12'} += @MonthlyStats {$wp.$m.$c[$f]} ; }
+      @MonthlyStats {$wp.$c[$f].'avg12'} /= 12 ;
+      @MonthlyStats {$wp.$c[$f].'avg12'} = sprintf ("%.0f", @MonthlyStats {$wp.$c[$f].'avg12'}) ;
     }
 
     $editstot = 0;
@@ -2018,7 +2026,7 @@ sub ReadMonthlyStats
     @MonthlyStats {$wp.$c[11].'tot'} = $editstot ;
     @MonthlyStats {$wp.$c[11].'+'}   = $editsnew ;
 
-print "$m editstot $editstot, editsnew $editsnew\n" ; # qqqq
+    # print "$m editstot $editstot, editsnew $editsnew\n" ; # qqqq
     # if ($editstot-$editsnew > 0)
     # { @MonthlyStats {$wp.$c[11].'%'}   = sprintf ("%.0f",100 * ($editsnew / ($editstot-$editsnew))) ; }
     if ($editstot > 0)

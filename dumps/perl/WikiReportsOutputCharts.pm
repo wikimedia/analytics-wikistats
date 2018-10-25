@@ -21,10 +21,14 @@ sub GenerateChartsPerWikipedia
     $years {$year} ++ ;
   }
 
-  &GenerateHtmlStartWikipediaReport ($wp, "Charts", "") ;
+  $out_msg_deep_wikistats2 = "<p>&nbsp;&nbsp;You can go directly to " . &GetDeepLinkWikistats2 ($wp) ;
+
+  &GenerateHtmlStartWikipediaReport ($wp, "Charts", "", "", $out_msg_deep_wikistats2) ;
 
 # $out_html =~ s/-->/img { width: 10px ; }\n-->/ ;
 
+# print "$out_html\n" ;
+# exit ;
   $out_html .= "<noscript><h3><font color='red'>Charts can not be displayed. " .
                "Please use a browser that supports javascript.</font></h3><hr></noscript>" ;
 

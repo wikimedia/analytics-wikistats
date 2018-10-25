@@ -1205,7 +1205,8 @@ sub GeneratePlotEditors
     $out_script_plot =~ s/PLOT_FOOTER// ; 
   }
 
-  &GeneratePlotCallR ($out_script_plot, $file_script_R) ;
+  $lang_code = uc ($wp) ;
+  &GeneratePlotCallR ($out_script_plot, $file_script_R, $lang_code) ;
 }
 
 sub GeneratePlotActiveWikis
@@ -1867,13 +1868,13 @@ sub GeneratePlotArticles
 
   $m = $m_lo - 11 + $m_lo % 12 ;
   $date = &m2mmddyyyy ($m) ;
- print "1 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
+# print "1 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
   while ($m < $m_lo)
   {
 # for ($m = $m_lo - ($m_lo % 12) + 1 ; $m < $m_lo; $m++)
 # {
     $date = &m2mmddyyyy ($m) ;
-   print "2 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
+  # print "2 date: $date m_lo: $m_lo, m: $m\n" ; # debug code
     $date =~ s/(\d\d)\/\d\d\/(\d\d\d\d)/$1\/01\/$2/ ;
     if (($tot_or_new eq 'New') && ($new_articles_per_usertype > 0)) # new refined counts available ?
     { print ARTICLES_OUT "$wp,$date,0,0,0\n" ; }
@@ -2420,9 +2421,12 @@ __HTML_SUMMARY_BINARIES__
 
 sub GeneratePlotCallR
 {
-  return ; # Aug 2017: temporary disabled after migration to stat1005: 'stack smashing detected'
+  # return ; # Aug 2017: temporary disabled after migration to stat1005: 'stack smashing detected'
 
-  my ($script, $file_script) = @_ ;
+  my ($script, $file_script,$lang_code) = @_ ;
+
+  if ($lang_code ne '')
+  { $file_script =~ s/\./$langcode\./ ; }
 
   ($file_script_out = $file_script) =~ s/R-in/R-out/ ;
 
