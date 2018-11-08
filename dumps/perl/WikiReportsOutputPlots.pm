@@ -210,7 +210,7 @@ sub GeneratePlotFiles2
   $out_html .= "<p>Since 2011 there is a summary page for every wiki, where core metrics are plotted.\n" .
                "<br>For individual summaries follow links from project <b>sitemap</b>." .
                "<br>There are also <b>collections</b> of summaries per project.\n" .
-               "<p>For comparison between several languages see the <b><a href='http://reportcard.wmflabs.org'>new report card</a></b>.\n" ;
+               "<p>For comparison between several languages see <b><a href='https://stats.wikimedia.org/v2'>Wikistats 2</a></b>.\n" ;
 
   $out_html .= "<table border='1'>" ;
   $out_html .= "<tr><th class=l>Wikipedia</a></th><td class=l><a href='http://stats.wikimedia.org/EN'>Sitemap</a></td><td class=l><a href='http://stats.wikimedia.org/EN/ReportCardTopWikis.htm'>Summary collection</a></td></tr>\n" ;
