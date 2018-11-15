@@ -17,7 +17,7 @@ export https_proxy=http://webproxy.eqiad.wmnet:8080
 perl=$wikistats/dumps/perl 
 csv=$wikistats_data/dumps/csv
 dblists=$wikistats/dumps/dblists/master%20copy # to be fixed: folder has space in name, here as %20
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $csv/csv_mw
 cp StatisticsContentNamespacesExtraNamespaces.csv StatisticsContentNamespacesExtraNamespaces.bak

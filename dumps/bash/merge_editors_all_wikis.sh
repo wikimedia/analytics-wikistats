@@ -7,7 +7,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl
 csv=$dumps/csv
 out=$dumps/csv/csv_mw
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 clear 
 cd $out 

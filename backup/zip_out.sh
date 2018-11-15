@@ -18,7 +18,7 @@ fi
 wikistats_data=$WIKISTATS_DATA
 wikistats_backup=$WIKISTATS_BACKUP
 data=$wikistats_data/dumps/out
-backup=/srv/dumps/wikistats_1 #backup=$wikistats_backup/dumps_out
+backup=/dumps/wikistats_1 #backup=$wikistats_backup/dumps_out
 
 rm $backup/out_$1.zip
 

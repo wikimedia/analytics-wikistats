@@ -19,7 +19,7 @@ set -x
 ulimit -v 10000000
 
 data_hourly=/mnt/hdfs/wmf/data/archive/projectview/geo/hourly/ 
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 wikistats=$WIKISTATS_SCRIPTS
 bash=$wikistats/dumps/bash
@@ -52,8 +52,8 @@ meta=$wikistats_data/squids/csv/meta # for bots views and edits use these 'meta'
 
 { set +x; } 2>/dev/null ;
 echo -e "\nsend log to $log_file"
-# exec >> $log_file 2>&1 # send stdout/stderr to file
-echo -e "$job\n" ; # repeated after exec to reroute log
+exec >> $log_file 2>&1 # send stdout/stderr to file
+echo -e "$job\n" ; # repeated after exec, to also have this info in rerouted log
 set -x
 
 # very loose input validation

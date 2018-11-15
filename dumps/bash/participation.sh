@@ -2,7 +2,7 @@
 
 wikistats=$WIKISTATS_SCRIPTS
 wikistats_data=$WIKISTATS_DATA
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $wikistats/dumps/perl
 

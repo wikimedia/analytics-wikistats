@@ -16,7 +16,7 @@ exec >> $log_file 2>&1 # send stdout/stderr to file
 data=$WIKISTATS_DATA
 backup=$WIKISTATS_BACKUP
 csv=$data/dumps/csv
-zip=/srv/dumps/wikistats_1 # was zip=$backup/dumps_csv
+zip=/dumps/wikistats_1 # was zip=$backup/dumps_csv
 
 # dataset1001=dataset1001.wikimedia.org::pagecounts-ez/wikistats
 
