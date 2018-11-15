@@ -8,7 +8,7 @@ bash=$dumps/bash
 bash=/home/ezachte/wikistats/dumps/bash # tests
 csv=$dumps/csv
 out=$dumps/out
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 log=$dumps/logs/log_report_regions.txt
 

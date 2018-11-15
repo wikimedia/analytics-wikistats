@@ -30,7 +30,7 @@ exec 1>> $log 2>&1 # send stdout/stderr to file
 #dumps=$wikistats/dumps
 #csv=$dumps/csv
 #out=$dumps/out
-#htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+#htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $perl
 

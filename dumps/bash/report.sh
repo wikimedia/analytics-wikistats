@@ -35,7 +35,7 @@ fi
 echo
 set -x
 
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/ # publish reports on this server
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/ # publish reports on this server
 
 wikistats=$WIKISTATS_SCRIPTS
 perl=$wikistats/dumps/perl

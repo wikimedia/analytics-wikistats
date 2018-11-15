@@ -6,7 +6,7 @@ perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl # tests
 csv=$dumps/csv
 out=$dumps/out
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $perl
  perl WikiReports.pl -m wm -l en -i $csv/csv_wp/ -o $out/out_wp

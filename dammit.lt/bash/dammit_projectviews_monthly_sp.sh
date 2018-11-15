@@ -7,7 +7,7 @@ perl=$dumps/perl
 csv=$dumps/csv
 out=$dumps/out
 report=$dumps/logs/log_pageviews_monthly_sp.txt
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 # -l = language (en:English)
 # -m = mode (wb:wikibooks, wk:wiktionary, wn:wikinews, wp:wikipedia, wq:wikiquote, ws:wikisource, wv:wikiversity, wx:wikispecial=commons,meta,..)

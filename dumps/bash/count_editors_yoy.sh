@@ -8,7 +8,7 @@ dumps=$wikistats/dumps
 perl=$dumps/perl
 perl=/home/ezachte/wikistats/dumps/perl
 csv=$dumps/csv
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 dataset1001=dataset1001.wikimedia.org::pagecounts-ez/wikistats/
 
 cd $perl

@@ -1,4 +1,6 @@
-#!/bin/sh -x 
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
 # collect updates from mail archives 
 # generate new html reports
@@ -23,8 +25,9 @@ ulimit -v 8000000
 logfile_collect=$logs/collect/log_collect_mail_archives_$yyyymmdd.txt  
 logfile_report=$logs/report/log_report_mail_archives_$yyyymmdd.txt     
 
-export http_proxy=http://webproxy.eqiad.wmnet:8080                     
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/            
+export http_proxy=http://webproxy.eqiad.wmnet:8080
+export https_proxy=http://webproxy.eqiad.wmnet:8080                     
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/            
 hdfs_backup=/user/ezachte/wikistats_data/mail-lists/lists/             
 
 perl=$wikistats/mail-lists/perl                                        

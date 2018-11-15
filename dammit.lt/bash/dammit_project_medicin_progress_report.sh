@@ -10,7 +10,7 @@ meta=/a/wikistats_git/dumps/csv/csv_mw/MetaLanguages.csv
 perl=$dammit/perl
 perl=/home/ezachte/wikistats/dammit.lt/perl # tests
 work=/a/dammit.lt/pagecounts/categorized
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 data=$work/data/wp-medicin/$yyyy_mm
 publish=$work/publish

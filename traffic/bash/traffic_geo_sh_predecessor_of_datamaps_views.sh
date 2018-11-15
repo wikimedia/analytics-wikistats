@@ -20,7 +20,7 @@ reports_edits_unsampled=$squids/reports_edits
 logs=$traffic/logs
 meta=$wikistats/squids/csv/meta # for bots views and edits use these 'meta' files (lookup for country/region codes) 
 data_hourly=/mnt/hdfs/wmf/data/archive/projectview/geo/hourly/ 
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $perl
 

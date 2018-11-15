@@ -10,7 +10,7 @@ exec 1> $logfile 2>&1 # send stdout/stderr output to file
 perl=$wikistats/dumps/perl
 csv=$wikistats_data/dumps/csv
 out=$wikistats_data/animations/growth
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 dt=$(date +[%Y-%m-%d][%H:%M])
 cd $out 

@@ -16,7 +16,7 @@ perl=$wikistats/dumps/perl
 out=$wikistats_data/dumps/out
 dumps=$wikistats_data/dumps
 dammit=$wikistats_data/dammit
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs
 
 cd $perl
 perl WikiCountsJobProgress.pl -i $dumps -d $dammit -o $out -u $wikistats -p $perl
