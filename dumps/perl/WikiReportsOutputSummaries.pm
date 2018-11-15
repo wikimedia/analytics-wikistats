@@ -2132,7 +2132,7 @@ sub HtmlSummaryExplanation
   my $explanation_new_editors         = "<dt><b><a href='../EN/TablesWikipediansNew.htm'>New Editors</a></b><dd>Registered (and signed in) users who completed their all time 10th edit in this month\n" ;
   my $explanation_speakers            = "<dt><b>Speakers <sup>1</sup></b><dd>Includes secondary language speakers. ARTICLE_LANGUAGE\n" ;
   my $explanation_editors_per_million = "<dt><b>Editors per Million Speakers <sup>1</sup></b><dd> aka Participation Rate.\n" ;
-  my $explanation_comparison          = "<sup>1</sup> For language/project comparisons see also <a href='$page_sitemap'>$out_publication sitemap</a> and new WMF <a href='http://reportcard.wmflabs.org/'>Report Card</a> (beta).\n" ;
+  my $explanation_comparison          = "<sup>1</sup> For language/project comparisons see also <a href='$page_sitemap'>$out_publication sitemap</a> and <a href='https://stats.wikimedia.org/v2'>Wikistats 2</a>.\n" ;
 
   my $html = <<__HTML_SUMMARY_EXPLANATION__ ;
       <td class=l colspan=99 width=100%>

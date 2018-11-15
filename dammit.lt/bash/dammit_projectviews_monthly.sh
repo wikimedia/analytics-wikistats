@@ -12,7 +12,7 @@ wikistats_data=$WIKISTATS_DATA
 logfile=$wikistats_data/dammit/logs/pageviews_monthly/log_pageviews_monthly_$yyyymmdd.txt
 exec 1> $logfile 2>&1 # send stdout/stderr to file
 
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/ 
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/ 
 
 scripts=$WIKISTATS_SCRIPTS                           
 perl_dumps=$scripts/dumps/perl                       
