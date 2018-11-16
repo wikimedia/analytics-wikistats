@@ -13,7 +13,6 @@ logfile=$wikistats_data/dammit/logs/pageviews_monthly/log_pageviews_monthly_$yyy
 exec 1> $logfile 2>&1 # send stdout/stderr to file
 
 htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/ 
-
 scripts=$WIKISTATS_SCRIPTS                           
 perl_dumps=$scripts/dumps/perl                       
 perl_dammit=$scripts/dammit.lt/perl                
@@ -233,7 +232,7 @@ do
   perl WikiReports.pl -v c -m wp -l en -i $csv/csv_wp/ -j $csv_pv/csv_wp -o $out/out_wp     -r $region
 done;
 for region in Africa Asia America Europe India Oceania Artificial 
-do	
+do
   echo "rsync -av $out/out_wp/EN_$region/TablesPageViewsMonthly*.htm  $htdocs/EN_$region"
         rsync -av $out/out_wp/EN_$region/TablesPageViewsMonthly*.htm  $htdocs/EN_$region 
 done;
