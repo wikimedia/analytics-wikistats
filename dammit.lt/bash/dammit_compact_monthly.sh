@@ -12,7 +12,8 @@ input=$merged
 output=$merged                          
 
 temp=$WIKISTATS_DATA/dammit/pagecounts/temp                             
-logfile=$WIKISTATS_DATA/dammit/logs/log_compact_monthly_$yyyymmdd.txt              
+logfile=$WIKISTATS_DATA/dammit/logs/compact_monthly/log_compact_monthly_$yyyymmdd.txt      
+exec 1> $logfile 2>&1 # send stdout/stderr to file        
 
 data=/srv/dumps/pagecounts-ez/merged/ 
 
