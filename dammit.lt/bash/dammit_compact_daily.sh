@@ -10,7 +10,7 @@ wikistats=$WIKISTATS_SCRIPTS
 wikistats_data=$WIKISTATS_DATA
 
 logfile=$wikistats_data/dammit/logs/compact_daily/log_compact_daily_$yyyymmdd.txt
-exec 1> $logfile 2>&1 # send stdout/stderr to file
+exec 1> $logfile 2>&1 # send stdout/stderr to file	
 maxage=21
 
 input=/mnt/data/xmldatadumps/public/other/pageviews     # webstatscollector 3.0 (was pagecounts-raw for webstatscollector 1.0)

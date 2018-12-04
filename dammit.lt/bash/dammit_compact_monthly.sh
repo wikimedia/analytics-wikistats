@@ -32,3 +32,9 @@ echo -e "Grab semaphore dammit_compact_monthly.semaphore\n"
 
 cmd="nice perl DammitCompactHourlyOrDailyPageCountFiles.pl $mode $verbose -a $maxage -i $input -o $output -t $temp | tee -a $logfile | cat"
 flock -n -e $bash/dammit_compact_monthly.semaphore -c "$cmd" || { echo "Script is already running: lock on ../bash/dammit_compact_monthly.semaphore" ; exit 1 ; } >&2
+
+# delete temporary files
+cd $temp
+ls -l
+rm *patched
+rm *sorted
