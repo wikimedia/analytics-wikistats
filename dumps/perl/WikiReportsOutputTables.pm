@@ -1592,10 +1592,9 @@ sub GenerateTablesPerWiki
   &GenerateTableMostActiveBots ($wp) ;
 
 
-  # EZ Oct 2018: disabled this, as no-one ever commented on this, except one person, it just adds to byte size of page
-  # if ($mode_wp)
-  # { &GenerateTableSizeDistribution ($wp) ; }
-  # if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableSizeDistribution"} += $t1 - $t0 ; $t0 = $t1 ; }
+  if ($mode_wp)
+  { &GenerateTableSizeDistribution ($wp) ; }
+  if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableSizeDistribution"} += $t1 - $t0 ; $t0 = $t1 ; }
 
   &GenerateTableNamespaces ($wp) ;
   if ($mode_wp) { $t1 = time ; $TimesGenerateTables {"GenerateTableNamespaces"} += $t1 - $t0 ; $t0 = $t1 ; }
@@ -3421,7 +3420,6 @@ sub GenerateTableAnonymousUsers
 
 sub GenerateTableSizeDistribution
 {
-  return ; # EZ Oct 2018: disabled this, as no-one ever commented on this, except one person, just adds to byte size of page
 
   my $wp = shift ;
 
@@ -6766,6 +6764,13 @@ sub GenerateTablePageviewsPerRange
     $wpndx++ ;
   }
 
+  # EZ Nov 2018: disabled this second table on the page, as no-one ever commented on it, except one person. It adds to page size which is too high already.
+  # see for how it looked e.g. Wayback Machine at
+  # https://web.archive.org/web/20181004111607/https://stats.wikimedia.org/EN/TablesPageViewsMonthlyCombined.htm
+  # it's mostly cosmetic: size of ../out/out_wp/TablesPageViewsMonthly.htm went down from 2132422 to 2091843 = -2%
+
+if (0)
+{
   if ($region eq '')
   {
     $out_html .= "<p>&nbsp;<hr>&nbsp;<h3>Distribution of page views</h3>" ; 
@@ -6872,7 +6877,7 @@ sub GenerateTablePageviewsPerRange
 
   $out_html .= &trh5b ($line_html2) ;
   $out_html .= "</table>" ;
-
+}
   $javascript = $javascript_ ;
 }
 

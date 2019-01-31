@@ -13,12 +13,12 @@ set -x
 
 ulimit -v 2000000
 # ulimit -s 32768
-# keep logging dewstination 'as is', may already be redirected by calling bash file 'count_report_publish.sh'
-#log_dir=$WIKISTATS_DATA/dumps/logs/report_one_project ; mkdir -m 775 $log_dir >/dev/null 2>&1
-#log=$log_dir/log_report_one_project_${projectcode}_$yyyymmddhhnn.txt
-#exec 1>> $log 2>&1 # send stdout/stderr to file
-#projectcode="$1"  # repeat for log file
-#{ set +x; } 2>/dev/null ; echo $job ; set -x # repeat for log file
+keep logging dewstination 'as is', may already be redirected by calling bash file 'count_report_publish.sh'
+log_dir=$WIKISTATS_DATA/dumps/logs/report_one_project ; mkdir -m 775 $log_dir >/dev/null 2>&1
+log=$log_dir/log_report_one_project_${projectcode}_$yyyymmddhhnn.txt
+exec 1>> $log 2>&1 # send stdout/stderr to file
+projectcode="$1"  # repeat for log file
+{ set +x; } 2>/dev/null ; echo $job ; set -x # repeat for log file
 
 projectcode=$1
 mode_publish=$2
