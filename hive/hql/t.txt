@@ -1,0 +1,51 @@
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive (default)> USE wmf ;
+hive (wmf)> 
+          > SELECT 
+          >   COUNT (DISTINCT page_title_latest),
+          >   COUNT (DISTINCT page_title_latest, page_namespace_latest),
+          >   page_namespace_latest
+          > --  page_namespace_is_content_latest
+          > 
+          > FROM 
+          >   mediawiki_history
+          > 
+          > WHERE 
+          >       snapshot     = '2017-08'
+          >   AND wiki_db      = 'afwiki'
+          >   AND event_entity = 'page'
+          > --AND page_title_latest = 'Andy_Warhol'
+          > 
+          > GROUP BY
+          > --  page_title_latest,
+          >   page_namespace_latest
+          > 
+          > ORDER BY
+          > --  page_title_latest,
+          >   page_namespace_latest
+          > 
+          > 
+          > 
+          > LIMIT 10000 ; 
+_c0	_c1	page_namespace_latest
+72793	72793	0
+7655	7655	1
+3925	3925	2
+5818	5818	3
+2210	2210	4
+188	188	5
+10564	10564	6
+203	203	7
+2160	2160	8
+81	81	9
+6231	6231	10
+312	312	11
+22	22	12
+3	3	13
+8818	8818	14
+252	252	15
+419	419	100
+8	8	101
+112	112	828
+7	7	829
+hive (wmf)> 

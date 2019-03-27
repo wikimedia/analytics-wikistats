@@ -12,7 +12,9 @@
 
   $| = 1; # Flush output
 
+  use lib "/home/ezachte/wikistats/squids/perl" ;
   use SquidReportArchiveConfig ;
+  use lib "/home/ezachte/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
   ez_lib_version (2) ;

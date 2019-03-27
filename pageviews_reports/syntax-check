@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# syntax check for all Perl scripts and modules in the current directory
+find . -name "*.pl" -o -name "*.pm" | \
+  perl -MTerm::ANSIColor -ne 'chomp; $o=`perl -Ilib -mstrict -wc $_ 2>&1`; $o=~/syntax OK/? print(color("bold green"),"$_ => OK\n"): print(color("bold red"),"$_ => NOT OK\n");'

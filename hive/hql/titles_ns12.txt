@@ -1,0 +1,53 @@
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+hive (default)> USE wmf ;
+hive (wmf)> 
+          > SELECT 
+          >   page_title_latest,
+          >   page_namespace_latest
+          > --  page_namespace_is_content_latest
+          > 
+          > FROM 
+          >   mediawiki_history
+          > 
+          > WHERE 
+          >       snapshot     = '2017-08'
+          >   AND wiki_db      = 'afwiki'
+          >   AND event_entity = 'page'
+          >   AND page_namespace_latest = 12 
+          > --AND page_title_latest = 'Andy_Warhol'
+          > 
+          > GROUP BY
+          >   page_title_latest,
+          >   page_namespace_latest
+          > 
+          > ORDER BY
+          >   page_title_latest,
+          >   page_namespace_latest
+          > 
+          > 
+          > 
+          > LIMIT 10000 ; 
+page_title_latest	page_namespace_latest
+Boeke	12
+Boeke/Gevorderde_funksies	12
+Boeke/Vraagafdeling	12
+Gadget-HotCat	12
+Gebruik_van_kategorieë	12
+Gebruik_van_openbare_bronne	12
+Gebruik_van_tabelle	12
+Hulp	12
+Inhoud	12
+Naamruimte	12
+Permanente_skakel	12
+Permanente_skakels	12
+Sleutelbord	12
+Speltoetser	12
+Tegnologie	12
+Wikipedia:_Die_Verlore_Handleiding	12
+Wikipedia:_Die_Verlore_Handleiding/Die_skepping,_wysiging_en_instandhouding_van_artikels	12
+Wikipedia:_Die_Verlore_Handleiding/Die_skepping,_wysiging_en_instandhouding_van_artikels/Jou_eerste_wysigings	12
+Wikipedia:_Die_Verlore_Handleiding/Inleiding	12
+Wikipedia:_Die_Verlore_Handleiding/Inligting_oor_die_outeur_en_uitgewer	12
+Wikipedia:_Die_Verlore_Handleiding/Meer_oor_hierdie_boek	12
+Wikipedia:_Die_Verlore_Handleiding/Titelblad_en_lisensiëringsinligting	12
+hive (wmf)> 

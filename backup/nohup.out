@@ -1,0 +1,432 @@
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_03_23
+++ date +%Y_%m
++ yyyymm=2018_03
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_11
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_03_23.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_04_14
+++ date +%Y_%m
++ yyyymm=2018_04
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_04_14.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_05_29
+++ date +%Y_%m
++ yyyymm=2018_05
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_22
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_05_29.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec
++ ulimit -v 8000000
+++ date +%Y_%m_%d
++ yyyymmdd=2018_07_11
+++ date +%Y_%m
++ yyyymm=2018_07
+++ date +%Y
++ yyyy=2018
+++ date +%Y_%q%q
++ yyyyq=2018_33
++ backup=/home/ezachte/wikistats_backup
++ log_file=/home/ezachte/wikistats_backup/logs/log_backup_csv_dumps_2018_07_11.txt
++ exec

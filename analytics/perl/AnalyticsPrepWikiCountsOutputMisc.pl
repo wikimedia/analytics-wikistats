@@ -285,9 +285,12 @@ sub FindLargestWikis
     foreach $project_language (keys %largest_projects)
     {
       ($project,$language) = split (',', $project_language) ;
-          if ($data2 {"$project,$language,$yyyymm"} eq '')
+      if ($data2 {"$project,$language,$yyyymm"} eq '')
       {
         $months {$yyyymm} = 0 ; # when execution is not aborted skip this month in output
+
+        next if $project_language eq 'wx,wikidata' and $yyyymm lt '2013' ; # wikidata did not yet exist, no reason to skip month
+ 
       #	print "No data yet for large wiki '$project_language' for $yyyymm-> skip month $yyyymm\n" ;
 	$data_missing .= "!!! No data yet for $project_language/$yyyymm\n" ;
       }

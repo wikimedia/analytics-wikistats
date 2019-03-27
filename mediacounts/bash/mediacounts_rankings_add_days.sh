@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
 
 # find days since 2015 for which mediacounts rankings do not exist yet
 # for each such day invoke mediacounts_rankings_one_day.sh to add ~20 files, one for each column

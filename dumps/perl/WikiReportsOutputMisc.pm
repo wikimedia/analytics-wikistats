@@ -927,7 +927,8 @@ sub TableSeeAlso
 
       $out_html .= &tr (&tdlb ("Job progress: <a href='http://www.infodisiac.com/cgi-bin/WikimediaDownload.pl'>Database dumps</a>&nbsp;/&nbsp;" .
                                "<a href='http://stats.wikimedia.org/WikiCountsJobProgress.html'>Data gathering</a> " . blank_text_after ("31/03/2009", " <font color=#008000><b>NEW</b></font>")) . &tde) ;
-      $out_html .= &tr (&tdlb ("Raw data: <a href='http://dumps.wikimedia.org/other/pagecounts-ez/wikistats/csv_$mode.zip'>csv_$mode.zip</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)") . &tde) ;
+# Jan 31, 2019
+#     $out_html .= &tr (&tdlb ("Raw data: <a href='http://dumps.wikimedia.org/other/wikistats_1'>csv zip files</a> (doc: <a href='http://meta.wikimedia.org/wiki/Wikistat_csv'>meta</a>)") . &tde) ;
     }
 
     $out_html .= "<\/table>\n" ;
@@ -1584,19 +1585,34 @@ sub GenerateHtmlStart
 
     $link_wikistats_2 = "<a href='https://stats.wikimedia.org/v2/#/all-projects'>Wikistats 2</a>" ;
     $link_survey      = "<a href='https://www.mediawiki.org/wiki/Analytics/Wikistats/DumpReports/Future_per_report'>survey</a>" ;
+
+# Jan 31, 2019
+#   $link_feedback    = "<a href='https://wikitech.wikimedia.org/wiki/Talk:Analytics/Systems/Wikistats'>feedback and suggestions</a>" ; 
     $link_feedback    = "<a href='https://wikitech.wikimedia.org/wiki/Talk:Analytics/Systems/Wikistats'>feedback and suggestions</a>" ; 
 
-    $out_html .= "<table width=1000><tr><td colspan=999 style='background-color:#DD8;text-align:left'>" .
-                 "<font color=#107000>&nbsp;<br>$sp2" .
-                 "<b>Dec 2017: WMF Analytics Team is happy to announce the first release of $link_wikistats_2</font></b>$sp2<p>" .
-                 "<p>${sp2}Wikistats has been redesigned for architectural simplicity, faster data processing, " . 
-                 "and a more dynamic and interactive user experience. The data used in the reports will also be made available for external processing.${sp2}" . 
-                 "<p>${sp2}First goal is to match the numbers of the current system, and to provide the most important reports, " . 
-                 "as decided by the Wikistats community (see $link_survey).${sp2}".
-                 "<br>${sp2}Over time, we will continue to migrate reports and add new ones that you find useful. " . 
-                 "We can also analyze the data in new and interesting ways, " . 
-                 "and look forward to hearing your $link_feedback.${sp2}" .
-                 "</td></tr></table>$sp2<br>" ;
+
+
+# Jan 31, 2019
+#$out_announcement = 
+#   "<table width=1000><tr><td colspan=999 style='background-color:#DD8;text-align:left'>" .
+#   "<font color=#107000>&nbsp;<br>$sp2" .
+#   "<b>Jan 31, 2019: This the final release of Wikistats 1 dump-based reports. " . 
+#   "Some of these data are available in the first release of Wikistats 2. " .  
+#   "Read more <a href='http://stats.wikimedia.org/final_release_Wikistats_1'>here</a>" .           
+#   "</td></tr></table>$sp2<br>" ;
+#  "Erik Zachte, the author, has retired from WMF and no longer maintains these reports." . 
+   #              "Maintenance of the scripts by others has never been seen as feasible: " . 
+   #              "the scripts date from a different era (oldest are from 2002) and were designed for a totally different environment at that time. ". 
+   #              "Continued publication of uncurated reports is a liability and not an option.<p>" .     
+   #                 "<b>Dec 2017: WMF Analytics Team is happy to announce the first release of $link_wikistats_2</font></b>$sp2<p>" .
+   #             "<p>${sp2}Wikistats has been redesigned for architectural simplicity, faster data processing, " . 
+   #             "and a more dynamic and interactive user experience. The data used in the reports will also be made available for external processing.${sp2}" . 
+   #             "<p>${sp2}First goal is to match the numbers of the current system, and to provide the most important reports, " . 
+   #             "as decided by the Wikistats community (see $link_survey).${sp2}".
+   #              "<br>${sp2}Over time, we will continue to migrate reports and add new ones that you find useful. " . 
+   #              "We can also analyze the data in new and interesting ways, " . 
+   #              "and look forward to hearing your $link_feedback.${sp2}" .
+    $out_html .= $out_announcement ;
 
 # request for comments banner shown March 2017-November 2017
 
@@ -1678,11 +1694,15 @@ sub GenerateColophon
 
   $path_about = "http://stats.wikimedia.org/index.html#fragment-14" ;
 
-  if ($out_delay ne "")
-  { $out_delay = "$out_delay<p>" ; }
+# if ($out_delay ne "")
+# { $out_delay = "$out_delay<p>" ; }
 
   ($sec,$min,$hour) = gmtime(time);
   $out_generated_at = &GetDate (time) . ' ' . sprintf ("%02d:%02d",$hour,$min) ;
+
+# Jan 31 2019
+  if ($wikimedia)
+  { $out_generated_at .= ' <font color=red><b>(final run)</b></font>' ; }
 
 # obsolete SP001
 # if ($squidslog)
@@ -1710,10 +1730,13 @@ sub GenerateColophon
                ($false ? "$out_squidslog<p>" :
 	       ($dumpdetails ne '' ? "<p>$dumpdetails<p>" : ($pageviews ? $out_pageviewfiles : $out_sqlfiles) . &GetDate ($dumpdate2) . "\n<p>")) .
 
-               (! $pageviews ? $out_delay : "") .
+
+# Jan 31 2019: delay message no longer needed as reports are phased out
+#              (! $pageviews ? $out_delay : "") . 
+
                (! $wikimedia ? "$out_no_wikimedia<br>" : "") .
              # $out_version . $version . "\n<br>" . # version id not updated in years
-               $out_author . ":" . $out_myname .
+               $out_author . ":" . $out_myname . " (2002-Jan 2019)" .
                " (<a href='" . $out_mysite . "'>" . $out_site . "</a>)\n<br>" .
                ($wikimedia ? $out_mail . ":" . $out_mymail . "<br>\n" : "") .
                ($wikimedia ? "$out_documentation / $out_scripts / $out_csv_files" . ": <a href='$path_about'>About WikiStats</a>\n" : "") .
@@ -1721,7 +1744,10 @@ sub GenerateColophon
                $out_ploticus2 . $out_r . "\n" .
                ((! $wikimedia && $mail ne "") ? "<p>" .$siteadmin . "\n" . $mail . "\n" : "") .
                $out_index_timelines . "\n<br><br>" .
-               ($wikimedia ? $out_license : "") .
+               ($wikimedia ? "<p>". $out_download_reports : "") .
+               ($wikimedia ? "<br>". $out_download_data : "") .
+   
+               ($wikimedia ? "<p>"  .$out_license : "") .
                "</small>\n" ;
 #              "</small>\n$out_counter\n" ;
 

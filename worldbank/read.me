@@ -1,4 +1,16 @@
-script world_bank_demographics.pl parses 3 files from World Bank (1 json, 2 csv) 
-and produces json files for any usage 
-and csv files used for charts at https://meta.wikimedia.org/wiki/World_Bank_demographics
-see also Excel spreadsheets with data from csv files, and charts
+script world_bank_demographics.pl parses four files from World Bank 
+- one json file 
+  = SP.POP.TOTL.json (population counts), 
+  = IT.NET.USER.json (internet users per 100 (adults?))
+- three csv files 
+  = API_IT.NET.USER.ZS_DS2_en_csv_v2.csv (internet users per 100 (adults?)) 
+  = API_IT.CEL.SETS.P2_DS2_en_csv_v2.csv (mobile subscriptions per 100 (adults?))
+  = API_NY.GDP.PCAP.KD_DS2_en_csv_v2_[...].csv (gdp per capita)
+and produces 
+- one json file (for any usage)  
+  = demographics.json (see this file also for more meta data on worldbank API)
+- two csv files (used for charts at https://meta.wikimedia.org/wiki/World_Bank_demographics):
+  = internet_plus_mobile_subscriptions.csv
+  = gdp_plus_mobile_subscriptions.csv 
+  see also Excel spreadsheets with data from these csv files, plus charts
+for updates, download newer files from World Bank manually, update file names in script, and rerun 

@@ -8,7 +8,7 @@ perl=/home/ezachte/wikistats/squids-scripts-2012-10/perl/ # temp
 csv=$squids/csv_edits
 reports=$squids/reports_edits
 logs=$squids/logs
-htdocs=thorium.eqiad.wmnet::srv/stats.wikimedia.org/htdocs/
+htdocs=thorium.eqiad.wmnet::stats.wikimedia.org/htdocs/
 
 cd $perl
 
@@ -33,8 +33,8 @@ cd $reports/$month
 tar -cvf - *.htm | gzip > reports-$month.tar.gz
 exit
 # after vetting reports are now manually rsynced to 
-# - thorium/a/srv/stats.wikimedia.org/htdocs/wikimedia/squids
-# - thorium/a/srv/stats.wikimedia.org/htdocs/archive/squid_reports/$month
+# - thorium stats.wikimedia.org/htdocs/wikimedia/squids
+# - thorium stats.wikimedia.org/htdocs/archive/squid_reports/$month
 echo Publish
 rsync -av $reports/$month/SquidReport*.htm  $htdocs/wikimedia/squids
 rsync -av $reports/$month/SquidReport*.htm  $htdocs/archive/squid_reports/$month

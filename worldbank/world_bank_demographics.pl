@@ -60,13 +60,12 @@ use Text::CSV_XS;
 # this script processes local copies of the files, download can be done in bash file
 
   my $file_json_population              = "$folder/SP.POP.TOTL.json" ;
-  my $file_json_internet_users          = "$folder/IT.NET.USER.json" ;
 
   my $file_csv_internet_users           = "$folder/API_IT.NET.USER.ZS_DS2_en_csv_v2.csv" ;
   my $file_csv_mobile_subscriptions     = "$folder/API_IT.CEL.SETS.P2_DS2_en_csv_v2.csv" ;
   my $file_csv_gdp_per_capita           = "$folder/API_NY.GDP.PCAP.KD_DS2_en_csv_v2_9908764.csv" ;
   
-  my $file_csv_out                      = "$folder/geo_codes_countries.csv" ;
+# my $file_csv_out                      = "$folder/geo_codes_countries.csv" ;
   my $file_csv_out_internet_users       = "$folder/internet_users.csv" ;
   my $file_csv_out_mobile_subscriptions = "$folder/mobile_subscriptions.csv" ;
   my $file_csv_out_internet_plus_mobile = "$folder/internet_plus_mobile_subscriptions.csv" ;
@@ -74,7 +73,7 @@ use Text::CSV_XS;
   
   my $file_json_out                     = "$folder/demographics.json" ;
   my $file_country_stats                = "$folder/datamaps-country-stats.csv" ; # not for WiViVi viz. (yet), so not actually for datamaps, calling it this to keep files names uniform
-  my $file_flags                        = "$folder/datamaps-flags.csv" ;
+# my $file_flags                        = "$folder/datamaps-flags.csv" ;
   
   my $file_csv_geo_codes                = "$folder/geo_codes_countries.csv" ;
 
@@ -194,14 +193,22 @@ use Text::CSV_XS;
 
   &WriteJsonFile ;
   
-  print "\n" ;
+  my $msgid = '' ;
+  my $msgid_prev = '';
   foreach my $message (sort keys %messages) # Q&D way to avoid long series of duplicate messages, findings will be reported out of order 
-  { print "$message\n" ; }
+  { 
+    $msgid = substr ($message,1,3) ;
+    print "\n" if $msgid ne $msgid_prev ;
+    $message =~ s/[\x00-\x0f]/\?/g ; # remove unprintable control characters
+    print "$message\n" ; 
+    $msgid_prev = $msgid ;
+  }
   
-# extra visual cue to signal completion (bell character is silenced in Komodo IDE)
-  print 'X ' x 40 . "\n\n" ; 
-  print 'X ' x 40 . "\n\n" ; 
-  print 'X ' x 40 . "\n\n" ; 
+# for debug only: extra visual cue to signal completion (bell character is silenced in Komodo IDE)
+# print 'X ' x 40 . "\n\n" ; 
+# print 'X ' x 40 . "\n\n" ; 
+# print 'X ' x 40 . "\n\n" ; 
+
   print "\n\nReady" ;
   
   exit ;
@@ -220,7 +227,7 @@ sub WriteJsonFile
   close JSON_OUT ;
 
   my $json_file_size = -s $file_json_out ;
-  print "\nFile $file_json_out: size $json_file_size bytes\n" ;
+  print "\nFile $file_json_out: size $json_file_size bytes\n\n" ;
 
   my $json_text_demographics = do
   {
@@ -228,6 +235,9 @@ sub WriteJsonFile
     local $/;
     <$json_fh>
   };
+
+
+# completeness check
   $json_text_demographics =~ s/[^\x00-\x7f]//g ; # drop 'wide characters'
 
   my $json = JSON->new ;
@@ -236,7 +246,7 @@ sub WriteJsonFile
   {
     my $year = $data -> {'countries'}{$iso2}{'years'}{'latest'}{'year'} ;
     if (! defined $year)
-    { print "\$year not defined for: '$iso2'\n" ; }
+    { print "json key {'countries'}{\$iso2}{'years'}{'latest'}{'year'} not defined for iso2: '$iso2'\n" ; }
     # else
     # {  print "$iso2 $year\n"; }
   }
@@ -314,6 +324,8 @@ sub ImportCountriesNames
 
   foreach $code (split ',', $languages_countries_names)
   {
+    next if $code eq 'en'; # English names are taken from geo_codes_countries.csv 
+
     my $file_names = "$folder/countries_iso3166_1_$code.csv" ;
     if (! -e $file_names)
     {
@@ -375,6 +387,7 @@ sub ReadCsvGeoCodes
     my ($iso2,$iso3,$region_code,$north_south_code,$name) = split (',', $line) ;
     $region_codes {$region_code} ++ ;
     $name =~ s/"//g ; # fix typos
+    $name =~ s/[\x00-\x0F]//g ; 
 
     if ($iso2 =~ /^X/) # list custom codes
     { $json_out {$key_about} {$key_codes} {'3'} .= "$iso2:$iso3, " ; }
@@ -391,6 +404,8 @@ sub ReadCsvGeoCodes
   $json_out {$key_about} {$key_codes} {'3'} =~ s/,$// ; # remove last comma
 }
 
+
+# one-time merge of csv files, kept for reference
 sub WriteCsvGeoCodes
 {
   my ($iso2,$iso3,$name,$region_code,$north_south_code) ;
@@ -478,7 +493,7 @@ sub ImportPopulationCounts
     {
       if ($name_wb ne $name_ws)
       {
-        $messages {"010: id '$iso2_wb': Wikistats '$name_ws' / World Bank SP.POP.TOTL: '$name_wb'"} ++ ;
+        $messages {"010: country names differ for iso2 '$iso2_wb' Wikistats vs World Bank: '$name_ws' vs '$name_wb'"} ++ ;
         if ($worldbank_names_override)
         { $json_out {$key_countries} {$iso2_wb} {$key_names} {'en'} = $name_wb ; }
       } 
@@ -585,6 +600,7 @@ sub ImportInternetUserPercentages
 
      # next if $iso3 !~ /NLD/ ; # debug only
 
+       $messages {"030  no custom iso2 codes ('custom = starting with 'X') found in geo_codes_countrie.csv for following iso3 codes from World Bank IT.NET.USER.ZS'"} ++ ;
        $iso2 = $iso2_by_iso3 {$iso3} ;
      # print "name $name, iso2 $iso2, iso3 $iso3, description $description, code $code," . join (':', @year_data) . "\n" ;
      # print "years " . join (':', @years) . "\n" ;
@@ -593,7 +609,7 @@ sub ImportInternetUserPercentages
          # $iso2 = "_$iso3" ; # debug
          # print "1 '$iso3' -> '$iso2' \n" ;
         
-         $messages {"020 no custom iso2 code ('starting with 'X') found for World Bank IT.NET.USER.ZS id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
+         $messages {"030 no iso2 equivalent for iso3 code: $iso3 => skip"} ++ ;
          next ;
        }
        
@@ -675,6 +691,7 @@ sub ImportMobileSubscriptions
 
      # next if $iso3 !~ /NLD/ ; # debug only
 
+       $messages {"031  no custom iso2 codes ('custom = starting with 'X') found in geo_codes_countrie.csv for following iso3 codes from World Bank IT.CEL.SETS.P2'"} ++ ;
        $iso2 = $iso2_by_iso3 {$iso3} ;
      # print "name $name, iso2 $iso2, iso3 $iso3, description $description, code $code," . join (':', @year_data) . "\n" ;
      # print "years " . join (':', @years) . "\n" ;
@@ -682,8 +699,8 @@ sub ImportMobileSubscriptions
        {
        # $iso2 = "_$iso3" ;
        # print "2 '$iso3' -> '$iso2' \n" ;
-          $messages {"021 no custom iso2 code ('starting with 'X') found for World Bank IT.CEL.SETS.P2 id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
-          next ;
+         $messages {"031 no iso2 equivalent for iso3 code: $iso3 => skip"} ++ ;
+         next ;
        }
        
        $year_data_prev = '' ;
@@ -780,6 +797,7 @@ sub ImportGdpPerCapita
 
      # next if $iso3 !~ /NLD/ ; # debug only
 
+       $messages {"032  no custom iso2 codes ('custom = starting with 'X') found in geo_codes_countrie.csv for following iso3 codes from World Bank IT.NET.USER.ZS'"} ++ ;
        $iso2 = $iso2_by_iso3 {$iso3} ;
      # print "name $name, iso2 $iso2, iso3 $iso3, description $description, code $code," . join (':', @year_data) . "\n" ;
      # print "years " . join (':', @years) . "\n" ;
@@ -788,7 +806,7 @@ sub ImportGdpPerCapita
          # $iso2 = "_$iso3" ; # debug
          # print "1 '$iso3' -> '$iso2' \n" ;
         
-         $messages {"022 no custom iso2 code ('starting with 'X') found for World Bank NY.GDP.PCAP.KD id: $iso3 in 'geo_codes_countries.csv' => skip"} ++ ;
+         $messages {"032 no iso2 equivalent for iso3 code: $iso3 => skip"} ++ ;
          next ;
        }
        
@@ -863,9 +881,15 @@ sub DetermineLatestYearWithFullData
 
     if ($year_last_complete == $year_min) 
     {
-      print "iso2 $iso2 no complete data for any year: " . $json_out {$key_countries} {$iso2} {$key_names} {'en'} . "\n" ;
-      print "iso2 $iso2 population $year_last_data_population, internet users $year_last_data_internet_users, " .
-                        "mobile subscriptions $year_last_data_mobile_subscriptions, gdp_per_capita $year_last_data_gdp_per_capita\n" ;
+      my $lines = "iso2 $iso2 no complete data for any year: " . 
+                  $json_out {$key_countries} {$iso2} {$key_names} {'en'}."\n" .
+                  "        population '$year_last_data_population', " . 
+                 "internet users '$year_last_data_internet_users', " .
+                 "mobile subscriptions '$year_last_data_mobile_subscriptions', " . 
+                 "gdp_per_capita '$year_last_data_gdp_per_capita'\n" ;
+
+      $lines =~ s/$year_min/--/g ;
+      print $lines ; 
     }
     else
     {

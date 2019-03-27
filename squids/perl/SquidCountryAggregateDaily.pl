@@ -4,6 +4,8 @@
 # use SquidCountryScanConfig ;
 # print "use EzLib from '$cfg_liblocation'\n" ;
 # use lib $cfg_liblocation ;
+
+  use lib "/home/ezachte/lib" ;
   use EzLib ;
   $trace_on_exit = $true ;
 

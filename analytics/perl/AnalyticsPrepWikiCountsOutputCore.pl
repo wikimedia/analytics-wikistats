@@ -6,11 +6,11 @@
 # C StatisticsUserActivitySpreadAllProjects.csv  # same
 #   For editor totals either use (arg -u) legacy B: unmerged editor totals (commons) or (default) C: merged editor totals 
 
-# use lib "/home/ezachte/lib" ; # moved to ../perl folder 
+  use lib "/home/ezachte/lib" ; # moved to ../perl folder 
   use EzLib ;
 # $trace_on_exit_concise = $true ;
-# $trace_on_exit         = $true ;
-  ez_lib_version (15) ; # minimum version of EzLib.pm required
+  $trace_on_exit         = $true ;
+  ez_lib_version (14) ; # minimum version of EzLib.pm required
 
   $null = "+++," ; # temporarily changed to "0," when Limn seemed to not handle missing values
 
@@ -1096,6 +1096,7 @@ sub InitProjectNames
   hz=>"http://hz.wikipedia.org Herero",
   ia=>"http://ia.wikipedia.org Interlingua",
   iba=>"http://iba.wikipedia.org Iban",
+  incubator=>"http://incubator.wikimedia.org Incubator",
   id=>"http://id.wikipedia.org Indonesian",
   ie=>"http://ie.wikipedia.org Interlingue",
   ig=>"http://ig.wikipedia.org Igbo",

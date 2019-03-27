@@ -1,4 +1,7 @@
-#!/bin/bash -x
+#! /bin/bash -x 
+# read more about set -x/+x (and why used) in ../../wikistats/read.me
+# script migrated to stat1005
+
 ulimit -v 400000
 
 # rsync -av -ipv4 $archive_local/$base.csv.zip $archive_remote

@@ -51,7 +51,18 @@
 
   use warnings qw (qw) ;
 
+  # Jan 31, 2019
+  $out_announcement = 
+# "<table width=1000 align=left><tr><td colspan=999 style='background-color:DD8;text-align:left'>" .
+  "<big><font color=#107000>&nbsp;<br>$sp2".
+  "<b>Jan 31, 2019: This is the final release of Wikistats-1 dump-based reports. " .
+  "Part of these data are available in the first release of Wikistats 2. ".
+  "Read more <a href='http://stats.wikimedia.org/Wikistats_1_announcements.htm'>here</a></big></font></b>".
+# "</td></tr></table>$sp2</b>" . 
+  "<br>&nbsp;" ;
+ 
 
+  
 sub SetLanguageInfo
 {
   # taken from http://meta.wikimedia.org/wiki/List_of_Wikipedias
@@ -587,6 +598,8 @@ sub SetLiterals
                      "<font color='#008000'><u>75\% &lt; x</u></font></small>\n" ;
 
   $out_documentation = "Documentation" ; # was "For documentation see <a href='http://meta.wikipedia.org/wiki/Wikistats'>meta</a>" ;
+  $out_download_reports = "You can download the English version of these reports <a href='https://dumps.wikimedia.org/other/wikistats_1/reports/'>here</a> (also download <a href='https://dumps.wikimedia.org/other/wikistats_1/reports/common_files.zip'>common_files.zip</a>)" ;
+  $out_download_data = "You can download aggregated data <a href='https://dumps.wikimedia.org/other/wikistats_1/'>here</a>"; 
 }
 
 sub GetProjectBaseUrl

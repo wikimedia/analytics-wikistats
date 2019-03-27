@@ -148,7 +148,8 @@
   $javascript = $false ;
 
   $out_myname = "Erik Zachte" ;
-  $out_mymail = "ezachte@### (no spam: ### = wikimedia.org)" ;
+# $out_mymail = "ezachte@### (no spam: ### = wikimedia.org)" ; # Jan 31 2019 ->
+  $out_mymail = "erikzachte@### (no spam: ### = infodisiac.com)" ;
   $out_mysite = "http://infodisiac.com/" ;
   $out_pageviewlogs = "http://dumps.wikimedia.org/other/pagecounts-raw/" ;
 

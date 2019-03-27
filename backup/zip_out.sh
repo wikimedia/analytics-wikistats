@@ -1,4 +1,5 @@
 #!/bin/bash
+# read 'out' as 'reports'
 
 ulimit -v 8000000
 
@@ -18,9 +19,9 @@ fi
 wikistats_data=$WIKISTATS_DATA
 wikistats_backup=$WIKISTATS_BACKUP
 data=$wikistats_data/dumps/out
-backup=/dumps/wikistats_1 #backup=$wikistats_backup/dumps_out
+backup=/srv/dumps/wikistats_1 # was backup=$wikistats_backup/dumps_out
 
-rm $backup/out_$1.zip
+#rm $backup/out_$1.zip
 
 if [ "$1" == "wm" ] ; then
   cd $data/out_$1
@@ -30,9 +31,15 @@ fi
 
 echo 
 date 
-echo zip -q -r $backup/out_$1.zip *
+mkdir $backup/reports
+mkdir $backup/reports/$yyyymm
 
-zip -q -r $backup/out_$1.zip * -x *.zip
+# echo zip -q -r $backup/out_$1.zip *
+echo zip -q -r $backup/reports/$yyyymm/reports_$yyyymm_$1.zip *
+
+# zip -q -r $backup/out_$1.zip * -x *.zip
+zip -q -r $backup/reports/$yyyymm/reports_${yyyymm}_$1.zip * -x *.zip
+
 # 7z a $backup/out_$1.7z *
 # 7z a -mx=9  $backup/out_$1.mx9.7z *
 

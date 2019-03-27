@@ -1,1 +1,11 @@
+all bash script which were migrated to stat1005 and its new folder structure say 'migrated to stat1005'
+
+bash scripts updated after after move to stat1005 (Aug 2017) often use '#! /bin/bash -x' and 'set -x/+x'
+-x : xtrace each line in this file, toggle xtrace off/on with 'set +x/-x'
+avoid -x in echo statements (looks messy in log, even if doing so it makes bash file a bit more messy)
+{ set +x; } 2>/dev/null ; # doesn't even show 'set +x' command in log
+all this set +x/-x makes this script a bit more complex, but imho a neat log takes precedence
+
 any bash files with ultra short names like t1.sh, t2.sh and similar are temporary variations on production bash files, and can be safely discarded
+
+

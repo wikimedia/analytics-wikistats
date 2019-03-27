@@ -1,0 +1,12 @@
++ ulimit -v 12000000
+++ date +%Y_%m_%d__%H_%M
++ yyyymmddhhnn=2017_09_20__16_23
++ logs=/home/ezachte/wikistats_data/squids/logs
++ log=/home/ezachte/wikistats_data/squids/logs/log_squids_report_2017_09_20__16_23.txt
++ exec
++ ulimit -v 12000000
+++ date +%Y_%m_%d__%H_%M
++ yyyymmddhhnn=2017_09_21__19_05
++ logs=/home/ezachte/wikistats_data/squids/logs
++ log=/home/ezachte/wikistats_data/squids/logs/log_squids_report_2017_09_21__19_05.txt
++ exec

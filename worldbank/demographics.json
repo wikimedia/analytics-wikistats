@@ -8,7 +8,7 @@
          "0" : "This json file is about World Bank demographics in a Wikimedia context",
          "1" : "Codes stored for countries are ISO 3166-1 alpha-2, ISO 3166-1 alpha-3, region code, north_south code, see also https://en.wikipedia.org/wiki/ISO_3166",
          "2" : "Primary key for countries is ISO 3166-1 alpha-2, for custom codes (starting with 'X') see 'geo_codes_countries.csv'",
-         "3" : "X1:EAS, X2:ECS, X3:CEB, X4:CSS, X5:MEA, X6:OED, X7:BES, X8:PSS, X9:SSF, XA:FCS, XB:HPC, XC:LDC, XD:LCN, XE:LIC, XF:LMC, XG:LMY, XH:MIC, XI:UMC, XJ:HIC, XK:SST, ",
+         "3" : "X1:EAS, X2:ECS, X3:CEB, X4:CSS, X5:MEA, X6:OED, X7:BES, X8:PSS, X9:SSF, XA:FCS, XB:HPC, XC:LDC, XD:LCN, XE:LIC, XF:LMC, XG:LMY, XH:MIC, XI:UMC, XJ:HIC, XK:XKX, ",
          "4" : "Note that some World Bank files use ISO 3166-1 alpha-2 (as does MaxMind), others use ISO 3166-1 alpha-3",
          "5" : "ISO 3166-1 alpha-2 codes without ISO 3166 alpha-3 code are non-country codes from MaxMind",
          "6" : "For MaxMind see http://www.maxmind.com/app/iso3166; non country codes as used by MaxMind: A1,A2,AP,EU,O1",
@@ -21,7 +21,7 @@
          "organization_name" : "Wikimedia Foundation",
          "organization_url" : "https://wikimediafoundation.org/"
       },
-      "file_generated" : "2018-06-06 13:28",
+      "file_generated" : "2018-07-11 18:06",
       "layout" : {
          "comments" : "0.1 = initial release",
          "version" : "0.1"
@@ -31,7 +31,7 @@
          "2" : "$do_not_import_years_before = 2000",
          "3" : "Only accept id's from World Bank unknown to Wikistats: $only_allow_new_codes '*' (use * for all)",
          "4" : "Add derived values (like YoY growth percentage)",
-         "5" : "Language codes requested (and found) for country names: de,en,es,fr,it,ja,nl,pl,pt,ru,sv,zh"
+         "5" : "Language codes requested (and found) for country names: de,es,fr,it,ja,nl,pl,pt,ru,sv,zh"
       },
       "sources" : {
          "world bank" : {
@@ -1768,7 +1768,6 @@
       "AN" : {
          "names" : {
             "de" : "Niederländische Antillen",
-            "en" : "Netherlands Antilles",
             "es" : "Antillas Neerlandesas",
             "fr" : "Nederlandse Antillen",
             "it" : "Antille Olandesi",
@@ -2974,7 +2973,7 @@
          },
          "names" : {
             "de" : "Åland",
-            "en" : "Åland Islands",
+            "en" : "Aland Islands",
             "es" : "Åland",
             "fr" : "Åland",
             "it" : "Isole Åland",
@@ -5766,7 +5765,6 @@
       "BQ" : {
          "names" : {
             "de" : "Karibische Niederlande",
-            "en" : "Caribbean Netherlands",
             "es" : "Caribe Neerlandés",
             "fr" : "Caribisch Nederland",
             "it" : "Paesi Bassi caraibici",
@@ -7291,7 +7289,7 @@
          },
          "names" : {
             "de" : "Demokratische Republik Kongo",
-            "en" : "Democratic Republic of the Congo",
+            "en" : "Congo Dem. Rep.",
             "es" : "República Democrática del Congo",
             "fr" : "Congo-Kinshasa",
             "it" : "Repubblica Democratica del Congo",
@@ -7699,7 +7697,7 @@
          },
          "names" : {
             "de" : "Republik Kongo",
-            "en" : "Republic of the Congo",
+            "en" : "Congo Rep.",
             "es" : "República del Congo",
             "fr" : "Republiek Congo",
             "it" : "Repubblica del Congo",
@@ -8762,7 +8760,7 @@
          },
          "names" : {
             "de" : "Volksrepublik China",
-            "en" : "People's Republic of China",
+            "en" : "China",
             "es" : "República Popular China",
             "fr" : "Volksrepubliek China",
             "it" : "Cina",
@@ -9369,7 +9367,6 @@
       "CS" : {
          "names" : {
             "de" : "Serbien und Montenegro",
-            "en" : "Serbia and Montenegro",
             "es" : "Serbia y Montenegro",
             "fr" : "Servië en Montenegro",
             "it" : "Serbia e Montenegro",
@@ -9796,7 +9793,7 @@
          },
          "names" : {
             "de" : "Curaçao",
-            "en" : "Curaçao",
+            "en" : "Curacao",
             "es" : "Curazao",
             "fr" : "Curaçao",
             "it" : "Curaçao",
@@ -10352,7 +10349,6 @@
       "DD" : {
          "names" : {
             "de" : "Deutsche Demokratische Republik",
-            "en" : "East Germany",
             "es" : "República Democrática Alemana",
             "fr" : "Duitse Democratische Republiek",
             "it" : "Repubblica Democratica Tedesca",
@@ -10779,7 +10775,7 @@
          },
          "names" : {
             "de" : "Königreich Dänemark",
-            "en" : "Kingdom of Denmark",
+            "en" : "Denmark",
             "es" : "Reino de Dinamarca",
             "fr" : "Koninkrijk Denemarken",
             "it" : "Regno di Danimarca",
@@ -13435,7 +13431,7 @@
          },
          "names" : {
             "de" : "Mikronesien",
-            "en" : "Federated States of Micronesia",
+            "en" : "Micronesia Fed. States",
             "es" : "Micronesia",
             "fr" : "Micronesia",
             "it" : "Stati Federati di Micronesia",
@@ -17396,7 +17392,7 @@
          },
          "names" : {
             "de" : "Honduras",
-            "en" : "Tu hermana en tanga",
+            "en" : "Honduras",
             "es" : "Honduras",
             "fr" : "Honduras",
             "it" : "Honduras",
@@ -21760,7 +21756,7 @@
          },
          "names" : {
             "de" : "St. Kitts und Nevis",
-            "en" : "Saint Kitts and Nevis",
+            "en" : "St. Kitts and Nevis",
             "es" : "San Cristóbal y Nieves",
             "fr" : "Saint Kitts en Nevis",
             "it" : "Saint Kitts e Nevis",
@@ -23261,7 +23257,7 @@
          },
          "names" : {
             "de" : "St. Lucia",
-            "en" : "Saint Lucia",
+            "en" : "St. Lucia",
             "es" : "Santa Lucía",
             "fr" : "Saint Lucia",
             "it" : "Saint Lucia",
@@ -25817,7 +25813,7 @@
          },
          "names" : {
             "de" : "Saint-Martin",
-            "en" : "Saint Martin",
+            "en" : "St. Martin",
             "es" : "San Martín",
             "fr" : "Sint-Maarten",
             "it" : "Saint-Martin",
@@ -26301,7 +26297,7 @@
          },
          "names" : {
             "de" : "Mazedonien",
-            "en" : "Republic of Macedonia",
+            "en" : "Macedonia",
             "es" : "República de Macedonia",
             "fr" : "Macedonië",
             "it" : "Repubblica di Macedonia",
@@ -30174,7 +30170,7 @@
          },
          "names" : {
             "de" : "Königreich der Niederlande",
-            "en" : "Kingdom of the Netherlands",
+            "en" : "Netherlands",
             "es" : "Países Bajos",
             "fr" : "Koninkrijk der Nederlanden",
             "it" : "Regno dei Paesi Bassi",
@@ -32864,7 +32860,7 @@
          },
          "names" : {
             "de" : "Saint-Pierre und Miquelon",
-            "en" : "Saint Pierre and Miquelon",
+            "en" : "St. Pierre and Miquelon",
             "es" : "San Pedro y Miquelón",
             "fr" : "Saint-Pierre en Miquelon",
             "it" : "Saint-Pierre e Miquelon",
@@ -36497,7 +36493,7 @@
          },
          "names" : {
             "de" : "\"St. Helena",
-            "en" : "\"Saint Helena",
+            "en" : "St. Helena",
             "es" : "\"Santa Elena",
             "fr" : "\"Sint-Helena",
             "it" : "\"Sant'Elena",
@@ -38087,7 +38083,7 @@
          },
          "names" : {
             "de" : "São Tomé und Príncipe",
-            "en" : "São Tomé and Príncipe",
+            "en" : "Sao Tome and Principe",
             "es" : "Santo Tomé y Príncipe",
             "fr" : "Sao Tomé en Principe",
             "it" : "São Tomé e Príncipe",
@@ -38750,7 +38746,7 @@
          },
          "names" : {
             "de" : "Swasiland",
-            "en" : "eSwatini",
+            "en" : "Swaziland",
             "es" : "eSwatini",
             "fr" : "Swaziland",
             "it" : "Swaziland",
@@ -42501,7 +42497,7 @@
          },
          "names" : {
             "de" : "Vereinigte Staaten",
-            "en" : "United States of America",
+            "en" : "United States",
             "es" : "Estados Unidos",
             "fr" : "Verenigde Staten van Amerika",
             "it" : "Stati Uniti d'America",
@@ -43456,7 +43452,7 @@
          },
          "names" : {
             "de" : "St. Vincent und die Grenadinen",
-            "en" : "Saint Vincent and the Grenadines",
+            "en" : "St. Vincent and the Grenadines",
             "es" : "San Vicente y las Granadinas",
             "fr" : "Saint Vincent en de Grenadines",
             "it" : "Saint Vincent e Grenadine",
@@ -43860,7 +43856,7 @@
          },
          "names" : {
             "de" : "Britische Jungferninseln",
-            "en" : "British Virgin Islands",
+            "en" : "Virgin Islands (BR)",
             "es" : "Islas Vírgenes Británicas",
             "fr" : "Britse Maagdeneilanden",
             "it" : "Isole Vergini britanniche",
@@ -43982,7 +43978,7 @@
          },
          "names" : {
             "de" : "Amerikanische Jungferninseln",
-            "en" : "United States Virgin Islands",
+            "en" : "Virgin Islands (US)",
             "es" : "Islas Vírgenes de los Estados Unidos",
             "fr" : "Amerikaanse Maagdeneilanden",
             "it" : "Isole Vergini americane",
@@ -47857,195 +47853,129 @@
       },
       "XK" : {
          "codes" : {
-            "iso_3166_1_alpha_3" : "SST",
+            "iso_3166_1_alpha_3" : "XKX",
             "north_south" : "-",
-            "region" : "YY"
+            "region" : "EU"
          },
          "names" : {
-            "en" : "Small states"
+            "en" : "Kosovo"
          },
          "years" : {
             "1996" : {},
             "1999" : {},
             "2000" : {
-               "GDP per capita" : "7470.94",
-               "internet users per 100" : "5.01",
-               "mobile subscriptions per 100" : "10.79",
+               "GDP per capita" : "1919.84",
                "population" : 1700000
             },
             "2001" : {
-               "GDP per capita" : "7635.76",
-               "GDP per capita growth (+%)" : "2.21",
-               "internet users per 100" : "6.69",
-               "internet users per 100 increase (+pp)" : "1.68",
-               "mobile subscriptions per 100" : "15.81",
-               "mobile subscriptions per 100 increase (+pp)" : "5.02",
+               "GDP per capita" : "2436.04",
+               "GDP per capita growth (+%)" : "26.89",
                "population" : 1701154,
                "population growth (+%)" : "0.1"
             },
             "2002" : {
-               "GDP per capita" : "7844.90",
-               "GDP per capita growth (+%)" : "2.74",
-               "internet users per 100" : "8.93",
-               "internet users per 100 increase (+pp)" : "2.24",
-               "mobile subscriptions per 100" : "22.07",
-               "mobile subscriptions per 100 increase (+pp)" : "6.26",
+               "GDP per capita" : "2417.32",
+               "GDP per capita growth (+%)" : "-0.77",
                "population" : 1702310,
                "population growth (+%)" : "0.1"
             },
             "2003" : {
-               "GDP per capita" : "8076.76",
-               "GDP per capita growth (+%)" : "2.96",
-               "internet users per 100" : "10.85",
-               "internet users per 100 increase (+pp)" : "1.92",
-               "mobile subscriptions per 100" : "26.97",
-               "mobile subscriptions per 100 increase (+pp)" : "4.90",
+               "GDP per capita" : "2560.14",
+               "GDP per capita growth (+%)" : "5.91",
                "population" : 1703466,
                "population growth (+%)" : "0.1"
             },
             "2004" : {
-               "GDP per capita" : "8577.06",
-               "GDP per capita growth (+%)" : "6.19",
-               "internet users per 100" : "12.60",
-               "internet users per 100 increase (+pp)" : "1.75",
-               "mobile subscriptions per 100" : "34.88",
-               "mobile subscriptions per 100 increase (+pp)" : "7.91",
+               "GDP per capita" : "2625.24",
+               "GDP per capita growth (+%)" : "2.54",
                "population" : 1704622,
                "population growth (+%)" : "0.1"
             },
             "2005" : {
-               "GDP per capita" : "8862.47",
-               "GDP per capita growth (+%)" : "3.33",
-               "internet users per 100" : "13.66",
-               "internet users per 100 increase (+pp)" : "1.06",
-               "mobile subscriptions per 100" : "42.13",
-               "mobile subscriptions per 100 increase (+pp)" : "7.25",
+               "GDP per capita" : "2781.73",
+               "GDP per capita growth (+%)" : "5.96",
+               "mobile subscriptions per 100" : "32.30",
                "population" : 1705780,
                "population growth (+%)" : "0.1"
             },
             "2006" : {
-               "GDP per capita" : "9540.47",
-               "GDP per capita growth (+%)" : "7.65",
-               "internet users per 100" : "15.27",
-               "internet users per 100 increase (+pp)" : "1.61",
-               "mobile subscriptions per 100" : "52.11",
-               "mobile subscriptions per 100 increase (+pp)" : "9.98",
+               "GDP per capita" : "2883.74",
+               "GDP per capita growth (+%)" : "3.67",
+               "mobile subscriptions per 100" : "32.30",
+               "mobile subscriptions per 100 increase (+pp)" : "0.00",
                "population" : 1719536,
                "population growth (+%)" : "0.8"
             },
             "2007" : {
-               "GDP per capita" : "10146.02",
-               "GDP per capita growth (+%)" : "6.35",
-               "internet users per 100" : "17.25",
-               "internet users per 100 increase (+pp)" : "1.98",
-               "mobile subscriptions per 100" : "63.85",
-               "mobile subscriptions per 100 increase (+pp)" : "11.74",
+               "GDP per capita" : "3069.10",
+               "GDP per capita growth (+%)" : "6.43",
+               "mobile subscriptions per 100" : "32.30",
+               "mobile subscriptions per 100 increase (+pp)" : "0.00",
                "population" : 1733404,
                "population growth (+%)" : "0.8"
             },
             "2008" : {
-               "GDP per capita" : "10547.05",
-               "GDP per capita growth (+%)" : "3.95",
-               "internet users per 100" : "19.87",
-               "internet users per 100 increase (+pp)" : "2.62",
-               "mobile subscriptions per 100" : "74.61",
-               "mobile subscriptions per 100 increase (+pp)" : "10.76",
+               "GDP per capita" : "3125.07",
+               "GDP per capita growth (+%)" : "1.82",
+               "mobile subscriptions per 100" : "32.30",
+               "mobile subscriptions per 100 increase (+pp)" : "0.00",
                "population" : 1747383,
                "population growth (+%)" : "0.8"
             },
             "2009" : {
-               "GDP per capita" : "10426.20",
-               "GDP per capita growth (+%)" : "-1.15",
-               "internet users per 100" : "22.26",
-               "internet users per 100 increase (+pp)" : "2.39",
-               "mobile subscriptions per 100" : "82.71",
-               "mobile subscriptions per 100 increase (+pp)" : "8.10",
+               "GDP per capita" : "3203.66",
+               "GDP per capita growth (+%)" : "2.51",
+               "mobile subscriptions per 100" : "32.30",
+               "mobile subscriptions per 100 increase (+pp)" : "0.00",
                "population" : 1761474,
                "population growth (+%)" : "0.8"
             },
             "2010" : {
-               "GDP per capita" : "10945.70",
-               "GDP per capita growth (+%)" : "4.98",
-               "internet users per 100" : "25.72",
-               "internet users per 100 increase (+pp)" : "3.46",
-               "mobile subscriptions per 100" : "90.12",
-               "mobile subscriptions per 100 increase (+pp)" : "7.41",
+               "GDP per capita" : "3283.21",
+               "GDP per capita growth (+%)" : "2.48",
+               "mobile subscriptions per 100" : "32.30",
+               "mobile subscriptions per 100 increase (+pp)" : "0.00",
                "population" : 1775680,
                "population growth (+%)" : "0.8"
             },
             "2011" : {
-               "GDP per capita" : "11432.30",
-               "GDP per capita growth (+%)" : "4.45",
-               "internet users per 100" : "29.98",
-               "internet users per 100 increase (+pp)" : "4.26",
-               "mobile subscriptions per 100" : "95.98",
-               "mobile subscriptions per 100 increase (+pp)" : "5.86",
+               "GDP per capita" : "3405.50",
+               "GDP per capita growth (+%)" : "3.72",
                "population" : 1791000,
                "population growth (+%)" : "0.9"
             },
             "2012" : {
-               "GDP per capita" : "11581.30",
-               "GDP per capita growth (+%)" : "1.30",
-               "internet users per 100" : "32.68",
-               "internet users per 100 increase (+pp)" : "2.70",
-               "mobile subscriptions per 100" : "100.36",
-               "mobile subscriptions per 100 increase (+pp)" : "4.38",
+               "GDP per capita" : "3473.60",
+               "GDP per capita growth (+%)" : "2.00",
                "population" : 1805200,
                "population growth (+%)" : "0.8"
             },
             "2013" : {
-               "GDP per capita" : "11702.77",
-               "GDP per capita growth (+%)" : "1.05",
-               "internet users per 100" : "36.89",
-               "internet users per 100 increase (+pp)" : "4.21",
-               "mobile subscriptions per 100" : "106.67",
-               "mobile subscriptions per 100 increase (+pp)" : "6.31",
+               "GDP per capita" : "3555.88",
+               "GDP per capita growth (+%)" : "2.37",
                "population" : 1824100,
                "population growth (+%)" : "1.0"
             },
             "2014" : {
-               "GDP per capita" : "11818.25",
-               "GDP per capita growth (+%)" : "0.99",
-               "internet users per 100" : "40.43",
-               "internet users per 100 increase (+pp)" : "3.54",
-               "mobile subscriptions per 100" : "112.35",
-               "mobile subscriptions per 100 increase (+pp)" : "5.68",
+               "GDP per capita" : "3603.75",
+               "GDP per capita growth (+%)" : "1.35",
                "population" : 1821800,
                "population growth (+%)" : "-0.1"
             },
             "2015" : {
-               "GDP per capita" : "11857.83",
-               "GDP per capita growth (+%)" : "0.33",
-               "internet users per 100" : "43.78",
-               "internet users per 100 increase (+pp)" : "3.35",
-               "mobile subscriptions per 100" : "114.90",
-               "mobile subscriptions per 100 increase (+pp)" : "2.55",
+               "GDP per capita" : "3792.29",
+               "GDP per capita growth (+%)" : "5.23",
                "population" : 1801800,
                "population growth (+%)" : "-1.1"
             },
             "2016" : {
-               "GDP per capita" : "11856.51",
-               "GDP per capita growth (+%)" : "-0.01",
-               "internet users per 100" : "46.31",
-               "internet users per 100 increase (+pp)" : "2.53",
-               "mobile subscriptions per 100" : "117.64",
-               "mobile subscriptions per 100 increase (+pp)" : "2.74",
+               "GDP per capita" : "3890.07",
+               "GDP per capita growth (+%)" : "2.58",
                "population" : 1816200,
                "population growth (+%)" : "0.8"
             },
             "2017" : {},
-            "2018" : {},
-            "latest" : {
-               "GDP per capita" : "11856.51",
-               "GDP per capita growth (+%)" : "-0.01",
-               "internet users per 100" : "46.31",
-               "internet users per 100 increase (+pp)" : "2.53",
-               "mobile subscriptions per 100" : "117.64",
-               "mobile subscriptions per 100 increase (+pp)" : "2.74",
-               "population" : 1816200,
-               "population growth (+%)" : "0.8",
-               "year" : "2016"
-            }
+            "2018" : {}
          }
       },
       "XL" : {
@@ -48903,7 +48833,6 @@
       "YU" : {
          "names" : {
             "de" : "Bundesrepublik Jugoslawien",
-            "en" : "Federal Republic of Yugoslavia",
             "es" : "República Federal de Yugoslavia",
             "fr" : "Federale Republiek Joegoslavië",
             "it" : "Repubblica Federale di Jugoslavia",
