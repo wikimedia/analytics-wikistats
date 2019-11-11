@@ -36,7 +36,29 @@
     ul       { padding-left: 12px; margin-left: 10;  }
    .highlight { background-color:#FFFFAA  }
    .tags     {color:font-size:8px;color:#CCCCAA; }
-   .taks     {color:font-size:8px;color:#FF00FF; } <-- switch tags and taks during maintenance for better visibility -->
+   .taks     {color:font-size:8px;color:#FF00FF; }
+   .central.notice {
+
+        padding-top: 1px;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #CC0000;
+        z-index: 20;
+        padding-bottom: 0.5px;
+    }
+    .central.notice p {
+        text-align: center;
+        background-color: transparent;
+        color: #fff;
+        margin-top: 10px;
+        margin-left: 10%;
+        margin-right: 10%;
+        font-size: 15px;
+    }
+    .central.notice a {
+        color: #ffc;
+    }
   </style>
 </head>
 
@@ -51,7 +73,11 @@
 <hr width=500 align=left>
 <p>	
 </noscript>
-
+<div class="central notice">
+      <p class="message">
+          In January 2020, this site will be replaced with the new Wikimedia Statistics. All old Wikistats links will be preserved except for the homepage. <a href="https://wikitech.wikimedia.org/wiki/Analytics/Wikistats/Deprecation_of_Wikistats_1">See details of this move in Wikitech.</a>
+      </p>
+  </div>
 <table>
 <tr>	
   <td valign=middle>&nbsp;<img src='//upload.wikimedia.org/wikipedia/commons/thumb/8/81/Wikimedia-logo.svg/25px-Wikimedia-logo.svg.png'></td>
